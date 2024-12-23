@@ -63,7 +63,7 @@ On microcontrollers, either add the following to your `boot.py` (MicroPython) or
 import lib.path
 ```
 
-The  [examples](examples) directory will be on the system path, so to run an app from it, you just need to type:
+The  [examples](src/examples) directory will be on the system path, so to run an app from it, you just need to type:
 ```
 import calculator  # substitute `calculator` with the file OR directory you want to run, omitting the .py extension
 ```
