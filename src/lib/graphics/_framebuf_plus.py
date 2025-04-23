@@ -281,7 +281,7 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             (Area): Bounding box of the text
         """
-        _font.text(
+        return _font.text(
             self, s, x, y, c, scale=scale, inverted=inverted, font_data=font_data, height=height
         )
 
@@ -300,6 +300,7 @@ class FrameBuffer(_FrameBuffer):
             (Area): Bounding box of the blitted buffer
         """
         super().blit(buf, x, y, key, palette)
+        return Area(x, y, buf.width, buf.height)
 
     ########### Additional methods
 
