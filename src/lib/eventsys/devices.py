@@ -33,6 +33,7 @@ Devices can be created with the following types:
 
 from micropython import const
 from . import events
+from .joystick import JoystickDriver
 from sys import exit
 
 
@@ -137,7 +138,7 @@ class Device:
         self._state = None
         self._user_data = None  # Can be set and retrieved by apps such as lv_config
 
-    def poll(self, *args) -> events:
+    def poll(self, *args) -> [events]:
         """
         Poll the device for events.
 
@@ -145,17 +146,21 @@ class Device:
             *args (Any): Additional arguments that can be passed to the read callback functions.
 
         Returns:
-            Event: The event that was polled or None if no event was polled.
+            list: A list of event objects if events are received, otherwise None.
         """
-        if (event := self._poll()) is not None:
-            if event.type in events.filter:
+        if (dev_events := self._poll()) is not None:
+            if isinstance(dev_events, list):
+                eventlist = [e for e in dev_events if e.type in events.filter]
+            else:
+                eventlist = [dev_events] if dev_events.type in events.filter else None
+            for event in eventlist:
                 if event.type == events.QUIT:
                     if self._broker:
                         self._broker.quit()
                 if callback_list := self._event_callbacks.get(event.type):
                     for callback in callback_list:
                         callback(event, *args)
-                return event
+            return eventlist if len(eventlist) > 0 else None
         return None
 
     def subscribe(self, callback, event_types=None):
@@ -375,15 +380,17 @@ class Broker(Device):
         Polls the registered devices for events.
 
         Returns:
-            object: The event object if an event is received, otherwise None.
+            list: A list of event objects if events are received, otherwise None.
         """
+        eventlist = []
         for device in self.devices:
-            if (event := device.poll()) is not None:
+            if (dev_events := device.poll()) is not None:
+                eventlist.extend(dev_events)                
                 if callback_list := self._device_callbacks.get(device.type):
-                    for func in callback_list():
-                        func(event)
-                return event
-        return None
+                    for func in callback_list:
+                        for event in dev_events:
+                            func(event)
+        return eventlist if len(eventlist) > 0 else None
 
 
 class QueueDevice(Device):
@@ -671,6 +678,10 @@ class JoystickDevice(Device):
         __init__(*args, **kwargs): Initializes the JoystickDevice instance.
         _poll(): Polls the device for events.
 
+    Args:
+        joystick_driver (JoystickDriver): The joystick driver to use.
+        emulate_digital [(int,int)]: Emulate digital buttons for the given axis pairs. If set, a hat will be added for each axis pair. The hats will be added after any true hats.
+        digital_threshold (float): The threshold to use for digital emulation.
     Raises:
         NotImplementedError: If the `_poll` method is not implemented.
     """
@@ -684,11 +695,64 @@ class JoystickDevice(Device):
         events.JOYBUTTONUP,
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, joystick_driver: JoystickDriver, emulate_digital: list[(int,int)] = None, digital_threshold: float = 0.5, **kwargs):
         super().__init__(*args, **kwargs)
+        self.joystick_driver = joystick_driver
+        self.emulate_digital = emulate_digital
+        self.digital_threshold = digital_threshold
+        self._state = [
+            [0] * self.joystick_driver.get_numaxes(),
+            [False] * self.joystick_driver.get_numbuttons(),
+            [(0,0)] * self.joystick_driver.get_numhats(),
+            [(0,0)] * self.joystick_driver.get_numballs(),
+        ]
+        if self.emulate_digital:
+            self._state.append([0] * len(self.emulate_digital))
 
+    def emulate(self, value):
+        return -1 if value < -self.digital_threshold else 1 if value > self.digital_threshold else 0
+    
     def _poll(self):
-        raise NotImplementedError("JoystickDevice.read() not implemented")
+        eventlist = []
+        new_state = [
+            [self.joystick_driver.get_axis(i) for i in range(self.joystick_driver.get_numaxes())],
+            [self.joystick_driver.get_button(i) for i in range(self.joystick_driver.get_numbuttons())],
+            [self.joystick_driver.get_hat(i) for i in range(self.joystick_driver.get_numhats())],
+            [self.joystick_driver.get_ball(i) for i in range(self.joystick_driver.get_numballs())],
+        ]
+
+        instance_id = self.joystick_driver.get_instance_id()
+        # axes
+        for i, (old,new) in enumerate(zip(self._state[0], new_state[0])):
+            if old != new:
+                eventlist.append(events.JoyAxisMotion(events.JOYAXISMOTION, instance_id, i, new))
+
+        # buttons
+        for i, (old,new) in enumerate(zip(self._state[1], new_state[1])):
+            if old != new:
+                eventlist.append(events.JoyButtonDown(events.JOYBUTTONDOWN, instance_id, i) if new else events.JoyButtonUp(events.JOYBUTTONUP, instance_id, i))
+
+        # hats
+        for i, (old,new) in enumerate(zip(self._state[2], new_state[2])):
+            if old != new:
+                eventlist.append(events.JoyHatMotion(events.JOYHATMOTION, instance_id, i, new))
+
+        # balls
+        for i, (old,new) in enumerate(zip(self._state[3], new_state[3])):
+            if old != new:
+                eventlist.append(events.JoyBallMotion(events.JOYBALLMOTION, instance_id, i, new))
+
+        if self.emulate_digital:
+            axes = new_state[0]
+            new_state.append([
+                (self.emulate(axes[x]), self.emulate(axes[y])) for x,y in self.emulate_digital
+            ])
+            for i, (old,new) in enumerate(zip(self._state[4], new_state[4])):
+                if old != new:
+                    eventlist.append(events.JoyHatMotion(events.JOYHATMOTION, instance_id, i+self.joystick_driver.get_numhats(), new))
+        
+        self._state = new_state
+        return eventlist if len(eventlist) > 0 else None
 
 
 
@@ -719,13 +783,14 @@ class VirtualDevices:
         self.devices = [self._vd_touch, self._vd_encoder, self._vd_keypad]
 
     def poll_queue_device(self):
-        if e:= self._queue_device.poll():
-            if e.type == events.MOUSEBUTTONDOWN or e.type == events.MOUSEBUTTONUP:
-                self._vd_touch.add_event(e)
-            elif e.type == events.MOUSEWHEEL:
-                self._vd_encoder.add_event(e)
-            elif e.type == events.KEYDOWN or e.type == events.KEYUP:
-                self._vd_keypad.add_event(e)
+        if elist := self._queue_device.poll():
+            for e in elist:
+                if e.type == events.MOUSEBUTTONDOWN or e.type == events.MOUSEBUTTONUP:
+                    self._vd_touch.add_event(e)
+                elif e.type == events.MOUSEWHEEL:
+                    self._vd_encoder.add_event(e)
+                elif e.type == events.KEYDOWN or e.type == events.KEYUP:
+                    self._vd_keypad.add_event(e)
 
 _mapping = {
     # Mapping of device types to device classes

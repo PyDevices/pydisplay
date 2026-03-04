@@ -24,25 +24,26 @@ display_drv.vscsad(y_pos)
 draw_line()
 
 while True:
-    if not (e := broker.poll()):
+    if not (elist := broker.poll()):
         continue
-    if e.type == broker.events.MOUSEWHEEL:
-        if e.y != 0:
-            direction = factor if e.y > 0 else -factor
-            delta = e.y * e.y * direction  # Quadratic acceleration
-            y_pos = (y_pos + delta) % h
-            display_drv.vscsad(y_pos)
-        if e.x != 0:
-            direction = factor if e.x > 0 else -factor
-            delta = e.x * e.x * direction
-            x_pos = (x_pos + delta) % w
-            draw_line()
-    elif e.type == broker.events.MOUSEBUTTONDOWN:
-        if e.button == 2:
-            color_byte = color_byte << 1 & 0xFF
-            if color_byte == 0:
-                color_byte = 1
-            draw_line()
-        elif e.button == 3:
-            bg_color = ~bg_color
-            draw_line()
+    for e in elist:
+        if e.type == broker.events.MOUSEWHEEL:
+            if e.y != 0:
+                direction = factor if e.y > 0 else -factor
+                delta = e.y * e.y * direction  # Quadratic acceleration
+                y_pos = (y_pos + delta) % h
+                display_drv.vscsad(y_pos)
+            if e.x != 0:
+                direction = factor if e.x > 0 else -factor
+                delta = e.x * e.x * direction
+                x_pos = (x_pos + delta) % w
+                draw_line()
+        elif e.type == broker.events.MOUSEBUTTONDOWN:
+            if e.button == 2:
+                color_byte = color_byte << 1 & 0xFF
+                if color_byte == 0:
+                    color_byte = 1
+                draw_line()
+            elif e.button == 3:
+                bg_color = ~bg_color
+                draw_line()

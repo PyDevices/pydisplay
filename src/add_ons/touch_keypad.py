@@ -55,23 +55,26 @@ class Keypad:
             ]
 
     def read(self):
-        event = self._poll()
-        if event and event.type == events.MOUSEBUTTONDOWN and event.button == 1:
-            x, y = self._translate(event.pos)
-            if x < self.x or x > self.x + self.w or y < self.y or y > self.y + self.h:
-                return None
-            col = int((x - self.x) / self.key_width)
-            row = int((y - self.y) / self.key_height)
-            # BUG:  Sometimes throws an IndexError in Wokwi if the touch is on the last line
-            # Instead of doing a bounds check we just catch the exception.
-            try:
-                key = self._keys[row * self.cols + col]
-                return key
-            except IndexError:
-                pass
+        if elist := self._poll():
+            if not isinstance(elist, list):
+                elist = [elist]
+            for event in elist:
+                if event.type == events.MOUSEBUTTONDOWN and event.button == 1:
+                    x, y = self._translate(event.pos)
+                    if x < self.x or x > self.x + self.w or y < self.y or y > self.y + self.h:
+                        return None
+                    col = int((x - self.x) / self.key_width)
+                    row = int((y - self.y) / self.key_height)
+                    # BUG:  Sometimes throws an IndexError in Wokwi if the touch is on the last line
+                    # Instead of doing a bounds check we just catch the exception.
+                    try:
+                        key = self._keys[row * self.cols + col]
+                        return key
+                    except IndexError:
+                        pass
 
-        if event and event.type == events.KEYDOWN:
-            key = event.key
-            return key
+                if event.type == events.KEYDOWN:
+                    key = event.key
+                    return key
 
         return None

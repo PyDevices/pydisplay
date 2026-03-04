@@ -59,21 +59,22 @@ def main():
         i += 1
         if i < display_drv.width:
             continue
-        event = broker.poll()
-        if event and event.type == broker.events.MOUSEMOTION and event.buttons[0] == 1:
-            touched_point = event.pos
-            if touched_point[1] < display_drv.height // 2:
-                sprites = jump_shoot_sprites
-                if not shot_location:
-                    shot_location = 1
-            elif touched_point[0] < display_drv.width // 2:
-                sprites = jump_sprites
-            elif touched_point[0] > display_drv.width // 2:
-                sprites = shoot_sprites
-                if not shot_location:
-                    shot_location = 1
-        else:
-            sprites = run_sprites
+        elist = broker.poll()
+        for event in elist:
+            if event and event.type == broker.events.MOUSEMOTION and event.buttons[0] == 1:
+                touched_point = event.pos
+                if touched_point[1] < display_drv.height // 2:
+                    sprites = jump_shoot_sprites
+                    if not shot_location:
+                        shot_location = 1
+                elif touched_point[0] < display_drv.width // 2:
+                    sprites = jump_sprites
+                elif touched_point[0] > display_drv.width // 2:
+                    sprites = shoot_sprites
+                    if not shot_location:
+                        shot_location = 1
+            else:
+                sprites = run_sprites
         draw_x = scroll + char_x
         sprite = sprites[i % len(sprites)]
         draw_sprite(draw_x, char_y, sprite.x, sprite.y)

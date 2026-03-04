@@ -4,11 +4,11 @@ import asyncio
 
 async def main():
     while True:
-        e = broker.poll()
-        if e:
-            print(e)
-            if e == broker.events.QUIT:
-                break
+        if elist := broker.poll():
+            for e in elist:
+                print(e)
+                if e == broker.events.QUIT:
+                    break
         await asyncio.sleep(0.001)
 
 

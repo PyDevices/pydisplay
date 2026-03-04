@@ -40,44 +40,45 @@ async def main():
     print("Application loaded.  Select a color and PAINT!")
     while True:
         await asyncio.sleep(0.01)
-        if not (e := broker.poll()):
+        if not (elist := broker.poll()):
             continue
-        if e.type == broker.events.MOUSEBUTTONDOWN:
-            x, y = e.pos
-            last_selected = selected
-            if on_x_axis and y < block_size or not on_x_axis and x < block_size:
-                if on_x_axis:
-                    selected = x // block_size
-                else:
-                    selected = y // block_size
-                if selected != last_selected:
-                    draw_block(last_selected, colors[last_selected])
-                    draw_block(selected, colors[selected])
-                if e.button == 3:
+        for e in elist:
+            if e.type == broker.events.MOUSEBUTTONDOWN:
+                x, y = e.pos
+                last_selected = selected
+                if on_x_axis and y < block_size or not on_x_axis and x < block_size:
                     if on_x_axis:
-                        display_drv.fill_rect(
-                            0,
-                            block_size,
-                            display_drv.width,
-                            display_drv.height - block_size,
-                            colors[selected],
-                        )
+                        selected = x // block_size
                     else:
-                        display_drv.fill_rect(
-                            block_size,
-                            0,
-                            display_drv.width - block_size,
-                            display_drv.height,
-                            colors[selected],
-                        )
-            elif e.button == 1:
-                paint(x, y, colors[selected])
-        elif e.type == broker.events.MOUSEMOTION and e.buttons[0] == 1:
-            x, y = e.pos
-            if (on_x_axis and y > block_size) or (not on_x_axis and x > block_size):
-                paint(x, y, colors[selected])
-        elif e.type == broker.events.QUIT:
-            break
+                        selected = y // block_size
+                    if selected != last_selected:
+                        draw_block(last_selected, colors[last_selected])
+                        draw_block(selected, colors[selected])
+                    if e.button == 3:
+                        if on_x_axis:
+                            display_drv.fill_rect(
+                                0,
+                                block_size,
+                                display_drv.width,
+                                display_drv.height - block_size,
+                                colors[selected],
+                            )
+                        else:
+                            display_drv.fill_rect(
+                                block_size,
+                                0,
+                                display_drv.width - block_size,
+                                display_drv.height,
+                                colors[selected],
+                            )
+                elif e.button == 1:
+                    paint(x, y, colors[selected])
+            elif e.type == broker.events.MOUSEMOTION and e.buttons[0] == 1:
+                x, y = e.pos
+                if (on_x_axis and y > block_size) or (not on_x_axis and x > block_size):
+                    paint(x, y, colors[selected])
+            elif e.type == broker.events.QUIT:
+                break
 
 
 loop = asyncio.get_event_loop()

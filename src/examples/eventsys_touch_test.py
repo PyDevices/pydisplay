@@ -66,9 +66,10 @@ def loop():
                 )
                 touched_point = None
                 while not touched_point:
-                    event = broker.poll()
-                    if event and event.type == broker.events.MOUSEBUTTONDOWN and event.button == 1:
-                        touched_point = event.pos
+                    if elist := broker.poll():
+                        for event in elist:
+                            if event.type == broker.events.MOUSEBUTTONDOWN and event.button == 1:
+                                touched_point = event.pos
                 zone = (touched_point[1] // half_height) * 2 + (touched_point[0] // half_width)
                 touched_zones.append(zone)
                 print(f"{touched_point=} in {zone=}")
