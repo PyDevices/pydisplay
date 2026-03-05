@@ -54,10 +54,10 @@ else:
 
     try:
         # This should load for CPython
-        from displaysys.pgdisplay import PGDisplay as DTDisplay, poll, get
+        from displaysys.pgdisplay import PGDisplay as DTDisplay, get
     except ImportError:
         # This should load for MicroPython on the desktop
-        from displaysys.sdldisplay import SDLDisplay as DTDisplay, poll
+        from displaysys.sdldisplay import SDLDisplay as DTDisplay, get
 
     display_drv = DTDisplay(
         width=width,

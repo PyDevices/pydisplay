@@ -103,6 +103,24 @@ def poll() -> Optional[events]:
                 return _convert(SDL_Event(_event))
     return None
 
+def get() -> [events]:
+    """
+    Gets all events from the event queue.
+
+    Returns:
+        [events]: A list of events.
+    """
+    global _event
+    eventlist = []
+    while SDL_PollEvent(_event):
+        if is_cpython:
+            if _event.type in events.filter:
+                eventlist.append(_convert(SDL_Event(_event)))
+        else:
+            if int.from_bytes(_event[:4], "little") in events.filter:
+                eventlist.append(_convert(SDL_Event(_event)))
+    return eventlist if len(eventlist) > 0 else None
+
 def _convert(e):
     # Convert an SDL event to a Pygame event
     if e.type == SDL_MOUSEMOTION:
