@@ -58,7 +58,6 @@ class Keypad:
         
 
     def callback(self, event):
-        print(f"Touchpad callback: {event}")
         if event.type in [events.MOUSEBUTTONDOWN, events.MOUSEBUTTONUP] and event.button == 1:
             x, y = event.pos
             if x < self.x or x > self.x + self.w or y < self.y or y > self.y + self.h:

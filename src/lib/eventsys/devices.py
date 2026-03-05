@@ -153,8 +153,7 @@ class Device:
                 eventlist = [e for e in dev_events if e.type in events.filter]
             else:
                 eventlist = [dev_events] if dev_events.type in events.filter else None
-            if events.MOUSEMOTION not in [e.type for e in eventlist]:
-                print(f"Device {self.__class__.__name__} returned events: {eventlist}")
+            
             for event in eventlist:
                 if event.type == events.QUIT:
                     if self._broker:
@@ -426,7 +425,6 @@ class QueueDevice(Device):
         """
         if (dev_events := self._read()) is not None:
             for event in dev_events:
-                print(f"PyGame returned event: {event}")
                 if event.type in self._data2:
                     if event.type in (
                         events.MOUSEMOTION,
@@ -440,14 +438,9 @@ class QueueDevice(Device):
                             )
                             if event.type == events.MOUSEMOTION:
                                 event.rel = (event.rel[0] // scale, event.rel[1] // scale)
-                    if event.type == events.KEYDOWN:
-                        self._debug = True
-                    elif event.type == events.KEYUP:
-                        self._debug = False
+                    
                     return event
-                else:
-                    if self._debug:
-                        print(f"QueueDevice {self.__class__.__name__} returned event: {event} but it was not in the filter")
+                
         return None
 
     def peek(self) -> bool:

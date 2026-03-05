@@ -313,13 +313,11 @@ def main():  # noqa: C901, PLR0915
         Returns:
             str: The key that was pressed.
         """
-        print(f"Waiting for key: {key}, exclude: {exclude}")
         while True:  # Wait for the user to press a key
             broker.poll()
             keys = joystick_keypad.read()
             keys.extend(keypad.read())
-            if len(keys) > 0:
-                print(f"Keys: {keys}")
+            
             if key is not None:
                 if key in keys:
                     return key
@@ -486,9 +484,7 @@ def main():  # noqa: C901, PLR0915
                         keys.extend(keypad.read())
 
                         if len(keys) > 0:  # If keys were pressed
-                            print(f'got {len(keys)} keys')
                             for key in keys:
-                                print(f"Key: {key}")
                                 last_read = ticks_ms()  # Save the time of the last read
                                 if key == LEFT and not collision(current_piece, current_position, -1, 0):
                                     current_position[0] -= 1  # Move the piece left
