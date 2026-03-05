@@ -15,7 +15,7 @@ gc.collect()
 mem = mem_free()
 print(f"Free memory at start: {mem:,}")
 
-from board_config import display_drv  # noqa: E402
+from board_config import display_drv, broker  # noqa: E402
 import apollo_dsky as dsky  # noqa: E402
 import time  # noqa: E402
 import asyncio  # noqa: E402
@@ -54,18 +54,20 @@ async def main():
 
     while True:
         await asyncio.sleep(0)
-        if (key := dsky.keypad.read()) is not None:
-            dsky.set_acty(True)
-            dsky.set_button(key, True)
+        broker.poll()
+        if (keys := dsky.keypad.read()) is not None:
+            for key in keys:
+                dsky.set_acty(True)
+                dsky.set_button(key, True)
 
-            if key < len(dsky.light_status):
-                dsky.set_light(key)
-            else:
-                await scroll()
+                if key < len(dsky.light_status):
+                    dsky.set_light(key)
+                else:
+                    await scroll()
 
-            await asyncio.sleep(0.2)
-            dsky.set_button(key, False)
-            dsky.set_acty(False)
+                await asyncio.sleep(0.2)
+                dsky.set_button(key, False)
+                dsky.set_acty(False)
 
 
 loop = asyncio.get_event_loop()
