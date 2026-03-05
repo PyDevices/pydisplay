@@ -54,7 +54,7 @@ else:
 
     try:
         # This should load for CPython
-        from displaysys.pgdisplay import PGDisplay as DTDisplay, poll
+        from displaysys.pgdisplay import PGDisplay as DTDisplay, poll, get
     except ImportError:
         # This should load for MicroPython on the desktop
         from displaysys.sdldisplay import SDLDisplay as DTDisplay, poll
@@ -71,7 +71,7 @@ else:
 
     events_dev = broker.create_device(
         type=devices.types.QUEUE,
-        read=poll,
+        read=get,
         data=display_drv,
         # data2=events.filter,
     )

@@ -10,7 +10,7 @@ class GPIOJoystick(JoystickDriver):
         axes: A list of ADC objects for the axes.
         buttons: A list of Pin objects for the buttons.
         button_high: True if logic high when button is pressed.
-        hats: A list of tuples of Pin objects for the hats. A hat is a 4-way switch, like a d-pad. 4 pins: left, right, up, down.
+        hats: A list of tuples of Pin objects for the hats. A hat is a 4-way switch, like a d-pad. 4 pins: left, right, down, up.
     """
     def __init__(
         self,
@@ -47,7 +47,7 @@ class GPIOJoystick(JoystickDriver):
         return self._buttons[button].value() == cmp
 
     def get_hat(self, hat):
-        l, r, u, d = self._hats[hat]
+        l, r, d, u = self._hats[hat]
         cmp = 1 if self._button_high else 0
         if (l.value() == cmp and r.value() == cmp) or (u.value() == cmp and d.value() == cmp):
             raise ValueError("Hat is in an invalid position")

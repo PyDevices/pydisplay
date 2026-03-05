@@ -153,6 +153,8 @@ class Device:
                 eventlist = [e for e in dev_events if e.type in events.filter]
             else:
                 eventlist = [dev_events] if dev_events.type in events.filter else None
+            if events.MOUSEMOTION not in [e.type for e in eventlist]:
+                print(f"Device {self.__class__.__name__} returned events: {eventlist}")
             for event in eventlist:
                 if event.type == events.QUIT:
                     if self._broker:
@@ -413,6 +415,7 @@ class QueueDevice(Device):
             self.scale = self._data.touch_scale
         else:
             self.scale = 1
+        self._debug = False
 
     def _poll(self):
         """
@@ -421,21 +424,30 @@ class QueueDevice(Device):
         Returns:
             Event or None: The next event from the device, or None if no event is available.
         """
-        if (event := self._read()) is not None:
-            if event.type in self._data2:
-                if event.type in (
-                    events.MOUSEMOTION,
-                    events.MOUSEBUTTONDOWN,
-                    events.MOUSEBUTTONUP,
-                ):
-                    if (scale := self.scale) != 1:
-                        event.pos = (
-                            int(event.pos[0] // scale),
-                            int(event.pos[1] // scale),
-                        )
-                        if event.type == events.MOUSEMOTION:
-                            event.rel = (event.rel[0] // scale, event.rel[1] // scale)
-                return event
+        if (dev_events := self._read()) is not None:
+            for event in dev_events:
+                print(f"PyGame returned event: {event}")
+                if event.type in self._data2:
+                    if event.type in (
+                        events.MOUSEMOTION,
+                        events.MOUSEBUTTONDOWN,
+                        events.MOUSEBUTTONUP,
+                    ):
+                        if (scale := self.scale) != 1:
+                            event.pos = (
+                                int(event.pos[0] // scale),
+                                int(event.pos[1] // scale),
+                            )
+                            if event.type == events.MOUSEMOTION:
+                                event.rel = (event.rel[0] // scale, event.rel[1] // scale)
+                    if event.type == events.KEYDOWN:
+                        self._debug = True
+                    elif event.type == events.KEYUP:
+                        self._debug = False
+                    return event
+                else:
+                    if self._debug:
+                        print(f"QueueDevice {self.__class__.__name__} returned event: {event} but it was not in the filter")
         return None
 
     def peek(self) -> bool:
@@ -683,7 +695,8 @@ class JoystickDevice(Device):
         emulate_digital [(int,int)]: Emulate digital buttons for the given axis pairs. If set, a hat will be added for each axis pair. The hats will be added after any true hats.
         digital_threshold (float): The threshold to use for digital emulation.
     Raises:
-        NotImplementedError: If the `_poll` method is not implemented.
+        NotImplementedError: If any of the joystick driver methods are not implemented.
+        ValueError: If a hat has an invalid value, e.g. both up and down are true.
     """
 
     type = types.JOYSTICK

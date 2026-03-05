@@ -1,4 +1,3 @@
-from machine import ADC,Pin
 
 class JoystickDriver:
     

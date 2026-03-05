@@ -57,7 +57,7 @@ async def main():
 
     # Create the keypad
     keypad = Keypad(
-        broker.poll,
+        broker,
         0,
         0,
         display_drv.width,
@@ -141,67 +141,69 @@ async def main():
     # Main loop
     while True:
         await asyncio.sleep(0.01)
-        code = keypad.read()
-        if code is None:
+        broker.poll()
+        codes = keypad.read()
+        if codes is None or len(codes) == 0:
             continue
-        if code not in button_codes:
-            continue
-        x, y = button_pos[code]
-        label = button_labels[button_codes.index(code)]
-        draw_button(x, y, label, True)
-        # print(f"{code=}, {label=}")
+        for code in codes:
+            if code not in button_codes:
+                continue
+            x, y = button_pos[code]
+            label = button_labels[button_codes.index(code)]
+            draw_button(x, y, label, True)
+            # print(f"{code=}, {label=}")
 
-        if label in "0123456789.":
-            if not editable:
-                input = label
-            elif input == "0" and label != ".":
-                input = label
-            elif label == "." and "." not in input:
-                input += label
-            elif label != ".":
-                input += label
-            editable = True
-        elif label == "C":
-            if input == "0":
-                result = 0
-                pending_operation = ""
-            else:
-                input = "0"
-            editable = True
-        elif label == "+/-":
-            if input != "0":
-                input = str(-float(input))
-        elif label in "+-*/=":
-            editable = True
-            if pending_operation:
-                try:
-                    result = eval(f"{result}{pending_operation}{input}")
-                except ZeroDivisionError:
-                    result = "Error: division by zero"
-                    editable = False
-            else:
+            if label in "0123456789.":
+                if not editable:
+                    input = label
+                elif input == "0" and label != ".":
+                    input = label
+                elif label == "." and "." not in input:
+                    input += label
+                elif label != ".":
+                    input += label
+                editable = True
+            elif label == "C":
+                if input == "0":
+                    result = 0
+                    pending_operation = ""
+                else:
+                    input = "0"
+                editable = True
+            elif label == "+/-":
                 if input != "0":
-                    result = float(input)
-            if label == "=":
-                pending_operation = ""
+                    input = str(-float(input))
+            elif label in "+-*/=":
+                editable = True
+                if pending_operation:
+                    try:
+                        result = eval(f"{result}{pending_operation}{input}")
+                    except ZeroDivisionError:
+                        result = "Error: division by zero"
+                        editable = False
+                else:
+                    if input != "0":
+                        result = float(input)
+                if label == "=":
+                    pending_operation = ""
+                else:
+                    pending_operation = label
+                input = "0"
+            elif label == "%":
+                input = str(float(input) / 100)
+                editable = False
+            elif label == "Sqrt":
+                if float(input) < 0:
+                    result = "Error: sqrt of negative number"
+                else:
+                    input = str(float(input) ** 0.5)
+                editable = False
             else:
-                pending_operation = label
-            input = "0"
-        elif label == "%":
-            input = str(float(input) / 100)
-            editable = False
-        elif label == "Sqrt":
-            if float(input) < 0:
-                result = "Error: sqrt of negative number"
-            else:
-                input = str(float(input) ** 0.5)
-            editable = False
-        else:
-            print("Unknown label")
-        show_result(result)
-        show_input(input)
-        sleep(0.15)
-        draw_button(x, y, label, False)
+                print("Unknown label")
+            show_result(result)
+            show_input(input)
+            sleep(0.15)
+            draw_button(x, y, label, False)
 
 
 loop = asyncio.get_event_loop()

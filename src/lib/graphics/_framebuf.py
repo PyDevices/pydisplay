@@ -294,7 +294,7 @@ class RGB565Format:
                 offset = _y * stride
                 for _x in range(x, x + width):
                     index = (offset + _x) * 2
-                    framebuf.buffer[index : index + 2] = rgb565_color
+                    framebuf._buffer[index : index + 2] = rgb565_color
 
 
 class FrameBuffer:

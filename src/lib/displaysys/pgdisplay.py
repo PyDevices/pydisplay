@@ -24,6 +24,15 @@ def poll() -> Optional[pg.event.Event]:
     """
     return pg.event.poll()
 
+def get() -> [pg.event.Event]:
+    """
+    Gets all events from the event queue.
+
+    Returns:
+        [pg.event.Event]: A list of events.
+    """
+    return pg.event.get()
+
 
 class PGDisplay(DisplayDriver):
     """
