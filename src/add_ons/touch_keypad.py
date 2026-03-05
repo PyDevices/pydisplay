@@ -76,7 +76,8 @@ class Keypad:
 
         if event.type in [events.KEYDOWN, events.KEYUP]:
             key = event.key
-            self._state[key] = event.type == events.KEYDOWN
+            if key in self._keys:
+                self._state[key] = event.type == events.KEYDOWN
 
     def read(self):
         return [k for k, v in self._state.items() if v]
