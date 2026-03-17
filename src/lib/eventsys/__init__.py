@@ -80,6 +80,11 @@ class events:
         MOUSEBUTTONDOWN,
         MOUSEBUTTONUP,
         MOUSEWHEEL,
+        JOYAXISMOTION,
+        JOYBALLMOTION,
+        JOYHATMOTION,
+        JOYBUTTONDOWN,
+        JOYBUTTONUP,
     ]
 
     # Event classes from PyGame
@@ -90,3 +95,8 @@ class events:
     Key = namedtuple("Key", "type name key mod scancode window")  # noqa: PYI024
     Quit = namedtuple("Quit", "type")  # noqa: PYI024
     Any = namedtuple("Any", "type")  # noqa: PYI024
+    JoyAxisMotion = namedtuple("JoyAxisMotion", "type instance_id axis value")  # noqa: PYI024
+    JoyButtonUp = namedtuple("JoyButtonUp", "type instance_id button")  # noqa: PYI024
+    JoyButtonDown = namedtuple("JoyButtonDown", "type instance_id button")  # noqa: PYI024
+    JoyHatMotion = namedtuple("JoyHatMotion", "type instance_id hat value")  # noqa: PYI024
+    JoyBallMotion = namedtuple("JoyBallMotion", "type instance_id ball rel")  # noqa: PYI024

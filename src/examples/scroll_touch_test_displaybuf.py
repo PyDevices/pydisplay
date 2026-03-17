@@ -48,19 +48,20 @@ def main():
 
     while True:
         # Check for mouse events
-        if evt := broker.poll():
-            if evt.type == broker.events.MOUSEBUTTONDOWN:
-                x, y = canvas.translate_point(evt.pos)
-                if y < canvas.tfa:
-                    canvas.vscroll -= line_height
-                elif y > canvas.height - canvas.bfa:
-                    canvas.vscroll += line_height
-                else:
-                    y_pos = (y // line_height) * line_height
-                    canvas.fill_rect(
-                        canvas.width - 20, y_pos + 2, 12, 12, getrandbits(canvas.color_depth)
-                    )
-                canvas.show()
+        if elist := broker.poll():
+            for e in elist:
+                if e.type == broker.events.MOUSEBUTTONDOWN:
+                    x, y = canvas.translate_point(e.pos)
+                    if y < canvas.tfa:
+                        canvas.vscroll -= line_height
+                    elif y > canvas.height - canvas.bfa:
+                        canvas.vscroll += line_height
+                    else:
+                        y_pos = (y // line_height) * line_height
+                        canvas.fill_rect(
+                            canvas.width - 20, y_pos + 2, 12, 12, getrandbits(canvas.color_depth)
+                        )
+                    canvas.show()
 
 
 main()

@@ -642,9 +642,10 @@ class Display(Widget):
             for dirty in dirty_areas:
                 self.refresh(dirty)
         else:
-            if e := self.broker.poll():
-                if e.type in events.filter:
-                    self.handle_event(e)
+            if elist := self.broker.poll():
+                for e in elist:
+                    if e.type in events.filter:
+                        self.handle_event(e)
 
             t = ticks_ms()
             for task in self._tasks:

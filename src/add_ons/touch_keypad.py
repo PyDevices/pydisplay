@@ -35,9 +35,9 @@ except ImportError:
 
 
 class Keypad:
-    def __init__(self, poll, x, y, w, h, cols=3, rows=3, keys=None, translate=None):
+    def __init__(self, broker, x, y, w, h, cols=3, rows=3, keys=None, translate=None):
         self._keys = keys if keys else list(range(cols * rows))
-        self._poll = poll
+        self._broker = broker
         self.x = x
         self.y = y
         self.w = w
@@ -53,25 +53,30 @@ class Keypad:
                 for j in range(rows)
                 for i in range(cols)
             ]
+        self._state = {k:False for k in self._keys}
+        self._broker.subscribe(self.callback, event_types=[events.MOUSEBUTTONDOWN, events.MOUSEBUTTONUP, events.KEYDOWN, events.KEYUP])
+        
 
-    def read(self):
-        event = self._poll()
-        if event and event.type == events.MOUSEBUTTONDOWN and event.button == 1:
-            x, y = self._translate(event.pos)
+    def callback(self, event):
+        if event.type in [events.MOUSEBUTTONDOWN, events.MOUSEBUTTONUP] and event.button == 1:
+            x, y = event.pos
             if x < self.x or x > self.x + self.w or y < self.y or y > self.y + self.h:
-                return None
+                return
             col = int((x - self.x) / self.key_width)
             row = int((y - self.y) / self.key_height)
             # BUG:  Sometimes throws an IndexError in Wokwi if the touch is on the last line
             # Instead of doing a bounds check we just catch the exception.
             try:
                 key = self._keys[row * self.cols + col]
-                return key
+                self._state[key] = event.type == events.MOUSEBUTTONDOWN
+                return
             except IndexError:
-                pass
+                return
 
-        if event and event.type == events.KEYDOWN:
+        if event.type in [events.KEYDOWN, events.KEYUP]:
             key = event.key
-            return key
+            if key in self._keys:
+                self._state[key] = event.type == events.KEYDOWN
 
-        return None
+    def read(self):
+        return [k for k, v in self._state.items() if v]

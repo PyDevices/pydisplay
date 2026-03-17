@@ -6,6 +6,7 @@ Testris game implemented in MicroPython by Brad Barnett.
 from board_config import display_drv, broker
 from displaysys import alloc_buffer
 from touch_keypad import Keypad
+from joystick_keypad import JoystickKeypad
 from eventsys.keys import Keys
 from random import choice  # For random piece selection
 from json import load, dump  # For saving the high score
@@ -28,14 +29,14 @@ if display_drv.width > display_drv.height:
 START = Keys.K_RETURN  # RETURN
 UNUSED = 0  # Not used
 PAUSE = Keys.K_ESCAPE  # ESCAPE
-CW = Keys.K_d  # D
+CCW = Keys.K_d  # D
 DROP = Keys.K_UP  # UP
-CCW = Keys.K_f  # F
+CW = Keys.K_f  # F
 LEFT = Keys.K_LEFT  # LEFT
 DOWN = Keys.K_DOWN  # DOWN
 RIGHT = Keys.K_RIGHT  # RIGHT
 keypad = Keypad(
-    broker.poll,
+    broker,
     0,
     0,
     display_drv.width,
@@ -43,6 +44,21 @@ keypad = Keypad(
     keys=[START, UNUSED, PAUSE, CW, DROP, CCW, LEFT, DOWN, RIGHT],
 )
 
+joystick_keypad = JoystickKeypad(
+    broker,
+    joymap={
+        1: {
+            'hats': {
+                0: [LEFT, RIGHT, DOWN, DROP]
+            },
+            'buttons': {
+                0: START,
+                1: CCW,
+                2: CW,
+            }
+        }
+    }
+)
 
 def main():  # noqa: C901, PLR0915
     # Define the draw_block function
@@ -76,7 +92,7 @@ def main():  # noqa: C901, PLR0915
 
     # Define other constants
     SPLASH_ENABLED = const(1)  # Set to 1 to show the splash screen, 0 to skip it
-    DELAY = const(150)  # Delay in ms so we don't read the keypad too quickly
+    DELAY = const(250)  # Delay in ms so we don't read the keypad too quickly
     SPEEDUP = const(
         25
     )  # Amount of time in ms to reduce the drop time by when a row is cleared (Difficulty)
@@ -298,14 +314,17 @@ def main():  # noqa: C901, PLR0915
             str: The key that was pressed.
         """
         while True:  # Wait for the user to press a key
-            if (
-                pressed := keypad.read()
-            ) and pressed not in exclude:  # If a key was pressed and it's not excluded
-                if (
-                    key is None or pressed == key
-                ):  # If no key was specified or the key pressed matches the specified key
-                    break  # Exit the loop
-        return pressed
+            broker.poll()
+            keys = joystick_keypad.read()
+            keys.extend(keypad.read())
+            
+            if key is not None:
+                if key in keys:
+                    return key
+            else:
+                for key in keys:
+                    if key not in exclude:
+                        return key
 
     def sample(population, k):
         """
@@ -458,40 +477,44 @@ def main():  # noqa: C901, PLR0915
                 while (
                     current_piece == old_piece and current_position == old_position
                 ):  # Inner loop - while the piece hasn't moved
-                    # If it has been DELAY ms since the last keypad read, then read the keypad
-                    if (ticks_diff(ticks_ms(), last_read) >= DELAY) and (
-                        key := keypad.read()
-                    ):  # If a key was pressed
-                        last_read = ticks_ms()  # Save the time of the last read
-                        if key == LEFT and not collision(current_piece, current_position, -1, 0):
-                            current_position[0] -= 1  # Move the piece left
-                        elif key == RIGHT and not collision(current_piece, current_position, 1, 0):
-                            current_position[0] += 1  # Move the piece right
-                        elif key == DOWN and not collision(current_piece, current_position, 0, 1):
-                            current_position[1] += 1  # Move the piece down
-                            last_drop = ticks_ms()  # Reset the last drop time
-                        elif key == DROP and not collision(current_piece, current_position, 0, 1):
-                            hard_drop = True  # Hard drop the piece
-                        elif key == CCW and not collision(
-                            current_piece, current_position, 0, 0, ROTCCW
-                        ):
-                            current_piece = rotate(
-                                current_piece, CCW
-                            )  # Rotate the piece counter-clockwise
-                        elif key == CW and not collision(
-                            current_piece, current_position, 0, 0, ROTCW
-                        ):
-                            current_piece = rotate(current_piece, CW)  # Rotate the piece clockwise
-                        elif key == PAUSE:  # Pause the game
-                            draw_banner("Paused.\n\nPress START to reset.\nAny key to resume.")
-                            key = wait_for_key(
-                                exclude=[PAUSE]
-                            )  # Wait for the user to press a key, excluding PAUSE
-                            if key == START:
-                                clear_screen()  # Clear the screen
-                                exit()  # Reset the machine
-                            else:  # Resume the game
-                                show_score()  # Show the score
+                    # If it has been DELAY ms since the last read, then read the keypads
+                    if (ticks_diff(ticks_ms(), last_read) >= DELAY):
+                        broker.poll()
+                        keys = joystick_keypad.read()
+                        keys.extend(keypad.read())
+
+                        if len(keys) > 0:  # If keys were pressed
+                            for key in keys:
+                                last_read = ticks_ms()  # Save the time of the last read
+                                if key == LEFT and not collision(current_piece, current_position, -1, 0):
+                                    current_position[0] -= 1  # Move the piece left
+                                elif key == RIGHT and not collision(current_piece, current_position, 1, 0):
+                                    current_position[0] += 1  # Move the piece right
+                                elif key == DOWN and not collision(current_piece, current_position, 0, 1):
+                                    current_position[1] += 1  # Move the piece down
+                                    last_drop = ticks_ms()  # Reset the last drop time
+                                elif key == DROP and not collision(current_piece, current_position, 0, 1):
+                                    hard_drop = True  # Hard drop the piece
+                                elif key == CCW and not collision(
+                                    current_piece, current_position, 0, 0, ROTCCW
+                                ):
+                                    current_piece = rotate(
+                                        current_piece, ROTCCW
+                                    )  # Rotate the piece counter-clockwise
+                                elif key == CW and not collision(
+                                    current_piece, current_position, 0, 0, ROTCW
+                                ):
+                                    current_piece = rotate(current_piece, ROTCW)  # Rotate the piece clockwise
+                                elif key == PAUSE:  # Pause the game
+                                    draw_banner("Paused.\n\nPress START to reset.\nAny key to resume.")
+                                    key = wait_for_key(
+                                        exclude=[PAUSE]
+                                    )  # Wait for the user to press a key, excluding PAUSE
+                                    if key == START:
+                                        clear_screen()  # Clear the screen
+                                        exit()  # Reset the machine
+                                    else:  # Resume the game
+                                        show_score()  # Show the score
 
                     if hard_drop:  # Hard drop the piece
                         while not collision(

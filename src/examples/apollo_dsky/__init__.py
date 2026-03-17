@@ -93,7 +93,7 @@ data3_pos = (187, 184)
 # The keypad area starts at (2, 233) and is 7 keys wide and 3 keys tall
 # The keys are 45x45 pixels
 keypad = Keypad(
-    broker.poll, 2, 233, 7 * 45, 3 * 45, cols=7, rows=3, translate=display_drv.translate_point
+    broker, 2, 233, 7 * 45, 3 * 45, cols=7, rows=3, translate=display_drv.translate_point
 )
 
 ########### Define the states of the screen elements
