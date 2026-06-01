@@ -19,5 +19,6 @@
     "files.exclude": {
         "build-*/**": false
     },
-    "files.insertFinalNewline": true
+    "files.insertFinalNewline": true,
+    "python.analysis.typeCheckingMode": "standard"
 }
