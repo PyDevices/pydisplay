@@ -424,6 +424,7 @@ class QueueDevice(Device):
             Event or None: The next event from the device, or None if no event is available.
         """
         if (dev_events := self._read()) is not None:
+            eventlist = []
             for event in dev_events:
                 if event.type in self._data2:
                     if event.type in (
@@ -438,9 +439,10 @@ class QueueDevice(Device):
                             )
                             if event.type == events.MOUSEMOTION:
                                 event.rel = (event.rel[0] // scale, event.rel[1] // scale)
-                    
-                    return event
-                
+
+                    eventlist.append(event)
+
+            return eventlist if len(eventlist) > 0 else None
         return None
 
     def peek(self) -> bool:

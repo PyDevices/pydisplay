@@ -25,6 +25,7 @@ except OSError:
 CLOCK_REALTIME = 0
 CLOCK_MONOTONIC = 1
 SIGEV_SIGNAL = 0
+SIGEV_THREAD_ID = 4
 
 # C structs
 
@@ -44,6 +45,7 @@ sigevent_t = {
     "sigev_value": (0, sigval_t),
     "sigev_signo": uctypes.sizeof(sigval_t) | uctypes.INT32,
     "sigev_notify": (uctypes.sizeof(sigval_t) + 4) | uctypes.INT32,
+    "sigev_notify_thread_id": (uctypes.sizeof(sigval_t) + 8) | uctypes.INT32,
 }
 
 timespec_t = {
@@ -66,6 +68,12 @@ timer_delete_ = librt.func("i", "timer_delete", "i")
 timer_settime_ = librt.func("i", "timer_settime", "PiPp")
 
 sigaction_ = libc.func("i", "sigaction", "iPp")
+
+try:
+    gettid_ = libc.func("i", "gettid", "")
+except OSError:
+    _syscall = libc.func("l", "syscall", "l")  # SYS_gettid = 186 on x86_64
+    gettid_ = lambda: _syscall(186)
 
 # Create a new C struct
 
@@ -97,8 +105,9 @@ def sigaction(signum, handler, flags=0):
 def timer_create(sig_id):
     sev = new(sigevent_t)
     # print(sev)
-    sev.sigev_notify = SIGEV_SIGNAL
+    sev.sigev_notify = SIGEV_THREAD_ID
     sev.sigev_signo = SIGRTMIN + sig_id
+    sev.sigev_notify_thread_id = gettid_()
     timerid = array.array("P", [0])
     r = timer_create_(CLOCK_MONOTONIC, sev, timerid)
     if r != 0:
