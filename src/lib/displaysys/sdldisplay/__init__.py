@@ -73,6 +73,61 @@ try:
 except ImportError:
     from adafruit_ticks import ticks_ms, ticks_add
 
+# Linux c_lflag bits (MicroPython termios has no ECHO/ICANON constants).
+_TTY_ICANON = 0x002
+_TTY_ECHO = 0x008
+_saved_tty = None
+
+
+def _save_tty() -> None:
+    """Save stdin termios before SDL_Init may alter the controlling terminal."""
+    global _saved_tty
+    try:
+        import os
+        import termios
+
+        if os.isatty(0):
+            _saved_tty = termios.tcgetattr(0)
+    except Exception:
+        _saved_tty = None
+
+
+def _restore_tty() -> None:
+    """Restore stdin termios saved at SDL init."""
+    global _saved_tty
+    if _saved_tty is None:
+        return
+    try:
+        import termios
+
+        termios.tcsetattr(0, termios.TCSANOW, _saved_tty)
+    except Exception:
+        pass
+    _saved_tty = None
+
+
+def _ensure_tty_sane() -> None:
+    """
+    Ensure canonical mode and echo are enabled before returning a TTY to the shell.
+
+    SDL_Quit restores the snapshot taken at SDL_Init, which may still reflect a
+    no-echo REPL state.  Forcing sane flags avoids a shell prompt that accepts
+    input but does not echo typed characters.
+    """
+    try:
+        import termios
+
+        attr = termios.tcgetattr(0)
+        attr[3] |= _TTY_ICANON | _TTY_ECHO
+        termios.tcsetattr(0, termios.TCSANOW, attr)
+    except Exception:
+        try:
+            import os
+
+            os.system("stty sane 2>/dev/null")
+        except Exception:
+            pass
+
 
 def scheduler(param):
     func, next_run, interval = param
@@ -228,6 +283,7 @@ class SDLDisplay(DisplayDriver):
         else:
             raise ValueError("Unsupported color_depth")
 
+        _save_tty()
         retcheck(SDL_Init(SDL_INIT_EVERYTHING))
         self._window = SDL_CreateWindow(
             self._title.encode(),
@@ -496,6 +552,7 @@ class SDLDisplay(DisplayDriver):
             SDL_DestroyWindow(self._window)
             self._window = None
         SDL_Quit()
+        _restore_tty()
 
     def quit(self, code: int = 0) -> None:
         """
@@ -509,6 +566,7 @@ class SDLDisplay(DisplayDriver):
         falling back to ``os._exit`` on CPython, then to ``SystemExit``.
         """
         self.deinit()
+        _ensure_tty_sane()
         try:
             import ffi
 

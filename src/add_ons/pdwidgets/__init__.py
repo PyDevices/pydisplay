@@ -35,7 +35,6 @@ Functions:
 
 from graphics import Area, FrameBuffer, RGB565
 from eventsys import events
-from sys import exit
 from time import localtime  # for DigitalClock
 from random import getrandbits  # for MARK_UPDATES
 from ._constants import ICON_SIZE, ALIGN, POSITION, TEXT_SIZE, PAD, DEFAULT_PADDING, TEXT_WIDTH
@@ -615,13 +614,15 @@ class Display(Widget):
 
     def quit(self):
         Display.displays.remove(self)
-        self.display_drv.deinit()
         if Display.timer and not Display.displays:
             try:
                 Display.timer.deinit()
             except Exception:
                 pass
-        exit()
+        # display_drv.quit() releases SDL resources, restores the TTY, and
+        # performs a low-level process exit.  sys.exit() raised from a timer or
+        # micropython.schedule callback is printed and swallowed on the unix port.
+        self.display_drv.quit()
 
     def tick(self):
         if self._tick_busy:

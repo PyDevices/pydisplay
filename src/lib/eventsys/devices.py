@@ -379,17 +379,18 @@ class Broker(Device):
         Handle a window-close (QUIT) event.  This runs for every front end
         (LVGL or not), since the QUIT event is handled here in eventsys.
 
-        If the application installed a custom ``quit_func``, it takes full
-        responsibility for cleanup and exit and is simply called.  Otherwise,
-        delegate to the registered display driver's polymorphic ``quit()``
-        (found via a registered device whose backing data object is a display).
-        The driver releases its resources and terminates the process; on the
-        unix SDL port it does so even from the LVGL task handler, which runs via
-        ``micropython.schedule`` where a raised ``SystemExit`` would be swallowed.
+        If the application installed a custom ``quit_func``, it is called first
+        for app-specific cleanup.  If it returns (for example because ``sys.exit``
+        was swallowed when quit was invoked from a timer or
+        ``micropython.schedule`` callback), cleanup falls through to the
+        registered display driver's ``quit()``.  With no display registered,
+        the broker's fallback ``quit_func`` is used.
         """
         if self._quit_func_customized:
             self._quit_func()
-            return
+            # A custom handler may call sys.exit(), which is swallowed when quit
+            # is invoked from a timer or micropython.schedule callback.  Fall
+            # through to the display driver's hard exit when that happens.
 
         for device in self.devices:
             data = getattr(device, "_data", None)
