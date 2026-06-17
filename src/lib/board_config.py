@@ -6,10 +6,10 @@ board_config.py file that is specific to your hardware from:
 https://github.com/PyDevices/pydisplay/tree/main/board_configs
 """
 
-width = 320
-height = 480
+width = 1024
+height = 600
 rotation = 0
-scale = 2.0
+scale = 1.0
 
 _ps = _jn = False
 try:

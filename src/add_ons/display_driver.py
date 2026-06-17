@@ -21,6 +21,9 @@ def main():
     if not lv_utils.event_loop.is_running():
         lv_utils.event_loop()
 
+    if lv.group_get_default() is None:
+        lv.group_create().set_default()
+
     DisplayDriver(
         display_drv,
         broker.devices,
@@ -71,7 +74,6 @@ def create_devices(devs, lv_display):
         if device.type in (devices.types.TOUCH, devices.types.ENCODER, devices.types.KEYPAD):
             indev = lv.indev_create()
             indev.set_display(lv_display)
-            indev.set_group(lv.group_get_default())
             device.user_data = indev
             if device.type == devices.types.TOUCH:
                 device.subscribe(_touch_cb)  # Called by device
@@ -82,6 +84,7 @@ def create_devices(devs, lv_display):
             elif device.type == devices.types.KEYPAD:
                 device.subscribe(_keypad_cb)  # Called by device
                 indev.set_type(lv.INDEV_TYPE.KEYPAD)
+            indev.set_group(lv.group_get_default())
             indev.set_read_cb(device.poll)  # Called by lv task handler
         elif device.type == devices.types.QUEUE:
             vd = devices.VirtualDevices(device)
