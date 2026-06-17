@@ -256,7 +256,10 @@ class Broker(Device):
         # Set it like `display_drv.quit_func = cleanup_func` where `cleanup_func` is a
         # function that cleans up resources and calls `sys.exit()`.
         # .poll() must be called periodically to check for the quit event.
+        # When left at the default, quit() delegates cleanup + process exit to the
+        # registered display driver's polymorphic quit() instead (see quit()).
         self._quit_func = exit
+        self._quit_func_customized = False
 
     def subscribe(self, callback, event_types=None, device_types=None):
         """
@@ -369,11 +372,31 @@ class Broker(Device):
         if not callable(value):
             raise ValueError("quit_func must be callable")
         self._quit_func = value
+        self._quit_func_customized = True
 
     def quit(self):
         """
-        Call the quit function.
+        Handle a window-close (QUIT) event.  This runs for every front end
+        (LVGL or not), since the QUIT event is handled here in eventsys.
+
+        If the application installed a custom ``quit_func``, it takes full
+        responsibility for cleanup and exit and is simply called.  Otherwise,
+        delegate to the registered display driver's polymorphic ``quit()``
+        (found via a registered device whose backing data object is a display).
+        The driver releases its resources and terminates the process; on the
+        unix SDL port it does so even from the LVGL task handler, which runs via
+        ``micropython.schedule`` where a raised ``SystemExit`` would be swallowed.
         """
+        if self._quit_func_customized:
+            self._quit_func()
+            return
+
+        for device in self.devices:
+            data = getattr(device, "_data", None)
+            if callable(getattr(data, "deinit", None)) and callable(getattr(data, "quit", None)):
+                data.quit()  # releases resources and terminates; does not return
+
+        # No display registered to handle the exit; fall back.
         self._quit_func()
 
     def _poll(self):

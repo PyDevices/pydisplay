@@ -543,9 +543,27 @@ class DisplayDriver:
 
     def deinit(self) -> None:
         """
-        Deinitialize the display.
+        Deinitialize the display.  Stops the auto-refresh timer so it can't fire
+        after resources are released.  Idempotent.  Subclasses that override
+        this should call ``super().deinit()``.
         """
-        self.__del__()
+        if getattr(self, "_timer", None) is not None:
+            self._timer.deinit()
+            self._timer = None
+
+    def quit(self, code: int = 0) -> None:
+        """
+        Release resources and terminate the program.
+
+        Called by ``eventsys.devices.Broker.quit()`` on a window-close (QUIT)
+        event.  The base implementation deinitializes the display and raises
+        ``SystemExit``, which is correct for front ends that poll on the main
+        thread.  Drivers needing a platform-specific exit (e.g. ``SDLDisplay``,
+        where ``SystemExit`` raised from the LVGL scheduled task handler is
+        swallowed on the unix port) should override this.
+        """
+        self.deinit()
+        raise SystemExit(code)
 
     def show(self, *args, **kwargs) -> None:
         """

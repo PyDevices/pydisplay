@@ -480,9 +480,46 @@ class SDLDisplay(DisplayDriver):
 
     def deinit(self) -> None:
         """
-        Deinitializes the sdl2lcd instance.
+        Deinitializes the sdl2lcd instance.  Idempotent and safe to call from
+        the quit path.
         """
-        retcheck(SDL_DestroyTexture(self._buffer))
-        retcheck(SDL_DestroyRenderer(self._renderer))
-        retcheck(SDL_DestroyWindow(self._window))
-        retcheck(SDL_Quit())
+        # Stop the auto-refresh timer first (super().deinit()) so a pending
+        # render can't call SDL_RenderPresent on a renderer we destroy here.
+        super().deinit()
+        if self._buffer is not None:
+            SDL_DestroyTexture(self._buffer)
+            self._buffer = None
+        if self._renderer is not None:
+            SDL_DestroyRenderer(self._renderer)
+            self._renderer = None
+        if self._window is not None:
+            SDL_DestroyWindow(self._window)
+            self._window = None
+        SDL_Quit()
+
+    def quit(self, code: int = 0) -> None:
+        """
+        Release SDL resources and terminate the process.
+
+        Overrides ``DisplayDriver.quit`` because raising ``SystemExit`` from the
+        LVGL task handler (which runs via ``micropython.schedule`` on the unix
+        port) is printed and swallowed instead of ending the program.  After
+        releasing resources, a low-level process exit is used: libc ``_exit``
+        via ffi on the MicroPython unix port (which has no ``os._exit``),
+        falling back to ``os._exit`` on CPython, then to ``SystemExit``.
+        """
+        self.deinit()
+        try:
+            import ffi
+
+            ffi.open("libc.so.6").func("v", "_exit", "i")(code)
+            return
+        except Exception:
+            pass
+        try:
+            import os
+
+            os._exit(code)
+        except Exception:
+            pass
+        raise SystemExit(code)
