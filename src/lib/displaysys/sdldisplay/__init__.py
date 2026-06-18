@@ -9,7 +9,6 @@ displaysys.sdldisplay
 from displaysys import DisplayDriver, color_rgb
 from eventsys import events
 from sys import implementation
-from micropython import schedule
 from ._sdl2_lib import (
     SDL_Init,
     SDL_Quit,
@@ -57,29 +56,21 @@ from ._sdl2_lib import (
 )
 
 try:
-    from typing import Optional, Union, Sequence
+    from typing import Optional
 except ImportError:
     pass
 
 if implementation.name == "cpython":
     import ctypes
 
-    is_cpython = True
     uses_native_event = True
     uses_ctypes_blit = True
 elif implementation.name == "circuitpython":
-    is_cpython = False
     uses_native_event = True
     uses_ctypes_blit = False
 else:
-    is_cpython = False
     uses_native_event = False
     uses_ctypes_blit = False
-
-try:
-    from time import ticks_ms, ticks_add
-except ImportError:
-    from adafruit_ticks import ticks_ms, ticks_add
 
 # Linux c_lflag bits (MicroPython termios has no ECHO/ICANON constants).
 _TTY_ICANON = 0x002
@@ -135,15 +126,6 @@ def _ensure_tty_sane() -> None:
             os.system("stty sane 2>/dev/null")
         except Exception:
             pass
-
-
-def scheduler(param):
-    func, next_run, interval = param
-    if (current_time := ticks_ms()) >= next_run:
-        interval = func(interval)
-        next_run = ticks_add(current_time, interval)
-    if interval > 0:
-        schedule(scheduler, (func, next_run, interval))
 
 
 _event = SDL_Event()
@@ -320,7 +302,6 @@ class SDLDisplay(DisplayDriver):
 
         # SDL rendering must happen on one thread; present with each render() instead
         # of using a separate auto-refresh timer thread.
-        self._present_in_render = True
         super().__init__(auto_refresh=False)
 
     ############### Required API Methods ################
@@ -462,7 +443,6 @@ class SDLDisplay(DisplayDriver):
             value (int): The new rotation value.
         """
 
-        print("here")
         if (angle := (value % 360) - (self._rotation % 360)) != 0:
             if uses_native_event:
                 tempBuffer = SDL_CreateTexture(
@@ -514,33 +494,28 @@ class SDLDisplay(DisplayDriver):
         Args:
             renderRect (Optional[SDL_Rect], optional): The rectangle to render. Defaults to None.
         """
-        # if (y_start := self.vscsad()) == False:
-        if False:
-            # The following line is not working on Chromebooks, Ubuntu and Raspberry Pi OS
-            retcheck(SDL_RenderCopy(self._renderer, self._buffer, renderRect, renderRect))
-        else:
-            # Ignore renderRect and render the entire texture to the window in four steps
-            y_start = self.vscsad()
-            if self._tfa > 0:
-                tfaRect = SDL_Rect(0, 0, self.width, self._tfa)
-                retcheck(SDL_RenderCopy(self._renderer, self._buffer, tfaRect, tfaRect))
+        # Single SDL_RenderCopy was disabled: not working on Chromebooks, Ubuntu, Raspberry Pi OS.
+        # Ignore renderRect and render the entire texture to the window in four steps.
+        y_start = self.vscsad()
+        if self._tfa > 0:
+            tfaRect = SDL_Rect(0, 0, self.width, self._tfa)
+            retcheck(SDL_RenderCopy(self._renderer, self._buffer, tfaRect, tfaRect))
 
-            vsaTopHeight = self._vsa + self._tfa - y_start
-            vsaTopSrcRect = SDL_Rect(0, y_start, self.width, vsaTopHeight)
-            vsaTopDestRect = SDL_Rect(0, self._tfa, self.width, vsaTopHeight)
-            retcheck(SDL_RenderCopy(self._renderer, self._buffer, vsaTopSrcRect, vsaTopDestRect))
+        vsaTopHeight = self._vsa + self._tfa - y_start
+        vsaTopSrcRect = SDL_Rect(0, y_start, self.width, vsaTopHeight)
+        vsaTopDestRect = SDL_Rect(0, self._tfa, self.width, vsaTopHeight)
+        retcheck(SDL_RenderCopy(self._renderer, self._buffer, vsaTopSrcRect, vsaTopDestRect))
 
-            vsaBtmHeight = self._vsa - vsaTopHeight
-            vsaBtmSrcRect = SDL_Rect(0, self._tfa, self.width, vsaBtmHeight)
-            vsaBtmDestRect = SDL_Rect(0, self._tfa + vsaTopHeight, self.width, vsaBtmHeight)
-            retcheck(SDL_RenderCopy(self._renderer, self._buffer, vsaBtmSrcRect, vsaBtmDestRect))
+        vsaBtmHeight = self._vsa - vsaTopHeight
+        vsaBtmSrcRect = SDL_Rect(0, self._tfa, self.width, vsaBtmHeight)
+        vsaBtmDestRect = SDL_Rect(0, self._tfa + vsaTopHeight, self.width, vsaBtmHeight)
+        retcheck(SDL_RenderCopy(self._renderer, self._buffer, vsaBtmSrcRect, vsaBtmDestRect))
 
-            if self._bfa > 0:
-                bfaRect = SDL_Rect(0, self._tfa + self._vsa, self.width, self._bfa)
-                retcheck(SDL_RenderCopy(self._renderer, self._buffer, bfaRect, bfaRect))
+        if self._bfa > 0:
+            bfaRect = SDL_Rect(0, self._tfa + self._vsa, self.width, self._bfa)
+            retcheck(SDL_RenderCopy(self._renderer, self._buffer, bfaRect, bfaRect))
 
-        if self._present_in_render:
-            self.show()
+        self.show()
 
     def show(self) -> None:
         """

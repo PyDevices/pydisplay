@@ -10,7 +10,7 @@ from displaysys import DisplayDriver, color_rgb
 import pygame as pg
 
 try:
-    from typing import Optional, Union, Sequence
+    from typing import Optional
 except ImportError:
     pass
 
