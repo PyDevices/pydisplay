@@ -65,8 +65,16 @@ if implementation.name == "cpython":
     import ctypes
 
     is_cpython = True
+    uses_native_event = True
+    uses_ctypes_blit = True
+elif implementation.name == "circuitpython":
+    is_cpython = False
+    uses_native_event = True
+    uses_ctypes_blit = False
 else:
     is_cpython = False
+    uses_native_event = False
+    uses_ctypes_blit = False
 
 try:
     from time import ticks_ms, ticks_add
@@ -150,7 +158,7 @@ def poll() -> Optional[events]:
     """
     global _event
     if SDL_PollEvent(_event):
-        if is_cpython:
+        if uses_native_event:
             if _event.type in events.filter:
                 return _convert(SDL_Event(_event))
         else:
@@ -168,7 +176,7 @@ def get() -> [events]:
     global _event
     eventlist = []
     while SDL_PollEvent(_event):
-        if is_cpython:
+        if uses_native_event:
             if _event.type in events.filter:
                 eventlist.append(_convert(SDL_Event(_event)))
         else:
@@ -310,7 +318,10 @@ class SDLDisplay(DisplayDriver):
             raise RuntimeError(f"{SDL_GetError()}")
         retcheck(SDL_SetTextureBlendMode(self._buffer, SDL_BLENDMODE_NONE))
 
-        super().__init__(auto_refresh=True)
+        # SDL rendering must happen on one thread; present with each render() instead
+        # of using a separate auto-refresh timer thread.
+        self._present_in_render = True
+        super().__init__(auto_refresh=False)
 
     ############### Required API Methods ################
 
@@ -350,7 +361,7 @@ class SDLDisplay(DisplayDriver):
         if len(buffer) != pitch * h:
             raise ValueError("Buffer size does not match dimensions")
         blitRect = SDL_Rect(x, y, w, h)
-        if is_cpython:
+        if uses_ctypes_blit:
             if isinstance(buffer, memoryview):
                 buffer_array = (ctypes.c_ubyte * len(buffer.obj)).from_buffer(buffer.obj)
             elif type(buffer) is bytearray:
@@ -453,7 +464,7 @@ class SDLDisplay(DisplayDriver):
 
         print("here")
         if (angle := (value % 360) - (self._rotation % 360)) != 0:
-            if implementation.name == "cpython":
+            if uses_native_event:
                 tempBuffer = SDL_CreateTexture(
                     self._renderer,
                     self._px_format,
@@ -528,6 +539,9 @@ class SDLDisplay(DisplayDriver):
                 bfaRect = SDL_Rect(0, self._tfa + self._vsa, self.width, self._bfa)
                 retcheck(SDL_RenderCopy(self._renderer, self._buffer, bfaRect, bfaRect))
 
+        if self._present_in_render:
+            self.show()
+
     def show(self) -> None:
         """
         Show the display.
@@ -539,6 +553,9 @@ class SDLDisplay(DisplayDriver):
         Deinitializes the sdl2lcd instance.  Idempotent and safe to call from
         the quit path.
         """
+        if getattr(self, "_deinitialized", False):
+            return
+        self._deinitialized = True
         # Stop the auto-refresh timer first (super().deinit()) so a pending
         # render can't call SDL_RenderPresent on a renderer we destroy here.
         super().deinit()
@@ -553,18 +570,22 @@ class SDLDisplay(DisplayDriver):
             self._window = None
         SDL_Quit()
         _restore_tty()
+        _ensure_tty_sane()
 
     def quit(self, code: int = 0) -> None:
         """
         Release SDL resources and terminate the process.
 
-        Overrides ``DisplayDriver.quit`` because raising ``SystemExit`` from the
-        LVGL task handler (which runs via ``micropython.schedule`` on the unix
-        port) is printed and swallowed instead of ending the program.  After
-        releasing resources, a low-level process exit is used: libc ``_exit``
-        via ffi on the MicroPython unix port (which has no ``os._exit``),
-        falling back to ``os._exit`` on CPython, then to ``SystemExit``.
+        Delegates to ``display_driver.shutdown`` when that module is loaded so
+        LVGL is torn down before SDL.  Falls back to ``deinit`` + hard exit.
         """
+        try:
+            import display_driver
+
+            display_driver.shutdown(code, exit_process=True)
+            return
+        except ImportError:
+            pass
         self.deinit()
         _ensure_tty_sane()
         try:

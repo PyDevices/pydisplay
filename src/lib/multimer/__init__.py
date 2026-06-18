@@ -10,8 +10,9 @@ Cross-platform Timer class for *Python.
 Enables using 'from multimer import Timer' on MicroPython on microcontrollers,
 on MicroPython on Unix (which doesn't have a machine.Timer) and CPython (ditto).
 
-_librt.py uses uses MicroPython ffi to connect to libc and librt, while _sdl2.py uses
-SDL2 on CPython to connect to libSDL2.  No compatibility for CircuitPython yet.
+_librt.py uses MicroPython ffi to connect to libc and librt, while _sdl2.py uses
+SDL2 on CPython to connect to libSDL2.  CircuitPython unix uses _aio.py (thread-based;
+see that module for why usdl2.add_timer is not used here).
 
 Returns None if the platform is not supported rather than raising an ImportError so that
 the client can handle the error more gracefully (e.g. by using `if Timer is not None:`).
@@ -35,6 +36,8 @@ except ImportError:
     elif sys.implementation.name == "cpython":  # Big Python
 #        from ._aio import Timer
         from ._sdl2 import Timer
+    elif sys.implementation.name == "circuitpython":
+        from ._aio import Timer
     else:
         Timer = None
 
@@ -56,6 +59,10 @@ def get_timer(callback, period=33):
         id = _next_timer_id
         _next_timer_id += 1
     t = Timer(id)
-    t.init(mode=Timer.PERIODIC, period=period, callback=lambda t: callback())
+
+    def _timer_cb(_t):
+        callback()
+
+    t.init(mode=Timer.PERIODIC, period=period, callback=_timer_cb)
     print(f"Timer:  timer started ({id=}, {period=})")
     return t

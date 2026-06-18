@@ -819,6 +819,8 @@ class VirtualDevices:
             for e in elist:
                 if e.type == events.MOUSEBUTTONDOWN or e.type == events.MOUSEBUTTONUP:
                     self._vd_touch.add_event(e)
+                elif e.type == events.MOUSEMOTION and e.buttons[0]:
+                    self._vd_touch.add_event(e)
                 elif e.type == events.MOUSEWHEEL:
                     self._vd_encoder.add_event(e)
                 elif e.type == events.KEYDOWN or e.type == events.KEYUP:

@@ -13,32 +13,179 @@ import gc
 import lvgl as lv
 import lv_utils
 
+# Keep the LVGL display driver alive; flush_cb and draw buffers must not be GC'd.
+_lvgl_driver = None
+_shutdown_done = False
+
+
+def _hard_exit(code=0):
+    """Process exit that bypasses SystemExit swallowing on CP unix."""
+    try:
+        from displaysys.sdldisplay import _ensure_tty_sane
+
+        _ensure_tty_sane()
+    except Exception:
+        pass
+    try:
+        import usdl2
+
+        usdl2.process_exit(code)
+        return
+    except Exception:
+        pass
+    try:
+        import ffi
+
+        ffi.open("libc.so.6").func("v", "_exit", "i")(code)
+        return
+    except Exception:
+        pass
+    try:
+        import os
+
+        os._exit(code)
+    except Exception:
+        pass
+    raise SystemExit(code)
+
+
+def shutdown(code=0, exit_process=False):
+    """
+    Release LVGL and SDL resources.  Idempotent.
+
+    With exit_process=False (e.g. Ctrl+C), returns to the caller.
+    With exit_process=True (window close), terminates the process.
+    """
+    global _lvgl_driver, _shutdown_done
+    if _shutdown_done:
+        if exit_process:
+            _hard_exit(code)
+        return
+    _shutdown_done = True
+
+    if lv_utils.event_loop.is_running():
+        try:
+            lv_utils.event_loop.current_instance().deinit()
+        except Exception:
+            pass
+
+    if _lvgl_driver is not None:
+        try:
+            _lvgl_driver.lv_display.set_flush_cb(None)
+        except Exception:
+            pass
+        _lvgl_driver = None
+
+    try:
+        if lv.is_initialized():
+            lv.deinit()
+    except Exception:
+        pass
+
+    if _uses_sdl_run_loop():
+        try:
+            display_drv.deinit()
+        except Exception:
+            pass
+        try:
+            from displaysys.sdldisplay import _ensure_tty_sane
+
+            _ensure_tty_sane()
+        except Exception:
+            pass
+
+    if exit_process:
+        _hard_exit(code)
+
+
+def _broker_quit():
+    shutdown(0, exit_process=True)
+
+
+def _uses_sdl_run_loop():
+    """True when LVGL should be driven by run() instead of lv_utils timer."""
+    return type(display_drv).__module__.endswith("sdldisplay")
+
 
 def main():
+    global _lvgl_driver
     gc.collect()
     if not lv.is_initialized():
         lv.init()
-    if not lv_utils.event_loop.is_running():
+    if not _uses_sdl_run_loop() and not lv_utils.event_loop.is_running():
         lv_utils.event_loop()
 
     if lv.group_get_default() is None:
         lv.group_create().set_default()
 
-    DisplayDriver(
+    if _uses_sdl_run_loop():
+        broker.quit_func = _broker_quit
+
+    _lvgl_driver = DisplayDriver(
         display_drv,
         broker.devices,
     )
+    lv.refr_now(_lvgl_driver.lv_display)
+
+
+def run(freq=30):
+    """
+    Block on the main thread, pumping SDL input and running LVGL.
+
+    Required on desktop SDL (CircuitPython unix / MicroPython unix) where input
+    and rendering must stay on the thread that initialized the video subsystem.
+    """
+    if not _uses_sdl_run_loop():
+        raise RuntimeError("display_driver.run() requires displaysys.sdldisplay")
+    if _lvgl_driver is None:
+        main()
+
+    delay = 1000 // freq
+    try:
+        from time import sleep_ms
+    except ImportError:
+        from time import sleep
+
+        def sleep_ms(ms):
+            sleep(ms / 1000)
+
+    try:
+        while True:
+            lv.tick_inc(delay)
+            if lv._nesting.value == 0:
+                lv.task_handler()  # polls SDL input via VirtualDevices during read_cb
+            sleep_ms(delay)
+    except KeyboardInterrupt:
+        shutdown(0, exit_process=True)
+
+
+def refresh():
+    """Force LVGL to flush the current UI to the display."""
+    if _lvgl_driver is not None:
+        lv.refr_now(_lvgl_driver.lv_display)
+
+class _TouchState:
+    x = 0
+    y = 0
+    pressed = False
+
 
 def _touch_cb(event, indev, data):
-    # LVGL hands us an object called data.  We just change the state attributes when necessary.
-    if event is None:
-        return
-    if event.type == events.MOUSEBUTTONDOWN and event.button == 1:
-        x, y = event.pos
-        data.point = lv.point_t({"x": x, "y": y})
-        data.state = lv.INDEV_STATE.PRESSED
-    elif event.type == events.MOUSEBUTTONUP and event.button == 1:
-        data.state = lv.INDEV_STATE.RELEASED
+    # LVGL read_cb must report current pointer state on every call, not only when
+    # a new event arrives.
+    if event is not None:
+        if event.type == events.MOUSEBUTTONDOWN and event.button == 1:
+            _TouchState.x, _TouchState.y = event.pos
+            _TouchState.pressed = True
+        elif event.type == events.MOUSEMOTION and event.buttons[0]:
+            _TouchState.x, _TouchState.y = event.pos
+        elif event.type == events.MOUSEBUTTONUP and event.button == 1:
+            _TouchState.x, _TouchState.y = event.pos
+            _TouchState.pressed = False
+    data.point = lv.point_t({"x": _TouchState.x, "y": _TouchState.y})
+    data.state = (
+        lv.INDEV_STATE.PRESSED if _TouchState.pressed else lv.INDEV_STATE.RELEASED
+    )
 
 def _encoder_cb(event, indev, data):
     # LVGL hands us an object called data.  We just change the enc_diff and/or state attributes if necessary.
@@ -100,12 +247,6 @@ class DisplayDriver:
         blocking=True,
     ):
         gc.collect()
-        draw_buf1 = lv.draw_buf_create(
-            display_drv.width, display_drv.height // 10, color_format, 0
-        )
-        draw_buf2 = lv.draw_buf_create(
-            display_drv.width, display_drv.height // 10, color_format, 0
-        )
         # If byte swapping is required and the display bus is capable of having byte swapping disabled,
         # disable it and set a flag so we can swap the color bytes as they are created.
         if display_drv.requires_byteswap:
@@ -115,16 +256,27 @@ class DisplayDriver:
         self._color_size = lv.color_format_get_size(color_format)
         self._blocking = blocking
 
-        self._lv_display = lv.display_create(display_drv.width, display_drv.height)
+        self._draw_buf1 = lv.draw_buf_create(
+            display_drv.width, display_drv.height // 10, color_format, 0
+        )
+        self._draw_buf2 = lv.draw_buf_create(
+            display_drv.width, display_drv.height // 10, color_format, 0
+        )
+
+        self.lv_display = lv.display_create(display_drv.width, display_drv.height)
+        self._lv_display = self.lv_display
         self._lv_display.set_flush_cb(self._flush_cb)
         self._lv_display.set_color_format(color_format)
         if not self._blocking:
             display_drv.display_bus.register_callback(self._lv_display.flush_ready)
-        self._lv_display.set_draw_buffers(draw_buf1, draw_buf2)
+        self._lv_display.set_draw_buffers(self._draw_buf1, self._draw_buf2)
         self._lv_display.set_render_mode(lv.DISPLAY_RENDER_MODE.PARTIAL)
         create_devices(devs, self._lv_display)
 
     def _flush_cb(self, disp_drv, area, color_p):
+        if _shutdown_done:
+            self._lv_display.flush_ready()
+            return
         width = area.x2 - area.x1 + 1
         height = area.y2 - area.y1 + 1
 
