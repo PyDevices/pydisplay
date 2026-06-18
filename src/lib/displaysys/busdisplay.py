@@ -57,8 +57,6 @@ _VSCSAD = const(0x37)
 # Instead of using them, we only change Bits 6 (column/horizontal) and 7 (page/vertical).
 _RGB = const(0x00)  # (Bit 3: 0=RGB order, 1=BGR order)
 _BGR = const(0x08)  # (Bit 3: 0=RGB order, 1=BGR order)
-_MADCTL_MH = const(0x04)  # Refresh 0=Left to Right, 1=Right to Left (Bit 2: Display Data Latch Order)
-_MADCTL_ML = const(0x10)  # Refresh 0=Top to Bottom, 1=Bottom to Top (Bit 4: Line Refresh Order)
 _MADCTL_MV = const(0x20)  # 0=Normal, 1=Row/column exchange (Bit 5: Page/Column Addressing Order)
 _MADCTL_MX = const(0x40)  # 0=Left to Right, 1=Right to Left (Bit 6: Column Address Order)
 _MADCTL_MY = const(0x80)  # 0=Top to Bottom, 1=Bottom to Top (Bit 7: Page Address Order)
@@ -147,7 +145,6 @@ class BusDisplay(DisplayDriver):
         data_as_commands=False,  # For color OLEDs
         single_byte_bounds=False,  # For color OLEDs
     ):
-        print("Started BusDisplay")
         gc.collect()
         self.display_bus = display_bus
         self._width = width
@@ -217,7 +214,6 @@ class BusDisplay(DisplayDriver):
         self.brightness = brightness
 
         gc.collect()
-        print("Finished BusDisplay")
 
     ############### Required API Methods ################
 
@@ -331,8 +327,6 @@ class BusDisplay(DisplayDriver):
             if self._auto_byteswap
             else (c & 0xFFFF).to_bytes(2, "little")
         )
-        if self._auto_byteswap:
-            c = c >> 8 | c << 8
         xpos = x + self.colstart
         ypos = y + self.rowstart
         self._set_window(xpos, ypos, xpos, ypos)

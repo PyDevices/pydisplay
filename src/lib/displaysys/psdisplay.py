@@ -27,8 +27,6 @@ class PSDevices:
         self.canvas = document.getElementById(id)
         self._mouse_pos = None
 
-        #         self.canvas.oncontextmenu = self._no_context
-
         # Proxy functions are required for javascript
         self.on_down = create_proxy(self._on_down)
         self.on_up = create_proxy(self._on_up)
@@ -77,11 +75,6 @@ class PSDevices:
         log("Mouse leave")
         self._mouse_pos = None
 
-    def _no_context(self, e):
-        e.preventDefault()
-        e.stopPropagation()
-        return False
-
 
 class PSDisplay(DisplayDriver):
     """
@@ -101,7 +94,6 @@ class PSDisplay(DisplayDriver):
         self._requires_byteswap = False
         self._rotation = 0
         self.color_depth = 16
-        self._draw = self._ctx
 
         super().__init__()
 

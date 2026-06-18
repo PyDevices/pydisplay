@@ -42,21 +42,6 @@ def alloc_buffer(size):
     return memoryview(bytearray(size))
 
 
-def color888(r, g, b):
-    """
-    Convert RGB values to a 24-bit color value.
-
-    Args:
-        r (int): The red value.
-        g (int): The green value.
-        b (int): The blue value.
-
-    Returns:
-        (int): The 24-bit color value.
-    """
-    return (r << 16) | (g << 8) | b
-
-
 def color565(r, g=None, b=None):
     """
     Convert RGB values to a 16-bit color value.
