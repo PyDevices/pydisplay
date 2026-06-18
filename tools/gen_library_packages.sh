@@ -10,8 +10,9 @@ AUTHOR="Brad Barnett <contact@pydevices.com>"
 LICENSE="MIT"
 
 BASENAME=pydisplay
-DEST_REPO=~/gh/micropython-lib
-SOURCE_REPO=~/gh/$BASENAME
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SOURCE_REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
+DEST_REPO="${MICROPYTHON_LIB_DIR:-$HOME/github/micropython-lib}"
 SOURCE_DIR=$SOURCE_REPO/src
 DEST_DIR=$DEST_REPO/micropython/$BASENAME
 BUNDLE_MANIFEST=$DEST_DIR/$BASENAME-bundle/manifest.py

@@ -114,8 +114,8 @@ Running `./tools/regenerate.sh --audit` before regeneration showed the committed
 `packages/pydisplay-bundle.json` contained two bad URLs from an earlier generator bug (absolute paths concatenated into `github:` URLs):
 
 ```
-src/lib/board_config.py → github:PyDevices/pydisplay/src//home/brad/gh/pydisplay/src/lib/board_config.py
-src/lib/path.py         → github:PyDevices/pydisplay/src//home/brad/gh/pydisplay/src/lib/path.py
+src/lib/board_config.py → github:PyDevices/pydisplay/src/<bad-absolute-path>/src/lib/board_config.py
+src/lib/path.py         → github:PyDevices/pydisplay/src/<bad-absolute-path>/src/lib/path.py
 ```
 
 `html/pyscript.toml` also had a stray `../src/src/lib/board_config.py` entry from the same bug. `gen_repo_packages.py` has been corrected; run `./tools/regenerate.sh` to refresh.
@@ -138,16 +138,19 @@ MkDocs **gen-files** plugin script (configured in `mkdocs.yml`). Scans `src/lib/
 
 Full **micropython-lib / PyPI publishing** pipeline:
 
-1. Copies `src/lib/*` into a separate `micropython-lib` checkout (`~/gh/micropython-lib` by default)
+1. Copies `src/lib/*` into a separate `micropython-lib` checkout (`~/github/micropython-lib` by default)
 2. Writes per-package `manifest.py` files
 3. Calls `makepyproject.py` → `hatch build` → `twine upload --repository testpypi`
 4. Optionally commits and pushes the micropython-lib repo
 
 **When to run:** releasing new versions to the [PyDevices micropython-lib](https://github.com/PyDevices/micropython-lib) fork or TestPyPI.
 
-**Caveats:**
+**Paths:**
 
-- Paths are hardcoded to `~/gh/pydisplay` and `~/gh/micropython-lib`
+- `SOURCE_REPO` is derived from this repo (parent of `tools/`)
+- `DEST_REPO` defaults to `~/github/micropython-lib`; override with `MICROPYTHON_LIB_DIR`
+
+**Other caveats:**
 - Sub-packages under `displaysys-*` (except core `displaysys`) have PyPI/bundle steps commented out pending `displaysys` on PyPI
 - Bundle packaging is also commented out
 
@@ -192,7 +195,12 @@ Bulk-converts [Material Design Icons](https://github.com/google/material-design-
 
 **When to run:** refreshing icon assets.
 
-**Before running:** edit the `source` and `dest` paths at the top of the script (they still point at the author's original machine layout).
+**Defaults:**
+
+- `dest` → `icons/` in this repository
+- `source` → `~/github/material-design-icons/png` (override with `MATERIAL_DESIGN_ICONS_DIR`)
+
+Clone [material-design-icons](https://github.com/google/material-design-icons) to `~/github/material-design-icons` before running.
 
 ---
 
