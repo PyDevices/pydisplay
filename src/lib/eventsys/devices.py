@@ -61,13 +61,12 @@ def custom_type(type_name, responses):
         ValueError: If a device class with the same name already exists.
 
     Example:
-        To create the KEYPAD device type and `KeypadDevice` class:
+        To create a custom device type and device class:
 
         ```python
-        import eventsys.device as device
-        from eventsys import events
+        from eventsys import devices, events
 
-        KeypadDevice = device.new_type("KEYPAD", [events.KEYDOWN, events.KEYUP])
+        MyDevice = devices.custom_type("MINE", [events.KEYDOWN, events.KEYUP])
         ```
     """
     if not isinstance(type_name, str):
@@ -438,7 +437,6 @@ class QueueDevice(Device):
             self.scale = self._data.touch_scale
         else:
             self.scale = 1
-        self._debug = False
 
     def _poll(self):
         """
@@ -468,16 +466,6 @@ class QueueDevice(Device):
 
             return eventlist if len(eventlist) > 0 else None
         return None
-
-    def peek(self) -> bool:
-        """
-        Peek at the next event in the queue without removing it.
-
-        Returns:
-            bool: True if there is an event in the queue that matches the filter in self._data, otherwise False.
-                Note: self._data defaults to events.filter but may be set to a different list.
-        """
-        raise NotImplementedError("QueueDevice.peek() not implemented")
 
 
 class TouchDevice(Device):
