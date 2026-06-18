@@ -2,50 +2,95 @@
 
 Develop and debug on Linux, macOS, or Windows using SDL2 or PyGame backends.
 
-## Dependencies
-
-**SDL2Display (preferred)** — faster; uses SDL2:
-
-- Linux: install `libsdl2-dev` (or your distro equivalent)
-- macOS: `brew install sdl2`
-- Windows: install SDL2 development libraries or use PyGame fallback
-
-**PGDisplay (optional)** — uses PyGame:
+## Quick start (after dependencies)
 
 ```bash
-pip install pygame
-```
-
-PGDisplay is useful when SDL2 glitches (some Chromebooks) or when SDL2 is hard to install on Windows.
-
-## Run from a clone
-
-```bash
+git clone https://github.com/PyDevices/pydisplay.git
 cd pydisplay/src
 python3 -i path.py
 ```
 
 ```python
 >>> import hello
->>> import calculator
 ```
 
-Default desktop config: `src/lib/board_config.py` (SDL2). For PyGame explicitly, use `board_configs/pgdisplay/board_config.py`.
+Default config: `src/lib/board_config.py` (SDL2Display). A window should open with the hello example.
 
-## board_config.py
+## Linux (including WSL)
 
-Copy or symlink the config you need:
+Install SDL2 development libraries, then run as above.
+
+**Debian / Ubuntu / WSL:**
+
+```bash
+sudo apt update
+sudo apt install libsdl2-dev python3-venv
+git clone https://github.com/PyDevices/pydisplay.git
+cd pydisplay/src
+python3 -i path.py
+```
+
+**Fedora:**
+
+```bash
+sudo dnf install SDL2-devel
+```
+
+If SDL2 fails or is unavailable, use PyGame instead — see [PGDisplay fallback](#pgdisplay-fallback) below.
+
+## macOS
+
+```bash
+brew install sdl2
+git clone https://github.com/PyDevices/pydisplay.git
+cd pydisplay/src
+python3 -i path.py
+```
+
+## Windows
+
+SDL2 native libraries can be awkward on Windows. Recommended path:
+
+1. Install [Python 3](https://www.python.org/downloads/) (check "Add to PATH").
+2. Use **PGDisplay** (PyGame) instead of SDL2 — see below.
+3. Or develop in **WSL** with the Linux instructions above.
+
+## PGDisplay fallback
+
+PyGame is easier to install and avoids some SDL2 issues (especially on Windows and Chromebooks):
+
+```bash
+pip install pygame
+```
+
+Use the PyGame board config. From a clone, copy or symlink before running:
+
+```bash
+cp ../board_configs/pgdisplay/board_config.py lib/board_config.py
+cd pydisplay/src
+python3 -i path.py
+```
+
+Or install via MIP on MicroPython Unix:
+
+```python
+mip.install("github:PyDevices/pydisplay/board_configs/pgdisplay")
+```
 
 | Config path | Display class |
 |-------------|---------------|
-| `board_configs/sdldisplay/` | SDL2Display |
+| `board_configs/sdldisplay/` | SDL2Display (default `src/lib/board_config.py`) |
 | `board_configs/pgdisplay/` | PGDisplay |
 
-Install via MIP on MicroPython Unix:
+## MicroPython on Unix
 
-```python
-mip.install("github:PyDevices/pydisplay/board_configs/sdldisplay")
+Same layout as CPython, but use the MicroPython interpreter:
+
+```bash
+micropython -i path.py
 ```
+
+Install SDL2/PyGame for your OS first; MicroPython Unix builds vary in bundled modules.
 
 ## Input
 

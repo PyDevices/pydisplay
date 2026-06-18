@@ -4,7 +4,7 @@
 
 ## Config
 
-Requires `color_setup.py` in your project (template in `src/configs/`). Wire it to pydisplay's display and fonts.
+Requires `color_setup.py` in your project (copy from [`src/add_ons/color_setup.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/color_setup.py)). Wire it to pydisplay's display and fonts.
 
 ## Example
 

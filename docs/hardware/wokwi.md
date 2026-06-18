@@ -35,4 +35,4 @@ The full example project downloads and runs [`installer.py`](../installation/ins
 
 ## Local Wokwi projects
 
-This repo does not include `wokwi.toml` or `diagram.json`. Fork the hosted projects or create a new Wokwi project and point MIP installs at the board config paths above.
+In-repo projects are **planned (Phase 2b, required)** under `wokwi/`. Until then, use the hosted projects below or MIP-install the board config paths above.

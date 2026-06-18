@@ -20,8 +20,7 @@ src/
 ├── path.py              # adds lib/, examples/, add_ons/ to sys.path
 ├── lib/                 # core packages (displaysys, eventsys, …)
 ├── examples/            # demo scripts
-├── add_ons/             # optional extensions
-└── configs/             # templates for board_config, lv_config, etc.
+├── add_ons/             # optional extensions (color_setup, tft_config, …)
 ```
 
 ## Run on desktop

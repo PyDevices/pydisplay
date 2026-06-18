@@ -91,7 +91,7 @@ The public docs URL is **https://pydisplay.readthedocs.io**. ReadTheDocs reads [
 ### Ongoing
 
 1. RTD rebuilds automatically when you push to `main`.
-2. Optionally disable old version slugs (e.g. `docs-revamp`) under **Admin** → **Versions**.
+2. Optionally disable obsolete version slugs under **Admin** → **Versions** if any remain from earlier experiments.
 3. Enable **search indexing** under **Settings** once the site is live.
 
 ### Optional: pull request previews

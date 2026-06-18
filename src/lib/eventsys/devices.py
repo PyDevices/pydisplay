@@ -136,7 +136,7 @@ class Device:
 
         self._broker = None
         self._state = None
-        self._user_data = None  # Can be set and retrieved by apps such as lv_config
+        self._user_data = None  # Can be set and retrieved by user apps
 
     def poll(self, *args) -> [events]:
         """

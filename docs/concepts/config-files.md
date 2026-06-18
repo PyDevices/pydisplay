@@ -1,15 +1,16 @@
 # Config files
 
-Templates and examples live in [`src/configs/`](https://github.com/PyDevices/pydisplay/tree/main/src/configs) and board-specific trees.
+Templates for GUI libraries and ported examples live in [`src/add_ons/`](https://github.com/PyDevices/pydisplay/tree/main/src/add_ons/). Board-specific setup uses [`board_configs/`](https://github.com/PyDevices/pydisplay/tree/main/board_configs) or `src/lib/board_config.py`.
 
-| File | Required for |
-|------|--------------|
-| `board_config.py` | **Always** — display, touch, brokers, setup |
-| `path.py` | Development layout — adds `lib/`, `examples/` to path |
-| `color_setup.py` | [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui) |
-| `hardware_setup.py` | [MicroPython-Touch](https://github.com/peterhinch/micropython-touch) |
-| `lv_config.py` | [LVGL](https://github.com/lvgl/lv_micropython) — create/adapt for your board |
-| `tft_config.py` | @russhughes st7789py_mpy examples |
+| File | Location | Required for |
+|------|----------|--------------|
+| `board_config.py` | `board_configs/` or `src/lib/` | **Always** — display, touch, brokers, setup |
+| `path.py` | `src/` | Development layout — adds `lib/`, `examples/` to path |
+| `color_setup.py` | `src/add_ons/` | [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui) |
+| `hardware_setup.py` | `src/add_ons/` | [MicroPython-Touch](https://github.com/peterhinch/micropython-touch) |
+| `tft_config.py` | `src/add_ons/` | @russhughes st7789py_mpy examples |
+
+Install add-on templates with [add_ons package](../installation/mip-github.md) or copy files from a full clone.
 
 ## board_config.py
 
@@ -27,6 +28,6 @@ import lib.path
 
 Not needed if all packages are installed into `/lib` on the device.
 
-## LVGL note
+## LVGL
 
-There is no checked-in `src/examples/lv_config.py` yet. For LVGL, follow [LVGL micropython](https://github.com/lvgl/lv_micropython) documentation and wire displaysys as the display driver — see [GUI: LVGL](../guis/lvgl.md).
+Wire pydisplay through upstream [LVGL micropython](https://github.com/lvgl/lv_micropython) using your `board_config.py` display and touch brokers. See [GUI: LVGL](../guis/lvgl.md) and the [minimum Wokwi project](https://wokwi.com/projects/404248867674669057).
