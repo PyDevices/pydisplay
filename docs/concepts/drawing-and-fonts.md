@@ -27,4 +27,4 @@ Peter Hinch's API — full display as a logical framebuffer with 4/8/16-bit buff
 
 ## API reference
 
-[Package Reference](../reference/) → `graphics`, `framebuf` (add_ons).
+[Package Reference](../reference/) → `graphics`, `framebuf` ([add-ons reference](../reference/add_ons/)).

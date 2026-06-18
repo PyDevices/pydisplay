@@ -1,6 +1,6 @@
 # Add-ons
 
-Optional extensions in [`src/add_ons/`](https://github.com/PyDevices/pydisplay/tree/main/src/add_ons/). Not required for basic display and event use.
+Optional extensions in [`src/add_ons/`](https://github.com/PyDevices/pydisplay/tree/main/src/add_ons/). Not required for basic display and event use. API docs: [Add-ons Reference](reference/add_ons/).
 
 ## Install
 

@@ -30,9 +30,9 @@ One-shot production build (output in `site/`):
 | [`mkdocs.yml`](https://github.com/PyDevices/pydisplay/blob/main/mkdocs.yml) | Site config, theme, navigation |
 | [`docs/requirements.txt`](https://github.com/PyDevices/pydisplay/blob/main/docs/requirements.txt) | Python packages for MkDocs and plugins |
 | [`.readthedocs.yaml`](https://github.com/PyDevices/pydisplay/blob/main/.readthedocs.yaml) | ReadTheDocs build settings (same deps) |
-| [`tools/gen_ref_pages.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/gen_ref_pages.py) | Auto-generates API reference stubs from `src/lib/` |
+| [`tools/gen_ref_pages.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/gen_ref_pages.py) | Auto-generates API reference stubs from `src/lib/` and `src/add_ons/` |
 
-API reference pages under `reference/` are generated at build time — do not hand-edit them.
+API reference pages under `reference/` and `reference/add_ons/` are generated at build time — do not hand-edit them.
 
 ### Troubleshooting
 

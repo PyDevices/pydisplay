@@ -38,7 +38,7 @@ plugins:
 - mkdocstrings:
     handlers:
       python:
-        paths: [src/lib]
+        paths: [src/lib, src/add_ons]
         options:
           show_source: false
           show_bases: false
@@ -85,6 +85,7 @@ nav:
   - Live demos: examples/live-demos.md
 - Add-ons: add-ons.md
 - Package Reference: reference/
+- Add-ons Reference: reference/add_ons/
 - Contributing: contributing.md
 - Building docs: building-docs.md
 - Getting help: getting-help.md

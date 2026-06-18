@@ -91,6 +91,18 @@ def color_rgb(color):
 
 
 class DisplayDriver:
+    """
+    Base class for all display backends (BusDisplay, SDL2Display, FBDisplay, etc.).
+
+    Subclasses implement bus- or platform-specific drawing and refresh. Most applications
+    use a concrete driver from ``board_config.display`` rather than instantiating this
+    class directly.
+
+    Args:
+        auto_refresh: If ``True`` or an integer period in ms, starts a ``multimer`` timer
+            that calls ``show()`` automatically.
+    """
+
     def __init__(self, auto_refresh=False):
         print(f"Initializing {self.__class__.__name__}...")
         gc.collect()
