@@ -45,6 +45,10 @@
       "github:PyDevices/pydisplay/src/add_ons/hardware_setup.py"
     ],
     [
+      "joystick_keypad.py",
+      "github:PyDevices/pydisplay/src/add_ons/joystick_keypad.py"
+    ],
+    [
       "keypins.py",
       "github:PyDevices/pydisplay/src/add_ons/keypins.py"
     ],
@@ -99,6 +103,62 @@
     [
       "wifi.py",
       "github:PyDevices/pydisplay/src/add_ons/wifi.py"
+    ],
+    [
+      "fonts/__init__.py",
+      "github:PyDevices/pydisplay/src/add_ons/fonts/__init__.py"
+    ],
+    [
+      "fonts/compile_upload.sh",
+      "github:PyDevices/pydisplay/src/add_ons/fonts/compile_upload.sh"
+    ],
+    [
+      "fonts/vga1_16x16.py",
+      "github:PyDevices/pydisplay/src/add_ons/fonts/vga1_16x16.py"
+    ],
+    [
+      "fonts/vga1_16x32.py",
+      "github:PyDevices/pydisplay/src/add_ons/fonts/vga1_16x32.py"
+    ],
+    [
+      "fonts/vga1_8x16.py",
+      "github:PyDevices/pydisplay/src/add_ons/fonts/vga1_8x16.py"
+    ],
+    [
+      "fonts/vga1_8x8.py",
+      "github:PyDevices/pydisplay/src/add_ons/fonts/vga1_8x8.py"
+    ],
+    [
+      "fonts/vga1_bold_16x16.py",
+      "github:PyDevices/pydisplay/src/add_ons/fonts/vga1_bold_16x16.py"
+    ],
+    [
+      "fonts/vga1_bold_16x32.py",
+      "github:PyDevices/pydisplay/src/add_ons/fonts/vga1_bold_16x32.py"
+    ],
+    [
+      "fonts/vga2_16x16.py",
+      "github:PyDevices/pydisplay/src/add_ons/fonts/vga2_16x16.py"
+    ],
+    [
+      "fonts/vga2_16x32.py",
+      "github:PyDevices/pydisplay/src/add_ons/fonts/vga2_16x32.py"
+    ],
+    [
+      "fonts/vga2_8x16.py",
+      "github:PyDevices/pydisplay/src/add_ons/fonts/vga2_8x16.py"
+    ],
+    [
+      "fonts/vga2_8x8.py",
+      "github:PyDevices/pydisplay/src/add_ons/fonts/vga2_8x8.py"
+    ],
+    [
+      "fonts/vga2_bold_16x16.py",
+      "github:PyDevices/pydisplay/src/add_ons/fonts/vga2_bold_16x16.py"
+    ],
+    [
+      "fonts/vga2_bold_16x32.py",
+      "github:PyDevices/pydisplay/src/add_ons/fonts/vga2_bold_16x32.py"
     ],
     [
       "pdwidgets/__init__.py",
@@ -195,62 +255,6 @@
     [
       "pdwidgets/icons/toggle_on_36dp.pbm",
       "github:PyDevices/pydisplay/src/add_ons/pdwidgets/icons/toggle_on_36dp.pbm"
-    ],
-    [
-      "fonts/__init__.py",
-      "github:PyDevices/pydisplay/src/add_ons/fonts/__init__.py"
-    ],
-    [
-      "fonts/compile_upload.sh",
-      "github:PyDevices/pydisplay/src/add_ons/fonts/compile_upload.sh"
-    ],
-    [
-      "fonts/vga1_16x16.py",
-      "github:PyDevices/pydisplay/src/add_ons/fonts/vga1_16x16.py"
-    ],
-    [
-      "fonts/vga1_16x32.py",
-      "github:PyDevices/pydisplay/src/add_ons/fonts/vga1_16x32.py"
-    ],
-    [
-      "fonts/vga1_8x16.py",
-      "github:PyDevices/pydisplay/src/add_ons/fonts/vga1_8x16.py"
-    ],
-    [
-      "fonts/vga1_8x8.py",
-      "github:PyDevices/pydisplay/src/add_ons/fonts/vga1_8x8.py"
-    ],
-    [
-      "fonts/vga1_bold_16x16.py",
-      "github:PyDevices/pydisplay/src/add_ons/fonts/vga1_bold_16x16.py"
-    ],
-    [
-      "fonts/vga1_bold_16x32.py",
-      "github:PyDevices/pydisplay/src/add_ons/fonts/vga1_bold_16x32.py"
-    ],
-    [
-      "fonts/vga2_16x16.py",
-      "github:PyDevices/pydisplay/src/add_ons/fonts/vga2_16x16.py"
-    ],
-    [
-      "fonts/vga2_16x32.py",
-      "github:PyDevices/pydisplay/src/add_ons/fonts/vga2_16x32.py"
-    ],
-    [
-      "fonts/vga2_8x16.py",
-      "github:PyDevices/pydisplay/src/add_ons/fonts/vga2_8x16.py"
-    ],
-    [
-      "fonts/vga2_8x8.py",
-      "github:PyDevices/pydisplay/src/add_ons/fonts/vga2_8x8.py"
-    ],
-    [
-      "fonts/vga2_bold_16x16.py",
-      "github:PyDevices/pydisplay/src/add_ons/fonts/vga2_bold_16x16.py"
-    ],
-    [
-      "fonts/vga2_bold_16x32.py",
-      "github:PyDevices/pydisplay/src/add_ons/fonts/vga2_bold_16x32.py"
     ]
   ],
   "deps": [],

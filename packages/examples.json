@@ -125,6 +125,10 @@
       "github:PyDevices/pydisplay/src/examples/hello.py"
     ],
     [
+      "joystick_list_select.py",
+      "github:PyDevices/pydisplay/src/examples/joystick_list_select.py"
+    ],
+    [
       "keypins_simpletest.py",
       "github:PyDevices/pydisplay/src/examples/keypins_simpletest.py"
     ],
@@ -229,24 +233,36 @@
       "github:PyDevices/pydisplay/src/examples/widgets_test.py"
     ],
     [
-      "noto_fonts/NotoSansMono_32.py",
-      "github:PyDevices/pydisplay/src/examples/noto_fonts/NotoSansMono_32.py"
+      "alien/__init__.py",
+      "github:PyDevices/pydisplay/src/examples/alien/__init__.py"
     ],
     [
-      "noto_fonts/NotoSans_32.py",
-      "github:PyDevices/pydisplay/src/examples/noto_fonts/NotoSans_32.py"
+      "alien/alien.png",
+      "github:PyDevices/pydisplay/src/examples/alien/alien.png"
     ],
     [
-      "noto_fonts/NotoSerif_32.py",
-      "github:PyDevices/pydisplay/src/examples/noto_fonts/NotoSerif_32.py"
+      "alien/alien.py",
+      "github:PyDevices/pydisplay/src/examples/alien/alien.py"
     ],
     [
-      "noto_fonts/__init__.py",
-      "github:PyDevices/pydisplay/src/examples/noto_fonts/__init__.py"
+      "alien/alien_bitmap.py",
+      "github:PyDevices/pydisplay/src/examples/alien/alien_bitmap.py"
     ],
     [
-      "noto_fonts/noto_fonts.py",
-      "github:PyDevices/pydisplay/src/examples/noto_fonts/noto_fonts.py"
+      "alien/make_alien_bitmap.sh",
+      "github:PyDevices/pydisplay/src/examples/alien/make_alien_bitmap.sh"
+    ],
+    [
+      "apollo_dsky/Apollo_DSKY_interface.bmp",
+      "github:PyDevices/pydisplay/src/examples/apollo_dsky/Apollo_DSKY_interface.bmp"
+    ],
+    [
+      "apollo_dsky/Apollo_DSKY_interface.svg",
+      "github:PyDevices/pydisplay/src/examples/apollo_dsky/Apollo_DSKY_interface.svg"
+    ],
+    [
+      "apollo_dsky/__init__.py",
+      "github:PyDevices/pydisplay/src/examples/apollo_dsky/__init__.py"
     ],
     [
       "assets/font_8x14.bin",
@@ -281,18 +297,6 @@
       "github:PyDevices/pydisplay/src/examples/assets/warrior.bmp"
     ],
     [
-      "apollo_dsky/Apollo_DSKY_interface.bmp",
-      "github:PyDevices/pydisplay/src/examples/apollo_dsky/Apollo_DSKY_interface.bmp"
-    ],
-    [
-      "apollo_dsky/Apollo_DSKY_interface.svg",
-      "github:PyDevices/pydisplay/src/examples/apollo_dsky/Apollo_DSKY_interface.svg"
-    ],
-    [
-      "apollo_dsky/__init__.py",
-      "github:PyDevices/pydisplay/src/examples/apollo_dsky/__init__.py"
-    ],
-    [
       "chango/__init__.py",
       "github:PyDevices/pydisplay/src/examples/chango/__init__.py"
     ],
@@ -313,6 +317,26 @@
       "github:PyDevices/pydisplay/src/examples/chango/chango_64.py"
     ],
     [
+      "noto_fonts/NotoSansMono_32.py",
+      "github:PyDevices/pydisplay/src/examples/noto_fonts/NotoSansMono_32.py"
+    ],
+    [
+      "noto_fonts/NotoSans_32.py",
+      "github:PyDevices/pydisplay/src/examples/noto_fonts/NotoSans_32.py"
+    ],
+    [
+      "noto_fonts/NotoSerif_32.py",
+      "github:PyDevices/pydisplay/src/examples/noto_fonts/NotoSerif_32.py"
+    ],
+    [
+      "noto_fonts/__init__.py",
+      "github:PyDevices/pydisplay/src/examples/noto_fonts/__init__.py"
+    ],
+    [
+      "noto_fonts/noto_fonts.py",
+      "github:PyDevices/pydisplay/src/examples/noto_fonts/noto_fonts.py"
+    ],
+    [
       "proverbs/__init__.py",
       "github:PyDevices/pydisplay/src/examples/proverbs/__init__.py"
     ],
@@ -331,26 +355,6 @@
     [
       "proverbs/proverbs_30.py",
       "github:PyDevices/pydisplay/src/examples/proverbs/proverbs_30.py"
-    ],
-    [
-      "alien/__init__.py",
-      "github:PyDevices/pydisplay/src/examples/alien/__init__.py"
-    ],
-    [
-      "alien/alien.png",
-      "github:PyDevices/pydisplay/src/examples/alien/alien.png"
-    ],
-    [
-      "alien/alien.py",
-      "github:PyDevices/pydisplay/src/examples/alien/alien.py"
-    ],
-    [
-      "alien/alien_bitmap.py",
-      "github:PyDevices/pydisplay/src/examples/alien/alien_bitmap.py"
-    ],
-    [
-      "alien/make_alien_bitmap.sh",
-      "github:PyDevices/pydisplay/src/examples/alien/make_alien_bitmap.sh"
     ],
     [
       "tiny_toasters/__init__.py",

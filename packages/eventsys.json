@@ -9,12 +9,12 @@
       "github:PyDevices/pydisplay/src/lib/eventsys/devices.py"
     ],
     [
-      "eventsys/keys.py",
-      "github:PyDevices/pydisplay/src/lib/eventsys/keys.py"
-    ],
-    [
       "eventsys/joystick.py",
       "github:PyDevices/pydisplay/src/lib/eventsys/joystick.py"
+    ],
+    [
+      "eventsys/keys.py",
+      "github:PyDevices/pydisplay/src/lib/eventsys/keys.py"
     ]
   ],
   "deps": [],

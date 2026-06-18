@@ -41,6 +41,10 @@
       "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/__init__.py"
     ],
     [
+      "displaysys/sdldisplay/_sdl2_lib/_circuitpython.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/_circuitpython.py"
+    ],
+    [
       "displaysys/sdldisplay/_sdl2_lib/_constants.py",
       "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/_constants.py"
     ],

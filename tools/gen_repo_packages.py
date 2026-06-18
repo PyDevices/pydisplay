@@ -26,12 +26,20 @@ packages = [
 
 master_exclude = ["examples"]
 
+SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
+SKIP_FILE_SUFFIXES = {".pyc", ".pyo"}
+
+
+def should_include_file(filename):
+    return not any(filename.endswith(suffix) for suffix in SKIP_FILE_SUFFIXES)
+
 
 # Create the data structures
 package_dicts = {}
 master_package = {"urls": [], "version": package_ver}
 master_toml = ["[files]"]
-extra_files_added_to_master = ["jupyter_notebook.ipynb"]
+# Standalone files included in the bundle but not discovered by package walks.
+extra_files_added_to_master = [os.path.join(src_dir, "jupyter_notebook.ipynb")]
 
 # Iterate over the packages and create the package files
 for package_path, deps, extra_files in packages:
@@ -55,10 +63,7 @@ for package_path, deps, extra_files in packages:
         src_file = repo_url + os.path.relpath(full_file_path, repo_dir)
         package_dicts[package_name]["urls"].append([extra_file, src_file])
 
-        if (
-            package_name not in master_exclude
-            and full_file_path not in extra_files_added_to_master
-        ):
+        if package_name not in master_exclude:
             # Add the file the master package
             master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
             master_package["urls"].append([master_dest_file, src_file])
@@ -70,12 +75,14 @@ for package_path, deps, extra_files in packages:
             master_toml.append(
                 f'"../{os.path.relpath(full_file_path, repo_dir)}" = "{toml_dest_dir}"'
             )
-            extra_files_added_to_master.append(full_file_path)
 
     # Iterate over the directories in the package
-    for root, _, files in os.walk(full_path):
+    for root, dirs, files in os.walk(full_path):
+        dirs[:] = sorted(d for d in dirs if d not in SKIP_DIR_NAMES)
         # Iterate over the sorted files list
         for f in sorted(files):
+            if not should_include_file(f):
+                continue
             # Add the file to the package
             full_file_path = os.path.join(root, f)
             dest_file = package_sub_dir + os.path.relpath(full_file_path, full_path)
@@ -98,17 +105,16 @@ for package_path, deps, extra_files in packages:
     if package_name not in master_exclude:
         master_toml.append("")
 
-# add extra files to the master package and toml
-for extra_file in extra_files_added_to_master:
-    src_file = repo_url + src_dir + extra_file
-    master_dest_file = os.path.relpath(extra_file, repo_dir)
+# Add standalone bundle files not discovered by package walks.
+for rel_path in extra_files_added_to_master:
+    src_file = repo_url + rel_path
+    master_dest_file = os.path.relpath(rel_path, src_dir)
     master_package["urls"].append([master_dest_file, src_file])
 
     toml_dest_dir = "/" + "/".join(master_dest_file.split("/")[:-1]) + "/"
     if toml_dest_dir == "//":
         toml_dest_dir = "/"
-    toml_src_file = src_dir + master_dest_file
-    master_toml.append(f'"../{toml_src_file}" = "{toml_dest_dir}"')
+    master_toml.append(f'"../{rel_path}" = "{toml_dest_dir}"')
 
 # Add the master package to the package dictionaries
 package_dicts[master_package_name] = master_package
