@@ -10,6 +10,7 @@ board_config.py to be in a directory on the micropython path.
 from board_config import display_drv, broker
 from eventsys import events, devices
 import gc
+import sys
 import lvgl as lv
 import lv_utils
 
@@ -103,8 +104,11 @@ def _broker_quit():
 
 
 def _uses_sdl_run_loop():
-    """True when LVGL should be driven by run() instead of lv_utils timer."""
-    return type(display_drv).__module__.endswith("sdldisplay")
+    """CircuitPython unix SDL uses blocking run(); MicroPython keeps lv_utils."""
+    return (
+        sys.implementation.name == "circuitpython"
+        and type(display_drv).__module__.endswith("sdldisplay")
+    )
 
 
 def main():
