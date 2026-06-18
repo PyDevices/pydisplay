@@ -1,0 +1,5 @@
+[wokwi]
+version = 1
+firmware = "../firmware/ESP32_GENERIC_S3.bin"
+elf = "../firmware/ESP32_GENERIC_S3.bin"
+rfc2217ServerPort = 4001

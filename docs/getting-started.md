@@ -7,7 +7,7 @@ The fastest way to try pydisplay depends on your platform.
 1. **Desktop (CPython or MicroPython on Unix)** — clone the repo, `cd src`, run `python3 -i path.py`, then `import hello`.
 2. **MicroPython on a board** — install packages with [installer.py](installation/installer.md) or `mip`, pick a [board config](hardware/board-configs.md), then run an example.
 3. **Browser (PyScript)** — open the [live demo](https://PyDevices.github.io/pydisplay/demo/) or run `python -m http.server` from the repo root.
-4. **Wokwi simulator** — open the [ESP32-S3 example project](https://wokwi.com/projects/415770470006384641).
+4. **Wokwi simulator** — copy [`wokwi/minimum/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi/minimum) into a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micro-python-esp32-s3), or open the [hosted example](https://wokwi.com/projects/415770470006384641).
 
 ## Choose an install method
 
@@ -60,7 +60,7 @@ mip.install("github:PyDevices/pydisplay/packages/eventsys.json")
 mip.install("github:PyDevices/pydisplay/board_configs/<your_board>")
 ```
 
-See the [minimum-config Wokwi project](https://wokwi.com/projects/404248867674669057) for a working example.
+See the [minimum Wokwi project](https://github.com/PyDevices/pydisplay/tree/main/wokwi/minimum) ([hosted copy](https://wokwi.com/projects/404248867674669057)) for a working example.
 
 ## Next steps
 

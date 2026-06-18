@@ -1,0 +1,33 @@
+name: Documentation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'tools/gen_ref_pages.py'
+      - 'src/lib/**'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'tools/gen_ref_pages.py'
+      - 'src/lib/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install MkDocs dependencies
+        run: pip install -r docs/requirements.txt
+
+      - name: Build documentation
+        run: mkdocs build

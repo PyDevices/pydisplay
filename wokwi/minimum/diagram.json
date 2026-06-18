@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "author": "PyDevices",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-s3-devkitc-1",
+      "id": "esp",
+      "top": 96,
+      "left": 0,
+      "attrs": { "flashSize": "16" }
+    },
+    {
+      "type": "wokwi-ili9341",
+      "id": "lcd1",
+      "top": -80,
+      "left": 220,
+      "rotate": 90,
+      "attrs": {}
+    }
+  ],
+  "connections": [
+    ["esp:TX", "$serialMonitor:RX", "", []],
+    ["esp:RX", "$serialMonitor:TX", "", []],
+    ["lcd1:VCC", "esp:3V3", "red", []],
+    ["lcd1:GND", "esp:GND.1", "black", []],
+    ["lcd1:SCK", "esp:36", "orange", []],
+    ["lcd1:MOSI", "esp:35", "blue", []],
+    ["lcd1:MISO", "esp:37", "blue", []],
+    ["lcd1:CS", "esp:5", "green", []],
+    ["lcd1:D/C", "esp:16", "purple", []],
+    ["lcd1:LED", "esp:3V3", "red", []]
+  ]
+}
