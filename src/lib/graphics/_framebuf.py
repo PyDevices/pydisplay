@@ -261,13 +261,8 @@ class RGB565Format:
     @staticmethod
     def fill(framebuf, color):
         rgb565_color = (color & 0xFFFF).to_bytes(2, "little")
-        if False:
-            rgb565_color_int = int.from_bytes(rgb565_color, "little")
-            arr = np.frombuffer(framebuf._buffer, dtype=np.uint16)
-            arr[:] = rgb565_color_int
-        else:
-            for i in range(0, len(framebuf._buffer), 2):
-                framebuf._buffer[i : i + 2] = rgb565_color
+        for i in range(0, len(framebuf._buffer), 2):
+            framebuf._buffer[i : i + 2] = rgb565_color
 
     @staticmethod
     def fill_rect(framebuf, x, y, width, height, color):
