@@ -49,8 +49,8 @@ This project was registered on ReadTheDocs before the docs revamp. RTD kept buil
 **Fix:**
 
 1. **Admin** → **Settings** → Advanced → uncheck **Disable builds for this project** → Save.
-2. **Commit and push** the docs revamp branch — RTD cannot build fixes that exist only on your laptop (see rollout checklist below).
-3. **Admin** → **Versions** → activate **`docs-revamp`** (or `latest` after merge) → **Build version**.
+2. **Push fixes to `main`** — RTD builds from the default branch; it cannot build changes that exist only locally.
+3. **Admin** → **Versions** → ensure **`latest`** is active → click **Build version**.
 4. Confirm the build log shows MkDocs Material and `docs/requirements.txt` installing — not the old readthedocs theme with missing `test2.md`.
 
 #### ReadTheDocs: "Search indexing has been disabled"
@@ -79,21 +79,20 @@ The public docs URL is **https://pydisplay.readthedocs.io**. ReadTheDocs reads [
    - **Configuration file:** `.readthedocs.yaml`
    - Click **Next**, then **This file exists** (the config is already in the repo).
 
-5. **Build from your docs branch first** (before merging to `main`):
-   - Go to **Admin** → **Versions** for the project.
-   - Under **Active Versions**, find **`docs-revamp`** (or your feature branch) and enable it.
-   - Optionally set it as the **default version** temporarily so `pydisplay.readthedocs.io` shows the new docs.
-   - Click **Build version** (or wait for the webhook after the next push).
+5. **Build `latest` (tracks `main`):**
+   - Go to **Admin** → **Versions**.
+   - Ensure **`latest`** is **Active** and set as the **default version**.
+   - Click **Build** on `latest` (or wait for the webhook after pushing to `main`).
 
 6. Check the **Builds** tab. A successful build ends with `Documentation built successfully`. The site appears at:
-   - `https://pydisplay.readthedocs.io/en/docs-revamp/` (branch slug), or
-   - `https://pydisplay.readthedocs.io/en/latest/` once `main` is the default and built.
+   - `https://pydisplay.readthedocs.io/en/latest/`
+   - `https://pydisplay.readthedocs.io/` when `latest` is the default
 
-### After merging to main
+### Ongoing
 
-1. In RTD **Admin** → **Versions**, set **`latest`** (tracks `main`) as the default version.
-2. Disable or hide old preview branches if desired.
-3. Confirm `https://pydisplay.readthedocs.io` loads the new home page.
+1. RTD rebuilds automatically when you push to `main`.
+2. Optionally disable old version slugs (e.g. `docs-revamp`) under **Admin** → **Versions**.
+3. Enable **search indexing** under **Settings** once the site is live.
 
 ### Optional: pull request previews
 
@@ -107,25 +106,19 @@ Use this after ReadTheDocs is connected:
 
 | Step | Action | Status |
 |------|--------|--------|
-| **3. Push branch** | `git push -u origin docs-revamp` — triggers RTD build (if branch is active) and the GitHub Pages demo workflow | ☐ |
-| **4. Open PR** | Open a PR from `docs-revamp` → `main` on GitHub; review docs on RTD preview or `/en/docs-revamp/` | ☐ |
-| **5. Merge PR** | Merge to `main`; set RTD default version to `latest` | ☐ |
-| **6. Verify live URLs** | Docs: `https://pydisplay.readthedocs.io` · Demo: `https://PyDevices.github.io/pydisplay/demo/` · Landing: `https://PyDevices.github.io/pydisplay/` | ☐ |
+| **Push to main** | Merge docs revamp and `git push origin main` | Done |
+| **RTD build** | Re-enable builds; trigger **Build** on `latest` in RTD Admin → Versions | ☐ |
+| **Verify live URLs** | Docs: `https://pydisplay.readthedocs.io` · Demo: `https://PyDevices.github.io/pydisplay/demo/` · Landing: `https://PyDevices.github.io/pydisplay/` | ☐ |
 
-### Step 3 detail — push the branch
+### Push to main
 
 ```bash
-git checkout docs-revamp
-git push -u origin docs-revamp
+git checkout main
+git merge docs-revamp
+git push origin main
 ```
 
-This also runs [`.github/workflows/deploy-demo.yml`](https://github.com/PyDevices/pydisplay/blob/main/.github/workflows/deploy-demo.yml), which deploys the PyScript demo to GitHub Pages at `/demo/`.
-
-### Step 4 detail — open a PR
-
-On GitHub: **Compare & pull request** from `docs-revamp` into `main`. Note the RTD build link in the PR checks (if PR previews are enabled).
-
-### Step 6 detail — what each URL should show
+This runs [`.github/workflows/deploy-demo.yml`](https://github.com/PyDevices/pydisplay/blob/main/.github/workflows/deploy-demo.yml), which deploys the PyScript demo to GitHub Pages at `/demo/`.
 
 | URL | Expected content |
 |-----|------------------|
