@@ -11,8 +11,7 @@ Enables using 'from multimer import Timer' on MicroPython on microcontrollers,
 on MicroPython on Unix (which doesn't have a machine.Timer) and CPython (ditto).
 
 _librt.py uses MicroPython ffi to connect to libc and librt, while _sdl2.py uses
-SDL2 on CPython to connect to libSDL2.  CircuitPython unix uses _aio.py (thread-based;
-see that module for why usdl2.add_timer is not used here).
+SDL2 on CPython to connect to libSDL2.  CircuitPython unix uses _aio.py (thread-based).
 
 Returns None if the platform is not supported rather than raising an ImportError so that
 the client can handle the error more gracefully (e.g. by using `if Timer is not None:`).
