@@ -1,17 +1,31 @@
 site_name: pydisplay
+site_url: https://pydisplay.readthedocs.io
 repo_url: https://github.com/PyDevices/pydisplay/
+edit_uri: edit/main/docs/
 copyright: "Copyright 2024, Brad Barnett"
 docs_dir: docs
 site_dir: site
 
 theme:
-#  name: "material"
-  name: "readthedocs"
+  name: material
   palette:
-    scheme: slate
-    primary: indigo
-    accent: amber
-
+    - scheme: default
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - content.code.copy
 
 plugins:
 - search
@@ -24,65 +38,61 @@ plugins:
 - mkdocstrings:
     handlers:
       python:
+        paths: [src/lib]
         options:
           show_source: false
           show_bases: false
           inherited_members: true
-          paths: [src]
           docstring_style: google
           docstring_section_style: table
           separate_signature: true
           show_category_heading: true
-          # heading_level: 1
-# - mkdocs-pyscript:
-#     pyscript_version: "unstable"
 
 nav:
-# rest of the navigation...
-- About the project:
-    - Background: index.md
-    - Getting Started: getting-started.md
-    - Live Demos: test2.md
-    - Getting Help: getting-help.md
-    - Contributing: contributing.md
-- Modules:
-  - displaysys:
-    - busdisplay:  test-page#src.lib.displaysys.busdisplay
-    - fbdisplay:  test-page#src.lib.displaysys.fbdisplay
-    - jndisplay:  test-page#src.lib.displaysys.jndisplay
-    - pgdisplay:  test-page#src.lib.displaysys.pgdisplay
-    - psdisplay:  test-page#src.lib.displaysys.psdisplay
-    - sdldisplay:  test-page#src.lib.displaysys.sdldisplay
-  - eventsys:  test-page#src.lib.eventsys
-  - graphics:  test-page#src.lib.graphics
-  - multimer:  test-page#src.lib.multimer
-  - palettes:  test-page#src.lib.palettes
+- Home: index.md
+- Getting Started: getting-started.md
+- Installation:
+  - Overview: installation/index.md
+  - Full clone: installation/full-clone.md
+  - GitHub MIP packages: installation/mip-github.md
+  - micropython-lib MIP: installation/mip-micropython-lib.md
+  - installer.py: installation/installer.md
 - Platforms:
-    - Micropython:
-      - Embedded:  micropython#embedded
-      - Unix:  micropython#unix
-      - PyScript:  micropython#pyscript
-    - CPython:
-      - Desktop:  cpython#desktop
-      - Single Board Computer:  cpython#sbc
-      - Jupyter Notebook:  cpython#jupyter
-      - PyScript:  cpython#pyscript
-    - CircuitPython:
-      - Embedded:  circuitpython#embedded
-      - Blinka:  circuitpython#blinka
-      - USB_Video:  circuitpython#usb_video
-      - DVI (HDMI):  circuitpython#dvi
-      - More - RGBMatrix, IS31FL3741, etc.:  circuitpython#more
-- GUIs:
-  - LVGL:  lvgl.md
-  - MicroPython-Touch:  micropython-touch.md
-  - TFT_GUI:  tft_gui.md
-  - PyWidgets:  pywidgets.md
-# defer to gen-files + literate-nav
+  - MicroPython: platforms/micropython.md
+  - CircuitPython: platforms/circuitpython.md
+  - CPython desktop: platforms/cpython-desktop.md
+  - Jupyter: platforms/jupyter.md
+  - PyScript: platforms/pyscript.md
+- Hardware:
+  - Board configs: hardware/board-configs.md
+  - Wokwi: hardware/wokwi.md
+  - Display drivers: hardware/display-drivers.md
+  - Touch drivers: hardware/touch-drivers.md
+- Concepts:
+  - Displays: concepts/displays.md
+  - Events: concepts/events.md
+  - Drawing and fonts: concepts/drawing-and-fonts.md
+  - Graphics files: concepts/graphics-files.md
+  - Config files: concepts/config-files.md
+- GUI libraries:
+  - LVGL: guis/lvgl.md
+  - MicroPython-Touch: guis/micropython-touch.md
+  - Nano-GUI: guis/nano-gui.md
+  - TFT examples: guis/tft-gui.md
+  - PyWidgets: guis/pywidgets.md
+- Examples:
+  - Catalog: examples/index.md
+  - Live demos: examples/live-demos.md
+- Add-ons: add-ons.md
 - Package Reference: reference/
-# rest of the navigation...
+- Contributing: contributing.md
+- Building docs: building-docs.md
+- Getting help: getting-help.md
 
 markdown_extensions:
+  - admonition
   - toc:
       permalink: true
-      separator: "_"
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true

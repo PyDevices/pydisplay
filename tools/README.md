@@ -24,6 +24,19 @@ From the repository root:
 | `drivers/bus/i80bus.py` or `gpio_pin.py` | Edit `packages/i80bus.json` by hand |
 | `drivers/bus/spibus.py` | Edit `packages/spibus.json` by hand |
 | Docstrings or modules under `src/lib/` | `mkdocs build` (uses `gen_ref_pages.py` automatically) |
+
+### Documentation site
+
+User docs live in `docs/` and publish to [ReadTheDocs](https://pydisplay.readthedocs.io) via `.readthedocs.yaml`.
+
+**Full guide:** [docs/building-docs.md](../docs/building-docs.md) (local preview, RTD setup, rollout checklist).
+
+```bash
+python3 -m venv .venv-docs
+.venv-docs/bin/pip install -r docs/requirements.txt
+.venv-docs/bin/mkdocs serve    # http://127.0.0.1:8000
+.venv-docs/bin/mkdocs build    # output in site/
+```
 | Publishing to micropython-lib / TestPyPI | `tools/gen_library_packages.sh` |
 | mip index on micropython-lib gh-pages | `tools/build.py` (see below) |
 | Material Design PNG icons | `tools/convert_md_png_to_pbm.py` (update paths first) |

@@ -1,0 +1,44 @@
+# Installation overview
+
+pydisplay supports three install channels. Pick based on whether you need the full repo, source files on device, or precompiled bytecode.
+
+## Comparison
+
+| Channel | Format | Install tool | Includes examples | Includes add_ons |
+|---------|--------|--------------|-------------------|------------------|
+| [Full clone](full-clone.md) | Entire repo | `git clone` | Yes | Yes |
+| [GitHub MIP](mip-github.md) | Source `.py` | `mip` / `mpremote mip` | Optional (`examples.json`) | Yes (`add_ons.json`) |
+| [micropython-lib MIP](mip-micropython-lib.md) | Precompiled `.mpy` | `mip` with custom index | No | No |
+
+The [installer.py](installer.md) script combines GitHub and micropython-lib installs in one call — recommended for MicroPython boards.
+
+## What gets installed
+
+**Core libraries** (under `src/lib/`):
+
+- `displaysys` — display drivers (BusDisplay, SDL2Display, etc.)
+- `eventsys` — input events and device brokers
+- `graphics` — extended drawing helpers
+- `palettes` — color palettes
+- `multimer` — cross-platform timers (CPython + MicroPython, not CircuitPython)
+
+**Optional packages:**
+
+- `add_ons` — framebuf shim, console, pdwidgets, displaybuf, etc.
+- `examples` — demo scripts
+- `spibus` / `i80bus` — MicroPython bus drivers (viper; GitHub only)
+
+**Board support:**
+
+- `board_config.py` per hardware — see [board configs](../hardware/board-configs.md)
+- Display and touch drivers from `drivers/`
+
+## PyPI / pip
+
+CPython wheels are built to [TestPyPI](https://test.pypi.org/) for maintainer testing. End-user `pip install` is not documented yet. Use a full clone for desktop development.
+
+## After installing
+
+1. Import `path.py` (or install packages into `lib/` so imports resolve without it).
+2. Provide or install a `board_config.py` matching your hardware.
+3. Run an example: `import hello`.

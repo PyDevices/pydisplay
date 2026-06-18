@@ -1,0 +1,36 @@
+name: Deploy PyScript demo to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - docs-revamp
+    paths:
+      - 'index.html'
+      - 'html/**'
+      - 'demo-pages/**'
+      - '.github/workflows/deploy-demo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble GitHub Pages site
+        run: |
+          mkdir -p _site/demo
+          cp index.html _site/demo/
+          cp -r html _site/demo/
+          cp demo-pages/index.html _site/index.html
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _site
+          publish_branch: gh-pages

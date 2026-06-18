@@ -1,0 +1,51 @@
+# Contributing
+
+pydisplay is a community project. Bug reports, board configs, drivers, docs, and examples are all welcome.
+
+## Development setup
+
+See **[Building and publishing documentation](building-docs.md)** for local preview (`mkdocs serve`) and ReadTheDocs setup.
+
+Quick version:
+
+```bash
+python3 -m venv .venv-docs
+.venv-docs/bin/pip install -r docs/requirements.txt
+.venv-docs/bin/mkdocs serve    # http://127.0.0.1:8000
+```
+
+After editing files under `src/`:
+
+```bash
+./tools/regenerate.sh    # refresh packages/*.json and html/pyscript.toml
+```
+
+## Pull request workflow
+
+1. Fork [PyDevices/pydisplay](https://github.com/PyDevices/pydisplay)
+2. Create a feature branch
+3. Make changes; run `./tools/regenerate.sh --audit` if you touched `src/`
+4. For docs: see [Building docs](building-docs.md) — `mkdocs serve` and verify pages build
+5. Open a PR against `main` with a clear description
+
+## High-value contributions
+
+- **Board configs** for new hardware
+- **Display/touch drivers** for unsupported controllers
+- **C bus drivers** (STM32, i.MX RT) compatible with BusDisplay
+- **Documentation** fixes and platform guides
+- **EPaperDisplay** implementation
+- **CircuitPython** board configs and circup packaging
+- **PyScript** asyncio examples and psdisplay improvements
+
+## Code style
+
+Python is linted with Ruff — see `pyproject.toml`. Pre-commit hooks may run on commit.
+
+## Maintainer docs
+
+Publishing, micropython-lib, and TestPyPI: [tools/README.md](https://github.com/PyDevices/pydisplay/blob/main/tools/README.md).
+
+## License
+
+Follow the license terms in the repository. Third-party add_ons retain their original licenses where noted.
