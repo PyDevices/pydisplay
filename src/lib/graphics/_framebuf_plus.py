@@ -38,7 +38,7 @@ class FrameBuffer(_FrameBuffer):
     as color_depth, width, height, buffer, and format.  Also adds a save method to save
     the framebuffer to a file, and a from_file method to load a framebuffer from a file.
 
-    Inherits from frambuf.Framebuffer, which may be compiled into MicroPython
+    Inherits from framebuf.FrameBuffer, which may be compiled into MicroPython
     or may be from _framebuf.py.  Methods should return an Area object, but
     the MicroPython framebuf module returns None, so the methods inherited from
     framebuf.FrameBuffer are overridden to return an Area object.
@@ -302,7 +302,7 @@ class FrameBuffer(_FrameBuffer):
 
     ########### Additional methods
 
-    def arc(self, *args, **kwargs):
+    def arc(self, x, y, r, a0, a1, c):
         """
         Arc drawing function.  Will draw a single pixel wide arc with a radius r
         centered at x, y from a0 to a1.
@@ -318,7 +318,7 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             (Area): The bounding box of the arc.
         """
-        return _shapes.arc(self, *args, **kwargs)
+        return _shapes.arc(self, x, y, r, a0, a1, c)
 
     def blit_rect(self, buf, x, y, w, h):
         """
@@ -352,7 +352,7 @@ class FrameBuffer(_FrameBuffer):
             self.buffer[dest_begin:dest_end] = buf[source_begin:source_end]
         return Area(x, y, w, h)
 
-    def blit_transparent(self, *args, **kwargs):
+    def blit_transparent(self, buf, x, y, w, h, key):
         """
         Blit a buffer with transparency.
 
@@ -367,9 +367,9 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             (Area): The bounding box of the blitted area.
         """
-        return _shapes.blit_transparent(self, *args, **kwargs)
+        return _shapes.blit_transparent(self, buf, x, y, w, h, key)
 
-    def circle(self, *args, **kwargs):
+    def circle(self, x0, y0, r, c, f=False):
         """
         Circle drawing function.  Will draw a single pixel wide circle
         centered at x0, y0 and the specified r.
@@ -384,9 +384,9 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             (Area): The bounding box of the circle.
         """
-        return _shapes.circle(self, *args, **kwargs)
+        return _shapes.circle(self, x0, y0, r, c, f)
 
-    def gradient_rect(self, *args, **kwargs):
+    def gradient_rect(self, x, y, w, h, c1, c2=None, vertical=True):
         """
         Fill a rectangle with a gradient.
 
@@ -403,9 +403,9 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             (Area): The bounding box of the filled area.
         """
-        return _shapes.gradient_rect(self, *args, **kwargs)
+        return _shapes.gradient_rect(self, x, y, w, h, c1, c2, vertical)
 
-    def polygon(self, *args, **kwargs):
+    def polygon(self, points, x, y, color, angle=0, center_x=0, center_y=0):
         """
         Draw a polygon on the canvas.
 
@@ -424,9 +424,9 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             (Area): The bounding box of the polygon.
         """
-        return _shapes.polygon(self, *args, **kwargs)
+        return _shapes.polygon(self, points, x, y, color, angle, center_x, center_y)
 
-    def round_rect(self, *args, **kwargs):
+    def round_rect(self, x0, y0, w, h, r, c, f=False):
         """
         Rounded rectangle drawing function.  Will draw a single pixel wide rounded rectangle starting at
         x0, y0 and extending w, h pixels with the specified radius.
@@ -443,9 +443,9 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             (Area): The bounding box of the rectangle.
         """
-        return _shapes.round_rect(self, *args, **kwargs)
+        return _shapes.round_rect(self, x0, y0, w, h, r, c, f)
 
-    def triangle(self, *args, **kwargs):
+    def triangle(self, x0, y0, x1, y1, x2, y2, c, f=False):
         """
         Triangle drawing function.  Draws a single pixel wide triangle with vertices at
         (x0, y0), (x1, y1), and (x2, y2).
@@ -463,15 +463,14 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             (Area): The bounding box of the triangle.
         """
-        return _shapes.triangle(self, *args, **kwargs)
+        return _shapes.triangle(self, x0, y0, x1, y1, x2, y2, c, f)
 
-    def text8(self, *args, **kwargs):
+    def text8(self, s, x, y, c=1, scale=1, inverted=False, font_data=None):
         """
         Place text on the canvas with an 8 pixel high font.
         Breaks on \n to next line.  Does not break on line going off canvas.
 
         Args:
-            canvas (Canvas): The DisplayDriver, FrameBuffer, or other canvas-like object to draw on.
             s (str): The text to draw.
             x (int): The x position to start drawing the text.
             y (int): The y position to start drawing the text.
@@ -483,15 +482,14 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             Area: The area that was drawn to.
         """
-        return _font.text8(self, *args, **kwargs)
+        return _font.text8(self, s, x, y, c, scale, inverted, font_data)
 
-    def text14(self, *args, **kwargs):
+    def text14(self, s, x, y, c=1, scale=1, inverted=False, font_data=None):
         """
         Place text on the canvas with a 14 pixel high font.
         Breaks on \n to next line.  Does not break on line going off canvas.
 
         Args:
-            canvas (Canvas): The DisplayDriver, FrameBuffer, or other canvas-like object to draw on.
             s (str): The text to draw.
             x (int): The x position to start drawing the text.
             y (int): The y position to start drawing the text.
@@ -503,15 +501,14 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             Area: The area that was drawn to.
         """
-        return _font.text14(self, *args, **kwargs)
+        return _font.text14(self, s, x, y, c, scale, inverted, font_data)
 
-    def text16(self, *args, **kwargs):
+    def text16(self, s, x, y, c=1, scale=1, inverted=False, font_data=None):
         """
         Place text on the canvas with a 16 pixel high font.
         Breaks on \n to next line.  Does not break on line going off canvas.
 
         Args:
-            canvas (Canvas): The DisplayDriver, FrameBuffer, or other canvas-like object to draw on.
             s (str): The text to draw.
             x (int): The x position to start drawing the text.
             y (int): The y position to start drawing the text.
@@ -523,7 +520,7 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             Area: The area that was drawn to.
         """
-        return _font.text16(self, *args, **kwargs)
+        return _font.text16(self, s, x, y, c, scale, inverted, font_data)
 
     def save(self, filename=None):
         """

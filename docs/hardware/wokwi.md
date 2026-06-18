@@ -1,6 +1,8 @@
 # Wokwi
 
-Try pydisplay in the browser simulator without hardware.
+Extended Wokwi reference — wiring, board configs, and legacy hosted projects.
+
+For a quick start, see **[Wokwi quick start guide](../guides/wokwi.md)** or **[Try pydisplay](../try/index.md#wokwi-simulator)**.
 
 ## In-repo projects
 
@@ -12,8 +14,6 @@ Runnable projects live under [`wokwi/`](https://github.com/PyDevices/pydisplay/t
 | [`wokwi/esp32-s3-full/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi/esp32-s3-full) | Full install (bundle, add_ons, examples) via `installer.py` |
 
 Each folder contains `main.py`, `diagram.json`, and `wokwi.toml`. See [`wokwi/README.md`](https://github.com/PyDevices/pydisplay/blob/main/wokwi/README.md) for setup on [wokwi.com](https://wokwi.com) and VS Code.
-
-**Quick start (browser):** create a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3), paste in `wokwi/minimum/main.py` and `diagram.json`, and run.
 
 ## Hosted projects (legacy)
 
@@ -35,6 +35,8 @@ Wiring matches these MIP packages:
 
 ```python
 import mip
+mip.install("github:PyDevices/pydisplay/packages/displaysys.json")
+mip.install("github:PyDevices/pydisplay/packages/eventsys.json")
 mip.install("github:PyDevices/pydisplay/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3")
 ```
 
@@ -45,3 +47,5 @@ The full example downloads and runs [`installer.py`](../installation/installer.m
 ## Known issues
 
 `touch_keypad.py` notes occasional Wokwi `IndexError` when touching the last keypad row — simulator quirk, not necessarily hardware.
+
+See also [Troubleshooting](../troubleshooting.md).

@@ -2,6 +2,21 @@
 
 pydisplay provides several display driver classes. All expose a drawing surface compatible with MicroPython's `framebuf` API.
 
+See [Architecture](architecture.md) for how drivers connect to `board_config.py`.
+
+## Pick a driver
+
+| Your target | Driver class | Board config example |
+|-------------|--------------|----------------------|
+| MicroPython MCU (SPI/I80) | `BusDisplay` | `board_configs/busdisplay/spi/...` |
+| CPython / MicroPython Unix desktop | `SDL2Display` | `board_configs/sdldisplay/` |
+| Windows / Chromebook (PyGame easier) | `PGDisplay` | `board_configs/pgdisplay/` |
+| CircuitPython RGB / USB video | `FBDisplay` | varies |
+| Jupyter notebook | `JNDisplay` | `board_configs/jndisplay/` |
+| PyScript browser | `PSDisplay` | `board_configs/psdisplay/` |
+
+Install the matching [board config](../hardware/board-configs.md) — it constructs the driver for you.
+
 ## Display classes
 
 ### BusDisplay
@@ -31,7 +46,7 @@ Jupyter Notebook output. No input devices yet. Config: `board_configs/jndisplay/
 
 ### PSDisplay
 
-PyScript browser canvas. Touch only. Config: `board_configs/psdisplay/`. See [PyScript](../platforms/pyscript.md).
+PyScript browser canvas. Touch only. Config: `board_configs/psdisplay/`. See [PyScript](../guides/pyscript.md).
 
 ### EPaperDisplay
 
@@ -44,7 +59,7 @@ Anything you can draw on implements the framebuf API:
 - The display itself
 - `framebuf` bytearrays
 - `bmp565.BMP565` bitmap files
-- `displaybuf.DisplayBuffer` (see add_ons)
+- `displaybuf.DisplayBuffer` (see [add-ons](../add-ons.md))
 
 ## Timing
 
@@ -59,6 +74,12 @@ BusDisplay uses CircuitPython-style rotation degrees (`0`, `90`, `180`, `270`).
 
 Known issues: Unix SDL rotation clears the screen; scrolling while rotated has edge cases on desktop and MCU — see [roadmap](https://github.com/PyDevices/pydisplay#roadmap).
 
+## Next
+
+- [Events](events.md)
+- [Drawing and fonts](drawing-and-fonts.md)
+- [Display drivers (chips)](../hardware/display-drivers.md)
+
 ## API reference
 
-Auto-generated docs: [Package Reference](../reference/) → `displaysys`.
+[API reference (core)](../reference/) → `displaysys`.

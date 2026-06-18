@@ -62,13 +62,10 @@ _display_drv_set_attrs = {"vscroll"}
 
 class DisplayBuffer(framebuf.FrameBuffer):
     """
-    DisplayBuffer: A class to wrap an displaysys driver and provide a framebuf
-    compatible interface to it.  It provides a show() method to copy the framebuf
-    to the display.  The show() method is optimized for the format.
-    The format must be one of the following:
-        DisplayBuffer.RGB565
-        DisplayBuffer.GS8
-        DisplayBuffer.GS4_HMSB
+    Wrap a displaysys driver with a framebuf-compatible logical framebuffer.
+
+    Call ``show()`` to copy the buffer to the physical display. Supported formats:
+    ``DisplayBuffer.RGB565``, ``DisplayBuffer.GS8``, ``DisplayBuffer.GS4_HMSB``.
     """
 
     rgb = None  # Function to convert r, g, b to a color value; used by Nano-GUI and Micro-GUI.
@@ -79,6 +76,17 @@ class DisplayBuffer(framebuf.FrameBuffer):
     GS4_HMSB = framebuf.GS4_HMSB
 
     def __init__(self, display_drv, format=framebuf.RGB565, stride=8):
+        """
+        Allocate a logical framebuffer backed by ``display_drv``.
+
+        Args:
+            display_drv: A displaysys driver (BusDisplay, SDL2Display, etc.).
+            format: One of ``RGB565``, ``GS8``, or ``GS4_HMSB``.
+            stride: Lines per chunk for GS8/GS4 bounce buffers (MicroPython viper).
+
+        Attributes:
+            show: Bound to ``_show16``, ``_show8``, or ``_show4`` — call to flush buffer to panel.
+        """
         gc.collect()
         self.display_drv = display_drv
         self.vscrdef = display_drv.vscrdef
@@ -197,6 +205,7 @@ class DisplayBuffer(framebuf.FrameBuffer):
         return idx  # Return the index of the registered color
 
     def _show16(self, area=None):
+        """Copy RGB565 buffer (or ``area`` sub-rectangle) to the display."""
         if area is not None:
             x, y, w, h = area
             for row in range(y, y + h):

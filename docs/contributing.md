@@ -33,7 +33,7 @@ After editing files under `src/`:
 - **Board configs** for new hardware
 - **Display/touch drivers** for unsupported controllers
 - **C bus drivers** (STM32, i.MX RT) compatible with BusDisplay
-- **Documentation** fixes and platform guides
+- **Documentation** fixes and platform guides — see [docstring conventions](contributing/docstrings.md)
 - **EPaperDisplay** implementation
 - **CircuitPython** board configs and circup packaging
 - **PyScript** asyncio examples and psdisplay improvements
@@ -42,7 +42,9 @@ After editing files under `src/`:
 
 Python is linted with Ruff — see `pyproject.toml`. Pre-commit hooks may run on commit.
 
-## Maintainer docs
+Public API docstrings: [Docstring conventions](contributing/docstrings.md).
+
+## Documentation
 
 Publishing, micropython-lib, and TestPyPI: [tools/README.md](https://github.com/PyDevices/pydisplay/blob/main/tools/README.md).
 

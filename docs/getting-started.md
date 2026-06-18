@@ -1,70 +1,32 @@
 # Getting started
 
-The fastest way to try pydisplay depends on your platform.
+This page is a **router**. Pick the path that matches how you want to use pydisplay.
 
-## TL;DR
+## Try without installing
 
-1. **Desktop (CPython or MicroPython on Unix)** — clone the repo, `cd src`, run `python3 -i path.py`, then `import hello`.
-2. **MicroPython on a board** — install packages with [installer.py](installation/installer.md) or `mip`, pick a [board config](hardware/board-configs.md), then run an example.
-3. **Browser (PyScript)** — open the [live demo](https://PyDevices.github.io/pydisplay/demo/) or run `python -m http.server` from the repo root.
-4. **Wokwi simulator** — copy [`wokwi/minimum/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi/minimum) into a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3), or open the [hosted example](https://wokwi.com/projects/415770470006384641).
+| Path | Guide |
+|------|-------|
+| Browser demo | [Try pydisplay → PyScript](try/index.md#pyscript-browser) |
+| Wokwi simulator | [Try pydisplay → Wokwi](try/index.md#wokwi-simulator) |
 
-## Choose an install method
+## Quick start (install locally)
 
-| Method | Best for | Details |
-|--------|----------|---------|
-| [Full clone](installation/full-clone.md) | Development, all examples | `git clone` + `import lib.path` |
-| [GitHub MIP](installation/mip-github.md) | MicroPython devices, source `.py` files | `packages/*.json`, board configs |
-| [micropython-lib MIP](installation/mip-micropython-lib.md) | MicroPython devices, precompiled `.mpy` | PyDevices package index |
-| [installer.py](installation/installer.md) | One-shot setup on a device | Combines both MIP sources |
+| I have… | Start here |
+|---------|------------|
+| ESP32 or other MicroPython board | [ESP32 board guide](guides/esp32-board.md) |
+| Linux / macOS / Windows desktop | [Desktop CPython](guides/desktop-cpython.md) |
+| Browser + local PyScript dev | [PyScript guide](guides/pyscript.md) |
+| Wokwi only (no local install) | [Wokwi guide](guides/wokwi.md) |
+| CircuitPython board | [CircuitPython platform](platforms/circuitpython.md) |
+| Jupyter notebook | [Jupyter platform](platforms/jupyter.md) |
 
-PyPI wheels are not published for end users yet. TestPyPI uploads exist for maintainer testing only.
+## Learn the model
 
-## Run your first example
+- [Architecture](concepts/architecture.md) — how board_config, displaysys, and eventsys fit together
+- [Installation overview](installation/index.md) — MIP vs full clone vs micropython-lib
 
-Every example expects `path.py` to be imported first (unless you installed everything into `lib/` on the device).
+## Reference
 
-```python
-import lib.path   # or: import path  (desktop clone layout)
-import hello       # any script from src/examples/
-```
-
-On desktop from a full clone:
-
-```bash
-cd src
-python3 -i path.py
-```
-
-Then at the `>>>` prompt: `import hello`.
-
-On a microcontroller with `mpremote`:
-
-```bash
-mpremote mount .
-# at REPL:
-import lib.path
-import hello
-```
-
-See [platform-specific guides](platforms/micropython.md) for SDL2/PyGame setup on desktop, CircuitPython copying, Jupyter, and PyScript.
-
-## Minimum packages
-
-For LVGL or framebuffer-only use without the full bundle:
-
-```python
-import mip
-mip.install("github:PyDevices/pydisplay/packages/displaysys.json")
-mip.install("github:PyDevices/pydisplay/packages/eventsys.json")
-mip.install("github:PyDevices/pydisplay/board_configs/<your_board>")
-```
-
-See the [minimum Wokwi project](https://github.com/PyDevices/pydisplay/tree/main/wokwi/minimum) ([hosted copy](https://wokwi.com/projects/404248867674669057)) for a working example.
-
-## Next steps
-
-- [Installation overview](installation/index.md) — all three install channels explained
-- [Board configs](hardware/board-configs.md) — pick hardware settings
-- [Examples catalog](examples/index.md) — what to run after hello
-- [Concepts: displays](concepts/displays.md) — BusDisplay, SDL2Display, and friends
+- [Examples catalog](examples/index.md)
+- [API reference (core)](reference/)
+- [Troubleshooting](troubleshooting.md)

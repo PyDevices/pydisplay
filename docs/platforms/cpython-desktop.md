@@ -1,20 +1,10 @@
 # CPython desktop
 
-Develop and debug on Linux, macOS, or Windows using SDL2 or PyGame backends.
+Platform-specific notes for SDL2, PyGame, and OS dependencies. **First run:** use the [Desktop CPython quick start](../guides/desktop-cpython.md).
 
-## Quick start (after dependencies)
+## Dependencies
 
-```bash
-git clone https://github.com/PyDevices/pydisplay.git
-cd pydisplay/src
-python3 -i path.py
-```
-
-```python
->>> import hello
-```
-
-Default config: `src/lib/board_config.py` (SDL2Display). A window should open with the hello example.
+Install SDL2 development libraries (Linux/macOS) or PyGame (Windows fallback). The [desktop quick start](../guides/desktop-cpython.md) links here for OS-specific packages.
 
 ## Linux (including WSL)
 

@@ -1,6 +1,6 @@
 # MicroPython
 
-pydisplay targets MicroPython on microcontrollers and on Unix-like desktop OSes.
+Platform notes for embedded MCUs and MicroPython on Unix. **Quick start:** [ESP32 board guide](../guides/esp32-board.md).
 
 ## Embedded (MCU)
 
@@ -12,7 +12,9 @@ pydisplay targets MicroPython on microcontrollers and on Unix-like desktop OSes.
 
 ### Quick start with mpremote
 
-From the repo `src/` directory on your PC:
+See [ESP32 board guide](../guides/esp32-board.md) for the full install and hello workflow.
+
+Brief version from the repo `src/` directory:
 
 ```bash
 mpremote mip install "github:PyDevices/pydisplay/board_configs/busdisplay/i80/wt32sc01-plus"

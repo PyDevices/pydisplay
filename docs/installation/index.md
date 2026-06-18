@@ -35,10 +35,16 @@ The [installer.py](installer.md) script combines GitHub and micropython-lib inst
 
 ## PyPI / pip
 
-CPython wheels are built to [TestPyPI](https://test.pypi.org/) for maintainer testing. End-user `pip install` is not documented yet. Use a full clone for desktop development.
+CPython wheels are built to [TestPyPI](https://test.pypi.org/) for maintainer testing. End-user `pip install` is not documented yet. Use a [full clone](full-clone.md) or [desktop quick start](../guides/desktop-cpython.md).
 
 ## After installing
 
-1. Import `path.py` (or install packages into `lib/` so imports resolve without it).
-2. Provide or install a `board_config.py` matching your hardware.
-3. Run an example: `import hello`.
+1. Provide or install a `board_config.py` matching your hardware.
+2. Follow the quick start for your platform:
+   - [ESP32 / MCU](../guides/esp32-board.md)
+   - [Desktop CPython](../guides/desktop-cpython.md)
+   - [Wokwi](../guides/wokwi.md)
+
+## Troubleshooting
+
+See [Troubleshooting](../troubleshooting.md) for import errors, MIP failures, and display issues.

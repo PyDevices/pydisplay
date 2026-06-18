@@ -206,7 +206,14 @@ class Widget:
         """
 
     def add_event_cb(self, event_type: int, callback: callable, data=None):
-        # Look in self._event_callbacks for the event_type.  The value is a dictionary.
+        """
+        Register a callback for an event type on this widget.
+
+        Args:
+            event_type: ``eventsys.events`` constant (e.g. ``events.MOUSEBUTTONDOWN``).
+            callback: Callable invoked as ``callback(event, data)``.
+            data: User data passed to callback; defaults to this widget.
+        """
         # Each item's key is the callback and value is the optional data.  If the event_type is not found,
         # add it to the dictionary with the callback and data.
         data = data or self
@@ -260,9 +267,10 @@ class Widget:
     @property
     def area(self):
         """
-        Get the absolute area of the widget on the screen.
+        Absolute bounding box of the widget on screen.
 
-        :return: An Area object representing the absolute area.
+        Returns:
+            Area: ``(x, y, width, height)`` in display coordinates.
         """
         return Area(self.x, self.y, self.width, self.height)
 
@@ -596,6 +604,12 @@ class Display(Widget):
         return new_task
 
     def refresh(self, area: Area):
+        """
+        Copy a dirty region from the internal framebuffer to the physical display.
+
+        Args:
+            area: ``Area`` or ``(x, y, w, h)`` rectangle to flush.
+        """
         area = area.clip(self.area)
         _log("Refreshing", area)
         x, y, w, h = area
@@ -626,6 +640,13 @@ class Display(Widget):
         self.display_drv.quit()
 
     def tick(self):
+        """
+        Run one frame of the widget event loop.
+
+        Flushes dirty areas to the display, otherwise polls ``broker`` for events,
+        runs scheduled tasks, and re-renders invalidated widgets. Call from a timer
+        (see ``init_timer``) or your main loop.
+        """
         if self._tick_busy:
             return
         self._tick_busy = True

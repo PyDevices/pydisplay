@@ -60,8 +60,17 @@ def color565(r, g=None, b=None):
 
 
 def color565_swapped(r, g=0, b=0):
-    # Convert r, g, b in range 0-255 to a 16 bit color value RGB565
-    # ggbbbbbb rrrrrggg
+    """
+    Convert RGB to 16-bit RGB565 with byte order swapped for some displays.
+
+    Args:
+        r (int | tuple | list): Red value, or an (r, g, b) sequence.
+        g (int): Green value when r is an int.
+        b (int): Blue value when r is an int.
+
+    Returns:
+        int: Byte-swapped RGB565 color.
+    """
     if isinstance(r, (tuple, list)):
         r, g, b = r[:3]
     color = color565(r, g, b)
@@ -69,14 +78,29 @@ def color565_swapped(r, g=0, b=0):
 
 
 def color332(r, g, b):
-    # Convert r, g, b in range 0-255 to an 8 bit color value RGB332
-    # rrrgggbb
+    """
+    Convert RGB to 8-bit RGB332 color.
+
+    Args:
+        r (int): Red (0-255).
+        g (int): Green (0-255).
+        b (int): Blue (0-255).
+
+    Returns:
+        int: RGB332 color byte.
+    """
     return (r & 0xE0) | ((g >> 3) & 0x1C) | (b >> 6)
 
 
 def color_rgb(color):
     """
-    color can be an 16-bit integer or a tuple, list or bytearray of length 2 or 3.
+    Expand a display color to an (r, g, b) tuple.
+
+    Args:
+        color (int | tuple | list | bytearray): 16-bit RGB565 int or 2-3 byte sequence.
+
+    Returns:
+        tuple[int, int, int]: Red, green, blue (0-255 each).
     """
     if isinstance(color, int):
         # convert 16-bit int color to 2 bytes
@@ -397,10 +421,10 @@ class DisplayDriver:
     @property
     def tfa_area(self):
         """
-        The top fixed area as an Area object.
+        Top fixed area for vertical scrolling.
 
         Returns:
-            (tuple): The top fixed area.
+            tuple[int, int, int, int]: ``(x, y, width, height)`` of the top fixed band.
         """
         return (0, 0, self.width, self.tfa)
 

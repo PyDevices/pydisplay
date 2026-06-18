@@ -32,7 +32,11 @@ One-shot production build (output in `site/`):
 | [`.readthedocs.yaml`](https://github.com/PyDevices/pydisplay/blob/main/.readthedocs.yaml) | ReadTheDocs build settings (same deps) |
 | [`tools/gen_ref_pages.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/gen_ref_pages.py) | Auto-generates API reference stubs from `src/lib/` and `src/add_ons/` |
 
+Hand-authored pages live under `docs/` and follow a **Try → Quick start → Install → Learn → Reference** structure (see `mkdocs.yml` nav).
+
 API reference pages under `reference/` and `reference/add_ons/` are generated at build time — do not hand-edit them.
+
+Shared copy-paste blocks: `docs/_snippets/` (included via pymdownx Snippets).
 
 ### Troubleshooting
 

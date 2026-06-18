@@ -138,15 +138,15 @@ class Device:
         self._state = None
         self._user_data = None  # Can be set and retrieved by user apps
 
-    def poll(self, *args) -> [events]:
+    def poll(self, *args):
         """
         Poll the device for events.
 
         Args:
-            *args (Any): Additional arguments that can be passed to the read callback functions.
+            *args: Forwarded to the device read callback when applicable.
 
         Returns:
-            list: A list of event objects if events are received, otherwise None.
+            list | None: Matching events, or None if none were received.
         """
         if (dev_events := self._poll()) is not None:
             if isinstance(dev_events, list):
@@ -183,7 +183,7 @@ class Device:
             device.subscribe(callback, [events.MOUSEBUTTONDOWN, events.MOUSEBUTTONUP])
             ```
 
-            This will call `callback` when the  receives a MOUSEBUTTONDOWN or MOUSEBUTTONUP event.
+            This will call `callback` when the device receives a MOUSEBUTTONDOWN or MOUSEBUTTONUP event.
         """
         event_types = event_types or self.responses
         if not callable(callback):
@@ -277,9 +277,9 @@ class Broker(Device):
         if not callable(callback):
             raise ValueError("callback is not callable.")
         if device_types is not None and event_types is not None:
-            raise ValueError("set one of device_type or event_type but not both.")
+            raise ValueError("set one of device_types or event_types but not both.")
         if device_types is None and event_types is None:
-            raise ValueError("set one of device_type or event_type but not both.")
+            raise ValueError("set one of device_types or event_types but not both.")
         if device_types is not None:
             for device_type in device_types:
                 callback_set = self._device_callbacks.get(device_type, set())
@@ -302,9 +302,9 @@ class Broker(Device):
             ValueError: If neither device_types nor event_types are provided.
         """
         if device_types is not None and event_types is not None:
-            raise ValueError("set one of device_type or event_type but not both.")
+            raise ValueError("set one of device_types or event_types but not both.")
         if device_types is None and event_types is None:
-            raise ValueError("set one of device_type or event_type but not both.")
+            raise ValueError("set one of device_types or event_types but not both.")
         if device_types is not None:
             for device_type in device_types:
                 if callback_set := self._device_callbacks.get(device_type):

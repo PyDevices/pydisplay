@@ -29,8 +29,9 @@ def custom_type(types=None, classes=None):
     ```
 
     Args:
-        types (dict[str, int]): Dictionary of event types and values.
-        classes (dict[str, str]): Dictionary of event classes and fields.
+        types (dict[str, int] | list[tuple[str, int]]): Event type names and values.
+            Pass a dict or a list of `(name, value)` tuples.
+        classes (dict[str, str]): Event class names mapped to namedtuple field strings.
     """
     if classes is None:
         classes = {}

@@ -2,11 +2,13 @@
 
 ## Documentation
 
-- [Getting started](getting-started.md)
+- [Getting started](getting-started.md) — path router
+- [Try pydisplay](try/index.md) — browser and Wokwi demos
+- [Troubleshooting](troubleshooting.md) — common errors
 - [Installation](installation/index.md)
 - [Examples catalog](examples/index.md)
-- [Package reference](reference/) — API from source docstrings
-- [Building docs locally / ReadTheDocs](building-docs.md) — `mkdocs serve` and publishing
+- [API reference](reference/) — generated from source docstrings
+- [Building docs](building-docs.md) — `mkdocs serve` and ReadTheDocs
 
 ## GitHub
 
@@ -15,8 +17,7 @@
 
 ## Try without hardware
 
-- [PyScript demo](https://PyDevices.github.io/pydisplay/demo/)
-- [Wokwi ESP32-S3 project](https://wokwi.com/projects/415770470006384641)
+- [Try pydisplay](try/index.md) — PyScript demo and Wokwi links
 
 ## Related projects
 

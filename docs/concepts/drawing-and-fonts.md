@@ -1,5 +1,16 @@
 # Drawing and fonts
 
+## Which API?
+
+| Need | Use |
+|------|-----|
+| Basic pixels, lines, rects, text | `framebuf` API on display or buffer |
+| Rounded rects, gradients, `Area` bounds | `graphics.FrameBuffer` or `graphics.Draw` |
+| Peter Hinch scrollable buffer | `add_ons/displaybuf.DisplayBuffer` |
+| CPython / CircuitPython without framebuf | `add_ons/framebuf.py` shim |
+
+See [Architecture](architecture.md).
+
 ## framebuf everywhere
 
 All drawing targets support MicroPython's `framebuf.FrameBuffer` methods: `pixel`, `hline`, `vline`, `line`, `rect`, `fill_rect`, `text`, `blit`, etc.
@@ -9,6 +20,8 @@ CPython and CircuitPython lack a compatible built-in `framebuf` — use `add_ons
 ## graphics module
 
 `graphics` subclasses FrameBuffer and adds helpers (e.g. `round_rect`). Methods return an **Area** object (`x`, `y`, `w`, `h`) describing the bounding box of what changed — useful for partial updates and e-paper (future).
+
+Use `Draw(canvas)` when you prefer a separate drawer object over subclassing.
 
 ## Font mechanisms
 
@@ -27,4 +40,4 @@ Peter Hinch's API — full display as a logical framebuffer with 4/8/16-bit buff
 
 ## API reference
 
-[Package Reference](../reference/) → `graphics`, `framebuf` ([add-ons reference](../reference/add_ons/)).
+[API reference (core)](../reference/) → `graphics`. [Add-ons API](../reference/add_ons/) → `displaybuf`, `framebuf`.

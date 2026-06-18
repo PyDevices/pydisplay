@@ -25,24 +25,11 @@ src/
 
 ## Run on desktop
 
-Install display dependencies for your platform (see [CPython desktop](../platforms/cpython-desktop.md)), then:
-
-```bash
-cd src
-python3 -i path.py
-```
-
-```python
->>> import hello
-```
-
-Use `micropython -i path.py` instead of `python3` to test with MicroPython on Unix.
+See [Desktop CPython quick start](../guides/desktop-cpython.md) for dependencies and first run.
 
 ## Run on a microcontroller
 
-1. Copy or MIP-install the packages you need (see [GitHub MIP](mip-github.md)).
-2. Install a [board config](../hardware/board-configs.md).
-3. Use `mpremote mount .` from `src/` or copy files to the device.
+See [ESP32 board quick start](../guides/esp32-board.md) for MIP install and `mpremote` workflow.
 
 ## path.py
 

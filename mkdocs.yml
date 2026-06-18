@@ -33,7 +33,7 @@ plugins:
     scripts:
     - tools/gen_ref_pages.py
 - literate-nav:
-    nav_file: SUMMARY.md
+    nav_file: reference/SUMMARY.md
 - section-index
 - mkdocstrings:
     handlers:
@@ -47,48 +47,70 @@ plugins:
           docstring_section_style: table
           separate_signature: true
           show_category_heading: true
+          show_root_heading: true
+          members_order: source
+          merge_init_into_class: true
+          filters:
+            - "!^_"
+            - "!^__"
 
 nav:
 - Home: index.md
-- Getting Started: getting-started.md
+- Try pydisplay:
+  - Overview: try/index.md
+  - Wokwi details: hardware/wokwi.md
+- Quick start:
+  - Router: getting-started.md
+  - ESP32 / MicroPython board: guides/esp32-board.md
+  - Desktop CPython: guides/desktop-cpython.md
+  - Wokwi simulator: guides/wokwi.md
+  - PyScript: guides/pyscript.md
+  - PyScript asyncio: guides/pyscript-asyncio.md
 - Installation:
-  - Overview: installation/index.md
+  - Choose a method: installation/index.md
   - Full clone: installation/full-clone.md
-  - GitHub MIP packages: installation/mip-github.md
-  - micropython-lib MIP: installation/mip-micropython-lib.md
   - installer.py: installation/installer.md
+  - GitHub MIP: installation/mip-github.md
+  - micropython-lib MIP: installation/mip-micropython-lib.md
+- Hardware setup:
+  - Board configs: hardware/board-configs.md
+  - Display drivers: hardware/display-drivers.md
+  - Touch drivers: hardware/touch-drivers.md
+- Learn:
+  - Architecture: concepts/architecture.md
+  - Displays: concepts/displays.md
+  - Events: concepts/events.md
+  - Drawing and fonts: concepts/drawing-and-fonts.md
+  - Graphics files: concepts/graphics-files.md
+  - Config files: concepts/config-files.md
 - Platforms:
   - MicroPython: platforms/micropython.md
   - CircuitPython: platforms/circuitpython.md
   - CPython desktop: platforms/cpython-desktop.md
   - Jupyter: platforms/jupyter.md
   - PyScript: platforms/pyscript.md
-- Hardware:
-  - Board configs: hardware/board-configs.md
-  - Wokwi: hardware/wokwi.md
-  - Display drivers: hardware/display-drivers.md
-  - Touch drivers: hardware/touch-drivers.md
-- Concepts:
-  - Displays: concepts/displays.md
-  - Events: concepts/events.md
-  - Drawing and fonts: concepts/drawing-and-fonts.md
-  - Graphics files: concepts/graphics-files.md
-  - Config files: concepts/config-files.md
-- GUI libraries:
-  - LVGL: guis/lvgl.md
-  - MicroPython-Touch: guis/micropython-touch.md
-  - Nano-GUI: guis/nano-gui.md
-  - TFT examples: guis/tft-gui.md
-  - PyWidgets: guis/pywidgets.md
 - Examples:
   - Catalog: examples/index.md
   - Live demos: examples/live-demos.md
+- GUI integration:
+  - LVGL: guis/lvgl.md
+  - MicroPython-Touch: guis/micropython-touch.md
+  - Nano-GUI: guis/nano-gui.md
+  - TFT / st7789py ports: guis/tft-gui.md
+  - PyWidgets: guis/pywidgets.md
 - Add-ons: add-ons.md
-- Package Reference: reference/
-- Add-ons Reference: reference/add_ons/
-- Contributing: contributing.md
-- Building docs: building-docs.md
-- Getting help: getting-help.md
+- API reference:
+  - displaysys: reference/overviews/displaysys.md
+  - eventsys: reference/overviews/eventsys.md
+  - graphics: reference/overviews/graphics.md
+  - Core modules: reference/
+  - Add-ons: reference/add_ons/
+- Project:
+  - Contributing: contributing.md
+  - Docstring conventions: contributing/docstrings.md
+  - Building docs: building-docs.md
+  - Getting help: getting-help.md
+  - Troubleshooting: troubleshooting.md
 
 markdown_extensions:
   - admonition
@@ -97,3 +119,4 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.snippets
