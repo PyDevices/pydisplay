@@ -31,6 +31,12 @@ User docs live in `docs/` and publish to [ReadTheDocs](https://pydisplay.readthe
 
 **Full guide:** [docs/building-docs.md](../docs/building-docs.md) (local preview, RTD setup, rollout checklist).
 
+Check GitHub Actions after a push (requires one-time `gh auth login`):
+
+```bash
+gh run list --limit 5
+```
+
 ```bash
 python3 -m venv .venv-docs
 .venv-docs/bin/pip install -r docs/requirements.txt

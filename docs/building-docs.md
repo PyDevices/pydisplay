@@ -100,31 +100,38 @@ In RTD project **Admin** → **Preview documentation from pull requests**, enabl
 
 ---
 
-## Remaining rollout checklist
-
-Use this after ReadTheDocs is connected:
+## Rollout checklist (completed)
 
 | Step | Action | Status |
 |------|--------|--------|
-| **Push to main** | Merge docs revamp and `git push origin main` | Done |
-| **RTD build** | Re-enable builds; trigger **Build** on `latest` in RTD Admin → Versions | ☐ |
-| **Verify live URLs** | Docs: `https://pydisplay.readthedocs.io` · Demo: `https://PyDevices.github.io/pydisplay/demo/` · Landing: `https://PyDevices.github.io/pydisplay/` | ☐ |
+| Push to `main` | Merge docs revamp and `git push origin main` | Done |
+| RTD build | Re-enable builds; **Build** on `latest` in Admin → Versions | Done |
+| Verify live URLs | See table below | Done |
 
-### Push to main
+| URL | Content |
+|-----|---------|
+| [pydisplay.readthedocs.io](https://pydisplay.readthedocs.io) | Full MkDocs site (Material theme) |
+| [PyDevices.github.io/pydisplay/](https://PyDevices.github.io/pydisplay/) | Landing page with links to docs and demo |
+| [PyDevices.github.io/pydisplay/demo/](https://PyDevices.github.io/pydisplay/demo/) | PyScript calculator / REPL / test pages |
+
+Pushes to `main` trigger an automatic RTD rebuild and the [deploy-demo workflow](https://github.com/PyDevices/pydisplay/blob/main/.github/workflows/deploy-demo.yml) for GitHub Pages.
+
+### Check GitHub Actions from the CLI
+
+Authenticate once (stores credentials for future sessions):
 
 ```bash
-git checkout main
-git merge docs-revamp
-git push origin main
+gh auth login
 ```
 
-This runs [`.github/workflows/deploy-demo.yml`](https://github.com/PyDevices/pydisplay/blob/main/.github/workflows/deploy-demo.yml), which deploys the PyScript demo to GitHub Pages at `/demo/`.
+Then from the repo root:
 
-| URL | Expected content |
-|-----|------------------|
-| `pydisplay.readthedocs.io` | Full MkDocs site (Material theme, all nav sections) |
-| `PyDevices.github.io/pydisplay/` | Short landing page with links to docs and demo |
-| `PyDevices.github.io/pydisplay/demo/` | PyScript calculator / REPL / test pages |
+```bash
+gh run list --limit 5              # recent workflow runs
+gh run watch                       # follow the latest run
+```
+
+Useful after pushing doc or demo changes to confirm the Pages deploy succeeded.
 
 ---
 
