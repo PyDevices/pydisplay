@@ -151,6 +151,8 @@ Full **micropython-lib / PyPI publishing** pipeline:
 - `DEST_REPO` defaults to `~/github/micropython-lib`; override with `MICROPYTHON_LIB_DIR`
 
 **Other caveats:**
+
+- Copies skip `__pycache__/`, `.pyc`, `.pyo`, and common cache directories (same rules as `gen_repo_packages.py`)
 - Sub-packages under `displaysys-*` (except core `displaysys`) have PyPI/bundle steps commented out pending `displaysys` on PyPI
 - Bundle packaging is also commented out
 

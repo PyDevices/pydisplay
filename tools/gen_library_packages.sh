@@ -4,7 +4,7 @@
 # Resolves to:  https://pydevices.github.io/micropython-lib/mip/PyDevices/package/6/displaysys/latest.json
 # Repo URL:  https://github.com/PyDevices/micropython-lib/blob/gh-pages/mip/PyDevices/package/6/displaysys/latest.json
 
-VERSION=0.0.1
+VERSION=0.0.2
 DESCRIPTION_PREFIX="PyDisplay"
 AUTHOR="Brad Barnett <contact@pydevices.com>"
 LICENSE="MIT"
@@ -24,6 +24,63 @@ TOUCH_SOURCE_DIR=$SOURCE_REPO/drivers/touch
 DISPLAY_DEST_DIR=$DEST_REPO/micropython/drivers/display
 TOUCH_DEST_DIR=$DEST_REPO/micropython/drivers/touch
 
+RSYNC_EXCLUDES=(
+    --exclude '__pycache__/'
+    --exclude '*.pyc'
+    --exclude '*.pyo'
+    --exclude '.git/'
+    --exclude '.mypy_cache/'
+    --exclude '.ruff_cache/'
+)
+
+should_skip_name() {
+    case "$1" in
+        __pycache__ | .git | .mypy_cache | .ruff_cache) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+copy_source_tree() {
+    local src="$1"
+    local dest="$2"
+    mkdir -p "$dest"
+    rsync -a "${RSYNC_EXCLUDES[@]}" "$src/" "$dest/"
+}
+
+copy_displaysys_module() {
+    local module="$1"
+    local dest_dir="$2"
+    local base
+    base="$(basename "$module")"
+
+    if should_skip_name "$base"; then
+        return
+    fi
+    if [[ "$base" == *.pyc ]] || [[ "$base" == *.pyo ]]; then
+        return
+    fi
+
+    mkdir -p "$dest_dir"
+    if [ -d "$module" ]; then
+        copy_source_tree "$module" "$dest_dir/$base"
+    elif [ -f "$module" ] && [[ "$base" == *.py ]]; then
+        cp "$module" "$dest_dir/"
+    fi
+}
+
+prune_skipped_artifacts() {
+    find "$DEST_DIR" \( \
+        -type d \( -name __pycache__ -o -name .mypy_cache -o -name .ruff_cache \) \
+        -o -type f \( -name '*.pyc' -o -name '*.pyo' \) \
+    \) -print0 | xargs -0 rm -rf
+}
+
+build_and_upload_pypi() {
+    rm -rf dist
+    hatch build
+    twine upload --repository testpypi dist/*
+}
+
 # set -e
 
 # Create the bundle manifest
@@ -42,12 +99,12 @@ EOF
 # Copy any example files starting with the package name to $DEST_DIR/$package/examples
 for package_dir in "$SOURCE_DIR/lib"/*; do
     package=$(basename $package_dir)
-    if [ -d $package_dir ] && [ $(basename $package) != "displaysys" ]; then
+    if [ -d "$package_dir" ] && [ "$package" != "displaysys" ] && ! should_skip_name "$package"; then
         echo
         echo "Processing $package"
-        mkdir -p $DEST_DIR/$package/examples
-        cp -r $package_dir $DEST_DIR/$package/
-        cp $SOURCE_DIR/examples/$package*.py $DEST_DIR/$package/examples/
+        mkdir -p "$DEST_DIR/$package/examples"
+        copy_source_tree "$package_dir" "$DEST_DIR/$package/$package"
+        cp "$SOURCE_DIR/examples/$package"*.py "$DEST_DIR/$package/examples/" 2>/dev/null || true
         # write the following text to $DEST_DIR/$package/manifest.py
         cat <<EOF > $DEST_DIR/$package/manifest.py
 metadata(
@@ -63,15 +120,18 @@ EOF
         cp $README_FULL_PATH $DEST_DIR/$package/README.md
         ./tools/makepyproject.py --output $PYPI_DIR/$package $DEST_DIR/$package/manifest.py
         pushd $PYPI_DIR/$package
-        hatch build
-        twine upload --repository testpypi dist/*
+        build_and_upload_pypi
         popd
     fi
 done
 
 # Copy the children of displaysys to $DEST_DIR/displaysys/$package/displaysys
 for module in "$SOURCE_DIR/lib/displaysys"/*; do
-    if [[ $(basename $module) == __init__.py ]]; then
+    base="$(basename "$module")"
+    if should_skip_name "$base" || [[ "$base" == *.pyc ]] || [[ "$base" == *.pyo ]]; then
+        continue
+    fi
+    if [[ "$base" == __init__.py ]]; then
         package=displaysys
     else
         package_dir=$(basename $module .py)
@@ -79,9 +139,9 @@ for module in "$SOURCE_DIR/lib/displaysys"/*; do
     fi
     echo
     echo "Processing $package"
-    mkdir -p $DEST_DIR/displaysys/$package/displaysys
-    cp -r $module $DEST_DIR/displaysys/$package/displaysys/
-    mkdir -p $DEST_DIR/displaysys/$package/examples
+    mkdir -p "$DEST_DIR/displaysys/$package/displaysys"
+    copy_displaysys_module "$module" "$DEST_DIR/displaysys/$package/displaysys"
+    mkdir -p "$DEST_DIR/displaysys/$package/examples"
     if [[ $package == displaysys ]]; then
         cat <<EOF > $DEST_DIR/displaysys/$package/manifest.py
 metadata(
@@ -97,8 +157,7 @@ EOF
         cp $README_FULL_PATH $DEST_DIR/displaysys/$package/README.md
         ./tools/makepyproject.py --output $PYPI_DIR/$package  $DEST_DIR/displaysys/$package/manifest.py
         pushd $PYPI_DIR/$package
-        hatch build
-        twine upload --repository testpypi dist/*
+        build_and_upload_pypi
         popd
         cp $SOURCE_DIR/examples/$package*.py $DEST_DIR/displaysys/$package/examples/
     else
@@ -140,9 +199,12 @@ done
 # cp $README_FULL_PATH $DEST_DIR/$BASENAME-bundle/README.md
 # ./tools/makepyproject.py --output $PYPI_DIR/$BASENAME-bundle $BUNDLE_MANIFEST
 # pushd $PYPI_DIR/$BASENAME-bundle
+# rm -rf dist
 # hatch build
 # twine upload --repository testpypi dist/*
 # popd
+
+prune_skipped_artifacts
 
 echo
 echo "To commit changes now, enter your git commit message, otherwise, press enter."
