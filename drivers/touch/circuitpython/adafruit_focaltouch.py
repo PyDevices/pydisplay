@@ -37,16 +37,14 @@ Implementation Notes
 __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_FocalTouch.git"
 
+import contextlib
 import struct
 
 from adafruit_bus_device.i2c_device import I2CDevice
-
 from micropython import const
 
-try:
+with contextlib.suppress(ImportError):
     from typing import List
-except ImportError:
-    pass
 
 
 _FT_DEFAULT_I2C_ADDR = 0x38
@@ -135,7 +133,7 @@ class Adafruit_FocalTouch:
             if all(i == 255 for i in point_data):
                 continue
             # print([hex(i) for i in point_data])
-            x, y, weight, misc = struct.unpack(">HHBB", point_data)
+            x, y, _weight, _misc = struct.unpack(">HHBB", point_data)
             # print(x, y, weight, misc)
             touch_id = y >> 12
             x = round((x & 0xFFF) / self._scale_factor[0])

@@ -1,11 +1,11 @@
 """T-HMI 240x320 ST7789V display"""
 
 from i80bus import I80Bus
-from st7789 import ST7789
 from machine import SPI, Pin  # See the note about reset below
+from st7789 import ST7789
 from xpt2046 import Touch
-from eventsys import devices
 
+from eventsys import devices
 
 display_bus = I80Bus(
     dc=7,

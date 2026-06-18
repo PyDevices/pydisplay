@@ -123,7 +123,6 @@ import sys
 import tempfile
 import time
 
-
 _JSON_VERSION_INDEX = 2
 _JSON_VERSION_PACKAGE = 1
 
@@ -148,9 +147,8 @@ def _get_file_hash(f):
 
 # Returns true if the two files contain identical contents.
 def _identical_files(path_a, path_b):
-    with open(path_a, "rb") as fa:
-        with open(path_b, "rb") as fb:
-            return fa.read() == fb.read()
+    with open(path_a, "rb") as fa, open(path_b, "rb") as fb:
+        return fa.read() == fb.read()
 
 
 # Helper to write the object as json to the specified path, creating any

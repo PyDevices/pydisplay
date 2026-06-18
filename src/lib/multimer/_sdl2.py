@@ -5,10 +5,10 @@
 Timer using SDL2 for CPython with the same API as machine.Timer in MicroPython.
 """
 
-from ._timerbase import _TimerBase
 import ctypes
 from sys import platform
 
+from ._timerbase import _TimerBase
 
 if platform == "win32":
     _libSDL2 = ctypes.CDLL("SDL2.dll")

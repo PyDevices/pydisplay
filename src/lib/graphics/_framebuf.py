@@ -20,8 +20,7 @@ you need to use the returned Areas so your code will be transferable.
 
 """
 
-from . import _shapes
-from . import _font
+from . import _font, _shapes
 
 try:
     from ulab import numpy as np
@@ -61,10 +60,7 @@ class MVLSBFormat:
 
     @staticmethod
     def fill(framebuf, color):
-        if color:
-            fill = 0xFF
-        else:
-            fill = 0x00
+        fill = 255 if color else 0
         for i in range(len(framebuf._buffer)):  # pylint: disable=consider-using-enumerate
             framebuf._buffer[i] = fill
 
@@ -110,10 +106,7 @@ class MHLSBFormat:
 
     @staticmethod
     def fill(framebuf, color):
-        if color:
-            fill = 0xFF
-        else:
-            fill = 0x00
+        fill = 255 if color else 0
         for i in range(len(framebuf._buffer)):
             framebuf._buffer[i] = fill
 
@@ -137,10 +130,7 @@ class MHMSBFormat:
 
     @staticmethod
     def fill(framebuf, color):
-        if color:
-            fill = 0xFF
-        else:
-            fill = 0x00
+        fill = 255 if color else 0
         for i in range(len(framebuf._buffer)):  # pylint: disable=consider-using-enumerate
             framebuf._buffer[i] = fill
 
@@ -432,10 +422,7 @@ class FrameBuffer:
         bytes_per_row = width * BPP
 
         # Iterate over each row in the appropriate order (top to bottom for ystep > 0, bottom to top for ystep < 0)
-        if ystep > 0:
-            y_range = range(height - 1, -1, -1)
-        else:
-            y_range = range(height)
+        y_range = range(height - 1, -1, -1) if ystep > 0 else range(height)
 
         # Iterate over each row in the appropriate order
         for y in y_range:

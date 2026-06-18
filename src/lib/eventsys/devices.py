@@ -31,11 +31,13 @@ Devices can be created with the following types:
 - types.JOYSTICK: A device that returns joystick events (not implemented).
 """
 
+from sys import exit
+from typing import Optional
+
 from micropython import const
+
 from . import events
 from .joystick import JoystickDriver
-from sys import exit
-
 
 _DEFAULT_TOUCH_ROTATION_TABLE = (0b000, 0b101, 0b110, 0b011)
 
@@ -90,11 +92,11 @@ def custom_type(type_name, responses):
     return NewClass
 
 
-
 class types:
     """
     Device types for the Event System.
     """
+
     UNDEFINED = const(-1)
     BROKER = const(0x00)
     QUEUE = const(0x01)
@@ -152,11 +154,10 @@ class Device:
                 eventlist = [e for e in dev_events if e.type in events.filter]
             else:
                 eventlist = [dev_events] if dev_events.type in events.filter else None
-            
+
             for event in eventlist:
-                if event.type == events.QUIT:
-                    if self._broker:
-                        self._broker.quit()
+                if event.type == events.QUIT and self._broker:
+                    self._broker.quit()
                 if callback_list := self._event_callbacks.get(event.type):
                     for callback in callback_list:
                         callback(event, *args)
@@ -409,7 +410,7 @@ class Broker(Device):
         eventlist = []
         for device in self.devices:
             if (dev_events := device.poll()) is not None:
-                eventlist.extend(dev_events)                
+                eventlist.extend(dev_events)
                 if callback_list := self._device_callbacks.get(device.type):
                     for func in callback_list:
                         for event in dev_events:
@@ -449,18 +450,21 @@ class QueueDevice(Device):
             eventlist = []
             for event in dev_events:
                 if event.type in self._data2:
-                    if event.type in (
-                        events.MOUSEMOTION,
-                        events.MOUSEBUTTONDOWN,
-                        events.MOUSEBUTTONUP,
+                    if (
+                        event.type
+                        in (
+                            events.MOUSEMOTION,
+                            events.MOUSEBUTTONDOWN,
+                            events.MOUSEBUTTONUP,
+                        )
+                        and (scale := self.scale) != 1
                     ):
-                        if (scale := self.scale) != 1:
-                            event.pos = (
-                                int(event.pos[0] // scale),
-                                int(event.pos[1] // scale),
-                            )
-                            if event.type == events.MOUSEMOTION:
-                                event.rel = (event.rel[0] // scale, event.rel[1] // scale)
+                        event.pos = (
+                            int(event.pos[0] // scale),
+                            int(event.pos[1] // scale),
+                        )
+                        if event.type == events.MOUSEMOTION:
+                            event.rel = (event.rel[0] // scale, event.rel[1] // scale)
 
                     eventlist.append(event)
 
@@ -715,7 +719,14 @@ class JoystickDevice(Device):
         events.JOYBUTTONUP,
     )
 
-    def __init__(self, *args, joystick_driver: JoystickDriver, emulate_digital: list[(int,int)] = None, digital_threshold: float = 0.5, **kwargs):
+    def __init__(
+        self,
+        *args,
+        joystick_driver: JoystickDriver,
+        emulate_digital: Optional[list[int, int]] = None,
+        digital_threshold: float = 0.5,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
         self.joystick_driver = joystick_driver
         self.emulate_digital = emulate_digital
@@ -723,57 +734,72 @@ class JoystickDevice(Device):
         self._state = [
             [0] * self.joystick_driver.get_numaxes(),
             [False] * self.joystick_driver.get_numbuttons(),
-            [(0,0)] * self.joystick_driver.get_numhats(),
-            [(0,0)] * self.joystick_driver.get_numballs(),
+            [(0, 0)] * self.joystick_driver.get_numhats(),
+            [(0, 0)] * self.joystick_driver.get_numballs(),
         ]
         if self.emulate_digital:
             self._state.append([0] * len(self.emulate_digital))
 
     def emulate(self, value):
-        return -1 if value < -self.digital_threshold else 1 if value > self.digital_threshold else 0
-    
+        return (
+            -1 if value < -self.digital_threshold else 1 if value > self.digital_threshold else 0
+        )
+
     def _poll(self):
         eventlist = []
         new_state = [
             [self.joystick_driver.get_axis(i) for i in range(self.joystick_driver.get_numaxes())],
-            [self.joystick_driver.get_button(i) for i in range(self.joystick_driver.get_numbuttons())],
+            [
+                self.joystick_driver.get_button(i)
+                for i in range(self.joystick_driver.get_numbuttons())
+            ],
             [self.joystick_driver.get_hat(i) for i in range(self.joystick_driver.get_numhats())],
             [self.joystick_driver.get_ball(i) for i in range(self.joystick_driver.get_numballs())],
         ]
 
         instance_id = self.joystick_driver.get_instance_id()
         # axes
-        for i, (old,new) in enumerate(zip(self._state[0], new_state[0])):
+        for i, (old, new) in enumerate(zip(self._state[0], new_state[0])):
             if old != new:
                 eventlist.append(events.JoyAxisMotion(events.JOYAXISMOTION, instance_id, i, new))
 
         # buttons
-        for i, (old,new) in enumerate(zip(self._state[1], new_state[1])):
+        for i, (old, new) in enumerate(zip(self._state[1], new_state[1])):
             if old != new:
-                eventlist.append(events.JoyButtonDown(events.JOYBUTTONDOWN, instance_id, i) if new else events.JoyButtonUp(events.JOYBUTTONUP, instance_id, i))
+                eventlist.append(
+                    events.JoyButtonDown(events.JOYBUTTONDOWN, instance_id, i)
+                    if new
+                    else events.JoyButtonUp(events.JOYBUTTONUP, instance_id, i)
+                )
 
         # hats
-        for i, (old,new) in enumerate(zip(self._state[2], new_state[2])):
+        for i, (old, new) in enumerate(zip(self._state[2], new_state[2])):
             if old != new:
                 eventlist.append(events.JoyHatMotion(events.JOYHATMOTION, instance_id, i, new))
 
         # balls
-        for i, (old,new) in enumerate(zip(self._state[3], new_state[3])):
+        for i, (old, new) in enumerate(zip(self._state[3], new_state[3])):
             if old != new:
                 eventlist.append(events.JoyBallMotion(events.JOYBALLMOTION, instance_id, i, new))
 
         if self.emulate_digital:
             axes = new_state[0]
-            new_state.append([
-                (self.emulate(axes[x]), self.emulate(axes[y])) for x,y in self.emulate_digital
-            ])
-            for i, (old,new) in enumerate(zip(self._state[4], new_state[4])):
+            new_state.append(
+                [(self.emulate(axes[x]), self.emulate(axes[y])) for x, y in self.emulate_digital]
+            )
+            for i, (old, new) in enumerate(zip(self._state[4], new_state[4])):
                 if old != new:
-                    eventlist.append(events.JoyHatMotion(events.JOYHATMOTION, instance_id, i+self.joystick_driver.get_numhats(), new))
-        
+                    eventlist.append(
+                        events.JoyHatMotion(
+                            events.JOYHATMOTION,
+                            instance_id,
+                            i + self.joystick_driver.get_numhats(),
+                            new,
+                        )
+                    )
+
         self._state = new_state
         return eventlist if len(eventlist) > 0 else None
-
 
 
 class VirtualDevices:
@@ -805,14 +831,17 @@ class VirtualDevices:
     def poll_queue_device(self):
         if elist := self._queue_device.poll():
             for e in elist:
-                if e.type == events.MOUSEBUTTONDOWN or e.type == events.MOUSEBUTTONUP:
-                    self._vd_touch.add_event(e)
-                elif e.type == events.MOUSEMOTION and e.buttons[0]:
+                if (
+                    e.type == events.MOUSEBUTTONDOWN
+                    or e.type == events.MOUSEBUTTONUP
+                    or (e.type == events.MOUSEMOTION and e.buttons[0])
+                ):
                     self._vd_touch.add_event(e)
                 elif e.type == events.MOUSEWHEEL:
                     self._vd_encoder.add_event(e)
                 elif e.type == events.KEYDOWN or e.type == events.KEYUP:
                     self._vd_keypad.add_event(e)
+
 
 _mapping = {
     # Mapping of device types to device classes

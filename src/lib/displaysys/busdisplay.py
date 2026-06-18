@@ -6,26 +6,29 @@
 displaysys.busdisplay
 """
 
-from displaysys import DisplayDriver
-from micropython import const
+import contextlib
+import gc
 import struct
 import sys
-import gc
 
-try:
+from micropython import const
+
+from displaysys import DisplayDriver
+
+with contextlib.suppress(ImportError):
     from typing import Optional
-except ImportError:
-    pass
 
 if sys.implementation.name == "micropython":
-    from machine import Pin
     from time import sleep_ms
+
+    from machine import Pin
     from micropython import alloc_emergency_exception_buf
 
     alloc_emergency_exception_buf(256)
 elif sys.implementation.name == "circuitpython":
-    import digitalio
     from time import sleep
+
+    import digitalio
 
     def sleep_ms(ms):
         return sleep(ms / 1000)

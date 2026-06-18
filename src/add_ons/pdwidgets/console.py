@@ -31,7 +31,9 @@ SOFTWARE.
 """
 
 import io
-from . import Widget, TEXT_SIZE, TEXT_WIDTH
+
+from . import TEXT_SIZE, TEXT_WIDTH, Widget
+
 # Todo: Add color changing with ANSI escape codes.  See https://pypi.org/project/colored/
 
 

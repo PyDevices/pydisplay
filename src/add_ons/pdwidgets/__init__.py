@@ -33,17 +33,20 @@ Functions:
     init_timer: Initializes the timer to call the tick function at regular intervals.
 """
 
-from graphics import Area, FrameBuffer, RGB565
-from eventsys import events
-from time import localtime  # for DigitalClock
+import contextlib
 from random import getrandbits  # for MARK_UPDATES
-from ._constants import ICON_SIZE, ALIGN, POSITION, TEXT_SIZE, PAD, DEFAULT_PADDING, TEXT_WIDTH
-from ._themes import ColorTheme, icon_theme, get_palette
+from time import localtime  # for DigitalClock
+
+from eventsys import events
+from graphics import RGB565, Area, FrameBuffer
+
+from ._constants import ALIGN, DEFAULT_PADDING, ICON_SIZE, PAD, POSITION, TEXT_SIZE, TEXT_WIDTH
+from ._themes import ColorTheme, get_palette, icon_theme
 
 try:
-    from time import ticks_ms, ticks_add
+    from time import ticks_add, ticks_ms
 except ImportError:
-    from adafruit_ticks import ticks_ms, ticks_add
+    from adafruit_ticks import ticks_add, ticks_ms
 
 
 DEBUG = False
@@ -470,9 +473,8 @@ class Widget:
 
     def remove_dirty_widget(self, child):
         self.dirty_widgets.discard(child)
-        if not self.dirty_widgets and not self.dirty_descendants:
-            if self.parent:
-                self.parent.remove_dirty_descendant(self)
+        if not self.dirty_widgets and not self.dirty_descendants and self.parent:
+            self.parent.remove_dirty_descendant(self)
 
     def remove_dirty_descendant(self, branch):
         self.dirty_descendants.discard(branch)
@@ -615,10 +617,8 @@ class Display(Widget):
     def quit(self):
         Display.displays.remove(self)
         if Display.timer and not Display.displays:
-            try:
+            with contextlib.suppress(Exception):
                 Display.timer.deinit()
-            except Exception:
-                pass
         # display_drv.quit() releases SDL resources, restores the TTY, and
         # performs a low-level process exit.  sys.exit() raised from a timer or
         # micropython.schedule callback is printed and swallowed on the unix port.
@@ -1844,7 +1844,7 @@ class DigitalClock(Label):
 
     def update_time(self):
         if self.visible:
-            y, m, d, h, min, sec, *_ = localtime()
+            _y, _m, _d, h, min, sec, *_ = localtime()
             self.value = f"{h:02}:{min:02}:{sec:02}"
 
 

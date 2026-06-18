@@ -25,8 +25,9 @@ while True:
     time.sleep_ms(100)
 """
 
-from time import sleep_ms
 from array import array
+from time import sleep_ms
+
 from machine import Pin
 from micropython import const
 

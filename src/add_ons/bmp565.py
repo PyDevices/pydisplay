@@ -13,8 +13,8 @@ Usage:
     print(bmp[0:10, 0:10])  # Get a 10x10 slice of the image as a bytearray object
 """
 
-import struct
 import os
+import struct
 
 
 class BMP565:
@@ -32,7 +32,7 @@ class BMP565:
             self._buffer = source
         elif filename is not None:
             if self._streamed is True:
-                self._file = open(filename, "rb")
+                self._file = open(filename, "rb")  # noqa: SIM115  # kept open for streaming reads
                 self._read_header(self._file)
             else:
                 with open(filename, "rb") as f:
@@ -174,7 +174,7 @@ class BMP565:
                 # Micropython's slice notation doesn't support negative indices
                 # so we need to read the entire row and reorder the bytes
                 pixels = []
-                for i in range(length):
+                for _i in range(length):
                     pixels.insert(0, self._file.read(self.BPP))
                 return b"".join(pixels)
 

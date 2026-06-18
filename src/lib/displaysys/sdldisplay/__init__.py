@@ -6,59 +6,60 @@
 displaysys.sdldisplay
 """
 
+import contextlib
+from sys import implementation
+
 from displaysys import DisplayDriver, color_rgb
 from eventsys import events
-from sys import implementation
+
 from ._sdl2_lib import (
-    SDL_Init,
-    SDL_Quit,
-    SDL_GetError,
-    SDL_CreateWindow,
-    SDL_CreateRenderer,
-    SDL_DestroyWindow,
-    SDL_DestroyRenderer,
-    SDL_DestroyTexture,
-    SDL_SetRenderDrawColor,
-    SDL_RenderPresent,
-    SDL_RenderSetLogicalSize,
-    SDL_SetWindowSize,
-    SDL_RenderCopyEx,
-    SDL_SetRenderTarget,
-    SDL_SetTextureBlendMode,
-    SDL_RenderFillRect,
-    SDL_RenderCopy,
-    SDL_UpdateTexture,
-    SDL_CreateTexture,
-    SDL_PIXELFORMAT_ARGB8888,
-    SDL_PIXELFORMAT_RGB888,
-    SDL_PIXELFORMAT_RGB565,
-    SDL_TEXTUREACCESS_TARGET,
     SDL_BLENDMODE_NONE,
-    SDL_RENDERER_ACCELERATED,
-    SDL_RENDERER_PRESENTVSYNC,
-    SDL_WINDOWPOS_CENTERED,
-    SDL_WINDOW_SHOWN,
-    SDL_INIT_EVERYTHING,
-    SDL_Rect,
-    SDL_PollEvent,
-    SDL_GetKeyName,
-    SDL_Event,
-    SDL_QUIT,
     SDL_BUTTON_LMASK,
     SDL_BUTTON_MMASK,
     SDL_BUTTON_RMASK,
+    SDL_INIT_EVERYTHING,
+    SDL_KEYDOWN,
+    SDL_KEYUP,
     SDL_MOUSEBUTTONDOWN,
     SDL_MOUSEBUTTONUP,
     SDL_MOUSEMOTION,
     SDL_MOUSEWHEEL,
-    SDL_KEYDOWN,
-    SDL_KEYUP,
+    SDL_PIXELFORMAT_ARGB8888,
+    SDL_PIXELFORMAT_RGB565,
+    SDL_PIXELFORMAT_RGB888,
+    SDL_QUIT,
+    SDL_RENDERER_ACCELERATED,
+    SDL_RENDERER_PRESENTVSYNC,
+    SDL_TEXTUREACCESS_TARGET,
+    SDL_WINDOW_SHOWN,
+    SDL_WINDOWPOS_CENTERED,
+    SDL_CreateRenderer,
+    SDL_CreateTexture,
+    SDL_CreateWindow,
+    SDL_DestroyRenderer,
+    SDL_DestroyTexture,
+    SDL_DestroyWindow,
+    SDL_Event,
+    SDL_GetError,
+    SDL_GetKeyName,
+    SDL_Init,
+    SDL_PollEvent,
+    SDL_Quit,
+    SDL_Rect,
+    SDL_RenderCopy,
+    SDL_RenderCopyEx,
+    SDL_RenderFillRect,
+    SDL_RenderPresent,
+    SDL_RenderSetLogicalSize,
+    SDL_SetRenderDrawColor,
+    SDL_SetRenderTarget,
+    SDL_SetTextureBlendMode,
+    SDL_SetWindowSize,
+    SDL_UpdateTexture,
 )
 
-try:
+with contextlib.suppress(ImportError):
     from typing import Optional
-except ImportError:
-    pass
 
 if implementation.name == "cpython":
     import ctypes
@@ -148,6 +149,7 @@ def poll() -> Optional[events]:
                 return _convert(SDL_Event(_event))
     return None
 
+
 def get() -> [events]:
     """
     Gets all events from the event queue.
@@ -165,6 +167,7 @@ def get() -> [events]:
             if int.from_bytes(_event[:4], "little") in events.filter:
                 eventlist.append(_convert(SDL_Event(_event)))
     return eventlist if len(eventlist) > 0 else None
+
 
 def _convert(e):
     # Convert an SDL event to a Pygame event
@@ -214,6 +217,7 @@ def _convert(e):
     else:
         evt = events.Unknown(e.type)
     return evt
+
 
 def retcheck(retvalue):
     # Check the return value of an SDL function and raise an exception if it's not 0

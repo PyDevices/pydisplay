@@ -106,7 +106,7 @@ class DisplayDriver:
 
                 self._timer = get_timer(self.show, period=period)
             except ImportError:
-                raise ImportError("multimer is required for auto_refresh")
+                raise ImportError("multimer is required for auto_refresh") from None
         else:
             self._timer = None
         self.init()

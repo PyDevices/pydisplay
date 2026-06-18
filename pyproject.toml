@@ -6,9 +6,11 @@ exclude = [
   "icons/**",
   "src/add_ons/png.py",
   "src/examples/**",
+  "tools/typings/**",
 ]
 lint.select = [
-  "ASYNC",  # flake8-comprehensions
+  "ASYNC",  # flake8-async
+  "B",      # flake8-bugbear
   "C4",     # flake8-comprehensions
   "C90",    # McCabe cyclomatic complexity
   "DTZ",    # flake8-datetimez
@@ -16,6 +18,7 @@ lint.select = [
   "EXE",    # flake8-executable
   "F",      # Pyflakes
   "G",      # flake8-logging-format
+  "I",      # isort
   "ICN",    # flake8-import-conventions
   "INT",    # flake8-gettext
   "ISC",    # flake8-implicit-str-concat
@@ -25,6 +28,7 @@ lint.select = [
   "PYI",    # flake8-pyi
   "RSE",    # flake8-raise
   "RUF",    # Ruff-specific rules
+  "SIM",    # flake8-simplify
   "T10",    # flake8-debugger
   "TCH",    # flake8-type-checking
   "W",      # pycodestyle
@@ -32,7 +36,6 @@ lint.select = [
   # "A",    # flake8-builtins
   # "ANN",  # flake8-annotations
   # "ARG",  # flake8-unused-arguments
-  # "B",    # flake8-bugbear
   # "BLE",  # flake8-blind-except
   # "COM",  # flake8-commas
   # "D",    # pydocstyle
@@ -40,7 +43,6 @@ lint.select = [
   # "EM",   # flake8-errmsg
   # "ERA",  # eradicate
   # "FBT",  # flake8-boolean-trap
-  # "I",    # isort
   # "INP",  # flake8-no-pep420
   # "N",    # pep8-naming
   # "NPY",  # NumPy-specific rules
@@ -50,14 +52,14 @@ lint.select = [
   # "Q",    # flake8-quotes
   # "RET",  # flake8-return
   # "S",    # flake8-bandit
-  # "SIM",  # flake8-simplify
   # "SLF",  # flake8-self
   # "T20",  # flake8-print
   # "TID",  # flake8-tidy-imports
   # "TRY",  # tryceratops
-  # "UP",   # pyupgrade
+  # "UP",   # pyupgrade (can break MicroPython; enable with care)
 ]
 lint.ignore = [
+  "B905",   # zip() without strict= (requires Python 3.10)
   "E722",
   "E741",  # 'l' is currently widely used
   "F401",
@@ -68,6 +70,7 @@ lint.ignore = [
   "ISC002",
   "ISC003",  # micropython does not support implicit concatenation of f-strings
   "PIE810",  # micropython does not support passing tuples to .startswith or .endswith
+  "PLC0415",  # lazy/conditional imports for optional platform modules
   "PLC1901",
   "PLR1714",
   "PLR5501",
@@ -80,8 +83,12 @@ lint.ignore = [
   "W191",  # tab-indent, redundant when using formatter
 ]
 line-length = 99
-target-version = "py37"
+target-version = "py38"  # walrus operator (:=) used throughout src/lib
 
+
+[tool.ruff.lint.isort]
+known-first-party = ["displaysys", "eventsys", "graphics", "multimer", "palettes"]
+force-sort-within-sections = true
 
 [tool.ruff.lint.mccabe]
 max-complexity = 61
@@ -95,6 +102,7 @@ max-statements = 166
 
 [tool.ruff.lint.per-file-ignores]
 "micropython/aiorepl/aiorepl.py" = ["PGH001"]
+"src/add_ons/viper_tools.py" = ["F821"]  # `uint` is a MicroPython @viper native type
 
 # manifest.py files are evaluated with some global names pre-defined
 "**/manifest.py" = ["F821"]

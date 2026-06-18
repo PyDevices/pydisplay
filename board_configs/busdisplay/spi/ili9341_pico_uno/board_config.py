@@ -6,10 +6,11 @@ See ICSP Jumpers at:
     https://learn.adafruit.com/adafruit-2-8-tft-touch-shield-v2/tsc2007-pinouts
 """
 
-from spibus import SPIBus
-from ili9341 import ILI9341
-from machine import Pin, I2C
 from ft6x36 import FT6x36
+from ili9341 import ILI9341
+from machine import I2C, Pin
+from spibus import SPIBus
+
 from eventsys import devices
 
 display_bus = SPIBus(

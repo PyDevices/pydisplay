@@ -26,13 +26,14 @@
 # THE SOFTWARE.
 
 from __future__ import print_function
+
+from collections import namedtuple
 import contextlib
 import os
 import sys
 import tempfile
-from collections import namedtuple
 
-__all__ = ["ManifestFileError", "ManifestFile"]
+__all__ = ["ManifestFile", "ManifestFileError"]
 
 # Allow freeze*() etc.
 MODE_FREEZE = 1
@@ -79,7 +80,7 @@ class ManifestUsePyPIException(Exception):
 
 
 # The set of files that this manifest references.
-ManifestOutput = namedtuple(
+ManifestOutput = namedtuple(  # noqa: PYI024
     "ManifestOutput",
     [
         "file_type",  # FILE_TYPE_*.
@@ -154,9 +155,8 @@ class ManifestPackageMetadata:
     def check_initialised(self, mode):
         # Ensure that metadata() is the first thing a manifest.py does.
         # This is to ensure that we early-exit if it should be replaced by a pypi dependency.
-        if mode in (MODE_COMPILE, MODE_PYPROJECT):
-            if not self._initialised:
-                raise ManifestFileError("metadata() must be the first command in a manifest file.")
+        if mode in (MODE_COMPILE, MODE_PYPROJECT) and not self._initialised:
+            raise ManifestFileError("metadata() must be the first command in a manifest file.")
 
     def __str__(self):
         return "version={} description={} license={} author={} pypi={} pypi_publish={}".format(
@@ -253,15 +253,15 @@ class ManifestFile:
             try:
                 exec(manifest_file, self._manifest_globals({}))
             except Exception as er:
-                raise ManifestFileError("Error in manifest: {}".format(er))
+                raise ManifestFileError("Error in manifest: {}".format(er)) from er
 
     def _add_file(self, full_path, target_path, kind=KIND_AUTO, opt=None):
         # Check file exists and get timestamp.
         try:
             stat = os.stat(full_path)
             timestamp = stat.st_mtime
-        except OSError:
-            raise ManifestFileError("Cannot stat {}".format(full_path))
+        except OSError as e:
+            raise ManifestFileError("Cannot stat {}".format(full_path)) from e
 
         # Map the AUTO kinds to their actual kind based on mode and extension.
         _, ext = os.path.splitext(full_path)
@@ -395,12 +395,14 @@ class ManifestFile:
                 # python-ecosys. Add PyPI dependency instead.
                 self._pypi_dependencies.append(e.pypi_name)
             except Exception as e:
-                raise ManifestFileError("Error in manifest file: {}: {}".format(manifest_path, e))
+                raise ManifestFileError(
+                    "Error in manifest file: {}: {}".format(manifest_path, e)
+                ) from e
             if is_require:
                 self._metadata.pop()
 
     def _require_from_path(self, library_path, name, version, extra_kwargs):
-        for root, dirnames, filenames in os.walk(library_path): # type: ignore
+        for root, _dirnames, filenames in os.walk(library_path):  # type: ignore[type-arg]
             if os.path.basename(root) == name and "manifest.py" in filenames:
                 self.include(root, is_require=True, **extra_kwargs)
                 return True
@@ -577,14 +579,13 @@ class ManifestFile:
 def tagged_py_file(path, metadata):
     dest_fd, dest_path = tempfile.mkstemp(suffix=".py", text=True)
     try:
-        with os.fdopen(dest_fd, "w") as dest:
-            with open(path, "r") as src:
-                contents = src.read()
-                dest.write(contents)
+        with os.fdopen(dest_fd, "w") as dest, open(path, "r") as src:
+            contents = src.read()
+            dest.write(contents)
 
-                # Don't overwrite a version definition if the file already has one in it.
-                if metadata.version and "__version__ =" not in contents:
-                    dest.write("\n\n__version__ = {}\n".format(repr(metadata.version)))
+            # Don't overwrite a version definition if the file already has one in it.
+            if metadata.version and "__version__ =" not in contents:
+                dest.write("\n\n__version__ = {}\n".format(repr(metadata.version)))
         yield dest_path
     finally:
         os.unlink(dest_path)
@@ -631,7 +632,7 @@ def main():
         mode = MODE_PYPROJECT
     else:
         print("Error: No mode specified.", file=sys.stderr)
-        exit(1)
+        sys.exit(1)
 
     m = ManifestFile(mode, path_vars)
     if args.unix_ffi:
@@ -641,7 +642,7 @@ def main():
             m.execute(manifest_file)
         except ManifestFileError as er:
             print(er, file=sys.stderr)
-            exit(1)
+            sys.exit(1)
     print(m.metadata())
     for f in m.files():
         print(f)

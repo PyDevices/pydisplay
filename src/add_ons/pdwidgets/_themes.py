@@ -5,8 +5,9 @@
 Themes used by the pdwidgets library.  The IconTheme class is used to manage icons and the ColorTheme class is used to manage colors.
 """
 
-from ._constants import ICON_SIZE
 from palettes import get_palette  # noqa: F401
+
+from ._constants import ICON_SIZE
 
 try:
     from os import sep  # PyScript doesn't have os.sep

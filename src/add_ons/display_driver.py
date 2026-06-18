@@ -7,12 +7,15 @@ display_driver.py - LVGL driver configuration for pydisplay.  Requires a valid
 board_config.py to be in a directory on the micropython path.
 """
 
-from board_config import display_drv, broker
-from eventsys import events, devices
+import contextlib
 import gc
 import sys
-import lvgl as lv
+
+from board_config import broker, display_drv
 import lv_utils
+import lvgl as lv
+
+from eventsys import devices, events
 
 # Keep the LVGL display driver alive; flush_cb and draw buffers must not be GC'd.
 _lvgl_driver = None
@@ -65,16 +68,12 @@ def shutdown(code=0, exit_process=False):
     _shutdown_done = True
 
     if lv_utils.event_loop.is_running():
-        try:
+        with contextlib.suppress(Exception):
             lv_utils.event_loop.current_instance().deinit()
-        except Exception:
-            pass
 
     if _lvgl_driver is not None:
-        try:
+        with contextlib.suppress(Exception):
             _lvgl_driver.lv_display.set_flush_cb(None)
-        except Exception:
-            pass
         _lvgl_driver = None
 
     try:
@@ -84,10 +83,8 @@ def shutdown(code=0, exit_process=False):
         pass
 
     if _uses_sdl_run_loop():
-        try:
+        with contextlib.suppress(Exception):
             display_drv.deinit()
-        except Exception:
-            pass
         try:
             from displaysys.sdldisplay import _ensure_tty_sane
 
@@ -105,9 +102,8 @@ def _broker_quit():
 
 def _uses_sdl_run_loop():
     """CircuitPython unix SDL uses blocking run(); MicroPython keeps lv_utils."""
-    return (
-        sys.implementation.name == "circuitpython"
-        and type(display_drv).__module__.endswith("sdldisplay")
+    return sys.implementation.name == "circuitpython" and type(display_drv).__module__.endswith(
+        "sdldisplay"
     )
 
 
@@ -168,6 +164,7 @@ def refresh():
     if _lvgl_driver is not None:
         lv.refr_now(_lvgl_driver.lv_display)
 
+
 class _TouchState:
     x = 0
     y = 0
@@ -187,9 +184,8 @@ def _touch_cb(event, indev, data):
             _TouchState.x, _TouchState.y = event.pos
             _TouchState.pressed = False
     data.point = lv.point_t({"x": _TouchState.x, "y": _TouchState.y})
-    data.state = (
-        lv.INDEV_STATE.PRESSED if _TouchState.pressed else lv.INDEV_STATE.RELEASED
-    )
+    data.state = lv.INDEV_STATE.PRESSED if _TouchState.pressed else lv.INDEV_STATE.RELEASED
+
 
 def _encoder_cb(event, indev, data):
     # LVGL hands us an object called data.  We just change the enc_diff and/or state attributes if necessary.
@@ -202,6 +198,7 @@ def _encoder_cb(event, indev, data):
     elif event.type == events.MOUSEBUTTONUP and event.button == 3:
         data.state = lv.INDEV_STATE.RELEASED
 
+
 def _keypad_cb(event, indev, data):
     # LVGL hands us an object called data.  We just change the state attributes when necessary.
     if event is None:
@@ -212,6 +209,7 @@ def _keypad_cb(event, indev, data):
     elif event.type == events.KEYUP:
         data.state = lv.INDEV_STATE.RELEASED
         data.key = event.key
+
 
 def create_devices(devs, lv_display):
     # Create an input device for each device in the 'devices' list
@@ -246,10 +244,12 @@ class DisplayDriver:
     def __init__(
         self,
         display_drv,
-        devs=[],
+        devs=None,
         color_format=lv.COLOR_FORMAT.RGB565,
         blocking=True,
     ):
+        if devs is None:
+            devs = []
         gc.collect()
         # If byte swapping is required and the display bus is capable of having byte swapping disabled,
         # disable it and set a flag so we can swap the color bytes as they are created.

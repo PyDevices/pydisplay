@@ -9,7 +9,6 @@ except ImportError:
     from busdisplay import BusDisplay
 from time import sleep_ms
 
-
 _INIT_SEQUENCE = [
     (0xFF, b"\x77\x01\x00\x00\x10", 0),
     (0xC0, b"\x3b\x00", 0),

@@ -6,9 +6,10 @@
 displaysys.jndisplay
 """
 
-from displaysys import DisplayDriver, color_rgb
 from IPython.display import display, update_display
 from PIL import Image, ImageDraw
+
+from displaysys import DisplayDriver, color_rgb
 
 
 class JNDisplay(DisplayDriver):

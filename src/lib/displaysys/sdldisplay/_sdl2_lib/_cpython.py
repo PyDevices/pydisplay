@@ -7,8 +7,9 @@ A bare implementation of SDL2 written in CPython using ctypes.
 """
 
 import ctypes
-from ._constants import *  # noqa: F403
 from sys import platform
+
+from ._constants import *  # noqa: F403
 
 # Load the SDL2 shared library using ctypes
 if platform == "win32":

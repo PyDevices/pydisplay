@@ -1,7 +1,7 @@
 """ODROID GO with ILI9341 2.4" display"""
 
-from spibus import SPIBus
 from ili9341 import ILI9341
+from spibus import SPIBus
 
 display_bus = SPIBus(
     id=2,

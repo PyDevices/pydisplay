@@ -6,15 +6,15 @@ i80bus
 """
 
 from array import array
-from uctypes import addressof
+import contextlib
 import struct
+
 import micropython
 from micropython import const
+from uctypes import addressof
 
-try:
+with contextlib.suppress(ImportError):
     from typing import Optional
-except ImportError:
-    pass
 
 # _I80BaseBus will work with either Pin class, but I80Bus will only work with GPIO_Pin
 try:
@@ -132,7 +132,7 @@ class I80Bus(_I80BaseBus):
         # If self._is_32bit is True the _write method will use a 32-bit set and a 32-bit
         # clear register.  Otherwise, the _write method will use set_reset registers
         # which use the lower 16 bits for set and the upper 16 bits for clear.
-        self._is_32bit = True if self._wr.BSRR is None else False
+        self._is_32bit = self._wr.BSRR is None
 
         # Both lut mode and sequential mode need the write pin registers and masks saved to use in viper.
         # Subclasses may not need the write pin registers and masks, so they are defined here instead of

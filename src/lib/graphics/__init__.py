@@ -6,17 +6,17 @@ Graphics library extending MicroPython's framebuf module.
 
 from ._area import Area
 from ._draw import Draw
+from ._files import bmp_to_framebuffer, pbm_to_framebuffer, pgm_to_framebuffer
 from ._font import Font, text, text8, text14, text16
-from ._files import pbm_to_framebuffer, pgm_to_framebuffer, bmp_to_framebuffer
 from ._framebuf_plus import (
-    FrameBuffer,
-    MONO_VLSB,
-    MONO_HLSB,
-    MONO_HMSB,
     GS2_HMSB,
     GS4_HMSB,
     GS8,
+    MONO_HLSB,
+    MONO_HMSB,
+    MONO_VLSB,
     RGB565,
+    FrameBuffer,
 )
 from ._shapes import (
     arc,
@@ -40,28 +40,22 @@ from ._shapes import (
 )
 
 __all__ = [
-    "Area",
-    "Draw",
-    "Font",
-    "text",
-    "text8",
-    "text14",
-    "text16",
-    "pbm_to_framebuffer",
-    "pgm_to_framebuffer",
-    "bmp_to_framebuffer",
-    "FrameBuffer",
-    "MONO_VLSB",
-    "MONO_HLSB",
-    "MONO_HMSB",
     "GS2_HMSB",
     "GS4_HMSB",
     "GS8",
+    "MONO_HLSB",
+    "MONO_HMSB",
+    "MONO_VLSB",
     "RGB565",
+    "Area",
+    "Draw",
+    "Font",
+    "FrameBuffer",
     "arc",
     "blit",
     "blit_rect",
     "blit_transparent",
+    "bmp_to_framebuffer",
     "circle",
     "ellipse",
     "fill",
@@ -69,11 +63,17 @@ __all__ = [
     "gradient_rect",
     "hline",
     "line",
+    "pbm_to_framebuffer",
+    "pgm_to_framebuffer",
     "pixel",
     "poly",
     "polygon",
     "rect",
     "round_rect",
+    "text",
+    "text8",
+    "text14",
+    "text16",
     "triangle",
     "vline",
 ]

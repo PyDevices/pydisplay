@@ -7,7 +7,6 @@ Constants used by the pdwidgets library.
 
 from micropython import const
 
-
 PAD = const(2)
 DEFAULT_PADDING = (PAD, PAD, PAD, PAD)
 TEXT_WIDTH = const(8)

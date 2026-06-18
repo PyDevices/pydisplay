@@ -5,11 +5,13 @@
 #
 # Based on timer.py from micropython-lib (https://github.com/micropython/micropython-lib/blob/master/unix-ffi/machine/machine/timer.py)
 
-from ._timerbase import _TimerBase
-import ffi
-import uctypes
 import array
 import os
+
+import ffi
+import uctypes
+
+from ._timerbase import _TimerBase
 
 # FFI libraries
 
@@ -73,7 +75,9 @@ try:
     gettid_ = libc.func("i", "gettid", "")
 except OSError:
     _syscall = libc.func("l", "syscall", "l")  # SYS_gettid = 186 on x86_64
-    gettid_ = lambda: _syscall(186)
+
+    def gettid_():
+        return _syscall(186)
 
 # Create a new C struct
 

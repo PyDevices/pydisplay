@@ -3,15 +3,15 @@
 spibus
 """
 
-from machine import Pin, SPI
+import contextlib
 import struct
+
+from machine import SPI, Pin
 import micropython
 from micropython import const
 
-try:
+with contextlib.suppress(ImportError):
     from typing import Optional, Union
-except ImportError:
-    pass
 
 
 DC_CMD = const(0)

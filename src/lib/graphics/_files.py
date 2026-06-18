@@ -1,5 +1,6 @@
-from ._framebuf_plus import FrameBuffer, MONO_HLSB, GS2_HMSB, GS4_HMSB, GS8, RGB565
 import struct
+
+from ._framebuf_plus import GS2_HMSB, GS4_HMSB, GS8, MONO_HLSB, RGB565, FrameBuffer
 
 
 def pbm_to_framebuffer(filename):

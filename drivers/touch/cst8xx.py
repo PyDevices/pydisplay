@@ -5,10 +5,10 @@ by Brad Barnett, 2024
 Reference:  https://files.waveshare.com/upload/c/c2/CST816S_register_declaration.pdf
 """
 
-from machine import Pin
 from time import sleep_ms
-from micropython import const
 
+from machine import Pin
+from micropython import const
 
 _CST816S_ID = const(0xB4)
 _CST816T_ID = const(0xB5)

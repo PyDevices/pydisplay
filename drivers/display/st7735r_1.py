@@ -4,7 +4,6 @@
 
 from busdisplay import BusDisplay
 
-
 _INIT_SEQUENCE = [
     (0x36, b"\x70", 0),
     (0x3A, b"\x05", 0),

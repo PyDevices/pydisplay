@@ -19,34 +19,42 @@ Example joymap:
 
 from eventsys import events
 
+
 class JoystickKeypad:
     def __init__(self, broker, joymap):
         self._broker = broker
         self._joymap = joymap
         self._state = {}
         for j in joymap.values():
-            for h in j['hats'].values():
+            for h in j["hats"].values():
                 for key in h:
                     self._state[key] = False
-            for b in j['buttons'].values():
+            for b in j["buttons"].values():
                 self._state[b] = False
-        self._broker.subscribe(self.callback, event_types=[events.JOYHATMOTION, events.JOYBUTTONDOWN, events.JOYBUTTONUP])
+        self._broker.subscribe(
+            self.callback,
+            event_types=[events.JOYHATMOTION, events.JOYBUTTONDOWN, events.JOYBUTTONUP],
+        )
 
     def callback(self, event):
-        if event.type == events.JOYHATMOTION:
-            if j := self._joymap.get(event.instance_id):
-                if h := j['hats'].get(event.hat):
-                    x,y = event.value
-                    self._state[h[0]] = x == -1
-                    self._state[h[1]] = x == 1
-                    self._state[h[2]] = y == -1
-                    self._state[h[3]] = y == 1
-                    return
-        if event.type in [events.JOYBUTTONDOWN, events.JOYBUTTONUP]:
-            if j := self._joymap.get(event.instance_id):
-                if b := j['buttons'].get(event.button):
-                    self._state[b] = event.type == events.JOYBUTTONDOWN
-                    return
-    
+        if (
+            event.type == events.JOYHATMOTION
+            and (j := self._joymap.get(event.instance_id))
+            and (h := j["hats"].get(event.hat))
+        ):
+            x, y = event.value
+            self._state[h[0]] = x == -1
+            self._state[h[1]] = x == 1
+            self._state[h[2]] = y == -1
+            self._state[h[3]] = y == 1
+            return
+        if (
+            event.type in [events.JOYBUTTONDOWN, events.JOYBUTTONUP]
+            and (j := self._joymap.get(event.instance_id))
+            and (b := j["buttons"].get(event.button))
+        ):
+            self._state[b] = event.type == events.JOYBUTTONDOWN
+            return
+
     def read(self):
         return [k for k, v in self._state.items() if v]

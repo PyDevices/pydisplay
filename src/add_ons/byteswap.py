@@ -38,4 +38,4 @@ except Exception:
             """
             byteswap_viper(buf, len(buf))
     except Exception:
-        raise ImportError("No implementation of byteswap available")
+        raise ImportError("No implementation of byteswap available") from None

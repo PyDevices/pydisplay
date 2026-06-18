@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: MIT
 """Thread-based software Timer for MicroPython-Unix (and CPython), signal-free."""
 
+import contextlib
 import time
+
 from ._timerbase import _TimerBase
 
 try:
@@ -17,6 +19,7 @@ except ImportError:
     def _spawn(fn):
         threading.Thread(target=fn, daemon=True).start()
 
+
 try:
     _ticks_ms, _ticks_add, _ticks_diff, _sleep_ms = (
         time.ticks_ms,
@@ -25,6 +28,7 @@ try:
         time.sleep_ms,
     )
 except AttributeError:  # CPython
+
     def _ticks_ms():
         return int(time.monotonic() * 1000)
 
@@ -59,10 +63,8 @@ class Timer(_TimerBase):
             if not self._running:
                 break
             self._busy = True
-            try:
+            with contextlib.suppress(Exception):
                 self._callback(self)
-            except Exception:
-                pass
             self._busy = False
             if self._mode == self.ONE_SHOT:
                 self._running = False

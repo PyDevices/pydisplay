@@ -1,28 +1,30 @@
+from . import _files, _font, _shapes
 from ._area import Area
-from . import _shapes
-from . import _files
-from . import _font
 
 try:  # Try to import framebuf from MicroPython
     from framebuf import (
-        MONO_VLSB,
-        MONO_HLSB,
-        MONO_HMSB,
         GS2_HMSB,
         GS4_HMSB,
         GS8,
+        MONO_HLSB,
+        MONO_HMSB,
+        MONO_VLSB,
         RGB565,
+    )
+    from framebuf import (
         FrameBuffer as _FrameBuffer,
     )
 except ImportError:  # If framebuf is not available, import from _framebuf.py
     from ._framebuf import (
-        MONO_VLSB,
-        MONO_HLSB,
-        MONO_HMSB,
         GS2_HMSB,
         GS4_HMSB,
         GS8,
+        MONO_HLSB,
+        MONO_HMSB,
+        MONO_VLSB,
         RGB565,
+    )
+    from ._framebuf import (
         FrameBuffer as _FrameBuffer,
     )
 
@@ -61,11 +63,7 @@ class FrameBuffer(_FrameBuffer):
         self._height = height
         self._fb_format = format
         self._buffer = buffer
-        if format == MONO_VLSB:
-            self._color_depth = 1
-        elif format == MONO_HLSB:
-            self._color_depth = 1
-        elif format == MONO_HMSB:
+        if format in (MONO_VLSB, MONO_HLSB, MONO_HMSB):
             self._color_depth = 1
         elif format == RGB565:
             self._color_depth = 16
@@ -613,9 +611,8 @@ class FrameBuffer(_FrameBuffer):
             filename (str): Filename to load from
         """
         # Read the first two bytes to determine the file type
-        f = open(filename, "rb")
-        header = f.read(2)
-        f.close()
+        with open(filename, "rb") as f:
+            header = f.read(2)
 
         if header == b"P4":
             return _files.pbm_to_framebuffer(filename)

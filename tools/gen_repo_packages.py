@@ -1,8 +1,7 @@
 #!/bin/python
 
-import os
 import json
-
+import os
 
 # Define constants
 package_ver = "0.0.1"
@@ -56,20 +55,22 @@ for package_path, deps, extra_files in packages:
         src_file = repo_url + os.path.relpath(full_file_path, repo_dir)
         package_dicts[package_name]["urls"].append([extra_file, src_file])
 
-        if package_name not in master_exclude:
-            if full_file_path not in extra_files_added_to_master:
-                # Add the file the master package
-                master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
-                master_package["urls"].append([master_dest_file, src_file])
+        if (
+            package_name not in master_exclude
+            and full_file_path not in extra_files_added_to_master
+        ):
+            # Add the file the master package
+            master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
+            master_package["urls"].append([master_dest_file, src_file])
 
-                # Add the file to the master toml
-                toml_dest_dir = "/" + "/".join(master_dest_file.split("/")[:-1]) + "/"
-                if toml_dest_dir == "//":
-                    toml_dest_dir = "/"
-                master_toml.append(
-                    f'"../{os.path.relpath(full_file_path, repo_dir)}" = "{toml_dest_dir}"'
-                )
-                extra_files_added_to_master.append(full_file_path)
+            # Add the file to the master toml
+            toml_dest_dir = "/" + "/".join(master_dest_file.split("/")[:-1]) + "/"
+            if toml_dest_dir == "//":
+                toml_dest_dir = "/"
+            master_toml.append(
+                f'"../{os.path.relpath(full_file_path, repo_dir)}" = "{toml_dest_dir}"'
+            )
+            extra_files_added_to_master.append(full_file_path)
 
     # Iterate over the directories in the package
     for root, _, files in os.walk(full_path):

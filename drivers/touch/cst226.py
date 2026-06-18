@@ -3,8 +3,9 @@ Adapted from:
     https://github.com/lewisxhe/SensorLib/blob/master/src/touch/TouchClassCST226.cpp
 """
 
-from machine import Pin
 from time import sleep_ms
+
+from machine import Pin
 from micropython import const
 
 # CST226-specific constants

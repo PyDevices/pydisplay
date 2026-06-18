@@ -7,8 +7,8 @@ try:
 except ImportError:
     from busdisplay import BusDisplay
 from time import sleep_ms
-from micropython import const
 
+from micropython import const
 
 _SWRESET = const(0x01)
 _SLPOUT = const(0x11)
@@ -57,7 +57,7 @@ class ST7796(BusDisplay):
             pixel_format = 0x77
         else:
             raise RuntimeError(
-                "ST7796 IC only supports " "lv.COLOR_FORMAT.RGB565 or lv.COLOR_FORMAT.RGB888"
+                "ST7796 IC only supports lv.COLOR_FORMAT.RGB565 or lv.COLOR_FORMAT.RGB888"
             )
 
         param_buf[0] = pixel_format

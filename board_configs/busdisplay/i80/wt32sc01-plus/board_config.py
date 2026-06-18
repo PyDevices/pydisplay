@@ -1,12 +1,11 @@
 """WT32-SC01 Plus 320x480 ST7796 display"""
 
-from i80bus import I80Bus
-from st7796 import ST7796
-from machine import I2C, Pin  # See the note about reset below
 from ft6x36 import FT6x36
-from machine import freq
-from eventsys import devices
+from i80bus import I80Bus
+from machine import I2C, Pin, freq  # See the note about reset below
+from st7796 import ST7796
 
+from eventsys import devices
 
 freq(240_000_000)
 # The WT32-SC01 Plus has the reset pins of the display IC and the touch IC both

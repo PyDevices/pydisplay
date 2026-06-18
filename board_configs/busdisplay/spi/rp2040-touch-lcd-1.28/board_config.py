@@ -1,11 +1,11 @@
 """Waveshare RP2040-Touch-LCD-1.28 GC9A01 240x240"""
 
-from spibus import SPIBus
-from gc9a01 import GC9A01
-from machine import Pin, I2C
 from cst8xx import CST8XX
-from eventsys import devices
+from gc9a01 import GC9A01
+from machine import I2C, Pin
+from spibus import SPIBus
 
+from eventsys import devices
 
 display_bus = SPIBus(
     id=1,

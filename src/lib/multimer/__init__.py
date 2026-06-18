@@ -30,10 +30,10 @@ try:
     from machine import Timer  # MicroPython on microcontrollers
 except ImportError:
     if sys.implementation.name == "micropython":  # MicroPython on Unix
-#        from ._aio import Timer
+        #        from ._aio import Timer
         from ._librt import Timer
     elif sys.implementation.name == "cpython":  # Big Python
-#        from ._aio import Timer
+        #        from ._aio import Timer
         from ._sdl2 import Timer
     elif sys.implementation.name == "circuitpython":
         from ._aio import Timer

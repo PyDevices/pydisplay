@@ -1,8 +1,9 @@
 import os
-import lib.path  # noqa: E402, F401
-from png import Reader  # noqa: E402
-from graphics import FrameBuffer, MONO_HLSB
 
+from png import Reader  # noqa: E402
+
+from graphics import MONO_HLSB, FrameBuffer
+import lib.path  # noqa: E402, F401
 
 # Source path is in the format:
 #     /home/brad/gh2/material-design-icons/png/action/3d_rotation/materialicons/18dp/1x/baseline_3d_rotation_black_18dp.png
@@ -35,10 +36,7 @@ def png_to_pbm(filename, dest_file):
     planes = metadata["planes"]
     for y in range(height):
         for x in range(width):
-            if pixels[(y * width + x) * planes + alpha] > threshold:
-                c = 1
-            else:
-                c = 0
+            c = 1 if pixels[(y * width + x) * planes + alpha] > threshold else 0
             fbuf.pixel(x, y, c)
     fbuf.save(dest_file)
 

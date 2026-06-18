@@ -53,9 +53,16 @@ class Keypad:
                 for j in range(rows)
                 for i in range(cols)
             ]
-        self._state = {k:False for k in self._keys}
-        self._broker.subscribe(self.callback, event_types=[events.MOUSEBUTTONDOWN, events.MOUSEBUTTONUP, events.KEYDOWN, events.KEYUP])
-        
+        self._state = dict.fromkeys(self._keys, False)
+        self._broker.subscribe(
+            self.callback,
+            event_types=[
+                events.MOUSEBUTTONDOWN,
+                events.MOUSEBUTTONUP,
+                events.KEYDOWN,
+                events.KEYUP,
+            ],
+        )
 
     def callback(self, event):
         if event.type in [events.MOUSEBUTTONDOWN, events.MOUSEBUTTONUP] and event.button == 1:

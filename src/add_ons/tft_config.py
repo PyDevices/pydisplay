@@ -1,15 +1,13 @@
-from board_config import display_drv
-from palettes import get_palette
-from graphics import Draw
-import tft_text
-import sys
 import os
+import sys
 
+from board_config import display_drv
+import tft_text
 
-if hasattr(os, "sep"):
-    sep = os.sep  # PyScipt doesn't have os.sep
-else:
-    sep = "/"
+from graphics import Draw
+from palettes import get_palette
+
+sep = os.sep if hasattr(os, "sep") else "/"  # PyScipt doesn't have os.sep
 
 if sys.implementation.name == "esp32":
     from machine import freq
@@ -20,6 +18,7 @@ BUFFERED = False
 
 if BUFFERED:
     from displaybuf import DisplayBuffer
+
     from multimer import Timer
 
 

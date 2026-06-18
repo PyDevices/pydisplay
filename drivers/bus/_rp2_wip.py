@@ -5,11 +5,14 @@
 An I80 bus driver for the RP2 using a PIO state machine.
 """
 
-from . import I80Bus as _I80Bus, Optional
-from rp2 import PIO, StateMachine, asm_pio
 import struct
+
 from machine import Pin
 import micropython
+from rp2 import PIO, StateMachine, asm_pio
+
+from . import I80Bus as _I80Bus
+from . import Optional
 
 # workaround Ruff errors for PIO statements
 if 0:

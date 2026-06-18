@@ -106,9 +106,7 @@ Includes 2 functions that install from different sources:
   2 installers to use.  It is simply called `install`.
 """
 
-
 from sys import implementation
-
 
 pkg_index = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
 repo = "github:PyDevices/pydisplay"
@@ -116,6 +114,7 @@ repo = "github:PyDevices/pydisplay"
 
 if implementation.name == "micropython":
     import mip
+
     def lib_install(package, **kwargs):
         """
         Installs 'library packages' from the PyDevices fork of micropython-lib.
@@ -131,6 +130,7 @@ if implementation.name == "micropython":
         mip.install(repo + package, **kwargs)
 else:
     import os
+
     def lib_install(package, target="", index=None, mpy=True):
         """
         Installs 'library packages' from the PyDevices fork of micropython-lib.
@@ -150,7 +150,7 @@ else:
             raise ValueError("The 'mpy' option is not supported for 'repo_install'.")
         if index:
             raise ValueError("The 'index' option is not supported for 'repo_install'.")
-        os.system(f"mpremote mip install --target={target} {repo+package}")
+        os.system(f"mpremote mip install --target={target} {repo + package}")
 
 
 def install(package, **kwargs):
@@ -158,6 +158,7 @@ def install(package, **kwargs):
         repo_install(package, **kwargs)
     else:
         lib_install(package, **kwargs)
+
 
 ####################################################################################################
 # Library packages - install as precompiled bytecode (.mpy) files

@@ -7,8 +7,7 @@
 Graphics Draw class
 """
 
-from . import _shapes
-from . import _font
+from . import _font, _shapes
 
 
 class Draw:

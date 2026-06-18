@@ -6,11 +6,12 @@
 A bare implementation of SDL2 written in MicroPython using ffi
 """
 
-import uctypes
-import ffi
 import struct
-from ._constants import *  # noqa: F403
 
+import ffi
+import uctypes
+
+from ._constants import *  # noqa: F403
 
 # Load the SDL2 shared library using ffi
 _libSDL2 = ffi.open("libSDL2-2.0.so.0")

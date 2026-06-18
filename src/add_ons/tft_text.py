@@ -33,20 +33,24 @@ https://github.com/devbis/st7789py_mpy.
 
 """
 
-from micropython import const
 from sys import implementation
+
+from micropython import const
+
 from graphics import Area
 
 _viper = False
 if implementation.name == "micropython":
     try:
         from viper_tools import _pack8, _pack16
+
         _viper = True
     except Exception:
         pass
 
 if not _viper:
     import struct
+
     _BIT7 = 0x80
     _BIT6 = 0x40
     _BIT5 = 0x20

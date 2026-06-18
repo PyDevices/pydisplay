@@ -12,22 +12,17 @@ https://github.com/spacerace/romfont
 
 import os
 import struct
+
 from ._area import Area
 
-
-if hasattr(os, "sep"):
-    sep = os.sep  # PyScipt doesn't have os.sep
-else:
-    sep = "/"
+sep = os.sep if hasattr(os, "sep") else "/"  # PyScipt doesn't have os.sep
 
 # Default font files or memoryviews to use if none is specified.
 # Should be 8 pixels wide to keep framebuf.py compatible with MicroPython framebuf module
 # Try to import the font data from .py files in the same directory as this module.
 # If that fails, use the .bin files in the same directory.
 try:
-    from . import _font_8x8
-    from . import _font_8x14
-    from . import _font_8x16
+    from . import _font_8x8, _font_8x14, _font_8x16
 
     _FONTS = {
         8: _font_8x8.FONT,
@@ -193,7 +188,7 @@ class Font:
         # Open the font file.
         try:
             font_path = self.font_data
-            self._font = open(font_path, "rb")
+            self._font = open(font_path, "rb")  # noqa: SIM115  # kept open for random access
             # simple font file validation check based on expected file size
             filesize = os.stat(font_path)[6]
             if filesize != 256 * self.height and filesize != 128 * self.height:
@@ -310,20 +305,22 @@ class Font:
             last_x = x  # the last x position reached on the current line
             for i, char in enumerate(chunk):
                 char_x = x + (i * self.width * scale)
-                if char_x < canvas.width if hasattr(canvas, "width") else True:
-                    if char_y < canvas.height if hasattr(canvas, "height") else True:
-                        if char_x + (self.width * scale) > 0:
-                            if char_y + (self.height * scale) > 0:
-                                self.draw_char(
-                                    char,
-                                    char_x,
-                                    char_y,
-                                    canvas,
-                                    color,
-                                    scale=scale,
-                                    inverted=inverted,
-                                )
-                                last_x = char_x + (self.width * scale)
+                if (
+                    (char_x < canvas.width if hasattr(canvas, "width") else True)
+                    and (char_y < canvas.height if hasattr(canvas, "height") else True)
+                    and char_x + (self.width * scale) > 0
+                    and char_y + (self.height * scale) > 0
+                ):
+                    self.draw_char(
+                        char,
+                        char_x,
+                        char_y,
+                        canvas,
+                        color,
+                        scale=scale,
+                        inverted=inverted,
+                    )
+                    last_x = char_x + (self.width * scale)
             largest_x = max([largest_x, last_x])  # update the largest x position
             char_y += self.height * scale
         return Area(x, y, largest_x - x, char_y - y)

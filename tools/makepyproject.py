@@ -39,8 +39,7 @@ import re
 import shutil
 import sys
 
-from build import error_color, ensure_path_exists
-
+from build import ensure_path_exists, error_color
 
 DEFAULT_AUTHOR = "micropython-lib <contact@micropython.org>"
 DEFAULT_LICENSE = "MIT"

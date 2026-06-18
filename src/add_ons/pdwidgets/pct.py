@@ -41,6 +41,8 @@ class Height:
         self._percent = percent
         self._widget = widget
 
+    __hash__ = None
+
     def __eq__(self, other):
         return float(self) == other
 
@@ -110,6 +112,8 @@ class Width:
             raise AttributeError(f"{self.__class__.__name__}: widget has no attribute 'area'")
         self._percent = percent
         self._widget = widget
+
+    __hash__ = None
 
     def __eq__(self, other):
         return float(self) == other

@@ -3,7 +3,6 @@
 from spibus import SPIBus
 from st7735 import ST7735
 
-
 display_bus = SPIBus(
     id=2,
     baudrate=60_000_000,

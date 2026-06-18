@@ -20,12 +20,11 @@ are set to 160 and 120 regardless of what you enter.
     enable_framebuffer(160, 120)
 """
 
-from usb_video import USBFramebuffer
-from framebufferio import FramebufferDisplay
 from displayio import release_displays
+from framebufferio import FramebufferDisplay
+from usb_video import USBFramebuffer
 
 from displaysys.fbdisplay import FBDisplay
-
 
 release_displays()
 display = FramebufferDisplay(USBFramebuffer(), auto_refresh=True)

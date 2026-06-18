@@ -2,9 +2,11 @@
 Combination board configuration for desktop, pyscript and jupyter notebook platforms.
 """
 
-from displaysys.sdldisplay import SDLDisplay as DTDisplay, poll
-from eventsys import devices
 import sys
+
+from displaysys.sdldisplay import SDLDisplay as DTDisplay
+from displaysys.sdldisplay import poll
+from eventsys import devices
 
 width = 320
 height = 480

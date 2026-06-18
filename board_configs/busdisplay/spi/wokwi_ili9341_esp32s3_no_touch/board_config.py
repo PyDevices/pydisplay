@@ -1,8 +1,7 @@
 """Wokwi ESP32S3 and ILI9341 Display"""
 
-from spibus import SPIBus
 from ili9341 import ILI9341
-
+from spibus import SPIBus
 
 display_bus = SPIBus(
     id=1,

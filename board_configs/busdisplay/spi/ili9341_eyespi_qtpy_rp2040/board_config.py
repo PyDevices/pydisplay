@@ -1,12 +1,13 @@
 """QT Py RP2040 with EyeSPI and ILI9341 2.8" display"""
 
-from spibus import SPIBus
-from ili9341 import ILI9341
-from machine import Pin, I2C
-from ft6x36 import FT6x36
-from eventsys import devices
 import gc
 
+from ft6x36 import FT6x36
+from ili9341 import ILI9341
+from machine import I2C, Pin
+from spibus import SPIBus
+
+from eventsys import devices
 
 gc.collect()
 

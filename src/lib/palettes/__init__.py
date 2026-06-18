@@ -81,9 +81,8 @@ class Palette:
     def __getitem__(self, index):
         index = self._normalize(index)
 
-        if self._cache is not None:
-            if index in self._cache:
-                return self._cache[index]
+        if self._cache is not None and index in self._cache:
+            return self._cache[index]
 
         r, g, b = self._get_rgb(index)
         if self._color_depth == 24 or self._color_depth == 4:

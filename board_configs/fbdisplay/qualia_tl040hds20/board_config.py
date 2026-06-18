@@ -1,10 +1,11 @@
 """Qualia S3 RGB-666 with TL040HDS20 4.0" 720x720 Square Display"""
 # Similar configs may be available for RGBMatrix, is31fl3741 and picodvi
 
-from rgbframebuffer import RGBFrameBuffer
+from ft6x36 import FT6x36
 from machine import I2C, Pin
 from pca9554 import PCA9554
-from ft6x36 import FT6x36
+from rgbframebuffer import RGBFrameBuffer
+
 from displaysys.fbdisplay import FBDisplay
 from eventsys import devices
 

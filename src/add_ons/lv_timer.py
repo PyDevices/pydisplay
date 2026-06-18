@@ -7,6 +7,7 @@ except ImportError:
         # Idea by X-Ryl669: https://github.com/lvgl/lvgl/issues/4011#issuecomment-1483094051
 
         import jswindow
+
         class Timer:
             PERIODIC = 0
             ONE_SHOT = 1
@@ -31,22 +32,22 @@ except ImportError:
         # for the unix port.
         #
         # MIT license; Copyright (c) 2021 Amir Gonnen
-        # 
+        #
         # Based on timer.py from micropython-lib (https://github.com/micropython/micropython-lib/blob/master/unix-ffi/machine/machine/timer.py)
-        import ffi
-        import uctypes
         import array
         import os
         import sys
+
+        import ffi
+        import uctypes
 
         # FFI libraries
 
         libc = ffi.open("libc.so.6")
         try:
             librt = ffi.open("librt.so")
-        except OSError as e:
+        except OSError:
             librt = libc
-
 
         # C constants
 
@@ -57,10 +58,10 @@ except ImportError:
         # C structs
 
         sigaction_t = {
-            "sa_handler" : (0 | uctypes.UINT64),
-            "sa_mask"    : (8 | uctypes.ARRAY, 16 | uctypes.UINT64),
-            "sa_flags"   : (136 | uctypes.INT32),
-            "sa_restorer": (144 |uctypes.PTR, uctypes.UINT8), 
+            "sa_handler": (0 | uctypes.UINT64),
+            "sa_mask": (8 | uctypes.ARRAY, 16 | uctypes.UINT64),
+            "sa_flags": (136 | uctypes.INT32),
+            "sa_restorer": (144 | uctypes.PTR, uctypes.UINT8),
         }
 
         sigval_t = {
@@ -104,7 +105,6 @@ except ImportError:
 
         # Posix Signal handling
 
-
         def sigaction(signum, handler, flags=0):
             sa = new(sigaction_t)
             sa_old = new(sigaction_t)
@@ -114,7 +114,7 @@ except ImportError:
             r = sigaction_(signum, sa, sa_old)
             if r != 0:
                 raise RuntimeError("sigaction_ error: %d (errno = %d)" % (r, os.errno()))
-            return cb # sa_old.sa_handler
+            return cb  # sa_old.sa_handler
 
         # Posix Timer handling
 
@@ -156,7 +156,6 @@ except ImportError:
         # Timer class
 
         class Timer:
-
             PERIODIC = 0
             ONE_SHOT = 1
 

@@ -2,7 +2,7 @@
 Board configuration for PyScript.
 """
 
-from displaysys.psdisplay import PSDisplay, PSDevices
+from displaysys.psdisplay import PSDevices, PSDisplay
 from eventsys import devices
 
 width = 320

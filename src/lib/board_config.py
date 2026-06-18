@@ -25,7 +25,7 @@ except ImportError:
 
 if _ps:
     # Running in PyScript
-    from displaysys.psdisplay import PSDisplay, PSDevices
+    from displaysys.psdisplay import PSDevices, PSDisplay
     from eventsys import devices
 
     display_drv = PSDisplay("display_canvas", width, height)
@@ -49,15 +49,18 @@ elif _jn:
     display_drv = JNDisplay(width, height)
 else:
     # Running on the desktop
-    from eventsys import devices
     import sys
+
+    from eventsys import devices
 
     try:
         # This should load for CPython
-        from displaysys.pgdisplay import PGDisplay as DTDisplay, get
+        from displaysys.pgdisplay import PGDisplay as DTDisplay
+        from displaysys.pgdisplay import get
     except ImportError:
         # This should load for MicroPython on the desktop
-        from displaysys.sdldisplay import SDLDisplay as DTDisplay, get
+        from displaysys.sdldisplay import SDLDisplay as DTDisplay
+        from displaysys.sdldisplay import get
 
     display_drv = DTDisplay(
         width=width,

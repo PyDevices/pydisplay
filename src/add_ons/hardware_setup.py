@@ -7,8 +7,8 @@ Usage:
     <your code here>
 """
 
+from board_config import broker, display_drv
 from displaybuf import DisplayBuffer as SSD
-from board_config import display_drv, broker
 
 # format = SSD.GS4_HMSB  # 4-bit (16 item) lookup table of 16-bit RGB565 colors; w*h/2 buffer
 # format = SSD.GS8  # 256 8-bit RGB332 colors; w*h buffer
@@ -36,13 +36,12 @@ class Poller:
 
     def poll(self):
         self._poll_func()
-        return True if self._touched else False
+        return bool(self._touched)
 
     def callback(self, event):
-        if event.type == broker.events.MOUSEMOTION and event.buttons[0] == 1:
-            self.col, self.row = event.pos
-            self._touched = True
-        elif event.type == broker.events.MOUSEBUTTONDOWN and event.button == 1:
+        if (event.type == broker.events.MOUSEMOTION and event.buttons[0] == 1) or (
+            event.type == broker.events.MOUSEBUTTONDOWN and event.button == 1
+        ):
             self.col, self.row = event.pos
             self._touched = True
         elif event.type == broker.events.MOUSEBUTTONUP and event.button == 1:

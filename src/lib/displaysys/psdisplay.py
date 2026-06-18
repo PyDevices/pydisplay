@@ -6,9 +6,10 @@
 displaysys.psdisplay
 """
 
-from displaysys import DisplayDriver, color_rgb
+from js import console, document
 from pyscript.ffi import create_proxy
-from js import document, console
+
+from displaysys import DisplayDriver, color_rgb
 
 
 def log(*args):

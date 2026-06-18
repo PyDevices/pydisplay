@@ -26,7 +26,8 @@ Usage:
 
 import gc
 import sys
-from displaysys import alloc_buffer, color565, color565_swapped, color332
+
+from displaysys import alloc_buffer, color332, color565, color565_swapped
 
 try:
     import graphics as framebuf
@@ -36,7 +37,7 @@ except ImportError:
 _has_viper_tools = False
 if sys.implementation.name == "micropython":
     try:
-        from viper_tools import _bounce8, _bounce4
+        from viper_tools import _bounce4, _bounce8
 
         _has_viper_tools = True
     except Exception:

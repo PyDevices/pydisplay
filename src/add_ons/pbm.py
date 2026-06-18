@@ -30,14 +30,11 @@ Example:
 
 """
 
-from framebuf import FrameBuffer, MONO_HLSB, RGB565
 import os
 
+from framebuf import MONO_HLSB, RGB565, FrameBuffer
 
-if hasattr(os, "sep"):
-    sep = os.sep  # PyScipt doesn't have os.sep
-else:
-    sep = "/"
+sep = os.sep if hasattr(os, "sep") else "/"  # PyScipt doesn't have os.sep
 
 
 class PBM(FrameBuffer):

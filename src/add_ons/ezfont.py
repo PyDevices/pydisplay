@@ -37,10 +37,7 @@ class EZFont(ezFBfont):
             for cx in range(char_width):
                 color = charbuf.pixel(cx, cy)
                 print(color, end=" ")
-                if color > 0:
-                    color = self.fg
-                else:
-                    color = self.bg
+                color = self.fg if color > 0 else self.bg
                 if color != tkey:
                     self._device.pixel(x + cx, y + cy, color)
             print("")

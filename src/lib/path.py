@@ -21,8 +21,8 @@ RELPATH = True
 
 
 def update():
-    import sys
     import os
+    import sys
 
     def find_dir(directory):
         try:

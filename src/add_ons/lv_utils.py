@@ -30,9 +30,10 @@
 #
 ##############################################################################
 
+import sys
+
 import lvgl as lv
 import micropython
-import sys
 
 # Try standard machine.Timer, or cross-platform timer from multimer, if available
 
@@ -43,7 +44,7 @@ except:
         from multimer import Timer
     except:
         if sys.platform != "darwin":
-            raise RuntimeError("Missing machine.Timer implementation!")
+            raise RuntimeError("Missing machine.Timer implementation!") from None
         Timer = False
 
 # Try to determine default timer id
@@ -91,25 +92,19 @@ class event_loop:
 
         self.delay = 1000 // freq
         self.refresh_cb = refresh_cb
-        self.exception_sink = (
-            exception_sink if exception_sink else self.default_exception_sink
-        )
+        self.exception_sink = exception_sink if exception_sink else self.default_exception_sink
 
         self.asynchronous = asynchronous
         if self.asynchronous:
             if not asyncio_available:
-                raise RuntimeError(
-                    "Cannot run asynchronous event loop. asyncio is not available!"
-                )
+                raise RuntimeError("Cannot run asynchronous event loop. asyncio is not available!")
             self.refresh_event = asyncio.Event()
             self.refresh_task = asyncio.create_task(self.async_refresh())
             self.timer_task = asyncio.create_task(self.async_timer())
         else:
             if Timer:
                 self.timer = Timer(timer_id)
-                self.timer.init(
-                    mode=Timer.PERIODIC, period=self.delay, callback=self.timer_cb
-                )
+                self.timer.init(mode=Timer.PERIODIC, period=self.delay, callback=self.timer_cb)
             self.task_handler_ref = self.task_handler  # Allocation occurs here
             self.max_scheduled = max_scheduled
             self.scheduled = 0

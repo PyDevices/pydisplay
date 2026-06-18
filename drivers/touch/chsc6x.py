@@ -6,10 +6,10 @@
 # Set IRQ speed to 100000 if not using an IRQ pin
 
 
-from machine import Pin, I2C
 from time import sleep_ms
-from micropython import const
 
+from machine import I2C, Pin
+from micropython import const
 
 CHSC6X_I2C_ID = const(0x2E)
 CHSC6X_READ_POINT_LEN = const(5)
@@ -25,9 +25,7 @@ class CHSC6X:
 
     def is_touched(self):
         if self._irq is not None:
-            if self._irq.value() is False:
-                return True
-            return False
+            return self._irq.value() is False
         return self.touch_read() is not None
 
     def touch_read(self):

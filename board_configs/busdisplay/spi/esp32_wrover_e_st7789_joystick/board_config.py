@@ -1,10 +1,11 @@
 """ESP32 WROVER E with ST7789 display, and joystick instead of touchscreen"""
 
 from gpiojoystick import GPIOJoystick
+from machine import ADC, Pin
 from spibus import SPIBus
 from st7789 import ST7789
+
 from eventsys import devices
-from machine import ADC, Pin
 
 display_bus = SPIBus(
     id=1,
@@ -33,21 +34,16 @@ display_drv = ST7789(
 
 joystick_driver = GPIOJoystick(
     instance_id=1,
-    axes=[
-        ADC(Pin(39), atten=ADC.ATTN_11DB),
-        ADC(Pin(36), atten=ADC.ATTN_11DB)
-    ],
+    axes=[ADC(Pin(39), atten=ADC.ATTN_11DB), ADC(Pin(36), atten=ADC.ATTN_11DB)],
     buttons=[
         Pin(4, Pin.IN, Pin.PULL_UP),
         Pin(25, Pin.IN, Pin.PULL_UP),
-        Pin(26, Pin.IN, Pin.PULL_UP)
+        Pin(26, Pin.IN, Pin.PULL_UP),
     ],
 )
 
 broker = devices.Broker()
 
 joystick_dev = broker.create_device(
-    type=devices.types.JOYSTICK,
-    joystick_driver=joystick_driver,
-    emulate_digital=[(0,1)]
+    type=devices.types.JOYSTICK, joystick_driver=joystick_driver, emulate_digital=[(0, 1)]
 )

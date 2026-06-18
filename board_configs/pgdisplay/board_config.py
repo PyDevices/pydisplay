@@ -2,10 +2,11 @@
 Board configuration for PyGame.
 """
 
-from displaysys.pgdisplay import PGDisplay as DTDisplay, poll
-from eventsys import devices
 import sys
 
+from displaysys.pgdisplay import PGDisplay as DTDisplay
+from displaysys.pgdisplay import poll
+from eventsys import devices
 
 width = 320
 height = 480

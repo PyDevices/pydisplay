@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
+from contextlib import suppress
+
 try:
     from micropython import const, schedule
 except ImportError:
@@ -91,10 +93,8 @@ class _TimerBase:
             return
 
         self._busy = True
-        try:
+        with suppress(RuntimeError):  # MicroPython: schedule queue may be full
             schedule(self._callback, 0)
-        except RuntimeError:  # MicroPython raises RuntimeError if the schedule queue is full
-            pass
         self._busy = False
 
         if self._mode == self.ONE_SHOT:

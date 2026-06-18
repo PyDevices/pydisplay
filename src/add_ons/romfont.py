@@ -2,7 +2,7 @@
 Read a raw binary font file and creates a Framebuffer font object.
 """
 
-from graphics import Area, FrameBuffer, MONO_HLSB, RGB565
+from graphics import MONO_HLSB, RGB565, Area, FrameBuffer
 
 
 class ROMFont:

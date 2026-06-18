@@ -1,11 +1,11 @@
 """BPI-Centi-S3 170x320 ST7789 display"""
 
 from i80bus import I80Bus
-from st7789 import ST7789
 from machine import Pin
 from rotary_irq_esp import RotaryIRQ
-from eventsys import devices
+from st7789 import ST7789
 
+from eventsys import devices
 
 display_rd_pin = Pin(7, Pin.OUT, value=1)
 

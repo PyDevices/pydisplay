@@ -35,6 +35,8 @@ class Area:
         __str__(): Returns a string representation of the Area object.
     """
 
+    __hash__ = None
+
     def __init__(self, x, y=None, w=None, h=None):
         """
         Initializes a new instance of the Area class.
@@ -100,9 +102,7 @@ class Area:
         """
         if self.x + self.w <= other.x or other.x + other.w <= self.x:
             return False
-        if self.y + self.h <= other.y or other.y + other.h <= self.y:
-            return False
-        return True
+        return not (self.y + self.h <= other.y or other.y + other.h <= self.y)
 
     def touches_or_intersects(self, other):
         """
@@ -116,9 +116,7 @@ class Area:
         """
         if self.x + self.w < other.x or other.x + other.w < self.x:
             return False
-        if self.y + self.h < other.y or other.y + other.h < self.y:
-            return False
-        return True
+        return not (self.y + self.h < other.y or other.y + other.h < self.y)
 
     def shift(self, dx=0, dy=0):
         """

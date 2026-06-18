@@ -1,11 +1,11 @@
 """Wokwi ESP32S3 and ILI9341 Touchscreen Display"""
 
-from spibus import SPIBus
-from ili9341 import ILI9341
-from machine import Pin, I2C
 from ft6x36 import FT6x36
-from eventsys import devices
+from ili9341 import ILI9341
+from machine import I2C, Pin
+from spibus import SPIBus
 
+from eventsys import devices
 
 display_bus = SPIBus(
     id=1,

@@ -1,11 +1,11 @@
 """T-Embed ST7789 display with encoder"""
 
-from spibus import SPIBus
-from st7789 import ST7789
 from machine import Pin
 from rotary_irq_esp import RotaryIRQ
-from eventsys import devices
+from spibus import SPIBus
+from st7789 import ST7789
 
+from eventsys import devices
 
 display_bus = SPIBus(
     id=1,

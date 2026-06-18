@@ -1,6 +1,6 @@
 import time as _time
-from micropython import const
 
+from micropython import const
 
 _FT6x36_ADDR = const(0x38)
 
@@ -82,20 +82,14 @@ class FT6x36:
         * ``GESTURE_ZOOM_OUT``: Zoom Out
         """
         gesture = self._i2c.readfrom_mem(self._address, _GEST_ID_REG, 1)[0]
-        if 0x10 == gesture:
-            return GESTURE_MOVE_UP
-        elif 0x14 == gesture:
-            return GESTURE_MOVE_RIGHT
-        elif 0x18 == gesture:
-            return GESTURE_MOVE_DOWN
-        elif 0x1C == gesture:
-            return GESTURE_MOVE_LEFT
-        elif 0x48 == gesture:
-            return GESTURE_ZOOM_IN
-        elif 0x49 == gesture:
-            return GESTURE_ZOOM_OUT
-        else:
-            return GESTURE_NO_GESTRUE
+        return {
+            0x10: GESTURE_MOVE_UP,
+            0x14: GESTURE_MOVE_RIGHT,
+            0x18: GESTURE_MOVE_DOWN,
+            0x1C: GESTURE_MOVE_LEFT,
+            0x48: GESTURE_ZOOM_IN,
+            0x49: GESTURE_ZOOM_OUT,
+        }.get(gesture, GESTURE_NO_GESTRUE)
 
     def get_positions(self) -> list:
         positions = []

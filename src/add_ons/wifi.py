@@ -6,8 +6,9 @@ Usage:
     wifi.radio.connect('ssid', 'password')
 """
 
-import network
 from time import sleep_ms
+
+import network
 
 _retries = 50
 

@@ -7,11 +7,13 @@
 An Event System including event types and device types for *Python.
 """
 
-from micropython import const
 from collections import namedtuple
+from typing import Optional
+
+from micropython import const
 
 
-def custom_type(types: dict[str, int]={}, classes: dict[str, str]={}):
+def custom_type(types: Optional[dict[str, int]] = None, classes: Optional[dict[str, str]] = None):
     """
     Create new event types and classes for the events class.
 
@@ -31,6 +33,10 @@ def custom_type(types: dict[str, int]={}, classes: dict[str, str]={}):
         types (dict[str, int]): Dictionary of event types and values.
         classes (dict[str, str]): Dictionary of event classes and fields.
     """
+    if classes is None:
+        classes = {}
+    if types is None:
+        types = {}
     for type_name, value in types.items():
         type_name = type_name.upper()
         if hasattr(events, type_name):
@@ -51,6 +57,7 @@ def custom_type(types: dict[str, int]={}, classes: dict[str, str]={}):
                 event_class_name,
                 namedtuple(event_class_name, event_class_fields),  # noqa: PYI024
             )
+
 
 class events:
     """

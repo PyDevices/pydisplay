@@ -20,6 +20,7 @@ object has these methods.
 """
 
 import math
+
 from ._area import Area
 
 
@@ -525,10 +526,7 @@ def line(canvas, x0, y0, x1, y1, c):
     dy = abs(y1 - y0)
     err = dx // 2
     ystep = 0
-    if y0 < y1:
-        ystep = 1
-    else:
-        ystep = -1
+    ystep = 1 if y0 < y1 else -1
     while x0 <= x1:
         if steep:
             pixel(canvas, y0, x0, c)
@@ -855,10 +853,7 @@ def _fill_triangle(canvas, x0, y0, x1, y1, x2, y2, c):
     sa = 0
     sb = 0
     y = y0
-    if y0 == y1:
-        last = y1 - 1
-    else:
-        last = y1
+    last = y1 - 1 if y0 == y1 else y1
     while y <= last:
         a = x0 + sa // dy01
         b = x0 + sb // dy02

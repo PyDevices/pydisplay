@@ -4,23 +4,23 @@ in CPython and CircuitPython.
 """
 
 from graphics._framebuf import (
-    FrameBuffer,
-    MONO_VLSB,
-    MONO_HLSB,
-    MONO_HMSB,
     GS2_HMSB,
     GS4_HMSB,
     GS8,
+    MONO_HLSB,
+    MONO_HMSB,
+    MONO_VLSB,
     RGB565,
+    FrameBuffer,
 )
 
 __all__ = [
-    "FrameBuffer",
-    "MONO_VLSB",
-    "MONO_HLSB",
-    "MONO_HMSB",
     "GS2_HMSB",
     "GS4_HMSB",
     "GS8",
+    "MONO_HLSB",
+    "MONO_HMSB",
+    "MONO_VLSB",
     "RGB565",
+    "FrameBuffer",
 ]

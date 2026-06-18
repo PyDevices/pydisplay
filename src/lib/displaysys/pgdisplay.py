@@ -6,13 +6,14 @@
 displaysys.pgdisplay
 """
 
-from displaysys import DisplayDriver, color_rgb
+import contextlib
+
 import pygame as pg
 
-try:
+from displaysys import DisplayDriver, color_rgb
+
+with contextlib.suppress(ImportError):
     from typing import Optional
-except ImportError:
-    pass
 
 
 def poll() -> Optional[pg.event.Event]:
@@ -23,6 +24,7 @@ def poll() -> Optional[pg.event.Event]:
         Optional[pg.event.Event | False]: The event type and data.
     """
     return pg.event.poll()
+
 
 def get() -> [pg.event.Event]:
     """
@@ -217,10 +219,7 @@ class PGDisplay(DisplayDriver):
             renderRect (Optional[pg.Rect], optional): The rectangle to render. Defaults to None.
         """
         s = self._scale
-        if s != 1:
-            buffer = pg.transform.scale_by(self._buffer, s)
-        else:
-            buffer = self._buffer
+        buffer = pg.transform.scale_by(self._buffer, s) if s != 1 else self._buffer
         if not (y_start := self.vscsad()):
             if renderRect is not None:
                 x, y, w, h = renderRect

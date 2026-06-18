@@ -6,6 +6,7 @@ Inspired by https://github.com/rdagger/micropython-ili9341
 """
 
 from time import sleep
+
 from micropython import const
 
 

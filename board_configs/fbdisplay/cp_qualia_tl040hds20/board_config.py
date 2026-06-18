@@ -1,16 +1,15 @@
 """Qualia S3 RGB-666 with TL040HDS20 4.0" 720x720 Square Display"""
 # Similar configs may be available for RGBMatrix, is31fl3741 and picodvi
 
+import adafruit_focaltouch
+import board
+import busio
+from displayio import release_displays
 import dotclockframebuffer
 from framebufferio import FramebufferDisplay
-from displayio import release_displays
-import busio
-import board
 
 from displaysys.fbdisplay import FBDisplay
-import adafruit_focaltouch
 from eventsys import devices
-
 
 # This first part is particular to CircuitPython-based framebuffer-based displays
 

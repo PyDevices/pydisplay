@@ -5,7 +5,6 @@ Board configuration for Jupyter Notebook.
 from displaysys.jndisplay import JNDisplay
 from eventsys import devices
 
-
 width = 320
 height = 480
 

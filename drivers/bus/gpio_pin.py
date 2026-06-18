@@ -2,9 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-from machine import Pin as _Pin
-from sys import platform, implementation
+from sys import implementation, platform
 
+from machine import Pin as _Pin
 
 if platform == "pyboard":
     import stm
@@ -143,7 +143,7 @@ def _init_module():
             GPIO_Pin._gpios = gpios  # Set the GPIOs and break
             break
     if GPIO_Pin._gpios is None:  # If the GPIOs are not set
-        if "*" in data["gpios"].keys():  # If there is a wildcard
+        if "*" in data["gpios"]:  # If there is a wildcard
             GPIO_Pin._gpios = data["gpios"]["*"]  # Set the GPIOs to the wildcard
         else:
             raise NotImplementedError(
