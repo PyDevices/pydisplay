@@ -28,7 +28,6 @@
 from __future__ import print_function
 
 from collections import namedtuple
-import contextlib
 import os
 import sys
 import tempfile
@@ -575,20 +574,30 @@ class ManifestFile:
 
 
 # Generate a temporary file with a line appended to the end that adds __version__.
-@contextlib.contextmanager
-def tagged_py_file(path, metadata):
-    dest_fd, dest_path = tempfile.mkstemp(suffix=".py", text=True)
-    try:
-        with os.fdopen(dest_fd, "w") as dest, open(path, "r") as src:
-            contents = src.read()
-            dest.write(contents)
+class tagged_py_file:
+    def __init__(self, path, metadata):
+        self._path = path
+        self._metadata = metadata
+        self._dest_path = None
 
-            # Don't overwrite a version definition if the file already has one in it.
-            if metadata.version and "__version__ =" not in contents:
-                dest.write("\n\n__version__ = {}\n".format(repr(metadata.version)))
-        yield dest_path
-    finally:
-        os.unlink(dest_path)
+    def __enter__(self):
+        dest_fd, self._dest_path = tempfile.mkstemp(suffix=".py", text=True)
+        try:
+            with os.fdopen(dest_fd, "w") as dest, open(self._path, "r") as src:
+                contents = src.read()
+                dest.write(contents)
+
+                # Don't overwrite a version definition if the file already has one in it.
+                if self._metadata.version and "__version__ =" not in contents:
+                    dest.write("\n\n__version__ = {}\n".format(repr(self._metadata.version)))
+        except Exception:
+            os.unlink(self._dest_path)
+            raise
+        return self._dest_path
+
+    def __exit__(self, exc_type, exc, tb):
+        os.unlink(self._dest_path)
+        return False
 
 
 def main():

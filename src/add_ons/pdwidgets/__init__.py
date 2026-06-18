@@ -33,7 +33,6 @@ Functions:
     init_timer: Initializes the timer to call the tick function at regular intervals.
 """
 
-import contextlib
 from random import getrandbits  # for MARK_UPDATES
 from time import localtime  # for DigitalClock
 
@@ -617,8 +616,10 @@ class Display(Widget):
     def quit(self):
         Display.displays.remove(self)
         if Display.timer and not Display.displays:
-            with contextlib.suppress(Exception):
+            try:
                 Display.timer.deinit()
+            except Exception:
+                pass
         # display_drv.quit() releases SDL resources, restores the TTY, and
         # performs a low-level process exit.  sys.exit() raised from a timer or
         # micropython.schedule callback is printed and swallowed on the unix port.

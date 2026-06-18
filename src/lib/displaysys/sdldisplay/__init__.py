@@ -6,7 +6,6 @@
 displaysys.sdldisplay
 """
 
-import contextlib
 from sys import implementation
 
 from displaysys import DisplayDriver, color_rgb
@@ -57,9 +56,6 @@ from ._sdl2_lib import (
     SDL_SetWindowSize,
     SDL_UpdateTexture,
 )
-
-with contextlib.suppress(ImportError):
-    from typing import Optional
 
 if implementation.name == "cpython":
     import ctypes
@@ -132,7 +128,7 @@ def _ensure_tty_sane() -> None:
 _event = SDL_Event()
 
 
-def poll() -> Optional[events]:
+def poll():
     """
     Polls for an event and returns the event type and data.
 
@@ -423,7 +419,7 @@ class SDLDisplay(DisplayDriver):
         super().vscrdef(tfa, vsa, bfa)
         self.render()
 
-    def vscsad(self, vssa: Optional[int] = None) -> int:
+    def vscsad(self, vssa=None) -> int:
         """
         Set or get the vertical scroll start address.
 
@@ -491,7 +487,7 @@ class SDLDisplay(DisplayDriver):
 
     ############### Class Specific Methods ##############
 
-    def render(self, renderRect: Optional[SDL_Rect] = None):
+    def render(self, renderRect=None):
         """
         Render the display.  Automatically called after blitting or filling the display.
 

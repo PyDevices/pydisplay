@@ -12,7 +12,6 @@ import micropython
 from rp2 import PIO, StateMachine, asm_pio
 
 from . import I80Bus as _I80Bus
-from . import Optional
 
 # workaround Ruff errors for PIO statements
 if 0:
@@ -113,7 +112,7 @@ class I80Bus(_I80Bus):
             self._write(data, len(data))
 
     @micropython.native
-    def tx_param(self, cmd: int, data: Optional[memoryview] = None) -> None:
+    def tx_param(self, cmd: int, data=None) -> None:
         """
         Transmit parameters over the bus.
         """

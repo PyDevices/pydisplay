@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MIT
 """Thread-based software Timer for MicroPython-Unix (and CPython), signal-free."""
 
-import contextlib
 import time
 
 from ._timerbase import _TimerBase
@@ -63,8 +62,10 @@ class Timer(_TimerBase):
             if not self._running:
                 break
             self._busy = True
-            with contextlib.suppress(Exception):
+            try:
                 self._callback(self)
+            except Exception:
+                pass
             self._busy = False
             if self._mode == self.ONE_SHOT:
                 self._running = False

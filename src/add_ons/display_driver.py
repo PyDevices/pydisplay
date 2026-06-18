@@ -7,7 +7,6 @@ display_driver.py - LVGL driver configuration for pydisplay.  Requires a valid
 board_config.py to be in a directory on the micropython path.
 """
 
-import contextlib
 import gc
 import sys
 
@@ -68,12 +67,16 @@ def shutdown(code=0, exit_process=False):
     _shutdown_done = True
 
     if lv_utils.event_loop.is_running():
-        with contextlib.suppress(Exception):
+        try:
             lv_utils.event_loop.current_instance().deinit()
+        except Exception:
+            pass
 
     if _lvgl_driver is not None:
-        with contextlib.suppress(Exception):
+        try:
             _lvgl_driver.lv_display.set_flush_cb(None)
+        except Exception:
+            pass
         _lvgl_driver = None
 
     try:
@@ -83,8 +86,10 @@ def shutdown(code=0, exit_process=False):
         pass
 
     if _uses_sdl_run_loop():
-        with contextlib.suppress(Exception):
+        try:
             display_drv.deinit()
+        except Exception:
+            pass
         try:
             from displaysys.sdldisplay import _ensure_tty_sane
 

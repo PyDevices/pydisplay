@@ -6,17 +6,12 @@
 displaysys.pgdisplay
 """
 
-import contextlib
-
 import pygame as pg
 
 from displaysys import DisplayDriver, color_rgb
 
-with contextlib.suppress(ImportError):
-    from typing import Optional
 
-
-def poll() -> Optional[pg.event.Event]:
+def poll():
     """
     Polls for an event and returns the event type and data.
 
@@ -186,7 +181,7 @@ class PGDisplay(DisplayDriver):
         super().vscrdef(tfa, vsa, bfa)
         self.render()
 
-    def vscsad(self, vssa: Optional[int] = None) -> int:
+    def vscsad(self, vssa=None) -> int:
         """
         Set the vertical scroll start address.
 
@@ -211,7 +206,7 @@ class PGDisplay(DisplayDriver):
 
     ############### Class Specific Methods ##############
 
-    def render(self, renderRect: Optional[pg.Rect] = None) -> None:
+    def render(self, renderRect=None) -> None:
         """
         Render the display.  Automatically called after blitting or filling the display.
 

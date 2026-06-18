@@ -6,7 +6,6 @@
 displaysys.busdisplay
 """
 
-import contextlib
 import gc
 import struct
 import sys
@@ -14,9 +13,6 @@ import sys
 from micropython import const
 
 from displaysys import DisplayDriver
-
-with contextlib.suppress(ImportError):
-    from typing import Optional
 
 if sys.implementation.name == "micropython":
     from time import sleep_ms
@@ -356,7 +352,7 @@ class BusDisplay(DisplayDriver):
         super().vscrdef(tfa, vsa, bfa)
         self.send(_VSCRDEF, struct.pack(">HHH", tfa, vsa, bfa))
 
-    def vscsad(self, vssa: Optional[int] = None) -> int:
+    def vscsad(self, vssa=None) -> int:
         """
         Set the vertical scroll start address.
 

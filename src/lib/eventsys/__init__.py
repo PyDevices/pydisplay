@@ -8,12 +8,11 @@ An Event System including event types and device types for *Python.
 """
 
 from collections import namedtuple
-from typing import Optional
 
 from micropython import const
 
 
-def custom_type(types: Optional[dict[str, int]] = None, classes: Optional[dict[str, str]] = None):
+def custom_type(types=None, classes=None):
     """
     Create new event types and classes for the events class.
 

@@ -37,15 +37,10 @@ Implementation Notes
 __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_FocalTouch.git"
 
-import contextlib
 import struct
 
 from adafruit_bus_device.i2c_device import I2CDevice
 from micropython import const
-
-with contextlib.suppress(ImportError):
-    from typing import List
-
 
 _FT_DEFAULT_I2C_ADDR = 0x38
 
@@ -116,7 +111,7 @@ class Adafruit_FocalTouch:
 
     # pylint: disable=unused-variable
     @property
-    def touches(self) -> List[dict]:
+    def touches(self):
         """
         Returns a list of touchpoint dicts, with 'x' and 'y' containing the
         touch coordinates, and 'id' as the touch # for multitouch tracking

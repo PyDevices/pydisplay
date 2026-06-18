@@ -32,7 +32,6 @@ Devices can be created with the following types:
 """
 
 from sys import exit
-from typing import Optional
 
 from micropython import const
 
@@ -723,7 +722,7 @@ class JoystickDevice(Device):
         self,
         *args,
         joystick_driver: JoystickDriver,
-        emulate_digital: Optional[list[int, int]] = None,
+        emulate_digital=None,
         digital_threshold: float = 0.5,
         **kwargs,
     ):

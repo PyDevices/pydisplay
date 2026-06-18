@@ -3,16 +3,11 @@
 spibus
 """
 
-import contextlib
 import struct
 
 from machine import SPI, Pin
 import micropython
 from micropython import const
-
-with contextlib.suppress(ImportError):
-    from typing import Optional, Union
-
 
 DC_CMD = const(0)
 DC_DATA = const(1)
@@ -90,9 +85,7 @@ class SPIBus:
 
         # DC and CS pins must be set AFTER the SPI bus is initialized on some boards
         self._dc: Pin = Pin(dc, Pin.OUT, value=DC_DATA)
-        self._cs: Union[Pin, callable] = (
-            Pin(cs, Pin.OUT, value=CS_INACTIVE) if cs != -1 else lambda val: None
-        )
+        self._cs = Pin(cs, Pin.OUT, value=CS_INACTIVE) if cs != -1 else lambda val: None
 
         self._buf1: bytearray = bytearray(1)
         print("SPIBus loaded")
@@ -100,8 +93,8 @@ class SPIBus:
     @micropython.native
     def send(
         self,
-        command: Optional[int] = None,
-        data: Optional[memoryview] = None,
+        command=None,
+        data=None,
     ) -> None:
         """
         Sends a command and/or data over the SPI bus.

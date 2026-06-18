@@ -80,6 +80,8 @@ lint.ignore = [
   "RUF012",
   "RUF100",
   "SIM101",
+  "SIM105",  # contextlib.suppress is not available on MicroPython
+  "TCH",     # typing module is not available on MicroPython
   "W191",  # tab-indent, redundant when using formatter
 ]
 line-length = 99

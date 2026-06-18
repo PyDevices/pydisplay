@@ -1,5 +1,3 @@
-from typing import Optional
-
 from machine import ADC, Pin
 
 from eventsys.joystick import JoystickDriver
@@ -21,9 +19,9 @@ class GPIOJoystick(JoystickDriver):
         self,
         instance_id: int,
         axes: list[ADC],
-        buttons: Optional[list[Pin]] = None,
+        buttons=None,
         button_high: bool = False,
-        hats: Optional[list[Pin, Pin, Pin, Pin]] = None,
+        hats=None,
     ):
         if hats is None:
             hats = []

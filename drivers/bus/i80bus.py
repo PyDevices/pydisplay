@@ -6,15 +6,11 @@ i80bus
 """
 
 from array import array
-import contextlib
 import struct
 
 import micropython
 from micropython import const
 from uctypes import addressof
-
-with contextlib.suppress(ImportError):
-    from typing import Optional
 
 # _I80BaseBus will work with either Pin class, but I80Bus will only work with GPIO_Pin
 try:
@@ -82,7 +78,7 @@ class _I80BaseBus:
         print("I80Bus loaded")
 
     @micropython.native
-    def send(self, command: Optional[int] = None, data: Optional[memoryview] = None) -> None:
+    def send(self, command=None, data=None) -> None:
         """
         Sends a command and/or data to the device.
         Args:
