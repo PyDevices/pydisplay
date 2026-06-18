@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="mini-coi.js"></script>
+        <title>Test</title>
+        <script type="module" src="https://pyscript.net/releases/2024.8.2/core.js"></script>
+    </head>
+    <body>
+        <script type="mpy" config="./pyscript.toml" id="main" terminal worker>
+            from pyscript import document
+            term = document.querySelector('script[terminal]').terminal
+            term.resize(80, 24)
+
+            import mip
+            mip.install("github:PyDevices/pydisplay/packages/examples.json", target="examples")
+            import lib.path
+
+            import os
+            from pyscript.ffi import create_proxy
+
+            output = document.getElementById('examples_list')
+            module = None
+
+            def click_handler(e):
+                global module
+                if module and hasattr(module, "task"):
+                    result = module.task.close()
+                    print(f"Task closed: {result=}")
+                file = e.target.id.split('.')[0]
+                output.style.display = 'none'
+                module = __import__(file)
+                # print(f"Loaded {file=} ({dir(module)=})")
+                if hasattr(module, "task"):
+                    if module.task.done():
+                        module.task = module.loop.create_task(module.main())
+                else:
+                    # print(f"No task found in {file=}")
+                    pass
+
+            click_proxy = create_proxy(click_handler)
+
+            for file in os.listdir("/examples"):
+                if file.endswith('.py'):
+                    new_btn = document.createElement('button')
+                    new_btn.id = file
+                    new_btn.textContent = file
+                    output.appendChild(new_btn)
+                    new_btn.addEventListener("click", click_proxy)
+
+            import code
+            code.interact(local=globals())
+        </script>
+        <div id="examples_list"></div>
+        <canvas id="display_canvas" width="1" height="1" style="background-color: black; border:2px solid black;"></canvas>
+    </body>
+</html>

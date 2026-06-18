@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Calculator</title>
+        <script type="module" src="https://pyscript.net/releases/2024.8.2/core.js"></script>
+    </head>
+    <body>
+        <div>Script:
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            const scriptParam = urlParams.get('script');
+            document.body.insertAdjacentHTML('beforeend', `<p name="scriptName">${scriptParam}</p>`);
+        </script>
+        </div>
+        <canvas id="display_canvas" width="1" height="1" style="background-color: black; border:2px solid black;"></canvas>
+        <script type="mpy" config="./pyscript.toml">
+            import mip
+            from js import document
+            script_name_element = document.querySelector('p[name="scriptName"]')
+            script_name = script_name_element.textContent
+            mip.install("github:PyDevices/pydisplay/src/examples/" + script_name + ".py")
+
+            import lib.path
+            exec(f"import {script_name}")
+        </script>
+    </body>
+</html>

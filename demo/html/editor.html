@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="mini-coi.js"></script>
+        <title>Editor</title>
+        <script type="module" src="https://pyscript.net/releases/2024.8.2/core.js"></script>
+    </head>
+    <body>
+        <canvas id="display_canvas" width="1" height="1" style="background-color: black; border:2px solid black;"></canvas>
+        <script type="mpy-editor" config="./pyscript.toml">
+            import mip
+            mip.install("github:PyDevices/pydisplay/src/examples/paint.py")
+
+            import lib.path
+            import paint
+        </script>
+    </body>
+</html>
