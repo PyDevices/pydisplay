@@ -13,7 +13,7 @@ Runnable projects live under [`wokwi/`](https://github.com/PyDevices/pydisplay/t
 
 Each folder contains `main.py`, `diagram.json`, and `wokwi.toml`. See [`wokwi/README.md`](https://github.com/PyDevices/pydisplay/blob/main/wokwi/README.md) for setup on [wokwi.com](https://wokwi.com) and VS Code.
 
-**Quick start (browser):** create a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micro-python-esp32-s3), paste in `wokwi/minimum/main.py` and `diagram.json`, and run.
+**Quick start (browser):** create a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3), paste in `wokwi/minimum/main.py` and `diagram.json`, and run.
 
 ## Hosted projects (legacy)
 

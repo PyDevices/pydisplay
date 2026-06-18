@@ -11,7 +11,7 @@ Board config (both projects): [`board_configs/busdisplay/spi/wokwi_ili9341_ft6x3
 
 ## Wokwi.com (browser)
 
-1. Open [New ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micro-python-esp32-s3).
+1. Open [New ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3).
 2. Replace **diagram.json** and **main.py** with the files from `minimum/` or `esp32-s3-full/` in this repo ([GitHub browse](https://github.com/PyDevices/pydisplay/tree/main/wokwi)).
 3. Start the simulation. The sketch needs network access to download packages via `mip`.
 

@@ -10,4 +10,4 @@ Installs core packages and runs `hello.py`.
 
 ## Quick test on wokwi.com
 
-Copy `main.py` and `diagram.json` into a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micro-python-esp32-s3) and start the simulation.
+Copy `main.py` and `diagram.json` into a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3) and start the simulation.

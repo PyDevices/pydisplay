@@ -16,4 +16,4 @@ Update the filename in each project's `wokwi.toml` if you use a different versio
 
 ## Wokwi.com
 
-Browser simulations on [wokwi.com](https://wokwi.com) use built-in MicroPython firmware — you only need `main.py` and `diagram.json` from the project folder.
+Browser simulations on [wokwi.com](https://wokwi.com) use built-in MicroPython firmware — you only need `main.py` and `diagram.json` from the project folder. New project: [micropython-esp32-s3](https://wokwi.com/projects/new/micropython-esp32-s3).
