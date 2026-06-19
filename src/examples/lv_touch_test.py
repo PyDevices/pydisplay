@@ -49,6 +49,3 @@ for alignment in alignments:
     label = lv.label(btn)
     label.set_text(f"Btn{i}")
     label.center()
-
-lv.refr_now(display_driver._lvgl_driver.lv_display)
-display_driver.run()

@@ -300,9 +300,7 @@ class SDLDisplay(DisplayDriver):
             raise RuntimeError(f"{SDL_GetError()}")
         retcheck(SDL_SetTextureBlendMode(self._buffer, SDL_BLENDMODE_NONE))
 
-        # SDL rendering must happen on one thread; present with each render() instead
-        # of using a separate auto-refresh timer thread.
-        super().__init__(auto_refresh=False)
+        super().__init__(auto_refresh=True)
 
     ############### Required API Methods ################
 
@@ -517,8 +515,6 @@ class SDLDisplay(DisplayDriver):
             bfaRect = SDL_Rect(0, self._tfa + self._vsa, self.width, self._bfa)
             retcheck(SDL_RenderCopy(self._renderer, self._buffer, bfaRect, bfaRect))
 
-        self.show()
-
     def show(self) -> None:
         """
         Show the display.
@@ -527,7 +523,7 @@ class SDLDisplay(DisplayDriver):
 
     def deinit(self) -> None:
         """
-        Deinitializes the sdl2lcd instance.  Idempotent and safe to call from
+        Deinitializes the SDLDisplay instance.  Idempotent and safe to call from
         the quit path.
         """
         if getattr(self, "_deinitialized", False):
@@ -552,17 +548,7 @@ class SDLDisplay(DisplayDriver):
     def quit(self, code: int = 0) -> None:
         """
         Release SDL resources and terminate the process.
-
-        Delegates to ``display_driver.shutdown`` when that module is loaded so
-        LVGL is torn down before SDL.  Falls back to ``deinit`` + hard exit.
         """
-        try:
-            import display_driver
-
-            display_driver.shutdown(code, exit_process=True)
-            return
-        except ImportError:
-            pass
         self.deinit()
         _ensure_tty_sane()
         try:

@@ -27,6 +27,8 @@ except ImportError:
 
 gc.collect()
 
+_DEFAULT_AUTO_REFRESH_PERIOD = 33
+
 
 def alloc_buffer(size):
     """
@@ -136,7 +138,9 @@ class DisplayDriver:
         self._auto_byteswap = self.requires_byteswap
         self._touch_device = None
         if auto_refresh:
-            period = 33 if isinstance(auto_refresh, bool) else auto_refresh
+            period = (
+                _DEFAULT_AUTO_REFRESH_PERIOD if isinstance(auto_refresh, bool) else auto_refresh
+            )
             try:
                 from multimer import get_timer
 

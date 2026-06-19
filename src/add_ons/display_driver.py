@@ -16,176 +16,21 @@ import lvgl as lv
 
 from eventsys import devices, events
 
-# Keep the LVGL display driver alive; flush_cb and draw buffers must not be GC'd.
-_lvgl_driver = None
-_shutdown_done = False
-
-
-def _hard_exit(code=0):
-    """Process exit that bypasses SystemExit swallowing on CP unix."""
-    try:
-        from displaysys.sdldisplay import _ensure_tty_sane
-
-        _ensure_tty_sane()
-    except Exception:
-        pass
-    try:
-        import usdl2
-
-        usdl2.process_exit(code)
-        return
-    except Exception:
-        pass
-    try:
-        import ffi
-
-        ffi.open("libc.so.6").func("v", "_exit", "i")(code)
-        return
-    except Exception:
-        pass
-    try:
-        import os
-
-        os._exit(code)
-    except Exception:
-        pass
-    raise SystemExit(code)
-
-
-def shutdown(code=0, exit_process=False):
-    """
-    Release LVGL and SDL resources.  Idempotent.
-
-    With exit_process=False (e.g. Ctrl+C), returns to the caller.
-    With exit_process=True (window close), terminates the process.
-    """
-    global _lvgl_driver, _shutdown_done
-    if _shutdown_done:
-        if exit_process:
-            _hard_exit(code)
-        return
-    _shutdown_done = True
-
-    if lv_utils.event_loop.is_running():
-        try:
-            lv_utils.event_loop.current_instance().deinit()
-        except Exception:
-            pass
-
-    if _lvgl_driver is not None:
-        try:
-            _lvgl_driver.lv_display.set_flush_cb(None)
-        except Exception:
-            pass
-        _lvgl_driver = None
-
-    try:
-        if lv.is_initialized():
-            lv.deinit()
-    except Exception:
-        pass
-
-    if _uses_sdl_run_loop():
-        try:
-            display_drv.deinit()
-        except Exception:
-            pass
-        try:
-            from displaysys.sdldisplay import _ensure_tty_sane
-
-            _ensure_tty_sane()
-        except Exception:
-            pass
-
-    if exit_process:
-        _hard_exit(code)
-
-
-def _broker_quit():
-    shutdown(0, exit_process=True)
-
-
-def _uses_sdl_run_loop():
-    """CircuitPython unix SDL uses blocking run(); MicroPython keeps lv_utils."""
-    return sys.implementation.name == "circuitpython" and type(display_drv).__module__.endswith(
-        "sdldisplay"
-    )
-
-
-def _cpython_sdl_desktop():
-    """CPython desktop using SDLDisplay (display_driver.run() pumps LVGL on main thread)."""
-    return sys.implementation.name == "cpython" and type(display_drv).__module__.endswith(
-        "sdldisplay"
-    )
-
 
 def main():
-    global _lvgl_driver
     gc.collect()
     if not lv.is_initialized():
         lv.init()
-    if (
-        not _uses_sdl_run_loop()
-        and not _cpython_sdl_desktop()
-        and not lv_utils.event_loop.is_running()
-    ):
+    if not lv_utils.event_loop.is_running():
         lv_utils.event_loop()
 
     if lv.group_get_default() is None:
         lv.group_create().set_default()
 
-    if _uses_sdl_run_loop():
-        broker.quit_func = _broker_quit
-
-    _lvgl_driver = DisplayDriver(
+    _dd = DisplayDriver(
         display_drv,
         broker.devices,
     )
-    lv.refr_now(_lvgl_driver.lv_display)
-
-
-def run(freq=30):
-    """
-    Block on the main thread, pumping SDL input and running LVGL.
-
-    Required on desktop SDL (CircuitPython unix / MicroPython unix) where input
-    and rendering must stay on the thread that initialized the video subsystem.
-    """
-    if not (_uses_sdl_run_loop() or _cpython_sdl_desktop()):
-        raise RuntimeError("display_driver.run() requires displaysys.sdldisplay")
-    if _lvgl_driver is None:
-        main()
-
-    delay = 1000 // freq
-    try:
-        from time import sleep_ms
-    except ImportError:
-        from time import sleep
-
-        def sleep_ms(ms):
-            sleep(ms / 1000)
-
-    try:
-        while True:
-            try:
-                from multimer import poll as _multimer_poll
-
-                if _multimer_poll is not None:
-                    _multimer_poll()
-            except ImportError:
-                pass
-            lv.tick_inc(delay)
-            if lv._nesting.value == 0:
-                lv.task_handler()  # polls SDL input via VirtualDevices during read_cb
-            sleep_ms(delay)
-    except KeyboardInterrupt:
-        shutdown(0, exit_process=True)
-
-
-def refresh():
-    """Force LVGL to flush the current UI to the display."""
-    if _lvgl_driver is not None:
-        lv.refr_now(_lvgl_driver.lv_display)
 
 
 class _TouchState:
@@ -291,19 +136,15 @@ class DisplayDriver:
         )
 
         self.lv_display = lv.display_create(display_drv.width, display_drv.height)
-        self._lv_display = self.lv_display
-        self._lv_display.set_flush_cb(self._flush_cb)
-        self._lv_display.set_color_format(color_format)
+        self.lv_display.set_flush_cb(self._flush_cb)
+        self.lv_display.set_color_format(color_format)
         if not self._blocking:
-            display_drv.display_bus.register_callback(self._lv_display.flush_ready)
-        self._lv_display.set_draw_buffers(self._draw_buf1, self._draw_buf2)
-        self._lv_display.set_render_mode(lv.DISPLAY_RENDER_MODE.PARTIAL)
-        create_devices(devs, self._lv_display)
+            display_drv.display_bus.register_callback(self.lv_display.flush_ready)
+        self.lv_display.set_draw_buffers(self._draw_buf1, self._draw_buf2)
+        self.lv_display.set_render_mode(lv.DISPLAY_RENDER_MODE.PARTIAL)
+        create_devices(devs, self.lv_display)
 
     def _flush_cb(self, disp_drv, area, color_p):
-        if _shutdown_done:
-            self._lv_display.flush_ready()
-            return
         width = area.x2 - area.x1 + 1
         height = area.y2 - area.y1 + 1
 
@@ -317,7 +158,7 @@ class DisplayDriver:
         data = color_p.__dereference__(width * height * self._color_size)
         display_drv.blit_rect(data, area.x1, area.y1, width, height)
         if self._blocking:
-            self._lv_display.flush_ready()
+            self.lv_display.flush_ready()
 
 
 main()
