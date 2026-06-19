@@ -123,7 +123,7 @@ Running `./tools/regenerate.sh --audit` before regeneration showed the committed
 | `add_ons` | `joystick_keypad.py` | `src/add_ons/joystick_keypad.py` |
 | `displaysys` | `displaysys/sdldisplay/_sdl2_lib/_circuitpython.py` | `src/lib/displaysys/sdldisplay/_sdl2_lib/_circuitpython.py` |
 | `examples` | `joystick_list_select.py` | `src/examples/joystick_list_select.py` |
-| `multimer` | `multimer/_aio.py` | `src/lib/multimer/_aio.py` |
+| `multimer` | `multimer/_threading.py` | `src/lib/multimer/_threading.py` |
 | `pydisplay-bundle` | same entries under `add_ons/`, `lib/…` prefixes | (bundle composition) |
 
 `eventsys/joystick.py` was already present in `packages/eventsys.json` but had not been propagated into `pydisplay-bundle.json` / `html/pyscript.toml`.

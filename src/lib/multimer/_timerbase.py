@@ -3,14 +3,14 @@
 # SPDX-License-Identifier: MIT
 
 try:
-    from micropython import const, schedule
+    from micropython import const
 except ImportError:
 
     def const(x):
         return x
 
-    def schedule(cb, interval):
-        cb(interval)
+
+from ._schedule import REQUIRES_RUN_SCHEDULED, schedule
 
 
 class _TimerBase:
@@ -18,6 +18,8 @@ class _TimerBase:
     A class to create a timer with the same API and similar functionality to
     MicroPython's machine.Timer class.
     """
+
+    REQUIRES_RUN_SCHEDULED = REQUIRES_RUN_SCHEDULED
 
     PERIODIC = const(0)
     ONE_SHOT = const(1)

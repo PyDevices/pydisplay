@@ -97,7 +97,9 @@
 "../src/lib/graphics/_shapes.py" = "/lib/graphics/"
 
 "../src/lib/multimer/__init__.py" = "/lib/multimer/"
-"../src/lib/multimer/_aio.py" = "/lib/multimer/"
+"../src/lib/multimer/_schedule.py" = "/lib/multimer/"
+"../src/lib/multimer/_ticks.py" = "/lib/multimer/"
+"../src/lib/multimer/_threading.py" = "/lib/multimer/"
 "../src/lib/multimer/_librt.py" = "/lib/multimer/"
 "../src/lib/multimer/_sdl2.py" = "/lib/multimer/"
 "../src/lib/multimer/_timerbase.py" = "/lib/multimer/"
