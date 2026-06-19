@@ -12,7 +12,9 @@ Evaluate pydisplay without installing anything on your machine.
 
 ## PyScript (browser)
 
-**URL:** [PyDevices.github.io/pydisplay/demo/](https://PyDevices.github.io/pydisplay/demo/)
+### Live demo (online)
+
+**Hub:** [PyDevices.github.io/pydisplay/demo/](https://PyDevices.github.io/pydisplay/demo/)
 
 | Link | Description |
 |------|-------------|
@@ -20,6 +22,12 @@ Evaluate pydisplay without installing anything on your machine.
 | [Test runner](https://PyDevices.github.io/pydisplay/demo/html/test.html) | Pick an example |
 | [REPL](https://PyDevices.github.io/pydisplay/demo/html/repl.html) | Interactive REPL + canvas |
 | [Editor](https://PyDevices.github.io/pydisplay/demo/html/editor.html) | mpy-editor with paint.py |
+
+### Run locally
+
+--8<-- "_snippets/pyscript-local.md"
+
+Full guide (asyncio porting, compatible examples, board config): [PyScript local development](../guides/pyscript.md).
 
 !!! note
     Most examples use blocking loops and **will not run** in PyScript until ported to asyncio. See [PyScript asyncio guide](../guides/pyscript-asyncio.md).
