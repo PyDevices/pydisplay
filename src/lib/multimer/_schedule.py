@@ -6,7 +6,7 @@
 import sys
 
 if sys.implementation.name in ("cpython", "circuitpython"):
-    REQUIRES_RUN_SCHEDULED = True
+    REQUIRES_RUN_QUEUED = True
     _MAX_PENDING = 8
 
     try:
@@ -85,7 +85,7 @@ if sys.implementation.name in ("cpython", "circuitpython"):
         except _QueueFull as err:
             raise RuntimeError("schedule queue full") from err
 
-    def run_scheduled(max_items=None):
+    def run_queued(max_items=None):
         n = 0
         while max_items is None or n < max_items:
             try:
@@ -97,7 +97,7 @@ if sys.implementation.name in ("cpython", "circuitpython"):
 else:
     from micropython import schedule
 
-    REQUIRES_RUN_SCHEDULED = False
+    REQUIRES_RUN_QUEUED = False
 
-    def run_scheduled(max_items=None):
+    def run_queued(max_items=None):
         pass

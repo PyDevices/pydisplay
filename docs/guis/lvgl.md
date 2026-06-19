@@ -46,7 +46,26 @@ Try displaysys + eventsys without LVGL first: [Wokwi minimum](../guides/wokwi.md
 
 ## Helper add-ons
 
-`src/add_ons/lv_utils.py` — LVGL event loop helper (requires `multimer`; uses `multimer.aio` for async mode).
+`src/add_ons/lv_utils.py` — LVGL event loop helper (requires `multimer`).
+
+Set **`TIMER_ASYNC`** in `board_config.py` to choose the timer backend:
+
+| `TIMER_ASYNC` | Use when |
+|---------------|----------|
+| `False` (default) | MCU, MicroPython unix, CPython Linux — default `multimer.Timer` |
+| `True` | PyScript and other asyncio-native apps — `multimer.aio.Timer` |
+
+[`display_driver`](../../src/add_ons/display_driver.py) passes this to `lv_utils.event_loop(asynchronous=TIMER_ASYNC)`.
+
+On CPython Win/mac (`TIMER_ASYNC = False`), call **`multimer.run_queued()`** from your main loop when using threaded timer backends — see [multimer](../concepts/multimer.md).
+
+Override before import:
+
+```python
+import board_config
+board_config.TIMER_ASYNC = True
+import display_driver
+```
 
 ## Next
 

@@ -10,7 +10,7 @@ except ImportError:
         return x
 
 
-from ._schedule import REQUIRES_RUN_SCHEDULED, schedule
+from ._schedule import REQUIRES_RUN_QUEUED, schedule
 
 
 class _TimerBase:
@@ -19,7 +19,7 @@ class _TimerBase:
     MicroPython's machine.Timer class.
     """
 
-    REQUIRES_RUN_SCHEDULED = REQUIRES_RUN_SCHEDULED
+    REQUIRES_RUN_QUEUED = REQUIRES_RUN_QUEUED
 
     PERIODIC = const(0)
     ONE_SHOT = const(1)

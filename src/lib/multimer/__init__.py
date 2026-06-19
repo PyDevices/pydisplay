@@ -11,7 +11,7 @@ Enables using 'from multimer import Timer' on MicroPython on microcontrollers,
 on MicroPython on Unix (which doesn't have a machine.Timer) and CPython (ditto).
 
 _ffi.py uses MicroPython ffi to connect to libc and librt.  CPython on Linux uses
-_ctypes.py (POSIX librt via ctypes; callbacks on the main thread without run_scheduled).
+_ctypes.py (POSIX librt via ctypes; callbacks on the main thread without run_queued).
 Other CPython ports use _threading.py (_sdl2.py if threading is unavailable).
 CircuitPython unix uses _threading.py.
 
@@ -19,21 +19,21 @@ Returns None if the platform is not supported rather than raising an ImportError
 the client can handle the error more gracefully (e.g. by using `if Timer is not None:`).
 
 Usage:
-    from multimer import Timer, schedule, run_scheduled, ticks_ms, ticks_diff
+    from multimer import Timer, schedule, run_queued, ticks_ms, ticks_diff
     tim = Timer()
     tim.init(mode=Timer.PERIODIC, period=500, callback=lambda t: print("."))
     ....
     tim.deinit()
 
-On CPython (non-Linux) and CircuitPython, call ``run_scheduled()`` from the main
-thread to drain scheduled callbacks (for example in an event loop).
+On CPython (non-Linux) and CircuitPython, call ``run_queued()`` from the main
+thread to drain queued callbacks (for example in an event loop).
 
 For asyncio-based apps, use ``multimer.aio`` — see ``docs/concepts/multimer.md``.
 """
 
 import sys
 
-from ._schedule import REQUIRES_RUN_SCHEDULED, run_scheduled, schedule
+from ._schedule import REQUIRES_RUN_QUEUED, run_queued, schedule
 from ._ticks import sleep_ms, ticks_add, ticks_diff, ticks_less, ticks_ms
 
 try:
@@ -57,29 +57,36 @@ except ImportError:
 _next_timer_id = 1
 
 
-def get_timer(callback, period=33, *, warn=True):
+def get_timer(callback, period=33, *, asynchronous=None, warn=True):
     """
     Creates and returns a timer to periodically call the callback function
 
     Args:
         callback (function): The function to call periodically
         period (int): The period in milliseconds, default is 33ms (30fps)
-        warn (bool): If True and this platform requires ``run_scheduled()``, print a
+        asynchronous (bool): If True, use ``multimer.aio.Timer``. If None or False,
+            use the default ``Timer`` loaded at import.
+        warn (bool): If True and this platform requires ``run_queued()``, print a
             reminder. Defaults to True.
     """
     global _next_timer_id
+    if asynchronous:
+        from multimer.aio import Timer as TimerCls
+    else:
+        TimerCls = Timer
+
     if sys.platform == "rp2":
         id = -1
     else:
         id = _next_timer_id
         _next_timer_id += 1
-    t = Timer(id)
+    t = TimerCls(id)
 
     def _timer_cb(_t):
         callback()
 
-    t.init(mode=Timer.PERIODIC, period=period, callback=_timer_cb)
+    t.init(mode=TimerCls.PERIODIC, period=period, callback=_timer_cb)
     print(f"Timer:  timer started ({id=}, {period=})")
-    if warn and getattr(Timer, "REQUIRES_RUN_SCHEDULED", False):
-        print("Timer:  callbacks require run_scheduled(); call it from your main loop")
+    if warn and getattr(TimerCls, "REQUIRES_RUN_QUEUED", False):
+        print("Timer:  callbacks require run_queued(); call it from your main loop")
     return t

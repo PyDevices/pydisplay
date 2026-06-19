@@ -6,6 +6,10 @@ board_config.py file that is specific to your hardware from:
 https://github.com/PyDevices/pydisplay/tree/main/board_configs
 """
 
+# False: default multimer.Timer (MCU, desktop Linux, etc.)
+# True: multimer.aio.Timer — PyScript and asyncio-native apps
+TIMER_ASYNC = False
+
 width = 1024
 height = 600
 rotation = 0
@@ -78,5 +82,8 @@ else:
         data=display_drv,
         # data2=events.filter,
     )
+
+if _ps:
+    TIMER_ASYNC = True
 
 display_drv.fill(0)

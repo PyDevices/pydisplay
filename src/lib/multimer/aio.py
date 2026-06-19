@@ -9,7 +9,7 @@ asyncio/uasyncio. See ``docs/concepts/multimer.md`` for full documentation.
 
 Quick start (helpers are optional)::
 
-    from multimer.aio import Timer, run_scheduled, run
+    from multimer.aio import Timer, run_queued, run
 
     async def main():
         t = Timer()
@@ -17,11 +17,11 @@ Quick start (helpers are optional)::
         while True:
             broker.poll()
             display.show()
-            await run_scheduled()  # or await asyncio.sleep(0)
+            await run_queued()  # or await asyncio.sleep(0)
 
     run(main)  # or asyncio.run(main())
 
-``run_scheduled`` and ``run`` are convenience wrappers only. Any ``await`` that
+``run_queued`` and ``run`` are convenience wrappers only. Any ``await`` that
 yields to the event loop is sufficient for timer callbacks to fire.
 """
 
@@ -46,11 +46,11 @@ async def _sleep_ms(ms):
         await asyncio.sleep(ms / 1000)
 
 
-async def run_scheduled():
+async def run_queued():
     """Yield to the event loop so asyncio timer tasks can run.
 
     Optional helper — equivalent to ``await asyncio.sleep(0)`` (or ``sleep_ms(0)``).
-    Not related to sync ``multimer.run_scheduled()`` from the top-level package.
+    Not related to sync ``multimer.run_queued()`` from the top-level package.
     """
     await _sleep_ms(0)
 
@@ -69,7 +69,7 @@ def run(main):
 class Timer(_TimerBase):
     """asyncio/uasyncio software Timer."""
 
-    REQUIRES_RUN_SCHEDULED = False
+    REQUIRES_RUN_QUEUED = False
 
     def __init__(self, id=-1, **kwargs):
         self._running = False

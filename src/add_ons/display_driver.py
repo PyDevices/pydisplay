@@ -11,6 +11,12 @@ import gc
 import sys
 
 from board_config import broker, display_drv
+
+try:
+    from board_config import TIMER_ASYNC
+except ImportError:
+    TIMER_ASYNC = False
+
 import lv_utils
 import lvgl as lv
 
@@ -22,7 +28,7 @@ def main():
     if not lv.is_initialized():
         lv.init()
     if not lv_utils.event_loop.is_running():
-        lv_utils.event_loop()
+        lv_utils.event_loop(asynchronous=TIMER_ASYNC)
 
     if lv.group_get_default() is None:
         lv.group_create().set_default()

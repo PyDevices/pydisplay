@@ -17,7 +17,7 @@ reported as SKIP.
 
 import sys
 
-from multimer._schedule import run_scheduled
+from multimer._schedule import run_queued
 from multimer._ticks import sleep_ms as wait_ms
 
 TEST_PERIOD_MS = 50
@@ -68,11 +68,11 @@ def _run_timer_test(TimerClass):
     timer = TimerClass(_timer_id())
     timer.init(mode=TimerClass.PERIODIC, period=TEST_PERIOD_MS, callback=callback)
 
-    requires_run = getattr(TimerClass, "REQUIRES_RUN_SCHEDULED", False)
+    requires_run = getattr(TimerClass, "REQUIRES_RUN_QUEUED", False)
     elapsed = 0
     while elapsed < TEST_DURATION_MS:
         if requires_run:
-            run_scheduled()
+            run_queued()
         wait_ms(10)
         elapsed += 10
 
@@ -100,8 +100,8 @@ async def _run_async_timer_test(TimerClass):
 
 
 def _run_async_loop_test(TimerClass):
-    """Exercise Timer + run_scheduled() in a sync-work / async-yield loop."""
-    from multimer.aio import run, run_scheduled
+    """Exercise Timer + run_queued() in a sync-work / async-yield loop."""
+    from multimer.aio import run, run_queued
 
     counter = [0]
 
@@ -114,7 +114,7 @@ def _run_async_loop_test(TimerClass):
         elapsed = 0
         while elapsed < TEST_DURATION_MS:
             wait_ms(10)
-            await run_scheduled()
+            await run_queued()
             elapsed += 10
         timer.deinit()
         return counter[0]
@@ -152,7 +152,7 @@ def _probe(name, import_fn, *, async_test=False, async_loop_test=False):
         print()
         return
 
-    print(f"  REQUIRES_RUN_SCHEDULED: {getattr(TimerClass, 'REQUIRES_RUN_SCHEDULED', False)}")
+    print(f"  REQUIRES_RUN_QUEUED: {getattr(TimerClass, 'REQUIRES_RUN_QUEUED', False)}")
 
     try:
         if async_loop_test:
@@ -225,7 +225,7 @@ def main():
         ("_threading.Timer", _import_threading_timer, False, False),
         ("_ctypes.Timer", _import_ctypes_timer, False, False),
         ("aio.Timer", _import_aio_timer, True, False),
-        ("aio.Timer (run_scheduled loop)", _import_aio_timer, False, True),
+        ("aio.Timer (run_queued loop)", _import_aio_timer, False, True),
         ("multimer.Timer (default)", _import_multimer_timer, False, False),
     )
 

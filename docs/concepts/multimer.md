@@ -6,15 +6,15 @@ Cross-platform periodic timers with a `machine.Timer`-compatible API. pydisplay 
 
 | Import | When to use |
 |--------|-------------|
-| `from multimer import Timer, run_scheduled, …` | Default — blocking or threaded main loops (MCU, desktop SDL, CircuitPython unix) |
-| `from multimer.aio import Timer, run_scheduled, run` | Opt-in — apps that already run under **asyncio** / **uasyncio** (PyScript, async ports) |
+| `from multimer import Timer, run_queued, …` | Default — blocking or threaded main loops (MCU, desktop SDL, CircuitPython unix) |
+| `from multimer.aio import Timer, run_queued, run` | Opt-in — apps that already run under **asyncio** / **uasyncio** (PyScript, async ports) |
 
 `multimer.aio` is **not** wired into `multimer.Timer`. The package picks a platform backend automatically (`machine.Timer`, POSIX timers, SDL, threads, …). Choose `multimer.aio` explicitly when your app is asyncio-native.
 
 ## Default `multimer.Timer`
 
 ```python
-from multimer import Timer, run_scheduled
+from multimer import Timer, run_queued
 
 def callback(timer):
     print("tick")
@@ -23,13 +23,13 @@ tim = Timer(-1)
 tim.init(mode=Timer.PERIODIC, period=500, callback=callback)
 
 while True:
-    run_scheduled()   # required on some backends — see below
+    run_queued()   # required on some backends — see below
     do_other_work()
 ```
 
-On **CPython (non-Linux)** and **CircuitPython unix**, timer callbacks from the threading backend are delivered via a schedule queue. Call the sync **`multimer.run_scheduled()`** from your main loop to drain it.
+On **CPython (non-Linux)** and **CircuitPython unix**, timer callbacks from the threading backend are delivered via a schedule queue. Call the sync **`multimer.run_queued()`** from your main loop to drain it.
 
-On **MicroPython unix** (POSIX backend) and **CPython Linux** (`_ctypes`), callbacks run on the main thread automatically — `run_scheduled()` is harmless but not required.
+On **MicroPython unix** (POSIX backend) and **CPython Linux** (`_ctypes`), callbacks run on the main thread automatically — `run_queued()` is harmless but not required.
 
 See [installation](../installation/index.md) for which ports ship multimer.
 
@@ -45,28 +45,28 @@ Use when the whole app runs inside an asyncio event loop — typical for **PyScr
 - **`Timer.init()` must be called while the event loop is already running** (usually inside `async def main()`).
 - Callbacks run on the event-loop thread when the loop gets control.
 
-### `run_scheduled` and `run` are optional helpers
+### `run_queued` and `run` are optional helpers
 
 These are **convenience wrappers**, not requirements:
 
 | Helper | What it does | Required? |
 |--------|--------------|-----------|
 | `run(main)` | Calls `asyncio.run(main())` (or `run_until_complete` on older ports) | No — use `asyncio.run` yourself if you prefer |
-| `await run_scheduled()` | Yields to the event loop (`sleep(0)`) so timer tasks and other coroutines run | No — any `await` in your loop does the same |
+| `await run_queued()` | Yields to the event loop (`sleep(0)`) so timer tasks and other coroutines run | No — any `await` in your loop does the same |
 
-If your main loop already contains `await asyncio.sleep(0)`, `await broker.some_async_poll()`, or similar, **`run_scheduled` is redundant**.
+If your main loop already contains `await asyncio.sleep(0)`, `await broker.some_async_poll()`, or similar, **`run_queued` is redundant**.
 
-!!! note "Not the same as `multimer.run_scheduled`"
-    Sync **`multimer.run_scheduled()`** (from `import multimer`) drains a thread→main callback queue used by the default threading/SDL backends.
+!!! note "Not the same as `multimer.run_queued`"
+    Sync **`multimer.run_queued()`** (from `import multimer`) drains a thread→main callback queue used by the default threading/SDL backends.
 
-    **`multimer.aio.run_scheduled()`** is an **async** yield to the asyncio scheduler. Different module, different purpose. Async apps using **`aio.Timer`** do not need the sync queue drainer unless you also use the default `multimer.Timer` or other code that posts to `multimer.schedule`.
+    **`multimer.aio.run_queued()`** is an **async** yield to the asyncio scheduler. Different module, different purpose. Async apps using **`aio.Timer`** do not need the sync queue drainer unless you also use the default `multimer.Timer` or other code that posts to `multimer.schedule`.
 
 ### Example — with helpers (sync work inside an async loop)
 
 Typical pydisplay port: poll and draw are synchronous; the loop must yield each iteration.
 
 ```python
-from multimer.aio import Timer, run_scheduled, run
+from multimer.aio import Timer, run_queued, run
 
 def on_frame(timer):
     display.auto_refresh()
@@ -78,12 +78,12 @@ async def main():
         for event in broker.poll():
             handle(event)
         display.show()
-        await run_scheduled()   # yield so the timer task can run
+        await run_queued()   # yield so the timer task can run
 
 run(main)
 ```
 
-`run(main)` avoids importing `asyncio` at the top level. `await run_scheduled()` avoids remembering `asyncio.sleep(0)`.
+`run(main)` avoids importing `asyncio` at the top level. `await run_queued()` avoids remembering `asyncio.sleep(0)`.
 
 ### Example — without helpers (stdlib asyncio only)
 
@@ -103,7 +103,7 @@ async def main():
         for event in broker.poll():
             handle(event)
         display.show()
-        await asyncio.sleep(0)   # same role as await run_scheduled()
+        await asyncio.sleep(0)   # same role as await run_queued()
 
 asyncio.run(main())
 ```
@@ -116,7 +116,7 @@ await asyncio.sleep_ms(0)
 
 ### Example — no main loop yield needed
 
-If the async function already awaits often enough, you do not need `run_scheduled` in the loop:
+If the async function already awaits often enough, you do not need `run_queued` in the loop:
 
 ```python
 import asyncio
@@ -137,7 +137,7 @@ async def main():
 asyncio.run(main())
 ```
 
-Here the timer fires because `await asyncio.sleep(0.3)` gives the event loop time to run the timer task. No `run_scheduled`, no `while True`.
+Here the timer fires because `await asyncio.sleep(0.3)` gives the event loop time to run the timer task. No `run_queued`, no `while True`.
 
 ### Example — one-shot timer
 
@@ -183,14 +183,14 @@ flowchart TD
     A[Need periodic callbacks?] --> B{Main loop style?}
     B -->|blocking while True| C["multimer.Timer"]
     B -->|async def + await| D["multimer.aio.Timer"]
-    C --> E{Platform needs sync run_scheduled?}
-    E -->|CPython non-Linux / CP unix threading| F["call multimer.run_scheduled() in loop"]
+    C --> E{Platform needs sync run_queued?}
+    E -->|CPython non-Linux / CP unix threading| F["call multimer.run_queued() in loop"]
     E -->|MCU / MP unix / CPython Linux| G["optional or unnecessary"]
 ```
 
 ## PyScript
 
-PyScript requires an async main loop. Prefer **`multimer.aio`** for timers there, or yield with `await run_scheduled()` / `await asyncio.sleep(0)` each frame. See [PyScript asyncio porting](../guides/pyscript-asyncio.md).
+PyScript requires an async main loop. Prefer **`multimer.aio`** for timers there, or yield with `await run_queued()` / `await asyncio.sleep(0)` each frame. See [PyScript asyncio porting](../guides/pyscript-asyncio.md).
 
 ## API reference
 
