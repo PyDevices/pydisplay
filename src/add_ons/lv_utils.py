@@ -33,19 +33,14 @@
 import sys
 
 import lvgl as lv
-import micropython
-
-# Try standard machine.Timer, or cross-platform timer from multimer, if available
 
 try:
-    from machine import Timer
-except:
-    try:
-        from multimer import Timer
-    except:
-        if sys.platform != "darwin":
-            raise RuntimeError("Missing machine.Timer implementation!") from None
-        Timer = False
+    from multimer import Timer, schedule
+except ImportError:
+    if sys.platform != "darwin":
+        raise RuntimeError("Missing multimer implementation!") from None
+    Timer = False
+    schedule = None
 
 # Try to determine default timer id
 
@@ -64,7 +59,7 @@ try:
     import asyncio
 
     asyncio_available = True
-except:
+except ImportError:
     asyncio_available = False
 
 ##############################################################################
@@ -93,14 +88,13 @@ class event_loop:
         self.delay = 1000 // freq
         self.refresh_cb = refresh_cb
         self.exception_sink = exception_sink if exception_sink else self.default_exception_sink
+        self._aio_timer = None
 
         self.asynchronous = asynchronous
         if self.asynchronous:
             if not asyncio_available:
                 raise RuntimeError("Cannot run asynchronous event loop. asyncio is not available!")
-            self.refresh_event = asyncio.Event()
-            self.refresh_task = asyncio.create_task(self.async_refresh())
-            self.timer_task = asyncio.create_task(self.async_timer())
+            self._init_async_timers()
         else:
             if Timer:
                 self.timer = Timer(timer_id)
@@ -109,15 +103,23 @@ class event_loop:
             self.max_scheduled = max_scheduled
             self.scheduled = 0
 
-    def init_async(self):
+    def _init_async_timers(self):
+        from multimer.aio import Timer as AioTimer
+
         self.refresh_event = asyncio.Event()
         self.refresh_task = asyncio.create_task(self.async_refresh())
-        self.timer_task = asyncio.create_task(self.async_timer())
+        self._aio_timer = AioTimer(-1)
+        self._aio_timer.init(mode=AioTimer.PERIODIC, period=self.delay, callback=self._aio_tick)
+
+    def init_async(self):
+        self._init_async_timers()
 
     def deinit(self):
         if self.asynchronous:
             self.refresh_task.cancel()
-            self.timer_task.cancel()
+            if self._aio_timer is not None:
+                self._aio_timer.deinit()
+                self._aio_timer = None
         else:
             if Timer:
                 self.timer.deinit()
@@ -160,20 +162,16 @@ class event_loop:
         # Can be called in Interrupt context
         # Use task_handler_ref since passing self.task_handler would cause allocation.
         lv.tick_inc(self.delay)
-        if getattr(self.timer, "direct", False):
-            # Thread/software timer: already in a normal (non-IRQ) context, so run
-            # the handler directly. micropython.schedule only drains on the main
-            # thread, which is blocked at the REPL.
-            if lv._nesting.value == 0:
-                lv.task_handler()
-                if self.refresh_cb:
-                    self.refresh_cb()
-        elif self.scheduled < self.max_scheduled:
+        if self.scheduled < self.max_scheduled:
             try:
-                micropython.schedule(self.task_handler_ref, 0)
+                schedule(self.task_handler_ref, 0)
                 self.scheduled += 1
-            except:
+            except Exception:
                 pass
+
+    def _aio_tick(self, _timer):
+        lv.tick_inc(self.delay)
+        self.refresh_event.set()
 
     async def async_refresh(self):
         while True:
@@ -187,12 +185,6 @@ class event_loop:
                         self.exception_sink(e)
                 if self.refresh_cb:
                     self.refresh_cb()
-
-    async def async_timer(self):
-        while True:
-            await asyncio.sleep_ms(self.delay)
-            lv.tick_inc(self.delay)
-            self.refresh_event.set()
 
     def default_exception_sink(self, e):
         sys.print_exception(e)

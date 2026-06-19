@@ -29,7 +29,6 @@ Or copy modules into `lib/` on your device.
 | `tft_text.py`, `tft_write.py` | russhughes font rendering |
 | `png.py` | PNG support (experimental) |
 | `touch_keypad.py` | On-screen keypad |
-| `lv_timer.py` | LVGL timer helper |
 
 Many examples in `src/examples/` depend on add_ons. They are excluded from the micropython-lib bundle — install from GitHub only.
 

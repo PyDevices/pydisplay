@@ -3,20 +3,30 @@
 # SPDX-License-Identifier: MIT
 """Thread-based software Timer for MicroPython-Unix and CPython."""
 
+import sys
+
 from ._schedule import schedule
 from ._ticks import sleep_ms, ticks_add, ticks_diff, ticks_ms
 from ._timerbase import _TimerBase
 
-try:
-    import _thread
-
-    def _spawn(fn):
-        _thread.start_new_thread(fn, ())
-except ImportError:
+if sys.implementation.name == "cpython":
     import threading
 
     def _spawn(fn):
         threading.Thread(target=fn, daemon=True).start()
+
+else:
+    try:
+        import _thread
+
+        def _spawn(fn):
+            _thread.start_new_thread(fn, ())
+
+    except ImportError:
+        import threading
+
+        def _spawn(fn):
+            threading.Thread(target=fn, daemon=True).start()
 
 
 class Timer(_TimerBase):

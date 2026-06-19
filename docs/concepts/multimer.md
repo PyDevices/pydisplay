@@ -27,7 +27,7 @@ while True:
     do_other_work()
 ```
 
-On **CPython (non-Linux)** and **CircuitPython unix**, timer callbacks from the threading/SDL backends are delivered via a schedule queue. Call the sync **`multimer.run_scheduled()`** from your main loop to drain it.
+On **CPython (non-Linux)** and **CircuitPython unix**, timer callbacks from the threading backend are delivered via a schedule queue. Call the sync **`multimer.run_scheduled()`** from your main loop to drain it.
 
 On **MicroPython unix** (POSIX backend) and **CPython Linux** (`_ctypes`), callbacks run on the main thread automatically — `run_scheduled()` is harmless but not required.
 
@@ -184,7 +184,7 @@ flowchart TD
     B -->|blocking while True| C["multimer.Timer"]
     B -->|async def + await| D["multimer.aio.Timer"]
     C --> E{Platform needs sync run_scheduled?}
-    E -->|CPython SDL / CP unix threading| F["call multimer.run_scheduled() in loop"]
+    E -->|CPython non-Linux / CP unix threading| F["call multimer.run_scheduled() in loop"]
     E -->|MCU / MP unix / CPython Linux| G["optional or unnecessary"]
 ```
 

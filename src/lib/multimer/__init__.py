@@ -12,7 +12,8 @@ on MicroPython on Unix (which doesn't have a machine.Timer) and CPython (ditto).
 
 _ffi.py uses MicroPython ffi to connect to libc and librt.  CPython on Linux uses
 _ctypes.py (POSIX librt via ctypes; callbacks on the main thread without run_scheduled).
-Other CPython ports use _sdl2.py.  CircuitPython unix uses _threading.py.
+Other CPython ports use _threading.py (_sdl2.py if threading is unavailable).
+CircuitPython unix uses _threading.py.
 
 Returns None if the platform is not supported rather than raising an ImportError so that
 the client can handle the error more gracefully (e.g. by using `if Timer is not None:`).
@@ -44,7 +45,10 @@ except ImportError:
         try:
             from ._ctypes import Timer
         except ImportError:
-            from ._sdl2 import Timer
+            try:
+                from ._threading import Timer
+            except ImportError:
+                from ._sdl2 import Timer
     elif sys.implementation.name == "circuitpython":
         from ._threading import Timer
     else:

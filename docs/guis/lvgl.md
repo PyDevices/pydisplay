@@ -46,7 +46,7 @@ Try displaysys + eventsys without LVGL first: [Wokwi minimum](../guides/wokwi.md
 
 ## Helper add-ons
 
-`src/add_ons/lv_utils.py` and `src/add_ons/lv_timer.py` — optional utilities when integrating LVGL with pydisplay.
+`src/add_ons/lv_utils.py` — LVGL event loop helper (requires `multimer`; uses `multimer.aio` for async mode).
 
 ## Next
 
