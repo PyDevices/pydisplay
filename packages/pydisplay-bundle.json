@@ -393,8 +393,8 @@
       "github:PyDevices/pydisplay/src/lib/multimer/_threading.py"
     ],
     [
-      "lib/multimer/_uctypes.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_uctypes.py"
+      "lib/multimer/_ffi.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_ffi.py"
     ],
     [
       "lib/multimer/_sdl2.py",

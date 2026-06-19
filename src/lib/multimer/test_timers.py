@@ -189,8 +189,8 @@ def _import_machine_timer():
     return Timer
 
 
-def _import_uctypes_timer():
-    return _import_timer("_uctypes")
+def _import_ffi_timer():
+    return _import_timer("_ffi")
 
 
 def _import_sdl2_timer():
@@ -220,7 +220,7 @@ def main():
 
     probes = (
         ("machine.Timer", _import_machine_timer, False, False),
-        ("_uctypes.Timer", _import_uctypes_timer, False, False),
+        ("_ffi.Timer", _import_ffi_timer, False, False),
         ("_sdl2.Timer", _import_sdl2_timer, False, False),
         ("_threading.Timer", _import_threading_timer, False, False),
         ("_ctypes.Timer", _import_ctypes_timer, False, False),

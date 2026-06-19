@@ -4,7 +4,7 @@
 """
 POSIX librt Timer for CPython on Linux (ctypes).
 
-Like ``_uctypes`` on MicroPython unix: timer signals are delivered to the thread
+Like ``_ffi`` on MicroPython unix: timer signals are delivered to the thread
 that created the timer (the main thread), so callbacks run without
 ``run_scheduled()``.
 """
