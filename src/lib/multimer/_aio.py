@@ -1,11 +1,17 @@
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Thread-based software Timer for MicroPython-Unix (and CPython), signal-free."""
+"""Thread-based software Timer for MicroPython-Unix and CPython."""
 
+import sys
 import time
 
 from ._timerbase import _TimerBase
+
+if sys.implementation.name == "cpython":
+    from ._cpython_dispatch import schedule as _cpython_schedule
+else:
+    _cpython_schedule = None
 
 try:
     import _thread
@@ -42,9 +48,10 @@ except AttributeError:  # CPython
 
 
 class Timer(_TimerBase):
-    """Thread-based software Timer; callbacks run on a background thread."""
+    """Thread-based software Timer."""
 
-    direct = True  # marker: callback runs in a normal thread context, not IRQ/signal
+    # lv_utils: run task_handler directly when not using main-thread dispatch.
+    direct = _cpython_schedule is None
 
     def _start(self):
         self._running = True
@@ -52,6 +59,12 @@ class Timer(_TimerBase):
 
     def _stop(self):
         self._running = False
+
+    def _dispatch(self, arg):
+        if _cpython_schedule is not None:
+            _cpython_schedule(self._callback, arg)
+        else:
+            self._callback(arg)
 
     def _loop(self):
         next_t = _ticks_add(_ticks_ms(), self._interval)
@@ -63,7 +76,7 @@ class Timer(_TimerBase):
                 break
             self._busy = True
             try:
-                self._callback(self)
+                self._dispatch(self)
             except Exception:
                 pass
             self._busy = False

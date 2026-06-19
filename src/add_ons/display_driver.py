@@ -112,12 +112,23 @@ def _uses_sdl_run_loop():
     )
 
 
+def _cpython_sdl_desktop():
+    """CPython desktop using SDLDisplay (display_driver.run() pumps LVGL on main thread)."""
+    return sys.implementation.name == "cpython" and type(display_drv).__module__.endswith(
+        "sdldisplay"
+    )
+
+
 def main():
     global _lvgl_driver
     gc.collect()
     if not lv.is_initialized():
         lv.init()
-    if not _uses_sdl_run_loop() and not lv_utils.event_loop.is_running():
+    if (
+        not _uses_sdl_run_loop()
+        and not _cpython_sdl_desktop()
+        and not lv_utils.event_loop.is_running()
+    ):
         lv_utils.event_loop()
 
     if lv.group_get_default() is None:
@@ -140,7 +151,7 @@ def run(freq=30):
     Required on desktop SDL (CircuitPython unix / MicroPython unix) where input
     and rendering must stay on the thread that initialized the video subsystem.
     """
-    if not _uses_sdl_run_loop():
+    if not (_uses_sdl_run_loop() or _cpython_sdl_desktop()):
         raise RuntimeError("display_driver.run() requires displaysys.sdldisplay")
     if _lvgl_driver is None:
         main()
@@ -156,6 +167,13 @@ def run(freq=30):
 
     try:
         while True:
+            try:
+                from multimer import poll as _multimer_poll
+
+                if _multimer_poll is not None:
+                    _multimer_poll()
+            except ImportError:
+                pass
             lv.tick_inc(delay)
             if lv._nesting.value == 0:
                 lv.task_handler()  # polls SDL input via VirtualDevices during read_cb

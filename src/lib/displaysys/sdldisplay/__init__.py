@@ -344,7 +344,9 @@ class SDLDisplay(DisplayDriver):
         blitRect = SDL_Rect(x, y, w, h)
         if uses_ctypes_blit:
             if isinstance(buffer, memoryview):
-                buffer_array = (ctypes.c_ubyte * len(buffer.obj)).from_buffer(buffer.obj)
+                # CPython lvgl __dereference__ may yield a memoryview with obj=None.
+                backing = buffer if buffer.obj is None else buffer.obj
+                buffer_array = (ctypes.c_ubyte * len(backing)).from_buffer(backing)
             elif type(buffer) is bytearray:
                 buffer_array = (ctypes.c_ubyte * len(buffer)).from_buffer(buffer)
             else:
