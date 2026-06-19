@@ -23,6 +23,25 @@ This blocks the browser event loop. PyScript needs `async def`, `await`, and yie
 ## Port pattern
 
 ```python
+import board_config
+from board_config import display, broker
+from multimer.aio import Timer, run_scheduled, run
+
+async def main():
+    while True:
+        for event in broker.poll():
+            ...  # handle event
+        display.show()
+        await run_scheduled()  # yield to the event loop (optional if you await elsewhere)
+
+run(main)
+```
+
+You can use stdlib asyncio instead of the helpers — see [multimer.aio](../concepts/multimer.md#multimeraio--asyncio-timers).
+
+Legacy pattern with raw asyncio:
+
+```python
 import asyncio
 import board_config
 from board_config import display, broker
@@ -41,7 +60,7 @@ Use `await asyncio.sleep_ms(n)` (MicroPython-style) or `await asyncio.sleep(n/10
 
 ## Broker polling
 
-If `broker.poll()` is synchronous, call it inside the async loop and always `await asyncio.sleep(0)` each iteration so touch redraw and timers run.
+If `broker.poll()` is synchronous, call it inside the async loop and **await a yield each iteration** so touch redraw and timers run. Use `await run_scheduled()` from `multimer.aio`, or `await asyncio.sleep(0)` — both are equivalent.
 
 ## Examples to study
 
@@ -65,6 +84,7 @@ Regenerate manifest after adding examples: `./tools/regenerate.sh`.
 
 ## Next
 
+- [multimer.aio](../concepts/multimer.md#multimeraio--asyncio-timers)
 - [Try pydisplay](../try/index.md)
 - [Troubleshooting](../troubleshooting.md)
 - [Contributing](../contributing.md) — PyScript PRs welcome

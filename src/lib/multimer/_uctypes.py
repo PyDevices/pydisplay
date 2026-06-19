@@ -1,9 +1,11 @@
-# Timer that matches machine.Timer (https://docs.micropython.org/en/latest/library/machine.Timer.html)
-# for the unix port.
+# SPDX-FileCopyrightText: 2021 Amir Gonnen
+# SPDX-FileCopyrightText: 2024 Brad Barnett
 #
-# MIT license; Copyright (c) 2021 Amir Gonnen, 2024 Brad Barnett
-#
-# Based on timer.py from micropython-lib (https://github.com/micropython/micropython-lib/blob/master/unix-ffi/machine/machine/timer.py)
+# SPDX-License-Identifier: MIT
+"""POSIX librt Timer for MicroPython unix (ffi + uctypes)."""
+
+# Based on timer.py from micropython-lib
+# (https://github.com/micropython/micropython-lib/blob/master/unix-ffi/machine/machine/timer.py)
 
 import array
 import os
@@ -149,7 +151,7 @@ def timer_settime(tid, period_ms, periodic):
 
 
 class Timer(_TimerBase):
-    """librt Timer class"""
+    """POSIX librt Timer via uctypes (MicroPython unix)."""
 
     def _start(self):
         self.id = (

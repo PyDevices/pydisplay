@@ -5,10 +5,6 @@
       "github:PyDevices/pydisplay/src/add_ons/README.md"
     ],
     [
-      "adafruit_ticks.py",
-      "github:PyDevices/pydisplay/src/add_ons/adafruit_ticks.py"
-    ],
-    [
       "bmp565.py",
       "github:PyDevices/pydisplay/src/add_ons/bmp565.py"
     ],

@@ -66,7 +66,8 @@ Anything you can draw on implements the framebuf API:
 pydisplay does not include a task scheduler. Options:
 
 - **`asyncio`** — works on CPython, MicroPython, and PyScript (required there)
-- **[multimer](../installation/index.md)** — scheduled callbacks on CPython and MicroPython (not CircuitPython)
+- **[multimer](multimer.md)** — cross-platform timers; default `Timer` for sync/threaded loops
+- **[multimer.aio](multimer.md#multimeraio--asyncio-timers)** — opt-in asyncio timers for async/PyScript apps
 
 ## Rotation
 

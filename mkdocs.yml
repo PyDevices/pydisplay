@@ -84,6 +84,7 @@ nav:
     - Architecture: concepts/architecture.md
     - Displays: concepts/displays.md
     - Events: concepts/events.md
+    - multimer: concepts/multimer.md
     - Drawing and fonts: concepts/drawing-and-fonts.md
     - Graphics files: concepts/graphics-files.md
     - Config files: concepts/config-files.md
@@ -114,6 +115,7 @@ nav:
     - displaysys: reference/overviews/displaysys.md
     - eventsys: reference/overviews/eventsys.md
     - graphics: reference/overviews/graphics.md
+    - multimer: reference/overviews/multimer.md
   - Core modules: reference/
   - Add-ons API: reference/add_ons/
 

@@ -17,7 +17,7 @@ from micropython import const  # For constant values
 try:
     from time import ticks_ms, ticks_diff  # For timing
 except ImportError:
-    from adafruit_ticks import ticks_ms, ticks_diff
+    from multimer import ticks_diff, ticks_ms
 
 if display_drv.width > display_drv.height:
     display_drv.rotation += 90

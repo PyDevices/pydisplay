@@ -45,7 +45,7 @@ from ._themes import ColorTheme, get_palette, icon_theme
 try:
     from time import ticks_add, ticks_ms
 except ImportError:
-    from adafruit_ticks import ticks_add, ticks_ms
+    from multimer import ticks_add, ticks_ms
 
 
 DEBUG = False

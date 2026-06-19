@@ -29,11 +29,7 @@ https://github.com/erikflowers/weather-icons and is licensed under SIL OFL 1.1
 try:
     from time import ticks_ms, sleep_ms
 except ImportError:
-    from adafruit_ticks import ticks_ms
-    from time import sleep
-
-    def sleep_ms(ms):
-        sleep(ms / 1000)
+    from multimer import sleep_ms, ticks_ms
 
 
 import tft_config

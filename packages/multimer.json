@@ -13,12 +13,20 @@
       "github:PyDevices/pydisplay/src/lib/multimer/_ticks.py"
     ],
     [
+      "multimer/_ctypes.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_ctypes.py"
+    ],
+    [
+      "multimer/aio.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/aio.py"
+    ],
+    [
       "multimer/_threading.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_threading.py"
     ],
     [
-      "multimer/_librt.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_librt.py"
+      "multimer/_uctypes.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_uctypes.py"
     ],
     [
       "multimer/_sdl2.py",

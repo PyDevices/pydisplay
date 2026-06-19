@@ -5,10 +5,6 @@
       "github:PyDevices/pydisplay/src/add_ons/README.md"
     ],
     [
-      "add_ons/adafruit_ticks.py",
-      "github:PyDevices/pydisplay/src/add_ons/adafruit_ticks.py"
-    ],
-    [
       "add_ons/bmp565.py",
       "github:PyDevices/pydisplay/src/add_ons/bmp565.py"
     ],
@@ -385,12 +381,20 @@
       "github:PyDevices/pydisplay/src/lib/multimer/_ticks.py"
     ],
     [
+      "lib/multimer/_ctypes.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_ctypes.py"
+    ],
+    [
+      "lib/multimer/aio.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/aio.py"
+    ],
+    [
       "lib/multimer/_threading.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_threading.py"
     ],
     [
-      "lib/multimer/_librt.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_librt.py"
+      "lib/multimer/_uctypes.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_uctypes.py"
     ],
     [
       "lib/multimer/_sdl2.py",
