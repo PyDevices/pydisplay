@@ -5,36 +5,40 @@
       "github:PyDevices/pydisplay/src/lib/multimer/__init__.py"
     ],
     [
-      "multimer/_schedule.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_schedule.py"
-    ],
-    [
-      "multimer/_ticks.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_ticks.py"
-    ],
-    [
       "multimer/_ctypes.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_ctypes.py"
-    ],
-    [
-      "multimer/aio.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/aio.py"
-    ],
-    [
-      "multimer/_threading.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_threading.py"
     ],
     [
       "multimer/_ffi.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_ffi.py"
     ],
     [
+      "multimer/_schedule.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_schedule.py"
+    ],
+    [
       "multimer/_sdl2.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_sdl2.py"
     ],
     [
+      "multimer/_threading.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_threading.py"
+    ],
+    [
+      "multimer/_ticks.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_ticks.py"
+    ],
+    [
       "multimer/_timerbase.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_timerbase.py"
+    ],
+    [
+      "multimer/aio.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/aio.py"
+    ],
+    [
+      "multimer/test_timers.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/test_timers.py"
     ]
   ],
   "deps": [],

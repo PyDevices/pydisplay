@@ -23,7 +23,7 @@ Your `board_config.py` should expose:
 
 Connect LVGL's display flush callback to copy LVGL's draw buffer through `display.blit_rect` (or the pattern documented in lv_micropython for your port).
 
-Map LVGL input devices to pydisplay touch events from `broker.poll()`.
+With [`display_driver`](../../src/add_ons/display_driver.py), LVGL input is wired automatically: each indev `read_cb` polls the broker's queue device via virtual touch/encoder/keypad devices. **Do not call `broker.poll()` in your LVGL main loop** — `lv.task_handler()` (driven by `lv_utils` + multimer) already drains input. Calling both competes for the same event queue and breaks clicks. Window-close (`QUIT`) is handled on the same path inside `QueueDevice.poll()`.
 
 ### 4. Run the touch test example
 
@@ -57,6 +57,8 @@ Set **`TIMER_ASYNC`** in `board_config.py` to choose the timer backend:
 
 [`display_driver`](../../src/add_ons/display_driver.py) passes this to `lv_utils.event_loop(asynchronous=TIMER_ASYNC)`.
 
+When **`TIMER_ASYNC = True`**, `display_driver` disables SDL's sync `auto_refresh` timer and calls `display.show()` from the aio LVGL refresh loop instead. CircuitPython's default `multimer.Timer` uses a background thread and requires `run_queued()` — which an asyncio app does not call — so the window would never be presented otherwise.
+
 On CPython Win/mac (`TIMER_ASYNC = False`), call **`multimer.run_queued()`** from your main loop when using threaded timer backends — see [multimer](../concepts/multimer.md).
 
 Override before import:
@@ -66,6 +68,16 @@ import board_config
 board_config.TIMER_ASYNC = True
 import display_driver
 ```
+
+## Timer test examples
+
+Three scripts share the same UI via `lv_test_timer_common.build_ui()` and differ only in how multimer drives LVGL ticks:
+
+| Script | When to run |
+|--------|-------------|
+| [`lv_test_timer_sync.py`](../../src/examples/lv_test_timer_sync.py) | MCU, MP-unix, CPython Linux — no main loop; **exits** on queued-only platforms |
+| [`lv_test_timer_queued.py`](../../src/examples/lv_test_timer_queued.py) | CPython Win/mac — `run_queued()` drain loop only |
+| [`lv_test_timer_async.py`](../../src/examples/lv_test_timer_async.py) | PyScript / asyncio — `TIMER_ASYNC = True`, deferred `import display_driver`, `await asyncio.sleep(0)` loop |
 
 ## Next
 

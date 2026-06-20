@@ -102,7 +102,10 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `rotations.py` | Display rotation | CPython · MCU | core |
 | `timer_simpletest.py` | multimer timer | CPython · MCU | core |
 | `nano_gui_simpletest.py` | Nano-GUI | MCU | add_ons |
-| `lv_touch_test.py` | LVGL touch | MCU | LVGL |
+| `lv_touch_test.py` | LVGL touch grid | MCU | LVGL |
+| `lv_test_timer_sync.py` | LVGL timer — sync (no loop) | MCU · CPython Linux | LVGL |
+| `lv_test_timer_queued.py` | LVGL timer — sync + `run_queued()` | CPython · MCU | LVGL |
+| `lv_test_timer_async.py` | LVGL timer — asyncio / PyScript | CPython · PyScript | LVGL |
 
 ## Subdirectories
 
