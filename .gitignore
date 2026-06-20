@@ -1,4 +1,11 @@
 src/gui
+
+# Cursor IDE / local debug
+.cursor/
+
+# Local examples (not distributed)
+src/examples/spotapi/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
