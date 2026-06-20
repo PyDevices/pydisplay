@@ -36,6 +36,8 @@ import sys
 from ._schedule import REQUIRES_RUN_QUEUED, run_queued, schedule
 from ._ticks import sleep_ms, ticks_add, ticks_diff, ticks_less, ticks_ms
 
+DEBUG = True
+
 try:
     from machine import Timer  # MicroPython on microcontrollers
 except ImportError:
@@ -86,6 +88,10 @@ def get_timer(callback, period=33, *, asynchronous=None, warn=True):
         callback()
 
     t.init(mode=TimerCls.PERIODIC, period=period, callback=_timer_cb)
+    if DEBUG:
+        mod = getattr(TimerCls, "__module__", "?")
+        name = getattr(TimerCls, "__qualname__", getattr(TimerCls, "__name__", "?"))
+        print(f"Timer:  backend {mod}.{name}")
     print(f"Timer:  timer started ({id=}, {period=})")
     if warn and getattr(TimerCls, "REQUIRES_RUN_QUEUED", False):
         print("Timer:  callbacks require run_queued(); call it from your main loop")
