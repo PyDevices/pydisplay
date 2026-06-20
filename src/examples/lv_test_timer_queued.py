@@ -8,6 +8,8 @@ delivered via the thread-to-main queue.  Harmless on MCU (run_queued is
 a no-op on MicroPython).
 """
 
+# Override board_config.TIMER_ASYNC for this timer test only. Real apps normally
+# set this in board_config and can omit the import/assignment below.
 import board_config
 
 board_config.TIMER_ASYNC = False

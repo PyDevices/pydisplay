@@ -7,11 +7,11 @@ Import display_driver inside the async main coroutine so the asyncio
 event loop is already running when lv_utils starts aio timers.
 """
 
+# Override board_config.TIMER_ASYNC for this timer test only. Real apps normally
+# set this in board_config and can omit the import/assignment below.
 import board_config
 
 board_config.TIMER_ASYNC = True
-
-from multimer.aio import run
 
 try:
     import asyncio
@@ -29,4 +29,7 @@ async def main():
         await asyncio.sleep(0)
 
 
-run(main)
+if hasattr(asyncio, "run"):
+    asyncio.run(main())
+else:
+    asyncio.get_event_loop().run_until_complete(main())
