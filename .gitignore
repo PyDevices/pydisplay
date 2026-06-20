@@ -3,8 +3,8 @@ src/gui
 # Cursor IDE / local debug
 .cursor/
 
-# Local examples (not distributed)
-src/examples/spotapi/
+# Local examples (not distributed; spotapi is a symlink)
+src/examples/spotapi
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
