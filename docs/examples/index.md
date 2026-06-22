@@ -16,7 +16,7 @@ As examples are reviewed for [multimer](../concepts/multimer.md) portability (sy
 # multimer types: all
 ```
 
-**Progress (top-level `src/examples/*.py`):** **60 / 62** marked · **1** unmarked (`png_test.py`).
+**Progress (top-level `src/examples/*.py`):** **62 / 62** marked.
 
 ### Tag values
 
@@ -26,7 +26,6 @@ As examples are reviewed for [multimer](../concepts/multimer.md) portability (sy
 | `queued, sync` | Blocking loop with `run_queued()` + `sleep_ms()` (or finite variant in `timer_simpletest.py`) |
 | `sync` | Sync-only or one-shot on the main thread (`lv_test_timer_sync.py` exits on queued platforms; `console_advanced_demo.py` uses `os.dupterm` + one `display_drv.show()`) |
 | `async` | `TIMER_ASYNC` + `asyncio` main loop |
-| `untested` | Marked for catalog coverage; multimer portability not yet tested (`widgets_*.py`, `joystick_list_select.py`) |
 | `NA` | Not applicable — shared module or test harness, not a runnable portability example (`lv_test_timer_common.py`, `lv_test_timer_harness.py`) |
 
 ### Search commands
@@ -84,6 +83,18 @@ if getattr(Timer, "REQUIRES_RUN_QUEUED", False):
 ```
 
 On sync platforms the `if` block is skipped; on queued platforms (CPython SDL, CircuitPython threading) the loop keeps timer callbacks and display refresh alive.
+
+**PyWidgets (pdwidgets)** — [`widgets_stub.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_stub.py): build UI, then:
+
+```python
+import pdwidgets as pd
+
+pd.init_timer(10)  # optional; omit for poll mode
+# ... widgets ...
+pd.run_forever()
+```
+
+`run_forever()` drains `run_queued()` on queued backends; in poll mode it calls `pd.tick()`. On sync MCU with a timer, it returns immediately. On CPython Linux SDL it drives `tick()` from the main loop. See [PyWidgets](../guis/pywidgets.md#event-loop).
 
 ### Notes
 

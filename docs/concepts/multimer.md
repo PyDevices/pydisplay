@@ -29,7 +29,9 @@ while True:
 
 On **CPython (non-Linux)** and **CircuitPython unix**, timer callbacks from the threading backend are delivered via a schedule queue. Call the sync **`multimer.run_queued()`** from your main loop to drain it.
 
-On **MicroPython unix** (POSIX backend) and **CPython Linux** (`_ctypes`), callbacks run on the main thread automatically — `run_queued()` is harmless but not required.
+On **MicroPython unix** (POSIX backend) and **CPython Linux** (`_ctypes`), timer callbacks run on the main thread automatically — sync **`multimer.run_queued()`** is harmless but not required for the timer itself.
+
+On **CPython** (including Linux), the module flag **`multimer.REQUIRES_RUN_QUEUED`** is true because `multimer.schedule` may queue callbacks from other threads. That is separate from **`Timer.REQUIRES_RUN_QUEUED`** on the timer class (false on CPython Linux `_ctypes`). Library code that must present SDL frames or drain the queue should check the **module** flag, or both — see [`color_setup.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/color_setup.py) and `pdwidgets.Display.refresh()`.
 
 See [installation](../installation/index.md) for which ports ship multimer.
 
@@ -194,7 +196,7 @@ PyScript requires an async main loop. Prefer **`multimer.aio`** for timers there
 
 ## Example portability markers
 
-Scripts under `src/examples/` are tagged with a first-line comment as they are checked against sync, queued, and async timer patterns — for example `# multimer types: all`. As of the latest audit, **60 of 62** top-level examples are marked. See [Examples catalog — multimer portability markers](../examples/index.md#multimer-portability-markers) for tag meanings, `rg` search commands, and canonical patterns (event-poll, finite test, forever LVGL).
+Scripts under `src/examples/` are tagged with a first-line comment as they are checked against sync, queued, and async timer patterns — for example `# multimer types: all`. **All 62** top-level examples are marked. See [Examples catalog — multimer portability markers](../examples/index.md#multimer-portability-markers) for tag meanings, `rg` search commands, and canonical patterns (event-poll, finite test, forever LVGL, pdwidgets `run_forever()`).
 
 ## API reference
 

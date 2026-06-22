@@ -1,4 +1,4 @@
-# multimer types: untested
+# multimer types: queued, sync
 
 import board_config
 from eventsys.devices import types
@@ -18,7 +18,6 @@ selected = 0
 items[selected].bg = list_view.color_theme.secondary
 
 screen.visible = True
-running = True
 
 
 
@@ -40,7 +39,4 @@ def joystick_callback(event):
 
 board_config.broker.subscribe(joystick_callback,device_types=[types.JOYSTICK])
 
-if not display.timer:
-    print("Starting main loop")
-    while running:
-        pd.tick()        
+pd.run_forever()

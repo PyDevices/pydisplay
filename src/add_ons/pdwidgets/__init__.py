@@ -78,6 +78,57 @@ def init_timer(period=10):
         Display.timer = get_timer(tick, period)
 
 
+def pump():
+    """
+    Process one frame during setup bursts (before ``run_forever``).
+
+    On queued backends, drains the multimer callback queue. In poll mode
+    (no ``init_timer``), also calls ``tick()``.
+    """
+    from multimer import REQUIRES_RUN_QUEUED, Timer, run_queued
+
+    if REQUIRES_RUN_QUEUED or getattr(Timer, "REQUIRES_RUN_QUEUED", False):
+        run_queued()
+    if Display.timer is None:
+        tick()
+
+
+def run_forever():
+    """
+    Keep the widget loop alive on all platforms.
+
+    On queued/SDL backends, runs ``run_queued()`` forever. In poll mode
+    (no ``init_timer``), also calls ``tick()`` each iteration. On sync
+    MCU with an active timer, returns immediately (the timer drives
+    ``tick()``).
+    """
+    from multimer import REQUIRES_RUN_QUEUED, Timer, run_queued, sleep_ms
+
+    timer_req = getattr(Timer, "REQUIRES_RUN_QUEUED", False)
+    needs_queue_loop = REQUIRES_RUN_QUEUED or timer_req
+    # CPython linux ctypes: module requires run_queued but timer fires on main thread;
+    # drive tick from the main loop instead of the timer to avoid signal/reentrancy issues.
+    cpython_main_loop_tick = REQUIRES_RUN_QUEUED and not timer_req
+    has_timer = Display.timer is not None
+    if cpython_main_loop_tick and Display.timer:
+        try:
+            Display.timer.deinit()
+        except Exception:
+            pass
+        Display.timer = None
+        has_timer = False
+
+    if needs_queue_loop:
+        while Display.displays:
+            run_queued()
+            if not has_timer or cpython_main_loop_tick:
+                tick()
+            sleep_ms(1)
+    elif not has_timer:
+        while Display.displays:
+            tick()
+
+
 _display_drv_get_attrs = {
     "set_vscroll",
     "tfa",
@@ -623,6 +674,11 @@ class Display(Widget):
             self.display_drv.fill_rect(x, y + h - 2, w, 2, c)
             self.display_drv.fill_rect(x, y, 2, h, c)
             self.display_drv.fill_rect(x + w - 2, y, 2, h, c)
+        from multimer import REQUIRES_RUN_QUEUED, Timer
+
+        needs_show = REQUIRES_RUN_QUEUED or getattr(Timer, "REQUIRES_RUN_QUEUED", False)
+        if needs_show:
+            self.display_drv.show()
 
     def remove_task(self, task):
         self._tasks.remove(task)
@@ -630,10 +686,13 @@ class Display(Widget):
     def quit(self):
         Display.displays.remove(self)
         if Display.timer and not Display.displays:
-            try:
-                Display.timer.deinit()
-            except Exception:
-                pass
+            timer = Display.timer
+            Display.timer = None
+            if not getattr(timer, "_busy", False):
+                try:
+                    timer.deinit()
+                except Exception:
+                    pass
         # display_drv.quit() releases SDL resources, restores the TTY, and
         # performs a low-level process exit.  sys.exit() raised from a timer or
         # micropython.schedule callback is printed and swallowed on the unix port.

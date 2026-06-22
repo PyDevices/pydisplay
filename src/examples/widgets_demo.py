@@ -1,4 +1,4 @@
-# multimer types: untested
+# multimer types: queued, sync
 import board_config
 import pdwidgets as pd
 
@@ -143,8 +143,4 @@ screen.add_event_cb(pd.events.MOUSEWHEEL, lambda sender, e: scroll_by(-e.y))
 screen.visible = True
 
 
-if not display.timer:
-    print("Starting main loop")
-    running = True
-    while running:
-        pd.tick()
+pd.run_forever()

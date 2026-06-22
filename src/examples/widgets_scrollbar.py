@@ -1,4 +1,4 @@
-# multimer types: untested
+# multimer types: queued, sync
 import board_config
 import pdwidgets as pd
 
@@ -24,8 +24,4 @@ s_bottom = pd.ScrollBar(bottom, value=0.5, align=pd.ALIGN.TOP)
 
 screen.visible = True
 
-if not display.timer:
-    print("Starting main loop")
-    running = True
-    while running:
-        pd.tick()
+pd.run_forever()

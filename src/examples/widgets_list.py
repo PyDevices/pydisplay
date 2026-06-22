@@ -2,7 +2,7 @@
 Test ListView widget
 """
 
-# multimer types: untested
+# multimer types: queued, sync
 import board_config
 import pdwidgets as pd
 
@@ -76,8 +76,4 @@ list_view.set_change_cb(
 
 screen.visible = True
 
-if not display.timer:
-    print("Starting main loop")
-    running = True
-    while running:
-        pd.tick()
+pd.run_forever()

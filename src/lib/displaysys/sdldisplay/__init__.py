@@ -346,11 +346,7 @@ class SDLDisplay(DisplayDriver):
             raise ValueError("Buffer size does not match dimensions")
         blitRect = SDL_Rect(x, y, w, h)
         if uses_ctypes_blit:
-            if isinstance(buffer, memoryview):
-                # CPython lvgl __dereference__ may yield a memoryview with obj=None.
-                backing = buffer if buffer.obj is None else buffer.obj
-                buffer_array = (ctypes.c_ubyte * len(backing)).from_buffer(backing)
-            elif type(buffer) is bytearray:
+            if isinstance(buffer, memoryview) or type(buffer) is bytearray:
                 buffer_array = (ctypes.c_ubyte * len(buffer)).from_buffer(buffer)
             else:
                 raise ValueError(

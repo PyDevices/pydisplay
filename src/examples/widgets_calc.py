@@ -1,4 +1,4 @@
-# multimer types: untested
+# multimer types: queued, sync
 import board_config
 import pdwidgets as pd
 
@@ -173,8 +173,4 @@ screen.add_event_cb(pd.events.KEYDOWN, lambda sender, e: handle_key_input(e.unic
 
 screen.visible = True
 
-if not display.timer:
-    print("Starting main loop")
-    running = True
-    while running:
-        pd.tick()
+pd.run_forever()

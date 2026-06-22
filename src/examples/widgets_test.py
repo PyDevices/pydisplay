@@ -1,4 +1,4 @@
-# multimer types: untested
+# multimer types: queued, sync
 import board_config
 import pdwidgets as pd
 
@@ -142,8 +142,4 @@ clock = pd.DigitalClock(screen, align=pd.ALIGN.TOP_RIGHT)
 
 screen.visible = True
 
-
-polling = not display.timer
-print("Polling" if polling else "Timer running")
-while polling:
-    pd.tick()
+pd.run_forever()

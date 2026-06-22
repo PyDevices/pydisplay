@@ -1,10 +1,11 @@
-import png
-from board_config import display_drv
-from displaybuf import DisplayBuffer, alloc_buffer
-from collections import namedtuple
-from time import sleep
+# multimer types: queued, sync
 import os
+from collections import namedtuple
 
+import png
+from color_setup import ssd
+from displaybuf import alloc_buffer
+from multimer import REQUIRES_RUN_QUEUED, run_queued, sleep_ms
 
 png_image = namedtuple("png_image", ["width", "height", "pixels", "metadata"])
 
@@ -21,9 +22,8 @@ png_path = "/home/brad/github/material-design-icons/png/"
 fg_color = 0xFFFF
 bg_color = 0x001F
 
-canvas = DisplayBuffer(display_drv)
-canvas.fill(bg_color)
-canvas.show()
+ssd.fill(bg_color)
+ssd.show()
 
 while True:
     for file_name in png_files(png_path):
@@ -31,7 +31,7 @@ while True:
         if not p.metadata["greyscale"] or p.metadata["bitdepth"] != 8:
             print(f"Only 8-bit PNGs are supported {file_name}")
             continue
-        pos_x, pos_y = (canvas.width - p.width) // 2, (canvas.height - p.height) // 2
+        pos_x, pos_y = (ssd.width - p.width) // 2, (ssd.height - p.height) // 2
         offset = 1 if p.metadata["alpha"] else 0
         planes = p.metadata["planes"]
         buf = alloc_buffer(p.width * p.height * 2)
@@ -45,11 +45,13 @@ while True:
                     buf[(y * p.width + x) * 2 : (y * p.width + x) * 2 + 2] = bg_color.to_bytes(
                         2, "little"
                     )
-        canvas.blit_rect(buf, pos_x, pos_y, p.width, p.height)
+        ssd.blit_rect(buf, pos_x, pos_y, p.width, p.height)
         lines = os.path.relpath(file_name, png_path).rpartition("/")
-        canvas.text16(lines[0] + "/", 0, 0, 0xFFFF)
-        canvas.text16("    " + lines[2], 0, 16, 0xFFFF)
-        canvas.show()
-        sleep(1)
-        canvas.fill_rect(pos_x, pos_y, p.width, p.height, bg_color)
-        canvas.fill_rect(0, 0, canvas.width, 32, bg_color)
+        ssd.text16(lines[0] + "/", 0, 0, 0xFFFF)
+        ssd.text16("    " + lines[2], 0, 16, 0xFFFF)
+        ssd.show()
+        sleep_ms(1000)
+        ssd.fill_rect(pos_x, pos_y, p.width, p.height, bg_color)
+        ssd.fill_rect(0, 0, ssd.width, 32, bg_color)
+        if REQUIRES_RUN_QUEUED:
+            run_queued()
