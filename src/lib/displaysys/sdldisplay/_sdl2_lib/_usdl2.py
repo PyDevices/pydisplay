@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-SDL2 subset for CircuitPython via the native usdl2 module (unix port).
+SDL2 subset via the native usdl2 module (MicroPython and CircuitPython unix ports).
 """
 
 import struct

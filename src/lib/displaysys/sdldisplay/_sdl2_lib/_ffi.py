@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-A bare implementation of SDL2 written in MicroPython using ffi
+SDL2 subset for MicroPython unix via ffi when the native usdl2 module is unavailable.
 """
 
 import struct

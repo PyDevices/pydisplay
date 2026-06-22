@@ -41,8 +41,8 @@
       "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/__init__.py"
     ],
     [
-      "displaysys/sdldisplay/_sdl2_lib/_circuitpython.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/_circuitpython.py"
+      "displaysys/sdldisplay/_sdl2_lib/_usdl2.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/_usdl2.py"
     ],
     [
       "displaysys/sdldisplay/_sdl2_lib/_constants.py",
@@ -53,8 +53,8 @@
       "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/_cpython.py"
     ],
     [
-      "displaysys/sdldisplay/_sdl2_lib/_micropython.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/_micropython.py"
+      "displaysys/sdldisplay/_sdl2_lib/_ffi.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/_ffi.py"
     ]
   ],
   "deps": [],

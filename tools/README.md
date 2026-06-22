@@ -121,7 +121,7 @@ Running `./tools/regenerate.sh --audit` before regeneration showed the committed
 | Package | Missing dest path | Source file |
 |---|---|---|
 | `add_ons` | `joystick_keypad.py` | `src/add_ons/joystick_keypad.py` |
-| `displaysys` | `displaysys/sdldisplay/_sdl2_lib/_circuitpython.py` | `src/lib/displaysys/sdldisplay/_sdl2_lib/_circuitpython.py` |
+| `displaysys` | `displaysys/sdldisplay/_sdl2_lib/_usdl2.py` | `src/lib/displaysys/sdldisplay/_sdl2_lib/_usdl2.py` |
 | `examples` | `joystick_list_select.py` | `src/examples/joystick_list_select.py` |
 | `multimer` | `multimer/_threading.py` | `src/lib/multimer/_threading.py` |
 | `pydisplay-bundle` | same entries under `add_ons/`, `lib/…` prefixes | (bundle composition) |

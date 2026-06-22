@@ -11,9 +11,15 @@ The module checks the implementation name and imports the appropriate backend.
 
 from sys import implementation
 
-if implementation.name == "micropython":
-    from ._micropython import *  # noqa: F403
-elif implementation.name == "circuitpython":
-    from ._circuitpython import *  # noqa: F403
+if implementation.name in ("micropython", "circuitpython"):
+    try:
+        import usdl2  # noqa: F401
+
+        from ._usdl2 import *  # noqa: F403
+    except ImportError:
+        if implementation.name == "micropython":
+            from ._ffi import *  # noqa: F403
+        else:
+            raise
 else:
     from ._cpython import *  # noqa: F403
