@@ -16,7 +16,7 @@ As examples are reviewed for [multimer](../concepts/multimer.md) portability (sy
 # multimer types: all
 ```
 
-**Progress (top-level `src/examples/*.py`):** **59 / 62** marked · **3** unmarked/excluded · `console_advanced_demo.py` intentionally excluded.
+**Progress (top-level `src/examples/*.py`):** **60 / 62** marked · **1** unmarked (`png_test.py`).
 
 ### Tag values
 
@@ -24,7 +24,7 @@ As examples are reviewed for [multimer](../concepts/multimer.md) portability (sy
 |-----|---------|
 | `all` | Works on sync, queued, and async timer backends without code changes (often one-shot + `display_drv.show()`, or event-poll + `show()`) |
 | `queued, sync` | Blocking loop with `run_queued()` + `sleep_ms()` (or finite variant in `timer_simpletest.py`) |
-| `sync` | Sync-only reference (`lv_test_timer_sync.py`; exits on queued platforms) |
+| `sync` | Sync-only or one-shot on the main thread (`lv_test_timer_sync.py` exits on queued platforms; `console_advanced_demo.py` uses `os.dupterm` + one `display_drv.show()`) |
 | `async` | `TIMER_ASYNC` + `asyncio` main loop |
 | `untested` | Marked for catalog coverage; multimer portability not yet tested (`widgets_*.py`, `joystick_list_select.py`) |
 | `NA` | Not applicable — shared module or test harness, not a runnable portability example (`lv_test_timer_common.py`, `lv_test_timer_harness.py`) |
@@ -87,7 +87,6 @@ On sync platforms the `if` block is skipped; on queued platforms (CPython SDL, C
 
 ### Notes
 
-- `console_advanced_demo.py` is intentionally **not** tagged — it redirects the REPL with `os.dupterm(console)`.
 - `displaysys_simpletest.py` and `eventsys_encoder_test.py` are tagged `all` but use event loops: call `display_drv.show()` after draws (no `run_queued()`). Same pattern as [`scroll_touch_test_displaybuf.py`](scroll_touch_test_displaybuf.py).
 - `font_simpletest.py` is tagged `all` but the framebuffer `blit_rect` path is blank on CircuitPython and MicroPython Windows; `font_simpletest2.py` (direct draw) works on tested platforms.
 - `nano_gui_simpletest.py` is tagged `all`; requires upstream [`gui/`](../guis/nano-gui.md) in `add_ons/`.
