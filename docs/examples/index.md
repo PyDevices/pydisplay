@@ -112,6 +112,17 @@ broker.poll()  # SDL message pump — required on MicroPython Windows
 
 On **MicroPython Windows** (and other ports using `multimer._polling`), `multimer.REQUIRES_RUN_QUEUED` is false but `Timer.REQUIRES_RUN_QUEUED` is true — check the **timer class** flag, not the module flag. Without `broker.poll()`, the SDL window can freeze after the first frame even when the Python loop keeps running.
 
+**LVGL apps** — [`spotify_remote/main.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/spotify_remote/main.py) (symlinked from spotapi):
+
+```python
+import display_driver
+
+# ... build LVGL UI ...
+display_driver.run()
+```
+
+Returns immediately on **MicroPython unix** and **CPython** (non-Windows) when `lv_utils` is already running — REPL stays usable. Blocks on **Windows** (`run_queued()` + `broker.poll()`) and **macOS** (`lv_utils` tick loop). See [LVGL guide](../guis/lvgl.md).
+
 **PyWidgets (pdwidgets)** — [`widgets_stub.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_stub.py): build UI, then:
 
 ```python
@@ -238,7 +249,7 @@ Runnable demos in subfolders use the same multimer markers as top-level examples
 | `noto_fonts/` | `noto_fonts.py` | `all` | MP · MCU | One-shot Noto font demo; same tail as `chango` |
 | `proverbs/` | `proverbs.py` | `queued, sync` | CPython · MP · MCU | Chinese proverb slideshow; UTF-8 fonts on MCU |
 | `tiny_toasters/` | `tiny_toasters.py` | `queued, sync` | CPython · MP · MCU | Sprite animation; `getrandbits` `randint` on MP Windows |
-| `spotify_remote/` | `main.py`, `keyboard_test.py` | `queued, sync` | CPython · MP · network | LVGL + OAuth; not in `examples.json`; blocks in `display_driver.run()` |
+| `spotify_remote/` | `main.py`, `keyboard_test.py` | `queued, sync` | CPython · MP · network | LVGL + OAuth; symlink to spotapi; `display_driver.run()` (REPL on unix; block on Windows) |
 | `apollo_dsky/` | — | — | — | Support module for top-level `apollo.py` |
 | `assets/` | — | — | — | Shared fonts and images |
 

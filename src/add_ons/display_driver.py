@@ -178,27 +178,32 @@ class DisplayDriver:
 
 def run():
     """
-    Block on the main thread so LVGL and multimer timers keep running.
+    Keep LVGL alive on the main thread when a blocking loop is required.
 
-    Call after UI setup when the app should not return to the REPL (for example
-    CircuitPython unix/SDL) or when ``lv_utils.event_loop.run()`` only loops on macOS.
+    On MicroPython unix and CPython (non-Windows), ``lv_utils`` already started
+    a periodic timer at ``import display_driver`` time — this returns immediately
+    so the REPL stays usable while the UI runs.
+
+    On Windows (MicroPython and CPython), blocks in ``run_queued()`` +
+    ``broker.poll()`` because the SDL message pump needs the main thread.
+
+    On macOS, blocks in ``lv_utils.event_loop.run()`` (manual tick loop).
     """
-
-    from board_config import broker
-
     from multimer import Timer, run_queued, sleep_ms
 
     inst = lv_utils.event_loop.current_instance()
-    if inst is not None and sys.platform == "darwin":
-        inst.run()
-        return
+    if inst is not None:
+        if sys.platform == "darwin":
+            inst.run()
+            return
+        if sys.platform != "win32":
+            return
 
     timer_req = getattr(Timer, "REQUIRES_RUN_QUEUED", False)
     while True:
         if timer_req:
             run_queued()
-        if sys.platform == "win32":
-            broker.poll()
+        broker.poll()
         sleep_ms(1)
 
 

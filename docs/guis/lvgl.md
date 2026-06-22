@@ -59,7 +59,7 @@ Set **`TIMER_ASYNC`** in `board_config.py` to choose the timer backend:
 
 When **`TIMER_ASYNC = True`**, `display_driver` disables SDL's sync `auto_refresh` timer and calls `display.show()` from the aio LVGL refresh loop instead. CircuitPython's default `multimer.Timer` uses a background thread and requires `run_queued()` — which an asyncio app does not call — so the window would never be presented otherwise.
 
-On CPython Win/mac (`TIMER_ASYNC = False`), call **`multimer.run_queued()`** from your main loop when using threaded timer backends — see [multimer](../concepts/multimer.md). Full apps can use **`display_driver.run()`** after UI setup (drains `run_queued()` on polling/threaded backends and pumps SDL events on Windows).
+On CPython Win/mac (`TIMER_ASYNC = False`), call **`multimer.run_queued()`** from your main loop when using threaded timer backends — see [multimer](../concepts/multimer.md). Full apps call **`display_driver.run()`** after UI setup: it returns immediately on MicroPython unix and CPython Linux (REPL stays live) and blocks only on Windows SDL or macOS.
 
 Override before import:
 
