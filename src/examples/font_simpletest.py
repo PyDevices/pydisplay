@@ -3,10 +3,8 @@
 font_simpletest.py -- Simple test of the Font class.
 inspired by Russ Hughes's hello.py
 
-Draws on a framebuffer and blits it to the display.
-
-Verified on MicroPython unix and CPython. Blank screen on CircuitPython and
-MicroPython on Windows (see plan: font_simpletest display / MP Windows SDL issues).
+Draws on a framebuffer, blits to the display, and calls display_drv.show()
+after each draw (required on queued/SDL backends).
 """
 
 from board_config import display_drv

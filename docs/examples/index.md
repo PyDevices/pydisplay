@@ -88,7 +88,7 @@ On sync platforms the `if` block is skipped; on queued platforms (CPython SDL, C
 ### Notes
 
 - `displaysys_simpletest.py` and `eventsys_encoder_test.py` are tagged `all` but use event loops: call `display_drv.show()` after draws (no `run_queued()`). Same pattern as [`scroll_touch_test_displaybuf.py`](scroll_touch_test_displaybuf.py).
-- `font_simpletest.py` is tagged `all` but the framebuffer `blit_rect` path is blank on CircuitPython and MicroPython Windows; `font_simpletest2.py` (direct draw) works on tested platforms.
+- `font_simpletest.py` is tagged `all`; blits a small framebuffer with `display_drv.blit_rect()` and calls `display_drv.show()` after each draw.
 - `nano_gui_simpletest.py` is tagged `all`; requires upstream [`gui/`](../guis/nano-gui.md) in `add_ons/`.
 **Legend:** Platforms = CPython · MCU · PyScript · Wokwi · Packages = core · add_ons · LVGL
 
