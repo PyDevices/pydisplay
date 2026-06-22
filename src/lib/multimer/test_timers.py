@@ -209,6 +209,10 @@ def _import_aio_timer():
     return _import_timer("aio")
 
 
+def _import_polling_timer():
+    return _import_timer("_polling")
+
+
 def _import_multimer_timer():
     from multimer import Timer
 
@@ -223,6 +227,7 @@ def main():
         ("_ffi.Timer", _import_ffi_timer, False, False),
         ("_sdl2.Timer", _import_sdl2_timer, False, False),
         ("_threading.Timer", _import_threading_timer, False, False),
+        ("_polling.Timer", _import_polling_timer, False, False),
         ("_ctypes.Timer", _import_ctypes_timer, False, False),
         ("aio.Timer", _import_aio_timer, True, False),
         ("aio.Timer (run_queued loop)", _import_aio_timer, False, True),

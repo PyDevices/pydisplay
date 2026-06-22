@@ -100,4 +100,9 @@ else:
     REQUIRES_RUN_QUEUED = False
 
     def run_queued(max_items=None):
-        pass
+        try:
+            from ._polling import _tick
+
+            _tick(max_items)
+        except ImportError:
+            pass

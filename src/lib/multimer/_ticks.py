@@ -84,9 +84,33 @@ def ticks_less(ticks1: int, ticks2: int) -> bool:
 
 
 try:
-    from time import sleep_ms
+    from time import sleep_ms as _time_sleep_ms
 except ImportError:
     import time
 
-    def sleep_ms(ms):
+    def _time_sleep_ms(ms):
         time.sleep(ms / 1000)
+
+
+def _tick_polling_timers():
+    try:
+        from ._polling import _tick
+
+        _tick()
+    except ImportError:
+        pass
+
+
+def sleep_ms(ms):
+    if ms <= 0:
+        _tick_polling_timers()
+        return
+
+    end = ticks_add(ticks_ms(), ms)
+    while True:
+        _tick_polling_timers()
+        delay = ticks_diff(end, ticks_ms())
+        if delay <= 0:
+            break
+        chunk = delay if delay < 10 else 10
+        _time_sleep_ms(chunk)

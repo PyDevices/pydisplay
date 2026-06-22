@@ -23,10 +23,14 @@ else:
             _thread.start_new_thread(fn, ())
 
     except ImportError:
-        import threading
+        try:
+            import threading
 
-        def _spawn(fn):
-            threading.Thread(target=fn, daemon=True).start()
+            def _spawn(fn):
+                threading.Thread(target=fn, daemon=True).start()
+
+        except ImportError:
+            raise ImportError("no thread support") from None
 
 
 class Timer(_TimerBase):

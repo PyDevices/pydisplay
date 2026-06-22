@@ -10,10 +10,11 @@ Cross-platform Timer class for *Python.
 Enables using 'from multimer import Timer' on MicroPython on microcontrollers,
 on MicroPython on Unix (which doesn't have a machine.Timer) and CPython (ditto).
 
-_ffi.py uses MicroPython ffi to connect to libc and librt.  CPython on Linux uses
-_ctypes.py (POSIX librt via ctypes; callbacks on the main thread without run_queued).
-Other CPython ports use _threading.py (_sdl2.py if threading is unavailable).
-CircuitPython unix uses _threading.py.
+_ffi.py uses MicroPython ffi to connect to libc and librt (MicroPython unix only).
+MicroPython Windows and other ports without ffi or threads use _polling.py.
+CPython on Linux uses _ctypes.py (POSIX librt via ctypes; callbacks on the main
+thread without run_queued).  Other CPython ports use _threading.py (_sdl2.py if
+threading is unavailable).  CircuitPython unix uses _threading.py.
 
 Returns None if the platform is not supported rather than raising an ImportError so that
 the client can handle the error more gracefully (e.g. by using `if Timer is not None:`).
@@ -25,8 +26,9 @@ Usage:
     ....
     tim.deinit()
 
-On CPython (non-Linux) and CircuitPython, call ``run_queued()`` from the main
-thread to drain queued callbacks (for example in an event loop).
+On CPython (non-Linux), CircuitPython, and MicroPython ports using the polling
+backend, call ``run_queued()`` from the main thread to drain queued callbacks
+(for example in an event loop).  ``sleep_ms()`` also advances polling timers.
 
 For asyncio-based apps, use ``multimer.aio`` — see ``docs/concepts/multimer.md``.
 """
@@ -41,8 +43,14 @@ DEBUG = True
 try:
     from machine import Timer  # MicroPython on microcontrollers
 except ImportError:
-    if sys.implementation.name == "micropython":  # MicroPython on Unix
-        from ._ffi import Timer
+    if sys.implementation.name == "micropython":
+        try:
+            from ._ffi import Timer
+        except ImportError:
+            try:
+                from ._threading import Timer
+            except ImportError:
+                from ._polling import Timer
     elif sys.implementation.name == "cpython":  # Big Python
         try:
             from ._ctypes import Timer
