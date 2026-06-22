@@ -5,13 +5,23 @@ lv_test_timer_harness.py
 Automated LVGL timer + input test for sync, queued, and async modes.
 Run from ~/github/pydisplay/src (import lib.path must be first).
 
-Usage:
-    python examples/lv_test_timer_harness.py sync
-    lv examples/lv_test_timer_harness.py queued
+Usage (from pydisplay/src):
+    .venv/bin/python examples/lv_test_timer_harness.py queued
+    micropython examples/lv_test_timer_harness.py queued
     circuitpython examples/lv_test_timer_harness.py async
 
 Prints a KIT_RESULT= JSON line on stdout for tools/lv_timer_test_kit.py.
 """
+
+import sys
+
+_file = __file__.replace("\\", "/").split("/")
+if len(_file) >= 2 and _file[-2] == "examples":
+    _src = "/".join(_file[:-2]) or "."
+else:
+    _src = "."
+if _src not in sys.path:
+    sys.path.insert(0, _src)
 
 import lib.path  # noqa: F401 — must be first
 
@@ -25,19 +35,9 @@ _RESULT_PREFIX = "KIT_RESULT="
 
 def _timer_backend():
     try:
-        from multimer import Timer
+        from lv_test_timer_common import timer_backend_name
 
-        mod = getattr(Timer, "__module__", "?")
-        name = getattr(Timer, "__qualname__", getattr(Timer, "__name__", "?"))
-        if mod.endswith("_ffi"):
-            return "_ffi"
-        if mod.endswith("_ctypes"):
-            return "_ctypes"
-        if mod.endswith("_threading"):
-            return "_threading"
-        if mod.endswith("_sdl2"):
-            return "_sdl2"
-        return f"{mod}.{name}"
+        return timer_backend_name()
     except Exception as exc:
         return f"error:{exc!r}"
 
@@ -303,6 +303,17 @@ def _print_result(result):
     sys.stdout.flush()
 
 
+def _deinit_display():
+    try:
+        import lv_utils
+
+        inst = lv_utils.event_loop.current_instance()
+        if inst is not None:
+            inst.deinit()
+    except Exception:
+        pass
+
+
 def _run_sync():
     import board_config
 
@@ -346,6 +357,7 @@ def _run_sync():
     }
     click = _click_status("sync", state["seconds"], inp)
     _print_result(_result_payload("sync", click, state, broker_polls, inp))
+    _deinit_display()
 
 
 def _run_queued():
@@ -353,15 +365,21 @@ def _run_queued():
 
     board_config.TIMER_ASYNC = False
 
+    from board_config import broker
+
     import display_driver  # noqa: F401
     from lv_test_timer_common import build_ui, get_state
-    from multimer import run_queued, sleep_ms
+    from multimer import Timer, run_queued, sleep_ms
+
+    timer_req = getattr(Timer, "REQUIRES_RUN_QUEUED", False)
 
     def queued_pump(n=5, delay_s=0):
         import lvgl as lv
 
         for _ in range(n):
             run_queued()
+            if timer_req:
+                broker.poll()
             if lv._nesting.value == 0:
                 lv.task_handler()
             if delay_s:
@@ -374,23 +392,28 @@ def _run_queued():
     deadline = time.time() + _DURATION_S
     input_tests = None
 
-    while time.time() < deadline:
-        run_queued()
-        sleep_ms(1)
+    try:
+        while time.time() < deadline:
+            run_queued()
+            if timer_req:
+                broker.poll()
+            sleep_ms(1)
 
-        if input_tests is None and get_state()["seconds"] >= 2:
-            input_tests = _run_input_tests(btn, cx, cy, pump=queued_pump)
+            if input_tests is None and get_state()["seconds"] >= 2:
+                input_tests = _run_input_tests(btn, cx, cy, pump=queued_pump)
 
-    state = get_state()
-    inp = input_tests or {
-        "sdl_stolen_taps": 0,
-        "sdl_lv_taps": 0,
-        "fifo_taps": 0,
-        "lv_event_ok": False,
-        "taps_total": state["taps"],
-    }
-    click = _click_status("queued", state["seconds"], inp)
-    _print_result(_result_payload("queued", click, state, broker_polls, inp))
+        state = get_state()
+        inp = input_tests or {
+            "sdl_stolen_taps": 0,
+            "sdl_lv_taps": 0,
+            "fifo_taps": 0,
+            "lv_event_ok": False,
+            "taps_total": state["taps"],
+        }
+        click = _click_status("queued", state["seconds"], inp)
+        _print_result(_result_payload("queued", click, state, broker_polls, inp))
+    finally:
+        _deinit_display()
 
 
 def _run_async():
@@ -408,6 +431,8 @@ def _run_async():
     result = {}
 
     async def main():
+        from board_config import broker
+
         import display_driver  # noqa: F401
         from lv_test_timer_common import build_ui, get_state
 
@@ -418,22 +443,26 @@ def _run_async():
         deadline = time.time() + _DURATION_S
         input_tests = None
 
-        while time.time() < deadline:
-            await asyncio.sleep(0)
+        try:
+            while time.time() < deadline:
+                broker.poll()
+                await asyncio.sleep(0)
 
-            if input_tests is None and get_state()["seconds"] >= 2:
-                input_tests = await _run_input_tests_async(btn, cx, cy)
+                if input_tests is None and get_state()["seconds"] >= 2:
+                    input_tests = await _run_input_tests_async(btn, cx, cy)
 
-        state = get_state()
-        inp = input_tests or {
-            "sdl_stolen_taps": 0,
-            "sdl_lv_taps": 0,
-            "fifo_taps": 0,
-            "lv_event_ok": False,
-            "taps_total": state["taps"],
-        }
-        click = _click_status("async", state["seconds"], inp)
-        result.update(_result_payload("async", click, state, broker_polls, inp))
+            state = get_state()
+            inp = input_tests or {
+                "sdl_stolen_taps": 0,
+                "sdl_lv_taps": 0,
+                "fifo_taps": 0,
+                "lv_event_ok": False,
+                "taps_total": state["taps"],
+            }
+            click = _click_status("async", state["seconds"], inp)
+            result.update(_result_payload("async", click, state, broker_polls, inp))
+        finally:
+            _deinit_display()
 
     run(main)
     _print_result(result)

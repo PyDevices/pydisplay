@@ -20,11 +20,12 @@ import sys
 REPO = Path(__file__).resolve().parent.parent
 SRC = REPO / "src"
 HARNESS = SRC / "examples" / "lv_test_timer_harness.py"
+HARNESS_ARG = "examples/lv_test_timer_harness.py"
 RESULT_RE = re.compile(r"^KIT_RESULT=(.+)$", re.MULTILINE)
 DEFAULT_TIMEOUT = 45
 
 INTERPRETERS = {
-    "micropython": ["lv"],
+    "micropython": ["micropython"],
     "circuitpython": ["circuitpython"],
     "cpython": [str(SRC / ".venv" / "bin" / "python")],
 }
@@ -49,7 +50,7 @@ def _resolve_interpreters(only: list[str] | None) -> dict[str, list[str]]:
     return out
 
 
-def _parse_result(stdout: str) -> dict | None:
+def parse_result(stdout: str) -> dict | None:
     for match in RESULT_RE.finditer(stdout):
         try:
             return json.loads(match.group(1))
@@ -58,7 +59,7 @@ def _parse_result(stdout: str) -> dict | None:
     return None
 
 
-def _summarize(result: dict | None, returncode: int, timed_out: bool) -> str:
+def summarize(result: dict | None, returncode: int, timed_out: bool) -> str:
     if timed_out:
         return "hang"
     if result is None:
@@ -89,16 +90,55 @@ def _summarize(result: dict | None, returncode: int, timed_out: bool) -> str:
     return f"{backend}, ok"
 
 
-def run_case(interpreter: str, cmd_base: list[str], mode: str, timeout: int) -> dict:
-    code = f"import lib.path; import lv_test_timer_harness; lv_test_timer_harness.main({mode!r})"
-    cmd = [*cmd_base, "-c", code]
+def compute_exit_code(rows: list[dict], *, strict_clicks: bool = False) -> int:
+    failed = []
+    for row in rows:
+        if row.get("summary") == "missing":
+            continue
+        if row["timed_out"] or row["summary"].startswith("exit_") or row["summary"] == "no_result":
+            failed.append(row)
+            continue
+        result = row.get("result")
+        if not result:
+            failed.append(row)
+            continue
+        if result.get("status") == "skip":
+            continue
+        if result.get("status") == "error":
+            failed.append(row)
+            continue
+        if result.get("seconds", 0) < 2 and result.get("status") != "skip":
+            failed.append(row)
+            continue
+        if strict_clicks and result.get("click_status") != "ok":
+            failed.append(row)
+            continue
+        if not strict_clicks and (
+            row["summary"].endswith(", no timers") or row["summary"].endswith(", error")
+        ):
+            failed.append(row)
+    return 1 if failed else 0
+
+
+def run_case(
+    interpreter: str,
+    cmd_base: list[str],
+    mode: str,
+    timeout: int = DEFAULT_TIMEOUT,
+    *,
+    cwd: Path | None = None,
+) -> dict:
+    cmd = [*cmd_base, HARNESS_ARG, mode]
     env = os.environ.copy()
+    run_cwd = str(cwd or SRC)
     try:
         proc = subprocess.run(
             cmd,
-            cwd=str(SRC),
+            cwd=run_cwd,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=timeout,
             env=env,
             check=False,
@@ -113,8 +153,8 @@ def run_case(interpreter: str, cmd_base: list[str], mode: str, timeout: int) -> 
         stdout = (exc.stdout or "") if isinstance(exc.stdout, str) else ""
         stderr = (exc.stderr or "") if isinstance(exc.stderr, str) else ""
 
-    result = _parse_result(stdout)
-    summary = _summarize(result, returncode, timed_out)
+    result = parse_result(stdout)
+    summary = summarize(result, returncode, timed_out)
     return {
         "interpreter": interpreter,
         "mode": mode,
@@ -127,20 +167,20 @@ def run_case(interpreter: str, cmd_base: list[str], mode: str, timeout: int) -> 
     }
 
 
-def print_table(rows: list[dict]):
+def print_table(rows: list[dict], modes: tuple[str, ...] = MODES):
     flavors = sorted({r["interpreter"] for r in rows})
-    col_w = max(8, max(len(m) for m in MODES) + 2)
+    col_w = max(8, max(len(m) for m in modes) + 2)
     flavor_w = max(12, max(len(f) for f in flavors) + 2)
 
-    header = f"{'flavor':<{flavor_w}} |" + "|".join(f"{m:<{col_w}}" for m in MODES)
-    sep = "-" * flavor_w + "-+-" + "-+-".join("-" * col_w for _ in MODES)
+    header = f"{'flavor':<{flavor_w}} |" + "|".join(f"{m:<{col_w}}" for m in modes)
+    sep = "-" * flavor_w + "-+-" + "-+-".join("-" * col_w for _ in modes)
     print(header)
     print(sep)
 
     by_key = {(r["interpreter"], r["mode"]): r["summary"] for r in rows}
     for flavor in flavors:
         cells = [f"{flavor:<{flavor_w}}"]
-        for mode in MODES:
+        for mode in modes:
             cells.append(f"{by_key.get((flavor, mode), '—'):<{col_w}}")
         print(" |".join(cells))
 
@@ -175,24 +215,14 @@ def main():
                 print(json.dumps(row, indent=2))
 
     print()
-    print_table(rows)
+    print_table(rows, tuple(args.modes))
 
     out_path = REPO / ".cursor" / "lv_timer_test_kit_results.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(rows, indent=2) + "\n")
     print(f"\nFull results: {out_path}", file=sys.stderr)
 
-    # Exit 1 only for unexpected failures (not the known queued/async click issue).
-    failed = [
-        r
-        for r in rows
-        if r["timed_out"]
-        or r["summary"].startswith("exit_")
-        or r["summary"] == "no_result"
-        or r["summary"].endswith(", no timers")
-        or r["summary"].endswith(", error")
-    ]
-    return 1 if failed else 0
+    return compute_exit_code(rows, strict_clicks=False)
 
 
 if __name__ == "__main__":
