@@ -66,7 +66,12 @@ elif implementation.name == "circuitpython":
     uses_native_event = True
     uses_ctypes_blit = False
 else:
-    uses_native_event = False
+    try:
+        import usdl2  # noqa: F401
+
+        uses_native_event = True
+    except ImportError:
+        uses_native_event = False
     uses_ctypes_blit = False
 
 # Linux c_lflag bits (MicroPython termios has no ECHO/ICANON constants).
