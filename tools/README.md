@@ -210,6 +210,33 @@ The repo-root `manifest.py` is separate: it lists packages for **frozen MicroPyt
 
 ---
 
+## LVGL desktop test runners
+
+Automated checks for LVGL timer and input behavior across desktop Python ports. Full walkthrough: [LVGL guide — Desktop test suite](../docs/guis/lvgl.md#desktop-test-suite).
+
+### `run_desktop_lv_tests.py`
+
+Nine sequential harness runs (`queued` + `async` on each available desktop executable; async skipped on `micropython.exe`).
+
+```bash
+python tools/run_desktop_lv_tests.py
+```
+
+Requires `micropython`, `circuitpython`, and optionally `micropython.exe` / `python.exe` on `PATH`, plus `src/.venv/bin/python` for the CPython Linux venv. Results: summary table on stdout, JSON at `.cursor/desktop_lv_test_results.json`.
+
+### `lv_timer_test_kit.py`
+
+Smaller matrix for local development — default interpreters (micropython, circuitpython, `src/.venv/bin/python`) × modes (`sync`, `queued`, `async`):
+
+```bash
+python tools/lv_timer_test_kit.py
+python tools/lv_timer_test_kit.py --only cpython async
+```
+
+Both runners invoke [`src/examples/lv_test_timer_harness.py`](../src/examples/lv_test_timer_harness.py) from `src/` and parse `KIT_RESULT=` lines from stdout.
+
+---
+
 ## `convert_md_png_to_pbm.py`
 
 Bulk-converts [Material Design Icons](https://github.com/google/material-design-icons) PNGs to `.pbm` files for `pdwidgets` / `icons/`.

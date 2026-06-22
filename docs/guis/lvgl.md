@@ -79,6 +79,56 @@ Three scripts share the same UI via `lv_test_timer_common.build_ui()` and differ
 | [`lv_test_timer_queued.py`](../../src/examples/lv_test_timer_queued.py) | CPython Win/mac — `run_queued()` drain loop only |
 | [`lv_test_timer_async.py`](../../src/examples/lv_test_timer_async.py) | PyScript / asyncio — `TIMER_ASYNC = True`, deferred `import display_driver`, `await asyncio.sleep(0)` loop |
 
+The shared UI ([`lv_test_timer_common.py`](../../src/examples/lv_test_timer_common.py)) shows autodetected **runtime**, **OS**, **display** driver class, **timer** backend, and **LVGL** version.
+
+### Automated harness
+
+[`lv_test_timer_harness.py`](../../src/examples/lv_test_timer_harness.py) runs a timed LVGL timer + input check and prints a `KIT_RESULT=` JSON line on stdout (for CI and tooling). Run from `src/`:
+
+```bash
+cd src
+micropython examples/lv_test_timer_harness.py queued
+.venv/bin/python examples/lv_test_timer_harness.py async
+```
+
+Modes: `sync`, `queued`, `async`.
+
+### Desktop test suite
+
+[`tools/run_desktop_lv_tests.py`](../../tools/run_desktop_lv_tests.py) runs the harness across **five desktop Python+LVGL executables** in sequence (nine subprocess runs total — `queued` and `async` per runtime; **async is omitted on MicroPython Windows** because that port has no asyncio).
+
+| Executable | How resolved |
+|------------|--------------|
+| MicroPython (Unix) | `micropython` on `PATH` |
+| CircuitPython | `circuitpython` on `PATH` |
+| MicroPython (Windows) | `micropython.exe` on `PATH` |
+| CPython (Windows) | `python.exe` on `PATH` |
+| CPython (Linux venv) | `src/.venv/bin/python` |
+
+Each run uses `cwd=src/` and opens a window until the harness exits (~4 s). Missing executables are skipped (`missing` in the summary table).
+
+From the repository root:
+
+```bash
+python tools/run_desktop_lv_tests.py
+./tools/run_desktop_lv_tests.py
+```
+
+From `src/`:
+
+```bash
+../tools/run_desktop_lv_tests.py
+```
+
+The script prints a summary table (`queued` / `async` columns) and writes full results to `.cursor/desktop_lv_test_results.json`. Exit code **1** if any run hangs, crashes, fails timers, or fails click checks (strict policy).
+
+For a smaller **3×3 matrix** (micropython, circuitpython, cpython-venv × sync/queued/async), use [`tools/lv_timer_test_kit.py`](../../tools/lv_timer_test_kit.py):
+
+```bash
+python tools/lv_timer_test_kit.py
+python tools/lv_timer_test_kit.py --only cpython queued async
+```
+
 ## Next
 
 - [Architecture](../concepts/architecture.md)
