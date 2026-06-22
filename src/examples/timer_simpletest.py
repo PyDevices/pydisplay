@@ -1,11 +1,14 @@
+# multimer types: queued, sync
 """
 This is a simple test script that tests the basic functionality of the timer class.
 
 It creates a periodic timer in a class instance and a one-shot timer that stops the periodic timer.
 """
 
-from multimer import Timer
+from multimer import Timer, run_queued, sleep_ms
 from sys import platform
+
+_done = False
 
 
 class TimerTest:
@@ -21,8 +24,10 @@ class TimerTest:
         self._counter += 1
 
     def stop(self, t=None):
+        global _done
         self._tim.deinit()
         print(f"TimerTest:  timer stopped after {self._counter:,} calls.")
+        _done = True
 
 
 # Create a timer that calls tt.do_something every 1ms
@@ -32,3 +37,7 @@ tt.start(1)
 # Create a timer that stops the first timer after 5 seconds
 tim2 = Timer(-1 if platform == "rp2" else 2)
 tim2.init(mode=Timer.ONE_SHOT, period=5000, callback=tt.stop)
+
+while not _done:
+    run_queued()
+    sleep_ms(1)

@@ -1,3 +1,4 @@
+# multimer types: queued, sync
 from board_config import broker
 from keypins import KeyPins, Keys
 

@@ -1,5 +1,6 @@
+# multimer types: all
 from color_setup import ssd
-from framebuf import FrameBuffer, RGB565
+from graphics import FrameBuffer, RGB565
 
 
 ssd.fill(0xF800)

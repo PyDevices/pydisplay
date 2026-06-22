@@ -1,3 +1,4 @@
+# multimer types: all
 """
 scroll.py
 =========
@@ -22,7 +23,7 @@ Only works with fonts with heights that are even multiples of the screen height,
 
 """
 
-import time
+from multimer import sleep_ms
 import tft_text
 import tft_config
 
@@ -39,6 +40,7 @@ def main():
     tft.vscrdef(tfa, tft.height - tfa - bfa, bfa)
 
     tft.draw.fill(palette.BLUE)
+    tft.show()
     scroll = 0
     character = 0
     col = tft.width // 2 - 5 * font.WIDTH // 2
@@ -60,12 +62,13 @@ def main():
             character = character + 1 if character < 256 else 0
 
         tft.vscsad(scroll + tfa)
+        tft.show()
         scroll += 1
 
         if scroll == tft.height:
             scroll = 0
 
-        time.sleep(0.01)
+        sleep_ms(10)
 
 
 main()

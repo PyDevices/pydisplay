@@ -1,21 +1,17 @@
+# multimer types: queued, sync
+from collections import namedtuple
+from random import choice
+
 from board_config import display_drv
 from bmp565 import BMP565
-from time import sleep
-from random import choice
-from collections import namedtuple
-
-show = display_drv.show if hasattr(display_drv, "show") else lambda: None
-
+from multimer import run_queued, sleep_ms
 
 image = BMP565("examples/assets/warrior.bmp", streamed=True)
 print(f"\n{image.width=}, {image.height=}, {image.bpp=}")
 sprite_height = image.height // 4
 sprite_width = image.width // 3
-bg = image[0]  # top left pixel is the background color
+bg = image[0]
 print(f"{sprite_width=}, {sprite_height=} {bg=:#0x}\n")
-# display_drv.fill(0x0)
-# display_drv.blit_rect(image[sprite_height:sprite_height*2], 0, 0, image.width, sprite_height)
-# sleep(2)
 
 back, right, fwd, left = [x * sprite_height for x in range(4)]
 directions = [fwd, left, right, back]
@@ -45,7 +41,7 @@ def draw_sprite(
 
 
 display_drv.fill(bg)
-show()
+display_drv.show()
 
 point = namedtuple("point", "x y")
 location = point(0, 0)
@@ -55,7 +51,7 @@ draw_sprite(*location, *sprite)
 step = 3
 dir = choice(directions)
 while True:
-    if choice((True, False, False, False, False)):  # 20% chance of changing direction
+    if choice((True, False, False, False, False)):
         dir = choice(directions)
     if dir == fwd and location.y + sprite_height > display_drv.height - step * 4:
         continue
@@ -84,5 +80,6 @@ while True:
             display_drv.fill_rect(location.x, location.y, step, sprite_height, bg)
             location = point(location.x + step, location.y)
         draw_sprite(*location, pos, dir)
-        show()
-        sleep(0.1)
+        display_drv.show()
+        run_queued()
+        sleep_ms(100)

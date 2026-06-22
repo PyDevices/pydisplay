@@ -1,3 +1,10 @@
+# multimer types: async
+"""
+apollo.py — Apollo Guidance Computer DSKY emulator.
+
+Written for 320×480 displays. Other resolutions may show or behave oddly
+(scrolling, touch mapping, and layout assume that viewport size).
+"""
 import gc
 
 try:
@@ -15,10 +22,18 @@ gc.collect()
 mem = mem_free()
 print(f"Free memory at start: {mem:,}")
 
+import board_config  # noqa: E402
+
+board_config.TIMER_ASYNC = True
+
 from board_config import display_drv, broker  # noqa: E402
 import apollo_dsky as dsky  # noqa: E402
 import time  # noqa: E402
-import asyncio  # noqa: E402
+
+try:
+    import asyncio  # noqa: E402
+except ImportError:
+    import uasyncio as asyncio  # noqa: E402
 
 
 async def write_time():
@@ -32,6 +47,7 @@ async def write_time():
             last_time = (y, mo, d, h, m, s)
             gc.collect()
             dsky.write_string(f"{mem-mem_free():7}", dsky.data3_pos)
+            display_drv.show()
         await asyncio.sleep(0.5)
 
 
@@ -42,20 +58,22 @@ async def scroll():
         scroll_range = (display_drv.height, dsky.height - 1, -1)
     for i in range(*scroll_range):
         display_drv.vscsad(i)
+        display_drv.show()
         await asyncio.sleep(0.001)
 
 
 async def main():
     dsky.init_screen()
+    display_drv.show()
 
     dsky.write_string("42", dsky.prog_pos)
     dsky.write_string("01", dsky.verb_pos)
     dsky.write_string("23", dsky.noun_pos)
+    display_drv.show()
 
     while True:
-        await asyncio.sleep(0)
         broker.poll()
-        if (keys := dsky.keypad.read()) is not None:
+        if keys := dsky.keypad.read():
             for key in keys:
                 dsky.set_acty(True)
                 dsky.set_button(key, True)
@@ -68,15 +86,15 @@ async def main():
                 await asyncio.sleep(0.2)
                 dsky.set_button(key, False)
                 dsky.set_acty(False)
+                display_drv.show()
+        await asyncio.sleep(0)
 
 
-loop = asyncio.get_event_loop()
-tasks = [
-    loop.create_task(main()),
-    loop.create_task(write_time()),
-]
-if hasattr(loop, "is_running") and loop.is_running():
-    pass
+async def run():
+    await asyncio.gather(main(), write_time())
+
+
+if hasattr(asyncio, "run"):
+    asyncio.run(run())
 else:
-    if hasattr(loop, "run_forever"):
-        loop.run_forever()
+    asyncio.get_event_loop().run_until_complete(run())

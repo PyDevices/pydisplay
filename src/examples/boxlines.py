@@ -1,3 +1,4 @@
+# multimer types: all
 """
 boxlines.py
 ===========
@@ -19,10 +20,23 @@ Draws lines and rectangles in random colors at random locations on the display.
 
 """
 
-import random
+from random import getrandbits
+
 import tft_config
 
 palette = tft_config.palette
+
+
+def randint(a, b):
+    span = b - a + 1
+    if span <= 1:
+        return a
+    bits = 0
+    n = span - 1
+    while n:
+        bits += 1
+        n >>= 1
+    return a + getrandbits(bits) % span
 
 
 def main():
@@ -30,29 +44,28 @@ def main():
     tft = tft_config.config(tft_config.WIDE)
 
     while True:
-        color = palette.color565(
-            random.getrandbits(8), random.getrandbits(8), random.getrandbits(8)
-        )
+        color = palette.color565(getrandbits(8), getrandbits(8), getrandbits(8))
 
         tft.draw.line(
-            random.randint(0, tft.width),
-            random.randint(0, tft.height),
-            random.randint(0, tft.width),
-            random.randint(0, tft.height),
+            randint(0, tft.width),
+            randint(0, tft.height),
+            randint(0, tft.width),
+            randint(0, tft.height),
             color,
         )
 
-        width = random.randint(0, tft.width // 2)
-        height = random.randint(0, tft.height // 2)
-        col = random.randint(0, tft.width - width)
-        row = random.randint(0, tft.height - height)
+        width = randint(0, tft.width // 2)
+        height = randint(0, tft.height // 2)
+        col = randint(0, tft.width - width)
+        row = randint(0, tft.height - height)
         tft.draw.fill_rect(
             col,
             row,
             width,
             height,
-            palette.color565(random.getrandbits(8), random.getrandbits(8), random.getrandbits(8)),
+            palette.color565(getrandbits(8), getrandbits(8), getrandbits(8)),
         )
+        tft.show()
 
 
 main()

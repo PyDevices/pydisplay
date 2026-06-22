@@ -19,8 +19,10 @@ from board_config import display_drv, broker
 keys = [1, 2, 3, "A", "B", "C", "play", "pause", "esc"]
 keypad = Keypad(broker.poll, 0, 0, display_drv.width, display_drv.height, cols=3, rows=3, keys=keys)
 while True:
-    if key := keypad.read():
-        print(key)
+    broker.poll()
+    if keys := keypad.read():
+        print(keys)
+    # For held-key polling (e.g. continuous movement), use keypad.read_held()
 """
 
 from eventsys import events
@@ -54,6 +56,7 @@ class Keypad:
                 for i in range(cols)
             ]
         self._state = dict.fromkeys(self._keys, False)
+        self._clicks = []
         self._broker.subscribe(
             self.callback,
             event_types=[
@@ -66,7 +69,7 @@ class Keypad:
 
     def callback(self, event):
         if event.type in [events.MOUSEBUTTONDOWN, events.MOUSEBUTTONUP] and event.button == 1:
-            x, y = event.pos
+            x, y = self._translate(event.pos)
             if x < self.x or x > self.x + self.w or y < self.y or y > self.y + self.h:
                 return
             col = int((x - self.x) / self.key_width)
@@ -75,6 +78,8 @@ class Keypad:
             # Instead of doing a bounds check we just catch the exception.
             try:
                 key = self._keys[row * self.cols + col]
+                if event.type == events.MOUSEBUTTONDOWN:
+                    self._clicks.append(key)
                 self._state[key] = event.type == events.MOUSEBUTTONDOWN
                 return
             except IndexError:
@@ -83,7 +88,18 @@ class Keypad:
         if event.type in [events.KEYDOWN, events.KEYUP]:
             key = event.key
             if key in self._keys:
+                if event.type == events.KEYDOWN:
+                    self._clicks.append(key)
                 self._state[key] = event.type == events.KEYDOWN
 
     def read(self):
+        """Return keys pressed since the last ``read()`` (edge triggered)."""
+        if not self._clicks:
+            return None
+        clicks = self._clicks
+        self._clicks = []
+        return clicks
+
+    def read_held(self):
+        """Return keys currently held down (level triggered)."""
         return [k for k, v in self._state.items() if v]

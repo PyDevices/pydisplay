@@ -1,3 +1,4 @@
+# multimer types: all
 """
 color_test.py
 =============
@@ -21,11 +22,10 @@ gradient.  Then repeatedly draws a borders around the display in the same colors
 
 """
 
-from time import sleep
+from multimer import sleep_ms
 import tft_config
 import tft_text
 import vga2_bold_16x32 as font
-
 
 palette = tft_config.palette
 
@@ -73,6 +73,8 @@ def main():
         text_y = start_row + (end_row - start_row - font.HEIGHT) // 2
         tft_text.text(tft, font, name, text_x, text_y, palette.WHITE, color)
 
+    tft.show()
+
     while True:
         for color in [palette.RED, palette.GREEN, palette.BLUE]:
             for x in range(tft.width):
@@ -83,7 +85,8 @@ def main():
                 tft.draw.pixel(0, y, color)
                 tft.draw.pixel(tft.width - 1, y, color)
 
-            sleep(1)
+            tft.show()
+            sleep_ms(1000)
 
 
 main()

@@ -1,3 +1,4 @@
+# multimer types: all
 """
 font_simpletest.py -- Simple test of the Font class.
 inspired by Russ Hughes's hello.py
@@ -7,9 +8,21 @@ Draws to a DisplayBuffer and only updates the area that has changed.
 
 from board_config import display_drv
 from graphics import Font
-import random
+from random import getrandbits
 from displaybuf import DisplayBuffer
 from palettes import get_palette
+
+
+def randint(a, b):
+    span = b - a + 1
+    if span <= 1:
+        return a
+    bits = 0
+    n = span - 1
+    while n:
+        bits += 1
+        n >>= 1
+    return a + getrandbits(bits) % span
 
 
 display = DisplayBuffer(display_drv)
@@ -23,6 +36,7 @@ def write(font, string, x, y, fg_color, bg_color, scale):
     """
     dirty = font.text(display, string, x, y, fg_color, scale)
     display.show(dirty)
+    display_drv.show()
 
 
 def main():
@@ -58,12 +72,12 @@ def main():
 
             for _ in range(iterations):
                 write(
-                    fonts[random.randint(0, len(fonts) - 1)],
+                    fonts[randint(0, len(fonts) - 1)],
                     write_text,
-                    random.randint(0, col_max),
-                    random.randint(0, row_max),
-                    pal[random.randint(0, len(pal) - 1)],
-                    pal[random.randint(0, len(pal) - 1)],
+                    randint(0, col_max),
+                    randint(0, row_max),
+                    pal[randint(0, len(pal) - 1)],
+                    pal[randint(0, len(pal) - 1)],
                     scale,
                 )
 

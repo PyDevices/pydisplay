@@ -1,3 +1,4 @@
+# multimer types: all
 """
 rotations.py
 ============
@@ -21,7 +22,7 @@ number and the color of the display background.
 
 """
 
-import time
+from multimer import sleep_ms
 import tft_config
 import tft_text
 import vga1_16x16 as font
@@ -63,8 +64,6 @@ def main():
     """
     The big show!
     """
-    # enable display and clear screen
-
     tft = tft_config.config(tft_config.WIDE)
 
     colors = (
@@ -100,8 +99,9 @@ def main():
                 fg,
                 bg,
             )
+            tft.show()
             color_idx = (color_idx + 1) % len(colors)
-            time.sleep(2)
+            sleep_ms(2000)
 
 
 main()

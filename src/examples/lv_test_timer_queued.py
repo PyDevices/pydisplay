@@ -1,3 +1,4 @@
+# multimer types: queued, sync
 """
 lv_test_timer_queued.py
 

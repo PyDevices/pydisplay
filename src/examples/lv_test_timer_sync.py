@@ -1,3 +1,4 @@
+# multimer types: sync
 """
 lv_test_timer_sync.py
 

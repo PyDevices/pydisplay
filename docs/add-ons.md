@@ -30,6 +30,12 @@ Or copy modules into `lib/` on your device.
 | `png.py` | PNG support (experimental) |
 | `touch_keypad.py` | On-screen keypad |
 
+Third-party trees copied locally (not in `add_ons.json`):
+
+| Path | Purpose |
+|------|---------|
+| `gui/` | [Nano-GUI](../guis/nano-gui.md) — copy `gui/` from [micropython-nano-gui](https://github.com/peterhinch/micropython-nano-gui); gitignored |
+
 Many examples in `src/examples/` depend on add_ons. They are excluded from the micropython-lib bundle — install from GitHub only.
 
 Some files are third-party ports included for convenience; see file headers for attribution.

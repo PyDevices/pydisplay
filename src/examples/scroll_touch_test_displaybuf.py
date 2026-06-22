@@ -1,3 +1,4 @@
+# multimer types: queued, sync
 from board_config import display_drv, broker
 from graphics import Draw
 from palettes import get_palette
@@ -43,8 +44,8 @@ def main():
         txt = f"vssa: {y}, vscroll: {y - canvas.tfa}"
         draw.text14(txt, 1, y + 1, fg)
         draw.rect(canvas.width - 20, y + 2, 12, 12, fg)
-
-    canvas.show()
+        canvas.show()
+        display_drv.show()
 
     while True:
         # Check for mouse events
@@ -62,6 +63,7 @@ def main():
                             canvas.width - 20, y_pos + 2, 12, 12, getrandbits(canvas.color_depth)
                         )
                     canvas.show()
+                    display_drv.show()
 
 
 main()

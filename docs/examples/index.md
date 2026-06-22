@@ -16,22 +16,81 @@ As examples are reviewed for [multimer](../concepts/multimer.md) portability (sy
 # multimer types: all
 ```
 
-Other values may appear as the catalog is updated (for example `sync`, `queued`, `async`, or comma-separated combinations).
+**Progress (top-level `src/examples/*.py`):** **59 / 62** marked · **3** unmarked/excluded · `console_advanced_demo.py` intentionally excluded.
 
-From a repo clone, list marked examples:
+### Tag values
+
+| Tag | Meaning |
+|-----|---------|
+| `all` | Works on sync, queued, and async timer backends without code changes (often one-shot + `display_drv.show()`, or event-poll + `show()`) |
+| `queued, sync` | Blocking loop with `run_queued()` + `sleep_ms()` (or finite variant in `timer_simpletest.py`) |
+| `sync` | Sync-only reference (`lv_test_timer_sync.py`; exits on queued platforms) |
+| `async` | `TIMER_ASYNC` + `asyncio` main loop |
+| `untested` | Marked for catalog coverage; multimer portability not yet tested (`widgets_*.py`, `joystick_list_select.py`) |
+| `NA` | Not applicable — shared module or test harness, not a runnable portability example (`lv_test_timer_common.py`, `lv_test_timer_harness.py`) |
+
+### Search commands
+
+List all marked examples:
 
 ```bash
 rg '^# multimer types:' src/examples/*.py
 ```
 
-Examples verified for every timer style:
+List examples tagged for every timer style:
 
 ```bash
 rg '^# multimer types: all' src/examples/*.py
 ```
 
-`console_advanced_demo.py` is intentionally **not** tagged — it redirects the REPL with `os.dupterm(console)` and does not follow the draw-then-exit pattern used for one-shot examples.
+List unmarked examples:
 
+```bash
+comm -23 \
+  <(ls -1 src/examples/*.py | xargs -I{} basename {} | sort) \
+  <(rg -l '# multimer types:' src/examples/*.py | xargs -I{} basename {} | sort)
+```
+
+### Canonical patterns
+
+**Event-driven poll** — [`displaysys_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/displaysys_simpletest.py), [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_encoder_test.py):
+
+```python
+display_drv.show()  # after initial draw
+while True:
+    if elist := broker.poll():
+        for e in elist:
+            ...  # draw on event
+            display_drv.show()
+```
+
+**Finite queued/sync test** — [`timer_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/timer_simpletest.py):
+
+```python
+while not _done:
+    run_queued()
+    sleep_ms(1)
+```
+
+**Forever LVGL / library-driven app** — [`lv_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_touch_test.py): setup UI, then drain the queue only when needed:
+
+```python
+from multimer import Timer
+if getattr(Timer, "REQUIRES_RUN_QUEUED", False):
+    from multimer import run_queued, sleep_ms
+    while True:
+        run_queued()
+        sleep_ms(1)
+```
+
+On sync platforms the `if` block is skipped; on queued platforms (CPython SDL, CircuitPython threading) the loop keeps timer callbacks and display refresh alive.
+
+### Notes
+
+- `console_advanced_demo.py` is intentionally **not** tagged — it redirects the REPL with `os.dupterm(console)`.
+- `displaysys_simpletest.py` and `eventsys_encoder_test.py` are tagged `all` but use event loops: call `display_drv.show()` after draws (no `run_queued()`). Same pattern as [`scroll_touch_test_displaybuf.py`](scroll_touch_test_displaybuf.py).
+- `font_simpletest.py` is tagged `all` but the framebuffer `blit_rect` path is blank on CircuitPython and MicroPython Windows; `font_simpletest2.py` (direct draw) works on tested platforms.
+- `nano_gui_simpletest.py` is tagged `all`; requires upstream [`gui/`](../guis/nano-gui.md) in `add_ons/`.
 **Legend:** Platforms = CPython · MCU · PyScript · Wokwi · Packages = core · add_ons · LVGL
 
 ## Suggested learning order
@@ -124,7 +183,7 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `scroll.py` | Scrolling text | CPython · MCU | core |
 | `rotations.py` | Display rotation | CPython · MCU | core |
 | `timer_simpletest.py` | multimer timer | CPython · MCU | core |
-| `nano_gui_simpletest.py` | Nano-GUI | MCU | add_ons |
+| `nano_gui_simpletest.py` | Nano-GUI hardware check | CPython · MCU | add_ons + upstream `gui/` |
 | `lv_touch_test.py` | LVGL touch grid | MCU | LVGL |
 | `lv_test_timer_sync.py` | LVGL timer — sync (no loop) | MCU · CPython Linux | LVGL |
 | `lv_test_timer_queued.py` | LVGL timer — sync + `run_queued()` | CPython · MCU | LVGL |

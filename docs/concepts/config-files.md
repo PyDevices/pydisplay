@@ -5,8 +5,9 @@ Templates for GUI libraries and ported examples live in [`src/add_ons/`](https:/
 | File | Location | Required for |
 |------|----------|--------------|
 | `board_config.py` | `board_configs/` or `src/lib/` | **Always** — display, touch, brokers, setup |
-| `path.py` | `src/` | Development layout — adds `lib/`, `examples/` to path |
-| `color_setup.py` | `src/add_ons/` | [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui) |
+| `path.py` | `src/lib/` | Development layout — adds `lib/`, `add_ons/`, `examples/` to path |
+| `color_setup.py` | `src/add_ons/` | [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui) — display instance for `ssd` |
+| `gui/` | `src/add_ons/gui/` | [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui) — **upstream**; copy locally ([install](../guis/nano-gui.md#install-the-gui-package)) |
 | `hardware_setup.py` | `src/add_ons/` | [MicroPython-Touch](https://github.com/peterhinch/micropython-touch) |
 | `tft_config.py` | `src/add_ons/` | @russhughes st7789py_mpy examples |
 

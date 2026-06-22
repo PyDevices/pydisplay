@@ -1,3 +1,4 @@
+# multimer types: queued, sync
 """
 Testris game implemented in MicroPython by Brad Barnett.
 """
@@ -19,13 +20,14 @@ try:
 except ImportError:
     from multimer import ticks_diff, ticks_ms
 
+from multimer import run_queued, sleep_ms
+
 if display_drv.width > display_drv.height:
     display_drv.rotation += 90
 
 
 # Setup the keypad
-# keypad should have a .read() method that returns the values mapped below:
-# In this case keypad is a touchscreen keypad emulator provided by touch_keypad.
+# Touch keypad uses read_held() for continuous movement; joystick_keypad uses read().
 START = Keys.K_RETURN  # RETURN
 UNUSED = 0  # Not used
 PAUSE = Keys.K_ESCAPE  # ESCAPE
@@ -314,10 +316,11 @@ def main():  # noqa: C901, PLR0915
             str: The key that was pressed.
         """
         while True:  # Wait for the user to press a key
+            run_queued()
             broker.poll()
             keys = joystick_keypad.read()
-            keys.extend(keypad.read())
-            
+            keys.extend(keypad.read_held())
+
             if key is not None:
                 if key in keys:
                     return key
@@ -325,6 +328,7 @@ def main():  # noqa: C901, PLR0915
                 for key in keys:
                     if key not in exclude:
                         return key
+            sleep_ms(1)
 
     def sample(population, k):
         """
@@ -422,6 +426,7 @@ def main():  # noqa: C901, PLR0915
             x=(display_width - 5 * block_size) // 2,
             y=(display_height - 2 * block_size),
         )
+        display_drv.show()
         wait_for_key()  # Wait for the user to press a key
 
     while True:  # Outer loop - play the game repeatedly
@@ -449,6 +454,7 @@ def main():  # noqa: C901, PLR0915
         draw_banner(f"High Score {high_score:,}\n\nPress START\nto play.")
         if str(type(keypad)).find("Touchpad"):  # If we're using the touchpad
             draw_touch_targets()  # Draw the touch targets
+        display_drv.show()
         wait_for_key(START)  # Wait for the user to press START
 
         # Play the game
@@ -477,11 +483,12 @@ def main():  # noqa: C901, PLR0915
                 while (
                     current_piece == old_piece and current_position == old_position
                 ):  # Inner loop - while the piece hasn't moved
+                    run_queued()
                     # If it has been DELAY ms since the last read, then read the keypads
                     if (ticks_diff(ticks_ms(), last_read) >= DELAY):
                         broker.poll()
                         keys = joystick_keypad.read()
-                        keys.extend(keypad.read())
+                        keys.extend(keypad.read_held())
 
                         if len(keys) > 0:  # If keys were pressed
                             for key in keys:
@@ -571,6 +578,8 @@ def main():  # noqa: C901, PLR0915
                                                 y * block_size + grid_y_offset,
                                                 grid[y][x],
                                             )
+
+                    sleep_ms(1)
 
                 if (
                     current_piece

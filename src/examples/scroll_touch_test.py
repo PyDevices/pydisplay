@@ -1,3 +1,4 @@
+# multimer types: queued, sync
 from board_config import display_drv, broker
 from graphics import Draw
 from palettes import get_palette

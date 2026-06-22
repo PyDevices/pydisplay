@@ -1,3 +1,4 @@
+# multimer types: all
 """
 hello.py
 ========
@@ -21,13 +22,28 @@ https://www.youtube.com/watch?v=atBa0BYPAAc
 
 """
 
-import random
+from random import getrandbits
 
 import tft_config
 import tft_text
 import vga2_bold_16x32 as font
 
 palette = tft_config.palette
+
+
+def randint(a, b):
+    # MicroPython on Windows ships a minimal random module: getrandbits and
+    # seed only (randint needs MICROPY_PY_RANDOM_EXTRA_FUNCS, off on that port).
+    # CircuitPython, MicroPython unix, and CPython can use random.randint instead.
+    span = b - a + 1
+    if span <= 1:
+        return a
+    bits = 0
+    n = span - 1
+    while n:
+        bits += 1
+        n >>= 1
+    return a + getrandbits(bits) % span
 
 
 def main():
@@ -40,6 +56,7 @@ def main():
         for rotation in range(4):
             tft.rotation = rotation
             tft.draw.fill(0)
+            tft.show()
             col_max = tft.width - font.WIDTH * 5
             row_max = tft.height - font.HEIGHT
             if col_max < 0 or row_max < 0:
@@ -50,19 +67,20 @@ def main():
                     tft,
                     font,
                     "Hello",
-                    random.randint(0, col_max),
-                    random.randint(0, row_max),
+                    randint(0, col_max),
+                    randint(0, row_max),
                     palette.color565(
-                        random.getrandbits(8),
-                        random.getrandbits(8),
-                        random.getrandbits(8),
+                        getrandbits(8),
+                        getrandbits(8),
+                        getrandbits(8),
                     ),
                     palette.color565(
-                        random.getrandbits(8),
-                        random.getrandbits(8),
-                        random.getrandbits(8),
+                        getrandbits(8),
+                        getrandbits(8),
+                        getrandbits(8),
                     ),
                 )
+                tft.show()
 
 
 main()

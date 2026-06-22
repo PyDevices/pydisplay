@@ -1,3 +1,4 @@
+# multimer types: queued, sync
 """
 lv_touch_test.py
 Tests touchscreen and allows changing touch driver rotation
@@ -49,3 +50,10 @@ for alignment in alignments:
     label = lv.label(btn)
     label.set_text(f"Btn{i}")
     label.center()
+
+from multimer import Timer
+if getattr(Timer, "REQUIRES_RUN_QUEUED", False):
+    from multimer import run_queued, sleep_ms
+    while True:
+        run_queued()
+        sleep_ms(1)

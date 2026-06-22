@@ -1,7 +1,7 @@
+# multimer types: queued, sync
 from board_config import display_drv
 from bmp565 import BMP565
-from time import sleep
-
+from multimer import run_queued, sleep_ms
 
 display_drv.rotation = 0
 
@@ -21,10 +21,14 @@ def draw_bg(dest_x, dest_y, source_x, source_y, source_image=image, width=image.
 
 for j in range(display_drv.height):
     draw_bg(0, j, 0, j, height=1)
-sleep(3)
+display_drv.show()
+sleep_ms(3000)
 
 i = display_drv.height
 while True:
     display_drv.vscsad(i % display_drv.height)
     draw_bg(0, i % display_drv.height, 0, i % image.height)
+    display_drv.show()
+    run_queued()
+    sleep_ms(1)
     i += 1

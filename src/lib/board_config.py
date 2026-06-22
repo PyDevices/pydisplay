@@ -11,7 +11,7 @@ https://github.com/PyDevices/pydisplay/tree/main/board_configs
 TIMER_ASYNC = False
 
 width = 320
-height = 240
+height = 480
 rotation = 0
 scale = 1.0
 

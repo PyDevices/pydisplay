@@ -1,5 +1,14 @@
+# multimer types: async
+import board_config
+
+board_config.TIMER_ASYNC = True
+
 from board_config import broker
-import asyncio
+
+try:
+    import asyncio
+except ImportError:
+    import uasyncio as asyncio
 
 
 async def main():
@@ -7,12 +16,12 @@ async def main():
         if elist := broker.poll():
             for e in elist:
                 print(e)
-                if e == broker.events.QUIT:
-                    break
-        await asyncio.sleep(0.001)
+                if e.type == broker.events.QUIT:
+                    return
+        await asyncio.sleep(0)
 
 
-loop = asyncio.get_event_loop()
-main_task = loop.create_task(main())  # noqa: RUF006
-if hasattr(loop, "run_forever"):
-    loop.run_forever()
+if hasattr(asyncio, "run"):
+    asyncio.run(main())
+else:
+    asyncio.get_event_loop().run_until_complete(main())

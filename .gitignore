@@ -1,4 +1,4 @@
-src/gui
+src/add_ons/gui
 
 # Cursor IDE / local debug
 .cursor/

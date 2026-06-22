@@ -17,7 +17,7 @@ def png_files(directory):
                 yield os.path.join(root, file)
 
 
-png_path = "/home/brad/gh2/material-design-icons/png/"
+png_path = "/home/brad/github/material-design-icons/png/"
 fg_color = 0xFFFF
 bg_color = 0x001F
 

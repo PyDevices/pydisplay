@@ -1,3 +1,4 @@
+# multimer types: untested
 
 import board_config
 from eventsys.devices import types

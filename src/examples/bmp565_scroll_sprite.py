@@ -1,7 +1,9 @@
+# multimer types: queued, sync
+from collections import namedtuple
+
 from board_config import display_drv, broker
 from bmp565 import BMP565
-from time import sleep
-from collections import namedtuple
+from multimer import run_queued, sleep_ms
 
 point = namedtuple("point", "x y")
 
@@ -23,7 +25,7 @@ char_sprites = BMP565("examples/assets/runner.bmp", streamed=True)
 print(f"\n{char_sprites.width=}, {char_sprites.height=}, {char_sprites.bpp=}")
 char_height = char_sprites.height // 3
 char_width = char_sprites.width // 6
-bg = char_sprites[0]  # top left pixel is the background color
+bg = char_sprites[0]
 print(f"{char_width=}, {char_height=} {bg=:#0x}\n")
 
 run_sprites = [point(x * char_width, 0) for x in range(6)]
@@ -51,6 +53,7 @@ def main():
     char_y = display_drv.height - char_height
     char_x = 200
     shot_location = 0
+    sprites = run_sprites
     while True:
         if i > display_drv.width:
             scroll = i % display_drv.width
@@ -58,6 +61,9 @@ def main():
         draw_bg(i % display_drv.width, i % image.height, 1)
         i += 1
         if i < display_drv.width:
+            display_drv.show()
+            run_queued()
+            sleep_ms(1)
             continue
         elist = broker.poll()
         for event in elist:
@@ -86,7 +92,9 @@ def main():
                     draw_x + char_width + shot_location, char_y, char_width, char_height, bg
                 )
                 shot_location = 0
-        sleep(0.05)
+        display_drv.show()
+        run_queued()
+        sleep_ms(50)
 
 
 main()

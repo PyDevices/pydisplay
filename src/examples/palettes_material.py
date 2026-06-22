@@ -1,9 +1,8 @@
+# multimer types: queued, sync
 from board_config import display_drv
+from multimer import run_queued, sleep_ms
 from palettes import get_palette
-from graphics import text16
 
-# If byte swapping is required and the display bus is capable of having byte swapping disabled,
-# disable it and set a flag so we can swap the color bytes as they are created.
 if display_drv.requires_byteswap:
     needs_swap = display_drv.disable_auto_byteswap(True)
 else:
@@ -18,7 +17,10 @@ def main():
     line_height = 1
     for i, color in enumerate(palette):
         display_drv.fill_rect(0, i * line_height, display_drv.width, line_height, color)
+    display_drv.show()
 
 
 while True:
     main()
+    run_queued()
+    sleep_ms(1)

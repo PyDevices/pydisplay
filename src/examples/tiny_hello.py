@@ -1,3 +1,4 @@
+# multimer types: all
 """
 tiny_hello.py
 =============
@@ -20,8 +21,9 @@ Writes "Hello!" in a tiny font in random colors at random locations on the Displ
 
 """
 
-import random
-import time
+from random import getrandbits
+
+from multimer import sleep_ms
 import tft_text
 import tft_config
 
@@ -29,6 +31,18 @@ palette = tft_config.palette
 import vga1_8x8 as font
 
 tft = tft_config.config(tft_config.WIDE)
+
+
+def randint(a, b):
+    span = b - a + 1
+    if span <= 1:
+        return a
+    bits = 0
+    n = span - 1
+    while n:
+        bits += 1
+        n >>= 1
+    return a + getrandbits(bits) % span
 
 
 def center(text, fg=palette.WHITE, bg=palette.BLACK):
@@ -55,12 +69,14 @@ def main():
         tft.draw.fill(color)
         tft.draw.rect(0, 0, tft.width, tft.height, palette.WHITE)
         center("Hello!", palette.WHITE, color)
-        time.sleep(1)
+        tft.show()
+        sleep_ms(1000)
 
     while True:
         for rotation in range(4):
             tft.rotation = rotation
             tft.draw.fill(0)
+            tft.show()
             col_max = tft.width - font.WIDTH * 6
             row_max = tft.height - font.HEIGHT
 
@@ -69,19 +85,20 @@ def main():
                     tft,
                     font,
                     "Hello!",
-                    random.randint(0, col_max),
-                    random.randint(0, row_max),
+                    randint(0, col_max),
+                    randint(0, row_max),
                     palette.color565(
-                        random.getrandbits(8),
-                        random.getrandbits(8),
-                        random.getrandbits(8),
+                        getrandbits(8),
+                        getrandbits(8),
+                        getrandbits(8),
                     ),
                     palette.color565(
-                        random.getrandbits(8),
-                        random.getrandbits(8),
-                        random.getrandbits(8),
+                        getrandbits(8),
+                        getrandbits(8),
+                        getrandbits(8),
                     ),
                 )
+                tft.show()
 
 
 main()

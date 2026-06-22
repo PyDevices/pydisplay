@@ -194,7 +194,7 @@ PyScript requires an async main loop. Prefer **`multimer.aio`** for timers there
 
 ## Example portability markers
 
-Scripts under `src/examples/` are tagged with a first-line comment as they are checked against sync, queued, and async timer patterns — for example `# multimer types: all`. See [Examples catalog — multimer portability markers](../examples/index.md#multimer-portability-markers) for how to search the tree with `rg`.
+Scripts under `src/examples/` are tagged with a first-line comment as they are checked against sync, queued, and async timer patterns — for example `# multimer types: all`. As of the latest audit, **59 of 62** top-level examples are marked. See [Examples catalog — multimer portability markers](../examples/index.md#multimer-portability-markers) for tag meanings, `rg` search commands, and canonical patterns (event-poll, finite test, forever LVGL).
 
 ## API reference
 
