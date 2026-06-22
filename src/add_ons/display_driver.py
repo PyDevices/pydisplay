@@ -176,4 +176,30 @@ class DisplayDriver:
             self.lv_display.flush_ready()
 
 
+def run():
+    """
+    Block on the main thread so LVGL and multimer timers keep running.
+
+    Call after UI setup when the app should not return to the REPL (for example
+    CircuitPython unix/SDL) or when ``lv_utils.event_loop.run()`` only loops on macOS.
+    """
+
+    from board_config import broker
+
+    from multimer import Timer, run_queued, sleep_ms
+
+    inst = lv_utils.event_loop.current_instance()
+    if inst is not None and sys.platform == "darwin":
+        inst.run()
+        return
+
+    timer_req = getattr(Timer, "REQUIRES_RUN_QUEUED", False)
+    while True:
+        if timer_req:
+            run_queued()
+        if sys.platform == "win32":
+            broker.poll()
+        sleep_ms(1)
+
+
 main()

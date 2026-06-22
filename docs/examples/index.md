@@ -16,7 +16,7 @@ As examples are reviewed for [multimer](../concepts/multimer.md) portability (sy
 # multimer types: all
 ```
 
-**Progress:** **62 / 62** top-level (`src/examples/*.py`) and **5 / 5** subdirectory runnable demos marked.
+**Progress:** **62 / 62** top-level (`src/examples/*.py`) and **7 / 7** subdirectory runnable demos marked (including `spotify_remote`).
 
 ### Tag values
 
@@ -238,7 +238,7 @@ Runnable demos in subfolders use the same multimer markers as top-level examples
 | `noto_fonts/` | `noto_fonts.py` | `all` | MP · MCU | One-shot Noto font demo; same tail as `chango` |
 | `proverbs/` | `proverbs.py` | `queued, sync` | CPython · MP · MCU | Chinese proverb slideshow; UTF-8 fonts on MCU |
 | `tiny_toasters/` | `tiny_toasters.py` | `queued, sync` | CPython · MP · MCU | Sprite animation; `getrandbits` `randint` on MP Windows |
-| `spotify_remote/` | `main.py`, `keyboard_test.py` | — | CPython (network) | LVGL + OAuth; portability deferred — see Phase 2 |
+| `spotify_remote/` | `main.py`, `keyboard_test.py` | `queued, sync` | CPython · MP · network | LVGL + OAuth; not in `examples.json`; blocks in `display_driver.run()` |
 | `apollo_dsky/` | — | — | — | Support module for top-level `apollo.py` |
 | `assets/` | — | — | — | Shared fonts and images |
 
