@@ -50,6 +50,7 @@ except ImportError:
 
 console.label(Console.LEFT, platform, pal.RED)
 
+display_drv.show()
 
 #### Example commands
 # console.cls()                   # Clear the console screen

@@ -29,10 +29,6 @@
       "github:PyDevices/pydisplay/src/add_ons/displaybuf.py"
     ],
     [
-      "add_ons/ezfont.py",
-      "github:PyDevices/pydisplay/src/add_ons/ezfont.py"
-    ],
-    [
       "add_ons/framebuf.py",
       "github:PyDevices/pydisplay/src/add_ons/framebuf.py"
     ],

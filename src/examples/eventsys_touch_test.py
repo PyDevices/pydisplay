@@ -1,3 +1,4 @@
+# multimer types: all
 """
 eventsys_touch_test.py - Touch rotation test.
 Tests the touch driver and finds the correct rotation masks for the touch screen.
@@ -65,6 +66,7 @@ def loop():
                     BG_COLOR,
                 )
                 touched_point = None
+                display_drv.show()
                 while not touched_point:
                     if elist := broker.poll():
                         for event in elist:
@@ -80,6 +82,7 @@ def loop():
                     half_height - 1,
                     BG_COLOR,
                 )
+                display_drv.show()
 
         if touched_zones == [0, 1, 2, 3]:
             mask = 0b0
@@ -126,4 +129,5 @@ if not demo:
 
 completed = False
 while not completed:
+    display_drv.show()
     completed = loop()

@@ -8,6 +8,30 @@ mip.install("github:PyDevices/pydisplay/packages/examples.json", target="./examp
 
 Use `import lib.path` first in a development clone (see [full clone](../installation/full-clone.md)).
 
+## multimer portability markers
+
+As examples are reviewed for [multimer](../concepts/multimer.md) portability (sync, queued, and async timer patterns), each updated script gets a **first-line comment** tagging which timer styles it supports:
+
+```python
+# multimer types: all
+```
+
+Other values may appear as the catalog is updated (for example `sync`, `queued`, `async`, or comma-separated combinations).
+
+From a repo clone, list marked examples:
+
+```bash
+rg '^# multimer types:' src/examples/*.py
+```
+
+Examples verified for every timer style:
+
+```bash
+rg '^# multimer types: all' src/examples/*.py
+```
+
+`console_advanced_demo.py` is intentionally **not** tagged — it redirects the REPL with `os.dupterm(console)` and does not follow the draw-then-exit pattern used for one-shot examples.
+
 **Legend:** Platforms = CPython · MCU · PyScript · Wokwi · Packages = core · add_ons · LVGL
 
 ## Suggested learning order
@@ -61,7 +85,6 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `font_simpletest2.py`, `font_simpletest3.py` | More fonts | CPython · MCU | core |
 | `font_list.py` | Font picker | CPython · MCU | core |
 | `fonts.py` | Page through fonts | CPython · MCU | core |
-| `ezfont_simpletest.py` | EZFont | MCU | add_ons |
 | `boxlines.py` | Lines and boxes | CPython · MCU | core |
 
 ## Bitmaps and palettes

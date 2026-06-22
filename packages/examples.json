@@ -81,10 +81,6 @@
       "github:PyDevices/pydisplay/src/examples/eventsys_touch_test.py"
     ],
     [
-      "ezfont_simpletest.py",
-      "github:PyDevices/pydisplay/src/examples/ezfont_simpletest.py"
-    ],
-    [
       "feathers.py",
       "github:PyDevices/pydisplay/src/examples/feathers.py"
     ],

@@ -1,3 +1,4 @@
+# multimer types: all
 """
 console_simpletest.py
 
@@ -12,3 +13,4 @@ console = Console(display_drv)
 
 for x in range(60):
     console.write(f"Line {x}\n")
+    display_drv.show()

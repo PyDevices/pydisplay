@@ -1,3 +1,4 @@
+# multimer types: all
 from board_config import display_drv
 from framebuf import FrameBuffer, RGB565
 from pbm import PBM
@@ -87,3 +88,5 @@ display_drv.blit_rect(buf, display_drv.width * 2 // 3, 0, logo.width, logo.heigh
 display_drv.blit_transparent(
     buf, display_drv.width * 2 // 3, display_drv.height // 2, logo.width, logo.height, 0x000F
 )
+
+display_drv.show()

@@ -1,3 +1,4 @@
+# multimer types: all
 """
 Simple test example to demonstrate the use of framebuf.FrameBuffer.
 """
@@ -59,6 +60,7 @@ def main(scroll=False, animate=False, text1="framebuf", text2="simpletest", poly
         fb.text(text1, (WIDTH - FONT_WIDTH * len(text1)) // 2, HEIGHT // 2 - 8, pal.WHITE)
         fb.text(text2, (WIDTH - FONT_WIDTH * len(text2)) // 2, HEIGHT // 2, pal.WHITE)
         display_drv.blit_rect(ba, 0, 0, WIDTH, HEIGHT)
+        display_drv.show()
 
     fb.hline(0, 0, WIDTH, pal.BLACK)
     fb.vline(0, 0, HEIGHT, pal.BLACK)
@@ -67,10 +69,12 @@ def main(scroll=False, animate=False, text1="framebuf", text2="simpletest", poly
     for _ in scroll_range:
         fb.scroll(1, 1)
         display_drv.blit_rect(ba, 0, 0, WIDTH, HEIGHT)
+        display_drv.show()
 
 
-launch = lambda: main(animate=True)  # noqa: E731
+launch = lambda: main(animate=False)  # noqa: E731
 
-wipe = lambda: main(scroll=True)  # noqa: E731
+wipe = lambda: main(scroll=False)  # noqa: E731
 
 main()
+display_drv.show()

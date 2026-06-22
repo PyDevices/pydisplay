@@ -10,8 +10,8 @@ https://github.com/PyDevices/pydisplay/tree/main/board_configs
 # True: multimer.aio.Timer — PyScript and asyncio-native apps
 TIMER_ASYNC = False
 
-width = 1024
-height = 600
+width = 320
+height = 240
 rotation = 0
 scale = 1.0
 

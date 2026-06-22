@@ -6,7 +6,6 @@
 "../src/add_ons/console.py" = "/add_ons/"
 "../src/add_ons/display_driver.py" = "/add_ons/"
 "../src/add_ons/displaybuf.py" = "/add_ons/"
-"../src/add_ons/ezfont.py" = "/add_ons/"
 "../src/add_ons/framebuf.py" = "/add_ons/"
 "../src/add_ons/hardware_setup.py" = "/add_ons/"
 "../src/add_ons/joystick_keypad.py" = "/add_ons/"

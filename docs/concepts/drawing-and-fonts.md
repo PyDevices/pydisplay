@@ -30,7 +30,6 @@ Use `Draw(canvas)` when you prefer a separate drawer object over subclassing.
 | `graphics.Font` | Tony DiCola 5×7 lineage, romfont `.bin` files | 8×8, 8×14, 8×16 |
 | `tft_text.text()` | @russhughes text_font_converter | Width 8 or 16, height multiples of 8 |
 | `tft_write.write()` | @russhughes write_font_converter | Proportional fonts |
-| `EZFont` | microPyEZfonts / font-to-py | In `src/utils/`; no Area return |
 
 Peter Hinch's **Writer** (MicroPython-Touch) may be used on MicroPython but does not return Area objects.
 

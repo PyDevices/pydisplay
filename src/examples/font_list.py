@@ -1,3 +1,4 @@
+# multimer types: all
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
@@ -62,6 +63,7 @@ def main():
         y_pos += height
         if y_pos > display_drv.height:
             display_drv.vscsad((y_pos - display_drv.height) % display_drv.height)
+        display_drv.show()
 
 
 main()

@@ -1,3 +1,4 @@
+# multimer types: all
 """
 Simple test example to demonstrate the use of graphics.
 """
@@ -67,6 +68,7 @@ def main(animate=False, text1="Shapes", text2="simpletest", poly=triangle):
     graphics.vline(display_drv, 0, 0, HEIGHT, pal.BLACK)
 
 
-launch = lambda: main(animate=True)  # noqa: E731
+launch = lambda: main(animate=False)  # noqa: E731
 
 main()
+display_drv.show()

@@ -192,6 +192,10 @@ flowchart TD
 
 PyScript requires an async main loop. Prefer **`multimer.aio`** for timers there, or yield with `await run_queued()` / `await asyncio.sleep(0)` each frame. See [PyScript asyncio porting](../guides/pyscript-asyncio.md).
 
+## Example portability markers
+
+Scripts under `src/examples/` are tagged with a first-line comment as they are checked against sync, queued, and async timer patterns — for example `# multimer types: all`. See [Examples catalog — multimer portability markers](../examples/index.md#multimer-portability-markers) for how to search the tree with `rg`.
+
 ## API reference
 
 Build docs locally for generated signatures: [Building docs](../building-docs.md). Module: `multimer`, `multimer.aio`.
