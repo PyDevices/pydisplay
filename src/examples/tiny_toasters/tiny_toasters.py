@@ -1,3 +1,4 @@
+# multimer types: queued, sync
 """
 tiny_toasters.py
 ================
@@ -29,16 +30,31 @@ Tiny Flying Toasters for smaller displays using a converted BMP spritesheet modu
 """
 
 import gc
-import time
-import random
+from random import getrandbits
 import tft_bitmap
 import tft_config
+from board_config import broker
+from multimer import Timer, run_queued, sleep_ms
 
 palette = tft_config.palette
 import tiny_toasters_bitmaps as toast_bitmaps
 
 TOASTER_FRAMES = [0, 1, 2, 3]
 TOAST_FRAMES = [4]
+
+
+def randint(a, b):
+    # MicroPython on Windows ships a minimal random module: getrandbits and
+    # seed only (randint needs MICROPY_PY_RANDOM_EXTRA_FUNCS, off on that port).
+    span = b - a + 1
+    if span <= 1:
+        return a
+    bits = 0
+    n = span - 1
+    while n:
+        bits += 1
+        n >>= 1
+    return a + getrandbits(bits) % span
 
 
 def collide(a_col, a_row, a_width, a_height, b_col, b_row, b_width, b_height):
@@ -59,12 +75,12 @@ def random_start(tft, sprites, bitmaps, num):
 
     """
     # 50/50 chance to try along the top/right half or along the right/top half of the screen
-    if random.getrandbits(1):
+    if getrandbits(1):
         row = 1
-        col = random.randint(bitmaps.WIDTH // 2, tft.width - bitmaps.WIDTH)
+        col = randint(bitmaps.WIDTH // 2, tft.width - bitmaps.WIDTH)
     else:
         col = tft.width - bitmaps.WIDTH
-        row = random.randint(1, tft.height // 2)
+        row = randint(1, tft.height // 2)
 
     if any(
         collide(
@@ -103,8 +119,8 @@ def main():
             self.height = bitmaps.HEIGHT
             self.last_col = self.col
             self.last_row = self.row
-            self.step = random.randint(0, self.steps)
-            self.dir_col = -random.randint(2, 5)
+            self.step = randint(0, self.steps)
+            self.dir_col = -randint(2, 5)
             self.dir_row = 2
             self.prev_dir_col = self.dir_col
             self.prev_dir_row = self.dir_row
@@ -168,7 +184,7 @@ def main():
             # if new location touches edge of screen, erase then set new start location
             if self.col <= 0 or self.row > tft.height - self.height:
                 self.erase()
-                self.dir_col = -random.randint(2, 5)
+                self.dir_col = -randint(2, 5)
                 self.dir_row = 2
                 self.col, self.row = random_start(tft, sprites, self.bitmaps, self.num)
 
@@ -201,8 +217,12 @@ def main():
             sprite.move(sprites)
             sprite.draw()
 
+        tft.show()
+        if getattr(Timer, "REQUIRES_RUN_QUEUED", False):
+            run_queued()
+        broker.poll()
         gc.collect()
-        time.sleep(0.05)
+        sleep_ms(50)
 
 
 main()

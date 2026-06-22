@@ -16,7 +16,7 @@ As examples are reviewed for [multimer](../concepts/multimer.md) portability (sy
 # multimer types: all
 ```
 
-**Progress (top-level `src/examples/*.py`):** **62 / 62** marked.
+**Progress:** **62 / 62** top-level (`src/examples/*.py`) and **5 / 5** subdirectory runnable demos marked.
 
 ### Tag values
 
@@ -42,12 +42,26 @@ List examples tagged for every timer style:
 rg '^# multimer types: all' src/examples/*.py
 ```
 
-List unmarked examples:
+List unmarked top-level examples:
 
 ```bash
 comm -23 \
   <(ls -1 src/examples/*.py | xargs -I{} basename {} | sort) \
   <(rg -l '# multimer types:' src/examples/*.py | xargs -I{} basename {} | sort)
+```
+
+List all marked examples (recursive, including subdirectories):
+
+```bash
+rg '^# multimer types:' src/examples/
+```
+
+List unmarked runnable scripts (path-based; excludes support modules without markers by design):
+
+```bash
+comm -23 \
+  <(find src/examples -path '*/.*' -prune -o -name '*.py' -print | sort) \
+  <(rg -l '# multimer types:' src/examples/ -g '*.py' | sort)
 ```
 
 ### Canonical patterns
@@ -83,6 +97,20 @@ if getattr(Timer, "REQUIRES_RUN_QUEUED", False):
 ```
 
 On sync platforms the `if` block is skipped; on queued platforms (CPython SDL, CircuitPython threading) the loop keeps timer callbacks and display refresh alive.
+
+**`tft_config` animation / one-shot** — subdirectory demos [`alien/alien.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/alien/alien.py), [`tiny_toasters/tiny_toasters.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/tiny_toasters/tiny_toasters.py), [`chango/chango.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/chango/chango.py):
+
+```python
+from board_config import broker
+from multimer import Timer, run_queued, sleep_ms  # sleep_ms in loops only
+
+tft.show()
+if getattr(Timer, "REQUIRES_RUN_QUEUED", False):
+    run_queued()
+broker.poll()  # SDL message pump — required on MicroPython Windows
+```
+
+On **MicroPython Windows** (and other ports using `multimer._polling`), `multimer.REQUIRES_RUN_QUEUED` is false but `Timer.REQUIRES_RUN_QUEUED` is true — check the **timer class** flag, not the module flag. Without `broker.poll()`, the SDL window can freeze after the first frame even when the Python loop keeps running.
 
 **PyWidgets (pdwidgets)** — [`widgets_stub.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_stub.py): build UI, then:
 
@@ -201,15 +229,18 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 
 ## Subdirectories
 
-| Directory | Content | Screenshot |
-|-----------|---------|------------|
-| `alien/` | Sprite demo | — |
-| `apollo_dsky/` | Apollo assets | — |
-| `assets/` | Shared fonts and images | — |
-| `chango/` | Chango font demos | [chango](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/chango.png) |
-| `noto_fonts/` | Noto font examples | [noto](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/noto_fonts.png) |
-| `proverbs/` | Scrolling proverbs | [proverbs](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/proverbs.png) |
-| `tiny_toasters/` | Tiny Toasters game | [tiny_toasters](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/tiny_toasters.gif) |
+Runnable demos in subfolders use the same multimer markers as top-level examples (`# multimer types: …` first line).
+
+| Directory | Script | Tag | Platforms | Notes |
+|-----------|--------|-----|-----------|-------|
+| `alien/` | `alien.py` | `queued, sync` | CPython · MP · MCU | Sprite bounce; `tft.show()` + `Timer`/`run_queued()` + `broker.poll()` each frame |
+| `chango/` | `chango.py` | `all` | CPython · MP · MCU | One-shot font demo; `tft.show()` + `run_queued()` + `broker.poll()` after draws |
+| `noto_fonts/` | `noto_fonts.py` | `all` | MP · MCU | One-shot Noto font demo; same tail as `chango` |
+| `proverbs/` | `proverbs.py` | `queued, sync` | CPython · MP · MCU | Chinese proverb slideshow; UTF-8 fonts on MCU |
+| `tiny_toasters/` | `tiny_toasters.py` | `queued, sync` | CPython · MP · MCU | Sprite animation; `getrandbits` `randint` on MP Windows |
+| `spotify_remote/` | `main.py`, `keyboard_test.py` | — | CPython (network) | LVGL + OAuth; portability deferred — see Phase 2 |
+| `apollo_dsky/` | — | — | — | Support module for top-level `apollo.py` |
+| `assets/` | — | — | — | Shared fonts and images |
 
 ## Screenshots and live demos
 

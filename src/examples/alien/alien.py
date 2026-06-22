@@ -1,3 +1,4 @@
+# multimer types: queued, sync
 """
 alien.py
 =========
@@ -27,10 +28,12 @@ https://github.com/erikflowers/weather-icons and is licensed under SIL OFL 1.1
 """
 
 try:
-    from time import ticks_ms, sleep_ms
+    from time import ticks_ms
 except ImportError:
-    from multimer import sleep_ms, ticks_ms
+    from multimer import ticks_ms
 
+from board_config import broker
+from multimer import Timer, run_queued, sleep_ms
 
 import tft_config
 import tft_bitmap
@@ -58,6 +61,10 @@ def main():
         last = ticks_ms()
         tft.draw.fill_rect(last_col, old_row, alien.WIDTH, alien.HEIGHT, 0)
         tft_bitmap.bitmap(tft, alien, col, row)
+        tft.show()
+        if getattr(Timer, "REQUIRES_RUN_QUEUED", False):
+            run_queued()
+        broker.poll()
         last_col, old_row = col, row
         col, row = col + xd, row + yd
         xd = -xd if col <= 0 or col >= width - alien.WIDTH else xd

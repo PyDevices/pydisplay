@@ -1,3 +1,4 @@
+# multimer types: queued, sync
 """
 proverbs.py
 ===========
@@ -26,9 +27,10 @@ The fonts were converted from True Type fonts using the
 
 """
 
-import time
 import tft_write
 import tft_config
+from board_config import broker
+from multimer import Timer, run_queued, sleep_ms
 
 palette = tft_config.palette
 import proverbs_20 as font20
@@ -94,8 +96,11 @@ def main():
 
             wheel = (wheel + 5) % 256
 
-            # pause to slow down scrolling
-            time.sleep(5)
+            tft.show()
+            if getattr(Timer, "REQUIRES_RUN_QUEUED", False):
+                run_queued()
+            broker.poll()
+            sleep_ms(5000)
 
 
 main()

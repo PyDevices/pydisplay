@@ -31,6 +31,8 @@ On **CPython (non-Linux)** and **CircuitPython unix**, timer callbacks from the 
 
 On **MicroPython unix** (POSIX backend) and **CPython Linux** (`_ctypes`), timer callbacks run on the main thread automatically — sync **`multimer.run_queued()`** is harmless but not required for the timer itself.
 
+On **MicroPython Windows** and other ports without `machine.Timer` or threads, multimer uses **`_polling.Timer`**: `Timer.REQUIRES_RUN_QUEUED` is **true** while **`multimer.REQUIRES_RUN_QUEUED`** (module flag) is **false**. Example loops must check **`getattr(Timer, "REQUIRES_RUN_QUEUED", False)`**, not the module flag alone. SDL desktop demos also need **`broker.poll()`** each frame (or in the main loop) so the Windows message pump keeps the display updating — see [`tiny_toasters.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/tiny_toasters/tiny_toasters.py) and [Subdirectories](../examples/index.md#subdirectories).
+
 On **CPython** (including Linux), the module flag **`multimer.REQUIRES_RUN_QUEUED`** is true because `multimer.schedule` may queue callbacks from other threads. That is separate from **`Timer.REQUIRES_RUN_QUEUED`** on the timer class (false on CPython Linux `_ctypes`). Library code that must present SDL frames or drain the queue should check the **module** flag, or both — see [`color_setup.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/color_setup.py) and `pdwidgets.Display.refresh()`.
 
 See [installation](../installation/index.md) for which ports ship multimer.
@@ -196,7 +198,7 @@ PyScript requires an async main loop. Prefer **`multimer.aio`** for timers there
 
 ## Example portability markers
 
-Scripts under `src/examples/` are tagged with a first-line comment as they are checked against sync, queued, and async timer patterns — for example `# multimer types: all`. **All 62** top-level examples are marked. See [Examples catalog — multimer portability markers](../examples/index.md#multimer-portability-markers) for tag meanings, `rg` search commands, and canonical patterns (event-poll, finite test, forever LVGL, pdwidgets `run_forever()`).
+Scripts under `src/examples/` are tagged with a first-line comment as they are checked against sync, queued, and async timer patterns — for example `# multimer types: all`. **All 62** top-level examples and **5** subdirectory runnable demos (`alien`, `chango`, `noto_fonts`, `proverbs`, `tiny_toasters`) are marked. See [Examples catalog — multimer portability markers](../examples/index.md#multimer-portability-markers) and [Subdirectories](../examples/index.md#subdirectories) for tag meanings, `rg` search commands, and canonical patterns (event-poll, finite test, forever LVGL, pdwidgets `run_forever()`).
 
 ## API reference
 

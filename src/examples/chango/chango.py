@@ -1,3 +1,4 @@
+# multimer types: all
 """
 chango.py
 =========
@@ -26,6 +27,8 @@ import gc
 import chango_16 as font_16
 import chango_32 as font_32
 import chango_64 as font_64
+from board_config import broker
+from multimer import Timer, run_queued
 import tft_config
 import tft_write
 
@@ -48,6 +51,11 @@ def main():
 
     tft_write.write(tft, font_64, "abcd", 0, row, palette.BLUE)
     row += font_64.HEIGHT
+
+    tft.show()
+    if getattr(Timer, "REQUIRES_RUN_QUEUED", False):
+        run_queued()
+    broker.poll()
 
 
 main()
