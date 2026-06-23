@@ -27,7 +27,7 @@ while True:
     display.show()
 ```
 
-Run [`eventsys_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_simpletest.py) after [first run](../guides/desktop-cpython.md). For clicks, rotation, and scrolling together, see [**pydisplay_demo**](examples/pydisplay_demo.md).
+Run [`eventsys_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_simpletest.py) after [first run](../guides/desktop-cpython.md). For a copy-paste app template with clicks, see [**App starter**](../examples/app-starter.md). For rotation and scrolling together, see [**pydisplay_demo**](../examples/pydisplay_demo.md).
 
 ## Subscribe vs poll
 
@@ -71,6 +71,7 @@ Use polling in your main loop or integrate with a GUI library's event loop.
 
 ## Next
 
+- [App starter](../examples/app-starter.md) — copy-paste app boilerplate
 - [Displays](displays.md)
 - [ESP32 quick start](../guides/esp32-board.md)
 - [PyScript asyncio](../guides/pyscript-asyncio.md) — async poll loops

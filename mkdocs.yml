@@ -95,6 +95,8 @@ nav:
     - Jupyter: platforms/jupyter.md
     - PyScript: platforms/pyscript.md
   - Examples:
+    - App starter: examples/app-starter.md
+    - pydisplay_demo: examples/pydisplay_demo.md
     - Catalog: examples/index.md
     - Live demos: examples/live-demos.md
   - GUI integration:

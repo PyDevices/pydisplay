@@ -31,7 +31,7 @@ Mouse events map to touch events. Same event API as on embedded targets.
 
 ## Next
 
-- [**pydisplay_demo** walkthrough](../examples/pydisplay_demo.md) — flagship example after first run
+- [**App starter** walkthrough](../examples/app-starter.md) — copy-paste template after first run
 - [Architecture](../concepts/architecture.md)
 - [Examples catalog](../examples/index.md)
 - [ESP32 deploy guide](esp32-board.md) — same API on hardware later

@@ -52,7 +52,7 @@ If packages are installed into `/lib` on the device (no mount), skip `lib.path`:
 import pydisplay_demo
 ```
 
-See [**pydisplay_demo**](../examples/pydisplay_demo.md) for what the script demonstrates (clicks, rotation, scrolling). Legacy `hello.py` uses `tft_config` if you are porting older st7789py examples.
+See [**pydisplay_demo**](../examples/pydisplay_demo.md) for what the script demonstrates (clicks, rotation, scrolling). To start your own app, copy the [**App starter**](../examples/app-starter.md) boilerplate. Legacy `hello.py` uses `tft_config` if you are porting older st7789py examples.
 
 ## 4. Try events
 
@@ -63,7 +63,8 @@ import eventsys_simpletest
 
 ## Next
 
-- [**pydisplay_demo**](../examples/pydisplay_demo.md) — flagship example (display, input, scroll)
+- [**App starter**](../examples/app-starter.md) — copy-paste template for your first app
+- [**pydisplay_demo**](../examples/pydisplay_demo.md) — flagship feature demo (display, input, scroll)
 - [Examples catalog](../examples/index.md) — suggested learning order
 - [Events concept](../concepts/events.md) — broker poll loop
 - [MicroPython platform notes](../platforms/micropython.md) — bus drivers, frozen firmware

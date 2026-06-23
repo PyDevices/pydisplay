@@ -1,6 +1,9 @@
 # pydisplay_demo
 
-[`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py) is the recommended first example for pydisplay. It is a single file that uses only **`src/lib`** modules — no `add_ons`, no `tft_config`, no `displaybuf`.
+!!! tip "Need a minimal template?"
+    Copy the [**App starter**](app-starter.md) boilerplate to begin your first app without rotation or scrolling.
+
+[`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py) is the recommended feature demo for pydisplay. It is a single file that uses only **`src/lib`** modules — no `add_ons`, no `tft_config`, no `displaybuf`.
 
 It demonstrates:
 

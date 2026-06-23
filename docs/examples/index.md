@@ -9,7 +9,7 @@ mip.install("github:PyDevices/pydisplay/packages/examples.json", target="./examp
 Use `import lib.path` first in a development clone (see [full clone](../installation/full-clone.md)).
 
 !!! tip "Start here"
-    New to pydisplay? Read the [**pydisplay_demo** guide](pydisplay_demo.md) — a full walkthrough of the flagship example (board_config, events, scrolling, buffered text, multimer).
+    New to pydisplay? Copy the [**App starter**](app-starter.md) boilerplate to begin your first app, then read the [**pydisplay_demo** guide](pydisplay_demo.md) for rotation, scrolling, and buffered text.
 
 ## multimer portability markers
 
@@ -149,6 +149,7 @@ pd.run_forever()
 
 | Step | Script | Platforms | Packages | Screenshot |
 |------|--------|-----------|----------|------------|
+| 0 | [**App starter**](app-starter.md) (doc boilerplate) | CPython · MCU · PyScript | core | — |
 | 1 | [`pydisplay_demo.py`](pydisplay_demo.md) | CPython · MCU | core | — |
 | 2 | `color_test.py` | CPython · MCU | core | [color_test](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/color_test.png) |
 | 3 | `displaysys_simpletest.py` | CPython · MCU | core | — |
@@ -164,8 +165,9 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 
 ## Hello and basics
 
-| Script | Description | Platforms | Packages |
-|--------|-------------|-----------|----------|
+| Resource | Description | Platforms | Packages |
+|----------|-------------|-----------|----------|
+| [**App starter**](app-starter.md) | Copy-paste app boilerplate (doc only) | CPython · MCU · PyScript | core |
 | [`pydisplay_demo.py`](pydisplay_demo.md) | Clicks, rotation, scroll (`board_config` + multimer) | CPython · MCU | core |
 | `pydisplay_demo_async.py` | Same as pydisplay_demo with `multimer.aio` | CPython · MCU · PyScript | core |
 | `hello.py` | Minimal text (`tft_config`) | CPython · MCU · Wokwi | core |

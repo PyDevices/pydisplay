@@ -22,7 +22,7 @@ pydisplay is a foundation for GUI libraries — not a GUI itself. It provides di
 - **One API, many platforms** — develop on desktop CPython, deploy to MicroPython on ESP32-S3, or run in CircuitPython without rewriting display code.
 - **Unified input** — touchscreens, mice, keypads, keyboards, rotary encoders, and joysticks produce consistent events modeled on PyGame/SDL2.
 - **Drawing** — MicroPython `framebuf` API everywhere; optional `graphics` module with extra helpers such as rounded rectangles.
-- **Examples** — dozens of scripts in `src/examples/`; start with the [**pydisplay_demo** walkthrough](examples/pydisplay_demo.md) (display, touch, scroll, multimer in one file).
+- **Examples** — dozens of scripts in `src/examples/`; copy the [**App starter**](examples/app-starter.md) to begin your first app, then explore the [**pydisplay_demo** walkthrough](examples/pydisplay_demo.md) (rotation, scroll, timers).
 - **Flexible install** — full git clone, GitHub MIP packages, or precompiled packages from the [PyDevices micropython-lib index](https://PyDevices.github.io/micropython-lib/mip/PyDevices).
 
 ## Quick links
