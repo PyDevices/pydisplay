@@ -113,7 +113,7 @@ class FBDisplay(DisplayDriver):
 
     ############### Optional API Methods ################
 
-    def show(self) -> None:
+    def show(self, _timer=None) -> None:
         """
         Refreshes the display.
         """

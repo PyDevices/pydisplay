@@ -117,7 +117,7 @@ class JNDisplay(DisplayDriver):
 
     ############### Optional API Methods ################
 
-    def show(self) -> None:
+    def show(self, _timer=None) -> None:
         """
         Updates the display with the current buffer.
         """

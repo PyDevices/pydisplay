@@ -95,7 +95,7 @@ class _TimerBase:
 
         self._busy = True
         try:
-            schedule(self._callback, 0)
+            schedule(self._callback, self)
         except RuntimeError:  # MicroPython: schedule queue may be full
             pass
         self._busy = False

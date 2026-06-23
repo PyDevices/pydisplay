@@ -20,11 +20,13 @@ Returns None if the platform is not supported rather than raising an ImportError
 the client can handle the error more gracefully (e.g. by using `if Timer is not None:`).
 
 Usage:
-    from multimer import Timer, schedule, run_queued, ticks_ms, ticks_diff
+    from multimer import Timer, get_timer, schedule, run_queued, ticks_ms, ticks_diff
     tim = Timer()
     tim.init(mode=Timer.PERIODIC, period=500, callback=lambda t: print("."))
     ....
     tim.deinit()
+
+    scroll = get_timer(lambda t: tick(), period=40)  # auto-allocates timer id
 
 On CPython (non-Linux), CircuitPython, and MicroPython ports using the polling
 backend, call ``run_queued()`` from the main thread to drain queued callbacks
@@ -69,10 +71,13 @@ _next_timer_id = 1
 
 def get_timer(callback, period=33, *, asynchronous=None, warn=True):
     """
-    Creates and returns a timer to periodically call the callback function
+    Creates and returns a timer to periodically call the callback function.
+
+    The callback must accept one argument — the Timer instance — matching
+    ``machine.Timer`` on MicroPython.
 
     Args:
-        callback (function): The function to call periodically
+        callback (function): Called periodically as ``callback(timer)``.
         period (int): The period in milliseconds, default is 33ms (30fps)
         asynchronous (bool): If True, use ``multimer.aio.Timer``. If None or False,
             use the default ``Timer`` loaded at import.
@@ -93,7 +98,7 @@ def get_timer(callback, period=33, *, asynchronous=None, warn=True):
     t = TimerCls(id)
 
     def _timer_cb(_t):
-        callback()
+        callback(t)
 
     t.init(mode=TimerCls.PERIODIC, period=period, callback=_timer_cb)
     if DEBUG:

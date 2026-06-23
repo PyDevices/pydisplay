@@ -61,8 +61,10 @@ def _run_timer_test(TimerClass):
         return "SKIP", "Timer is None on this platform"
 
     counter = [0]
+    received = [None]
 
     def callback(_timer):
+        received[0] = _timer
         counter[0] += 1
 
     timer = TimerClass(_timer_id())
@@ -80,6 +82,8 @@ def _run_timer_test(TimerClass):
 
     count = counter[0]
     if count >= MIN_CALLBACKS:
+        if received[0] is not timer:
+            return "FAIL", f"callback arg is not timer instance: {received[0]!r}"
         return "PASS", f"{count} callbacks in {TEST_DURATION_MS} ms"
     return "FAIL", f"expected >={MIN_CALLBACKS} callbacks, got {count}"
 

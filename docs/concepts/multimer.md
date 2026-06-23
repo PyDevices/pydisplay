@@ -37,6 +37,25 @@ On **CPython** (including Linux), the module flag **`multimer.REQUIRES_RUN_QUEUE
 
 See [installation](../installation/index.md) for which ports ship multimer.
 
+## `get_timer`
+
+Convenience helper used by pydisplay drivers for `auto_refresh` and similar periodic work. It creates a periodic timer and auto-allocates the next timer id (`_next_timer_id`; `-1` on RP2).
+
+```python
+from multimer import get_timer, run_queued
+
+def on_tick(timer):
+    ...
+
+get_timer(on_tick, period=40, warn=False)
+```
+
+- **Callback contract** — same as `machine.Timer`: your function is called as `callback(timer)` with the Timer instance.
+- **`asynchronous=True`** — uses `multimer.aio.Timer` (call from a running event loop).
+- **`warn=False`** — suppresses the `run_queued()` reminder on backends that need it.
+
+When `display_drv` is created with `auto_refresh`, it calls `get_timer(self.show, …)` first (typically id 1). App timers created afterward get the next id automatically — see [**pydisplay_demo**](../examples/pydisplay_demo.md).
+
 ---
 
 ## `multimer.aio` — asyncio timers

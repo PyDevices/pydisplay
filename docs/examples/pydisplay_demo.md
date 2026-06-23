@@ -135,7 +135,7 @@ main()
 
 - **`setup_scroll()`** — calls `display_drv.set_vscroll(TOP, BOT)` to define fixed regions.
 - **`get_timer(on_tick, period=40)`** — allocates the next timer id after `display_drv` (SDLDisplay `auto_refresh` already took id 1 via `get_timer(show, …)`). No need to pick a timer number yourself.
-- **`on_tick(_=None)`** — every 40 ms, increments `state["scroll"]` and sets `display_drv.vscroll`. The optional timer argument matches `machine.Timer` / future `get_timer` behaviour.
+- **`on_tick(_=None)`** — every 40 ms, increments `state["scroll"]` and sets `display_drv.vscroll`. The optional timer argument matches the `machine.Timer` / `get_timer` callback contract.
 - **`run_queued()`** — drains multimer callbacks on backends that queue timer work to the main thread ([multimer](../concepts/multimer.md)).
 - **`broker.poll()`** — returns touch/mouse events; the demo handles `MOUSEBUTTONDOWN` only.
 
