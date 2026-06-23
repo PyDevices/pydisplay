@@ -24,10 +24,15 @@ packages = [
     ["lib/palettes", [], []],
 ]
 
-master_exclude = ["examples"]
+# Packages omitted from pydisplay-bundle.json (still get their own packages/*.json).
+bundle_exclude = ["examples", "add_ons"]
+# Packages omitted from html/pyscript.toml (PyScript mounts add_ons for local demos).
+toml_exclude = ["examples"]
 
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
 SKIP_FILE_SUFFIXES = {".pyc", ".pyo"}
+# Local upstream checkouts (gitignored) — never list in mip manifests.
+PACKAGE_SKIP_DIRS = {"add_ons": {"gui"}}
 
 
 def should_include_file(filename):
@@ -63,12 +68,12 @@ for package_path, deps, extra_files in packages:
         src_file = repo_url + os.path.relpath(full_file_path, repo_dir)
         package_dicts[package_name]["urls"].append([extra_file, src_file])
 
-        if package_name not in master_exclude:
-            # Add the file the master package
+        if package_name not in bundle_exclude:
             master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
             master_package["urls"].append([master_dest_file, src_file])
 
-            # Add the file to the master toml
+        if package_name not in toml_exclude:
+            master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
             toml_dest_dir = "/" + "/".join(master_dest_file.split("/")[:-1]) + "/"
             if toml_dest_dir == "//":
                 toml_dest_dir = "/"
@@ -76,9 +81,11 @@ for package_path, deps, extra_files in packages:
                 f'"../{os.path.relpath(full_file_path, repo_dir)}" = "{toml_dest_dir}"'
             )
 
+    package_skip = PACKAGE_SKIP_DIRS.get(package_name, set())
+
     # Iterate over the directories in the package
     for root, dirs, files in os.walk(full_path):
-        dirs[:] = sorted(d for d in dirs if d not in SKIP_DIR_NAMES)
+        dirs[:] = sorted(d for d in dirs if d not in SKIP_DIR_NAMES and d not in package_skip)
         # Iterate over the sorted files list
         for f in sorted(files):
             if not should_include_file(f):
@@ -89,20 +96,19 @@ for package_path, deps, extra_files in packages:
             src_file = repo_url + os.path.relpath(full_file_path, repo_dir)
             package_dicts[package_name]["urls"].append([dest_file, src_file])
 
-            if package_name not in master_exclude:
-                # Add the file to the master package
+            if package_name not in bundle_exclude:
                 master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
                 master_package["urls"].append([master_dest_file, src_file])
 
-                # Add the file to the master toml
+            if package_name not in toml_exclude:
+                master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
                 toml_dest_dir = "/".join(master_dest_file.split("/")[:-1])
                 if toml_dest_dir == "//":
                     toml_dest_dir = "/"
                 toml_src_file = src_dir + master_dest_file
                 master_toml.append(f'"../{toml_src_file}" = "/{toml_dest_dir}/"')
 
-    # Add a blank line to the master toml to make it easier to read
-    if package_name not in master_exclude:
+    if package_name not in toml_exclude:
         master_toml.append("")
 
 # Add standalone bundle files not discovered by package walks.

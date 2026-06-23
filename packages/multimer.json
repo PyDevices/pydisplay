@@ -13,6 +13,10 @@
       "github:PyDevices/pydisplay/src/lib/multimer/_ffi.py"
     ],
     [
+      "multimer/_polling.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_polling.py"
+    ],
+    [
       "multimer/_schedule.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_schedule.py"
     ],

@@ -71,7 +71,7 @@ Includes 2 functions that install from different sources:
     - Retrieves files as is, without precompilation (no .mpy files).
     - Includes:
         - /packages/pydisplay-bundle.json - Bundle package including 2 core packages, 3 utility packages,
-            6 extensions and default board_config.py.
+            6 extensions and default board_config.py (not add_ons or examples).
         - 2 core packages:
             - /packages/displaysys.json (includes all 6 display extensions and default board_config.py)
             - /packages/eventsys.json
@@ -200,8 +200,10 @@ install("xpt2046")
 # Repository packages - contains no precompiled bytecode (.mpy) files
 ####################################################################################################
 """
-## The bundle of 2 core packages, 3 utility packages, 6 display extensions and default board_config.py:
+## The bundle of 2 core packages, 3 utility packages, 6 display extensions and default board_config.py
+## (not add_ons or examples — install those separately below):
 install("/packages/pydisplay-bundle.json")
+install("/packages/add_ons.json", target="./add_ons")
 
 ## The 2 core packages:
 install("/packages/displaysys.json")  # Includes all 6 display extensions

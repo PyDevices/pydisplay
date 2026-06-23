@@ -93,7 +93,7 @@ Walks configured `src/` trees and writes the JSON/TOML files listed above. Consu
 | `graphics` | `src/lib/graphics/` | |
 | `multimer` | `src/lib/multimer/` | |
 | `palettes` | `src/lib/palettes/` | |
-| `pydisplay-bundle` | (composed) | All of the above except `examples`, plus `src/jupyter_notebook.ipynb` |
+| `pydisplay-bundle` | (composed) | All of the above except `examples` and `add_ons`, plus `src/jupyter_notebook.ipynb` |
 
 `__pycache__/` directories and `.pyc` / `.pyo` files are skipped.
 
@@ -124,7 +124,7 @@ Running `./tools/regenerate.sh --audit` before regeneration showed the committed
 | `displaysys` | `displaysys/sdldisplay/_sdl2_lib/_usdl2.py` | `src/lib/displaysys/sdldisplay/_sdl2_lib/_usdl2.py` |
 | `examples` | `joystick_list_select.py` | `src/examples/joystick_list_select.py` |
 | `multimer` | `multimer/_threading.py` | `src/lib/multimer/_threading.py` |
-| `pydisplay-bundle` | same entries under `add_ons/`, `lib/…` prefixes | (bundle composition) |
+| `pydisplay-bundle` | same entries under `lib/…` prefixes (not `add_ons/`) | (bundle composition) |
 
 `eventsys/joystick.py` was already present in `packages/eventsys.json` but had not been propagated into `pydisplay-bundle.json` / `html/pyscript.toml`.
 

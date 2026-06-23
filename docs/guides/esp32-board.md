@@ -25,6 +25,7 @@ Follow [installer.py](../installation/installer.md) on the device or via `mpremo
 ```bash
 mpremote mip install "github:PyDevices/pydisplay/board_configs/busdisplay/i80/wt32sc01-plus"
 mpremote mip install "github:PyDevices/pydisplay/packages/pydisplay-bundle.json"
+mpremote mip install --target "./add_ons" "github:PyDevices/pydisplay/packages/add_ons.json"
 ```
 
 **Option C — minimum packages only:**
