@@ -69,6 +69,14 @@ pydisplay does not include a task scheduler. Options:
 - **[multimer](multimer.md)** — cross-platform timers; default `Timer` for sync/threaded loops
 - **[multimer.aio](multimer.md#multimeraio--asyncio-timers)** — opt-in asyncio timers for async/PyScript apps
 
+## Vertical scrolling
+
+Many drivers expose **ILI9341-style** vertical scroll: a top fixed band (TFA), a scrollable middle (VSA), and a bottom fixed band (BFA). You define regions with `set_vscroll(tfa, bfa)` or `vscrdef`, then move content with the `vscroll` property (wrapper around `vscsad`).
+
+The [**pydisplay_demo**](../examples/pydisplay_demo.md) guide explains this model with diagrams, covers drawing at `vscroll = 0` during redraw, and shows auto-scroll with `multimer`.
+
+Related examples: [`scroll_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll_touch_test.py) (touch Up/Down), [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_encoder_test.py) (encoder).
+
 ## Rotation
 
 BusDisplay uses CircuitPython-style rotation degrees (`0`, `90`, `180`, `270`).

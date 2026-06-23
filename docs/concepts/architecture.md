@@ -62,6 +62,8 @@ while True:
 
 On desktop, `board_config` usually selects `SDL2Display` or `PGDisplay`. On ESP32, `BusDisplay` talks to the panel over SPI or I80.
 
+For a complete minimal app using this pattern (plus scrolling and timers), see [**pydisplay_demo**](../examples/pydisplay_demo.md).
+
 ## Where to go next
 
 - [Displays](displays.md) — pick a display driver class

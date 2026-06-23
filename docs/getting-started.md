@@ -22,6 +22,7 @@ This page is a **router**. Pick the path that matches how you want to use pydisp
 
 ## Learn the model
 
+- [**pydisplay_demo**](examples/pydisplay_demo.md) — recommended first example (display, clicks, rotation, scrolling, multimer)
 - [Architecture](concepts/architecture.md) — how board_config, displaysys, and eventsys fit together
 - [Installation overview](installation/index.md) — MIP vs full clone vs micropython-lib
 

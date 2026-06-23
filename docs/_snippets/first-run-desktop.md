@@ -7,7 +7,9 @@ python3 -i path.py
 ```
 
 ```python
->>> import hello
+>>> import pydisplay_demo
 ```
 
-A window should open with the hello example. Use `micropython -i path.py` to test with MicroPython on Unix instead of CPython.
+A window should open with the pydisplay demo (touch or click **Rotate** / **Color**; the tips list scrolls). See the [**pydisplay_demo** guide](../examples/pydisplay_demo.md) for a full walkthrough.
+
+Use `micropython -i path.py` to test with MicroPython on Unix instead of CPython. Legacy [`hello.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/hello.py) uses the older `tft_config` stack.

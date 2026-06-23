@@ -31,7 +31,7 @@ mpremote mip install "github:PyDevices/pydisplay/packages/pydisplay-bundle.json"
 
 --8<-- "_snippets/minimum-mip.md"
 
-## 3. Run hello
+## 3. Run the demo
 
 From the repo `src/` on your PC:
 
@@ -43,14 +43,16 @@ At the device REPL:
 
 ```python
 import lib.path
-import hello
+import pydisplay_demo
 ```
 
 If packages are installed into `/lib` on the device (no mount), skip `lib.path`:
 
 ```python
-import hello
+import pydisplay_demo
 ```
+
+See [**pydisplay_demo**](../examples/pydisplay_demo.md) for what the script demonstrates (clicks, rotation, scrolling). Legacy `hello.py` uses `tft_config` if you are porting older st7789py examples.
 
 ## 4. Try events
 
@@ -61,6 +63,7 @@ import eventsys_simpletest
 
 ## Next
 
+- [**pydisplay_demo**](../examples/pydisplay_demo.md) — flagship example (display, input, scroll)
 - [Examples catalog](../examples/index.md) — suggested learning order
 - [Events concept](../concepts/events.md) — broker poll loop
 - [MicroPython platform notes](../platforms/micropython.md) — bus drivers, frozen firmware

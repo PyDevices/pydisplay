@@ -28,6 +28,7 @@ Use `Draw(canvas)` when you prefer a separate drawer object over subclassing.
 | Mechanism | Source | Notes |
 |-----------|--------|-------|
 | `graphics.Font` | Tony DiCola 5×7 lineage, romfont `.bin` files | 8×8, 8×14, 8×16 |
+| `FrameBuffer` + `blit_rect` | Compose text in RAM, one blit to display | See [**pydisplay_demo**](../examples/pydisplay_demo.md) and `font_simpletest.py` |
 | `tft_text.text()` | @russhughes text_font_converter | Width 8 or 16, height multiples of 8 |
 | `tft_write.write()` | @russhughes write_font_converter | Proportional fonts |
 

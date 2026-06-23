@@ -85,4 +85,4 @@ An exact match for all four is rare; bus + display controller is usually enough 
 
 ## Custom config
 
-Copy the closest match, edit pin assignments and driver imports, and test with `import displaysys_simpletest` or `hello.py`.
+Copy the closest match, edit pin assignments and driver imports, and test with `import pydisplay_demo` or `import displaysys_simpletest`. See the [**pydisplay_demo** guide](../examples/pydisplay_demo.md) for a walkthrough of the recommended smoke test.

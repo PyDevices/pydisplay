@@ -185,6 +185,14 @@
       "github:PyDevices/pydisplay/src/examples/png_test.py"
     ],
     [
+      "pydisplay_demo.py",
+      "github:PyDevices/pydisplay/src/examples/pydisplay_demo.py"
+    ],
+    [
+      "pydisplay_demo_async.py",
+      "github:PyDevices/pydisplay/src/examples/pydisplay_demo_async.py"
+    ],
+    [
       "rotations.py",
       "github:PyDevices/pydisplay/src/examples/rotations.py"
     ],

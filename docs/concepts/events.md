@@ -27,7 +27,7 @@ while True:
     display.show()
 ```
 
-Run [`eventsys_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_simpletest.py) after [first run](../guides/desktop-cpython.md).
+Run [`eventsys_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_simpletest.py) after [first run](../guides/desktop-cpython.md). For clicks, rotation, and scrolling together, see [**pydisplay_demo**](examples/pydisplay_demo.md).
 
 ## Subscribe vs poll
 

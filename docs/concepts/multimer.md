@@ -198,7 +198,9 @@ PyScript requires an async main loop. Prefer **`multimer.aio`** for timers there
 
 ## Example portability markers
 
-Scripts under `src/examples/` are tagged with a first-line comment as they are checked against sync, queued, and async timer patterns — for example `# multimer types: all`. **All 62** top-level examples and **7** subdirectory runnable demos are marked (including `spotify_remote`). See [Examples catalog — multimer portability markers](../examples/index.md#multimer-portability-markers) and [Subdirectories](../examples/index.md#subdirectories) for tag meanings, `rg` search commands, and canonical patterns (event-poll, finite test, forever LVGL, pdwidgets `run_forever()`).
+Scripts under `src/examples/` are tagged with a first-line comment as they are checked against sync, queued, and async timer patterns — for example `# multimer types: all`. **All 63** top-level examples and **7** subdirectory runnable demos are marked (including `spotify_remote`). See [Examples catalog — multimer portability markers](../examples/index.md#multimer-portability-markers) and [Subdirectories](../examples/index.md#subdirectories) for tag meanings, `rg` search commands, and canonical patterns (event-poll, finite test, forever LVGL, pdwidgets `run_forever()`).
+
+For **`queued, sync`** — blocking loop with `run_queued()` plus a periodic timer — see [**pydisplay_demo**](../examples/pydisplay_demo.md).
 
 ## API reference
 

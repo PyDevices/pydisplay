@@ -8,6 +8,9 @@ mip.install("github:PyDevices/pydisplay/packages/examples.json", target="./examp
 
 Use `import lib.path` first in a development clone (see [full clone](../installation/full-clone.md)).
 
+!!! tip "Start here"
+    New to pydisplay? Read the [**pydisplay_demo** guide](pydisplay_demo.md) — a full walkthrough of the flagship example (board_config, events, scrolling, buffered text, multimer).
+
 ## multimer portability markers
 
 As examples are reviewed for [multimer](../concepts/multimer.md) portability (sync, queued, and async timer patterns), each updated script gets a **first-line comment** tagging which timer styles it supports:
@@ -16,7 +19,7 @@ As examples are reviewed for [multimer](../concepts/multimer.md) portability (sy
 # multimer types: all
 ```
 
-**Progress:** **62 / 62** top-level (`src/examples/*.py`) and **7 / 7** subdirectory runnable demos marked (including `spotify_remote`).
+**Progress:** **64 / 64** top-level (`src/examples/*.py`) and **7 / 7** subdirectory runnable demos marked (including `spotify_remote`).
 
 ### Tag values
 
@@ -146,7 +149,7 @@ pd.run_forever()
 
 | Step | Script | Platforms | Packages | Screenshot |
 |------|--------|-----------|----------|------------|
-| 1 | `hello.py` | CPython · MCU · Wokwi | core | — |
+| 1 | [`pydisplay_demo.py`](pydisplay_demo.md) | CPython · MCU | core | — |
 | 2 | `color_test.py` | CPython · MCU | core | [color_test](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/color_test.png) |
 | 3 | `displaysys_simpletest.py` | CPython · MCU | core | — |
 | 4 | `eventsys_simpletest.py` | CPython · MCU · PyScript | core | — |
@@ -163,7 +166,9 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 
 | Script | Description | Platforms | Packages |
 |--------|-------------|-----------|----------|
-| `hello.py` | Minimal text | CPython · MCU · Wokwi | core |
+| [`pydisplay_demo.py`](pydisplay_demo.md) | Clicks, rotation, scroll (`board_config` + multimer) | CPython · MCU | core |
+| `pydisplay_demo_async.py` | Same as pydisplay_demo with `multimer.aio` | CPython · MCU · PyScript | core |
+| `hello.py` | Minimal text (`tft_config`) | CPython · MCU · Wokwi | core |
 | `color_test.py` | Color bars | CPython · MCU | core |
 | `logo.py` | Logo drawing | CPython · MCU | core |
 | `displaysys_simpletest.py` | Display smoke test | CPython · MCU | core |
