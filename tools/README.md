@@ -67,7 +67,6 @@ Chains the most common local maintenance step: refreshing GitHub-install and PyS
 - `packages/examples.json`
 - `packages/graphics.json`
 - `packages/multimer.json`
-- `packages/palettes.json`
 - `packages/pydisplay-bundle.json`
 - `html/pyscript.toml`
 
@@ -92,7 +91,6 @@ Walks configured `src/` trees and writes the JSON/TOML files listed above. Consu
 | `eventsys` | `src/lib/eventsys/` | |
 | `graphics` | `src/lib/graphics/` | |
 | `multimer` | `src/lib/multimer/` | |
-| `palettes` | `src/lib/palettes/` | |
 | `pydisplay-bundle` | (composed) | All of the above except `examples` and `add_ons`, plus `src/jupyter_notebook.ipynb` |
 
 `__pycache__/` directories and `.pyc` / `.pyo` files are skipped.

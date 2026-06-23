@@ -161,42 +161,6 @@
       "github:PyDevices/pydisplay/src/lib/multimer/test_timers.py"
     ],
     [
-      "lib/palettes/__init__.py",
-      "github:PyDevices/pydisplay/src/lib/palettes/__init__.py"
-    ],
-    [
-      "lib/palettes/_cube125.py",
-      "github:PyDevices/pydisplay/src/lib/palettes/_cube125.py"
-    ],
-    [
-      "lib/palettes/_cube27.py",
-      "github:PyDevices/pydisplay/src/lib/palettes/_cube27.py"
-    ],
-    [
-      "lib/palettes/_cube64.py",
-      "github:PyDevices/pydisplay/src/lib/palettes/_cube64.py"
-    ],
-    [
-      "lib/palettes/_cube8.py",
-      "github:PyDevices/pydisplay/src/lib/palettes/_cube8.py"
-    ],
-    [
-      "lib/palettes/_material_design.py",
-      "github:PyDevices/pydisplay/src/lib/palettes/_material_design.py"
-    ],
-    [
-      "lib/palettes/cube.py",
-      "github:PyDevices/pydisplay/src/lib/palettes/cube.py"
-    ],
-    [
-      "lib/palettes/material_design.py",
-      "github:PyDevices/pydisplay/src/lib/palettes/material_design.py"
-    ],
-    [
-      "lib/palettes/wheel.py",
-      "github:PyDevices/pydisplay/src/lib/palettes/wheel.py"
-    ],
-    [
       "jupyter_notebook.ipynb",
       "github:PyDevices/pydisplay/src/jupyter_notebook.ipynb"
     ]

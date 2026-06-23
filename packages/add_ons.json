@@ -149,6 +149,42 @@
       "github:PyDevices/pydisplay/src/add_ons/fonts/vga2_bold_16x32.py"
     ],
     [
+      "palettes/__init__.py",
+      "github:PyDevices/pydisplay/src/add_ons/palettes/__init__.py"
+    ],
+    [
+      "palettes/_cube125.py",
+      "github:PyDevices/pydisplay/src/add_ons/palettes/_cube125.py"
+    ],
+    [
+      "palettes/_cube27.py",
+      "github:PyDevices/pydisplay/src/add_ons/palettes/_cube27.py"
+    ],
+    [
+      "palettes/_cube64.py",
+      "github:PyDevices/pydisplay/src/add_ons/palettes/_cube64.py"
+    ],
+    [
+      "palettes/_cube8.py",
+      "github:PyDevices/pydisplay/src/add_ons/palettes/_cube8.py"
+    ],
+    [
+      "palettes/_material_design.py",
+      "github:PyDevices/pydisplay/src/add_ons/palettes/_material_design.py"
+    ],
+    [
+      "palettes/cube.py",
+      "github:PyDevices/pydisplay/src/add_ons/palettes/cube.py"
+    ],
+    [
+      "palettes/material_design.py",
+      "github:PyDevices/pydisplay/src/add_ons/palettes/material_design.py"
+    ],
+    [
+      "palettes/wheel.py",
+      "github:PyDevices/pydisplay/src/add_ons/palettes/wheel.py"
+    ],
+    [
       "pdwidgets/__init__.py",
       "github:PyDevices/pydisplay/src/add_ons/pdwidgets/__init__.py"
     ],

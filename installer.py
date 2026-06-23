@@ -40,13 +40,12 @@ Includes 2 functions that install from different sources:
 - `lib_install`: Installs from the PyDevices fork of the micropython-lib library.
     - By default, installs all modules as precompiled bytecode (.mpy) files.
     - Includes:
-        - pydisplay-bundle - Bundle package including 2 core packages, 3 utility packages and 6 extensions.
+        - pydisplay-bundle - Bundle package including 2 core packages, 2 utility packages and 6 extensions.
         - 2 core packages:
             - displaysys
             - eventsys
-        - 3 utility packages:
+        - 2 utility packages:
             - graphics
-            - palettes
             - multimer
         - 6 display extensions for the displaysys package.
           Installing any of these will automatically install the displaysys core package:
@@ -70,14 +69,13 @@ Includes 2 functions that install from different sources:
     - Can retrieve any file from the repository, not just packages.
     - Retrieves files as is, without precompilation (no .mpy files).
     - Includes:
-        - /packages/pydisplay-bundle.json - Bundle package including 2 core packages, 3 utility packages,
+        - /packages/pydisplay-bundle.json - Bundle package including 2 core packages, 2 utility packages,
             6 extensions and default board_config.py (not add_ons or examples).
         - 2 core packages:
             - /packages/displaysys.json (includes all 6 display extensions and default board_config.py)
             - /packages/eventsys.json
-        - 3 utility packages:
+        - 2 utility packages:
             - /packages/graphics.json
-            - /packages/palettes.json
             - /packages/multimer.json
         - 4 additional packages:
             - /packages/add_ons.json
@@ -171,9 +169,8 @@ install("pydisplay-bundle")
 install("displaysys")
 install("eventsys")
 
-## The 3 utility packages:
+## The 2 utility packages:
 install("graphics")
-install("palettes")
 install("multimer")
 
 ## The 6 display extensions:
@@ -200,7 +197,7 @@ install("xpt2046")
 # Repository packages - contains no precompiled bytecode (.mpy) files
 ####################################################################################################
 """
-## The bundle of 2 core packages, 3 utility packages, 6 display extensions and default board_config.py
+## The bundle of 2 core packages, 2 utility packages, 6 display extensions and default board_config.py
 ## (not add_ons or examples — install those separately below):
 install("/packages/pydisplay-bundle.json")
 install("/packages/add_ons.json", target="./add_ons")
@@ -209,9 +206,8 @@ install("/packages/add_ons.json", target="./add_ons")
 install("/packages/displaysys.json")  # Includes all 6 display extensions
 install("/packages/eventsys.json")
 
-## The 3 utility packages:
+## The 2 utility packages:
 install("/packages/graphics.json")
-install("/packages/palettes.json")
 install("/packages/multimer.json")
 
 ## 4 additional packages:

@@ -21,7 +21,6 @@ packages = [
     ["lib/eventsys", [], []],
     ["lib/graphics", [], []],
     ["lib/multimer", [], []],
-    ["lib/palettes", [], []],
 ]
 
 # Packages omitted from pydisplay-bundle.json (still get their own packages/*.json).

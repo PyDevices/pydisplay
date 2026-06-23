@@ -15,7 +15,7 @@ SOURCE_TREES = (
         root / "src/lib",
         Path("reference"),
         (),
-        ("", "displaysys", "eventsys", "graphics", "multimer", "palettes"),
+        ("", "displaysys", "eventsys", "graphics", "multimer"),
     ),
     (
         root / "src/add_ons",
