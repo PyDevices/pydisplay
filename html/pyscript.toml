@@ -1,3 +1,11 @@
+# Pin the MicroPython interpreter to the copy bundled in this repo
+# (html/pyscript/micropython/) instead of fetching it from the jsDelivr CDN.
+# PyScript resolves this URL relative to each HTML page, so the same value works
+# both when serving html/ locally and under the GitHub Pages /demo/html/ prefix.
+# To use a custom build, drop a webassembly VARIANT=pyscript micropython.mjs +
+# micropython.wasm into html/pyscript/micropython/ (no further config changes).
+interpreter = "./pyscript/micropython/micropython.mjs"
+
 [files]
 "../src/add_ons/README.md" = "/add_ons/"
 "../src/add_ons/bmp565.py" = "/add_ons/"
