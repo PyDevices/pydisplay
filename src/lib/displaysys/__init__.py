@@ -151,6 +151,7 @@ class DisplayDriver:
                 raise ImportError("multimer is required for auto_refresh") from None
         else:
             self._timer = None
+        self._deinitialized = False
         self.init()
         gc.collect()
         print(f"{self.__class__.__name__}: initialized.")
@@ -570,13 +571,20 @@ class DisplayDriver:
 
     def deinit(self) -> None:
         """
-        Deinitialize the display.  Stops the auto-refresh timer so it can't fire
-        after resources are released.  Idempotent.  Subclasses that override
-        this should call ``super().deinit()``.
+        Stop the auto-refresh timer (so it can't fire after resources are
+        released) and then run subclass cleanup. Idempotent.
         """
+        if getattr(self, "_deinitialized", False):
+            return
+        self._deinitialized = True
         if getattr(self, "_timer", None) is not None:
             self._timer.deinit()
             self._timer = None
+        self._deinit()
+
+    def _deinit(self) -> None:
+        """Subclass resource cleanup hook, called after the timer is stopped."""
+        return
 
     def quit(self, code: int = 0) -> None:
         """

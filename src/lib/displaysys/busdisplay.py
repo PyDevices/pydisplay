@@ -508,6 +508,29 @@ class BusDisplay(DisplayDriver):
         """
         self.send(_SLPIN if value else _SLPOUT)
 
+    def _deinit(self) -> None:
+        """Best-effort hardware teardown."""
+        try:
+            self.brightness = 0
+        except Exception:
+            pass
+        try:
+            self.power = False
+        except Exception:
+            pass
+        bus = getattr(self, "display_bus", None)
+        if bus is not None and hasattr(bus, "deinit"):
+            bus.deinit()
+        self.display_bus = None
+        for attr in ("_backlight_pin", "_reset_pin", "_power_pin"):
+            pin = getattr(self, attr, None)
+            if pin is not None and hasattr(pin, "deinit"):
+                try:
+                    pin.deinit()
+                except Exception:
+                    pass
+            setattr(self, attr, None)
+
     ############### Class Specific Methods ##############
 
     def _set_window(self, x1, y1, x2, y2):

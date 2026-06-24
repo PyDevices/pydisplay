@@ -522,17 +522,8 @@ class SDLDisplay(DisplayDriver):
         """
         SDL_RenderPresent(self._renderer)
 
-    def deinit(self) -> None:
-        """
-        Deinitializes the SDLDisplay instance.  Idempotent and safe to call from
-        the quit path.
-        """
-        if getattr(self, "_deinitialized", False):
-            return
-        self._deinitialized = True
-        # Stop the auto-refresh timer first (super().deinit()) so a pending
-        # render can't call SDL_RenderPresent on a renderer we destroy here.
-        super().deinit()
+    def _deinit(self) -> None:
+        """Release SDL resources."""
         if self._buffer is not None:
             SDL_DestroyTexture(self._buffer)
             self._buffer = None

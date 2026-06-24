@@ -249,15 +249,13 @@ class PGDisplay(DisplayDriver):
                 bfaRect = pg.Rect(0, tfa + vsa, width, bfa)
                 self._window.blit(buffer, bfaRect, bfaRect)
 
-    def show(self, param=None) -> None:
+    def show(self, _timer=None) -> None:
         """
         Show the display.
         """
         pg.display.flip()
 
-    def deinit(self) -> None:
-        """
-        Deinitializes the pygame instance.
-        """
+    def _deinit(self) -> None:
+        """Release pygame resources."""
         pg.display.quit()
         pg.quit()
