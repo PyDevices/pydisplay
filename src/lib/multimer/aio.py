@@ -75,10 +75,17 @@ def run(main):
             loop = asyncio.get_running_loop()
         except RuntimeError:
             loop = None
-    if loop is not None:
+    # CircuitPython/MicroPython's get_running_loop() returns the singleton loop
+    # even when it isn't actually running, so confirm it's running before
+    # scheduling on it. CPython loops expose is_running(); when that's missing,
+    # assume not running and fall through to asyncio.run().
+    if loop is not None and getattr(loop, "is_running", lambda: False)():
         task = loop.create_task(main())
         _background_tasks.add(task)
-        task.add_done_callback(_background_tasks.discard)
+        # Task.add_done_callback() is CPython-only; CircuitPython Tasks lack it.
+        # The strong reference in _background_tasks is enough to prevent GC.
+        if hasattr(task, "add_done_callback"):
+            task.add_done_callback(_background_tasks.discard)
         return task
     if hasattr(asyncio, "run"):
         return asyncio.run(main())
