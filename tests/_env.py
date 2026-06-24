@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+"""Shared test bootstrap that puts ``eventsys`` on ``sys.path``.
+
+The tests are self-contained: importing this module makes ``src/lib`` (where
+the ``eventsys`` package lives) importable without installing anything. Import
+it before importing ``eventsys`` in any test module::
+
+    import _env  # noqa: F401
+    import eventsys
+"""
+
+import os
+import sys
+
+_SRC_LIB = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src", "lib"))
+
+if _SRC_LIB not in sys.path:
+    sys.path.insert(0, _SRC_LIB)
+
+#: Absolute path to the ``eventsys`` package directory, handy for tests that
+#: want to copy it somewhere isolated.
+EVENTSYS_DIR = os.path.join(_SRC_LIB, "eventsys")
