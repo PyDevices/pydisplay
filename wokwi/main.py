@@ -22,12 +22,12 @@ mip.install(
     target=".",
 )  # last — root board_config.py
 mip.install(
-    "github:PyDevices/pydisplay/src/examples/pydisplay_demo.py",
+    "github:PyDevices/pydisplay/src/examples/testris.py",
     target=".",
 )
 
 # isort: off
 import lib.path  # noqa: E402
-import pydisplay_demo  # noqa: E402
+import testris  # noqa: E402
 # isort: on
 # Full catalog: import hello, bmp565_simpletest, pydisplay_demo_async, etc. after uncommenting above
