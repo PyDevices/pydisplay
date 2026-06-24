@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Paint — pydisplay demo</title>
-    <meta name="description" content="Paint: a pydisplay example running in the browser via PyScript.">
+    <title>Framebuf Simpletest — pydisplay demo</title>
+    <meta name="description" content="Framebuf Simpletest: a pydisplay example running in the browser via PyScript.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="./demo.css">
@@ -31,14 +31,14 @@
         <nav class="crumbs">
             <a href="../index.html">Demos</a>
             <span class="sep">/</span>
-            <span>Paint</span>
+            <span>Framebuf Simpletest</span>
         </nav>
 
         <div class="example-head">
-            <h1>Paint</h1>
-            <span class="tag async">async</span>
+            <h1>Framebuf Simpletest</h1>
+            <span class="tag all">all</span>
         </div>
-        <p class="example-lede">A minimal paint program showing how <code>displaysys</code> handles pointer events.</p>
+        <p class="example-lede">Simple test example to demonstrate the use of framebuf.FrameBuffer.</p>
 
         <div class="stage-layout">
             <section class="stage">
@@ -57,20 +57,19 @@
                 <div class="panel">
                     <h2>How to use</h2>
                     <ul>
-                        <li>Click a color block in the palette strip to select it.</li>
-                        <li>Left-drag on the canvas to paint.</li>
-                        <li>Right-click a swatch to flood-fill the canvas.</li>
+                        <li>Click <strong>Run</strong> to install and start the example.</li>
+                        <li>Output (if any) appears in the console panel below.</li>
                     </ul>
                 </div>
                 <div class="panel">
                     <h2>Details</h2>
-                    <div class="meta-row"><span class="k">Source</span><span class="v">paint.py</span></div>
-                    <div class="meta-row"><span class="k">Type</span><span class="v">async</span></div>
+                    <div class="meta-row"><span class="k">Source</span><span class="v">framebuf_simpletest.py</span></div>
+                    <div class="meta-row"><span class="k">Type</span><span class="v">all</span></div>
                     <div class="meta-row"><span class="k">Install</span><span class="v">single file</span></div>
                 </div>
                 <div class="actions">
-                    <a class="btn" href="https://github.com/PyDevices/pydisplay/blob/main/src/examples/paint.py" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> View source</a>
-                    <a class="btn" href="./editor.html">Open in editor</a>
+                    <a class="btn" href="https://github.com/PyDevices/pydisplay/blob/main/src/examples/framebuf_simpletest.py" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> View source</a>
+                    <a class="btn" href="../index.html">Back to demos</a>
                 </div>
             </aside>
         </div>
@@ -110,16 +109,16 @@
             _btn.textContent = "Running…"
             _set("Installing modules…")
             import mip
-            mip.install("github:PyDevices/pydisplay/src/examples/paint.py")
-            _set("Importing paint…")
+            mip.install("github:PyDevices/pydisplay/src/examples/framebuf_simpletest.py")
+            _set("Importing framebuf_simpletest…")
             import lib.path
-            import paint
+            import framebuf_simpletest
             _set("Running.")
 
         _btn.addEventListener("click", create_proxy(_start))
         _btn.disabled = False
         _set("Runtime ready — click Run.")
-        print("PyScript runtime ready. Click Run to start paint.")
+        print("PyScript runtime ready. Click Run to start framebuf_simpletest.")
     </script>
 
     <script>

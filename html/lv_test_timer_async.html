@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>LVGL Timer (async) — pydisplay demo</title>
-    <meta name="description" content="LVGL timer test driven by multimer.aio and asyncio.">
+    <meta name="description" content="LVGL Timer (async): a pydisplay example running in the browser via PyScript.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="./demo.css">
@@ -39,42 +39,42 @@
             <span class="tag async">async</span>
             <span class="tag warn">experimental</span>
         </div>
-        <p class="example-lede">
-            Drives an LVGL UI from a <code>multimer.aio</code> timer on the asyncio event loop. LVGL is
-            a native binding, so this example depends on an <code>lvgl</code> build being available in
-            the browser runtime — see the console for details if it does not start.
-        </p>
+        <p class="example-lede">Drives an LVGL UI from a <code>multimer.aio</code> timer on the asyncio loop.</p>
 
         <div class="stage-layout">
             <section class="stage">
                 <div class="loading" id="loading">
-                    <span class="spinner"></span> Loading PyScript runtime…
+                    <span class="spinner"></span> <span id="status">Loading PyScript runtime…</span>
                 </div>
                 <div class="device">
                     <canvas id="display_canvas" width="1" height="1"></canvas>
+                </div>
+                <div class="run-bar">
+                    <button id="run-btn" class="btn primary" disabled>Run</button>
                 </div>
             </section>
 
             <aside class="aside">
                 <div class="panel">
-                    <h2>About</h2>
+                    <h2>How to use</h2>
                     <ul>
                         <li>Builds a small LVGL UI and refreshes it from an async timer.</li>
-                        <li>Requires an <code>lvgl</code> module in the runtime.</li>
+                        <li>Requires an <code>lvgl</code> binding in the runtime.</li>
                         <li>Provided as a reference for async LVGL integration.</li>
                     </ul>
                 </div>
                 <div class="panel">
+                    <h2>Note</h2>
+                    <ul><li>LVGL is a native binding; this needs an <code>lvgl</code>-enabled runtime, which the bundled PyScript MicroPython does not include.</li></ul>
+                </div>
+                <div class="panel">
                     <h2>Details</h2>
                     <div class="meta-row"><span class="k">Source</span><span class="v">lv_test_timer_async.py</span></div>
-                    <div class="meta-row"><span class="k">Timer</span><span class="v">multimer.aio</span></div>
-                    <div class="meta-row"><span class="k">Needs</span><span class="v">lvgl</span></div>
+                    <div class="meta-row"><span class="k">Type</span><span class="v">async</span></div>
+                    <div class="meta-row"><span class="k">Install</span><span class="v">examples.json</span></div>
                 </div>
                 <div class="actions">
-                    <a class="btn" href="https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_async.py" target="_blank" rel="noopener">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
-                        View source
-                    </a>
+                    <a class="btn" href="https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_async.py" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> View source</a>
                     <a class="btn" href="../index.html">Back to demos</a>
                 </div>
             </aside>
@@ -93,25 +93,47 @@
         </div>
     </footer>
 
-    <!--
-        lv_test_timer_async.py imports lv_test_timer_common; install the examples.json
-        manifest into target="examples" so both resolve. LVGL itself (the "lvgl"
-        binding) must be present in the runtime for the UI to build.
-    -->
+    <!-- Loader is gated behind the Run button so blocking examples never hang on load. -->
     <script type="mpy" config="./pyscript.toml" output="log">
-        import mip
-        mip.install("github:PyDevices/pydisplay/packages/examples.json", target="examples")
+        from js import document
+        from pyscript.ffi import create_proxy
 
-        import lib.path
-        import lv_test_timer_async
+        _status = document.getElementById("status")
+        _btn = document.getElementById("run-btn")
+        _started = False
+
+        def _set(msg):
+            if _status:
+                _status.textContent = msg
+
+        def _start(*_):
+            global _started
+            if _started:
+                return
+            _started = True
+            _btn.disabled = True
+            _btn.textContent = "Running…"
+            _set("Installing modules…")
+            import mip
+            mip.install("github:PyDevices/pydisplay/packages/examples.json", target="examples")
+            _set("Importing lv_test_timer_async…")
+            import lib.path
+            import lv_test_timer_async
+            _set("Running.")
+
+        _btn.addEventListener("click", create_proxy(_start))
+        _btn.disabled = False
+        _set("Runtime ready — click Run.")
+        print("PyScript runtime ready. Click Run to start lv_test_timer_async.")
     </script>
 
     <script>
-        const _c = document.getElementById('display_canvas');
-        const _l = document.getElementById('loading');
+        // Stop the spinner once the runtime is ready (Run button enabled).
+        const _btn = document.getElementById('run-btn');
+        const _spin = document.querySelector('#loading .spinner');
         const _t = setInterval(() => {
-            if (_c.width > 1) { _l.style.display = 'none'; clearInterval(_t); }
-        }, 200);
+            if (_btn && !_btn.disabled) { if (_spin) _spin.style.display = 'none'; clearInterval(_t); }
+        }, 150);
     </script>
 </body>
 </html>
