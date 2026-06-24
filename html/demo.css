@@ -348,6 +348,18 @@ kbd {
   background: rgba(108, 123, 255, 0.12);
 }
 
+.tag.all {
+  color: var(--good);
+  border-color: rgba(67, 197, 158, 0.4);
+  background: rgba(67, 197, 158, 0.12);
+}
+
+.tag.loops {
+  color: var(--warn);
+  border-color: rgba(245, 177, 78, 0.4);
+  background: rgba(245, 177, 78, 0.12);
+}
+
 .tag.tool {
   color: var(--good);
   border-color: rgba(67, 197, 158, 0.4);
@@ -463,6 +475,7 @@ kbd {
 .stage {
   display: grid;
   place-items: center;
+  gap: 16px;
   padding: 30px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
@@ -470,6 +483,17 @@ kbd {
     radial-gradient(420px 320px at 50% 0%, rgba(108, 123, 255, 0.1), transparent 70%),
     var(--bg-soft);
   min-height: 360px;
+}
+
+.run-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.run-bar .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .device {
