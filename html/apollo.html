@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Apollo DSKY — pydisplay demo</title>
+    <meta name="description" content="Apollo Guidance Computer DSKY emulator rendered with displaysys and a BMP565 sprite sheet.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="./demo.css">
+    <link rel="stylesheet" href="./pyscript/core.css">
+    <script src="./mini-coi-fd.js"></script>
+    <script type="module" src="./pyscript/core.js"></script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="brand" href="../index.html">
+                <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+                py<span class="accent">display</span>
+            </a>
+            <nav class="nav">
+                <a href="../index.html">Demos</a>
+                <a href="https://pydisplay.readthedocs.io">Docs</a>
+                <a href="https://github.com/PyDevices/pydisplay">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrap example-main">
+        <nav class="crumbs">
+            <a href="../index.html">Demos</a>
+            <span class="sep">/</span>
+            <span>Apollo DSKY</span>
+        </nav>
+
+        <div class="example-head">
+            <h1>Apollo DSKY</h1>
+            <span class="tag async">async</span>
+            <span class="tag warn">experimental</span>
+        </div>
+        <p class="example-lede">
+            An Apollo Guidance Computer DSKY emulator. It blits regions of a BMP565 sprite sheet to
+            render the panel, lights and seven-segment display, and runs a live clock. Designed for a
+            320×480 display.
+        </p>
+
+        <div class="stage-layout">
+            <section class="stage">
+                <div class="loading" id="loading">
+                    <span class="spinner"></span> Loading PyScript runtime &amp; assets…
+                </div>
+                <div class="device">
+                    <canvas id="display_canvas" width="1" height="1"></canvas>
+                </div>
+            </section>
+
+            <aside class="aside">
+                <div class="panel">
+                    <h2>How to use</h2>
+                    <ul>
+                        <li>Tap the keypad buttons on the panel.</li>
+                        <li>The status lights and clock update live.</li>
+                        <li>The bottom key scrolls the readout.</li>
+                    </ul>
+                </div>
+                <div class="panel">
+                    <h2>Details</h2>
+                    <div class="meta-row"><span class="k">Source</span><span class="v">apollo.py</span></div>
+                    <div class="meta-row"><span class="k">Timer</span><span class="v">async</span></div>
+                    <div class="meta-row"><span class="k">Assets</span><span class="v">apollo_dsky/</span></div>
+                </div>
+                <div class="actions">
+                    <a class="btn" href="https://github.com/PyDevices/pydisplay/blob/main/src/examples/apollo.py" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+                        View source
+                    </a>
+                    <a class="btn" href="../index.html">Back to demos</a>
+                </div>
+            </aside>
+        </div>
+
+        <details class="console" open>
+            <summary>Console output</summary>
+            <div id="log" class="log"></div>
+        </details>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <span>pydisplay — cross-platform display &amp; event drivers</span>
+            <span><a href="https://github.com/PyDevices/pydisplay">PyDevices/pydisplay</a></span>
+        </div>
+    </footer>
+
+    <!--
+        apollo.py depends on the apollo_dsky package (Python module + BMP asset).
+        Installing the examples.json manifest into target="examples" recreates the
+        directory structure so "import apollo" and "import apollo_dsky" resolve.
+    -->
+    <script type="mpy" config="./pyscript.toml" output="log">
+        import mip
+        mip.install("github:PyDevices/pydisplay/packages/examples.json", target="examples")
+
+        import lib.path
+        import apollo
+    </script>
+
+    <script>
+        const _c = document.getElementById('display_canvas');
+        const _l = document.getElementById('loading');
+        const _t = setInterval(() => {
+            if (_c.width > 1) { _l.style.display = 'none'; clearInterval(_t); }
+        }, 200);
+    </script>
+</body>
+</html>
