@@ -26,6 +26,7 @@ jobs:
           cp index.html _site/demo/
           cp -r html _site/demo/
           cp demo-pages/index.html _site/index.html
+          cp demo-pages/site.css _site/site.css
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
