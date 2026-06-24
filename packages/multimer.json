@@ -39,10 +39,6 @@
     [
       "multimer/aio.py",
       "github:PyDevices/pydisplay/src/lib/multimer/aio.py"
-    ],
-    [
-      "multimer/test_timers.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/test_timers.py"
     ]
   ],
   "deps": [],

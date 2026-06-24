@@ -1,35 +1,45 @@
-# Wokwi projects for pydisplay
+# pydisplay on Wokwi (ESP32-S3 + ILI9341 touch)
 
-In-repo [Wokwi](https://wokwi.com/) simulator projects for MicroPython on ESP32-S3 + ILI9341.
+Browser project for [wokwi.com](https://wokwi.com): bundle + Wokwi board config + [`pydisplay_demo`](../src/examples/pydisplay_demo.py).
 
-| Directory | Description |
-|-----------|-------------|
-| [`minimum/`](minimum/) | `displaysys` + `eventsys` + Wokwi board config + `hello` |
-| [`esp32-s3-full/`](esp32-s3-full/) | Full install via `installer.py` (bundle, add_ons, examples) |
+**Guide:** [Wokwi simulator](../docs/guides/wokwi.md) · **Hardware:** [Wokwi reference](../docs/hardware/wokwi.md)
 
-Board config (both projects): [`board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/`](../../board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/)
+Board config: [`wokwi_ili9341_ft6x36_esp32s3`](../board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/)
 
-## Wokwi.com (browser)
+## Files
 
-1. Open [New ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3).
-2. Replace **diagram.json** and **main.py** with the files from `minimum/` or `esp32-s3-full/` in this repo ([GitHub browse](https://github.com/PyDevices/pydisplay/tree/main/wokwi)).
-3. Start the simulation. The sketch needs network access to download packages via `mip`.
+| File | Purpose |
+|------|---------|
+| `main.py` | WiFi + `mip.install` (with `target="."`) + `pydisplay_demo` |
+| `diagram.json` | ESP32-S3 + `board-ili9341-cap-touch` wiring |
+| `pydisplay-bundle.json` | Slim MCU lib manifest (generated from `packages/pydisplay-bundle.json`) |
 
-Legacy hosted projects (same hardware intent): [minimum (404248867674669057)](https://wokwi.com/projects/404248867674669057), [full (415770470006384641)](https://wokwi.com/projects/415770470006384641).
+## Run in the browser
 
-## VS Code + Wokwi extension
+1. Create a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3).
+2. Replace the project's **main.py** and **diagram.json** with the files from this directory.
+3. Start the simulation. Serial shows `mip` downloads, then the demo UI appears.
 
-1. Install [Wokwi for VS Code](https://marketplace.visualstudio.com/items?itemName=Wokwi.wokwi-vscode) and [mpremote](https://docs.micropython.org/en/latest/reference/mpremote.html).
-2. Copy a MicroPython ESP32-S3 firmware `.bin` into [`firmware/`](firmware/) — see [`firmware/README.md`](firmware/README.md).
-3. Open `wokwi/minimum/` or `wokwi/esp32-s3-full/` in VS Code.
-4. **Wokwi: Start Simulator**, then upload and run:
+## Quick try (default)
 
-```bash
-mpremote connect port:rfc2217://localhost:4000 run main.py
-```
+Use `main.py` as committed. On first boot, `mip` downloads packages from GitHub (network required). You should see the **pydisplay_demo** UI: Rotate / Color bar and scrolling tips.
 
-Or copy `main.py` to the device filesystem and reset (see [Wokwi MicroPython VS Code guide](https://docs.wokwi.com/vscode/vscode-micropython)).
+## Full install
 
-## Wiring
+Uncomment the two `add_ons` and `examples` lines in `main.py`, then restart the simulation. First boot takes several minutes.
 
-SPI and I2C pins match [`wokwi_ili9341_ft6x36_esp32s3/board_config.py`](../../board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/board_config.py): SPI on GPIO 36/35/37/16/5, touch I2C on GPIO 7/6.
+Enables the full example catalog (`hello.py`, `bmp565_*`, `pydisplay_demo_async`, LVGL prep examples, and more under `examples/`).
+
+## Wiring (GPIO)
+
+| Signal | GPIO |
+|--------|------|
+| SPI SCK | 36 |
+| SPI MOSI | 35 |
+| SPI MISO | 37 |
+| Display D/C | 16 |
+| Display CS | 5 |
+| Touch I2C SDA | 7 |
+| Touch I2C SCL | 6 |
+
+Matches [`wokwi_ili9341_ft6x36_esp32s3/board_config.py`](../board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/board_config.py).

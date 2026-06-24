@@ -87,7 +87,6 @@
 
 "../src/lib/eventsys/__init__.py" = "/lib/eventsys/"
 "../src/lib/eventsys/devices.py" = "/lib/eventsys/"
-"../src/lib/eventsys/joystick.py" = "/lib/eventsys/"
 "../src/lib/eventsys/keys.py" = "/lib/eventsys/"
 
 "../src/lib/graphics/__init__.py" = "/lib/graphics/"
@@ -112,6 +111,5 @@
 "../src/lib/multimer/_ticks.py" = "/lib/multimer/"
 "../src/lib/multimer/_timerbase.py" = "/lib/multimer/"
 "../src/lib/multimer/aio.py" = "/lib/multimer/"
-"../src/lib/multimer/test_timers.py" = "/lib/multimer/"
 
 "../src/jupyter_notebook.ipynb" = "/"

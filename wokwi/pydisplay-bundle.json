@@ -1,10 +1,6 @@
 {
   "urls": [
     [
-      "lib/board_config.py",
-      "github:PyDevices/pydisplay/src/lib/board_config.py"
-    ],
-    [
       "lib/path.py",
       "github:PyDevices/pydisplay/src/lib/path.py"
     ],
@@ -15,46 +11,6 @@
     [
       "lib/displaysys/busdisplay.py",
       "github:PyDevices/pydisplay/src/lib/displaysys/busdisplay.py"
-    ],
-    [
-      "lib/displaysys/fbdisplay.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/fbdisplay.py"
-    ],
-    [
-      "lib/displaysys/jndisplay.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/jndisplay.py"
-    ],
-    [
-      "lib/displaysys/pgdisplay.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/pgdisplay.py"
-    ],
-    [
-      "lib/displaysys/psdisplay.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/psdisplay.py"
-    ],
-    [
-      "lib/displaysys/sdldisplay/__init__.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/__init__.py"
-    ],
-    [
-      "lib/displaysys/sdldisplay/_sdl2_lib/__init__.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/__init__.py"
-    ],
-    [
-      "lib/displaysys/sdldisplay/_sdl2_lib/_constants.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/_constants.py"
-    ],
-    [
-      "lib/displaysys/sdldisplay/_sdl2_lib/_cpython.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/_cpython.py"
-    ],
-    [
-      "lib/displaysys/sdldisplay/_sdl2_lib/_ffi.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/_ffi.py"
-    ],
-    [
-      "lib/displaysys/sdldisplay/_sdl2_lib/_usdl2.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/_usdl2.py"
     ],
     [
       "lib/eventsys/__init__.py",
@@ -117,28 +73,8 @@
       "github:PyDevices/pydisplay/src/lib/multimer/__init__.py"
     ],
     [
-      "lib/multimer/_ctypes.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_ctypes.py"
-    ],
-    [
-      "lib/multimer/_ffi.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_ffi.py"
-    ],
-    [
-      "lib/multimer/_polling.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_polling.py"
-    ],
-    [
       "lib/multimer/_schedule.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_schedule.py"
-    ],
-    [
-      "lib/multimer/_sdl2.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_sdl2.py"
-    ],
-    [
-      "lib/multimer/_threading.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_threading.py"
     ],
     [
       "lib/multimer/_ticks.py",
@@ -147,14 +83,6 @@
     [
       "lib/multimer/_timerbase.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_timerbase.py"
-    ],
-    [
-      "lib/multimer/aio.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/aio.py"
-    ],
-    [
-      "jupyter_notebook.ipynb",
-      "github:PyDevices/pydisplay/src/jupyter_notebook.ipynb"
     ]
   ],
   "version": "0.0.1"

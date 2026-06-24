@@ -5,7 +5,7 @@
 <p align="center">
   <a href="https://pydisplay.readthedocs.io">Documentation</a> •
   <a href="https://PyDevices.github.io/pydisplay/demo/">PyScript demo</a> •
-  <a href="https://wokwi.com/projects/415770470006384641">Wokwi example</a> •
+  <a href="https://pydisplay.readthedocs.io/en/latest/guides/wokwi/">Wokwi simulator</a> •
   <a href="screenshots/">Screenshots</a>
 </p>
 

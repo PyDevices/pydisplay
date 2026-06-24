@@ -36,7 +36,6 @@ from sys import exit
 from micropython import const
 
 from . import events
-from .joystick import JoystickDriver
 
 _DEFAULT_TOUCH_ROTATION_TABLE = (0b000, 0b101, 0b110, 0b011)
 
@@ -686,6 +685,35 @@ class KeypadDevice(Device):
             self._state.add(key)
             return events.Key(events.KEYDOWN, chr(key), key, 0, 0)
         return None
+
+
+class JoystickDriver:
+    def get_instance_id(self):
+        raise NotImplementedError("JoystickDriver.get_instance_id() not implemented")
+
+    def get_numaxes(self):
+        raise NotImplementedError("JoystickDriver.get_numaxes() not implemented")
+
+    def get_axis(self, axis):
+        raise NotImplementedError("JoystickDriver.get_axis() not implemented")
+
+    def get_numballs(self):
+        raise NotImplementedError("JoystickDriver.get_numballs() not implemented")
+
+    def get_ball(self, ball):
+        raise NotImplementedError("JoystickDriver.get_ball() not implemented")
+
+    def get_numbuttons(self):
+        raise NotImplementedError("JoystickDriver.get_numbuttons() not implemented")
+
+    def get_button(self, button):
+        raise NotImplementedError("JoystickDriver.get_button() not implemented")
+
+    def get_numhats(self):
+        raise NotImplementedError("JoystickDriver.get_numhats() not implemented")
+
+    def get_hat(self, hat):
+        raise NotImplementedError("JoystickDriver.get_hat() not implemented")
 
 
 class JoystickDevice(Device):

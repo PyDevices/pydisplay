@@ -1,40 +1,63 @@
-# Wokwi quick start
+# Wokwi simulator
 
-**Who:** You want to run pydisplay in the browser simulator without hardware or a local clone.
+Run pydisplay on a simulated ESP32-S3 with an ILI9341 capacitive touch display — no hardware required.
 
-**Prerequisites:** A [wokwi.com](https://wokwi.com) account (free).
+**In-repo project:** [`wokwi/`](../wokwi/)
 
-## Minimum project (recommended)
+**Who:** You want MCU-faithful testing (SPI display, I2C touch, MicroPython `machine` APIs) without flashing a board.
 
-In-repo files: [`wokwi/minimum/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi/minimum)
+**What you get:** [`pydisplay_demo`](../examples/pydisplay_demo.md) — Rotate / Color bar, scrolling tips, touch or mouse input. One `main.py`; full example catalog = uncomment two lines.
+
+**Prerequisites:**
+
+- Network on first boot (`mip.install` pulls packages from GitHub)
+- [wokwi.com](https://wokwi.com) account (free)
+
+---
+
+## Run in the browser
 
 1. Create a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3).
-2. Copy `main.py` and `diagram.json` from `wokwi/minimum/`.
-3. Start the simulation — `hello.py` should appear on the ILI9341 display.
+2. Replace **diagram.json** and **main.py** with the files from [`wokwi/`](../wokwi/).
+3. Start the simulation. Serial shows `mip` downloads, then the demo UI appears.
 
-Or open the [hosted minimum project](https://wokwi.com/projects/404248867674669057).
+**Full install:** uncomment the two `add_ons` / `examples` lines in `main.py` before starting (several-minute first boot).
 
-## Full install project
+The browser sim ships MicroPython — no local tools or firmware download needed.
 
-[`wokwi/esp32-s3-full/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi/esp32-s3-full) downloads and runs `installer.py` with the Wokwi board config. Hosted copy: [415770470006384641](https://wokwi.com/projects/415770470006384641).
+---
 
-## VS Code
+## Quick vs full
 
-See [`wokwi/README.md`](https://github.com/PyDevices/pydisplay/blob/main/wokwi/README.md) for the Wokwi VS Code extension and firmware setup.
+| | **Quick (default)** | **Full** |
+|--|---------------------|----------|
+| **User action** | Use `main.py` as committed | Uncomment `add_ons` + `examples` lines |
+| **First boot** | ~30 s | Several minutes |
+| **Demo** | `pydisplay_demo` | Same + full `examples/` catalog |
+| **Also enables** | — | `hello.py`, bmp565, `pydisplay_demo_async`, LVGL prep, etc. |
 
-## Board configs used
+---
 
-| Config | Touch |
-|--------|-------|
-| `board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3` | FT6X36 |
-| `board_configs/busdisplay/spi/wokwi_ili9341_esp32s3_no_touch` | None |
+## Verify it worked
+
+Display shows Rotate / Color bar; scrolling tips; serial has no `Traceback`.
+
+---
+
+## Board configs
+
+| MIP package | Touch |
+|-------------|-------|
+| `board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3` | FT6X36 (default) |
+| `board_configs/busdisplay/spi/wokwi_ili9341_esp32s3_no_touch` | None — use if touch is not wired |
+
+Hardware details: [Wokwi reference](../hardware/wokwi.md).
+
+---
 
 ## Next
 
-- [ESP32 board guide](esp32-board.md) — same steps on real hardware
+- [ESP32 board guide](esp32-board.md) — same workflow on real hardware
 - [Try pydisplay](../try/index.md) — PyScript browser demo
-- [Wokwi details](../hardware/wokwi.md) — hosted legacy projects, known issues
-
-## Reference
-
-- [API reference (core)](../reference/)
+- [pydisplay_demo example](../examples/pydisplay_demo.md)
+- [Desktop CPython](desktop-cpython.md)

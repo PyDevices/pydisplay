@@ -31,4 +31,4 @@ Not needed if all packages are installed into `/lib` on the device.
 
 ## LVGL
 
-Wire pydisplay through upstream [LVGL micropython](https://github.com/lvgl/lv_micropython) using your `board_config.py` display and touch brokers. See [GUI: LVGL](../guis/lvgl.md) and the [minimum Wokwi project](https://wokwi.com/projects/404248867674669057).
+Wire pydisplay through upstream [LVGL micropython](https://github.com/lvgl/lv_micropython) using your `board_config.py` display and touch brokers. See [GUI: LVGL](../guis/lvgl.md) and the [Wokwi project](../guides/wokwi.md) (`wokwi/`).

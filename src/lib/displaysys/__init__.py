@@ -19,10 +19,12 @@ try:
 except ImportError:
 
     def byteswap(buf):
-        """
-        Swap the bytes of a 16-bit buffer in place with no dependencies.
-        """
-        buf[::2], buf[1::2] = buf[1::2], buf[::2]
+        """Swap 16-bit pixel bytes in place (portable fallback)."""
+        n = len(buf) & ~1  # only complete 16-bit pairs
+        for i in range(0, n, 2):
+            b0 = buf[i]
+            buf[i] = buf[i + 1]
+            buf[i + 1] = b0
 
 
 gc.collect()
