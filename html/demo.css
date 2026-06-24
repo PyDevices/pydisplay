@@ -1,0 +1,678 @@
+/*
+ * pydisplay PyScript demo — shared stylesheet
+ *
+ * Used by the demo index (demo/index.html) and every example page in
+ * demo/html/. Keep this file dependency-free so it ships as a single asset.
+ */
+
+:root {
+  --bg: #0f1115;
+  --bg-soft: #161922;
+  --panel: #1c202b;
+  --panel-2: #232838;
+  --border: #2c3242;
+  --border-soft: #232838;
+  --ink: #e8ebf2;
+  --ink-soft: #aeb5c5;
+  --muted: #7c8499;
+  --accent: #f54e00;
+  --accent-soft: #ff7a3d;
+  --accent-ink: #1a0d05;
+  --indigo: #6c7bff;
+  --good: #43c59e;
+  --warn: #f5b14e;
+  --bad: #f5594e;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  --shadow-soft: 0 6px 20px rgba(0, 0, 0, 0.3);
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--ink);
+  line-height: 1.55;
+  background:
+    radial-gradient(1100px 600px at 12% -8%, rgba(108, 123, 255, 0.16), transparent 60%),
+    radial-gradient(1000px 620px at 100% 0%, rgba(245, 78, 0, 0.14), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+a {
+  color: var(--accent-soft);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+code,
+kbd {
+  font-family: var(--mono);
+  font-size: 0.92em;
+}
+
+code {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.08em 0.4em;
+  color: var(--ink);
+}
+
+kbd {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  padding: 0.1em 0.45em;
+  color: var(--ink);
+}
+
+/* ---------- Layout ---------- */
+
+.wrap {
+  width: min(1080px, 92vw);
+  margin: 0 auto;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(10px);
+  background: rgba(15, 17, 21, 0.72);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.site-header .wrap {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 0;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-size: 1.12rem;
+}
+
+.brand:hover {
+  text-decoration: none;
+}
+
+.brand .logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--accent), #ff9a5c);
+  box-shadow: 0 4px 14px rgba(245, 78, 0, 0.4);
+}
+
+.brand .logo svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.brand .accent {
+  color: var(--accent-soft);
+}
+
+.nav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  font-size: 0.95rem;
+}
+
+.nav a {
+  color: var(--ink-soft);
+}
+
+.nav a:hover {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* ---------- Hero (index) ---------- */
+
+.hero {
+  padding: 64px 0 30px;
+  text-align: center;
+}
+
+.hero .eyebrow {
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent-soft);
+  margin-bottom: 14px;
+}
+
+.hero h1 {
+  margin: 0 0 14px;
+  font-size: clamp(2rem, 4.6vw, 3.1rem);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.hero p {
+  margin: 0 auto;
+  max-width: 620px;
+  color: var(--ink-soft);
+  font-size: 1.06rem;
+}
+
+.callout {
+  margin: 26px auto 0;
+  max-width: 640px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  text-align: left;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.callout svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  color: var(--accent-soft);
+}
+
+/* ---------- Section headings ---------- */
+
+.section {
+  padding: 30px 0;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 6px 0 20px;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
+}
+
+.section-head .hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* ---------- Card grid ---------- */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--panel), var(--bg-soft));
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.16s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  border-color: #3a4256;
+  box-shadow: var(--shadow);
+  text-decoration: none;
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card .card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  margin-bottom: 14px;
+  color: var(--accent-soft);
+}
+
+.card .card-icon svg {
+  width: 21px;
+  height: 21px;
+}
+
+.card h3 {
+  margin: 0 0 6px;
+  font-size: 1.08rem;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.card p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  flex: 1;
+}
+
+.card .go {
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--accent-soft);
+}
+
+.card .go svg {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.16s ease;
+}
+
+.card:hover .go svg {
+  transform: translateX(3px);
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.18em 0.55em;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--ink-soft);
+  background: var(--panel-2);
+}
+
+.tag.async {
+  color: var(--indigo);
+  border-color: rgba(108, 123, 255, 0.4);
+  background: rgba(108, 123, 255, 0.12);
+}
+
+.tag.tool {
+  color: var(--good);
+  border-color: rgba(67, 197, 158, 0.4);
+  background: rgba(67, 197, 158, 0.12);
+}
+
+.tag.warn {
+  color: var(--warn);
+  border-color: rgba(245, 177, 78, 0.4);
+  background: rgba(245, 177, 78, 0.12);
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* Simple link list (Elsewhere) */
+.linklist {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.linklist a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  transition: border-color 0.16s ease, color 0.16s ease;
+}
+
+.linklist a:hover {
+  border-color: #3a4256;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.linklist svg {
+  width: 17px;
+  height: 17px;
+  color: var(--muted);
+}
+
+/* ---------- Example page ---------- */
+
+.example-main {
+  padding: 30px 0 60px;
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+.crumbs a {
+  color: var(--ink-soft);
+}
+
+.crumbs .sep {
+  opacity: 0.5;
+}
+
+.example-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.example-head h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+  letter-spacing: -0.025em;
+}
+
+.example-lede {
+  margin: 0 0 26px;
+  max-width: 680px;
+  color: var(--ink-soft);
+  font-size: 1.02rem;
+}
+
+.stage-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 26px;
+  align-items: start;
+}
+
+@media (max-width: 880px) {
+  .stage-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Device bezel that frames the canvas */
+.stage {
+  display: grid;
+  place-items: center;
+  padding: 30px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(420px 320px at 50% 0%, rgba(108, 123, 255, 0.1), transparent 70%),
+    var(--bg-soft);
+  min-height: 360px;
+}
+
+.device {
+  padding: 16px;
+  border-radius: 22px;
+  background: linear-gradient(160deg, #2b3040, #14171f);
+  box-shadow:
+    var(--shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border: 1px solid #3a4256;
+}
+
+#display_canvas {
+  display: block;
+  border-radius: 10px;
+  background-color: #000;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  max-width: 100%;
+  height: auto;
+}
+
+/* Side panel */
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 16px 18px;
+}
+
+.panel h2 {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.panel ul {
+  margin: 0;
+  padding-left: 1.1em;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.panel li + li {
+  margin-top: 6px;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.9rem;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.meta-row:last-child {
+  border-bottom: 0;
+}
+
+.meta-row .k {
+  color: var(--muted);
+}
+
+.meta-row .v {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 15px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.16s ease, transform 0.1s ease;
+}
+
+.btn:hover {
+  border-color: #44506a;
+  text-decoration: none;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+  border-color: transparent;
+  color: var(--accent-ink);
+}
+
+.btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Console / stdout panel */
+.console {
+  margin-top: 26px;
+}
+
+.console summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  padding: 4px 0;
+  user-select: none;
+}
+
+.console summary:hover {
+  color: var(--ink-soft);
+}
+
+#log,
+.log {
+  margin-top: 10px;
+  max-height: 220px;
+  overflow: auto;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #0a0c10;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* PyScript loading splash */
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Hide PyScript's default splashscreen in favour of our own */
+py-splashscreen,
+mpy-splashscreen {
+  display: none !important;
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  border-top: 1px solid var(--border-soft);
+  margin-top: 40px;
+  padding: 26px 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.site-footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.site-footer a {
+  color: var(--ink-soft);
+}

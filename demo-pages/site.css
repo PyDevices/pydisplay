@@ -1,0 +1,231 @@
+/*
+ * pydisplay — GitHub Pages landing stylesheet
+ *
+ * Used by the root landing page (demo-pages/index.html -> _site/index.html).
+ * Self-contained so it ships as a single asset alongside the page.
+ */
+
+:root {
+  --bg: #0f1115;
+  --bg-soft: #161922;
+  --panel: #1c202b;
+  --panel-2: #232838;
+  --border: #2c3242;
+  --border-soft: #232838;
+  --ink: #e8ebf2;
+  --ink-soft: #aeb5c5;
+  --muted: #7c8499;
+  --accent: #f54e00;
+  --accent-soft: #ff7a3d;
+  --indigo: #6c7bff;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  --shadow-soft: 0 6px 20px rgba(0, 0, 0, 0.3);
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--ink);
+  line-height: 1.6;
+  background:
+    radial-gradient(1100px 600px at 12% -10%, rgba(108, 123, 255, 0.18), transparent 60%),
+    radial-gradient(1000px 640px at 100% 0%, rgba(245, 78, 0, 0.16), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: var(--accent-soft);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.08em 0.4em;
+}
+
+.wrap {
+  width: min(960px, 92vw);
+  margin: 0 auto;
+}
+
+/* Hero */
+.hero {
+  padding: 90px 0 30px;
+  text-align: center;
+}
+
+.logo-badge {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 22px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--accent), #ff9a5c);
+  box-shadow: 0 10px 30px rgba(245, 78, 0, 0.45);
+}
+
+.logo-badge svg {
+  width: 36px;
+  height: 36px;
+}
+
+.hero .eyebrow {
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent-soft);
+  margin-bottom: 12px;
+}
+
+.hero h1 {
+  margin: 0 0 16px;
+  font-size: clamp(2.2rem, 5.4vw, 3.4rem);
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+}
+
+.hero p {
+  margin: 0 auto;
+  max-width: 600px;
+  color: var(--ink-soft);
+  font-size: 1.12rem;
+}
+
+.cta {
+  margin: 30px 0 8px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: var(--radius-sm);
+  font-size: 0.98rem;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--ink);
+  transition: border-color 0.16s ease, transform 0.1s ease;
+}
+
+.btn:hover {
+  border-color: #44506a;
+  text-decoration: none;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+  border-color: transparent;
+  color: #1a0d05;
+}
+
+.btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* Cards */
+.cards {
+  flex: 1;
+  padding: 24px 0 60px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--panel), var(--bg-soft));
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  border-color: #3a4256;
+  box-shadow: var(--shadow);
+  text-decoration: none;
+}
+
+.card .icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--accent-soft);
+  margin-bottom: 6px;
+}
+
+.card .icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.card p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.94rem;
+}
+
+/* Footer */
+.site-footer {
+  border-top: 1px solid var(--border-soft);
+  padding: 24px 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.site-footer a {
+  color: var(--ink-soft);
+}
