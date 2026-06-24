@@ -13,102 +13,11 @@ from PIL import Image, ImageDraw
 
 from displaysys import DisplayDriver, color_rgb
 from eventsys import events
-from eventsys.keys import Keys
+from eventsys.keys import Keys, chord_matches, key_to_keycode, mod_mask
 
 _JN_TOUCH_DEPS = "pip install ipywidgets ipyevents"
 
 _CSS_DISPLAY_ID = "pydisplay_jn_styles"
-
-
-# ---------------------------------------------------------------------------
-# Keyboard mapping
-#
-# Translate browser ``KeyboardEvent`` values (delivered by ipyevents) into
-# eventsys (SDL-style) key codes so the events produced here match the QUEUE
-# backends (SDL2 / PyGame).  ``key`` holds either a single printable character
-# (mapped by code point below) or a named value such as ``"ArrowUp"`` (mapped
-# via the table).  The table is kept local to this module by design.
-# ---------------------------------------------------------------------------
-_NAMED_KEYS = {
-    "Backspace": Keys.K_BACKSPACE,
-    "Tab": Keys.K_TAB,
-    "Enter": Keys.K_RETURN,
-    "Escape": Keys.K_ESCAPE,
-    "Delete": Keys.K_DELETE,
-    "ArrowUp": Keys.K_UP,
-    "ArrowDown": Keys.K_DOWN,
-    "ArrowLeft": Keys.K_LEFT,
-    "ArrowRight": Keys.K_RIGHT,
-    "Home": Keys.K_HOME,
-    "End": Keys.K_END,
-    "PageUp": Keys.K_PAGEUP,
-    "PageDown": Keys.K_PAGEDOWN,
-    "Insert": Keys.K_INSERT,
-    "CapsLock": Keys.K_CAPSLOCK,
-    "NumLock": Keys.K_NUMLOCKCLEAR,
-    "ScrollLock": Keys.K_SCROLLLOCK,
-    "Pause": Keys.K_PAUSE,
-    "PrintScreen": Keys.K_PRINTSCREEN,
-    "ContextMenu": Keys.K_MENU,
-    "Control": Keys.K_LCTRL,
-    "Shift": Keys.K_LSHIFT,
-    "Alt": Keys.K_LALT,
-    "Meta": Keys.K_LGUI,
-    "F1": Keys.K_F1,
-    "F2": Keys.K_F2,
-    "F3": Keys.K_F3,
-    "F4": Keys.K_F4,
-    "F5": Keys.K_F5,
-    "F6": Keys.K_F6,
-    "F7": Keys.K_F7,
-    "F8": Keys.K_F8,
-    "F9": Keys.K_F9,
-    "F10": Keys.K_F10,
-    "F11": Keys.K_F11,
-    "F12": Keys.K_F12,
-}
-
-_MOD_GROUPS = (Keys.KMOD_CTRL, Keys.KMOD_SHIFT, Keys.KMOD_ALT, Keys.KMOD_GUI)
-
-
-def _key_to_keycode(key):
-    """Map a DOM ``KeyboardEvent.key`` value to an eventsys key code."""
-    code = _NAMED_KEYS.get(key)
-    if code is not None:
-        return code
-    if key and len(key) == 1:
-        o = ord(key)
-        if 0x41 <= o <= 0x5A:  # 'A'-'Z' -> lowercase code, matching SDL
-            return o + 0x20
-        return o
-    return Keys.K_UNKNOWN
-
-
-def _mod_mask(ctrl, shift, alt, meta):
-    """Build an eventsys modifier mask from DOM modifier flags."""
-    mask = 0
-    if shift:
-        mask |= Keys.KMOD_LSHIFT
-    if ctrl:
-        mask |= Keys.KMOD_LCTRL
-    if alt:
-        mask |= Keys.KMOD_LALT
-    if meta:
-        mask |= Keys.KMOD_LGUI
-    return mask
-
-
-def _chord_matches(chord, keycode, mod):
-    """Return True if (keycode, mod) satisfies a ``(key, mod_mask)`` chord."""
-    if not chord:
-        return False
-    chord_key, chord_mod = chord
-    if keycode != chord_key:
-        return False
-    for group in _MOD_GROUPS:
-        if (chord_mod & group) and not (mod & group):
-            return False
-    return True
 
 
 def _inject_notebook_css(width, height, first_time):
@@ -343,15 +252,15 @@ class JNKeys:
         kind = event.get("type")
         if kind not in ("keydown", "keyup"):
             return
-        keycode = _key_to_keycode(event.get("key", ""))
-        mod = _mod_mask(
+        keycode = key_to_keycode(event.get("key", ""))
+        mod = mod_mask(
             event.get("ctrlKey"),
             event.get("shiftKey"),
             event.get("altKey"),
             event.get("metaKey"),
         )
         if kind == "keydown":
-            if _chord_matches(self.quit_chord, keycode, mod):
+            if chord_matches(self.quit_chord, keycode, mod):
                 self._queue.append(events.Quit(events.QUIT))
                 return
             if event.get("repeat"):  # ignore auto-repeat

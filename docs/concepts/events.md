@@ -72,9 +72,10 @@ input](displays.md#how-displays-expose-input) for the full table):
   `MOUSEBUTTONDOWN` / `MOUSEMOTION` / `MOUSEBUTTONUP` events. It also exposes a
   keyboard helper (`JNKeys` / `PSKeys`) with `read()`, registered as a
   **`QUEUE`** device, that emits `KEYDOWN` / `KEYUP` (with SDL-style key codes,
-  names and modifiers from a per-module keymap) plus a `QUIT` from an assignable
-  quit chord (default **CTRL+C**). Browser/notebook platforms expose only
-  single-element pointer events, so touch is limited to one pressed position.
+  names and modifiers from the shared keymap in `eventsys.keys`) plus a `QUIT`
+  from an assignable quit chord (default **CTRL+C**). Browser/notebook platforms
+  expose only single-element pointer events, so touch is limited to one pressed
+  position.
 
 Either way your handler sees the same `eventsys.events` objects, so application
 code does not need to know which family the active display belongs to.

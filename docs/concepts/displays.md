@@ -103,8 +103,9 @@ broker.create_device(type=devices.types.TOUCH, read=touch_drv.get_mouse_pos, dat
 Each backend also provides a **keyboard helper** (`JNKeys` / `PSKeys`) that
 listens for browser `keydown` / `keyup` events and produces fully-formed
 `eventsys.events.Key` objects — with SDL-style key codes, names, and modifier
-masks via a per-module keymap — so keyboard input matches the desktop event
-stream. It is registered as a `QUEUE` device through its `read()` method:
+masks via the shared keymap in `eventsys.keys` — so keyboard input matches the
+desktop event stream. It is registered as a `QUEUE` device through its `read()`
+method:
 
 ```python
 from displaysys.psdisplay import PSDisplay, PSKeys

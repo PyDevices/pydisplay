@@ -11,102 +11,11 @@ from pyscript.ffi import create_proxy
 
 from displaysys import DisplayDriver, color_rgb
 from eventsys import events
-from eventsys.keys import Keys
+from eventsys.keys import Keys, chord_matches, key_to_keycode, mod_mask
 
 
 def log(*args):
     console.log(*args)
-
-
-# ---------------------------------------------------------------------------
-# Keyboard mapping
-#
-# Translate browser ``KeyboardEvent`` values into eventsys (SDL-style) key
-# codes so the events produced here match the QUEUE backends (SDL2 / PyGame).
-# ``KeyboardEvent.key`` holds either a single printable character (mapped by
-# code point below) or a named value such as ``"ArrowUp"`` (mapped via the
-# table).  The table is kept local to this module by design.
-# ---------------------------------------------------------------------------
-_NAMED_KEYS = {
-    "Backspace": Keys.K_BACKSPACE,
-    "Tab": Keys.K_TAB,
-    "Enter": Keys.K_RETURN,
-    "Escape": Keys.K_ESCAPE,
-    "Delete": Keys.K_DELETE,
-    "ArrowUp": Keys.K_UP,
-    "ArrowDown": Keys.K_DOWN,
-    "ArrowLeft": Keys.K_LEFT,
-    "ArrowRight": Keys.K_RIGHT,
-    "Home": Keys.K_HOME,
-    "End": Keys.K_END,
-    "PageUp": Keys.K_PAGEUP,
-    "PageDown": Keys.K_PAGEDOWN,
-    "Insert": Keys.K_INSERT,
-    "CapsLock": Keys.K_CAPSLOCK,
-    "NumLock": Keys.K_NUMLOCKCLEAR,
-    "ScrollLock": Keys.K_SCROLLLOCK,
-    "Pause": Keys.K_PAUSE,
-    "PrintScreen": Keys.K_PRINTSCREEN,
-    "ContextMenu": Keys.K_MENU,
-    "Control": Keys.K_LCTRL,
-    "Shift": Keys.K_LSHIFT,
-    "Alt": Keys.K_LALT,
-    "Meta": Keys.K_LGUI,
-    "F1": Keys.K_F1,
-    "F2": Keys.K_F2,
-    "F3": Keys.K_F3,
-    "F4": Keys.K_F4,
-    "F5": Keys.K_F5,
-    "F6": Keys.K_F6,
-    "F7": Keys.K_F7,
-    "F8": Keys.K_F8,
-    "F9": Keys.K_F9,
-    "F10": Keys.K_F10,
-    "F11": Keys.K_F11,
-    "F12": Keys.K_F12,
-}
-
-_MOD_GROUPS = (Keys.KMOD_CTRL, Keys.KMOD_SHIFT, Keys.KMOD_ALT, Keys.KMOD_GUI)
-
-
-def _key_to_keycode(key):
-    """Map a DOM ``KeyboardEvent.key`` value to an eventsys key code."""
-    code = _NAMED_KEYS.get(key)
-    if code is not None:
-        return code
-    if key and len(key) == 1:
-        o = ord(key)
-        if 0x41 <= o <= 0x5A:  # 'A'-'Z' -> lowercase code, matching SDL
-            return o + 0x20
-        return o
-    return Keys.K_UNKNOWN
-
-
-def _mod_mask(ctrl, shift, alt, meta):
-    """Build an eventsys modifier mask from DOM modifier flags."""
-    mask = 0
-    if shift:
-        mask |= Keys.KMOD_LSHIFT
-    if ctrl:
-        mask |= Keys.KMOD_LCTRL
-    if alt:
-        mask |= Keys.KMOD_LALT
-    if meta:
-        mask |= Keys.KMOD_LGUI
-    return mask
-
-
-def _chord_matches(chord, keycode, mod):
-    """Return True if (keycode, mod) satisfies a ``(key, mod_mask)`` chord."""
-    if not chord:
-        return False
-    chord_key, chord_mod = chord
-    if keycode != chord_key:
-        return False
-    for group in _MOD_GROUPS:
-        if (chord_mod & group) and not (mod & group):
-            return False
-    return True
 
 
 class PSTouch:
@@ -235,9 +144,9 @@ class PSKeys:
         self._queue.append(events.Key(type, Keys.keyname(keycode), keycode, mod, 0, None))
 
     def _on_keydown(self, e):
-        keycode = _key_to_keycode(e.key)
-        mod = _mod_mask(e.ctrlKey, e.shiftKey, e.altKey, e.metaKey)
-        if _chord_matches(self.quit_chord, keycode, mod):
+        keycode = key_to_keycode(e.key)
+        mod = mod_mask(e.ctrlKey, e.shiftKey, e.altKey, e.metaKey)
+        if chord_matches(self.quit_chord, keycode, mod):
             try:
                 e.preventDefault()
             except Exception:
@@ -250,8 +159,8 @@ class PSKeys:
         self._enqueue(events.KEYDOWN, keycode, mod)
 
     def _on_keyup(self, e):
-        keycode = _key_to_keycode(e.key)
-        mod = _mod_mask(e.ctrlKey, e.shiftKey, e.altKey, e.metaKey)
+        keycode = key_to_keycode(e.key)
+        mod = mod_mask(e.ctrlKey, e.shiftKey, e.altKey, e.metaKey)
         self._pressed.discard(keycode)
         self._enqueue(events.KEYUP, keycode, mod)
 
