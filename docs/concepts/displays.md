@@ -42,7 +42,7 @@ USB Video lets a board stream the framebuffer as a USB webcam (RP2040; host supp
 
 ### JNDisplay
 
-Jupyter Notebook output via an interactive `ipywidgets` image when touch is enabled (`JNDevices` + `ipyevents`). Mouse clicks map to touch events. Config: `board_configs/jndisplay/`.
+Jupyter Notebook output via an interactive `ipywidgets` image when touch is enabled (`JNTouch` + `ipyevents`). Mouse clicks map to touch events. Config: `board_configs/jndisplay/`.
 
 ### PSDisplay
 
@@ -51,6 +51,62 @@ PyScript browser canvas. Touch only. Config: `board_configs/psdisplay/`. See [Py
 ### EPaperDisplay
 
 Planned — community help wanted.
+
+## How displays expose input
+
+Display backends do not handle input the same way, because the platforms they
+run on do not offer the same input capabilities. There are **two families**,
+and which one a backend belongs to determines how its `board_config.py` wires
+input into [`eventsys`](events.md).
+
+| Family | Backends | Driver exposes | eventsys device | Reports |
+|--------|----------|----------------|-----------------|---------|
+| **Native event queue** | `SDL2Display`, `PGDisplay` | module-level `poll()` / `get()` returning `eventsys.events` objects | `QUEUE` | mouse motion/buttons, wheel, keyboard, window-close (QUIT) |
+| **Single-pointer** | `JNDisplay`, `PSDisplay` | a touch helper class (`JNTouch` / `PSTouch`) with `get_mouse_pos()` | `TOUCH` | left-button "touch" only (synthesized MOUSEBUTTONDOWN / MOUSEMOTION / MOUSEBUTTONUP) |
+
+### Native event queue (SDL2, PyGame)
+
+SDL2 and PyGame provide a real OS event queue. The driver module drains it and
+converts each event to an `eventsys.events` object, then `board_config.py`
+registers a `QUEUE` device:
+
+```python
+from displaysys.sdldisplay import SDLDisplay, poll
+from eventsys import devices
+
+display_drv = SDLDisplay(...)
+broker = devices.Broker()
+broker.create_device(type=devices.types.QUEUE, read=poll, data=display_drv)
+```
+
+This is the richest model — keyboard, mouse wheel, all mouse buttons, and the
+window-close event all flow through one device.
+
+### Single-pointer (Jupyter, PyScript)
+
+Jupyter and PyScript only expose pointer events on a single widget/canvas, so
+each provides a small helper class that tracks the current pressed position via
+`get_mouse_pos()`. `board_config.py` registers it as a `TOUCH` device, and
+`eventsys` synthesizes button-1 press/move/release events from the polled
+position (and applies touch rotation):
+
+```python
+from displaysys.psdisplay import PSDisplay, PSTouch
+from eventsys import devices
+
+display_drv = PSDisplay("display_canvas", width, height)
+broker = devices.Broker()
+touch_drv = PSTouch("display_canvas")
+broker.create_device(type=devices.types.TOUCH, read=touch_drv.get_mouse_pos, data=display_drv)
+```
+
+These backends cannot offer the full queue model because the platform has no
+equivalent keyboard/window event stream — the single-pointer helper is the most
+they can support.
+
+> The touch helpers were previously named `JNDevices` / `PSDevices`. Those names
+> remain available as aliases, but `JNTouch` / `PSTouch` better describe that
+> they are single-pointer touch adapters, not general event brokers.
 
 ## Canvases
 

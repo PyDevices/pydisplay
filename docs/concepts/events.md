@@ -55,6 +55,27 @@ See [API reference → eventsys.devices.Broker](../reference/eventsys/devices.md
 
 The same event types fire regardless of physical hardware — develop on desktop with a mouse, deploy with a touchscreen.
 
+## How displays feed the broker
+
+Desktop and restricted (browser/notebook) display backends supply input to the
+broker differently, because they have different access to the underlying
+platform. There are **two families** (see [Displays → How displays expose
+input](displays.md#how-displays-expose-input) for the full table):
+
+- **Native event queue** (`SDL2Display`, `PGDisplay`) — the driver exposes
+  module-level `poll()` / `get()` that return ready-made `eventsys.events`
+  objects, registered as a **`QUEUE`** device. This carries mouse motion/buttons,
+  the scroll wheel, the keyboard, and the window-close (`QUIT`) event.
+- **Single-pointer** (`JNDisplay`, `PSDisplay`) — the driver exposes a small
+  touch helper (`JNTouch` / `PSTouch`) with `get_mouse_pos()`, registered as a
+  **`TOUCH`** device. `eventsys` synthesizes button-1
+  `MOUSEBUTTONDOWN` / `MOUSEMOTION` / `MOUSEBUTTONUP` events from the polled
+  position. Browser/notebook platforms expose only single-element pointer
+  events, so this is the most they can provide.
+
+Either way your handler sees the same `eventsys.events` objects, so application
+code does not need to know which family the active display belongs to.
+
 ## Brokers
 
 `board_config.py` typically sets up brokers that poll hardware and enqueue events:

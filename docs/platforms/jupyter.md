@@ -20,7 +20,7 @@ Run pydisplay examples in VS Code or Jupyter with the `JNDisplay` backend.
 4. Open [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb).
 5. Run cells starting with `import lib.path`.
 
-Board config: `board_configs/jndisplay/board_config.py` (registers `JNDevices` + `TouchDevice`).
+Board config: `board_configs/jndisplay/board_config.py` (registers `JNTouch` + `TouchDevice`).
 
 Touch examples (e.g. [`eventsys_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_touch_test.py)) render a single interactive **ipywidgets Image** — click on that widget.
 

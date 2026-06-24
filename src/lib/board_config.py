@@ -31,14 +31,14 @@ except ImportError:
 
 if _ps:
     # Running in PyScript
-    from displaysys.psdisplay import PSDevices, PSDisplay
+    from displaysys.psdisplay import PSDisplay, PSTouch
     from eventsys import devices
 
     display_drv = PSDisplay("display_canvas", width, height)
 
     broker = devices.Broker()
 
-    touch_drv = PSDevices("display_canvas")
+    touch_drv = PSTouch("display_canvas")
 
     touch_dev = broker.create_device(
         type=devices.types.TOUCH,
@@ -47,7 +47,7 @@ if _ps:
     )
 elif _jn:
     # Running in Jupyter Notebook
-    from displaysys.jndisplay import JNDevices, JNDisplay
+    from displaysys.jndisplay import JNDisplay, JNTouch
     from eventsys import devices
 
     TIMER_ASYNC = True
@@ -56,7 +56,7 @@ elif _jn:
 
     display_drv = JNDisplay(width, height)
 
-    touch_drv = JNDevices(display_drv)
+    touch_drv = JNTouch(display_drv)
 
     touch_dev = broker.create_device(
         type=devices.types.TOUCH,

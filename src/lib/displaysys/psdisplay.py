@@ -16,9 +16,15 @@ def log(*args):
     console.log(*args)
 
 
-class PSDevices:
+class PSTouch:
     """
-    A class to emulate a display on PyScript.
+    Mouse/touch input for a PyScript canvas.
+
+    Wraps a single HTML ``<canvas>`` element and tracks the pointer position
+    while the left mouse button is held, exposing it through
+    :meth:`get_mouse_pos`.  Intended to be registered as an ``eventsys``
+    ``TOUCH`` device, which turns the polled position into button-1
+    MOUSEBUTTONDOWN / MOUSEMOTION / MOUSEBUTTONUP events.
 
     Args:
         id (str): The id of the canvas element.
@@ -75,6 +81,10 @@ class PSDevices:
     def _on_leave(self, e):
         log("Mouse leave")
         self._mouse_pos = None
+
+
+# Backwards-compatible alias for the pre-rename name.
+PSDevices = PSTouch
 
 
 class PSDisplay(DisplayDriver):

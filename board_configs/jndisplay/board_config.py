@@ -2,7 +2,7 @@
 Board configuration for Jupyter Notebook.
 """
 
-from displaysys.jndisplay import JNDevices, JNDisplay
+from displaysys.jndisplay import JNDisplay, JNTouch
 from eventsys import devices
 
 TIMER_ASYNC = True
@@ -14,7 +14,7 @@ broker = devices.Broker()
 
 display_drv = JNDisplay(width, height)
 
-touch_drv = JNDevices(display_drv)
+touch_drv = JNTouch(display_drv)
 
 touch_dev = broker.create_device(
     type=devices.types.TOUCH,

@@ -55,9 +55,15 @@ def _inject_notebook_css(width, height, first_time):
         update_display(css, display_id=_CSS_DISPLAY_ID)
 
 
-class JNDevices:
+class JNTouch:
     """
     Mouse/touch input for Jupyter Notebook via ipywidgets + ipyevents.
+
+    Wraps the interactive ``ipywidgets`` Image that mirrors the display buffer
+    and tracks the pointer position while the left mouse button is held,
+    exposing it through :meth:`get_mouse_pos`.  Intended to be registered as an
+    ``eventsys`` ``TOUCH`` device, which turns the polled position into button-1
+    MOUSEBUTTONDOWN / MOUSEMOTION / MOUSEBUTTONUP events.
 
     Args:
         display_drv (JNDisplay): Display whose buffer is shown on the Image widget.
@@ -163,6 +169,10 @@ class JNDevices:
             self._mouse_pos = (int(event["dataX"]), int(event["dataY"]))
         elif kind in ("mouseup", "mouseleave"):
             self._mouse_pos = None
+
+
+# Backwards-compatible alias for the pre-rename name.
+JNDevices = JNTouch
 
 
 class JNDisplay(DisplayDriver):
@@ -287,7 +297,7 @@ class JNDisplay(DisplayDriver):
             if _timer is not None:
                 # Auto-refresh timer fired before a device or explicit show().
                 # Creating a static output here would duplicate the interactive
-                # widget that JNDevices is about to display.  Wait for an
+                # widget that JNTouch is about to display.  Wait for an
                 # explicit show() (non-interactive use) or device attach.
                 return
             display(self._buffer, display_id=self._display_id)
