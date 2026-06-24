@@ -13,97 +13,51 @@ from displaysys import DisplayDriver, color_rgb
 from eventsys import events
 from eventsys.keys import Keys, chord_matches, key_to_keycode, mod_mask
 
+try:  # Gamepad polling is optional and only available in a browser.
+    from js import navigator
+except ImportError:
+    navigator = None
+
 
 def log(*args):
     console.log(*args)
 
 
-class PSTouch:
+def _buttons_tuple(buttons):
+    """Convert a DOM ``buttons`` bitmask to an (left, middle, right) tuple."""
+    return (
+        1 if buttons & 1 else 0,  # left
+        1 if buttons & 4 else 0,  # middle
+        1 if buttons & 2 else 0,  # right
+    )
+
+
+class PSDevices:
     """
-    Mouse/touch input for a PyScript canvas.
+    Unified input for a PyScript canvas, registered as an eventsys QUEUE device.
 
-    Wraps a single HTML ``<canvas>`` element and tracks the pointer position
-    while the left mouse button is held, exposing it through
-    :meth:`get_mouse_pos`.  Intended to be registered as an ``eventsys``
-    ``TOUCH`` device, which turns the polled position into button-1
-    MOUSEBUTTONDOWN / MOUSEMOTION / MOUSEBUTTONUP events.
+    Captures all available browser input on a single HTML element and turns it
+    into ``eventsys.events`` objects (matching the desktop SDL2 / PyGame event
+    stream), drained through :meth:`read`:
 
-    Args:
-        id (str): The id of the canvas element.
-    """
-
-    def __init__(self, id):
-        self.canvas = document.getElementById(id)
-        self._mouse_pos = None
-
-        # Proxy functions are required for javascript
-        self.on_down = create_proxy(self._on_down)
-        self.on_up = create_proxy(self._on_up)
-        self.on_move = create_proxy(self._on_move)
-        self.on_enter = create_proxy(self._on_enter)
-        self.on_leave = create_proxy(self._on_leave)
-
-        self.canvas.addEventListener("mousedown", self.on_down)
-        self.canvas.addEventListener("mouseup", self.on_up)
-        self.canvas.addEventListener("mousemove", self.on_move)
-        self.canvas.addEventListener("mouseenter", self.on_enter)
-        self.canvas.addEventListener("mouseleave", self.on_leave)
-
-    def get_mouse_pos(self) -> tuple | None:
-        """
-        Returns the current mouse position.
-
-        Returns:
-            tuple or None: The x, y coordinates of the mouse position.
-        """
-        return self._mouse_pos
-
-    def _on_down(self, e):
-        if e.button == 0:  # left mouse button
-            log(f"Mouse down {e.offsetX}, {e.offsetY}")
-            self._mouse_pos = (e.offsetX, e.offsetY)
-        else:
-            return False
-
-    def _on_up(self, e):
-        if e.button == 0:  # left mouse button
-            log(f"Mouse up {e.offsetX}, {e.offsetY}")
-            self._mouse_pos = None
-        else:
-            return False
-
-    def _on_move(self, e):
-        if e.buttons & 1:
-            log(f"Mouse move {e.offsetX}, {e.offsetY}")
-            self._mouse_pos = (e.offsetX, e.offsetY)
-
-    def _on_enter(self, e):
-        log("Mouse enter")
-
-    def _on_leave(self, e):
-        log("Mouse leave")
-        self._mouse_pos = None
-
-
-class PSKeys:
-    """
-    Keyboard input for a PyScript canvas.
-
-    Listens for ``keydown`` / ``keyup`` on an HTML element and queues
-    ``eventsys`` ``Key`` events (with SDL-style key codes, names and modifier
-    masks).  Intended to be registered as an ``eventsys`` ``QUEUE`` device via
-    :meth:`read`, matching the desktop SDL2 / PyGame event stream.
-
-    A configurable key chord emits an ``events.QUIT`` event, the equivalent of
-    clicking an SDL window's close button (the broker then deinitializes the
-    display and exits).  ``quit_chord`` is a ``(key_code, modifier_mask)`` tuple
-    and defaults to CTRL+C; assign a different chord (e.g.
-    ``(Keys.K_q, Keys.KMOD_CTRL)``) or ``None`` to disable it.  If the host
-    browser/page intercepts the chosen chord, pick another one.
+    - **Pointer** (mouse, touch and pen via Pointer Events): ``MOUSEMOTION`` on
+      every move, ``MOUSEBUTTONDOWN`` / ``MOUSEBUTTONUP`` for any button, with
+      the ``touch`` flag set for non-mouse pointers.
+    - **Wheel**: ``MOUSEWHEEL`` (also consumed by encoder devices).
+    - **Keyboard**: ``KEYDOWN`` / ``KEYUP`` with SDL-style key codes, names and
+      modifier masks (left/right modifier variants via key location).
+    - **Gamepad** (Gamepad API, polled on each :meth:`read`): ``JOYAXISMOTION``,
+      ``JOYBUTTONDOWN`` / ``JOYBUTTONUP``.
+    - **Quit**: an assignable key chord emits ``events.QUIT`` (the equivalent of
+      clicking an SDL window's close button; the broker then deinitializes the
+      display and exits).  ``quit_chord`` is a ``(key_code, modifier_mask)``
+      tuple defaulting to CTRL+C; assign another (e.g.
+      ``(Keys.K_q, Keys.KMOD_CTRL)``) or ``None`` to disable.  If the host
+      browser/page intercepts the chord, pick a different one.
 
     Note:
-        The element must be focusable and focused (e.g. clicked) to receive key
-        events; the constructor sets ``tabindex`` to make the canvas focusable.
+        The element must be focused (e.g. clicked) to receive key events; the
+        constructor sets ``tabindex`` to make the canvas focusable.
 
     Args:
         id (str): The id of the element to watch (usually the canvas).
@@ -113,6 +67,7 @@ class PSKeys:
         self.canvas = document.getElementById(id)
         try:
             self.canvas.tabIndex = 0  # make the element focusable for key events
+            self.canvas.style.touchAction = "none"  # don't scroll/zoom on touch
         except Exception:
             pass
 
@@ -120,31 +75,112 @@ class PSKeys:
         self._pressed = set()
         self.quit_chord = (Keys.K_c, Keys.KMOD_CTRL)
 
-        # Proxy functions are required for javascript
-        self.on_keydown = create_proxy(self._on_keydown)
-        self.on_keyup = create_proxy(self._on_keyup)
+        # Gamepad state keyed by gamepad index: (axes list, pressed-bool list).
+        self._gp_axes = {}
+        self._gp_buttons = {}
 
-        self.canvas.addEventListener("keydown", self.on_keydown)
-        self.canvas.addEventListener("keyup", self.on_keyup)
+        # Proxy functions are required for javascript
+        self._proxies = {
+            "pointerdown": create_proxy(self._on_pointer_down),
+            "pointerup": create_proxy(self._on_pointer_up),
+            "pointermove": create_proxy(self._on_pointer_move),
+            "wheel": create_proxy(self._on_wheel),
+            "contextmenu": create_proxy(self._on_contextmenu),
+            "keydown": create_proxy(self._on_keydown),
+            "keyup": create_proxy(self._on_keyup),
+        }
+        for name, proxy in self._proxies.items():
+            self.canvas.addEventListener(name, proxy)
 
     def read(self):
         """
-        Returns queued keyboard/quit events for an eventsys QUEUE device.
+        Returns queued input events for an eventsys QUEUE device.
+
+        Polls connected gamepads (if any) and returns all events received since
+        the last call.
 
         Returns:
-            list or None: The events received since the last call, or None.
+            list or None: The events, or None if there were none.
         """
+        self._poll_gamepads()
         if not self._queue:
             return None
         queued = self._queue
         self._queue = []
         return queued
 
-    def _enqueue(self, type, keycode, mod):
+    ############### Pointer (mouse / touch / pen) ################
+
+    def _is_touch(self, e):
+        try:
+            return e.pointerType != "mouse"
+        except Exception:
+            return False
+
+    def _on_pointer_down(self, e):
+        try:
+            self.canvas.setPointerCapture(e.pointerId)
+        except Exception:
+            pass
+        self._queue.append(
+            events.Button(
+                events.MOUSEBUTTONDOWN,
+                (e.offsetX, e.offsetY),
+                e.button + 1,  # DOM 0/1/2 -> SDL 1/2/3
+                self._is_touch(e),
+                None,
+            )
+        )
+
+    def _on_pointer_up(self, e):
+        self._queue.append(
+            events.Button(
+                events.MOUSEBUTTONUP,
+                (e.offsetX, e.offsetY),
+                e.button + 1,
+                self._is_touch(e),
+                None,
+            )
+        )
+
+    def _on_pointer_move(self, e):
+        self._queue.append(
+            events.Motion(
+                events.MOUSEMOTION,
+                (e.offsetX, e.offsetY),
+                (e.movementX, e.movementY),
+                _buttons_tuple(e.buttons),
+                self._is_touch(e),
+                None,
+            )
+        )
+
+    def _on_wheel(self, e):
+        try:
+            e.preventDefault()
+        except Exception:
+            pass
+        # DOM deltaY > 0 means scrolling down; SDL/PyGame report up as positive.
+        x = -1 if e.deltaX < 0 else (1 if e.deltaX > 0 else 0)
+        y = 1 if e.deltaY < 0 else (-1 if e.deltaY > 0 else 0)
+        self._queue.append(
+            events.Wheel(events.MOUSEWHEEL, False, x, y, e.deltaX, e.deltaY, False, None)
+        )
+
+    def _on_contextmenu(self, e):
+        # Suppress the browser menu so right-click is usable as a button event.
+        try:
+            e.preventDefault()
+        except Exception:
+            pass
+
+    ############### Keyboard ################
+
+    def _enqueue_key(self, type, keycode, mod):
         self._queue.append(events.Key(type, Keys.keyname(keycode), keycode, mod, 0, None))
 
     def _on_keydown(self, e):
-        keycode = key_to_keycode(e.key)
+        keycode = key_to_keycode(e.key, e.location)
         mod = mod_mask(e.ctrlKey, e.shiftKey, e.altKey, e.metaKey)
         if chord_matches(self.quit_chord, keycode, mod):
             try:
@@ -156,13 +192,51 @@ class PSKeys:
         if e.repeat:  # ignore auto-repeat
             return
         self._pressed.add(keycode)
-        self._enqueue(events.KEYDOWN, keycode, mod)
+        self._enqueue_key(events.KEYDOWN, keycode, mod)
 
     def _on_keyup(self, e):
-        keycode = key_to_keycode(e.key)
+        keycode = key_to_keycode(e.key, e.location)
         mod = mod_mask(e.ctrlKey, e.shiftKey, e.altKey, e.metaKey)
         self._pressed.discard(keycode)
-        self._enqueue(events.KEYUP, keycode, mod)
+        self._enqueue_key(events.KEYUP, keycode, mod)
+
+    ############### Gamepad ################
+
+    def _poll_gamepads(self):
+        if navigator is None:
+            return
+        try:
+            pads = navigator.getGamepads()
+        except Exception:
+            return
+        for i in range(pads.length):
+            pad = pads[i]
+            if not pad:
+                continue
+            gid = pad.index
+
+            axes = pad.axes
+            cur_axes = [float(axes[a]) for a in range(axes.length)]
+            prev_axes = self._gp_axes.get(gid, [0.0] * len(cur_axes))
+            for a in range(len(cur_axes)):
+                prev = prev_axes[a] if a < len(prev_axes) else 0.0
+                if cur_axes[a] != prev:
+                    self._queue.append(
+                        events.JoyAxisMotion(events.JOYAXISMOTION, gid, a, cur_axes[a])
+                    )
+            self._gp_axes[gid] = cur_axes
+
+            btns = pad.buttons
+            cur_btns = [bool(btns[b].pressed) for b in range(btns.length)]
+            prev_btns = self._gp_buttons.get(gid, [False] * len(cur_btns))
+            for b in range(len(cur_btns)):
+                prev = prev_btns[b] if b < len(prev_btns) else False
+                if cur_btns[b] != prev:
+                    if cur_btns[b]:
+                        self._queue.append(events.JoyButtonDown(events.JOYBUTTONDOWN, gid, b))
+                    else:
+                        self._queue.append(events.JoyButtonUp(events.JOYBUTTONUP, gid, b))
+            self._gp_buttons[gid] = cur_btns
 
 
 class PSDisplay(DisplayDriver):

@@ -31,31 +31,23 @@ except ImportError:
 
 if _ps:
     # Running in PyScript
-    from displaysys.psdisplay import PSDisplay, PSKeys, PSTouch
+    from displaysys.psdisplay import PSDevices, PSDisplay
     from eventsys import devices
 
     display_drv = PSDisplay("display_canvas", width, height)
 
     broker = devices.Broker()
 
-    touch_drv = PSTouch("display_canvas")
+    devices_drv = PSDevices("display_canvas")
 
-    touch_dev = broker.create_device(
-        type=devices.types.TOUCH,
-        read=touch_drv.get_mouse_pos,
-        data=display_drv,
-    )
-
-    keys_drv = PSKeys("display_canvas")
-
-    keys_dev = broker.create_device(
+    events_dev = broker.create_device(
         type=devices.types.QUEUE,
-        read=keys_drv.read,
+        read=devices_drv.read,
         data=display_drv,
     )
 elif _jn:
     # Running in Jupyter Notebook
-    from displaysys.jndisplay import JNDisplay, JNKeys, JNTouch
+    from displaysys.jndisplay import JNDevices, JNDisplay
     from eventsys import devices
 
     TIMER_ASYNC = True
@@ -64,19 +56,11 @@ elif _jn:
 
     display_drv = JNDisplay(width, height)
 
-    touch_drv = JNTouch(display_drv)
+    devices_drv = JNDevices(display_drv)
 
-    touch_dev = broker.create_device(
-        type=devices.types.TOUCH,
-        read=touch_drv.get_mouse_pos,
-        data=display_drv,
-    )
-
-    keys_drv = JNKeys(display_drv)
-
-    keys_dev = broker.create_device(
+    events_dev = broker.create_device(
         type=devices.types.QUEUE,
-        read=keys_drv.read,
+        read=devices_drv.read,
         data=display_drv,
     )
 else:

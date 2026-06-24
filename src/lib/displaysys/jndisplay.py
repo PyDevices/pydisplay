@@ -15,7 +15,7 @@ from displaysys import DisplayDriver, color_rgb
 from eventsys import events
 from eventsys.keys import Keys, chord_matches, key_to_keycode, mod_mask
 
-_JN_TOUCH_DEPS = "pip install ipywidgets ipyevents"
+_JN_DEPS = "pip install ipywidgets ipyevents"
 
 _CSS_DISPLAY_ID = "pydisplay_jn_styles"
 
@@ -57,15 +57,43 @@ def _inject_notebook_css(width, height, first_time):
         update_display(css, display_id=_CSS_DISPLAY_ID)
 
 
-class JNTouch:
-    """
-    Mouse/touch input for Jupyter Notebook via ipywidgets + ipyevents.
+def _buttons_tuple(buttons):
+    """Convert a DOM ``buttons`` bitmask to an (left, middle, right) tuple."""
+    return (
+        1 if buttons & 1 else 0,  # left
+        1 if buttons & 4 else 0,  # middle
+        1 if buttons & 2 else 0,  # right
+    )
 
-    Wraps the interactive ``ipywidgets`` Image that mirrors the display buffer
-    and tracks the pointer position while the left mouse button is held,
-    exposing it through :meth:`get_mouse_pos`.  Intended to be registered as an
-    ``eventsys`` ``TOUCH`` device, which turns the polled position into button-1
-    MOUSEBUTTONDOWN / MOUSEMOTION / MOUSEBUTTONUP events.
+
+class JNDevices:
+    """
+    Unified input for Jupyter Notebook, registered as an eventsys QUEUE device.
+
+    Creates the interactive ``ipywidgets`` Image that mirrors the display buffer
+    and watches it (via ``ipyevents``) for all available input, turning it into
+    ``eventsys.events`` objects (matching the desktop SDL2 / PyGame event
+    stream), drained through :meth:`read`:
+
+    - **Mouse**: ``MOUSEMOTION`` on every move, ``MOUSEBUTTONDOWN`` /
+      ``MOUSEBUTTONUP`` for any button.
+    - **Wheel**: ``MOUSEWHEEL`` (also consumed by encoder devices).
+    - **Keyboard**: ``KEYDOWN`` / ``KEYUP`` with SDL-style key codes, names and
+      modifier masks (left/right modifier variants via key location).
+    - **Quit**: an assignable key chord emits ``events.QUIT`` (the equivalent of
+      clicking an SDL window's close button; the broker then deinitializes the
+      display and exits).  ``quit_chord`` is a ``(key_code, modifier_mask)``
+      tuple defaulting to CTRL+C; assign another (e.g.
+      ``(Keys.K_q, Keys.KMOD_CTRL)``) or ``None`` to disable.  If the notebook
+      front end intercepts the chord, pick a different one.
+
+    This class also owns the display widget: ``JNDisplay`` pushes frames to it
+    via :meth:`update_buffer`.
+
+    Note:
+        The Image widget must be focused (e.g. clicked) to receive key events,
+        and some keys may be consumed by the notebook front end (JupyterLab /
+        classic Notebook / VS Code) before they reach the widget.
 
     Args:
         display_drv (JNDisplay): Display whose buffer is shown on the Image widget.
@@ -77,23 +105,33 @@ class JNTouch:
             from ipywidgets import Image, Layout, VBox
         except ImportError as exc:
             raise ImportError(
-                "Jupyter touch input requires ipywidgets and ipyevents. "
-                f"Install with: {_JN_TOUCH_DEPS}"
+                "Jupyter input requires ipywidgets and ipyevents. "
+                f"Install with: {_JN_DEPS}"
             ) from exc
 
         self._display_drv = display_drv
-        self._mouse_pos = None
         self._png_buf = BytesIO()
         self._last_png = b""
         self._layout_wh = (0, 0)
         self._css_shown = False
+
+        self._queue = []
+        self._pressed = set()
+        self.quit_chord = (Keys.K_c, Keys.KMOD_CTRL)
 
         self.image = Image(format="png")
         self.image.add_class("pydisplay-jn-image")
 
         self._events = Event(
             source=self.image,
-            watched_events=["mousedown", "mouseup", "mousemove", "mouseleave"],
+            watched_events=[
+                "mousedown",
+                "mouseup",
+                "mousemove",
+                "wheel",
+                "keydown",
+                "keyup",
+            ],
         )
         self._events.on_dom_event(self._on_dom_event)
 
@@ -116,14 +154,18 @@ class JNTouch:
         )
         display(self._root)
 
-    def get_mouse_pos(self):
+    def read(self):
         """
-        Returns the current mouse position in display coordinates.
+        Returns queued input events for an eventsys QUEUE device.
 
         Returns:
-            tuple or None: (x, y) while the left button is pressed, else None.
+            list or None: The events received since the last call, or None.
         """
-        return self._mouse_pos
+        if not self._queue:
+            return None
+        queued = self._queue
+        self._queue = []
+        return queued
 
     def update_buffer(self, pil_image):
         """Push a PIL image to the interactive widget."""
@@ -161,98 +203,52 @@ class JNTouch:
             root.width = px
             root.height = py
 
+    ############### Event handling ################
+
     def _on_dom_event(self, event):
         kind = event.get("type")
-        if kind == "mousedown" and event.get("button", 0) == 0:
-            if "dataX" not in event or "dataY" not in event:
-                return
-            self._mouse_pos = (int(event["dataX"]), int(event["dataY"]))
-        elif kind == "mousemove" and event.get("buttons", 0) & 1:
-            self._mouse_pos = (int(event["dataX"]), int(event["dataY"]))
-        elif kind in ("mouseup", "mouseleave"):
-            self._mouse_pos = None
+        if kind == "mousemove":
+            self._on_mouse_move(event)
+        elif kind == "mousedown":
+            self._on_mouse_button(event, events.MOUSEBUTTONDOWN)
+        elif kind == "mouseup":
+            self._on_mouse_button(event, events.MOUSEBUTTONUP)
+        elif kind == "wheel":
+            self._on_wheel(event)
+        elif kind in ("keydown", "keyup"):
+            self._on_key(event, kind)
 
+    def _pos(self, event):
+        return (int(event.get("dataX", 0)), int(event.get("dataY", 0)))
 
-class JNKeys:
-    """
-    Keyboard input for Jupyter Notebook via ipyevents.
+    def _on_mouse_button(self, event, type):
+        self._queue.append(
+            events.Button(type, self._pos(event), event.get("button", 0) + 1, False, None)
+        )
 
-    Watches ``keydown`` / ``keyup`` on the interactive ``ipywidgets`` Image
-    created by :class:`JNTouch` and queues ``eventsys`` ``Key`` events (with
-    SDL-style key codes, names and modifier masks).  Intended to be registered
-    as an ``eventsys`` ``QUEUE`` device via :meth:`read`, matching the desktop
-    SDL2 / PyGame event stream.
-
-    A configurable key chord emits an ``events.QUIT`` event, the equivalent of
-    clicking an SDL window's close button (the broker then deinitializes the
-    display and exits).  ``quit_chord`` is a ``(key_code, modifier_mask)`` tuple
-    and defaults to CTRL+C; assign a different chord (e.g.
-    ``(Keys.K_q, Keys.KMOD_CTRL)``) or ``None`` to disable it.  If the notebook
-    front end intercepts the chosen chord, pick another one.
-
-    Note:
-        The Image widget must be focused (e.g. clicked) to receive key events,
-        and some keys may be consumed by the notebook front end (JupyterLab /
-        classic Notebook / VS Code) before they reach the widget.
-
-    Args:
-        display_drv (JNDisplay): Display whose JNTouch Image widget is watched.
-    """
-
-    def __init__(self, display_drv):
-        try:
-            from ipyevents import Event  # noqa: F401
-        except ImportError as exc:
-            raise ImportError(
-                "Jupyter keyboard input requires ipywidgets and ipyevents. "
-                f"Install with: {_JN_TOUCH_DEPS}"
-            ) from exc
-
-        touch = getattr(display_drv, "_jn_devices", None)
-        if touch is None or getattr(touch, "_events", None) is None:
-            raise RuntimeError(
-                "JNKeys requires a JNTouch instance; create JNTouch(display_drv) first."
+    def _on_mouse_move(self, event):
+        rel = (int(event.get("movementX", 0)), int(event.get("movementY", 0)))
+        self._queue.append(
+            events.Motion(
+                events.MOUSEMOTION,
+                self._pos(event),
+                rel,
+                _buttons_tuple(event.get("buttons", 0)),
+                False,
+                None,
             )
+        )
 
-        self._queue = []
-        self._pressed = set()
-        self.quit_chord = (Keys.K_c, Keys.KMOD_CTRL)
+    def _on_wheel(self, event):
+        dx = event.get("deltaX", 0)
+        dy = event.get("deltaY", 0)
+        # DOM deltaY > 0 means scrolling down; SDL/PyGame report up as positive.
+        x = -1 if dx < 0 else (1 if dx > 0 else 0)
+        y = 1 if dy < 0 else (-1 if dy > 0 else 0)
+        self._queue.append(events.Wheel(events.MOUSEWHEEL, False, x, y, dx, dy, False, None))
 
-        # Reuse the JNTouch DOM event source so a single ipyevents listener
-        # serves both mouse and keyboard; JNTouch ignores key events and this
-        # class ignores mouse events.
-        self._events = touch._events
-        watched = list(self._events.watched_events)
-        changed = False
-        for ev in ("keydown", "keyup"):
-            if ev not in watched:
-                watched.append(ev)
-                changed = True
-        if changed:
-            self._events.watched_events = watched
-        self._events.on_dom_event(self._on_dom_event)
-
-    def read(self):
-        """
-        Returns queued keyboard/quit events for an eventsys QUEUE device.
-
-        Returns:
-            list or None: The events received since the last call, or None.
-        """
-        if not self._queue:
-            return None
-        queued = self._queue
-        self._queue = []
-        return queued
-
-    def _enqueue(self, type, keycode, mod):
-        self._queue.append(events.Key(type, Keys.keyname(keycode), keycode, mod, 0, None))
-
-    def _on_dom_event(self, event):
-        kind = event.get("type")
-        if kind not in ("keydown", "keyup"):
-            return
-        keycode = key_to_keycode(event.get("key", ""))
+    def _on_key(self, event, kind):
+        keycode = key_to_keycode(event.get("key", ""), event.get("location", 0))
         mod = mod_mask(
             event.get("ctrlKey"),
             event.get("shiftKey"),
@@ -266,10 +262,13 @@ class JNKeys:
             if event.get("repeat"):  # ignore auto-repeat
                 return
             self._pressed.add(keycode)
-            self._enqueue(events.KEYDOWN, keycode, mod)
+            self._enqueue_key(events.KEYDOWN, keycode, mod)
         else:
             self._pressed.discard(keycode)
-            self._enqueue(events.KEYUP, keycode, mod)
+            self._enqueue_key(events.KEYUP, keycode, mod)
+
+    def _enqueue_key(self, type, keycode, mod):
+        self._queue.append(events.Key(type, Keys.keyname(keycode), keycode, mod, 0, None))
 
 
 class JNDisplay(DisplayDriver):
@@ -394,7 +393,7 @@ class JNDisplay(DisplayDriver):
             if _timer is not None:
                 # Auto-refresh timer fired before a device or explicit show().
                 # Creating a static output here would duplicate the interactive
-                # widget that JNTouch is about to display.  Wait for an
+                # widget that JNDevices is about to display.  Wait for an
                 # explicit show() (non-interactive use) or device attach.
                 return
             display(self._buffer, display_id=self._display_id)

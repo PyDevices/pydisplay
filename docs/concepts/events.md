@@ -57,28 +57,23 @@ The same event types fire regardless of physical hardware — develop on desktop
 
 ## How displays feed the broker
 
-Desktop and restricted (browser/notebook) display backends supply input to the
-broker differently, because they have different access to the underlying
-platform. There are **two families** (see [Displays → How displays expose
-input](displays.md#how-displays-expose-input) for the full table):
+Every display backend feeds the broker the same way — as `eventsys.events`
+objects drained through a **`QUEUE`** device — differing only in how that stream
+is produced (see [Displays → How displays expose
+input](displays.md#how-displays-expose-input)):
 
-- **Native event queue** (`SDL2Display`, `PGDisplay`) — the driver exposes
-  module-level `poll()` / `get()` that return ready-made `eventsys.events`
-  objects, registered as a **`QUEUE`** device. This carries mouse motion/buttons,
-  the scroll wheel, the keyboard, and the window-close (`QUIT`) event.
-- **Single-pointer + keyboard** (`JNDisplay`, `PSDisplay`) — the driver exposes
-  a touch helper (`JNTouch` / `PSTouch`) with `get_mouse_pos()`, registered as a
-  **`TOUCH`** device, from which `eventsys` synthesizes button-1
-  `MOUSEBUTTONDOWN` / `MOUSEMOTION` / `MOUSEBUTTONUP` events. It also exposes a
-  keyboard helper (`JNKeys` / `PSKeys`) with `read()`, registered as a
-  **`QUEUE`** device, that emits `KEYDOWN` / `KEYUP` (with SDL-style key codes,
-  names and modifiers from the shared keymap in `eventsys.keys`) plus a `QUIT`
-  from an assignable quit chord (default **CTRL+C**). Browser/notebook platforms
-  expose only single-element pointer events, so touch is limited to one pressed
-  position.
+- **Desktop** (`SDL2Display`, `PGDisplay`) — module-level `poll()` / `get()`
+  drain the native OS event queue and return ready-made `eventsys.events`.
+- **Browser / notebook** (`PSDisplay`, `JNDisplay`) — a `PSDevices` / `JNDevices`
+  instance captures all available canvas/widget input and returns it via
+  `read()`: pointer (`MOUSEMOTION` / `MOUSEBUTTONDOWN` / `MOUSEBUTTONUP`, incl.
+  touch and pen on PyScript), wheel (`MOUSEWHEEL`), keyboard (`KEYDOWN` /
+  `KEYUP` with SDL-style codes/names/modifiers from the shared keymap in
+  `eventsys.keys`), gamepad (`JOY*`, PyScript only), and a `QUIT` from an
+  assignable quit chord (default **CTRL+C**).
 
 Either way your handler sees the same `eventsys.events` objects, so application
-code does not need to know which family the active display belongs to.
+code does not need to know which backend the active display uses.
 
 ## Brokers
 

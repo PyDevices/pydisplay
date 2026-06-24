@@ -621,19 +621,34 @@ _DOM_NAMED_KEYS = {
     "F12": Keys.K_F12,
 }
 
+# Right-hand variants of modifier keys, selected when the DOM key event reports
+# ``location == DOM_KEY_LOCATION_RIGHT`` (2).
+_DOM_RIGHT_KEYS = {
+    "Control": Keys.K_RCTRL,
+    "Shift": Keys.K_RSHIFT,
+    "Alt": Keys.K_RALT,
+    "Meta": Keys.K_RGUI,
+}
+
 _MOD_GROUPS = (Keys.KMOD_CTRL, Keys.KMOD_SHIFT, Keys.KMOD_ALT, Keys.KMOD_GUI)
 
 
-def key_to_keycode(key):
+def key_to_keycode(key, location=0):
     """
     Map a DOM ``KeyboardEvent.key`` value to an eventsys key code.
 
     Args:
         key (str): The ``KeyboardEvent.key`` value (e.g. ``"a"`` or ``"ArrowUp"``).
+        location (int): The ``KeyboardEvent.location`` value.  ``2`` selects the
+            right-hand variant of a modifier key (e.g. ``K_RCTRL``).
 
     Returns:
         int: The matching ``Keys.K_*`` code, or ``Keys.K_UNKNOWN``.
     """
+    if location == 2:
+        code = _DOM_RIGHT_KEYS.get(key)
+        if code is not None:
+            return code
     code = _DOM_NAMED_KEYS.get(key)
     if code is not None:
         return code
