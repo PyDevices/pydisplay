@@ -1,0 +1,12 @@
+# Strip Jupyter Notebook outputs and execution metadata so committed .ipynb
+# diffs stay limited to source changes.
+#
+# The pre-commit nbstripout hook handles this automatically. As a fallback for
+# clones committing without pre-commit, activate the git clean filter once with:
+#
+#     pip install nbstripout      # if not already available
+#     nbstripout --install        # configures this clone's filter.nbstripout.*
+#
+# Until that filter is configured locally, git ignores these lines harmlessly.
+*.ipynb filter=nbstripout
+*.ipynb diff=ipynb
