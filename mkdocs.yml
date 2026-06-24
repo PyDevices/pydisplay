@@ -8,6 +8,7 @@ site_dir: site
 
 theme:
   name: material
+  custom_dir: overrides
   palette:
     - scheme: default
       primary: indigo
@@ -35,9 +36,15 @@ plugins:
 - gen-files:
     scripts:
     - tools/gen_ref_pages.py
+    - tools/gen_notebook_pages.py
 - literate-nav:
     nav_file: SUMMARY.md
 - section-index
+- mkdocs-jupyter:
+    include_source: true
+    execute: false
+    include: ["platforms/jupyter-notebook.ipynb"]
+    ignore: ["src/*.ipynb", ".venv*/**/*.ipynb"]
 - mkdocstrings:
     handlers:
       python:
@@ -93,6 +100,7 @@ nav:
     - CircuitPython: platforms/circuitpython.md
     - CPython desktop: platforms/cpython-desktop.md
     - Jupyter: platforms/jupyter.md
+    - Jupyter notebook: platforms/jupyter-notebook.ipynb
     - PyScript: platforms/pyscript.md
   - Examples:
     - App starter: examples/app-starter.md
