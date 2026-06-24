@@ -33,7 +33,13 @@ Devices can be created with the following types:
 
 from sys import exit
 
-from micropython import const
+try:
+    from micropython import const
+except ImportError:
+
+    def const(x):
+        return x
+
 
 from . import events
 
