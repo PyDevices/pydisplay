@@ -49,6 +49,10 @@ WOKWI_BUNDLE_EXCLUDE_DESTS = {
     "lib/multimer/aio.py",
 }
 WOKWI_BUNDLE_EXCLUDE_PREFIXES = ("lib/displaysys/sdldisplay/",)
+# Dest paths added only to wokwi/pydisplay-bundle.json (not in pydisplay-bundle).
+WOKWI_BUNDLE_EXTRA_DESTS = [
+    "add_ons/touch_keypad.py",
+]
 
 
 def should_include_file(filename):
@@ -63,6 +67,8 @@ def exclude_from_wokwi_bundle(dest):
 
 def wokwi_bundle_from_master(master):
     urls = [entry for entry in master["urls"] if not exclude_from_wokwi_bundle(entry[0])]
+    for dest in WOKWI_BUNDLE_EXTRA_DESTS:
+        urls.append([dest, repo_url + os.path.join(src_dir, dest)])
     return {"urls": urls, "version": master["version"]}
 
 
