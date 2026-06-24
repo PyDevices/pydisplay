@@ -81,6 +81,11 @@ broker = devices.Broker()
 broker.create_device(type=devices.types.QUEUE, read=poll, data=display_drv)
 ```
 
+This captures mouse motion/buttons, the wheel, the keyboard, the window-close
+(`QUIT`) event, and **joysticks/gamepads** (`JOYAXISMOTION`, `JOYBALLMOTION`,
+`JOYHATMOTION`, `JOYBUTTONDOWN`, `JOYBUTTONUP`). Connect controllers before
+launching — hot-plugging after startup is not handled.
+
 ### Browser / notebook (PyScript, Jupyter)
 
 `PSDevices` (PyScript) and `JNDevices` (Jupyter) capture all available input on

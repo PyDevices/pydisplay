@@ -31,6 +31,32 @@ def get() -> [pg.event.Event]:
     return pg.event.get()
 
 
+# Opened joystick handles, kept referenced so PyGame keeps delivering their
+# events.  PyGame's joystick events (JOYAXISMOTION, JOYBUTTONDOWN, ...) already
+# share eventsys's numeric types and attribute names, so they flow through
+# poll()/get() unchanged once the joysticks are opened.
+_joysticks = []
+
+
+def _init_joysticks() -> None:
+    """
+    Initialize the joystick subsystem and open all connected joysticks.
+
+    Joysticks must be opened for PyGame to deliver their events.  Devices
+    connected after startup are not hot-plugged (connect controllers before
+    launching).  Failures are ignored so a missing joystick subsystem never
+    breaks the display.
+    """
+    try:
+        pg.joystick.init()
+        for i in range(pg.joystick.get_count()):
+            js = pg.joystick.Joystick(i)
+            js.init()
+            _joysticks.append(js)
+    except Exception:
+        pass
+
+
 class PGDisplay(DisplayDriver):
     """
     A class to emulate an LCD using pygame.
@@ -81,6 +107,7 @@ class PGDisplay(DisplayDriver):
             self._scale = 1
 
         pg.init()
+        _init_joysticks()
 
         self._buffer = pg.Surface(size=(self._width, self._height), depth=self.color_depth)
         self._buffer.fill((0, 0, 0))

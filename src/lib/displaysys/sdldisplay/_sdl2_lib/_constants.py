@@ -71,12 +71,26 @@ SDL_MOUSEMOTION = const(0x400)  # Mouse moved
 SDL_MOUSEBUTTONDOWN = const(0x401)  # Mouse button pressed
 SDL_MOUSEBUTTONUP = const(0x402)  # Mouse button released
 SDL_MOUSEWHEEL = const(0x403)  # Mouse wheel motion
+SDL_JOYAXISMOTION = const(0x600)  # Joystick axis motion
+SDL_JOYBALLMOTION = const(0x601)  # Joystick trackball motion
+SDL_JOYHATMOTION = const(0x602)  # Joystick hat position change
+SDL_JOYBUTTONDOWN = const(0x603)  # Joystick button pressed
+SDL_JOYBUTTONUP = const(0x604)  # Joystick button released
+SDL_JOYDEVICEADDED = const(0x605)  # A joystick was connected
+SDL_JOYDEVICEREMOVED = const(0x606)  # A joystick was disconnected
 SDL_POLLSENTINEL = const(0x7F00)  # Signals the end of an event poll cycle
 
 # SDL_MouseMotionEvent button masks
 SDL_BUTTON_LMASK = const(1 << 0)  # Left mouse button
 SDL_BUTTON_MMASK = const(1 << 1)  # Middle mouse button
 SDL_BUTTON_RMASK = const(1 << 2)  # Right mouse button
+
+# SDL_JoyHatEvent position masks
+SDL_HAT_CENTERED = const(0x00)
+SDL_HAT_UP = const(0x01)
+SDL_HAT_RIGHT = const(0x02)
+SDL_HAT_DOWN = const(0x04)
+SDL_HAT_LEFT = const(0x08)
 
 
 ###############################################################################

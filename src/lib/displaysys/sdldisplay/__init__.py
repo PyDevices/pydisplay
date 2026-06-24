@@ -16,7 +16,17 @@ from ._sdl2_lib import (
     SDL_BUTTON_LMASK,
     SDL_BUTTON_MMASK,
     SDL_BUTTON_RMASK,
+    SDL_HAT_DOWN,
+    SDL_HAT_LEFT,
+    SDL_HAT_RIGHT,
+    SDL_HAT_UP,
     SDL_INIT_EVERYTHING,
+    SDL_INIT_JOYSTICK,
+    SDL_JOYAXISMOTION,
+    SDL_JOYBALLMOTION,
+    SDL_JOYBUTTONDOWN,
+    SDL_JOYBUTTONUP,
+    SDL_JOYHATMOTION,
     SDL_KEYDOWN,
     SDL_KEYUP,
     SDL_MOUSEBUTTONDOWN,
@@ -56,6 +66,22 @@ from ._sdl2_lib import (
     SDL_SetWindowSize,
     SDL_UpdateTexture,
 )
+
+# Joystick support requires functions not present in every SDL2 backend (the
+# native usdl2 module may omit them).  Import them separately so their absence
+# only disables joystick input instead of breaking the whole module.
+try:
+    from ._sdl2_lib import (
+        SDL_InitSubSystem,
+        SDL_JoystickClose,
+        SDL_JoystickInstanceID,
+        SDL_JoystickOpen,
+        SDL_NumJoysticks,
+    )
+
+    _HAS_JOYSTICK_API = True
+except ImportError:
+    _HAS_JOYSTICK_API = False
 
 if implementation.name == "cpython":
     import ctypes
@@ -131,6 +157,51 @@ def _ensure_tty_sane() -> None:
 
 
 _event = SDL_Event()
+
+# Open joystick handles, keyed by SDL instance id, kept referenced so SDL keeps
+# delivering their events.
+_joysticks = {}
+
+
+def _init_joysticks() -> None:
+    """
+    Initialize the joystick subsystem and open all connected joysticks.
+
+    Joysticks must be opened for SDL to deliver their events.  Devices connected
+    after startup are not hot-plugged (connect controllers before launching).
+    Failures are ignored so a missing/headless joystick subsystem never breaks
+    the display.
+    """
+    if not _HAS_JOYSTICK_API:
+        return
+    try:
+        if SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0:
+            return
+        for i in range(SDL_NumJoysticks()):
+            handle = SDL_JoystickOpen(i)
+            if handle:
+                _joysticks[SDL_JoystickInstanceID(handle)] = handle
+    except Exception:
+        pass
+
+
+def _close_joysticks() -> None:
+    """Close any opened joysticks."""
+    if not _HAS_JOYSTICK_API:
+        return
+    for handle in _joysticks.values():
+        try:
+            SDL_JoystickClose(handle)
+        except Exception:
+            pass
+    _joysticks.clear()
+
+
+def _hat_xy(value):
+    """Convert an SDL hat bitmask to an (x, y) tuple matching PyGame's get_hat()."""
+    x = (1 if value & SDL_HAT_RIGHT else 0) - (1 if value & SDL_HAT_LEFT else 0)
+    y = (1 if value & SDL_HAT_UP else 0) - (1 if value & SDL_HAT_DOWN else 0)
+    return (x, y)
 
 
 def poll():
@@ -213,6 +284,19 @@ def _convert(e):
             e.key.keysym.scancode,
             e.key.windowID,
         )
+    elif e.type == SDL_JOYAXISMOTION:
+        # Normalize the Sint16 axis value to -1.0..1.0 to match PyGame/Gamepad.
+        evt = events.JoyAxisMotion(e.type, e.jaxis.which, e.jaxis.axis, e.jaxis.value / 32767)
+    elif e.type == SDL_JOYBALLMOTION:
+        evt = events.JoyBallMotion(
+            e.type, e.jball.which, e.jball.ball, (e.jball.xrel, e.jball.yrel)
+        )
+    elif e.type == SDL_JOYHATMOTION:
+        evt = events.JoyHatMotion(e.type, e.jhat.which, e.jhat.hat, _hat_xy(e.jhat.value))
+    elif e.type == SDL_JOYBUTTONDOWN:
+        evt = events.JoyButtonDown(e.type, e.jbutton.which, e.jbutton.button)
+    elif e.type == SDL_JOYBUTTONUP:
+        evt = events.JoyButtonUp(e.type, e.jbutton.which, e.jbutton.button)
     elif e.type == SDL_QUIT:
         evt = events.Quit(e.type)
     else:
@@ -280,6 +364,7 @@ class SDLDisplay(DisplayDriver):
 
         _save_tty()
         retcheck(SDL_Init(SDL_INIT_EVERYTHING))
+        _init_joysticks()
         self._window = SDL_CreateWindow(
             self._title.encode(),
             x,
@@ -524,6 +609,7 @@ class SDLDisplay(DisplayDriver):
 
     def _deinit(self) -> None:
         """Release SDL resources."""
+        _close_joysticks()
         if self._buffer is not None:
             SDL_DestroyTexture(self._buffer)
             self._buffer = None

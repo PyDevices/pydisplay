@@ -120,6 +120,62 @@ class SDL_MouseWheelEvent(ctypes.Structure):
     _fields_ = [("type", ctypes.c_uint), ("timestamp", ctypes.c_uint), ("wheel", Wheel)]
 
 
+class SDL_JoyAxisEvent(ctypes.Structure):
+    class JAxis(ctypes.Structure):
+        _fields_ = [
+            ("which", ctypes.c_int),
+            ("axis", ctypes.c_uint8),
+            ("padding1", ctypes.c_uint8),
+            ("padding2", ctypes.c_uint8),
+            ("padding3", ctypes.c_uint8),
+            ("value", ctypes.c_int16),
+            ("padding4", ctypes.c_uint16),
+        ]
+
+    _fields_ = [("type", ctypes.c_uint), ("timestamp", ctypes.c_uint), ("jaxis", JAxis)]
+
+
+class SDL_JoyBallEvent(ctypes.Structure):
+    class JBall(ctypes.Structure):
+        _fields_ = [
+            ("which", ctypes.c_int),
+            ("ball", ctypes.c_uint8),
+            ("padding1", ctypes.c_uint8),
+            ("padding2", ctypes.c_uint8),
+            ("padding3", ctypes.c_uint8),
+            ("xrel", ctypes.c_int16),
+            ("yrel", ctypes.c_int16),
+        ]
+
+    _fields_ = [("type", ctypes.c_uint), ("timestamp", ctypes.c_uint), ("jball", JBall)]
+
+
+class SDL_JoyHatEvent(ctypes.Structure):
+    class JHat(ctypes.Structure):
+        _fields_ = [
+            ("which", ctypes.c_int),
+            ("hat", ctypes.c_uint8),
+            ("value", ctypes.c_uint8),
+            ("padding1", ctypes.c_uint8),
+            ("padding2", ctypes.c_uint8),
+        ]
+
+    _fields_ = [("type", ctypes.c_uint), ("timestamp", ctypes.c_uint), ("jhat", JHat)]
+
+
+class SDL_JoyButtonEvent(ctypes.Structure):
+    class JButton(ctypes.Structure):
+        _fields_ = [
+            ("which", ctypes.c_int),
+            ("button", ctypes.c_uint8),
+            ("state", ctypes.c_uint8),
+            ("padding1", ctypes.c_uint8),
+            ("padding2", ctypes.c_uint8),
+        ]
+
+    _fields_ = [("type", ctypes.c_uint), ("timestamp", ctypes.c_uint), ("jbutton", JButton)]
+
+
 ###############################################################################
 #                          SDL2 functions                                     #
 ###############################################################################
@@ -140,6 +196,27 @@ SDL_GetError = _libSDL2.SDL_GetError
 _libSDL2.SDL_PollEvent.argtypes = [ctypes.POINTER(SDL_CommonEvent)]
 _libSDL2.SDL_PollEvent.restype = ctypes.c_int
 SDL_PollEvent = _libSDL2.SDL_PollEvent
+
+_libSDL2.SDL_InitSubSystem.argtypes = [ctypes.c_uint]
+_libSDL2.SDL_InitSubSystem.restype = ctypes.c_int
+SDL_InitSubSystem = _libSDL2.SDL_InitSubSystem
+
+# SDL joystick functions
+_libSDL2.SDL_NumJoysticks.argtypes = []
+_libSDL2.SDL_NumJoysticks.restype = ctypes.c_int
+SDL_NumJoysticks = _libSDL2.SDL_NumJoysticks
+
+_libSDL2.SDL_JoystickOpen.argtypes = [ctypes.c_int]
+_libSDL2.SDL_JoystickOpen.restype = ctypes.c_void_p
+SDL_JoystickOpen = _libSDL2.SDL_JoystickOpen
+
+_libSDL2.SDL_JoystickClose.argtypes = [ctypes.c_void_p]
+_libSDL2.SDL_JoystickClose.restype = None
+SDL_JoystickClose = _libSDL2.SDL_JoystickClose
+
+_libSDL2.SDL_JoystickInstanceID.argtypes = [ctypes.c_void_p]
+_libSDL2.SDL_JoystickInstanceID.restype = ctypes.c_int
+SDL_JoystickInstanceID = _libSDL2.SDL_JoystickInstanceID
 
 # SDL key functions
 _libSDL2.SDL_GetKeyName.argtypes = [ctypes.c_int]
@@ -286,6 +363,11 @@ _event_struct_map = {
     SDL_MOUSEBUTTONDOWN: SDL_MouseButtonEvent,  # noqa: F405
     SDL_MOUSEBUTTONUP: SDL_MouseButtonEvent,  # noqa: F405
     SDL_MOUSEWHEEL: SDL_MouseWheelEvent,  # noqa: F405
+    SDL_JOYAXISMOTION: SDL_JoyAxisEvent,  # noqa: F405
+    SDL_JOYBALLMOTION: SDL_JoyBallEvent,  # noqa: F405
+    SDL_JOYHATMOTION: SDL_JoyHatEvent,  # noqa: F405
+    SDL_JOYBUTTONDOWN: SDL_JoyButtonEvent,  # noqa: F405
+    SDL_JOYBUTTONUP: SDL_JoyButtonEvent,  # noqa: F405
     SDL_POLLSENTINEL: SDL_CommonEvent,  # noqa: F405
 }
 
