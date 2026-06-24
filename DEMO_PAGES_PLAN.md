@@ -1,7 +1,7 @@
-# PyScript async demo pages — plan & known issues
+# PyScript demo pages — plan & known issues
 
-This file tracks the new browser demo pages for the async examples and the
-issues to pick up during desktop development. It is intentionally not part of
+Tracks the browser demo pages for the pydisplay examples and the issues to pick
+up during desktop development (Cursor Debug mode). This file is **not** part of
 the deployed site (the deploy workflow only copies `index.html`, `html/**` and
 `demo-pages/index.html`).
 
@@ -9,120 +9,160 @@ the deployed site (the deploy workflow only copies `index.html`, `html/**` and
 
 - `html/demo.css` — shared stylesheet for the demo index and every example page.
 - `demo-pages/site.css` — stylesheet for the root GitHub Pages landing page.
-- One page per example marked `# multimer types: async`:
-  | Page | Example | Install strategy | Status |
-  | --- | --- | --- | --- |
-  | `html/calculator.html` | `calculator.py` | single file → root | expected to work |
-  | `html/paint.html` | `paint.py` | single file → root | expected to work |
-  | `html/eventsys_simpletest.html` | `eventsys_simpletest.py` | single file → root | works, console-only output |
-  | `html/pydisplay_demo_async.html` | `pydisplay_demo_async.py` | single file → root | expected to work (watch perf) |
-  | `html/apollo.html` | `apollo.py` | `examples.json` → `target="examples"` | experimental |
-  | `html/lv_test_timer_async.html` | `lv_test_timer_async.py` | `examples.json` → `target="examples"` | likely broken (needs LVGL) |
+- `tools/gen_demo_pages.py` — generator that writes one page per example marked
+  `# multimer types: async` **or** `all`, and refreshes the index card grids.
+- `tools/serve.py` — CPython dev server (see below).
+- 35 generated example pages in `html/` (6 `async`, 29 `all`).
 - `index.html` (demo index) and `demo-pages/index.html` (landing) restyled.
-- `.github/workflows/deploy-demo.yml` now also copies `demo-pages/site.css`.
+- `.github/workflows/deploy-demo.yml` also copies `demo-pages/site.css`.
 
-The async examples were identified by the `# multimer types: async` header
-comment. Only these six carry that marker exactly:
-`apollo.py`, `calculator.py`, `eventsys_simpletest.py`,
-`lv_test_timer_async.py`, `paint.py`, `pydisplay_demo_async.py`.
-(Examples marked `all` also run under async, but were left out per scope — see
-"Open question" below.)
+## Generating pages
 
-## How loading works
+Pages and the index card grids are generated, not hand-written:
 
-Each page mirrors the existing `html/example.html` pattern:
+```bash
+python tools/gen_demo_pages.py          # regenerate html/*.html + index cards
+python tools/gen_demo_pages.py --check  # CI: fail if anything is stale
+```
+
+`tools/gen_demo_pages.py` scans `src/examples/` for the `# multimer types:`
+header, derives a blurb from the module docstring, and applies curated overrides
+(`CURATED`), manifest-install hints (`NEEDS_MANIFEST`) and icons. The index has
+`<!-- GEN:async:start -->` / `<!-- GEN:all:start -->` markers the generator fills.
+To tweak copy for a specific example, edit its entry in `CURATED` and rerun.
+
+### How loading works (Run button)
+
+Every example page loads the PyScript runtime first and only installs + imports
+the example **when the user clicks Run**. This is deliberate: many `all`
+examples run a blocking `while True` loop at import, which would freeze the tab
+on load. The page wires a click handler that runs:
 
 ```python
 import mip
-mip.install("github:PyDevices/pydisplay/src/examples/<name>.py")  # or examples.json
-import lib.path          # adds lib/, add_ons/, examples/ to sys.path
-import <name>            # running the module schedules main() via multimer.aio.run
+mip.install(...)        # single file, or examples.json -> target="examples"
+import lib.path         # adds lib/, add_ons/, examples/ to sys.path
+import <module>         # module-level code runs (schedules async main, or blocks)
 ```
 
-Dependencies that are *not* example-local (graphics, eventsys, palettes,
-touch_keypad, board_config, displaysys, multimer …) are pre-mounted into the
-PyScript VFS by `html/pyscript.toml` `[files]`, so single-file installs resolve.
-Example-local packages (e.g. `apollo_dsky`) are only fetched when the whole
-`packages/examples.json` manifest is installed with `target="examples"`.
+Library deps (graphics, eventsys, displaysys, multimer, palettes, touch_keypad,
+tft_config, console, framebuf, fonts …) are pre-mounted by `html/pyscript.toml`
+`[files]`, so single-file installs resolve. Example-local packages and assets
+(`apollo_dsky/`, `chango/`, `noto_fonts/`, `examples/assets/*`) only exist when
+the full `packages/examples.json` manifest is installed with `target="examples"`
+— the generator picks that strategy for those (`NEEDS_MANIFEST` + sub-packages).
 
 All demos run on the **main thread** (no `worker`) because
-`displaysys.psdisplay` uses `from js import document` and `pyscript.ffi`, which
-are not available in a worker.
+`displaysys.psdisplay` uses `from js import document` / `pyscript.ffi`.
+
+## Local dev server (`tools/serve.py`)
+
+CPython stdlib only. Serves the repo root the way GitHub Pages does, with two
+extras aimed at troubleshooting:
+
+```bash
+python tools/serve.py                  # serve repo root on 127.0.0.1:8000
+python tools/serve.py -p 9000 --no-coi # custom port, no isolation headers
+python tools/serve.py /some/other/dir  # serve a different directory
+```
+
+Open:
+- `http://127.0.0.1:8000/index.html` — demo index
+- `http://127.0.0.1:8000/html/<example>.html` — an example page
+- `http://127.0.0.1:8000/demo-pages/index.html` — landing page
+
+1. **Cross-origin isolation headers.** It sends `Cross-Origin-Opener-Policy:
+   same-origin`, `Cross-Origin-Embedder-Policy: require-corp` and
+   `Cross-Origin-Resource-Policy: cross-origin` — the same headers
+   `html/mini-coi-fd.js` injects in production — so the worker-backed pages
+   (REPL, example picker) get `SharedArrayBuffer` and local behaviour matches
+   production. Disable with `--no-coi` if a cross-origin asset is blocked.
+
+2. **Debug log sink for Cursor Debug mode.** It accepts `POST` (and `OPTIONS`
+   preflight) at `/__debug` with permissive CORS and prints whatever it receives
+   to the terminal (which the desktop agent can read). `GET /__debug` is a
+   health check. Wire a page-side beacon so browser console/errors stream back:
+
+   ```js
+   for (const k of ['log','warn','error']) {
+     const orig = console[k];
+     console[k] = (...a) => { try { navigator.sendBeacon('/__debug',
+       JSON.stringify({level:k, args:a.map(String), url:location.href})); }
+       catch(_){} orig.apply(console, a); };
+   }
+   ```
+
+   This endpoint is the hook for any instrumentation Cursor Debug mode injects;
+   extend `do_POST` / `_log_debug` in `tools/serve.py` as needed (e.g. to fan
+   out to a websocket or persist to a file).
 
 ## Known issues to pick up on desktop
 
-### 1. LVGL is not available in the browser runtime (blocker for `lv_test_timer_async`)
-`lv_test_timer_async.py` → `display_driver` / `lv_utils` → `import lvgl`. The
-bundled PyScript MicroPython (`html/pyscript/micropython/`) has no `lvgl`
-binding, so the import will fail. Options:
-- Ship an LVGL-enabled MicroPython wasm build and point `pyscript.toml` at it, or
-- Drop this page / mark it clearly as "desktop/MCU only" (currently tagged
-  `experimental`, with the failure surfaced in the on-page console).
+### A. Examples that should "just work"
+No blocking loop, deps pre-mounted — draw once and idle, or run async:
+`graphics_simpletest`, `graphics_area_test`, `logo`, `displaybuf_simpletest`,
+`framebuf_simpletest`, `console_simpletest`, `pbm_create_new`,
+`eventsys_touch_test` (async-capable), plus the async set
+(`pydisplay_demo_async`, `calculator`, `paint`, `eventsys_simpletest`).
+Verify rendering and confirm the spinner/Run flow.
 
-### 2. `PSDisplay.blit_rect` is O(pixels) in pure Python (perf)
+### B. Blocking `while True` loops freeze the tab (tagged `loops`)
+These render but never yield to the event loop, so the tab becomes unresponsive
+after **Run** (reload to stop): `displaysys_simpletest`, `color_test`,
+`boxlines`, `feathers`, `eventsys_encoder_test`, `fonts`, `font_simpletest`,
+`font_simpletest2`, `font_simpletest3`, `font_list`, `hello`, `rotations`,
+`scroll`, `tiny_hello`, `chango`, `noto_fonts`. Options to make them
+browser-friendly: add an async variant (`await asyncio.sleep(0)` in the loop)
+or a frame cap, or run them in a worker with a headless display path. The Run
+gate already prevents an on-load hang.
+
+### C. Asset-dependent examples (need the manifest install)
+Load files from `examples/assets/` or sub-packages, so they use the
+`examples.json` install: `bmp565_blit`, `bmp565_simpletest`, `font_list`,
+`font_simpletest`, `font_simpletest2`, `font_simpletest3`, `pbm_simpletest`,
+`chango`, `noto_fonts`. Verify `mip` writes the **binary** assets (`.bmp`,
+`.pbm`) into the VFS and that relative paths like `examples/assets/warrior.bmp`
+resolve from cwd `/`. Downloading the whole example set per page is heavy —
+consider small per-demo manifests if load time matters.
+
+### D. Missing dependency — `nano_gui_simpletest`
+Imports the `gui` (nano-gui) package, which is **not** in `pyscript.toml`
+`[files]`. It will raise `ImportError` on Run until nano-gui is bundled or
+installed via `mip`. Tagged `experimental`.
+
+### E. LVGL not in the browser runtime — `lv_test_timer_async`
+`lv_test_timer_async` → `display_driver` / `lv_utils` → `import lvgl`. The
+bundled PyScript MicroPython has no `lvgl` binding, so Run will fail. Ship an
+LVGL-enabled wasm build (point `pyscript.toml` at it) or keep it as a clearly
+marked reference. Tagged `experimental`.
+
+### F. `apollo` asset + filesystem assumptions
+Needs `apollo_dsky/__init__.py` and the binary `Apollo_DSKY_interface.bmp`
+(both via `examples.json`). Verify `mip` writes the binary, that `__file__` is
+populated for `/examples/apollo_dsky/`, and keypad hit-testing via
+`display_drv.translate_point`. Designed for 320×480 (matches `board_config`).
+Tagged `experimental`.
+
+### G. `PSDisplay.blit_rect` is O(pixels) in pure Python (perf)
 `src/lib/displaysys/psdisplay.py` builds the canvas `ImageData` one pixel at a
-time in a Python loop (`for i in range(0, len(buf), BPP)`), converting each
-RGB565 value with `color_rgb`. For full-width text/sprite blits this is slow:
-- `pydisplay_demo_async` re-blits every notes row on each redraw.
-- `apollo` blits large BMP regions and a 320×372 panel.
-Consider a vectorised path (e.g. build a `Uint8ClampedArray` / use
-`numpy`-style conversion, or precompute an RGBA buffer) before optimising the
-examples themselves.
+time in a Python loop, converting each RGB565 value with `color_rgb`. This is
+the main bottleneck for text/sprite-heavy examples (fonts, bmp565, apollo,
+`pydisplay_demo_async`). Consider a vectorised conversion before optimising the
+examples.
 
-### 3. `apollo` asset + filesystem assumptions (experimental)
-- Requires `apollo_dsky/__init__.py` **and** the binary
-  `apollo_dsky/Apollo_DSKY_interface.bmp`. Both come from `examples.json`;
-  verify `mip` actually writes the binary into the VFS and that
-  `BMP565(..., streamed=True)` can `seek`/`read` it in the browser.
-- `apollo_dsky` derives its asset path from `__file__`; confirm `__file__` is
-  populated for modules installed under `/examples/apollo_dsky/`.
-- Layout assumes a 320×480 viewport (matches `board_config`), so it should fit,
-  but check keypad hit-testing via `display_drv.translate_point`.
-- Downloading the full `examples.json` set is heavy. If desired, create a small
-  per-demo manifest (apollo + apollo_dsky only) to cut download size.
+### H. Noisy `console.log` from pointer events
+`PSDevices._on_move/_on_down/_on_up` log on every mouse event, flooding the
+console and the on-page `#log` panel. Gate behind a debug flag in
+`psdisplay.py`.
 
-### 4. `eventsys_simpletest` has no visual output by design
-It only `print`s polled events. The page routes stdout to the on-page console
-(`output="log"`). The `QUIT` event never fires in the browser, so the loop runs
-forever — fine for a demo. Confirm the `output` attribute is honoured by the
-bundled PyScript build; if not, fall back to a `terminal worker` variant (note
-that worker mode loses canvas/DOM access, so board_config would need a headless
-path).
-
-### 5. Noisy `console.log` from pointer events
-`PSDevices._on_move` / `_on_down` / `_on_up` call `console.log` on every mouse
-event, flooding the browser console (and our `#log` panel) during paint/calc.
-Gate these behind a debug flag in `psdisplay.py`.
-
-### 6. Runtime fetches from GitHub
-Every page `mip.install`s from `github:PyDevices/...` at load time, so demos
-need network access and the first load is slow. If this becomes a problem,
-pre-mount the async example files via `pyscript.toml` `[files]` like the
-add-ons already are.
-
-### 7. Cross-origin isolation
-`html/mini-coi-fd.js` registers a service worker to provide COOP/COEP when the
-host doesn't. GitHub Pages works with this today; keep it in mind if pages are
-ever served from a context where the service worker can't register.
-
-## Local preview
-
-```bash
-# from repo root
-python -m http.server 8000
-# demo index:    http://localhost:8000/index.html
-# example pages: http://localhost:8000/html/calculator.html
-```
-
-The service worker in `mini-coi-fd.js` supplies the cross-origin-isolation
-headers, so a plain static server is enough. The landing page references
-`site.css` which only exists next to it after the deploy step copies it; for a
-local landing preview open `demo-pages/index.html` (the CSS sits beside it).
+### I. Runtime fetches from GitHub
+Every page `mip.install`s from `github:PyDevices/...` at Run time, so demos need
+network access and the first run is slow. To go offline-friendly, pre-mount the
+example files via `pyscript.toml` `[files]` like the add-ons.
 
 ## Open question for desktop session
 
-Scope here was "examples marked `async`" (the 6 above). Examples marked
-`all` (e.g. `hello`, `feathers`, `color_test`, `boxlines`, `rotations`,
-`logo`, font/graphics simpletests …) are also async-compatible and would make
-good additional demo pages. If wanted, the same single-file pattern applies and
-they can reuse `demo.css` directly.
+Examples marked `queued, sync`, `sync` or `NA` were intentionally left out —
+they require a synchronous multimer backend and won't run under PyScript's async
+loop without an async rewrite. If any are worth porting, add an async variant
+and they will be picked up automatically by the generator.
