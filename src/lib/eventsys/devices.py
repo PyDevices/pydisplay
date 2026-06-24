@@ -496,8 +496,11 @@ class TouchDevice(Device):
             raise ValueError("TouchDevice requires a display device as 'data'")
         if self._data2 is None:  # self._data is a rotation table
             self._data2 = _DEFAULT_TOUCH_ROTATION_TABLE
-        self._data.touch_device = self
+        # Initialize rotation (which sets _rotation/_mask) before registering with
+        # the display: its touch_device setter calls hasattr(self, "rotation"),
+        # which reads _rotation and would otherwise raise on first construction.
         self.rotation = self._data.rotation
+        self._data.touch_device = self
 
     @property
     def rotation(self):
