@@ -74,10 +74,20 @@ These are **convenience wrappers**, not requirements:
 
 | Helper | What it does | Required? |
 |--------|--------------|-----------|
-| `run(main)` | Calls `asyncio.run(main())` (or `run_until_complete` on older ports) | No — use `asyncio.run` yourself if you prefer |
+| `run(main)` | Runs `main` to completion with `asyncio.run` (or `run_until_complete`); on a host that already drives a loop it schedules `main` as a background task instead | Recommended for portability — use `asyncio.run` yourself only when you control the host |
 | `await run_queued()` | Yields to the event loop (`sleep(0)`) so timer tasks and other coroutines run | No — any `await` in your loop does the same |
 
 If your main loop already contains `await asyncio.sleep(0)`, `await broker.some_async_poll()`, or similar, **`run_queued` is redundant**.
+
+!!! tip "Use `run(main)` on hosts that already run a loop"
+    In Jupyter Notebook (and PyScript) the kernel already drives an `asyncio`
+    event loop, so calling `asyncio.run(main())` raises
+    `RuntimeError: asyncio.run() cannot be called from a running event loop`.
+    `multimer.aio.run(main)` detects the running loop and schedules `main` with
+    `loop.create_task(...)` (keeping a strong reference so it isn't garbage
+    collected), returning immediately while the coroutine runs in the
+    background. On desktop/MCU it blocks to completion as before. Prefer
+    `run(main)` over raw `asyncio.run` so the same example works everywhere.
 
 !!! note "Not the same as `multimer.run_queued`"
     Sync **`multimer.run_queued()`** (from `import multimer`) drains a thread→main callback queue used by the default threading/SDL backends.

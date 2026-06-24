@@ -28,13 +28,9 @@ Touch examples (e.g. [`eventsys_touch_test.py`](https://github.com/PyDevices/pyd
 
 The Jupyter board config sets `TIMER_ASYNC = True`. Touch-driven examples use this flag to run an `asyncio` main loop instead of a blocking one, because the notebook kernel already drives an event loop and `ipyevents` callbacks (mouse events) are only delivered when control returns to it.
 
-The example pattern:
+Examples launch their async main coroutine with **`multimer.aio.run(main)`** rather than `asyncio.run(main())`. The helper detects the kernel's already-running loop and schedules `main` with `loop.create_task(...)` (so the cell returns immediately and the coroutine runs in the background), while still blocking to completion on desktop/MCU. This is why calling `asyncio.run(main())` directly in a notebook raises `RuntimeError: asyncio.run() cannot be called from a running event loop`.
 
-- Detect a running loop with `asyncio.get_running_loop()`.
-- If one exists (Jupyter, PyScript), schedule the async main coroutine on it with `loop.create_task(...)` and return — the cell finishes immediately while the test continues in the background and streams its output.
-- Otherwise (desktop/MCU), fall back to `asyncio.run(...)` or a blocking `run_queued()` + `sleep_ms()` loop.
-
-The wait-for-touch loop yields with `await run_queued()` (from `multimer.aio`) each iteration so the kernel can dispatch widget events between polls. See [multimer](../concepts/multimer.md) for details on the async timer backend.
+The wait-for-touch loop yields with `await run_queued()` (from `multimer.aio`) each iteration so the kernel can dispatch widget events between polls. See [multimer](../concepts/multimer.md#run_queued-and-run-are-optional-helpers) for details on `run()` and the async timer backend.
 
 ## Cursor / VS Code widget rendering
 

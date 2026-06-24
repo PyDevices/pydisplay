@@ -19,6 +19,8 @@ try:
 except ImportError:
     import uasyncio as asyncio
 
+from multimer.aio import run
+
 
 async def main():
     import display_driver  # noqa: F401
@@ -30,7 +32,4 @@ async def main():
         await asyncio.sleep(0)
 
 
-if hasattr(asyncio, "run"):
-    asyncio.run(main())
-else:
-    asyncio.get_event_loop().run_until_complete(main())
+run(main)

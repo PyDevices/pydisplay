@@ -35,6 +35,8 @@ try:
 except ImportError:
     import uasyncio as asyncio  # noqa: E402
 
+from multimer.aio import run as aio_run  # noqa: E402
+
 
 async def write_time():
     last_time = (0, 0, 0, 0, 0, 0)
@@ -94,7 +96,4 @@ async def run():
     await asyncio.gather(main(), write_time())
 
 
-if hasattr(asyncio, "run"):
-    asyncio.run(run())
-else:
-    asyncio.get_event_loop().run_until_complete(run())
+aio_run(run)

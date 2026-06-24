@@ -55,15 +55,34 @@ async def run_queued():
     await _sleep_ms(0)
 
 
+# Strong references to background tasks scheduled by run() on an already-running
+# loop.  asyncio only holds weak references to tasks, so without this a
+# fire-and-forget task could be garbage collected mid-run.
+_background_tasks = set()
+
+
 def run(main):
     """Run an async main coroutine function under asyncio/uasyncio.
 
-    Optional helper — equivalent to ``asyncio.run(main())`` when available.
+    On a host that already drives an event loop (Jupyter Notebook, PyScript),
+    schedule ``main`` on the running loop and return the ``Task`` without
+    blocking — ``asyncio.run`` cannot be called re-entrantly there.  Otherwise
+    run ``main`` to completion with ``asyncio.run`` (or ``run_until_complete``).
     """
+    loop = None
+    if hasattr(asyncio, "get_running_loop"):
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+    if loop is not None:
+        task = loop.create_task(main())
+        _background_tasks.add(task)
+        task.add_done_callback(_background_tasks.discard)
+        return task
     if hasattr(asyncio, "run"):
         return asyncio.run(main())
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(main())
+    return asyncio.get_event_loop().run_until_complete(main())
 
 
 class Timer(_TimerBase):

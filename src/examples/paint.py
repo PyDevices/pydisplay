@@ -14,6 +14,8 @@ try:
 except ImportError:
     import uasyncio as asyncio
 
+from multimer.aio import run
+
 
 async def main():
     colors = [0xFFFF, 0xF800, 0x07E0, 0x001F, 0x07FF, 0xF81F, 0xFFE0, 0x0000]
@@ -91,7 +93,4 @@ async def main():
         await asyncio.sleep(0)
 
 
-if hasattr(asyncio, "run"):
-    asyncio.run(main())
-else:
-    asyncio.get_event_loop().run_until_complete(main())
+run(main)

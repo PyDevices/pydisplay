@@ -212,24 +212,10 @@ if not demo:
     set_rotation_table((0, 0, 0, 0))
 
 if TIMER_ASYNC:
-    try:
-        import asyncio
-    except ImportError:
-        import uasyncio as asyncio
+    # On a host with a running loop (Jupyter, PyScript) this schedules the test
+    # as a background task and returns; otherwise it runs to completion.
+    from multimer.aio import run
 
-    try:
-        _running_loop = asyncio.get_running_loop()
-    except RuntimeError:
-        _running_loop = None
-
-    if _running_loop is not None:
-        # Host already drives an event loop (Jupyter Notebook, PyScript).  Schedule
-        # the test on it and return control so the loop can dispatch input/widget
-        # events while we await between polls.
-        _task = _running_loop.create_task(main_async())
-    elif hasattr(asyncio, "run"):
-        asyncio.run(main_async())
-    else:
-        asyncio.get_event_loop().run_until_complete(main_async())
+    run(main_async)
 else:
     run_sync()
