@@ -116,7 +116,7 @@ python3 -i path.py
 >>> import hello
 ```
 
-A display window opens. SDL2 is used by default; PyGame is an easy fallback on Windows. See the [Desktop CPython guide](https://pydisplay.readthedocs.io/en/latest/guides/desktop-cpython/).
+A display window opens (PyGame or SDL2, whichever is installed). See the [Desktop CPython guide](https://pydisplay.readthedocs.io/en/latest/guides/desktop-cpython/).
 
 ### 3.3 MicroPython board
 

@@ -37,7 +37,7 @@ flowchart TB
 | Piece | Role |
 |-------|------|
 | **`board_config.py`** | Selects display class, wires pins, creates touch/keypad/encoder brokers. One file per hardware target. |
-| **`displaysys`** | Display backends (`BusDisplay`, `SDL2Display`, `PSDisplay`, …) with a unified drawing API. |
+| **`displaysys`** | Display backends (`BusDisplay`, `SDLDisplay`, `PGDisplay`, `PSDisplay`, `JNDisplay`, `FBDisplay`) with a unified drawing API. |
 | **`eventsys`** | Brokers poll hardware and enqueue PyGame/SDL2-style events; your loop calls `Broker.poll()`. |
 | **`graphics`** | Optional helpers on top of `framebuf` (rounded rects, gradients, `Area` bounding boxes). |
 | **`add_ons`** | Optional shims and integrations (`framebuf` on CPython, `displaybuf`, `pdwidgets`, config templates). |
@@ -50,17 +50,16 @@ flowchart TB
 4. Your main loop: draw on `display`, call `broker.poll()`, handle events.
 
 ```python
-import board_config
-from board_config import display, broker
+from board_config import display_drv, broker
 
 while True:
     for event in broker.poll():
         ...  # handle touch, keys, etc.
-    display.fill_rect(0, 0, 10, 10, 0xF800)
-    display.show()
+    display_drv.fill_rect(0, 0, 10, 10, 0xF800)
+    display_drv.show()
 ```
 
-On desktop, `board_config` usually selects `SDL2Display` or `PGDisplay`. On ESP32, `BusDisplay` talks to the panel over SPI or I80.
+On desktop, `board_config` selects `PGDisplay` (CPython, PyGame) or `SDLDisplay` (SDL2). On ESP32, `BusDisplay` talks to the panel over SPI or I80. See [Portability & platforms](../platforms/index.md) for the full backend matrix.
 
 For a complete minimal app using this pattern (plus scrolling and timers), see [**pydisplay_demo**](../examples/pydisplay_demo.md).
 

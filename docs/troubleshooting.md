@@ -11,14 +11,14 @@ Common problems when installing, importing, or running pydisplay.
 **Fix:**
 
 - **Full clone:** run from `src/` and `import path` first, or `python3 -i path.py`.
-- **Device:** install via [MIP](../installation/mip-github.md) or [installer.py](../installation/installer.md) into `/lib`.
+- **Device:** install via [MIP](installation/mip-github.md) or [installer.py](installation/installer.md) into `/lib`.
 - **Examples:** `import lib.path` before `import hello` when using `mpremote mount`.
 
 ### `ModuleNotFoundError: No module named 'board_config'`
 
 **Cause:** No `board_config.py` for your hardware.
 
-**Fix:** Install a [board config package](../hardware/board-configs.md) or copy one into `lib/`:
+**Fix:** Install a [board config package](hardware/board-configs.md) or copy one into `lib/`:
 
 ```python
 import mip
@@ -47,7 +47,7 @@ mip.install("github:PyDevices/pydisplay/board_configs/sdldisplay")  # desktop SD
 
 **Fix:**
 
-1. Confirm SDL2 dev libraries are installed — see [Desktop CPython](../guides/desktop-cpython.md).
+1. Confirm SDL2 dev libraries are installed — see [Desktop CPython](guides/desktop-cpython.md).
 2. Try **PGDisplay** (PyGame) instead of SDL2.
 3. Run `import hello` after `path.py` — a window should appear immediately.
 
@@ -55,8 +55,8 @@ mip.install("github:PyDevices/pydisplay/board_configs/sdldisplay")  # desktop SD
 
 **Fix:**
 
-1. Verify the correct [board config](../hardware/board-configs.md) for your wiring.
-2. Check `requires_byteswap` / `BusDisplay.disable_auto_byteswap()` — see [display drivers](../hardware/display-drivers.md).
+1. Verify the correct [board config](hardware/board-configs.md) for your wiring.
+2. Check `requires_byteswap` / `BusDisplay.disable_auto_byteswap()` — see [display drivers](hardware/display-drivers.md).
 3. Confirm SPI/I80 pins match your schematic.
 
 ### Touch coordinates wrong or inverted
@@ -69,7 +69,7 @@ mip.install("github:PyDevices/pydisplay/board_configs/sdldisplay")  # desktop SD
 
 **Cause:** Blocking `while True:` loop without `await`.
 
-**Fix:** Port to asyncio — see [PyScript asyncio guide](../guides/pyscript-asyncio.md).
+**Fix:** Port to asyncio — see [PyScript asyncio guide](guides/pyscript-asyncio.md).
 
 ### Example not listed in demo hub
 
@@ -81,7 +81,7 @@ mip.install("github:PyDevices/pydisplay/board_configs/sdldisplay")  # desktop SD
 
 ### Simulation starts but display stays blank
 
-**Fix:** Use files from [`wokwi/`](../wokwi/). Confirm `main.py` installs the pydisplay bundle and Wokwi board config before `import pydisplay_demo`.
+**Fix:** Use files from [`wokwi/`](../wokwi/). Confirm `main.py` installs the pydisplay bundle and Wokwi board config before `import testris`.
 
 ### `IndexError` on last keypad row (touch_keypad example)
 

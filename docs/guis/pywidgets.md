@@ -5,7 +5,7 @@ Cross-platform widget toolkit in `add_ons/pdwidgets/` — buttons, lists, scroll
 ## Setup
 
 ```python
-import add_ons.add_path   # or install add_ons package
+import lib.path   # dev clone: puts lib/, add_ons/, examples/ on sys.path
 ```
 
 Install add_ons:

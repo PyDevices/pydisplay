@@ -6,7 +6,7 @@ Run pydisplay on a simulated ESP32-S3 with an ILI9341 capacitive touch display �
 
 **Who:** You want MCU-faithful testing (SPI display, I2C touch, MicroPython `machine` APIs) without flashing a board.
 
-**What you get:** [`pydisplay_demo`](../examples/pydisplay_demo.md) — Rotate / Color bar, scrolling tips, touch or mouse input. One `main.py`; full example catalog = uncomment two lines.
+**What you get:** [`testris`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/testris.py) — a Tetris-style game driven by the on-screen touch keypad. One `main.py`; full example catalog = uncomment two lines.
 
 **Prerequisites:**
 
@@ -19,7 +19,7 @@ Run pydisplay on a simulated ESP32-S3 with an ILI9341 capacitive touch display �
 
 1. Create a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3).
 2. Replace **diagram.json** and **main.py** with the files from [`wokwi/`](../wokwi/).
-3. Start the simulation. Serial shows `mip` downloads, then the demo UI appears.
+3. Start the simulation. Serial shows `mip` downloads, then `testris` appears.
 
 **Full install:** uncomment the two `add_ons` / `examples` lines in `main.py` before starting (several-minute first boot).
 
@@ -33,14 +33,14 @@ The browser sim ships MicroPython — no local tools or firmware download needed
 |--|---------------------|----------|
 | **User action** | Use `main.py` as committed | Uncomment `add_ons` + `examples` lines |
 | **First boot** | ~30 s | Several minutes |
-| **Demo** | `pydisplay_demo` | Same + full `examples/` catalog |
-| **Also enables** | — | `hello.py`, bmp565, `pydisplay_demo_async`, LVGL prep, etc. |
+| **Demo** | `testris` | Same + full `examples/` catalog |
+| **Also enables** | — | `hello.py`, bmp565, `pydisplay_demo`, `pydisplay_demo_async`, LVGL prep, etc. |
 
 ---
 
 ## Verify it worked
 
-Display shows Rotate / Color bar; scrolling tips; serial has no `Traceback`.
+The `testris` game appears and responds to the on-screen touch keypad; serial has no `Traceback`.
 
 ---
 
