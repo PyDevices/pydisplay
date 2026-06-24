@@ -32,16 +32,11 @@ SDL_Quit = usdl2.quit
 SDL_GetError = usdl2.get_error
 SDL_PollEvent = usdl2.poll_event
 SDL_GetKeyName = usdl2.get_key_name
-
-# Joystick API (usdl2 PR #1 / pydisplay joystick parity).  Only exported when
-# the installed usdl2 build provides them; sdldisplay imports these names
-# defensively and disables joystick input when they are absent.
-if hasattr(usdl2, "init_subsystem"):
-    SDL_InitSubSystem = usdl2.init_subsystem
-    SDL_NumJoysticks = usdl2.num_joysticks
-    SDL_JoystickOpen = usdl2.joystick_open
-    SDL_JoystickClose = usdl2.joystick_close
-    SDL_JoystickInstanceID = usdl2.joystick_instance_id
+SDL_InitSubSystem = usdl2.init_subsystem
+SDL_NumJoysticks = usdl2.num_joysticks
+SDL_JoystickOpen = usdl2.joystick_open
+SDL_JoystickClose = usdl2.joystick_close
+SDL_JoystickInstanceID = usdl2.joystick_instance_id
 
 
 def SDL_CreateWindow(title, x, y, w, h, flags):
