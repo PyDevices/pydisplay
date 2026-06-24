@@ -7,7 +7,7 @@ Evaluate pydisplay without installing anything on your machine.
 | Path | Best for | Start here |
 |------|----------|------------|
 | **Browser (PyScript)** | Quick look, touch UI in the tab | [Live demo hub](https://PyDevices.github.io/pydisplay/demo/) |
-| **Wokwi simulator** | ESP32 + ILI9341 without hardware | [Minimum project guide](../guides/wokwi.md) or [hosted copy](https://wokwi.com/projects/404248867674669057) |
+| **Wokwi simulator** | ESP32 + ILI9341 without hardware | [Wokwi guide](../guides/wokwi.md) · [`wokwi/`](../wokwi/) |
 | **Screenshot gallery** | See what examples look like | [Gallery below](#screenshot-gallery) |
 
 ## PyScript (browser)
@@ -34,11 +34,9 @@ Full guide (asyncio porting, compatible examples, board config): [PyScript local
 
 ## Wokwi (simulator)
 
-Copy [`wokwi/minimum/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi/minimum) into a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3), or open the [hosted minimum project](https://wokwi.com/projects/404248867674669057).
+Copy [`wokwi/`](../wokwi/) `main.py` and `diagram.json` into a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3).
 
-Full install with examples: [`wokwi/esp32-s3-full/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi/esp32-s3-full) ([hosted copy](https://wokwi.com/projects/415770470006384641)).
-
-Details: [Wokwi guide](../guides/wokwi.md).
+Full example catalog: uncomment the two `add_ons` / `examples` lines in `main.py` (see [Wokwi guide](../guides/wokwi.md)).
 
 ## Screenshot gallery
 

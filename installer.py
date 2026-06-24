@@ -8,8 +8,8 @@ connection.  It will install pydisplay and its dependencies from the
 PyDevices fork of the micropython-lib repository or the PyDevices/pydisplay
 repository on GitHub.
 
-To see this file in action, check out the Wokwi PyDisplay ESP32-S3 Example:
-    https://wokwi.com/projects/415770470006384641
+To see this file in action on Wokwi, uncomment add_ons + examples in wokwi/main.py:
+    https://github.com/PyDevices/pydisplay/tree/main/wokwi
 
 To download this file:
 1. Download it with your browser from its home on Github:

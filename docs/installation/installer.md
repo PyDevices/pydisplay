@@ -49,7 +49,7 @@ https://PyDevices.github.io/micropython-lib/mip/PyDevices
 
 ## Wokwi demo
 
-See the installer in action: [Wokwi ESP32-S3 example](https://wokwi.com/projects/415770470006384641).
+See the installer in action: uncomment the `add_ons` / `examples` lines in [`wokwi/main.py`](https://github.com/PyDevices/pydisplay/blob/main/wokwi/main.py) ([Wokwi guide](../guides/wokwi.md)).
 
 ## Custom installs
 

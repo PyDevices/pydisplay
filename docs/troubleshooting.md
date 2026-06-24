@@ -81,7 +81,7 @@ mip.install("github:PyDevices/pydisplay/board_configs/sdldisplay")  # desktop SD
 
 ### Simulation starts but display stays blank
 
-**Fix:** Use files from [`wokwi/minimum/`](../guides/wokwi.md). Confirm `main.py` runs `mip.install` for displaysys, eventsys, and the Wokwi board config before `import hello`.
+**Fix:** Use files from [`wokwi/`](../wokwi/). Confirm `main.py` installs the pydisplay bundle and Wokwi board config before `import pydisplay_demo`.
 
 ### `IndexError` on last keypad row (touch_keypad example)
 

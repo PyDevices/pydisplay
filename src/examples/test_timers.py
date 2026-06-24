@@ -8,7 +8,7 @@ From ``src/`` with ``lib.path`` configured::
 
     python
     >>> import lib.path
-    >>> import multimer.test_timers
+    >>> import test_timers
 
 Each implementation is imported and exercised inside its own try block so one
 failure does not stop the rest.  Implementations that cannot be imported are

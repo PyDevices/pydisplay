@@ -1,51 +1,97 @@
-# Wokwi
+# Wokwi hardware reference
 
-Extended Wokwi reference — wiring, board configs, and legacy hosted projects.
+Technical reference for the in-repo Wokwi project. For setup steps, see **[Wokwi simulator guide](../guides/wokwi.md)**.
 
-For a quick start, see **[Wokwi quick start guide](../guides/wokwi.md)** or **[Try pydisplay](../try/index.md#wokwi-simulator)**.
+## Project layout
 
-## In-repo projects
+| Path | Role |
+|------|------|
+| [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi) | `main.py`, `diagram.json` — bundle + `pydisplay_demo` |
 
-Runnable projects live under [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi):
+---
 
-| Directory | Description |
-|-----------|-------------|
-| [`wokwi/minimum/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi/minimum) | Core packages + Wokwi board config + `hello.py` |
-| [`wokwi/esp32-s3-full/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi/esp32-s3-full) | Full install (bundle, add_ons, examples) via `installer.py` |
+## Simulated hardware
 
-Each folder contains `main.py`, `diagram.json`, and `wokwi.toml`. See [`wokwi/README.md`](https://github.com/PyDevices/pydisplay/blob/main/wokwi/README.md) for setup on [wokwi.com](https://wokwi.com) and VS Code.
+| Item | Detail |
+|------|--------|
+| MCU | ESP32-S3 DevKitC-1 (`board-esp32-s3-devkitc-1`), 16 MB flash |
+| Display | ILI9341 240×320 via SPI (`board-ili9341-cap-touch`) |
+| Touch | FT6206 I2C (simulated on the cap-touch board) |
 
-## Hosted projects (legacy)
+### Pin wiring
 
-These predate the in-repo projects; behavior should match `wokwi/minimum/` and `wokwi/esp32-s3-full/`:
+Matches [`wokwi_ili9341_ft6x36_esp32s3/board_config.py`](https://github.com/PyDevices/pydisplay/blob/main/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/board_config.py):
 
-| Project | Description |
-|---------|-------------|
-| [415770470006384641](https://wokwi.com/projects/415770470006384641) | Full PyDisplay ESP32-S3 example — uses `installer.py` |
-| [404248867674669057](https://wokwi.com/projects/404248867674669057) | Minimum configuration (displaysys + eventsys + board config) |
+| Signal | GPIO | `diagram.json` part / pin |
+|--------|------|---------------------------|
+| Power | 3V3 | `lcd1:VCC` → `esp:3V3.1` |
+| SPI SCK | 36 | `lcd1:SCK` → `esp:36` |
+| SPI MOSI | 35 | `lcd1:MOSI` → `esp:35` |
+| SPI MISO | 37 | `lcd1:MISO` → `esp:37` |
+| Display D/C | 16 | `lcd1:D/C` → `esp:16` |
+| Display CS | 5 | `lcd1:CS` → `esp:5` |
+| Touch I2C SDA | 7 | `lcd1:SDA` → `esp:7` |
+| Touch I2C SCL | 6 | `lcd1:SCL` → `esp:6` |
+| Backlight | 3V3 | `lcd1:LED` → `esp:3V3.1` |
 
-## In-repo board configs
+Display part id in `diagram.json`: **`lcd1`** (`board-ili9341-cap-touch`).
 
-Wiring matches these MIP packages:
+---
 
-| Config | Touch |
-|--------|-------|
-| `board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3` | FT6X36 |
-| `board_configs/busdisplay/spi/wokwi_ili9341_esp32s3_no_touch` | None |
+## FT6206 (Wokwi) vs FT6X36 (pydisplay driver)
+
+Wokwi’s cap-touch board simulates an **FT6206** I2C controller. pydisplay’s board config uses the **FT6X36** driver (`ft6x36.py`) — same FT6xx family and register-style protocol. No board_config change is expected; if touch behaves oddly, compare with real hardware and file an issue.
+
+---
+
+## Board `env` attribute (optional)
+
+Committed `diagram.json` does **not** pin a MicroPython `env` string. Browser sims use built-in firmware.
+
+If you need a specific MicroPython build, copy the current `env` value from the [ESP32-S3 MicroPython template](https://wokwi.com/projects/new/micropython-esp32-s3) into the DevKit `attrs` — do not commit a release-specific string in the repo.
+
+---
+
+## MIP install pattern
+
+Matches [`wokwi/main.py`](https://github.com/PyDevices/pydisplay/blob/main/wokwi/main.py):
 
 ```python
 import mip
-mip.install("github:PyDevices/pydisplay/packages/displaysys.json")
-mip.install("github:PyDevices/pydisplay/packages/eventsys.json")
-mip.install("github:PyDevices/pydisplay/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3")
+
+mip.install("github:PyDevices/pydisplay/wokwi/pydisplay-bundle.json", target=".")
+mip.install(
+    "github:PyDevices/pydisplay/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3",
+    target=".",
+)  # last — installs root board_config.py
+mip.install(
+    "github:PyDevices/pydisplay/src/examples/pydisplay_demo.py",
+    target=".",
+)
+
+import lib.path
+import pydisplay_demo
 ```
 
-## installer.py on Wokwi
+**Full install on Wokwi:** uncomment the `add_ons` and `examples` `mip.install` lines in `main.py`.
 
-The full example downloads and runs [`installer.py`](../installation/installer.md). The in-repo [`wokwi/esp32-s3-full/main.py`](https://github.com/PyDevices/pydisplay/blob/main/wokwi/esp32-s3-full/main.py) does the same with the Wokwi board config.
+**No-touch variant:**
+
+```python
+mip.install(
+    "github:PyDevices/pydisplay/board_configs/busdisplay/spi/wokwi_ili9341_esp32s3_no_touch"
+)
+```
+
+Use a display-only `diagram.json` (no touch I2C wires) with that config.
+
+---
 
 ## Known issues
 
-`touch_keypad.py` notes occasional Wokwi `IndexError` when touching the last keypad row — simulator quirk, not necessarily hardware.
+| Issue | Notes |
+|-------|-------|
+| `touch_keypad.py` IndexError on last row | Wokwi simulator quirk; may not reproduce on hardware |
+| Old hosted wokwi.com project IDs | May be stale; use in-repo [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi) |
 
 See also [Troubleshooting](../troubleshooting.md).

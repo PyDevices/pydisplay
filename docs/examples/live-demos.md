@@ -5,5 +5,5 @@ This content moved to **[Try pydisplay](../try/index.md)** — PyScript links, W
 Quick links:
 
 - [PyScript demo hub](https://PyDevices.github.io/pydisplay/demo/)
-- [Wokwi minimum project](https://wokwi.com/projects/404248867674669057)
+- [Wokwi project](../guides/wokwi.md) (`wokwi/`)
 - [Screenshot gallery](../try/index.md#screenshot-gallery)

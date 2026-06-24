@@ -33,9 +33,37 @@ SKIP_FILE_SUFFIXES = {".pyc", ".pyo"}
 # Local upstream checkouts (gitignored) — never list in mip manifests.
 PACKAGE_SKIP_DIRS = {"add_ons": {"gui"}}
 
+# Dest paths omitted from wokwi/pydisplay-bundle.json (derived from packages/pydisplay-bundle.json).
+WOKWI_BUNDLE_EXCLUDE_DESTS = {
+    "jupyter_notebook.ipynb",
+    "lib/board_config.py",
+    "lib/displaysys/fbdisplay.py",
+    "lib/displaysys/jndisplay.py",
+    "lib/displaysys/pgdisplay.py",
+    "lib/displaysys/psdisplay.py",
+    "lib/multimer/_ctypes.py",
+    "lib/multimer/_ffi.py",
+    "lib/multimer/_polling.py",
+    "lib/multimer/_sdl2.py",
+    "lib/multimer/_threading.py",
+    "lib/multimer/aio.py",
+}
+WOKWI_BUNDLE_EXCLUDE_PREFIXES = ("lib/displaysys/sdldisplay/",)
+
 
 def should_include_file(filename):
     return not any(filename.endswith(suffix) for suffix in SKIP_FILE_SUFFIXES)
+
+
+def exclude_from_wokwi_bundle(dest):
+    if dest in WOKWI_BUNDLE_EXCLUDE_DESTS:
+        return True
+    return any(dest.startswith(prefix) for prefix in WOKWI_BUNDLE_EXCLUDE_PREFIXES)
+
+
+def wokwi_bundle_from_master(master):
+    urls = [entry for entry in master["urls"] if not exclude_from_wokwi_bundle(entry[0])]
+    return {"urls": urls, "version": master["version"]}
 
 
 # Create the data structures
@@ -135,5 +163,11 @@ for package_name, contents in package_dicts.items():
 with open(toml_full_path, "w") as f:
     for line in master_toml:
         f.write(line + "\n")
+
+# Wokwi browser sim: slim copy of pydisplay-bundle (not a packages/ entry).
+wokwi_bundle_path = os.path.join(output_dir, "wokwi", "pydisplay-bundle.json")
+os.makedirs(os.path.dirname(wokwi_bundle_path), exist_ok=True)
+with open(wokwi_bundle_path, "w") as f:
+    json.dump(wokwi_bundle_from_master(master_package), f, indent=2)
 
 print(f"{__file__.split('/')[-1]} finished\n")

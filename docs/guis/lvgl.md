@@ -40,10 +40,6 @@ Requires LVGL-enabled firmware. See `src/examples/lv_touch_test.py` in the repo.
 
 For production ESP32 projects, consider [kdschlosser's lvgl_micropython](https://github.com/kdschlosser/lvgl_micropython) C drivers wired through `BusDisplay`.
 
-## Wokwi minimum project
-
-Try displaysys + eventsys without LVGL first: [Wokwi minimum](../guides/wokwi.md) ([hosted](https://wokwi.com/projects/404248867674669057)).
-
 ## Helper add-ons
 
 `src/add_ons/lv_utils.py` — LVGL event loop helper (requires `multimer`).

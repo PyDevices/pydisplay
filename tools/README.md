@@ -92,6 +92,7 @@ Walks configured `src/` trees and writes the JSON/TOML files listed above. Consu
 | `graphics` | `src/lib/graphics/` | |
 | `multimer` | `src/lib/multimer/` | |
 | `pydisplay-bundle` | (composed) | All of the above except `examples` and `add_ons`, plus `src/jupyter_notebook.ipynb` |
+| `wokwi/pydisplay-bundle.json` | (derived) | Copy of `pydisplay-bundle` with desktop/SDL/Jupyter paths removed — see `WOKWI_BUNDLE_EXCLUDE_*` in `gen_repo_packages.py` |
 
 `__pycache__/` directories and `.pyc` / `.pyo` files are skipped.
 

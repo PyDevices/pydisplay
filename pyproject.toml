@@ -103,6 +103,7 @@ max-returns = 13
 max-statements = 166
 
 [tool.ruff.lint.per-file-ignores]
+"wokwi/main.py" = ["E402", "I001"]
 "micropython/aiorepl/aiorepl.py" = ["PGH001"]
 "src/add_ons/viper_tools.py" = ["F821"]  # `uint` is a MicroPython @viper native type
 
