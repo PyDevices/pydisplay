@@ -66,12 +66,15 @@ input](displays.md#how-displays-expose-input) for the full table):
   module-level `poll()` / `get()` that return ready-made `eventsys.events`
   objects, registered as a **`QUEUE`** device. This carries mouse motion/buttons,
   the scroll wheel, the keyboard, and the window-close (`QUIT`) event.
-- **Single-pointer** (`JNDisplay`, `PSDisplay`) — the driver exposes a small
-  touch helper (`JNTouch` / `PSTouch`) with `get_mouse_pos()`, registered as a
-  **`TOUCH`** device. `eventsys` synthesizes button-1
-  `MOUSEBUTTONDOWN` / `MOUSEMOTION` / `MOUSEBUTTONUP` events from the polled
-  position. Browser/notebook platforms expose only single-element pointer
-  events, so this is the most they can provide.
+- **Single-pointer + keyboard** (`JNDisplay`, `PSDisplay`) — the driver exposes
+  a touch helper (`JNTouch` / `PSTouch`) with `get_mouse_pos()`, registered as a
+  **`TOUCH`** device, from which `eventsys` synthesizes button-1
+  `MOUSEBUTTONDOWN` / `MOUSEMOTION` / `MOUSEBUTTONUP` events. It also exposes a
+  keyboard helper (`JNKeys` / `PSKeys`) with `read()`, registered as a
+  **`QUEUE`** device, that emits `KEYDOWN` / `KEYUP` (with SDL-style key codes,
+  names and modifiers from a per-module keymap) plus a `QUIT` from an assignable
+  quit chord (default **CTRL+C**). Browser/notebook platforms expose only
+  single-element pointer events, so touch is limited to one pressed position.
 
 Either way your handler sees the same `eventsys.events` objects, so application
 code does not need to know which family the active display belongs to.
