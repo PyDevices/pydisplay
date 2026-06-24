@@ -1,4 +1,4 @@
-"""Wokwi pydisplay — bundle + pydisplay_demo (optional add_ons + examples)."""
+"""Wokwi pydisplay — bundle + testris (optional add_ons + examples)."""
 
 import network
 import time
