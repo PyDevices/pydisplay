@@ -83,10 +83,6 @@ class PSTouch:
         self._mouse_pos = None
 
 
-# Backwards-compatible alias for the pre-rename name.
-PSDevices = PSTouch
-
-
 class PSDisplay(DisplayDriver):
     """
     A class to emulate a display on PyScript.

@@ -104,10 +104,6 @@ These backends cannot offer the full queue model because the platform has no
 equivalent keyboard/window event stream — the single-pointer helper is the most
 they can support.
 
-> The touch helpers were previously named `JNDevices` / `PSDevices`. Those names
-> remain available as aliases, but `JNTouch` / `PSTouch` better describe that
-> they are single-pointer touch adapters, not general event brokers.
-
 ## Canvases
 
 Anything you can draw on implements the framebuf API:

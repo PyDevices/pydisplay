@@ -171,10 +171,6 @@ class JNTouch:
             self._mouse_pos = None
 
 
-# Backwards-compatible alias for the pre-rename name.
-JNDevices = JNTouch
-
-
 class JNDisplay(DisplayDriver):
     """
     A class to emulate a display on Jupyter Notebook.
