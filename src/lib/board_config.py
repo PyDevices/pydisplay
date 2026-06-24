@@ -15,6 +15,8 @@ height = 480
 rotation = 0
 scale = 1.0
 
+touch_dev = None
+
 _ps = _jn = False
 try:
     import pyscript
@@ -45,12 +47,22 @@ if _ps:
     )
 elif _jn:
     # Running in Jupyter Notebook
-    from displaysys.jndisplay import JNDisplay
+    from displaysys.jndisplay import JNDevices, JNDisplay
     from eventsys import devices
+
+    TIMER_ASYNC = True
 
     broker = devices.Broker()
 
     display_drv = JNDisplay(width, height)
+
+    touch_drv = JNDevices(display_drv)
+
+    touch_dev = broker.create_device(
+        type=devices.types.TOUCH,
+        read=touch_drv.get_mouse_pos,
+        data=display_drv,
+    )
 else:
     # Running on the desktop
     import sys

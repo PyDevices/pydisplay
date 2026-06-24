@@ -4,7 +4,7 @@
 from random import choice, getrandbits
 
 from board_config import display_drv
-from multimer import run_queued
+from multimer import run_queued, sleep_ms
 import gc
 import time
 
@@ -44,19 +44,25 @@ def main():
     print("Drawing blocks on display")
     count = 0
     start_time = time.time()
-    while True:
-        display_drv.blit_rect(
-            choice(blocks),
-            randint(0, max_x),
-            randint(0, max_y),
-            block_size,
-            block_size,
-        )
-        display_drv.show()
-        run_queued()
-        count += 1
-        if count % 2000 == 0:
-            print(f"\rblocks/sec: {(count / (time.time() - start_time)):5.2f}", end="")
+    try:
+        while True:
+            display_drv.blit_rect(
+                choice(blocks),
+                randint(0, max_x),
+                randint(0, max_y),
+                block_size,
+                block_size,
+            )
+            if display_drv._timer is None:
+                display_drv.show()
+            run_queued()
+            count += 1
+            if count % 2000 == 0:
+                rate = count / (time.time() - start_time)
+                print(f"blocks/sec: {rate:5.2f}")
+            sleep_ms(1)
+    except KeyboardInterrupt:
+        print("\nStopped.")
 
 
 main()

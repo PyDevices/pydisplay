@@ -42,7 +42,7 @@ USB Video lets a board stream the framebuffer as a USB webcam (RP2040; host supp
 
 ### JNDisplay
 
-Jupyter Notebook output. No input devices yet. Config: `board_configs/jndisplay/`.
+Jupyter Notebook output via an interactive `ipywidgets` image when touch is enabled (`JNDevices` + `ipyevents`). Mouse clicks map to touch events. Config: `board_configs/jndisplay/`.
 
 ### PSDisplay
 
