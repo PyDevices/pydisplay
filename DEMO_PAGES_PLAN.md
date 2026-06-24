@@ -145,10 +145,70 @@ Tagged `experimental`.
 
 ### G. `PSDisplay.blit_rect` is O(pixels) in pure Python (perf)
 `src/lib/displaysys/psdisplay.py` builds the canvas `ImageData` one pixel at a
-time in a Python loop, converting each RGB565 value with `color_rgb`. This is
-the main bottleneck for text/sprite-heavy examples (fonts, bmp565, apollo,
-`pydisplay_demo_async`). Consider a vectorised conversion before optimising the
-examples.
+time, calling `color_rgb` per pixel and writing each RGBA byte straight into the
+JS `Uint8ClampedArray`. For a 320×480 frame that's ~153k `color_rgb` calls and
+~614k **per-element FFI writes** — and the boundary crossings, not the math,
+dominate. This is the main bottleneck for text/sprite-heavy examples (fonts,
+bmp565, apollo, `pydisplay_demo_async`).
+
+**Proposed fix** (two changes, biggest win first):
+
+1. Build the whole RGBA buffer in a native Python `bytearray` (no FFI in the
+   loop), then transfer it in **one** `img_data.data.set(rgba)` call.
+2. Precompute an RGB565→RGBA lookup table once (only 65,536 possible values), so
+   the inner loop is a table read instead of a function call + bit ops.
+
+```python
+def init(self) -> None:
+    self._canvas.width = self.width
+    self._canvas.height = self.height
+    # One-time RGB565(LE) -> packed RGBA LUT: 65536 * 4 bytes = 256 KiB.
+    if getattr(self, "_rgba_lut", None) is None:
+        lut = bytearray(65536 * 4)
+        for v in range(65536):
+            lo, hi = v & 0xFF, v >> 8
+            k = v << 2
+            lut[k]     = (hi & 0xF8) | ((hi >> 5) & 0x07)         # R
+            lut[k + 1] = ((hi << 5) & 0xE0) | ((lo >> 3) & 0x1F)  # G
+            lut[k + 2] = ((lo << 3) & 0xF8) | ((lo >> 2) & 0x07)  # B
+            lut[k + 3] = 255                                      # A
+        self._rgba_lut = lut
+
+def blit_rect(self, buf, x, y, w, h):
+    BPP = self.color_depth // 8
+    if x < 0 or y < 0 or x + w > self.width or y + h > self.height:
+        raise ValueError("The provided x, y, w, h values are out of range")
+    if len(buf) != w * h * BPP:
+        raise ValueError("The source buffer is not the correct size")
+    lut = self._rgba_lut
+    rgba = bytearray(w * h * 4)
+    o = 0
+    for i in range(0, len(buf), 2):
+        k = (buf[i] | (buf[i + 1] << 8)) << 2   # 565 value * 4
+        rgba[o] = lut[k]
+        rgba[o + 1] = lut[k + 1]
+        rgba[o + 2] = lut[k + 2]
+        rgba[o + 3] = lut[k + 3]
+        o += 4
+    img_data = self._ctx.createImageData(w, h)
+    img_data.data.set(rgba)          # single bulk FFI copy
+    self._ctx.putImageData(img_data, x, y)
+    return (x, y, w, h)
+```
+
+Verify on desktop:
+- `img_data.data.set(rgba)` relies on MicroPython marshaling the `bytearray` to a
+  JS typed array (usual emscripten behaviour). If not, wrap with
+  `pyscript.ffi.to_js(rgba)` — still one crossing. This is the linchpin.
+- Even-faster variant (more memory): keep the LUT as a `list` of 65,536 four-byte
+  `bytes` and build the frame with the C-level join —
+  `rgba = b"".join([lut[v] for v in array("H", buf)])` (`from array import array`;
+  `array('H', buf)` reads 16-bit LE units).
+- Endianness: both assume little-endian RGB565 (matches `requires_byteswap=False`
+  and today's `color_rgb`); rebuild the LUT if byte order is ever swapped.
+- `fill_rect`/`pixel` are already fine — only `blit_rect` needs this.
+- If full-frame redraws are still heavy after the LUT, blit only dirty regions or
+  keep a persistent backing `ImageData`/`OffscreenCanvas` — but measure first.
 
 ### H. Noisy `console.log` from pointer events
 `PSDevices._on_move/_on_down/_on_up` log on every mouse event, flooding the
