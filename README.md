@@ -30,7 +30,7 @@ python3 -i path.py
 ```
 
 ```python
->>> import hello
+>>> import pydisplay_demo
 ```
 
 On a MicroPython board, use [installer.py](installer.py) or see [Getting started](https://pydisplay.readthedocs.io/en/latest/getting-started/).
