@@ -4,12 +4,14 @@
 """Shared test bootstrap that puts pydisplay packages on ``sys.path``.
 
 The tests are self-contained: importing this module makes ``src/lib`` (where
-the ``multimer`` and ``eventsys`` packages live) importable without installing
-anything. Import it before importing those packages in any test module::
+the ``multimer``, ``eventsys``, and ``graphics`` packages live) importable
+without installing anything. Import it before importing those packages in any
+test module::
 
     import _env  # noqa: F401
     import multimer
     import eventsys
+    import graphics
 """
 
 import os
@@ -27,3 +29,7 @@ MULTIMER_DIR = os.path.join(_SRC_LIB, "multimer")
 #: Absolute path to the ``eventsys`` package directory, handy for tests that
 #: want to copy it somewhere isolated.
 EVENTSYS_DIR = os.path.join(_SRC_LIB, "eventsys")
+
+#: Absolute path to the ``graphics`` package directory, handy for tests that
+#: want to copy it somewhere isolated.
+GRAPHICS_DIR = os.path.join(_SRC_LIB, "graphics")

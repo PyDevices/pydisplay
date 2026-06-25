@@ -1,12 +1,17 @@
 # Tests
 
-Self-contained tests for the standalone [`multimer`](../src/lib/multimer) and
-[`eventsys`](../src/lib/eventsys) packages.
+Self-contained tests for the standalone [`multimer`](../src/lib/multimer),
+[`eventsys`](../src/lib/eventsys), and [`graphics`](../src/lib/graphics)
+packages.
 
 They use only the Python standard library (`unittest`) — no third-party test
 runner or build step is required. The shared bootstrap in
 [`_env.py`](_env.py) puts `src/lib` on `sys.path`, so nothing needs to be
 installed first.
+
+On CPython the graphics package falls back to its pure-Python
+`graphics._framebuf` implementation (the native `framebuf` module only exists
+on MicroPython), so those tests exercise that fallback directly.
 
 ## Running
 
@@ -36,6 +41,13 @@ python tests/test_ticks.py
 | `test_events.py` | the `events` types/classes and `eventsys.custom_type` |
 | `test_devices.py` | `Broker` and the `Queue`/`Touch`/`Encoder`/`Keypad` devices plus `devices.custom_type` |
 | `test_keys.py` | the `Keys` key/modifier tables and `keyname`/`key`/`modname`/`mod` helpers |
+| `test_area.py` | the `Area` rectangle helper (containment, overlap, transforms, protocols) |
+| `test_framebuf.py` | the pure-Python `graphics._framebuf` fallback (pixels, fill, scroll) |
+| `test_framebuf_plus.py` | the exported `graphics.FrameBuffer` (properties + `Area` returns) |
+| `test_shapes.py` | the drawing primitives (`line`, `rect`, `circle`, `poly`, `blit`, ...) |
+| `test_font.py` | `Font` and the `text` / `text8` / `text14` / `text16` helpers |
+| `test_files.py` | `save` / `from_file` and the PBM/PGM converters |
+| `test_draw.py` | the `Draw` canvas-binding wrapper |
 | `test_standalone.py` | proves each package imports and runs with **none** of the rest of pydisplay on the path |
 
 The timer tests run on whichever synchronous backend the host selects
@@ -46,3 +58,7 @@ backend is available.
 The device tests drive each device through its `poll()` method using small
 scripted `read` callbacks from [`_support.py`](_support.py), so they run
 identically on every host without any hardware.
+
+Graphics tests deliberately avoid the format paths that cannot work under
+CPython's pure-Python fallback (for example `GS8` pixel writes), and focus on
+the broad surface that behaves identically on MicroPython and CPython.
