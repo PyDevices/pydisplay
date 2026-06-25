@@ -131,9 +131,12 @@
                 import mip
                 from js import document
                 _host = document.location.hostname
-                _local = _host in ("127.0.0.1", "localhost")
-                if _local:
-                    mip.install(document.location.origin + "/src/examples/nano_gui_simpletest.py")
+                _path = document.location.pathname
+                _demo_root = _path.split("/html/")[0] if "/html/" in _path else ""
+                _repo_base = document.location.origin + _demo_root
+                _origin = _host in ("127.0.0.1", "localhost") or _host.endswith(".github.io")
+                if _origin:
+                    mip.install(_repo_base + "/src/examples/nano_gui_simpletest.py")
                 else:
                     mip.install("github:PyDevices/pydisplay/src/examples/nano_gui_simpletest.py")
                 _set("Importing nano_gui_simpletest…")
