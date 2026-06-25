@@ -6,7 +6,7 @@ Technical reference for the in-repo Wokwi project. For setup steps, see **[Wokwi
 
 | Path | Role |
 |------|------|
-| [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi) | `main.py`, `diagram.json` — bundle + `pydisplay_demo` |
+| [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi) | `main.py`, `diagram.json` — bundle + `testris` |
 
 ---
 
@@ -65,12 +65,12 @@ mip.install(
     target=".",
 )  # last — installs root board_config.py
 mip.install(
-    "github:PyDevices/pydisplay/src/examples/pydisplay_demo.py",
+    "github:PyDevices/pydisplay/src/examples/testris.py",
     target=".",
 )
 
 import lib.path
-import pydisplay_demo
+import testris
 ```
 
 **Full install on Wokwi:** uncomment the `add_ons` and `examples` `mip.install` lines in `main.py`.

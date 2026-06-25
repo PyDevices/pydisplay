@@ -80,7 +80,7 @@ class DisplayBuffer(framebuf.FrameBuffer):
         Allocate a logical framebuffer backed by ``display_drv``.
 
         Args:
-            display_drv: A displaysys driver (BusDisplay, SDL2Display, etc.).
+            display_drv: A displaysys driver (BusDisplay, SDLDisplay, etc.).
             format: One of ``RGB565``, ``GS8``, or ``GS4_HMSB``.
             stride: Lines per chunk for GS8/GS4 bounce buffers (MicroPython viper).
 
