@@ -3,14 +3,11 @@
 lv_test_timer_harness.py
 
 Automated LVGL timer + input test for sync, queued, and async modes.
-Run from ~/github/pydisplay/src (import lib.path must be first).
+After timer/click checks, injects ``events.Quit`` through the queue read path
+and pumps LVGL (same path as clicking the window X) to verify clean shutdown.
 
-Usage (from pydisplay/src):
-    .venv/bin/python examples/lv_test_timer_harness.py queued
-    micropython examples/lv_test_timer_harness.py queued
-    circuitpython examples/lv_test_timer_harness.py async
-
-Prints a KIT_RESULT= JSON line on stdout for tools/lv_timer_test_kit.py.
+Prints a KIT_RESULT= JSON line on stdout before quit; the process should exit
+with code 0 (tools/lv_timer_test_kit.py).
 """
 
 import sys
@@ -314,6 +311,100 @@ def _deinit_display():
         pass
 
 
+def _inject_quit_and_exit(pump, *, broker_poll=False, mode="?"):
+    """
+    Inject events.Quit via the queue read path, then pump LVGL so VirtualDevices
+    drain the queue (production window-close path).  Process should not return.
+    """
+    from eventsys import events
+
+    queue_dev = _queue_device()
+    if queue_dev is None:
+        _print_result(
+            {
+                "mode": mode,
+                "status": "error",
+                "backend": _timer_backend(),
+                "error": "no QUEUE device for quit injection",
+            }
+        )
+        raise SystemExit(1)
+
+    pending = [events.Quit(events.QUIT)]
+    orig_read = queue_dev._read
+
+    def mock_read():
+        if pending:
+            return [pending.pop(0)]
+        return None
+
+    queue_dev._read = mock_read
+    try:
+        pump(15, 0.02)
+        if broker_poll:
+            from board_config import broker
+
+            broker.poll()
+    finally:
+        queue_dev._read = orig_read
+
+    _deinit_display()
+    _print_result(
+        {
+            "mode": mode,
+            "status": "error",
+            "backend": _timer_backend(),
+            "error": "events.Quit injection did not terminate process",
+        }
+    )
+    raise SystemExit(1)
+
+
+async def _inject_quit_and_exit_async(*, broker_poll=True, mode="?"):
+    from board_config import broker
+
+    queue_dev = _queue_device()
+    if queue_dev is None:
+        _print_result(
+            {
+                "mode": mode,
+                "status": "error",
+                "backend": _timer_backend(),
+                "error": "no QUEUE device for quit injection",
+            }
+        )
+        raise SystemExit(1)
+
+    from eventsys import events
+
+    pending = [events.Quit(events.QUIT)]
+    orig_read = queue_dev._read
+
+    def mock_read():
+        if pending:
+            return [pending.pop(0)]
+        return None
+
+    queue_dev._read = mock_read
+    try:
+        await _pump_lvgl_async(15, 0.02)
+        if broker_poll:
+            broker.poll()
+    finally:
+        queue_dev._read = orig_read
+
+    _deinit_display()
+    _print_result(
+        {
+            "mode": mode,
+            "status": "error",
+            "backend": _timer_backend(),
+            "error": "events.Quit injection did not terminate process",
+        }
+    )
+    raise SystemExit(1)
+
+
 def _run_sync():
     import board_config
 
@@ -357,7 +448,7 @@ def _run_sync():
     }
     click = _click_status("sync", state["seconds"], inp)
     _print_result(_result_payload("sync", click, state, broker_polls, inp))
-    _deinit_display()
+    _inject_quit_and_exit(_pump_lvgl, mode="sync")
 
 
 def _run_queued():
@@ -392,28 +483,26 @@ def _run_queued():
     deadline = time.time() + _DURATION_S
     input_tests = None
 
-    try:
-        while time.time() < deadline:
-            run_queued()
-            if timer_req:
-                broker.poll()
-            sleep_ms(1)
+    while time.time() < deadline:
+        run_queued()
+        if timer_req:
+            broker.poll()
+        sleep_ms(1)
 
-            if input_tests is None and get_state()["seconds"] >= 2:
-                input_tests = _run_input_tests(btn, cx, cy, pump=queued_pump)
+        if input_tests is None and get_state()["seconds"] >= 2:
+            input_tests = _run_input_tests(btn, cx, cy, pump=queued_pump)
 
-        state = get_state()
-        inp = input_tests or {
-            "sdl_stolen_taps": 0,
-            "sdl_lv_taps": 0,
-            "fifo_taps": 0,
-            "lv_event_ok": False,
-            "taps_total": state["taps"],
-        }
-        click = _click_status("queued", state["seconds"], inp)
-        _print_result(_result_payload("queued", click, state, broker_polls, inp))
-    finally:
-        _deinit_display()
+    state = get_state()
+    inp = input_tests or {
+        "sdl_stolen_taps": 0,
+        "sdl_lv_taps": 0,
+        "fifo_taps": 0,
+        "lv_event_ok": False,
+        "taps_total": state["taps"],
+    }
+    click = _click_status("queued", state["seconds"], inp)
+    _print_result(_result_payload("queued", click, state, broker_polls, inp))
+    _inject_quit_and_exit(queued_pump, broker_poll=timer_req, mode="queued")
 
 
 def _run_async():
@@ -443,29 +532,30 @@ def _run_async():
         deadline = time.time() + _DURATION_S
         input_tests = None
 
-        try:
-            while time.time() < deadline:
-                broker.poll()
-                await asyncio.sleep(0)
+        deadline = time.time() + _DURATION_S
+        input_tests = None
 
-                if input_tests is None and get_state()["seconds"] >= 2:
-                    input_tests = await _run_input_tests_async(btn, cx, cy)
+        while time.time() < deadline:
+            broker.poll()
+            await asyncio.sleep(0)
 
-            state = get_state()
-            inp = input_tests or {
-                "sdl_stolen_taps": 0,
-                "sdl_lv_taps": 0,
-                "fifo_taps": 0,
-                "lv_event_ok": False,
-                "taps_total": state["taps"],
-            }
-            click = _click_status("async", state["seconds"], inp)
-            result.update(_result_payload("async", click, state, broker_polls, inp))
-        finally:
-            _deinit_display()
+            if input_tests is None and get_state()["seconds"] >= 2:
+                input_tests = await _run_input_tests_async(btn, cx, cy)
+
+        state = get_state()
+        inp = input_tests or {
+            "sdl_stolen_taps": 0,
+            "sdl_lv_taps": 0,
+            "fifo_taps": 0,
+            "lv_event_ok": False,
+            "taps_total": state["taps"],
+        }
+        click = _click_status("async", state["seconds"], inp)
+        result.update(_result_payload("async", click, state, broker_polls, inp))
+        _print_result(result)
+        await _inject_quit_and_exit_async(mode="async")
 
     run(main)
-    _print_result(result)
 
 
 _MODES = {

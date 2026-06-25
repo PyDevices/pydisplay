@@ -233,6 +233,15 @@ class PGDisplay(DisplayDriver):
 
     ############### Class Specific Methods ##############
 
+    def _video_active(self) -> bool:
+        """True while pygame-ce video is initialized and this driver is live."""
+        if getattr(self, "_deinitialized", False):
+            return False
+        try:
+            return bool(pg.get_init()) and bool(pg.display.get_init())
+        except pg.error:
+            return False
+
     def render(self, renderRect=None) -> None:
         """
         Render the display.  Automatically called after blitting or filling the display.
@@ -240,6 +249,8 @@ class PGDisplay(DisplayDriver):
         Args:
             renderRect (Optional[pg.Rect], optional): The rectangle to render. Defaults to None.
         """
+        if not self._video_active():
+            return
         s = self._scale
         buffer = pg.transform.scale_by(self._buffer, s) if s != 1 else self._buffer
         if not (y_start := self.vscsad()):
@@ -280,9 +291,39 @@ class PGDisplay(DisplayDriver):
         """
         Show the display.
         """
-        pg.display.flip()
+        if not self._video_active():
+            return
+        try:
+            pg.display.flip()
+        except pg.error:
+            if getattr(self, "_deinitialized", False):
+                return
+            raise
+
+    def quit(self, code: int = 0) -> None:
+        """
+        Release pygame-ce resources and terminate the process.
+
+        Uses ``os._exit`` when ``SystemExit`` would be swallowed (e.g. quit
+        invoked from a ``run_queued`` callback while ``import`` is blocked in
+        a module-level loop).
+        """
+        self.deinit()
+        try:
+            import os
+
+            os._exit(code)
+        except Exception:
+            pass
+        raise SystemExit(code)
 
     def _deinit(self) -> None:
         """Release pygame resources."""
+        global _joysticks
+        try:
+            pg.joystick.quit()
+        except Exception:
+            pass
+        _joysticks = []
         pg.display.quit()
         pg.quit()

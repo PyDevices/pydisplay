@@ -383,26 +383,37 @@ class Broker(Device):
         Handle a window-close (QUIT) event.  This runs for every front end
         (LVGL or not), since the QUIT event is handled here in eventsys.
 
-        If the application installed a custom ``quit_func``, it is called first
-        for app-specific cleanup.  If it returns (for example because ``sys.exit``
-        was swallowed when quit was invoked from a timer or
-        ``micropython.schedule`` callback), cleanup falls through to the
-        registered display driver's ``quit()``.  With no display registered,
-        the broker's fallback ``quit_func`` is used.
+        If the application installed a custom ``quit_func``, it runs after the
+        display driver's ``quit()`` when a display is registered.  When a display
+        driver is registered, ``quit()`` ends with ``os._exit(0)`` if the driver
+        returns instead of terminating (for example when ``SystemExit`` is swallowed
+        from a timer or ``run_queued`` callback).
         """
+        display_quit = False
+        try:
+            for device in self.devices:
+                data = getattr(device, "_data", None)
+                if callable(getattr(data, "deinit", None)) and callable(
+                    getattr(data, "quit", None)
+                ):
+                    display_quit = True
+                    data.quit()
+        except SystemExit:
+            pass
+
+        if display_quit:
+            import os
+
+            os._exit(0)
+
         if self._quit_func_customized:
+            try:
+                self._quit_func()
+            except SystemExit:
+                pass
+
+        if not self._quit_func_customized:
             self._quit_func()
-            # A custom handler may call sys.exit(), which is swallowed when quit
-            # is invoked from a timer or micropython.schedule callback.  Fall
-            # through to the display driver's hard exit when that happens.
-
-        for device in self.devices:
-            data = getattr(device, "_data", None)
-            if callable(getattr(data, "deinit", None)) and callable(getattr(data, "quit", None)):
-                data.quit()  # releases resources and terminates; does not return
-
-        # No display registered to handle the exit; fall back.
-        self._quit_func()
 
     def _poll(self):
         """

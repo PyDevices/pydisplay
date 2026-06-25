@@ -3,7 +3,8 @@
 Run LVGL timer/input harness on all desktop Python+LVGL executables.
 
 Nine sequential runs (queued + async per runtime; async omitted on MicroPython
-Windows). Each subprocess runs from pydisplay/src and exits when its window closes.
+Windows). Each subprocess runs the harness from pydisplay/src (~4 s of checks,
+then injected ``events.Quit``); the child should print KIT_RESULT= and exit 0.
 
 From repo root:
     python tools/run_desktop_lv_tests.py
@@ -33,12 +34,20 @@ from lv_timer_test_kit import (  # noqa: E402
     run_case,
 )
 
+
+def _cpython_venv_exe() -> str:
+    for p in (REPO / ".venv" / "bin" / "python", SRC / ".venv" / "bin" / "python"):
+        if p.exists():
+            return str(p)
+    return str(REPO / ".venv" / "bin" / "python")
+
+
 EXECUTABLES: dict[str, list[str]] = {
     "micropython": ["micropython"],
     "circuitpython": ["circuitpython"],
     "micropython.exe": ["micropython.exe"],
     "python.exe": ["python.exe"],
-    "cpython-venv": [str(SRC / ".venv" / "bin" / "python")],
+    "cpython-venv": [_cpython_venv_exe()],
 }
 
 DESKTOP_MODES = ("queued", "async")

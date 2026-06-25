@@ -573,6 +573,12 @@ class SDLDisplay(DisplayDriver):
 
     ############### Class Specific Methods ##############
 
+    def _sdl_active(self) -> bool:
+        """True while SDL video is initialized and this driver is live."""
+        if getattr(self, "_deinitialized", False):
+            return False
+        return self._renderer is not None and self._window is not None
+
     def render(self, renderRect=None):
         """
         Render the display.  Automatically called after blitting or filling the display.
@@ -580,6 +586,8 @@ class SDLDisplay(DisplayDriver):
         Args:
             renderRect (Optional[SDL_Rect], optional): The rectangle to render. Defaults to None.
         """
+        if not self._sdl_active():
+            return
         # Single SDL_RenderCopy was disabled: not working on Chromebooks, Ubuntu, Raspberry Pi OS.
         # Ignore renderRect and render the entire texture to the window in four steps.
         y_start = self.vscsad()
@@ -605,6 +613,8 @@ class SDLDisplay(DisplayDriver):
         """
         Show the display.
         """
+        if not self._sdl_active():
+            return
         SDL_RenderPresent(self._renderer)
 
     def _deinit(self) -> None:
@@ -627,8 +637,14 @@ class SDLDisplay(DisplayDriver):
         """
         Release SDL resources and terminate the process.
         """
-        self.deinit()
-        _ensure_tty_sane()
+        try:
+            self.deinit()
+        except Exception:
+            pass
+        try:
+            _ensure_tty_sane()
+        except Exception:
+            pass
         try:
             import ffi
 

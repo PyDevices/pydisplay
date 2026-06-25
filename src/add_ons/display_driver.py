@@ -47,6 +47,13 @@ def main():
         broker.devices,
     )
 
+    def _quit_hook():
+        inst = lv_utils.event_loop.current_instance()
+        if inst is not None:
+            inst.deinit()
+
+    broker.quit_func = _quit_hook
+
 
 class _TouchState:
     x = 0

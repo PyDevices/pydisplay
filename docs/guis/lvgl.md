@@ -83,7 +83,7 @@ The shared UI ([`lv_test_timer_common.py`](https://github.com/PyDevices/pydispla
 
 ### Automated harness
 
-[`lv_test_timer_harness.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_harness.py) runs a timed LVGL timer + input check and prints a `KIT_RESULT=` JSON line on stdout (for CI and tooling). Run from `src/`:
+[`lv_test_timer_harness.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_harness.py) runs a timed LVGL timer + input check, prints a `KIT_RESULT=` JSON line on stdout, then injects `events.Quit` through the queue read path (same as clicking the window X) and expects the process to exit cleanly. Run from `src/`:
 
 ```bash
 cd src
@@ -105,7 +105,7 @@ Modes: `sync`, `queued`, `async`.
 | CPython (Windows) | `python.exe` on `PATH` |
 | CPython (Linux venv) | `src/.venv/bin/python` |
 
-Each run uses `cwd=src/` and opens a window until the harness exits (~4 s). Missing executables are skipped (`missing` in the summary table).
+Each run uses `cwd=src/`, opens a window for ~4 s of timer/click checks, then injected quit; the child should print `KIT_RESULT=` and exit 0. Missing executables are skipped (`missing` in the summary table).
 
 From the repository root:
 

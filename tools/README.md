@@ -215,7 +215,7 @@ Automated checks for LVGL timer and input behavior across desktop Python ports. 
 
 ### `run_desktop_lv_tests.py`
 
-Nine sequential harness runs (`queued` + `async` on each available desktop executable; async skipped on `micropython.exe`).
+Nine sequential harness runs (`queued` + `async` on each available desktop executable; async skipped on `micropython.exe`). Each run prints `KIT_RESULT=` then injects `events.Quit` and should exit 0.
 
 ```bash
 python tools/run_desktop_lv_tests.py

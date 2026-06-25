@@ -592,10 +592,10 @@ class DisplayDriver:
 
         Called by ``eventsys.devices.Broker.quit()`` on a window-close (QUIT)
         event.  The base implementation deinitializes the display and raises
-        ``SystemExit``, which is correct for front ends that poll on the main
-        thread.  Drivers needing a platform-specific exit (e.g. ``SDLDisplay``,
-        where ``SystemExit`` raised from the LVGL scheduled task handler is
-        swallowed on the unix port) should override this.
+        ``SystemExit``, which is correct when quit runs on the main thread.
+        Drivers where ``SystemExit`` would be swallowed when quit is invoked
+        from a timer or ``run_queued`` callback (e.g. ``SDLDisplay``,
+        ``PGDisplay``) should override this with a hard process exit.
         """
         self.deinit()
         raise SystemExit(code)
