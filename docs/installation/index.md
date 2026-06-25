@@ -16,7 +16,7 @@ The [installer.py](installer.md) script combines GitHub and micropython-lib inst
 
 **Core libraries** (under `src/lib/`):
 
-- `displaysys` — display drivers (BusDisplay, SDL2Display, etc.)
+- `displaysys` — display drivers (BusDisplay, SDLDisplay, PGDisplay, etc.)
 - `eventsys` — input events and device brokers
 - `graphics` — extended drawing helpers
 - `multimer` — cross-platform timers (CPython, MicroPython, CircuitPython unix). Asyncio timers: `multimer.aio` — see [multimer](../concepts/multimer.md)

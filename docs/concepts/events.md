@@ -17,14 +17,13 @@ flowchart LR
 Typical main loop:
 
 ```python
-import board_config
-from board_config import broker, display
+from board_config import broker, display_drv
 
 while True:
     for event in broker.poll():
         if event.type == events.MOUSEBUTTONDOWN:
             ...  # handle touch / click
-    display.show()
+    display_drv.show()
 ```
 
 Run [`eventsys_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_simpletest.py) after [first run](../guides/desktop-cpython.md). For a copy-paste app template with clicks, see [**App starter**](../examples/app-starter.md). For rotation and scrolling together, see [**pydisplay_demo**](../examples/pydisplay_demo.md).

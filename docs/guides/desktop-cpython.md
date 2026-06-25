@@ -12,7 +12,7 @@ Install SDL2 development libraries for your OS, or use PyGame (PGDisplay) — de
 
 --8<-- "_snippets/first-run-desktop.md"
 
-Default config uses **SDL2Display** (`src/lib/board_config.py`).
+The default `src/lib/board_config.py` uses **`PGDisplay`** (PyGame) on CPython when PyGame is installed, and falls back to **`SDLDisplay`** (SDL2) otherwise. To force SDL2, install the `board_configs/sdldisplay/` config.
 
 ## PyGame fallback
 

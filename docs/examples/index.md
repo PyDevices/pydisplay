@@ -19,7 +19,7 @@ As examples are reviewed for [multimer](../concepts/multimer.md) portability (sy
 # multimer types: all
 ```
 
-**Progress:** **64 / 64** top-level (`src/examples/*.py`) and **7 / 7** subdirectory runnable demos marked (including `spotify_remote`).
+Every runnable example (top-level scripts under `src/examples/*.py` and the subdirectory demos) carries a marker. Shared modules and test harnesses are tagged `NA`.
 
 ### Tag values
 
@@ -115,7 +115,7 @@ broker.poll()  # SDL message pump — required on MicroPython Windows
 
 On **MicroPython Windows** (and other ports using `multimer._polling`), `multimer.REQUIRES_RUN_QUEUED` is false but `Timer.REQUIRES_RUN_QUEUED` is true — check the **timer class** flag, not the module flag. Without `broker.poll()`, the SDL window can freeze after the first frame even when the Python loop keeps running.
 
-**LVGL apps** — [`spotify_remote/main.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/spotify_remote/main.py) (symlinked from spotapi):
+**LVGL apps** — [`lv_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_touch_test.py):
 
 ```python
 import display_driver
@@ -124,7 +124,7 @@ import display_driver
 display_driver.run()
 ```
 
-Returns immediately on **MicroPython unix** and **CPython** (non-Windows) when `lv_utils` is already running — REPL stays usable. Blocks on **Windows** (`run_queued()` + `broker.poll()`) and **macOS** (`lv_utils` tick loop). See [LVGL guide](../guis/lvgl.md).
+`display_driver.run()` returns immediately on **MicroPython unix** and **CPython** (non-Windows) when `lv_utils` is already running — REPL stays usable. It blocks on **Windows** (`run_queued()` + `broker.poll()`) and **macOS** (`lv_utils` tick loop). See [LVGL guide](../guis/lvgl.md).
 
 **PyWidgets (pdwidgets)** — [`widgets_stub.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_stub.py): build UI, then:
 
@@ -140,7 +140,7 @@ pd.run_forever()
 
 ### Notes
 
-- `displaysys_simpletest.py` and `eventsys_encoder_test.py` are tagged `all` but use event loops: call `display_drv.show()` after draws (no `run_queued()`). Same pattern as [`scroll_touch_test_displaybuf.py`](scroll_touch_test_displaybuf.py).
+- `displaysys_simpletest.py` and `eventsys_encoder_test.py` are tagged `all` but use event loops: call `display_drv.show()` after draws (no `run_queued()`). Same pattern as [`scroll_touch_test_displaybuf.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll_touch_test_displaybuf.py).
 - `font_simpletest.py` is tagged `all`; blits a small framebuffer with `display_drv.blit_rect()` and calls `display_drv.show()` after each draw.
 - `nano_gui_simpletest.py` is tagged `all`; requires upstream [`gui/`](../guis/nano-gui.md) in `add_ons/`.
 **Legend:** Platforms = CPython · MCU · PyScript · Wokwi · Packages = core · add_ons · LVGL
@@ -212,9 +212,9 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `bmp565_sprite_transparent.py` | Transparency | CPython · MCU | add_ons |
 | `bmp565_scroll.py` | Scrolling bitmap | CPython · MCU | add_ons |
 | `bmp565_scroll_sprite.py` | Scrolling sprite | CPython · MCU | add_ons |
-| `palettes_material.py` | Material palette | CPython · MCU | core |
-| `palettes_wheel.py` | Color wheel | CPython · MCU | core |
-| `palettes_cube.py` | RGB cube | CPython · MCU | core |
+| `palettes_material.py` | Material palette | CPython · MCU | add_ons |
+| `palettes_wheel.py` | Color wheel | CPython · MCU | add_ons |
+| `palettes_cube.py` | RGB cube | CPython · MCU | add_ons |
 | `pbm_simpletest.py` | PBM images | CPython · MCU | add_ons |
 | `png_test.py` | PNG (experimental) | CPython | add_ons |
 
@@ -256,7 +256,6 @@ Runnable demos in subfolders use the same multimer markers as top-level examples
 | `noto_fonts/` | `noto_fonts.py` | `all` | MP · MCU | One-shot Noto font demo; same tail as `chango` |
 | `proverbs/` | `proverbs.py` | `queued, sync` | CPython · MP · MCU | Chinese proverb slideshow; UTF-8 fonts on MCU |
 | `tiny_toasters/` | `tiny_toasters.py` | `queued, sync` | CPython · MP · MCU | Sprite animation; `getrandbits` `randint` on MP Windows |
-| `spotify_remote/` | `main.py`, `keyboard_test.py` | `queued, sync` | CPython · MP · network | LVGL + OAuth; symlink to spotapi; `display_driver.run()` (REPL on unix; block on Windows) |
 | `apollo_dsky/` | — | — | — | Support module for top-level `apollo.py` |
 | `assets/` | — | — | — | Shared fonts and images |
 

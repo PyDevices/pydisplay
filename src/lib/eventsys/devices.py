@@ -33,7 +33,13 @@ Devices can be created with the following types:
 
 from sys import exit
 
-from micropython import const
+try:
+    from micropython import const
+except ImportError:
+
+    def const(x):
+        return x
+
 
 from . import events
 
@@ -681,12 +687,12 @@ class KeypadDevice(Device):
         if released:
             key = released.pop()
             self._state.remove(key)
-            return events.Key(events.KEYUP, chr(key), key, 0, 0)
+            return events.Key(events.KEYUP, chr(key), key, 0, 0, None)
         pressed = keys - self._state
         if pressed:
             key = pressed.pop()
             self._state.add(key)
-            return events.Key(events.KEYDOWN, chr(key), key, 0, 0)
+            return events.Key(events.KEYDOWN, chr(key), key, 0, 0, None)
         return None
 
 

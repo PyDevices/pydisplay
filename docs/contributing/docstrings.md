@@ -61,4 +61,4 @@ Griffe warnings mean a docstring parameter does not appear in the signature — 
 | P1 | `graphics.Draw`, `displaybuf`, `eventsys` helpers |
 | P2 | `pdwidgets` lifecycle (`Display.tick`, `refresh`, event registration) |
 
-See [Contributing](contributing.md) for the PR workflow.
+See [Contributing](../contributing.md) for the PR workflow.

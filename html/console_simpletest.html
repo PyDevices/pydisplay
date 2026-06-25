@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Console Simpletest — pydisplay demo</title>
+    <meta name="description" content="Console Simpletest: a pydisplay example running in the browser via PyScript.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="./demo.css">
+    <link rel="stylesheet" href="./pyscript/core.css">
+    <script src="./mini-coi-fd.js"></script>
+    <script type="module" src="./pyscript/core.js"></script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="brand" href="../index.html">
+                <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+                py<span class="accent">display</span>
+            </a>
+            <nav class="nav">
+                <a href="../index.html">Demos</a>
+                <a href="https://pydisplay.readthedocs.io">Docs</a>
+                <a href="https://github.com/PyDevices/pydisplay">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrap example-main">
+        <nav class="crumbs">
+            <a href="../index.html">Demos</a>
+            <span class="sep">/</span>
+            <span>Console Simpletest</span>
+        </nav>
+
+        <div class="example-head">
+            <h1>Console Simpletest</h1>
+            <span class="tag all">all</span>
+        </div>
+        <p class="example-lede">Call `console.hide()` to use the display for something else.</p>
+
+        <div class="stage-layout">
+            <section class="stage">
+                <div class="loading" id="loading">
+                    <span class="spinner"></span> <span id="status">Loading PyScript runtime…</span>
+                </div>
+                <div class="device">
+                    <canvas id="display_canvas" width="1" height="1"></canvas>
+                </div>
+                <div class="run-bar">
+                    <button id="run-btn" class="btn primary" disabled>Run</button>
+                </div>
+            </section>
+
+            <aside class="aside">
+                <div class="panel">
+                    <h2>How to use</h2>
+                    <ul>
+                        <li>Click <strong>Run</strong> to install and start the example.</li>
+                        <li>Output (if any) appears in the console panel below.</li>
+                    </ul>
+                </div>
+                <div class="panel">
+                    <h2>Details</h2>
+                    <div class="meta-row"><span class="k">Source</span><span class="v">console_simpletest.py</span></div>
+                    <div class="meta-row"><span class="k">Type</span><span class="v">all</span></div>
+                    <div class="meta-row"><span class="k">Install</span><span class="v">single file</span></div>
+                </div>
+                <div class="actions">
+                    <a class="btn" href="https://github.com/PyDevices/pydisplay/blob/main/src/examples/console_simpletest.py" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> View source</a>
+                    <a class="btn" href="../index.html">Back to demos</a>
+                </div>
+            </aside>
+        </div>
+
+        <details class="console" open>
+            <summary>Console output</summary>
+            <div id="log" class="log"></div>
+        </details>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <span>pydisplay — cross-platform display &amp; event drivers</span>
+            <span><a href="https://github.com/PyDevices/pydisplay">PyDevices/pydisplay</a></span>
+        </div>
+    </footer>
+
+    <!-- Loader is gated behind the Run button so blocking examples never hang on load. -->
+    <script type="mpy" config="./pyscript.toml" output="log">
+        from js import document
+        from pyscript.ffi import create_proxy
+
+        _status = document.getElementById("status")
+        _btn = document.getElementById("run-btn")
+        _started = False
+
+        def _set(msg):
+            if _status:
+                _status.textContent = msg
+
+        def _start(*_):
+            global _started
+            if _started:
+                return
+            _started = True
+            _btn.disabled = True
+            _btn.textContent = "Running…"
+            _set("Installing modules…")
+            import mip
+            mip.install("github:PyDevices/pydisplay/src/examples/console_simpletest.py")
+            _set("Importing console_simpletest…")
+            import lib.path
+            import console_simpletest
+            _set("Running.")
+
+        _btn.addEventListener("click", create_proxy(_start))
+        _btn.disabled = False
+        _set("Runtime ready — click Run.")
+        print("PyScript runtime ready. Click Run to start console_simpletest.")
+    </script>
+
+    <script>
+        // Stop the spinner once the runtime is ready (Run button enabled).
+        const _btn = document.getElementById('run-btn');
+        const _spin = document.querySelector('#loading .spinner');
+        const _t = setInterval(() => {
+            if (_btn && !_btn.disabled) { if (_spin) _spin.style.display = 'none'; clearInterval(_t); }
+        }, 150);
+    </script>
+</body>
+</html>
