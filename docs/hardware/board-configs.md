@@ -6,7 +6,7 @@ Every pydisplay app needs a `board_config.py` that wires up the display, touch/i
 
 Typically:
 
-- A `display` object (BusDisplay, SDL2Display, FBDisplay, etc.)
+- A `display_drv` object (BusDisplay, SDLDisplay, PGDisplay, FBDisplay, etc.)
 - Touch/read functions or `eventsys` brokers for input
 - Optional setup (WiFi, sensors, backlight pins)
 
@@ -74,8 +74,8 @@ An exact match for all four is rare; bus + display controller is usually enough 
 
 | Directory | Platform |
 |-----------|----------|
-| `sdldisplay` | CPython / MicroPython Unix — SDL2 |
-| `pgdisplay` | CPython — PyGame |
+| `sdldisplay` | CPython / MicroPython Unix — SDL2 (`SDLDisplay`) |
+| `pgdisplay` | CPython — PyGame (`PGDisplay`) |
 | `jndisplay` | Jupyter Notebook |
 | `psdisplay` | PyScript browser |
 

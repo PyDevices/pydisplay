@@ -1,6 +1,6 @@
 # pydisplay on Wokwi (ESP32-S3 + ILI9341 touch)
 
-Browser project for [wokwi.com](https://wokwi.com): bundle + Wokwi board config + [`pydisplay_demo`](../src/examples/pydisplay_demo.py).
+Browser project for [wokwi.com](https://wokwi.com): bundle + Wokwi board config + [`testris`](../src/examples/testris.py) (a touch + joystick Tetris demo).
 
 **Guide:** [Wokwi simulator](../docs/guides/wokwi.md) · **Hardware:** [Wokwi reference](../docs/hardware/wokwi.md)
 
@@ -10,7 +10,7 @@ Board config: [`wokwi_ili9341_ft6x36_esp32s3`](../board_configs/busdisplay/spi/w
 
 | File | Purpose |
 |------|---------|
-| `main.py` | WiFi + `mip.install` (with `target="."`) + `pydisplay_demo` |
+| `main.py` | WiFi + `mip.install` (with `target="."`) + `testris` |
 | `diagram.json` | ESP32-S3 + `board-ili9341-cap-touch` wiring |
 | `pydisplay-bundle.json` | Slim MCU lib manifest (generated from `packages/pydisplay-bundle.json`) |
 
@@ -22,7 +22,7 @@ Board config: [`wokwi_ili9341_ft6x36_esp32s3`](../board_configs/busdisplay/spi/w
 
 ## Quick try (default)
 
-Use `main.py` as committed. On first boot, `mip` downloads packages from GitHub (network required). You should see the **pydisplay_demo** UI: Rotate / Color bar and scrolling tips.
+Use `main.py` as committed. On first boot, `mip` downloads packages from GitHub (network required). You should see the **testris** game running — drive it with the on-screen touch keypad.
 
 ## Full install
 

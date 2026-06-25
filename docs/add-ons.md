@@ -11,11 +11,13 @@ mip.install("github:PyDevices/pydisplay/packages/add_ons.json", target="./add_on
 
 ## Path setup
 
+In a development clone, put `lib/`, `add_ons/`, and `examples/` on `sys.path`:
+
 ```python
-import add_ons.add_path
+import lib.path
 ```
 
-Or copy modules into `lib/` on your device.
+Or copy the add-on modules into `lib/` on your device.
 
 ## Notable modules
 
@@ -26,6 +28,7 @@ Or copy modules into `lib/` on your device.
 | `bmp565.py` | RGB565 BMP read/write/stream |
 | `console.py` | Terminal-style console widget |
 | `pdwidgets/` | Cross-platform widget toolkit — [PyWidgets](guis/pywidgets.md) |
+| `palettes/` | Color palettes (`cube`, `material_design`, `wheel`, `get_palette()`) |
 | `tft_text.py`, `tft_write.py` | russhughes font rendering |
 | `png.py` | PNG support (experimental) |
 | `touch_keypad.py` | On-screen keypad |
@@ -34,7 +37,7 @@ Third-party trees copied locally (not in `add_ons.json`):
 
 | Path | Purpose |
 |------|---------|
-| `gui/` | [Nano-GUI](../guis/nano-gui.md) — copy `gui/` from [micropython-nano-gui](https://github.com/peterhinch/micropython-nano-gui); gitignored |
+| `gui/` | [Nano-GUI](guis/nano-gui.md) — copy `gui/` from [micropython-nano-gui](https://github.com/peterhinch/micropython-nano-gui); gitignored |
 
 Many examples in `src/examples/` depend on add_ons. They are excluded from the micropython-lib bundle — install from GitHub only.
 

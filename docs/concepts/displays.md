@@ -9,7 +9,7 @@ See [Architecture](architecture.md) for how drivers connect to `board_config.py`
 | Your target | Driver class | Board config example |
 |-------------|--------------|----------------------|
 | MicroPython MCU (SPI/I80) | `BusDisplay` | `board_configs/busdisplay/spi/...` |
-| CPython / MicroPython Unix desktop | `SDL2Display` | `board_configs/sdldisplay/` |
+| CPython / MicroPython Unix desktop | `SDLDisplay` | `board_configs/sdldisplay/` |
 | Windows / Chromebook (PyGame easier) | `PGDisplay` | `board_configs/pgdisplay/` |
 | CircuitPython RGB / USB video | `FBDisplay` | varies |
 | Jupyter notebook | `JNDisplay` | `board_configs/jndisplay/` |
@@ -26,13 +26,13 @@ For microcontrollers on **MicroPython and CircuitPython**.
 - MicroPython: uses `spibus` / `i80bus` or community C bus drivers ([lvgl_micropython](https://github.com/kdschlosser/lvgl_micropython)).
 - CircuitPython: uses Adafruit FourWire / ParallelBus — see [CircuitPython guide](../platforms/circuitpython.md).
 
-### SDL2Display
+### SDLDisplay
 
-Preferred desktop backend (CPython / MicroPython Unix). Uses an SDL texture as GRAM. Config: `board_configs/sdldisplay/`.
+SDL2 desktop backend (CPython, MicroPython Unix, CircuitPython Unix). Uses an SDL texture as GRAM. It is the default on MicroPython Unix and available on CPython via `board_configs/sdldisplay/`.
 
 ### PGDisplay
 
-Optional desktop backend using PyGame surfaces. Easier on Windows; avoids some SDL glitches on Chromebooks. Config: `board_configs/pgdisplay/`.
+PyGame desktop backend. The default `board_config.py` selects it first on CPython (it is easier to install on Windows and avoids some SDL glitches on Chromebooks); if PyGame is not installed it falls back to `SDLDisplay`. Config: `board_configs/pgdisplay/`.
 
 ### FBDisplay
 
@@ -67,7 +67,7 @@ pydisplay does not include a task scheduler. Options:
 
 - **`asyncio`** — works on CPython, MicroPython, and PyScript (required there)
 - **[multimer](multimer.md)** — cross-platform timers; default `Timer` for sync/threaded loops
-- **[multimer.aio](multimer.md#multimeraio--asyncio-timers)** — opt-in asyncio timers for async/PyScript apps
+- **[multimer.aio](multimer.md#multimeraio-asyncio-timers)** — opt-in asyncio timers for async/PyScript apps
 
 ## Vertical scrolling
 
