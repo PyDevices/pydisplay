@@ -1,4 +1,5 @@
 # multimer types: async
+# pyscript files: paint.py
 """
 A simple paint application demonstrating the use of displaysys.
 """
@@ -90,7 +91,7 @@ async def main():
                 elif e.type == broker.events.QUIT:
                     return
         display_drv.show()
-        await asyncio.sleep(0)
+        await asyncio.sleep(0.02)
 
 
 run(main)

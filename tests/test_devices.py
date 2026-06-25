@@ -101,6 +101,15 @@ class TestQueueDevice(unittest.TestCase):
         dev = QueueDevice(read=scripted(None))
         self.assertIsNone(dev.poll())
 
+    def test_touch_scale_on_display_data(self):
+        class ScaledDisplay:
+            touch_scale = 2
+
+        ev = events.Button(events.MOUSEBUTTONDOWN, (100, 200), 1, False, None)
+        dev = QueueDevice(read=scripted([ev]), data=ScaledDisplay())
+        out = dev.poll()
+        self.assertEqual(out[0].pos, (50, 100))
+
 
 class TestTouchDevice(unittest.TestCase):
     def test_press_move_release_sequence(self):

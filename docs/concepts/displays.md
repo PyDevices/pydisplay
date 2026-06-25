@@ -98,7 +98,7 @@ from eventsys import devices
 
 display_drv = PSDisplay("display_canvas", width, height)
 broker = devices.Broker()
-devices_drv = PSDevices("display_canvas")
+devices_drv = PSDevices("display_canvas", display_drv)
 broker.create_device(type=devices.types.QUEUE, read=devices_drv.read, data=display_drv)
 ```
 

@@ -49,6 +49,11 @@ except ImportError:
     except ImportError:
         raise ImportError("multimer.aio requires asyncio or uasyncio") from None
 
+try:
+    import pyscript
+except ImportError:
+    pyscript = None
+
 if not hasattr(asyncio, "create_task"):
     raise ImportError("multimer.aio requires asyncio with create_task")
 
@@ -77,6 +82,35 @@ async def run_queued():
 _background_tasks = set()
 
 
+def _is_cancelled(exc):
+    cancelled = getattr(asyncio, "CancelledError", None)
+    return cancelled is not None and isinstance(exc, cancelled)
+
+
+async def _logged_main(main):
+    try:
+        return await main()
+    except Exception as e:
+        if _is_cancelled(e):
+            raise
+        print("Task failed:", e)
+        # PyScript has no task exception handler; re-raising only spams the console.
+        if pyscript is None:
+            raise
+
+
+def _task_done(task):
+    _background_tasks.discard(task)
+
+
+def _schedule_background_task(loop, main):
+    task = loop.create_task(_logged_main(main))
+    _background_tasks.add(task)
+    if hasattr(task, "add_done_callback"):
+        task.add_done_callback(_task_done)
+    return task
+
+
 def run(main):
     """Run an async main coroutine function under asyncio/uasyncio.
 
@@ -91,18 +125,16 @@ def run(main):
             loop = asyncio.get_running_loop()
         except RuntimeError:
             loop = None
-    # CircuitPython/MicroPython's get_running_loop() returns the singleton loop
-    # even when it isn't actually running, so confirm it's running before
-    # scheduling on it. CPython loops expose is_running(); when that's missing,
-    # assume not running and fall through to asyncio.run().
-    if loop is not None and getattr(loop, "is_running", lambda: False)():
-        task = loop.create_task(main())
-        _background_tasks.add(task)
-        # Task.add_done_callback() is CPython-only; CircuitPython Tasks lack it.
-        # The strong reference in _background_tasks is enough to prevent GC.
-        if hasattr(task, "add_done_callback"):
-            task.add_done_callback(_background_tasks.discard)
-        return task
+    # CPython / Jupyter: schedule only when the loop is actually running.
+    is_running = getattr(loop, "is_running", None) if loop is not None else None
+    if loop is not None and callable(is_running) and is_running():
+        return _schedule_background_task(loop, main)
+    # PyScript: mp-script click handlers are synchronous even though the host
+    # drives asyncio — get_running_loop() is often unset here, but the global
+    # event loop is already active, so schedule and return.
+    if pyscript is not None:
+        loop = asyncio.get_event_loop()
+        return _schedule_background_task(loop, main)
     if hasattr(asyncio, "run"):
         return asyncio.run(main())
     return asyncio.get_event_loop().run_until_complete(main())

@@ -12,7 +12,7 @@ display_drv = PSDisplay("display_canvas", width, height)
 
 broker = devices.Broker()
 
-devices_drv = PSDevices("display_canvas")
+devices_drv = PSDevices("display_canvas", display_drv)
 
 events_dev = broker.create_device(
     type=devices.types.QUEUE,

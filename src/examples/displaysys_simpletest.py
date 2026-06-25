@@ -1,4 +1,5 @@
 # multimer types: all
+# pyscript files: displaysys_simpletest.py
 from board_config import display_drv, broker
 from random import getrandbits
 from graphics import Area

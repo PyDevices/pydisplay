@@ -1,4 +1,5 @@
 # multimer types: all
+# pyscript files: displaybuf_simpletest.py
 """
 displaybuf_simpletest.py - Simple test program for displaybuf.py
 """

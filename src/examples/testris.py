@@ -1,4 +1,5 @@
 # multimer types: queued, sync
+# pyscript files: testris.py
 """
 Testris game implemented in MicroPython by Brad Barnett.
 """

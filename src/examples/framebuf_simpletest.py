@@ -1,4 +1,5 @@
 # multimer types: all
+# pyscript files: framebuf_simpletest.py
 """
 Simple test example to demonstrate the use of framebuf.FrameBuffer.
 """

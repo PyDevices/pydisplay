@@ -1,4 +1,5 @@
 # multimer types: queued, sync
+# pyscript files: displaysys_fill_rect_test.py
 """displaysys_fill_rect_test.py"""
 
 from random import getrandbits

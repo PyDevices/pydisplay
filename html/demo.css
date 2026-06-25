@@ -465,9 +465,71 @@ kbd {
   align-items: start;
 }
 
+/* Display left, console right */
+.play-area {
+  display: grid;
+  grid-template-columns: auto minmax(280px, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 26px;
+  row-gap: 12px;
+  align-items: start;
+  margin-bottom: 26px;
+}
+
+.play-area > .loading {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.play-area > .display-column {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.play-area > .console-panel {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.display-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.meta-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
 @media (max-width: 880px) {
   .stage-layout {
     grid-template-columns: 1fr;
+  }
+
+  .play-area {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+
+  .play-area > .loading,
+  .play-area > .display-column,
+  .play-area > .console-panel {
+    grid-column: 1;
+  }
+
+  .play-area > .loading {
+    grid-row: 1;
+  }
+
+  .play-area > .display-column {
+    grid-row: 2;
+  }
+
+  .play-area > .console-panel {
+    grid-row: 3;
   }
 }
 
@@ -482,7 +544,6 @@ kbd {
   background:
     radial-gradient(420px 320px at 50% 0%, rgba(108, 123, 255, 0.1), transparent 70%),
     var(--bg-soft);
-  min-height: 360px;
 }
 
 .run-bar {
@@ -511,8 +572,6 @@ kbd {
   border-radius: 10px;
   background-color: #000;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-  max-width: 100%;
-  height: auto;
 }
 
 /* Side panel */
@@ -614,6 +673,27 @@ kbd {
 }
 
 /* Console / stdout panel */
+.console-panel {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 16px 18px;
+  overflow: hidden;
+}
+
+.console-label {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+/* Legacy collapsible console (unused by generated pages) */
 .console {
   margin-top: 26px;
 }
@@ -634,9 +714,12 @@ kbd {
 
 #log,
 .log {
-  margin-top: 10px;
-  max-height: 220px;
-  overflow: auto;
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: 12px 14px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
@@ -647,6 +730,13 @@ kbd {
   color: var(--ink-soft);
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+/* Stacked mobile layout: give the log a sensible minimum height */
+@media (max-width: 880px) {
+  .play-area .console-panel #log {
+    min-height: 12rem;
+  }
 }
 
 /* PyScript loading splash */

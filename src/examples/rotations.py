@@ -1,4 +1,5 @@
 # multimer types: all
+# pyscript files: rotations.py
 """
 rotations.py
 ============

@@ -132,7 +132,8 @@ class DisplayDriver:
     """
 
     def __init__(self, auto_refresh=False):
-        print(f"Initializing {self.__class__.__name__}...")
+        if not getattr(self, "_quiet", False):
+            print(f"Initializing {self.__class__.__name__}...")
         gc.collect()
 
         self.byteswap = byteswap
@@ -154,8 +155,9 @@ class DisplayDriver:
         self._deinitialized = False
         self.init()
         gc.collect()
-        print(f"{self.__class__.__name__}: initialized.")
-        print(f"{self.__class__.__name__}: requires_byteswap = {self.requires_byteswap}")
+        if not getattr(self, "_quiet", False):
+            print(f"{self.__class__.__name__}: initialized.")
+            print(f"{self.__class__.__name__}: requires_byteswap = {self.requires_byteswap}")
 
     def __del__(self):
         self.deinit()
@@ -198,9 +200,11 @@ class DisplayDriver:
         if value == self._rotation:
             return
 
-        print(f"{self.__class__.__name__}.rotation():  Setting rotation to {value}")
+        if not getattr(self, "_quiet", False):
+            print(f"{self.__class__.__name__}.rotation():  Setting rotation to {value}")
         self._rotation_helper(value)
-        print("done setting rotation")
+        if not getattr(self, "_quiet", False):
+            print("done setting rotation")
 
         self._rotation = value
 

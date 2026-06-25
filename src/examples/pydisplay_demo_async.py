@@ -1,4 +1,5 @@
 # multimer types: async
+# pyscript files: pydisplay_demo_async.py
 """
 pydisplay_demo_async.py — asyncio version of pydisplay_demo.
 
@@ -164,7 +165,7 @@ async def main():
                     state["color_i"] = (state["color_i"] + 1) % len(ACCENTS)
                     redraw()
                     resume_scroll()
-        await run_queued()
+        await asyncio.sleep(0.02)
 
 
 run(main)

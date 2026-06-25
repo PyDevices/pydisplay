@@ -1,4 +1,5 @@
 # multimer types: all
+# pyscript files: pbm_create_new.py
 from board_config import display_drv
 from framebuf import FrameBuffer, RGB565
 from pbm import PBM

@@ -474,12 +474,25 @@ class QueueDevice(Device):
                         )
                         and (scale := self.scale) != 1
                     ):
-                        event.pos = (
-                            int(event.pos[0] // scale),
-                            int(event.pos[1] // scale),
-                        )
+                        pos = (int(event.pos[0] // scale), int(event.pos[1] // scale))
                         if event.type == events.MOUSEMOTION:
-                            event.rel = (event.rel[0] // scale, event.rel[1] // scale)
+                            rel = (event.rel[0] // scale, event.rel[1] // scale)
+                            event = events.Motion(
+                                event.type,
+                                pos,
+                                rel,
+                                event.buttons,
+                                event.touch,
+                                event.window,
+                            )
+                        else:
+                            event = events.Button(
+                                event.type,
+                                pos,
+                                event.button,
+                                event.touch,
+                                event.window,
+                            )
 
                     eventlist.append(event)
 

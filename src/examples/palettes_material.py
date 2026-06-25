@@ -1,4 +1,5 @@
 # multimer types: queued, sync
+# pyscript files: palettes_material.py
 from board_config import display_drv
 from multimer import run_queued, sleep_ms
 from palettes import get_palette

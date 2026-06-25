@@ -1,4 +1,5 @@
 # multimer types: queued, sync
+# pyscript files: proverbs/__init__.py, proverbs/proverbs.py, proverbs/proverbs_20.py, proverbs/proverbs_30.py
 """
 proverbs.py
 ===========

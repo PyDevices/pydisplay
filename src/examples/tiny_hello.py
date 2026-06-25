@@ -1,4 +1,5 @@
 # multimer types: all
+# pyscript files: tiny_hello.py
 """
 tiny_hello.py
 =============

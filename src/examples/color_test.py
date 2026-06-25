@@ -1,4 +1,5 @@
 # multimer types: all
+# pyscript files: color_test.py
 """
 color_test.py
 =============

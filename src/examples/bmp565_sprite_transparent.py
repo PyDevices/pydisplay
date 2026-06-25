@@ -1,4 +1,5 @@
 # multimer types: queued, sync
+# pyscript files: bmp565_sprite_transparent.py, assets/warrior.bmp
 from collections import namedtuple
 from random import choice
 

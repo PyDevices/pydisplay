@@ -1,4 +1,5 @@
 # multimer types: queued, sync
+# pyscript files: tiny_toasters/__init__.py, tiny_toasters/tiny_toasters.py, tiny_toasters/tiny_toasters_bitmaps.py
 """
 tiny_toasters.py
 ================

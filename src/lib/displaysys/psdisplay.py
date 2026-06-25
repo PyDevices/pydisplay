@@ -18,6 +18,8 @@ try:  # Gamepad polling is optional and only available in a browser.
 except ImportError:
     navigator = None
 
+_POINTER_SCALE_EPS = 0.001
+
 
 def log(*args):
     console.log(*args)
@@ -61,10 +63,13 @@ class PSDevices:
 
     Args:
         id (str): The id of the element to watch (usually the canvas).
+        display (PSDisplay, optional): Display driver for ``map_pointer``; pass the
+            same ``PSDisplay`` instance used as ``QueueDevice`` data.
     """
 
-    def __init__(self, id):
+    def __init__(self, id, display=None):
         self.canvas = document.getElementById(id)
+        self._display = display
         try:
             self.canvas.tabIndex = 0  # make the element focusable for key events
             self.canvas.style.touchAction = "none"  # don't scroll/zoom on touch
@@ -117,6 +122,38 @@ class PSDevices:
         except Exception:
             return False
 
+    def _map_pos(self, x, y):
+        try:
+            xi, yi = int(x), int(y)
+        except Exception:
+            xi, yi = int(float(x)), int(float(y))
+        display = self._display
+        if display is None:
+            return (xi, yi)
+        try:
+            sx, sy = display._pointer_scale()
+            if abs(sx - 1.0) < _POINTER_SCALE_EPS and abs(sy - 1.0) < _POINTER_SCALE_EPS:
+                return (xi, yi)
+            return display.map_pointer(x, y)
+        except Exception:
+            return (xi, yi)
+
+    def _map_rel(self, dx, dy):
+        try:
+            xdi, ydi = int(dx), int(dy)
+        except Exception:
+            xdi, ydi = int(float(dx)), int(float(dy))
+        display = self._display
+        if display is None:
+            return (xdi, ydi)
+        try:
+            sx, sy = display._pointer_scale()
+            if abs(sx - 1.0) < _POINTER_SCALE_EPS and abs(sy - 1.0) < _POINTER_SCALE_EPS:
+                return (xdi, ydi)
+            return display.map_pointer_rel(dx, dy)
+        except Exception:
+            return (xdi, ydi)
+
     def _on_pointer_down(self, e):
         try:
             self.canvas.setPointerCapture(e.pointerId)
@@ -125,7 +162,7 @@ class PSDevices:
         self._queue.append(
             events.Button(
                 events.MOUSEBUTTONDOWN,
-                (e.offsetX, e.offsetY),
+                self._map_pos(e.offsetX, e.offsetY),
                 e.button + 1,  # DOM 0/1/2 -> SDL 1/2/3
                 self._is_touch(e),
                 None,
@@ -136,7 +173,7 @@ class PSDevices:
         self._queue.append(
             events.Button(
                 events.MOUSEBUTTONUP,
-                (e.offsetX, e.offsetY),
+                self._map_pos(e.offsetX, e.offsetY),
                 e.button + 1,
                 self._is_touch(e),
                 None,
@@ -147,8 +184,8 @@ class PSDevices:
         self._queue.append(
             events.Motion(
                 events.MOUSEMOTION,
-                (e.offsetX, e.offsetY),
-                (e.movementX, e.movementY),
+                self._map_pos(e.offsetX, e.offsetY),
+                self._map_rel(e.movementX, e.movementY),
                 _buttons_tuple(e.buttons),
                 self._is_touch(e),
                 None,
@@ -251,11 +288,14 @@ class PSDisplay(DisplayDriver):
 
     def __init__(self, id, width=None, height=None):
         self._canvas = document.getElementById(id)
-        self._ctx = self._canvas.getContext("2d")
+        self._vis_ctx = self._canvas.getContext("2d")
+        self._buffer = None
+        self._buf_ctx = None
         self._width = width or self._canvas.width
         self._height = height or self._canvas.height
         self._requires_byteswap = False
         self._rotation = 0
+        self._quiet = True
         self.color_depth = 16
 
         super().__init__()
@@ -268,6 +308,21 @@ class PSDisplay(DisplayDriver):
         """
         self._canvas.width = self.width
         self._canvas.height = self.height
+        if self._buffer is None:
+            self._buffer = document.createElement("canvas")
+            self._buf_ctx = self._buffer.getContext("2d")
+        self._buffer.width = self.width
+        self._buffer.height = self.height
+        if getattr(self, "_rgba_lut", None) is None:
+            lut = bytearray(65536 * 4)
+            for v in range(65536):
+                lo, hi = v & 0xFF, v >> 8
+                k = v << 2
+                lut[k] = (hi & 0xF8) | ((hi >> 5) & 0x07)
+                lut[k + 1] = ((hi << 5) & 0xE0) | ((lo >> 3) & 0x1F)
+                lut[k + 2] = ((lo << 3) & 0xF8) | ((lo >> 2) & 0x07)
+                lut[k + 3] = 255
+            self._rgba_lut = lut
 
     def fill_rect(self, x, y, w, h, c):
         """
@@ -284,8 +339,9 @@ class PSDisplay(DisplayDriver):
             (tuple): A tuple containing the x, y, w, h values
         """
         r, g, b = color_rgb(c)
-        self._ctx.fillStyle = f"rgb({r},{g},{b})"
-        self._ctx.fillRect(x, y, w, h)
+        self._buf_ctx.fillStyle = f"rgb({r},{g},{b})"
+        self._buf_ctx.fillRect(x, y, w, h)
+        self.render((x, y, w, h))
         return (x, y, w, h)
 
     def blit_rect(self, buf, x, y, w, h):
@@ -307,15 +363,22 @@ class PSDisplay(DisplayDriver):
             raise ValueError("The provided x, y, w, h values are out of range")
         if len(buf) != w * h * BPP:
             raise ValueError("The source buffer is not the correct size")
-        img_data = self._ctx.createImageData(w, h)
+        lut = self._rgba_lut
+        if lut is None:
+            self.init()
+            lut = self._rgba_lut
+        img_data = self._buf_ctx.createImageData(w, h)
+        data = img_data.data
+        j = 0
         for i in range(0, len(buf), BPP):
-            r, g, b = color_rgb(buf[i : i + BPP])
-            j = i * 2
-            img_data.data[j] = r
-            img_data.data[j + 1] = g
-            img_data.data[j + 2] = b
-            img_data.data[j + 3] = 255
-        self._ctx.putImageData(img_data, x, y)
+            k = (buf[i] | (buf[i + 1] << 8)) << 2
+            data[j] = lut[k]
+            data[j + 1] = lut[k + 1]
+            data[j + 2] = lut[k + 2]
+            data[j + 3] = lut[k + 3]
+            j += 4
+        self._buf_ctx.putImageData(img_data, x, y)
+        self.render((x, y, w, h))
         return (x, y, w, h)
 
     def pixel(self, x, y, c):
@@ -331,3 +394,70 @@ class PSDisplay(DisplayDriver):
             (tuple): A tuple containing the x, y, w & h values.
         """
         return self.fill_rect(x, y, 1, 1, c)
+
+    ############### Scrolling (ILI9341-style, like SDLDisplay / PGDisplay) ################
+
+    def vscrdef(self, tfa: int, vsa: int, bfa: int) -> None:
+        super().vscrdef(tfa, vsa, bfa)
+        self.render()
+
+    def vscsad(self, vssa=None) -> int:
+        if vssa is not None:
+            super().vscsad(vssa)
+            self.render()
+        return self._vssa
+
+    def render(self, render_rect=None) -> None:
+        """Copy the offscreen buffer to the visible canvas, applying vertical scroll."""
+        buf = self._buffer
+        vis = self._vis_ctx
+        w, h = self.width, self.height
+        y_start = self.vscsad()
+        if not y_start:
+            if render_rect is not None:
+                x, y, rw, rh = render_rect
+                vis.drawImage(buf, x, y, rw, rh, x, y, rw, rh)
+            else:
+                vis.drawImage(buf, 0, 0, w, h, 0, 0, w, h)
+            return
+
+        tfa = self._tfa
+        vsa = self._vsa
+        bfa = self._bfa
+        if tfa > 0:
+            vis.drawImage(buf, 0, 0, w, tfa, 0, 0, w, tfa)
+
+        vsa_top_height = vsa + tfa - y_start
+        vis.drawImage(buf, 0, y_start, w, vsa_top_height, 0, tfa, w, vsa_top_height)
+
+        vsa_btm_height = vsa - vsa_top_height
+        vis.drawImage(buf, 0, tfa, w, vsa_btm_height, 0, tfa + vsa_top_height, w, vsa_btm_height)
+
+        if bfa > 0:
+            vis.drawImage(buf, 0, tfa + vsa, w, bfa, 0, tfa + vsa, w, bfa)
+
+    def show(self, _timer=None) -> None:
+        self.render()
+
+    def _pointer_scale(self):
+        """Framebuffer pixels per CSS layout pixel (1.0 when layout is 1:1)."""
+        rect = self._canvas.getBoundingClientRect()
+        rw, rh = float(rect.width), float(rect.height)
+        if rw <= 0 or rh <= 0:
+            return 1.0, 1.0
+        return float(self._canvas.width) / rw, float(self._canvas.height) / rh
+
+    def map_pointer(self, local_x, local_y):
+        """
+        Map element-local pointer coordinates to framebuffer ``(x, y)``.
+
+        ``PSDevices`` maps coordinates at capture time when constructed with a
+        ``PSDisplay``; ``QueueDevice`` forwards events unchanged.
+        """
+        sx, sy = self._pointer_scale()
+        return (int(float(local_x) * sx), int(float(local_y) * sy))
+
+    def map_pointer_rel(self, dx, dy):
+        """Map a DOM pointer delta (``movementX``/``movementY``) to framebuffer pixels."""
+        sx, sy = self._pointer_scale()
+        return (int(float(dx) * sx), int(float(dy) * sy))

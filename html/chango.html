@@ -40,32 +40,39 @@
         </div>
         <p class="example-lede">Test for TrueType write_font_converter.</p>
 
-        <div class="stage-layout">
-            <section class="stage">
-                <div class="loading" id="loading">
-                    <span class="spinner"></span> <span id="status">Loading PyScript runtime…</span>
-                </div>
+        <div class="play-area">
+            <div class="loading" id="loading">
+                <span class="spinner"></span> <span id="status">Loading PyScript runtime…</span>
+            </div>
+            <div class="display-column">
                 <div class="device">
-                    <canvas id="display_canvas" width="1" height="1"></canvas>
+                    <canvas id="display_canvas" width="320" height="480"></canvas>
                 </div>
                 <div class="run-bar">
                     <button id="run-btn" class="btn primary" disabled>Run</button>
                 </div>
-            </section>
+            </div>
 
+            <section class="console-panel" aria-label="Console output">
+                <h2 class="console-label">Console output</h2>
+                <div id="log" class="log"></div>
+            </section>
+        </div>
+
+        <div class="meta-layout">
             <aside class="aside">
                 <div class="panel">
                     <h2>How to use</h2>
                     <ul>
                         <li>Click <strong>Run</strong> to install and start the example.</li>
-                        <li>Output (if any) appears in the console panel below.</li>
+                        <li>Output (if any) appears in the console panel to the right.</li>
                     </ul>
                 </div>
                 <div class="panel">
                     <h2>Details</h2>
                     <div class="meta-row"><span class="k">Source</span><span class="v">chango.py</span></div>
                     <div class="meta-row"><span class="k">Type</span><span class="v">all</span></div>
-                    <div class="meta-row"><span class="k">Install</span><span class="v">examples.json</span></div>
+                    <div class="meta-row"><span class="k">Install</span><span class="v">5 files</span></div>
                 </div>
                 <div class="actions">
                     <a class="btn" href="https://github.com/PyDevices/pydisplay/blob/main/src/examples/chango/chango.py" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> View source</a>
@@ -74,10 +81,6 @@
             </aside>
         </div>
 
-        <details class="console" open>
-            <summary>Console output</summary>
-            <div id="log" class="log"></div>
-        </details>
     </main>
 
     <footer class="site-footer">
@@ -89,8 +92,19 @@
 
     <!-- Loader is gated behind the Run button so blocking examples never hang on load. -->
     <script type="mpy" config="./pyscript.toml" output="log">
+        import builtins
         from js import document
         from pyscript.ffi import create_proxy
+
+        def _log_print(*args, **kwargs):
+            el = document.getElementById("log")
+            if el is not None:
+                sep = kwargs.get("sep", " ")
+                end = kwargs.get("end", "\n")
+                el.textContent += sep.join(str(a) for a in args) + end
+                el.scrollTop = el.scrollHeight
+
+        builtins.print = _log_print
 
         _status = document.getElementById("status")
         _btn = document.getElementById("run-btn")
@@ -107,13 +121,40 @@
             _started = True
             _btn.disabled = True
             _btn.textContent = "Running…"
-            _set("Installing modules…")
-            import mip
-            mip.install("github:PyDevices/pydisplay/packages/examples.json", target="examples")
-            _set("Importing chango…")
-            import lib.path
-            import chango
-            _set("Running.")
+            try:
+                _set("Installing modules…")
+                import mip
+                from js import document
+                _host = document.location.hostname
+                _local = _host in ("127.0.0.1", "localhost")
+                if _local:
+                    mip.install(document.location.origin + "/src/examples/chango/__init__.py", target="examples/chango")
+                else:
+                    mip.install("github:PyDevices/pydisplay/src/examples/chango/__init__.py", target="examples/chango")
+                if _local:
+                    mip.install(document.location.origin + "/src/examples/chango/chango.py", target="examples/chango")
+                else:
+                    mip.install("github:PyDevices/pydisplay/src/examples/chango/chango.py", target="examples/chango")
+                if _local:
+                    mip.install(document.location.origin + "/src/examples/chango/chango_16.py", target="examples/chango")
+                else:
+                    mip.install("github:PyDevices/pydisplay/src/examples/chango/chango_16.py", target="examples/chango")
+                if _local:
+                    mip.install(document.location.origin + "/src/examples/chango/chango_32.py", target="examples/chango")
+                else:
+                    mip.install("github:PyDevices/pydisplay/src/examples/chango/chango_32.py", target="examples/chango")
+                if _local:
+                    mip.install(document.location.origin + "/src/examples/chango/chango_64.py", target="examples/chango")
+                else:
+                    mip.install("github:PyDevices/pydisplay/src/examples/chango/chango_64.py", target="examples/chango")
+                _set("Importing chango…")
+                import lib.path
+                import chango
+                _set("Running.")
+            except Exception as e:
+                _log_print("Run failed:", e)
+                _set("Error — see console.")
+                raise
 
         _btn.addEventListener("click", create_proxy(_start))
         _btn.disabled = False
@@ -126,8 +167,36 @@
         const _btn = document.getElementById('run-btn');
         const _spin = document.querySelector('#loading .spinner');
         const _t = setInterval(() => {
-            if (_btn && !_btn.disabled) { if (_spin) _spin.style.display = 'none'; clearInterval(_t); }
+            if (_btn && !_btn.disabled) {
+                if (_spin) _spin.style.display = 'none';
+                clearInterval(_t);
+            }
         }, 150);
+    </script>
+
+    <script>
+        // Match console chrome height to the display bezel; log fills the remainder.
+        (function () {
+            const device = document.querySelector('.play-area .device');
+            const panel = document.querySelector('.play-area .console-panel');
+            const log = document.getElementById('log');
+            if (!device || !panel || !log) return;
+            function syncConsoleHeight() {
+                if (window.innerWidth <= 880) {
+                    panel.style.height = '';
+                    return;
+                }
+                const h = device.getBoundingClientRect().height;
+                if (h > 0) {
+                    panel.style.height = h + 'px';
+                }
+            }
+            syncConsoleHeight();
+            window.addEventListener('resize', syncConsoleHeight);
+            if (typeof ResizeObserver !== 'undefined') {
+                new ResizeObserver(syncConsoleHeight).observe(device);
+            }
+        })();
     </script>
 </body>
 </html>

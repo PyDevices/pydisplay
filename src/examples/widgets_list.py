@@ -1,8 +1,9 @@
+# multimer types: queued, sync
+# pyscript files: widgets_list.py
 """
 Test ListView widget
 """
 
-# multimer types: queued, sync
 import board_config
 import pdwidgets as pd
 

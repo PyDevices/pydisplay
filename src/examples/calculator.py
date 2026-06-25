@@ -1,4 +1,5 @@
 # multimer types: async
+# pyscript files: calculator.py
 """
 Simple calculator example to demonstrate the use of graphics.FrameBuffer
 """
@@ -213,7 +214,7 @@ async def main():
                 await asyncio.sleep(0.15)
                 draw_button(x, y, label, False)
                 display_drv.show()
-        await asyncio.sleep(0)
+        await asyncio.sleep(0.02)
 
 
 run(main)

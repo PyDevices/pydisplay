@@ -1,4 +1,5 @@
 # multimer types: queued, sync
+# pyscript files: timer_simpletest.py
 """
 This is a simple test script that tests the basic functionality of the timer class.
 

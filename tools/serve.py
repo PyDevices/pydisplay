@@ -38,17 +38,22 @@ from __future__ import annotations
 
 import argparse
 import datetime
-import json
-import sys
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+import json
 from pathlib import Path
+import sys
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # Path prefix the page-side debug beacon POSTs to. Anything under it is treated
 # as a log sink so Cursor Debug mode tooling can pick its own sub-paths.
 DEBUG_PREFIX = "/__debug"
+
+
+def _stamp() -> str:
+    now = datetime.datetime.now(datetime.UTC)
+    return now.strftime("%H:%M:%S.") + f"{now.microsecond // 1000:03d}"
 
 
 class DemoRequestHandler(SimpleHTTPRequestHandler):
@@ -75,7 +80,7 @@ class DemoRequestHandler(SimpleHTTPRequestHandler):
     def _send_cors(self, status: int = 204) -> None:
         self.send_response(status)
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, HEAD, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "*")
         self.send_header("Content-Length", "0")
         self.end_headers()
@@ -103,21 +108,32 @@ class DemoRequestHandler(SimpleHTTPRequestHandler):
             return
         super().do_GET()
 
+    def do_HEAD(self) -> None:  # noqa: N802 - http.server hook
+        if self._is_debug():
+            self._send_cors(200)
+            return
+        super().do_HEAD()
+
     def _log_debug(self, raw: bytes) -> None:
-        stamp = datetime.datetime.now().strftime("%H:%M:%S")
+        stamp = _stamp()
         text = raw.decode("utf-8", "replace").strip()
+        payload = None
         try:
             payload = json.loads(text)
             text = json.dumps(payload, ensure_ascii=False, indent=2)
         except (ValueError, TypeError):
             pass
         client = self.address_string()
-        sys.stdout.write(f"\n[debug {stamp} {client}] {self.path}\n{text}\n")
+        if isinstance(payload, dict) and payload.get("level") == "timing":
+            label = (payload.get("args") or ["?"])[0]
+            sys.stdout.write(f"\n[timing {stamp}] {label}\n")
+        else:
+            sys.stdout.write(f"\n[debug {stamp} {client}] {self.path}\n{text}\n")
         sys.stdout.flush()
 
     # Quieter, prefixed access log.
     def log_message(self, fmt: str, *args) -> None:  # noqa: A002 - http.server hook
-        stamp = datetime.datetime.now().strftime("%H:%M:%S")
+        stamp = _stamp()
         sys.stderr.write(f"[{stamp}] {self.address_string()} {fmt % args}\n")
 
 
@@ -136,13 +152,22 @@ PAGE_SNIPPET = """\
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("directory", nargs="?", default=str(REPO_ROOT),
-                        help="directory to serve (default: repo root)")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=str(REPO_ROOT),
+        help="directory to serve (default: repo root)",
+    )
     parser.add_argument("-p", "--port", type=int, default=8000, help="port (default: 8000)")
-    parser.add_argument("-b", "--bind", default="127.0.0.1", help="bind address (default: 127.0.0.1)")
-    parser.add_argument("--no-coi", action="store_true",
-                        help="do not send cross-origin isolation headers")
+    parser.add_argument(
+        "-b", "--bind", default="127.0.0.1", help="bind address (default: 127.0.0.1)"
+    )
+    parser.add_argument(
+        "--no-coi", action="store_true", help="do not send cross-origin isolation headers"
+    )
     args = parser.parse_args(argv)
 
     root = Path(args.directory).resolve()

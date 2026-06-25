@@ -1,4 +1,5 @@
 # multimer types: all
+# pyscript files: chango/__init__.py, chango/chango.py, chango/chango_16.py, chango/chango_32.py, chango/chango_64.py
 """
 chango.py
 =========

@@ -3,7 +3,8 @@
 gen_demo_pages.py — generate the PyScript demo pages for pydisplay examples.
 
 For every example whose header comment is ``# multimer types: async`` or
-``# multimer types: all`` (the browser-runnable set), this writes a styled,
+``# multimer types: all`` (the browser-runnable set), **and** whose
+``# pyscript files:`` list contains only ``.py`` paths, this writes a styled,
 self-contained page under ``html/`` and refreshes the card grids in
 ``index.html`` between the ``GEN:`` markers.
 
@@ -20,36 +21,45 @@ on load. Each generated page therefore loads the runtime first and only
 installs + imports the example when the user clicks **Run**, so nothing hangs
 unexpectedly and the user opts in per example.
 
+Each example declares install paths on line 2::
+
+    # multimer types: async
+    # pyscript files: calculator.py
+
+Use comma-separated paths relative to ``src/examples/``. List non-``.py`` assets
+too (``.bmp``, ``.bin``, …) for device installs; examples with any non-``.py``
+entry are omitted from the browser gallery.
+
 This script is CPython standard library only.
 """
 
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
+import sys
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES_DIR = REPO_ROOT / "src" / "examples"
 HTML_DIR = REPO_ROOT / "html"
 INDEX = REPO_ROOT / "index.html"
+BOARD_CONFIG = REPO_ROOT / "src" / "lib" / "board_config.py"
+
+
+def board_display_size() -> tuple[int, int]:
+    """Read ``width`` / ``height`` from the PyScript ``board_config`` (layout hint only)."""
+    width = height = None
+    for line in BOARD_CONFIG.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if stripped.startswith("width = "):
+            width = int(stripped.split("=", 1)[1].strip())
+        elif stripped.startswith("height = "):
+            height = int(stripped.split("=", 1)[1].strip())
+    return width or 320, height or 480
+
 
 # Example types we build pages for (anything async-compatible runs in PyScript).
 TARGET_TYPES = ("async", "all")
-
-# Examples that need the full examples.json tree (asset files, sibling modules
-# or sub-package layout) rather than a single-file install.
-NEEDS_MANIFEST = {
-    "apollo",                 # apollo_dsky package + BMP asset
-    "lv_test_timer_async",    # lv_test_timer_common sibling module
-    "bmp565_blit",            # examples/assets/warrior.bmp
-    "bmp565_simpletest",      # examples/assets/warrior.bmp
-    "font_list",              # lists examples/assets/
-    "font_simpletest",        # examples/assets/
-    "font_simpletest2",       # examples/assets/
-    "font_simpletest3",       # examples/assets/
-    "pbm_simpletest",         # examples/assets/micropython.pbm
-}
 
 # Curated copy. Anything omitted falls back to the module docstring + defaults.
 # Fields: title, blurb, howto (list), experimental (bool), note (str), icon.
@@ -57,42 +67,52 @@ CURATED: dict[str, dict] = {
     "pydisplay_demo_async": {
         "title": "pydisplay Demo",
         "blurb": "The flagship showcase: auto-scrolling notes with on-screen buttons to rotate the display and cycle the accent color.",
-        "howto": ["The notes panel scrolls automatically.",
-                  "Tap <strong>Rotate</strong> to turn the screen 90&deg;.",
-                  "Tap <strong>Color</strong> to cycle the accent."],
+        "howto": [
+            "The notes panel scrolls automatically.",
+            "Tap <strong>Rotate</strong> to turn the screen 90&deg;.",
+            "Tap <strong>Color</strong> to cycle the accent.",
+        ],
         "icon": "display",
     },
     "calculator": {
         "title": "Calculator",
         "blurb": "A touch calculator drawn with <code>graphics.FrameBuffer</code> and the material-design palette.",
-        "howto": ["Click the number and operator keys.",
-                  "<code>C</code> clears, <code>=</code> evaluates.",
-                  "<code>Sqrt</code>, <code>%</code> and <code>+/-</code> act on the current entry."],
+        "howto": [
+            "Click the number and operator keys.",
+            "<code>C</code> clears, <code>=</code> evaluates.",
+            "<code>Sqrt</code>, <code>%</code> and <code>+/-</code> act on the current entry.",
+        ],
         "icon": "calc",
     },
     "paint": {
         "title": "Paint",
         "blurb": "A minimal paint program showing how <code>displaysys</code> handles pointer events.",
-        "howto": ["Click a color block in the palette strip to select it.",
-                  "Left-drag on the canvas to paint.",
-                  "Right-click a swatch to flood-fill the canvas."],
+        "howto": [
+            "Click a color block in the palette strip to select it.",
+            "Left-drag on the canvas to paint.",
+            "Right-click a swatch to flood-fill the canvas.",
+        ],
         "icon": "paint",
         "extra_action": ('<a class="btn" href="./editor.html">Open in editor</a>'),
     },
     "eventsys_simpletest": {
         "title": "Event System",
         "blurb": "The smallest <code>eventsys</code> example &mdash; prints every pointer event it polls.",
-        "howto": ["Hover and click over the black display area.",
-                  "Events are printed in the console panel below.",
-                  "This example has no on-screen drawing by design."],
+        "howto": [
+            "Hover and click over the black display area.",
+            "Events are printed in the console panel to the right.",
+            "This example has no on-screen drawing by design.",
+        ],
         "icon": "event",
     },
     "apollo": {
         "title": "Apollo DSKY",
         "blurb": "An Apollo Guidance Computer DSKY emulator rendered from a BMP565 sprite sheet, with a live clock.",
-        "howto": ["Tap the keypad buttons on the panel.",
-                  "The status lights and clock update live.",
-                  "The bottom key scrolls the readout."],
+        "howto": [
+            "Tap the keypad buttons on the panel.",
+            "The status lights and clock update live.",
+            "The bottom key scrolls the readout.",
+        ],
         "experimental": True,
         "note": "Depends on the apollo_dsky package and a binary BMP asset; designed for a 320&times;480 display.",
         "icon": "rocket",
@@ -100,9 +120,11 @@ CURATED: dict[str, dict] = {
     "lv_test_timer_async": {
         "title": "LVGL Timer (async)",
         "blurb": "Drives an LVGL UI from a <code>multimer.aio</code> timer on the asyncio loop.",
-        "howto": ["Builds a small LVGL UI and refreshes it from an async timer.",
-                  "Requires an <code>lvgl</code> binding in the runtime.",
-                  "Provided as a reference for async LVGL integration."],
+        "howto": [
+            "Builds a small LVGL UI and refreshes it from an async timer.",
+            "Requires an <code>lvgl</code> binding in the runtime.",
+            "Provided as a reference for async LVGL integration.",
+        ],
         "experimental": True,
         "note": "LVGL is a native binding; this needs an <code>lvgl</code>-enabled runtime, which the bundled PyScript MicroPython does not include.",
         "icon": "timer",
@@ -135,20 +157,23 @@ SRC_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-wi
 
 def icon_svg(name: str) -> str:
     body = ICONS.get(name, ICONS["monitor"])
-    return (f'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
-            f'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{body}</svg>')
+    return (
+        f'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+        f'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{body}</svg>'
+    )
 
 
 class Example:
     def __init__(self, name: str, import_name: str, source_rel: str, kind: str):
-        self.name = name                 # page/file stem, e.g. "calculator"
-        self.import_name = import_name   # python import target, e.g. "chango"
-        self.source_rel = source_rel     # path under repo, e.g. "src/examples/x.py"
-        self.kind = kind                 # "module" or "package"
-        self.mtype = ""                  # "async" | "all" | ...
+        self.name = name  # page/file stem, e.g. "calculator"
+        self.import_name = import_name  # python import target, e.g. "chango"
+        self.source_rel = source_rel  # path under repo, e.g. "src/examples/x.py"
+        self.kind = kind  # "module" or "package"
+        self.mtype = ""  # "async" | "all" | ...
         self.docstring_blurb = ""
-        self.blocks = False              # blocking while-True without await
+        self.blocks = False  # blocking while-True without await
         self.is_async = False
+        self.pyscript_files: list[str] = []  # paths relative to src/examples/
 
     # ---- derived metadata ----
     @property
@@ -161,8 +186,11 @@ class Example:
 
     @property
     def blurb(self) -> str:
-        return self.curated.get("blurb") or self.docstring_blurb or (
-            f"The <code>{self.name}</code> example running in the browser via PyScript.")
+        return (
+            self.curated.get("blurb")
+            or self.docstring_blurb
+            or (f"The <code>{self.name}</code> example running in the browser via PyScript.")
+        )
 
     @property
     def icon(self) -> str:
@@ -186,15 +214,12 @@ class Example:
         return bool(self.curated.get("experimental"))
 
     @property
-    def needs_manifest(self) -> bool:
-        return self.kind == "package" or self.name in NEEDS_MANIFEST
+    def browser_eligible(self) -> bool:
+        return all(path.endswith(".py") for path in self.pyscript_files)
 
     @property
     def install_line(self) -> str:
-        if self.needs_manifest:
-            return ('mip.install("github:PyDevices/pydisplay/packages/'
-                    'examples.json", target="examples")')
-        return f'mip.install("github:PyDevices/pydisplay/src/examples/{self.name}.py")'
+        return render_mip_installs(self.pyscript_files)
 
     @property
     def primary_tag(self) -> tuple[str, str]:
@@ -205,6 +230,49 @@ class Example:
     @property
     def source_url(self) -> str:
         return f"https://github.com/PyDevices/pydisplay/blob/main/{self.source_rel}"
+
+
+def parse_pyscript_files(lines: list[str]) -> list[str]:
+    for line in lines[:5]:
+        s = line.strip()
+        if s.startswith("# pyscript files:"):
+            body = s.split(":", 1)[1].strip()
+            return [part.strip() for part in body.split(",") if part.strip()]
+    return []
+
+
+def mip_install_target(examples_rel: str) -> str | None:
+    if "/" in examples_rel:
+        return f"examples/{examples_rel.split('/', maxsplit=1)[0]}"
+    return None
+
+
+def render_mip_installs(pyscript_files: list[str]) -> str:
+    ind = "                "
+    br = "                    "
+    lines = [
+        "from js import document",
+        f"{ind}_host = document.location.hostname",
+        f'{ind}_local = _host in ("127.0.0.1", "localhost")',
+    ]
+    for path in pyscript_files:
+        target = mip_install_target(path)
+        if target:
+            local = (
+                f"mip.install(document.location.origin + "
+                f'"/src/examples/{path}", target="{target}")'
+            )
+            gh = (
+                f'mip.install("github:PyDevices/pydisplay/src/examples/{path}", target="{target}")'
+            )
+        else:
+            local = f'mip.install(document.location.origin + "/src/examples/{path}")'
+            gh = f'mip.install("github:PyDevices/pydisplay/src/examples/{path}")'
+        lines.append(f"{ind}if _local:")
+        lines.append(f"{br}{local}")
+        lines.append(f"{ind}else:")
+        lines.append(f"{br}{gh}")
+    return "\n".join(lines)
 
 
 def parse_example(path: Path) -> Example | None:
@@ -240,6 +308,11 @@ def parse_example(path: Path) -> Example | None:
     ex.is_async = (chosen == "async") or ("multimer.aio" in text) or ("async def main" in text)
     ex.blocks = ("while True" in text) and not ex.is_async
     ex.docstring_blurb = extract_blurb(text, name)
+    examples_rel = path.relative_to(EXAMPLES_DIR).as_posix()
+    ex.pyscript_files = parse_pyscript_files(lines) or [examples_rel]
+    for entry in ex.pyscript_files:
+        if not (EXAMPLES_DIR / entry).is_file():
+            raise SystemExit(f"{rel}: missing pyscript file {entry}")
     return ex
 
 
@@ -256,7 +329,7 @@ def extract_blurb(text: str, name: str) -> str:
     end = text.find(q, i + 3)
     if end == -1:
         return ""
-    doc = text[i + 3:end]
+    doc = text[i + 3 : end]
     skip = {name, f"{name}.py", "=" * len(name)}
     for raw in doc.splitlines():
         line = raw.strip()
@@ -275,13 +348,11 @@ def discover() -> list[Example]:
     for path in sorted(EXAMPLES_DIR.rglob("*.py")):
         # Only top-level files and one-level sub-package entry files.
         rel = path.relative_to(EXAMPLES_DIR)
-        if len(rel.parts) == 1:
-            ex = parse_example(path)
-        elif len(rel.parts) == 2 and rel.parts[0] == rel.stem:
+        if len(rel.parts) == 1 or (len(rel.parts) == 2 and rel.parts[0] == rel.stem):
             ex = parse_example(path)
         else:
             ex = None
-        if ex and ex.name not in found:
+        if ex and ex.browser_eligible and ex.name not in found:
             found[ex.name] = ex
     return list(found.values())
 
@@ -290,16 +361,21 @@ def discover() -> list[Example]:
 # Rendering
 # --------------------------------------------------------------------------- #
 
+
 def render_howto(ex: Example) -> str:
     items = ex.curated.get("howto")
     if not items:
         if ex.blocks:
-            items = ["Click <strong>Run</strong> to install and start the example.",
-                     "This example runs a continuous loop &mdash; see the note.",
-                     "Interact over the display where supported."]
+            items = [
+                "Click <strong>Run</strong> to install and start the example.",
+                "This example runs a continuous loop &mdash; see the note.",
+                "Interact over the display where supported.",
+            ]
         else:
-            items = ["Click <strong>Run</strong> to install and start the example.",
-                     "Output (if any) appears in the console panel below."]
+            items = [
+                "Click <strong>Run</strong> to install and start the example.",
+                "Output (if any) appears in the console panel to the right.",
+            ]
     return "\n".join(f"                        <li>{i}</li>" for i in items)
 
 
@@ -308,21 +384,23 @@ def render_note(ex: Example) -> str:
     if ex.curated.get("note"):
         notes.append(ex.curated["note"])
     if ex.blocks:
-        notes.append("Runs a blocking animation loop, so the browser tab may become "
-                     "unresponsive after <strong>Run</strong>. Reload the page to stop it.")
+        notes.append(
+            "Runs a blocking animation loop, so the browser tab may become "
+            "unresponsive after <strong>Run</strong>. Reload the page to stop it."
+        )
     if not notes:
         return ""
     body = " ".join(notes)
-    return f'''                <div class="panel">
+    return f"""                <div class="panel">
                     <h2>Note</h2>
                     <ul><li>{body}</li></ul>
                 </div>
-'''
+"""
 
 
 def render_tags(ex: Example) -> str:
     tags = []
-    cls, label = (("async", "async") if ex.mtype == "async" else ("all", "all"))
+    cls, label = ("async", "async") if ex.mtype == "async" else ("all", "all")
     tags.append(f'<span class="tag {cls}">{label}</span>')
     if ex.experimental:
         tags.append('<span class="tag warn">experimental</span>')
@@ -332,12 +410,16 @@ def render_tags(ex: Example) -> str:
 
 
 def render_install_meta(ex: Example) -> str:
-    return "examples.json" if ex.needs_manifest else "single file"
+    n = len(ex.pyscript_files)
+    return "1 file" if n == 1 else f"{n} files"
 
 
 def render_page(ex: Example) -> str:
-    extra_action = ex.curated.get("extra_action") or '<a class="btn" href="../index.html">Back to demos</a>'
+    extra_action = (
+        ex.curated.get("extra_action") or '<a class="btn" href="../index.html">Back to demos</a>'
+    )
     note_html = render_note(ex)
+    display_w, display_h = board_display_size()
     return f'''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -380,19 +462,26 @@ def render_page(ex: Example) -> str:
         </div>
         <p class="example-lede">{ex.blurb}</p>
 
-        <div class="stage-layout">
-            <section class="stage">
-                <div class="loading" id="loading">
-                    <span class="spinner"></span> <span id="status">Loading PyScript runtime…</span>
-                </div>
+        <div class="play-area">
+            <div class="loading" id="loading">
+                <span class="spinner"></span> <span id="status">Loading PyScript runtime…</span>
+            </div>
+            <div class="display-column">
                 <div class="device">
-                    <canvas id="display_canvas" width="1" height="1"></canvas>
+                    <canvas id="display_canvas" width="{display_w}" height="{display_h}"></canvas>
                 </div>
                 <div class="run-bar">
                     <button id="run-btn" class="btn primary" disabled>Run</button>
                 </div>
-            </section>
+            </div>
 
+            <section class="console-panel" aria-label="Console output">
+                <h2 class="console-label">Console output</h2>
+                <div id="log" class="log"></div>
+            </section>
+        </div>
+
+        <div class="meta-layout">
             <aside class="aside">
                 <div class="panel">
                     <h2>How to use</h2>
@@ -413,10 +502,6 @@ def render_page(ex: Example) -> str:
             </aside>
         </div>
 
-        <details class="console" open>
-            <summary>Console output</summary>
-            <div id="log" class="log"></div>
-        </details>
     </main>
 
     <footer class="site-footer">
@@ -428,8 +513,19 @@ def render_page(ex: Example) -> str:
 
     <!-- Loader is gated behind the Run button so blocking examples never hang on load. -->
     <script type="mpy" config="./pyscript.toml" output="log">
+        import builtins
         from js import document
         from pyscript.ffi import create_proxy
+
+        def _log_print(*args, **kwargs):
+            el = document.getElementById("log")
+            if el is not None:
+                sep = kwargs.get("sep", " ")
+                end = kwargs.get("end", "\\n")
+                el.textContent += sep.join(str(a) for a in args) + end
+                el.scrollTop = el.scrollHeight
+
+        builtins.print = _log_print
 
         _status = document.getElementById("status")
         _btn = document.getElementById("run-btn")
@@ -446,13 +542,18 @@ def render_page(ex: Example) -> str:
             _started = True
             _btn.disabled = True
             _btn.textContent = "Running…"
-            _set("Installing modules…")
-            import mip
-            {ex.install_line}
-            _set("Importing {ex.import_name}…")
-            import lib.path
-            import {ex.import_name}
-            _set("Running.")
+            try:
+                _set("Installing modules…")
+                import mip
+                {ex.install_line}
+                _set("Importing {ex.import_name}…")
+                import lib.path
+                import {ex.import_name}
+                _set("Running.")
+            except Exception as e:
+                _log_print("Run failed:", e)
+                _set("Error — see console.")
+                raise
 
         _btn.addEventListener("click", create_proxy(_start))
         _btn.disabled = False
@@ -465,8 +566,36 @@ def render_page(ex: Example) -> str:
         const _btn = document.getElementById('run-btn');
         const _spin = document.querySelector('#loading .spinner');
         const _t = setInterval(() => {{
-            if (_btn && !_btn.disabled) {{ if (_spin) _spin.style.display = 'none'; clearInterval(_t); }}
+            if (_btn && !_btn.disabled) {{
+                if (_spin) _spin.style.display = 'none';
+                clearInterval(_t);
+            }}
         }}, 150);
+    </script>
+
+    <script>
+        // Match console chrome height to the display bezel; log fills the remainder.
+        (function () {{
+            const device = document.querySelector('.play-area .device');
+            const panel = document.querySelector('.play-area .console-panel');
+            const log = document.getElementById('log');
+            if (!device || !panel || !log) return;
+            function syncConsoleHeight() {{
+                if (window.innerWidth <= 880) {{
+                    panel.style.height = '';
+                    return;
+                }}
+                const h = device.getBoundingClientRect().height;
+                if (h > 0) {{
+                    panel.style.height = h + 'px';
+                }}
+            }}
+            syncConsoleHeight();
+            window.addEventListener('resize', syncConsoleHeight);
+            if (typeof ResizeObserver !== 'undefined') {{
+                new ResizeObserver(syncConsoleHeight).observe(device);
+            }}
+        }})();
     </script>
 </body>
 </html>
@@ -501,7 +630,9 @@ def replace_block(text: str, key: str, payload: str) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--check", action="store_true", help="fail if any output is stale")
     args = parser.parse_args(argv)
 
@@ -530,8 +661,10 @@ def main(argv: list[str] | None = None) -> int:
     index_text = replace_block(index_text, "all", render_cards(by_type["all"]))
     write(INDEX, index_text)
 
-    print(f"\n{len(examples)} example pages "
-          f"({len(by_type['async'])} async, {len(by_type['all'])} all).")
+    print(
+        f"\n{len(examples)} example pages "
+        f"({len(by_type['async'])} async, {len(by_type['all'])} all)."
+    )
     if args.check and stale:
         print("STALE:\n  " + "\n  ".join(stale))
         return 1

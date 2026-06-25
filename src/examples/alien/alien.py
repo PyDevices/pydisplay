@@ -1,4 +1,5 @@
 # multimer types: queued, sync
+# pyscript files: alien/__init__.py, alien/alien.py, alien/alien_bitmap.py, alien/alien.png
 """
 alien.py
 =========

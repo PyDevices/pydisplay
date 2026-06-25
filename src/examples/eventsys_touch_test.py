@@ -1,4 +1,5 @@
 # multimer types: all
+# pyscript files: eventsys_touch_test.py
 """
 eventsys_touch_test.py - Touch rotation test.
 Tests the touch driver and finds the correct rotation masks for the touch screen.
@@ -154,7 +155,10 @@ def loop():
 
 
 async def loop_async():
-    from multimer.aio import run_queued as aio_run_queued
+    try:
+        import asyncio
+    except ImportError:
+        import uasyncio as asyncio
 
     display_drv.fill_rect(0, 0, display_drv.width - 1, display_drv.height - 1, BG_COLOR)
 
@@ -175,7 +179,7 @@ async def loop_async():
                 touched_point = None
                 while not touched_point:
                     touched_point = _poll_touch()
-                    await aio_run_queued()
+                    await asyncio.sleep(0.02)
                 _record_zone(touched_point, touched_zones, half_width, half_height)
                 _clear_target(x, y, half_width, half_height)
 

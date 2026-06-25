@@ -1,4 +1,5 @@
 # multimer types: sync
+# pyscript files: console_advanced_demo.py
 """
 console_advanced_demo.py - Advanced demo of the mpconsole module
 """
