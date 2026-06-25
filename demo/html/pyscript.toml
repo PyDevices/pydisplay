@@ -2,10 +2,8 @@
 # (html/pyscript/micropython/) instead of fetching it from the jsDelivr CDN.
 # PyScript resolves this URL relative to each HTML page, so the same value works
 # both when serving html/ locally and under the GitHub Pages /demo/html/ prefix.
-# To use a custom build, drop micropython.mjs + micropython.wasm into
-# html/pyscript/micropython/ and point interpreter there.
-# LVGL-enabled cmods builds live in html/pyscript/micropython-lvgl/ for
-# experiments only — they break PyScript (missing pyscript/pathlib integration).
+# Rebuild from cmods: ./build_mp.sh --port webassembly --variant pyscript
+# then copy build-pyscript/micropython.{mjs,wasm} into html/pyscript/micropython/.
 interpreter = "./pyscript/micropython/micropython.mjs"
 
 [files]
