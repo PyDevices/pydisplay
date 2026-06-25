@@ -1,6 +1,10 @@
 # LVGL
 
-Use pydisplay as the display and input layer for [LVGL on MicroPython](https://github.com/lvgl/lv_micropython).
+Use pydisplay as the display, input, and timing layer for [LVGL](https://lvgl.io/) — build full LVGL applications in pure Python.
+
+The PyDevices LVGL **sister projects** bundle this integration for each runtime: [lv_micropython_cmod](https://github.com/PyDevices/lv_micropython_cmod) (MicroPython), [lv_circuitpython_mod](https://github.com/PyDevices/lv_circuitpython_mod) (CircuitPython), and [lv_cpython_mod](https://github.com/PyDevices/lv_cpython_mod) (CPython). Because they share pydisplay as the backend, the same LVGL Python code is portable across all three — and you can even **develop it interactively in [Jupyter Notebook](../platforms/jupyter.md)**. See [Ecosystem & sister projects](../ecosystem.md).
+
+The walkthrough below covers wiring pydisplay to LVGL manually (e.g. with upstream [lv_micropython](https://github.com/lvgl/lv_micropython)).
 
 ## Walkthrough
 
@@ -23,7 +27,7 @@ Your `board_config.py` should expose:
 
 Connect LVGL's display flush callback to copy LVGL's draw buffer through `display.blit_rect` (or the pattern documented in lv_micropython for your port).
 
-With [`display_driver`](../../src/add_ons/display_driver.py), LVGL input is wired automatically: each indev `read_cb` polls the broker's queue device via virtual touch/encoder/keypad devices. **Do not call `broker.poll()` in your LVGL main loop** — `lv.task_handler()` (driven by `lv_utils` + multimer) already drains input. Calling both competes for the same event queue and breaks clicks. Window-close (`QUIT`) is handled on the same path inside `QueueDevice.poll()`.
+With [`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py), LVGL input is wired automatically: each indev `read_cb` polls the broker's queue device via virtual touch/encoder/keypad devices. **Do not call `broker.poll()` in your LVGL main loop** — `lv.task_handler()` (driven by `lv_utils` + multimer) already drains input. Calling both competes for the same event queue and breaks clicks. Window-close (`QUIT`) is handled on the same path inside `QueueDevice.poll()`.
 
 ### 4. Run the touch test example
 
@@ -51,7 +55,7 @@ Set **`TIMER_ASYNC`** in `board_config.py` to choose the timer backend:
 | `False` (default) | MCU, MicroPython unix, CPython Linux — default `multimer.Timer` |
 | `True` | PyScript and other asyncio-native apps — `multimer.aio.Timer` |
 
-[`display_driver`](../../src/add_ons/display_driver.py) passes this to `lv_utils.event_loop(asynchronous=TIMER_ASYNC)`.
+[`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py) passes this to `lv_utils.event_loop(asynchronous=TIMER_ASYNC)`.
 
 When **`TIMER_ASYNC = True`**, `display_driver` disables SDL's sync `auto_refresh` timer and calls `display.show()` from the aio LVGL refresh loop instead. CircuitPython's default `multimer.Timer` uses a background thread and requires `run_queued()` — which an asyncio app does not call — so the window would never be presented otherwise.
 
@@ -71,15 +75,15 @@ Three scripts share the same UI via `lv_test_timer_common.build_ui()` and differ
 
 | Script | When to run |
 |--------|-------------|
-| [`lv_test_timer_sync.py`](../../src/examples/lv_test_timer_sync.py) | MCU, MP-unix, CPython Linux — no main loop; **exits** on queued-only platforms |
-| [`lv_test_timer_queued.py`](../../src/examples/lv_test_timer_queued.py) | CPython Win/mac — `run_queued()` drain loop only |
-| [`lv_test_timer_async.py`](../../src/examples/lv_test_timer_async.py) | PyScript / asyncio — `TIMER_ASYNC = True`, deferred `import display_driver`, `await asyncio.sleep(0)` loop |
+| [`lv_test_timer_sync.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_sync.py) | MCU, MP-unix, CPython Linux — no main loop; **exits** on queued-only platforms |
+| [`lv_test_timer_queued.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_queued.py) | CPython Win/mac — `run_queued()` drain loop only |
+| [`lv_test_timer_async.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_async.py) | PyScript / asyncio — `TIMER_ASYNC = True`, deferred `import display_driver`, `await asyncio.sleep(0)` loop |
 
-The shared UI ([`lv_test_timer_common.py`](../../src/examples/lv_test_timer_common.py)) shows autodetected **runtime**, **OS**, **display** driver class, **timer** backend, and **LVGL** version.
+The shared UI ([`lv_test_timer_common.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_common.py)) shows autodetected **runtime**, **OS**, **display** driver class, **timer** backend, and **LVGL** version.
 
 ### Automated harness
 
-[`lv_test_timer_harness.py`](../../src/examples/lv_test_timer_harness.py) runs a timed LVGL timer + input check and prints a `KIT_RESULT=` JSON line on stdout (for CI and tooling). Run from `src/`:
+[`lv_test_timer_harness.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_harness.py) runs a timed LVGL timer + input check and prints a `KIT_RESULT=` JSON line on stdout (for CI and tooling). Run from `src/`:
 
 ```bash
 cd src
@@ -91,7 +95,7 @@ Modes: `sync`, `queued`, `async`.
 
 ### Desktop test suite
 
-[`tools/run_desktop_lv_tests.py`](../../tools/run_desktop_lv_tests.py) runs the harness across **five desktop Python+LVGL executables** in sequence (nine subprocess runs total — `queued` and `async` per runtime; **async is omitted on MicroPython Windows** because that port has no asyncio).
+[`tools/run_desktop_lv_tests.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/run_desktop_lv_tests.py) runs the harness across **five desktop Python+LVGL executables** in sequence (nine subprocess runs total — `queued` and `async` per runtime; **async is omitted on MicroPython Windows** because that port has no asyncio).
 
 | Executable | How resolved |
 |------------|--------------|
@@ -118,7 +122,7 @@ From `src/`:
 
 The script prints a summary table (`queued` / `async` columns) and writes full results to `.cursor/desktop_lv_test_results.json`. Exit code **1** if any run hangs, crashes, fails timers, or fails click checks (strict policy).
 
-For a smaller **3×3 matrix** (micropython, circuitpython, cpython-venv × sync/queued/async), use [`tools/lv_timer_test_kit.py`](../../tools/lv_timer_test_kit.py):
+For a smaller **3×3 matrix** (micropython, circuitpython, cpython-venv × sync/queued/async), use [`tools/lv_timer_test_kit.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/lv_timer_test_kit.py):
 
 ```bash
 python tools/lv_timer_test_kit.py

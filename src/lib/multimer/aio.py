@@ -4,8 +4,14 @@
 """
 asyncio/uasyncio Timer for multimer.
 
-Opt-in module — not wired into ``multimer.Timer``. Use when the app runs under
-asyncio/uasyncio. See ``docs/concepts/multimer.md`` for full documentation.
+Opt-in module — not wired into the package-level ``multimer.Timer``. Use it when
+the whole app runs under asyncio/uasyncio (e.g. PyScript, async ports, or
+CircuitPython with the asyncio library installed). It tries ``uasyncio`` first,
+then falls back to ``asyncio``.
+
+This module is self-contained: the public API is ``Timer`` (an asyncio software
+timer with the same ``machine.Timer``-style API as the rest of multimer) plus
+two optional helpers, ``run`` and ``run_queued``.
 
 Quick start (helpers are optional)::
 
@@ -13,16 +19,26 @@ Quick start (helpers are optional)::
 
     async def main():
         t = Timer()
+        # init() must be called while the event loop is already running
         t.init(mode=Timer.PERIODIC, period=33, callback=cb)
         while True:
-            broker.poll()
-            display.show()
+            do_periodic_work()
             await run_queued()  # or await asyncio.sleep(0)
 
     run(main)  # or asyncio.run(main())
 
-``run_queued`` and ``run`` are convenience wrappers only. Any ``await`` that
-yields to the event loop is sufficient for timer callbacks to fire.
+Notes:
+
+- ``Timer.init()`` must run while the event loop is already running; it raises
+  ``RuntimeError`` otherwise.  Callbacks run on the event-loop thread.
+- ``run(main)`` runs an async ``main`` coroutine function to completion with
+  ``asyncio.run`` (or ``run_until_complete``); on a host that already drives a
+  loop (Jupyter, PyScript) it schedules ``main`` as a background task instead.
+- ``run_queued`` and ``run`` are convenience wrappers only.  Any ``await`` that
+  yields to the event loop is sufficient for timer callbacks to fire, so a loop
+  that already awaits something can drop ``run_queued`` entirely.
+- ``aio.run_queued()`` (async) is unrelated to the sync package-level
+  ``multimer.run_queued()`` used by the threading/SDL backends.
 """
 
 try:

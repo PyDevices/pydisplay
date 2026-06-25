@@ -37,7 +37,7 @@ async def main():
 run(main)
 ```
 
-You can use stdlib asyncio instead of the helpers — see [multimer.aio](../concepts/multimer.md#multimeraio--asyncio-timers).
+You can use stdlib asyncio instead of the helpers — see [multimer.aio](../concepts/multimer.md#multimeraio-asyncio-timers).
 
 Legacy pattern with raw asyncio:
 
@@ -84,7 +84,7 @@ Regenerate manifest after adding examples: `./tools/regenerate.sh`.
 
 ## Next
 
-- [multimer.aio](../concepts/multimer.md#multimeraio--asyncio-timers)
+- [multimer.aio](../concepts/multimer.md#multimeraio-asyncio-timers)
 - [Try pydisplay](../try/index.md)
 - [Troubleshooting](../troubleshooting.md)
 - [Contributing](../contributing.md) — PyScript PRs welcome

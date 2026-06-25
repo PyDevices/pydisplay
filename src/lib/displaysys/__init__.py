@@ -120,7 +120,7 @@ def color_rgb(color):
 
 class DisplayDriver:
     """
-    Base class for all display backends (BusDisplay, SDL2Display, FBDisplay, etc.).
+    Base class for all display backends (BusDisplay, SDLDisplay, PGDisplay, FBDisplay, etc.).
 
     Subclasses implement bus- or platform-specific drawing and refresh. Most applications
     use a concrete driver from ``board_config.display`` rather than instantiating this

@@ -32,7 +32,15 @@ On CPython (non-Linux), CircuitPython, and MicroPython ports using the polling
 backend, call ``run_queued()`` from the main thread to drain queued callbacks
 (for example in an event loop).  ``sleep_ms()`` also advances polling timers.
 
-For asyncio-based apps, use ``multimer.aio`` — see ``docs/concepts/multimer.md``.
+``REQUIRES_RUN_QUEUED`` is exported at the package level (true whenever the
+backend may deliver callbacks from another thread, e.g. CPython); the chosen
+``Timer`` class also exposes a ``Timer.REQUIRES_RUN_QUEUED`` attribute for the
+specific backend.  Check ``getattr(Timer, "REQUIRES_RUN_QUEUED", False)`` to
+decide whether your main loop must call ``run_queued()``.
+
+For asyncio-based apps, import ``multimer.aio`` instead; see that module's
+docstring for the asyncio/uasyncio ``Timer`` and its ``run``/``run_queued``
+helpers.
 """
 
 import sys
