@@ -22,6 +22,7 @@ import _env
 _MULTIMER_SIBLINGS = ("displaysys", "eventsys", "graphics", "pdwidgets", "palettes")
 _EVENTSYS_SIBLINGS = ("displaysys", "graphics", "multimer", "pdwidgets", "palettes")
 _GRAPHICS_SIBLINGS = ("displaysys", "eventsys", "multimer", "pdwidgets", "palettes")
+_DISPLAYSYS_SIBLINGS = ("eventsys", "graphics", "multimer", "pdwidgets", "palettes")
 
 _MULTIMER_CHILD = textwrap.dedent(
     """
@@ -75,7 +76,6 @@ _EVENTSYS_CHILD = textwrap.dedent(
     assert not forbidden, "eventsys pulled in pydisplay modules: %r" % forbidden
     assert "micropython" not in sys.modules, "eventsys requires the micropython shim"
 
-    # Exercise a real flow: a keypad device feeding a broker.
     broker = Broker()
     presses = [set([65]), set()]
     kp = KeypadDevice(read=lambda: presses.pop(0) if presses else set())
@@ -127,6 +127,53 @@ _GRAPHICS_CHILD = textwrap.dedent(
     print("STANDALONE_OK")
     """
 ).format(siblings=list(_GRAPHICS_SIBLINGS))
+
+_DISPLAYSYS_CHILD = textwrap.dedent(
+    """
+    import sys
+
+    import displaysys
+    from displaysys import (
+        alloc_buffer,
+        color332,
+        color565,
+        color565_swapped,
+        color_rgb,
+    )
+    from displaysys.fbdisplay import FBDisplay
+
+
+    class FakeFrameBuffer:
+        def __init__(self, width, height, bpp=2):
+            self.width = width
+            self.height = height
+            self.data = bytearray(width * height * bpp)
+
+        def __buffer__(self, flags):
+            return memoryview(self.data)
+
+        def refresh(self):
+            pass
+
+
+    forbidden = [m for m in {siblings!r} if m in sys.modules]
+    assert not forbidden, "displaysys pulled in pydisplay modules: %r" % forbidden
+
+    assert color565(255, 255, 255) == 0xFFFF
+    assert color_rgb(0x0000) == (0, 0, 0)
+    assert len(alloc_buffer(8)) == 8
+
+    fb = FakeFrameBuffer(4, 2)
+    d = FBDisplay(fb)
+    d.fill(0xFFFF)
+    assert bytes(fb.data) == b"\\xff\\xff" * 8, "FBDisplay.fill did not paint buffer"
+    d.deinit()
+
+    assert "multimer" not in sys.modules, "displaysys imported multimer unexpectedly"
+
+    print("STANDALONE_OK")
+    """
+).format(siblings=list(_DISPLAYSYS_SIBLINGS))
 
 
 class TestStandalone(unittest.TestCase):
@@ -190,6 +237,31 @@ class TestStandalone(unittest.TestCase):
 
             proc = subprocess.run(
                 [sys.executable, "-c", _GRAPHICS_CHILD],
+                cwd=tmp,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(
+                proc.returncode,
+                0,
+                msg=f"child failed\nstdout:\n{proc.stdout}\nstderr:\n{proc.stderr}",
+            )
+            self.assertIn("STANDALONE_OK", proc.stdout)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_displaysys_imports_and_runs_in_isolation(self):
+        tmp = tempfile.mkdtemp(prefix="displaysys_standalone_")
+        try:
+            shutil.copytree(_env.DISPLAYSYS_DIR, os.path.join(tmp, "displaysys"))
+
+            env = dict(os.environ)
+            env["PYTHONPATH"] = tmp
+
+            proc = subprocess.run(
+                [sys.executable, "-c", _DISPLAYSYS_CHILD],
                 cwd=tmp,
                 env=env,
                 capture_output=True,

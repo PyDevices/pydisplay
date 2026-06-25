@@ -1,8 +1,10 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Helpers shared by the multimer, eventsys, and graphics tests."""
+"""Helpers shared by the multimer, eventsys, graphics, and displaysys tests."""
 
+import contextlib
+import io
 import time
 
 import _env  # noqa: F401
@@ -81,3 +83,50 @@ def set_pixels(fb):
 def count_set(fb):
     """Return how many pixels in ``fb`` have a non-zero value."""
     return len(set_pixels(fb))
+
+
+class FakeFrameBuffer:
+    """A minimal stand-in for a CircuitPython ``FrameBuffer``.
+
+    It exposes the three things ``displaysys.fbdisplay.FBDisplay`` needs:
+
+    - a ``width`` / ``height`` in pixels,
+    - the buffer protocol (so ``memoryview(fb)`` aliases its bytes), and
+    - a ``refresh()`` method that records how many times it was called.
+
+    The backing store is a flat ``bytearray`` of ``width * height * bpp`` bytes,
+    accessible as ``fb.data`` for assertions.
+    """
+
+    def __init__(self, width, height, bpp=2):
+        self.width = width
+        self.height = height
+        self.bpp = bpp
+        self.data = bytearray(width * height * bpp)
+        self.refresh_count = 0
+
+    def __buffer__(self, flags):
+        return memoryview(self.data)
+
+    def refresh(self):
+        self.refresh_count += 1
+
+
+@contextlib.contextmanager
+def quiet():
+    """Suppress the chatty ``print`` calls emitted while building a display."""
+    with contextlib.redirect_stdout(io.StringIO()):
+        yield
+
+
+def make_fbdisplay(width=8, height=4, reverse_bytes_in_word=False):
+    """Build an ``FBDisplay`` backed by a :class:`FakeFrameBuffer`.
+
+    Returns ``(display, framebuffer)``.
+    """
+    from displaysys.fbdisplay import FBDisplay
+
+    fb = FakeFrameBuffer(width, height)
+    with quiet():
+        display = FBDisplay(fb, reverse_bytes_in_word=reverse_bytes_in_word)
+    return display, fb

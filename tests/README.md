@@ -1,8 +1,8 @@
 # Tests
 
 Self-contained tests for the standalone [`multimer`](../src/lib/multimer),
-[`eventsys`](../src/lib/eventsys), and [`graphics`](../src/lib/graphics)
-packages.
+[`eventsys`](../src/lib/eventsys), [`graphics`](../src/lib/graphics), and
+[`displaysys`](../src/lib/displaysys) packages.
 
 They use only the Python standard library (`unittest`) — no third-party test
 runner or build step is required. The shared bootstrap in
@@ -48,6 +48,11 @@ python tests/test_ticks.py
 | `test_font.py` | `Font` and the `text` / `text8` / `text14` / `text16` helpers |
 | `test_files.py` | `save` / `from_file` and the PBM/PGM converters |
 | `test_draw.py` | the `Draw` canvas-binding wrapper |
+| `test_color.py` | `color565` / `color565_swapped` / `color332` / `color_rgb` / `alloc_buffer` |
+| `test_byteswap.py` | the `byteswap` helper (native or pure-Python fallback) |
+| `test_display_driver.py` | the `DisplayDriver` base class: rotation, byte-swap controls, touch device, lifecycle and vertical scroll math |
+| `test_fbdisplay.py` | the pure-Python `FBDisplay` driver (`fill_rect` / `blit_rect` / `pixel` / `fill` / `blit_transparent` / `show`) |
+| `test_auto_refresh.py` | the optional `auto_refresh` timer wiring into `multimer` |
 | `test_standalone.py` | proves each package imports and runs with **none** of the rest of pydisplay on the path |
 
 The timer tests run on whichever synchronous backend the host selects
@@ -62,3 +67,7 @@ identically on every host without any hardware.
 Graphics tests deliberately avoid the format paths that cannot work under
 CPython's pure-Python fallback (for example `GS8` pixel writes), and focus on
 the broad surface that behaves identically on MicroPython and CPython.
+
+The displaysys driver tests run on plain CPython using a hardware-free
+framebuffer (`_support.FakeFrameBuffer`) and a quiet-stdout helper. Tests that
+need the optional `multimer` dependency are skipped when it is not importable.
