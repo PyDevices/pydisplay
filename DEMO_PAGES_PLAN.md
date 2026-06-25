@@ -209,6 +209,9 @@ bundled PyScript MicroPython has no `lvgl` binding, so Run will fail. Ship an
 LVGL-enabled wasm build (point `pyscript.toml` at it) or keep it as a clearly
 marked reference. Tagged `experimental`.
 
+**Status (2026-06):** deferred — browser LVGL integration abandoned after repeated
+tab hangs; page stays in the gallery as a reference only.
+
 ### F. `apollo` asset + filesystem assumptions
 Needs `apollo_dsky/__init__.py` and the binary `Apollo_DSKY_interface.bmp`
 (both via `examples.json`). Verify `mip` writes the binary, that `__file__` is
@@ -227,7 +230,21 @@ time via FFI. For a 320×480 frame that's ~153k pixels × several FFI writes eac
 `PSDevices` at capture time (`PSDevices(canvas_id, display_drv)`).
 
 **Still open:** faster bulk copy if PyScript gains a working `data.set(rgba)` or
-`to_js` path; measure dirty-region blits if full-frame redraw is still heavy.
+`to_js` path.
+
+**Measured (2026-06, local Chromium, 320×480, `tools/serve.py`):**
+
+| Demo | Wall time (Run→Running) | Notes |
+|------|-------------------------|-------|
+| `paint` (40 stroke events) | interactive | `drawImage` dirty rects ~0.04 ms avg (JS compositing negligible) |
+| `graphics_simpletest` | ~5.9 s | ~1369 partial `render()` calls via `fill_rect`/`graphics.*`; canvas copy cheap, Python draw dominates |
+| `framebuf_simpletest` | ~13.5 s | two full-frame `blit_rect` (RGB565→RGBA LUT + `putImageData`); ~6–7 s per 153k-pixel blit |
+
+**Conclusion:** dirty-region updates (`fill_rect` → partial `drawImage`) are fine
+for interactive browser demos (`paint`, `calculator`, async loops). Avoid
+repeated full-frame `blit_rect` in the browser — one shot per frame is OK for
+static gallery pages (`framebuf_simpletest`, `logo`) but too slow for animation.
+No code change needed now; revisit if PyScript adds a bulk buffer copy API.
 
 ### H. Noisy init prints on PyScript
 `DisplayDriver.__init__` and `rotation` log to stdout (hooked to `#log` on demo
@@ -246,5 +263,6 @@ To go fully offline-friendly, pre-mount example files in `pyscript.toml` too.
 1. ~~**Section A (online)**~~ — done (2026-06).
 2. ~~**Section C (binary assets)**~~ — excluded from gallery by generator policy.
 3. ~~**Section B (blocking loops)**~~ — assessed; keep `loops` tag, no rewrites this pass.
-4. **Section E** — LVGL browser path deferred; `lv_test_timer_async` stays `experimental`.
-5. **Section G** — measure dirty-region blits if full-frame redraw is still heavy online.
+4. ~~**Section E (LVGL)**~~ — deferred; `lv_test_timer_async` stays `experimental`.
+5. ~~**Section G (perf)**~~ — measured locally (2026-06); dirty-region path OK, full `blit_rect` costly.
+6. **Section I** — optional: pre-mount example scripts in `pyscript.toml` for offline Pages.
