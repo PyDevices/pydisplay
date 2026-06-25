@@ -4,3 +4,4 @@ mkdocstrings[python]>=0.26
 mkdocs-gen-files>=0.5
 mkdocs-literate-nav>=0.6
 mkdocs-section-index>=0.3
+mkdocs-jupyter>=0.25

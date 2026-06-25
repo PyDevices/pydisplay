@@ -2,6 +2,13 @@
 
 Run pydisplay examples in VS Code or Jupyter with the `JNDisplay` backend.
 
+!!! tip "Read the notebook online"
+    The example notebook is rendered directly in these docs at
+    [Jupyter notebook](jupyter-notebook.ipynb) (markdown and code cells; not executed
+    during the build). Use the **download** button at the top of that page to grab
+    the `.ipynb`, or open [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb)
+    from the repo.
+
 ## Limitations
 
 - **Touch only** — mouse clicks on the interactive display widget are emulated as touch (`MOUSEBUTTONDOWN`/`MOUSEMOTION`/`MOUSEBUTTONUP`). Keyboard and encoder emulation are not implemented.

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{#
+  Adds a "Download Notebook" button to pages rendered by mkdocs-jupyter.
+  page.nb_url is only set when the mkdocs-jupyter plugin runs with
+  include_source: true, so regular Markdown pages are unaffected.
+#}
+{% block content %}
+{% if page.nb_url %}
+  <a href="{{ page.nb_url }}" title="Download notebook" class="md-content__button md-icon">
+    {% include ".icons/material/download.svg" %}
+  </a>
+{% endif %}
+{{ super() }}
+{% endblock content %}
