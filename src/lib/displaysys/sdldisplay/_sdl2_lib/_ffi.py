@@ -111,6 +111,59 @@ SDL_MouseWheelEvent = {
     ),
 }
 
+SDL_JoyAxisEvent = {
+    "type": uctypes.UINT32 | 0,
+    "timestamp": uctypes.UINT32 | 4,
+    "jaxis": (
+        8,
+        {
+            "which": uctypes.INT32 | 0,
+            "axis": uctypes.UINT8 | 4,
+            "value": uctypes.INT16 | 8,
+        },
+    ),
+}
+
+SDL_JoyBallEvent = {
+    "type": uctypes.UINT32 | 0,
+    "timestamp": uctypes.UINT32 | 4,
+    "jball": (
+        8,
+        {
+            "which": uctypes.INT32 | 0,
+            "ball": uctypes.UINT8 | 4,
+            "xrel": uctypes.INT16 | 8,
+            "yrel": uctypes.INT16 | 10,
+        },
+    ),
+}
+
+SDL_JoyHatEvent = {
+    "type": uctypes.UINT32 | 0,
+    "timestamp": uctypes.UINT32 | 4,
+    "jhat": (
+        8,
+        {
+            "which": uctypes.INT32 | 0,
+            "hat": uctypes.UINT8 | 4,
+            "value": uctypes.UINT8 | 5,
+        },
+    ),
+}
+
+SDL_JoyButtonEvent = {
+    "type": uctypes.UINT32 | 0,
+    "timestamp": uctypes.UINT32 | 4,
+    "jbutton": (
+        8,
+        {
+            "which": uctypes.INT32 | 0,
+            "button": uctypes.UINT8 | 4,
+            "state": uctypes.UINT8 | 5,
+        },
+    ),
+}
+
 
 ###############################################################################
 #                          SDL2 functions                                     #
@@ -118,9 +171,16 @@ SDL_MouseWheelEvent = {
 
 # SDL misc functions
 SDL_Init = _libSDL2.func("i", "SDL_Init", "I")
+SDL_InitSubSystem = _libSDL2.func("i", "SDL_InitSubSystem", "I")
 SDL_Quit = _libSDL2.func("v", "SDL_Quit", "")
 SDL_GetError = _libSDL2.func("s", "SDL_GetError", "")
 SDL_PollEvent = _libSDL2.func("i", "SDL_PollEvent", "P")
+
+# SDL joystick functions
+SDL_NumJoysticks = _libSDL2.func("i", "SDL_NumJoysticks", "")
+SDL_JoystickOpen = _libSDL2.func("P", "SDL_JoystickOpen", "i")
+SDL_JoystickClose = _libSDL2.func("v", "SDL_JoystickClose", "P")
+SDL_JoystickInstanceID = _libSDL2.func("i", "SDL_JoystickInstanceID", "P")
 
 # SDL key functions
 SDL_GetKeyName = _libSDL2.func("s", "SDL_GetKeyName", "i")
@@ -170,6 +230,11 @@ _event_struct_map = {
     SDL_MOUSEBUTTONDOWN: SDL_MouseButtonEvent,  # noqa: F405
     SDL_MOUSEBUTTONUP: SDL_MouseButtonEvent,  # noqa: F405
     SDL_MOUSEWHEEL: SDL_MouseWheelEvent,  # noqa: F405
+    SDL_JOYAXISMOTION: SDL_JoyAxisEvent,  # noqa: F405
+    SDL_JOYBALLMOTION: SDL_JoyBallEvent,  # noqa: F405
+    SDL_JOYHATMOTION: SDL_JoyHatEvent,  # noqa: F405
+    SDL_JOYBUTTONDOWN: SDL_JoyButtonEvent,  # noqa: F405
+    SDL_JOYBUTTONUP: SDL_JoyButtonEvent,  # noqa: F405
     SDL_POLLSENTINEL: SDL_CommonEvent,  # noqa: F405
 }
 

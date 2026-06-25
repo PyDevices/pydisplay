@@ -42,15 +42,97 @@ USB Video lets a board stream the framebuffer as a USB webcam (RP2040; host supp
 
 ### JNDisplay
 
-Jupyter Notebook output via an interactive `ipywidgets` image when touch is enabled (`JNDevices` + `ipyevents`). Mouse clicks map to touch events. Config: `board_configs/jndisplay/`.
+Jupyter Notebook output via an interactive `ipywidgets` image. Input (mouse, wheel, keyboard) is captured by `JNDevices` (`ipyevents`) and delivered as events. Config: `board_configs/jndisplay/`.
 
 ### PSDisplay
 
-PyScript browser canvas. Touch only. Config: `board_configs/psdisplay/`. See [PyScript](../guides/pyscript.md).
+PyScript browser canvas. Input (pointer/touch/pen, wheel, keyboard, gamepad) is captured by `PSDevices` and delivered as events. Config: `board_configs/psdisplay/`. See [PyScript](../guides/pyscript.md).
 
 ### EPaperDisplay
 
 Planned — community help wanted.
+
+## How displays expose input
+
+All display backends feed input into [`eventsys`](events.md) the same way: as a
+stream of `eventsys.events` objects drained through a **`QUEUE`** device. They
+differ only in *how* that stream is produced, which depends on what each
+platform exposes:
+
+| Backends | Input source | Registered as |
+|----------|--------------|---------------|
+| `SDL2Display`, `PGDisplay` | module-level `poll()` / `get()` draining the native OS event queue | `QUEUE` device with `read=poll`/`read=get` |
+| `JNDisplay`, `PSDisplay` | a `JNDevices` / `PSDevices` instance capturing browser input, drained via `read()` | `QUEUE` device with `read=devices_drv.read` |
+
+Either way your handler sees the same `eventsys.events` objects, so application
+code never needs to know which backend is active.
+
+### Desktop (SDL2, PyGame)
+
+SDL2 and PyGame provide a real OS event queue. The driver module drains it and
+converts each event to an `eventsys.events` object:
+
+```python
+from displaysys.sdldisplay import SDLDisplay, poll
+from eventsys import devices
+
+display_drv = SDLDisplay(...)
+broker = devices.Broker()
+broker.create_device(type=devices.types.QUEUE, read=poll, data=display_drv)
+```
+
+This captures mouse motion/buttons, the wheel, the keyboard, the window-close
+(`QUIT`) event, and **joysticks/gamepads** (`JOYAXISMOTION`, `JOYBALLMOTION`,
+`JOYHATMOTION`, `JOYBUTTONDOWN`, `JOYBUTTONUP`). Connect controllers before
+launching — hot-plugging after startup is not handled.
+
+### Browser / notebook (PyScript, Jupyter)
+
+`PSDevices` (PyScript) and `JNDevices` (Jupyter) capture all available input on
+the canvas/widget and turn it into the same `eventsys.events` objects, drained
+through `read()`:
+
+```python
+from displaysys.psdisplay import PSDevices, PSDisplay
+from eventsys import devices
+
+display_drv = PSDisplay("display_canvas", width, height)
+broker = devices.Broker()
+devices_drv = PSDevices("display_canvas")
+broker.create_device(type=devices.types.QUEUE, read=devices_drv.read, data=display_drv)
+```
+
+Each captures:
+
+- **Pointer** — `MOUSEMOTION` on every move and `MOUSEBUTTONDOWN` /
+  `MOUSEBUTTONUP` for any button. On PyScript this uses Pointer Events, so mouse,
+  touch, and pen all work (with the `touch` flag set for non-mouse pointers).
+- **Wheel** — `MOUSEWHEEL` (also consumed by encoder devices).
+- **Keyboard** — `KEYDOWN` / `KEYUP` with SDL-style key codes, names, and
+  modifier masks (incl. left/right modifier variants) via the shared keymap in
+  `eventsys.keys`.
+- **Gamepad** (PyScript only) — `JOYAXISMOTION` / `JOYBUTTONDOWN` /
+  `JOYBUTTONUP`, polled from the Gamepad API on each `read()`.
+- **Quit** — an assignable key chord emits `events.QUIT` (the equivalent of
+  clicking an SDL window's close button; the broker then deinitializes the
+  display and exits). It defaults to **CTRL+C**; reassign if the host intercepts
+  it:
+
+```python
+from eventsys.keys import Keys
+
+devices_drv.quit_chord = (Keys.K_q, Keys.KMOD_CTRL)  # use CTRL+Q instead
+```
+
+> **Caveat:** key events require the canvas/widget to be focused (click it
+> first), and the notebook/browser front end may consume some keys (arrows,
+> space, `Ctrl`/`Cmd` shortcuts) before they reach the helper. This makes
+> keyboard input on these backends less reliable than on the desktop SDL/PyGame
+> backends.
+>
+> Rotation on these backends only reshapes the surface (e.g. 320×480 ↔ 480×320);
+> it does not physically rotate, so pointer coordinates need no rotation
+> remapping.
 
 ## Canvases
 

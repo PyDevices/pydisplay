@@ -32,6 +32,11 @@ SDL_Quit = usdl2.quit
 SDL_GetError = usdl2.get_error
 SDL_PollEvent = usdl2.poll_event
 SDL_GetKeyName = usdl2.get_key_name
+SDL_InitSubSystem = usdl2.init_subsystem
+SDL_NumJoysticks = usdl2.num_joysticks
+SDL_JoystickOpen = usdl2.joystick_open
+SDL_JoystickClose = usdl2.joystick_close
+SDL_JoystickInstanceID = usdl2.joystick_instance_id
 
 
 def SDL_CreateWindow(title, x, y, w, h, flags):

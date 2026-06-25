@@ -27,9 +27,11 @@ Run pydisplay examples in VS Code or Jupyter with the `JNDisplay` backend.
 4. Open [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb).
 5. Run cells starting with `import lib.path`.
 
-Board config: `board_configs/jndisplay/board_config.py` (registers `JNDevices` + `TouchDevice`).
+Board config: `board_configs/jndisplay/board_config.py` (registers `JNDevices` as a `QUEUE` device).
 
 Touch examples (e.g. [`eventsys_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_touch_test.py)) render a single interactive **ipywidgets Image** — click on that widget.
+
+`JNDevices` captures mouse (motion/buttons), wheel, and keyboard input on that Image widget via `ipyevents`. The widget must be focused (clicked) to receive key events, and some keys may be consumed by the notebook front end. It also captures an assignable quit chord (default **CTRL+C**) that emits a `QUIT` event; reassign `devices_drv.quit_chord` if the front end intercepts it. See [Displays → How displays expose input](../concepts/displays.md#how-displays-expose-input).
 
 ## Async execution model
 

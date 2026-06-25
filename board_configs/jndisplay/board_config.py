@@ -14,11 +14,11 @@ broker = devices.Broker()
 
 display_drv = JNDisplay(width, height)
 
-touch_drv = JNDevices(display_drv)
+devices_drv = JNDevices(display_drv)
 
-touch_dev = broker.create_device(
-    type=devices.types.TOUCH,
-    read=touch_drv.get_mouse_pos,
+events_dev = broker.create_device(
+    type=devices.types.QUEUE,
+    read=devices_drv.read,
     data=display_drv,
 )
 

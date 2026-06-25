@@ -54,6 +54,26 @@ See [API reference → eventsys.devices.Broker](../reference/eventsys/devices.md
 
 The same event types fire regardless of physical hardware — develop on desktop with a mouse, deploy with a touchscreen.
 
+## How displays feed the broker
+
+Every display backend feeds the broker the same way — as `eventsys.events`
+objects drained through a **`QUEUE`** device — differing only in how that stream
+is produced (see [Displays → How displays expose
+input](displays.md#how-displays-expose-input)):
+
+- **Desktop** (`SDL2Display`, `PGDisplay`) — module-level `poll()` / `get()`
+  drain the native OS event queue and return ready-made `eventsys.events`.
+- **Browser / notebook** (`PSDisplay`, `JNDisplay`) — a `PSDevices` / `JNDevices`
+  instance captures all available canvas/widget input and returns it via
+  `read()`: pointer (`MOUSEMOTION` / `MOUSEBUTTONDOWN` / `MOUSEBUTTONUP`, incl.
+  touch and pen on PyScript), wheel (`MOUSEWHEEL`), keyboard (`KEYDOWN` /
+  `KEYUP` with SDL-style codes/names/modifiers from the shared keymap in
+  `eventsys.keys`), gamepad (`JOY*`, PyScript only), and a `QUIT` from an
+  assignable quit chord (default **CTRL+C**).
+
+Either way your handler sees the same `eventsys.events` objects, so application
+code does not need to know which backend the active display uses.
+
 ## Brokers
 
 `board_config.py` typically sets up brokers that poll hardware and enqueue events:

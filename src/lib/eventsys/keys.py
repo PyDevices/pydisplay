@@ -574,3 +574,144 @@ class Keys:
         KMOD_ALT: "Alt",
         KMOD_GUI: "GUI",
     }
+
+
+# ---------------------------------------------------------------------------
+# Browser / DOM keyboard helpers
+#
+# Translate values from a JavaScript ``KeyboardEvent`` (as delivered by
+# PyScript or ipyevents) into the SDL-style key codes and modifier masks above,
+# so web/notebook backends can emit the same ``Key`` events as the desktop
+# SDL2 / PyGame backends.  ``KeyboardEvent.key`` holds either a single printable
+# character (mapped by code point) or a named value such as ``"ArrowUp"``
+# (mapped via the table below).
+# ---------------------------------------------------------------------------
+
+_DOM_NAMED_KEYS = {
+    "Backspace": Keys.K_BACKSPACE,
+    "Tab": Keys.K_TAB,
+    "Enter": Keys.K_RETURN,
+    "Escape": Keys.K_ESCAPE,
+    "Delete": Keys.K_DELETE,
+    "ArrowUp": Keys.K_UP,
+    "ArrowDown": Keys.K_DOWN,
+    "ArrowLeft": Keys.K_LEFT,
+    "ArrowRight": Keys.K_RIGHT,
+    "Home": Keys.K_HOME,
+    "End": Keys.K_END,
+    "PageUp": Keys.K_PAGEUP,
+    "PageDown": Keys.K_PAGEDOWN,
+    "Insert": Keys.K_INSERT,
+    "CapsLock": Keys.K_CAPSLOCK,
+    "NumLock": Keys.K_NUMLOCKCLEAR,
+    "ScrollLock": Keys.K_SCROLLLOCK,
+    "Pause": Keys.K_PAUSE,
+    "PrintScreen": Keys.K_PRINTSCREEN,
+    "ContextMenu": Keys.K_MENU,
+    "Control": Keys.K_LCTRL,
+    "Shift": Keys.K_LSHIFT,
+    "Alt": Keys.K_LALT,
+    "Meta": Keys.K_LGUI,
+    "F1": Keys.K_F1,
+    "F2": Keys.K_F2,
+    "F3": Keys.K_F3,
+    "F4": Keys.K_F4,
+    "F5": Keys.K_F5,
+    "F6": Keys.K_F6,
+    "F7": Keys.K_F7,
+    "F8": Keys.K_F8,
+    "F9": Keys.K_F9,
+    "F10": Keys.K_F10,
+    "F11": Keys.K_F11,
+    "F12": Keys.K_F12,
+}
+
+# Right-hand variants of modifier keys, selected when the DOM key event reports
+# ``location == DOM_KEY_LOCATION_RIGHT`` (2).
+_DOM_RIGHT_KEYS = {
+    "Control": Keys.K_RCTRL,
+    "Shift": Keys.K_RSHIFT,
+    "Alt": Keys.K_RALT,
+    "Meta": Keys.K_RGUI,
+}
+
+_MOD_GROUPS = (Keys.KMOD_CTRL, Keys.KMOD_SHIFT, Keys.KMOD_ALT, Keys.KMOD_GUI)
+
+
+def key_to_keycode(key, location=0):
+    """
+    Map a DOM ``KeyboardEvent.key`` value to an eventsys key code.
+
+    Args:
+        key (str): The ``KeyboardEvent.key`` value (e.g. ``"a"`` or ``"ArrowUp"``).
+        location (int): The ``KeyboardEvent.location`` value.  ``2`` selects the
+            right-hand variant of a modifier key (e.g. ``K_RCTRL``).
+
+    Returns:
+        int: The matching ``Keys.K_*`` code, or ``Keys.K_UNKNOWN``.
+    """
+    if location == 2:
+        code = _DOM_RIGHT_KEYS.get(key)
+        if code is not None:
+            return code
+    code = _DOM_NAMED_KEYS.get(key)
+    if code is not None:
+        return code
+    if key and len(key) == 1:
+        o = ord(key)
+        if 0x41 <= o <= 0x5A:  # 'A'-'Z' -> lowercase code, matching SDL
+            return o + 0x20
+        return o
+    return Keys.K_UNKNOWN
+
+
+def mod_mask(ctrl, shift, alt, meta):
+    """
+    Build an eventsys modifier mask from DOM modifier flags.
+
+    Args:
+        ctrl (bool): Whether Ctrl is held.
+        shift (bool): Whether Shift is held.
+        alt (bool): Whether Alt is held.
+        meta (bool): Whether Meta/GUI (Cmd/Win) is held.
+
+    Returns:
+        int: A mask of ``Keys.KMOD_*`` bits.
+    """
+    mask = 0
+    if shift:
+        mask |= Keys.KMOD_LSHIFT
+    if ctrl:
+        mask |= Keys.KMOD_LCTRL
+    if alt:
+        mask |= Keys.KMOD_LALT
+    if meta:
+        mask |= Keys.KMOD_LGUI
+    return mask
+
+
+def chord_matches(chord, keycode, mod):
+    """
+    Return True if ``(keycode, mod)`` satisfies a ``(key, mod_mask)`` chord.
+
+    Modifier matching is group-aware: a required ``KMOD_CTRL`` is satisfied by
+    either left or right Ctrl.  Extra modifiers beyond those required are
+    ignored.
+
+    Args:
+        chord (tuple | None): A ``(key_code, modifier_mask)`` tuple, or None.
+        keycode (int): The pressed key code.
+        mod (int): The active modifier mask.
+
+    Returns:
+        bool: Whether the chord is satisfied.
+    """
+    if not chord:
+        return False
+    chord_key, chord_mod = chord
+    if keycode != chord_key:
+        return False
+    for group in _MOD_GROUPS:
+        if (chord_mod & group) and not (mod & group):
+            return False
+    return True
