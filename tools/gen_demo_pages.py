@@ -27,8 +27,9 @@ Each example declares install paths on line 2::
     # pyscript files: calculator.py
 
 Use comma-separated paths relative to ``src/examples/``. List non-``.py`` assets
-too (``.bmp``, ``.bin``, …) for device installs; examples with any non-``.py``
-entry are omitted from the browser gallery.
+too (``.bmp``, ``.bin``, …) for device installs; any example whose list
+includes a binary file is **excluded** from the browser gallery (see
+``BINARY_SUFFIXES`` / ``depends_on_binary_files``).
 
 This script is CPython standard library only.
 """
@@ -46,6 +47,10 @@ INDEX = REPO_ROOT / "index.html"
 BOARD_CONFIG = REPO_ROOT / "src" / "lib" / "board_config.py"
 
 
+def path_is_binary(path: str) -> bool:
+    return Path(path).suffix.lower() in BINARY_SUFFIXES
+
+
 def board_display_size() -> tuple[int, int]:
     """Read ``width`` / ``height`` from the PyScript ``board_config`` (layout hint only)."""
     width = height = None
@@ -60,6 +65,10 @@ def board_display_size() -> tuple[int, int]:
 
 # Example types we build pages for (anything async-compatible runs in PyScript).
 TARGET_TYPES = ("async", "all")
+
+# Non-Python install paths — browser demos skip these (mip + GitHub Pages cannot
+# reliably serve binary assets today).
+BINARY_SUFFIXES = frozenset({".bmp", ".bin", ".pbm", ".png", ".jpg", ".jpeg", ".gif", ".webp"})
 
 # Curated copy. Anything omitted falls back to the module docstring + defaults.
 # Fields: title, blurb, howto (list), experimental (bool), note (str), icon.
@@ -214,8 +223,12 @@ class Example:
         return bool(self.curated.get("experimental"))
 
     @property
+    def depends_on_binary_files(self) -> bool:
+        return any(path_is_binary(path) for path in self.pyscript_files)
+
+    @property
     def browser_eligible(self) -> bool:
-        return all(path.endswith(".py") for path in self.pyscript_files)
+        return not self.depends_on_binary_files
 
     @property
     def install_line(self) -> str:
@@ -343,7 +356,8 @@ def extract_blurb(text: str, name: str) -> str:
     return ""
 
 
-def discover() -> list[Example]:
+def discover_parsed() -> list[Example]:
+    """All browser-runnable examples (async/all), including binary-dependent ones."""
     found: dict[str, Example] = {}
     for path in sorted(EXAMPLES_DIR.rglob("*.py")):
         # Only top-level files and one-level sub-package entry files.
@@ -352,9 +366,13 @@ def discover() -> list[Example]:
             ex = parse_example(path)
         else:
             ex = None
-        if ex and ex.browser_eligible and ex.name not in found:
+        if ex and ex.name not in found:
             found[ex.name] = ex
     return list(found.values())
+
+
+def discover() -> list[Example]:
+    return [ex for ex in discover_parsed() if ex.browser_eligible]
 
 
 # --------------------------------------------------------------------------- #
@@ -636,7 +654,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--check", action="store_true", help="fail if any output is stale")
     args = parser.parse_args(argv)
 
-    examples = discover()
+    parsed = discover_parsed()
+    skipped_binary = sorted(ex.name for ex in parsed if ex.depends_on_binary_files)
+    examples = [ex for ex in parsed if ex.browser_eligible]
     by_type = {"async": [], "all": []}
     for ex in sorted(examples, key=lambda e: (e.experimental, e.title.lower())):
         by_type[ex.mtype].append(ex)
@@ -665,6 +685,11 @@ def main(argv: list[str] | None = None) -> int:
         f"\n{len(examples)} example pages "
         f"({len(by_type['async'])} async, {len(by_type['all'])} all)."
     )
+    if skipped_binary:
+        print(
+            f"Skipped {len(skipped_binary)} binary-dependent example(s): "
+            + ", ".join(skipped_binary)
+        )
     if args.check and stale:
         print("STALE:\n  " + "\n  ".join(stale))
         return 1

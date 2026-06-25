@@ -29,7 +29,7 @@ python tools/gen_demo_pages.py --check  # CI: fail if anything is stale
 
 `tools/gen_demo_pages.py` scans `src/examples/` for the `# multimer types:`
 header, derives a blurb from the module docstring, and applies curated overrides
-(`CURATED`), manifest-install hints (`NEEDS_MANIFEST`) and icons. The index has
+(`CURATED`) and icons. The index has
 `<!-- GEN:async:start -->` / `<!-- GEN:all:start -->` markers the generator fills.
 To tweak copy for a specific example, edit its entry in `CURATED` and rerun.
 
@@ -49,10 +49,10 @@ import <module>         # module-level code runs (schedules async main, or block
 
 Library deps (graphics, eventsys, displaysys, multimer, palettes, touch_keypad,
 tft_config, console, framebuf, fonts …) are pre-mounted by `html/pyscript.toml`
-`[files]`, so single-file installs resolve. Example-local packages and assets
-(`apollo_dsky/`, `chango/`, `noto_fonts/`, `examples/assets/*`) only exist when
-the full `packages/examples.json` manifest is installed with `target="examples"`
-— the generator picks that strategy for those (`NEEDS_MANIFEST` + sub-packages).
+`[files]`, so single-file installs resolve. Multi-file examples install sibling
+`.py` modules via per-file `mip.install` (e.g. `chango/`, `noto_fonts/`).
+Examples that need **binary** assets (`.bmp`, `.bin`, `.pbm`, …) are excluded
+from the browser gallery — see `BINARY_SUFFIXES` in `tools/gen_demo_pages.py`.
 
 All demos run on the **main thread** (no `worker`) because
 `displaysys.psdisplay` uses `from js import document` / `pyscript.ffi`.
@@ -156,27 +156,47 @@ PyScript. Clicks and auto-scroll confirmed on `calculator` and
 Section A online spot-check **complete** for the core async + draw-once set.
 
 ### B. Blocking `while True` loops freeze the tab (tagged `loops`)
-These render but never yield to the event loop, so the tab becomes unresponsive
-after **Run** (reload to stop): `displaysys_simpletest`, `color_test`,
-`boxlines`, `feathers`, `eventsys_encoder_test`, `fonts`, `font_simpletest`,
-`font_simpletest2`, `font_simpletest3`, `font_list`, `hello`, `rotations`,
-`scroll`, `tiny_hello`, `chango`, `noto_fonts`. Options to make them
-browser-friendly: add an async variant (`await asyncio.sleep(0)` in the loop)
-or a frame cap, or run them in a worker with a headless display path. The Run
-gate already prevents an on-load hang.
 
-### C. Asset-dependent examples (need the manifest install)
-Load files from `examples/assets/` or sub-packages, so they use the
-`examples.json` install: `bmp565_blit`, `bmp565_simpletest`, `font_list`,
-`font_simpletest`, `font_simpletest2`, `font_simpletest3`, `pbm_simpletest`,
-`chango`, `noto_fonts`. Verify `mip` writes the **binary** assets (`.bmp`,
-`.pbm`) into the VFS and that relative paths like `examples/assets/warrior.bmp`
-resolve from cwd `/`. Downloading the whole example set per page is heavy —
-consider small per-demo manifests if load time matters.
+Ten gallery pages carry the **`loops`** tag (`gen_demo_pages.py` sets `blocks`
+when the source has `while True` and the example is not async). After **Run**
+they never yield to the browser event loop — the tab becomes unresponsive until
+reload. The Run gate already prevents an on-load hang.
 
-**Status (2026-06):** `chango` verified online — per-file GitHub installs into
-`examples/chango/`, import succeeds, status Running. Still to verify: binary
-asset demos (`bmp565_*`, `pbm_simpletest`, font tests with assets).
+**Not blocking:** `chango`, `noto_fonts` (draw once, then `broker.poll()` /
+`run_queued()` — no `while True`).
+
+| Demo | Loop style | Browser decision |
+|------|------------|------------------|
+| `displaysys_simpletest` | Tight `broker.poll()` spin | **Leave for now** — useful interactive demo but hogs CPU; future async variant mirroring `eventsys_simpletest` |
+| `eventsys_encoder_test` | Tight `broker.poll()` spin | **Leave for now** — same; scroll-wheel test works briefly before the tab locks up |
+| `boxlines` | Continuous random draw, no sleep | **Leave** — hardware-style stress demo; `loops` warning is enough |
+| `hello` | 128× tight text draws per rotation | **Leave** — same |
+| `tiny_hello` | 3× `sleep_ms(1000)` intro, then tight loop | **Leave** — intro is visible; loop freezes afterward |
+| `color_test` | `sleep_ms(1000)` between border redraws | **Leave** — slow enough to see output once |
+| `fonts` | `sleep_ms(3000)` between font pages | **Leave** |
+| `rotations` | `sleep_ms(2000)` between rotations | **Leave** |
+| `scroll` | `sleep_ms(10)` hardware scroll | **Leave** — exercises `vscsad`; acceptable as a reference |
+| `feathers` | Tight scroll animation, no sleep | **Leave** — worst offender after `boxlines`/`hello`; keep `loops` tag |
+
+**Policy:** No async rewrites in this pass. Async gallery examples (`paint`,
+`calculator`, `eventsys_simpletest`, …) already show the browser-friendly
+pattern. Converting the `tft_config` animation set would duplicate a lot of
+device-oriented code for marginal gain. If we revisit, start with the two
+poll-loop examples (`displaysys_simpletest`, `eventsys_encoder_test`).
+
+**Status (2026-06):** assessed — keep all ten in the gallery with existing
+`loops` tag and page notes; no generator or example changes required.
+
+### C. Binary-asset examples — excluded from browser gallery
+Examples whose `# pyscript files:` list includes a non-`.py` path are skipped by
+`tools/gen_demo_pages.py` (`depends_on_binary_files`). Device installs still use
+the full path list; the browser gallery only ships Python-only installs.
+
+**Excluded:** `apollo`, all `bmp565_*`, `font_list`, `font_simpletest`,
+`font_simpletest2`, `font_simpletest3`, `pbm_simpletest`, `alien` (`.png`).
+
+**Included (Python-only assets):** `chango`, `noto_fonts` (converted font data
+as `.py` modules), `pbm_create_new` (builds a PBM in code, no external file).
 
 ### D. Missing dependency — `nano_gui_simpletest`
 Imports the `gui` (nano-gui) package, which is **not** in `pyscript.toml`
@@ -224,7 +244,7 @@ To go fully offline-friendly, pre-mount example files in `pyscript.toml` too.
 ## Next up
 
 1. ~~**Section A (online)**~~ — done (2026-06).
-2. **Section C** — verify manifest-install examples (`chango`, font tests, `bmp565_*`).
-3. **Section B** — decide per-demo whether to add async variants or leave as Run-and-freeze.
+2. ~~**Section C (binary assets)**~~ — excluded from gallery by generator policy.
+3. ~~**Section B (blocking loops)**~~ — assessed; keep `loops` tag, no rewrites this pass.
 4. **Section E** — LVGL browser path deferred; `lv_test_timer_async` stays `experimental`.
 5. **Section G** — measure dirty-region blits if full-frame redraw is still heavy online.
