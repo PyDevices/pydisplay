@@ -69,11 +69,18 @@ The deploy workflow (`.github/workflows/deploy-demo.yml`) therefore copies:
 - `index.html` → `_site/demo/`
 - `html/` → `_site/demo/html/`
 - `src/lib/`, `src/add_ons/`, `src/jupyter_notebook.ipynb` → `_site/demo/src/`
+- browser-gallery example `.py` files → `_site/demo/src/examples/` (via
+  `python tools/gen_demo_pages.py --copy-examples`)
 - `demo-pages/index.html` + `site.css` → `_site/`
 
-Only `lib/` and `add_ons/` are copied — not all of `src/` — because
-`src/examples/` contains tracked symlinks to paths outside the repo that break
-CI. Examples are still fetched at Run time via `mip.install("github:PyDevices/...")`.
+Only `lib/` and `add_ons/` are copied from `src/` wholesale — not all of
+`src/examples/` — because that tree contains tracked symlinks to paths outside
+the repo that break CI. Gallery examples (Python-only, 36 files) are copied
+file-by-file instead. Binary-dependent examples stay device-only.
+
+Generated demo pages install from `_repo_base + "/src/examples/..."` on
+localhost **and** `*.github.io` (same-origin); other hosts still use
+`github:PyDevices/...` as a fallback.
 
 Triggers on changes to `html/**`, `src/**`, `index.html`, `demo-pages/**`, or
 the workflow file itself.
@@ -252,11 +259,18 @@ pages). **`PSDisplay` sets `_quiet = True`** so browser demos stay clean. Pointe
 move logging is not present in current `PSDevices`.
 
 ### I. Runtime fetches from GitHub
-Every page `mip.install`s the **example script** from `github:PyDevices/...` at
-Run time (when not on localhost), so demos need network access and the first run
-is slow. Library code (`lib/`, `add_ons/`) is now **pre-mounted on GitHub Pages**
-via the deploy workflow; locally it comes from the repo root via `pyscript.toml`.
-To go fully offline-friendly, pre-mount example files in `pyscript.toml` too.
+Library code (`lib/`, `add_ons/`) is pre-mounted by `html/pyscript.toml`
+`[files]` and copied on deploy. Gallery example scripts are now copied to
+`demo/src/examples/` on deploy and installed from the same origin on GitHub Pages
+(no GitHub API fetch on Run). Locally `tools/serve.py` serves the repo root the
+same way.
+
+Non-gallery pages (`editor.html`, `example.html`, `test.html`, `repl.html`) still
+use `github:` installs. To go fully offline-friendly, extend the copy list or
+pre-mount those paths in `pyscript.toml` too.
+
+**Status (2026-06):** gallery pages use origin install on `*.github.io`; deploy
+copies 36 Python-only example files via `--copy-examples`.
 
 ## Next up
 
@@ -265,4 +279,4 @@ To go fully offline-friendly, pre-mount example files in `pyscript.toml` too.
 3. ~~**Section B (blocking loops)**~~ — assessed; keep `loops` tag, no rewrites this pass.
 4. ~~**Section E (LVGL)**~~ — deferred; `lv_test_timer_async` stays `experimental`.
 5. ~~**Section G (perf)**~~ — measured locally (2026-06); dirty-region path OK, full `blit_rect` costly.
-6. **Section I** — optional: pre-mount example scripts in `pyscript.toml` for offline Pages.
+6. ~~**Section I (origin install)**~~ — gallery examples copied on deploy; Pages uses same-origin `mip`.

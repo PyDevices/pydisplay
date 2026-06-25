@@ -28,9 +28,11 @@ jobs:
           cp -r html _site/demo/
           # pyscript.toml mounts ../src/lib and ../src/add_ons (not examples/) — copy
           # only those trees so broken local symlinks under src/examples/ do not break deploy.
+          # Gallery example .py files are copied file-by-file (see --copy-examples).
           mkdir -p _site/demo/src
           cp -r src/lib src/add_ons _site/demo/src/
           cp src/jupyter_notebook.ipynb _site/demo/src/
+          python tools/gen_demo_pages.py --copy-examples _site/demo/src/examples
           cp demo-pages/index.html _site/index.html
           cp demo-pages/site.css _site/site.css
 

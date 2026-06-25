@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import shutil
 import sys
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -260,32 +261,59 @@ def mip_install_target(examples_rel: str) -> str | None:
     return None
 
 
+def render_mip_install_preamble(ind: str) -> list[str]:
+    """JS prelude: repo base URL and whether to install from origin vs GitHub."""
+    return [
+        "from js import document",
+        f"{ind}_host = document.location.hostname",
+        f"{ind}_path = document.location.pathname",
+        f'{ind}_demo_root = _path.split("/html/")[0] if "/html/" in _path else ""',
+        f"{ind}_repo_base = document.location.origin + _demo_root",
+        # serve.py (repo root) or GitHub Pages (gallery examples under demo/src/examples/)
+        f'{ind}_origin = _host in ("127.0.0.1", "localhost") or _host.endswith(".github.io")',
+    ]
+
+
 def render_mip_installs(pyscript_files: list[str]) -> str:
     ind = "                "
     br = "                    "
-    lines = [
-        "from js import document",
-        f"{ind}_host = document.location.hostname",
-        f'{ind}_local = _host in ("127.0.0.1", "localhost")',
-    ]
+    lines = render_mip_install_preamble(ind)
     for path in pyscript_files:
         target = mip_install_target(path)
+        url = f'_repo_base + "/src/examples/{path}"'
         if target:
-            local = (
-                f"mip.install(document.location.origin + "
-                f'"/src/examples/{path}", target="{target}")'
-            )
+            origin = f'mip.install({url}, target="{target}")'
             gh = (
                 f'mip.install("github:PyDevices/pydisplay/src/examples/{path}", target="{target}")'
             )
         else:
-            local = f'mip.install(document.location.origin + "/src/examples/{path}")'
+            origin = f"mip.install({url})"
             gh = f'mip.install("github:PyDevices/pydisplay/src/examples/{path}")'
-        lines.append(f"{ind}if _local:")
-        lines.append(f"{br}{local}")
+        lines.append(f"{ind}if _origin:")
+        lines.append(f"{br}{origin}")
         lines.append(f"{ind}else:")
         lines.append(f"{br}{gh}")
     return "\n".join(lines)
+
+
+def gallery_example_files() -> list[str]:
+    """All ``# pyscript files:`` paths for browser-gallery examples (Python only)."""
+    files: set[str] = set()
+    for ex in discover():
+        files.update(ex.pyscript_files)
+    return sorted(files)
+
+
+def copy_gallery_examples(dest: Path) -> int:
+    """Copy gallery example sources into ``dest`` (for GitHub Pages deploy)."""
+    n = 0
+    for rel in gallery_example_files():
+        src = EXAMPLES_DIR / rel
+        dst = dest / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+        n += 1
+    return n
 
 
 def parse_example(path: Path) -> Example | None:
@@ -652,7 +680,17 @@ def main(argv: list[str] | None = None) -> int:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("--check", action="store_true", help="fail if any output is stale")
+    parser.add_argument(
+        "--copy-examples",
+        type=Path,
+        metavar="DIR",
+        help="copy gallery example .py files into DIR (for GitHub Pages deploy)",
+    )
     args = parser.parse_args(argv)
+
+    if args.copy_examples:
+        n = copy_gallery_examples(args.copy_examples)
+        print(f"copied {n} gallery example file(s) to {args.copy_examples}")
 
     parsed = discover_parsed()
     skipped_binary = sorted(ex.name for ex in parsed if ex.depends_on_binary_files)

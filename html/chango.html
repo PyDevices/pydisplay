@@ -126,25 +126,28 @@
                 import mip
                 from js import document
                 _host = document.location.hostname
-                _local = _host in ("127.0.0.1", "localhost")
-                if _local:
-                    mip.install(document.location.origin + "/src/examples/chango/__init__.py", target="examples/chango")
+                _path = document.location.pathname
+                _demo_root = _path.split("/html/")[0] if "/html/" in _path else ""
+                _repo_base = document.location.origin + _demo_root
+                _origin = _host in ("127.0.0.1", "localhost") or _host.endswith(".github.io")
+                if _origin:
+                    mip.install(_repo_base + "/src/examples/chango/__init__.py", target="examples/chango")
                 else:
                     mip.install("github:PyDevices/pydisplay/src/examples/chango/__init__.py", target="examples/chango")
-                if _local:
-                    mip.install(document.location.origin + "/src/examples/chango/chango.py", target="examples/chango")
+                if _origin:
+                    mip.install(_repo_base + "/src/examples/chango/chango.py", target="examples/chango")
                 else:
                     mip.install("github:PyDevices/pydisplay/src/examples/chango/chango.py", target="examples/chango")
-                if _local:
-                    mip.install(document.location.origin + "/src/examples/chango/chango_16.py", target="examples/chango")
+                if _origin:
+                    mip.install(_repo_base + "/src/examples/chango/chango_16.py", target="examples/chango")
                 else:
                     mip.install("github:PyDevices/pydisplay/src/examples/chango/chango_16.py", target="examples/chango")
-                if _local:
-                    mip.install(document.location.origin + "/src/examples/chango/chango_32.py", target="examples/chango")
+                if _origin:
+                    mip.install(_repo_base + "/src/examples/chango/chango_32.py", target="examples/chango")
                 else:
                     mip.install("github:PyDevices/pydisplay/src/examples/chango/chango_32.py", target="examples/chango")
-                if _local:
-                    mip.install(document.location.origin + "/src/examples/chango/chango_64.py", target="examples/chango")
+                if _origin:
+                    mip.install(_repo_base + "/src/examples/chango/chango_64.py", target="examples/chango")
                 else:
                     mip.install("github:PyDevices/pydisplay/src/examples/chango/chango_64.py", target="examples/chango")
                 _set("Importing chango…")
