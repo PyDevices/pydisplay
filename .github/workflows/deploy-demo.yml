@@ -7,6 +7,7 @@ on:
     paths:
       - 'index.html'
       - 'html/**'
+      - 'src/**'
       - 'demo-pages/**'
       - '.github/workflows/deploy-demo.yml'
   workflow_dispatch:
@@ -25,6 +26,9 @@ jobs:
           mkdir -p _site/demo
           cp index.html _site/demo/
           cp -r html _site/demo/
+          # pyscript.toml mounts ../src/* relative to html/ — library files must
+          # be served at demo/src/ on GitHub Pages (serve.py serves repo root locally).
+          cp -r src _site/demo/src
           cp demo-pages/index.html _site/index.html
           cp demo-pages/site.css _site/site.css
 
