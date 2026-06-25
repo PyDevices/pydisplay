@@ -9,7 +9,12 @@ An Event System including event types and device types for *Python.
 
 from collections import namedtuple
 
-from micropython import const
+try:
+    from micropython import const
+except ImportError:
+
+    def const(x):
+        return x
 
 
 def custom_type(types=None, classes=None):

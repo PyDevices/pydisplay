@@ -7,7 +7,12 @@
 ====================================================
 """
 
-from micropython import const as _const
+try:
+    from micropython import const as _const
+except ImportError:
+
+    def _const(x):
+        return x
 
 
 class Keys:
