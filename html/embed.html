@@ -99,7 +99,6 @@
 </script>
 <script type="mpy" config="./pyscript.toml" output="log">
 import builtins
-import json
 from js import document
 
 MANIFEST_MIP_TARGET = "examples"
@@ -138,27 +137,13 @@ def _loader_plan():
         entry = manifests[0]
     return modules, manifests, entry
 
-def _repo_context():
+def _mip_base():
     host = document.location.hostname
     path = document.location.pathname
     demo_root = path.split("/html/")[0] if "/html/" in path else ""
-    repo_base = document.location.origin + demo_root
-    origin = host in ("127.0.0.1", "localhost") or host.endswith(".github.io")
-    return repo_base, origin
-
-def _fetch_json(url):
-    from js import XMLHttpRequest
-    xhr = XMLHttpRequest.new()
-    xhr.open("GET", url, False)
-    xhr.send(None)
-    if xhr.status != 200:
-        raise RuntimeError("HTTP " + str(xhr.status) + " fetching " + url)
-    return json.loads(xhr.responseText)
-
-def _install_manifest_origin(mip, repo_base, name):
-    manifest = _fetch_json(repo_base + "/html/" + name + ".json")
-    for dest, _src in manifest["urls"]:
-        mip.install(repo_base + "/src/examples/" + dest, target=MANIFEST_MIP_TARGET)
+    if host in ("127.0.0.1", "localhost") or host.endswith(".github.io"):
+        return document.location.origin + demo_root + "/"
+    return "github:PyDevices/pydisplay/"
 
 def _run():
     if _from_window("__pydisplayLoaderDisabled"):
@@ -167,20 +152,11 @@ def _run():
     if not entry:
         return
     import mip
-    repo_base, origin = _repo_context()
+    mip_base = _mip_base()
     for name in manifests:
-        if origin:
-            _install_manifest_origin(mip, repo_base, name)
-        else:
-            mip.install(
-                "github:PyDevices/pydisplay/html/" + name + ".json",
-                target=MANIFEST_MIP_TARGET,
-            )
+        mip.install(mip_base + "html/" + name + ".json", target=MANIFEST_MIP_TARGET)
     for name in modules:
-        if origin:
-            mip.install(repo_base + "/src/examples/" + name + ".py")
-        else:
-            mip.install("github:PyDevices/pydisplay/src/examples/" + name + ".py")
+        mip.install(mip_base + "src/examples/" + name + ".py")
     import lib.path
     __import__(entry)
 
