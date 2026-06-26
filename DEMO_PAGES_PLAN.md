@@ -13,7 +13,8 @@ the deployed site (the deploy workflow copies `index.html`, `html/**`,
   `# multimer types: async` **or** `all`, and refreshes the index card grids.
 - `tools/serve.py` — CPython dev server (see below).
 - 27 generated example pages in `html/` (5 `async`, 22 `all`), plus hand-written
-  pages (`repl.html`, `editor.html`, `example.html`, `test.html`).
+  pages (`repl.html`, `editor.html`, `index.html` — parametric `?script=` loader,
+  `test.html`).
 - `index.html` (demo index) and `demo-pages/index.html` (landing) restyled.
 - `.github/workflows/deploy-demo.yml` — assembles `_site/` and pushes to
   `gh-pages` (see **GitHub Pages deploy** below).
@@ -265,18 +266,18 @@ Library code (`lib/`, `add_ons/`) is pre-mounted by `html/pyscript.toml`
 (no GitHub API fetch on Run). Locally `tools/serve.py` serves the repo root the
 same way.
 
-Non-gallery pages (`editor.html`, `example.html`, `test.html`, `repl.html`) still
+Non-gallery pages (`editor.html`, `index.html`, `test.html`, `repl.html`) still
 use `github:` installs. To go fully offline-friendly, extend the copy list or
 pre-mount those paths in `pyscript.toml` too.
 
 **Status (2026-06):** gallery pages use origin install on `*.github.io`; deploy
-copies 36 Python-only example files via `--copy-examples`.
+copies 36 Python-only example files via `--copy-examples`. **Verified online**
+after deploy run `28202033212`: `paint` and `chango` log
+`Downloading https://pydevices.github.io/pydisplay/demo/src/examples/...` (no
+`github:` fetch); Run succeeds.
 
 ## Next up
 
-1. ~~**Section A (online)**~~ — done (2026-06).
-2. ~~**Section C (binary assets)**~~ — excluded from gallery by generator policy.
-3. ~~**Section B (blocking loops)**~~ — assessed; keep `loops` tag, no rewrites this pass.
-4. ~~**Section E (LVGL)**~~ — deferred; `lv_test_timer_async` stays `experimental`.
-5. ~~**Section G (perf)**~~ — measured locally (2026-06); dirty-region path OK, full `blit_rect` costly.
-6. ~~**Section I (origin install)**~~ — gallery examples copied on deploy; Pages uses same-origin `mip`.
+All tracked items complete (2026-06). Remaining known issues stay in sections
+D/E/F above (nano-gui import, LVGL browser, apollo binary assets) — not planned
+for the browser gallery unless priorities change.

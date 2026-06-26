@@ -9,7 +9,8 @@ and refresh:
     python tools/serve.py
     # then open:
     #   http://127.0.0.1:8000/index.html            (demo index)
-    #   http://127.0.0.1:8000/html/calculator.html  (an example page)
+    #   http://127.0.0.1:8000/html/calculator.html  (a generated example page)
+    #   http://127.0.0.1:8000/html/index.html?script=calculator  (parametric loader)
     #   http://127.0.0.1:8000/demo-pages/index.html (landing page)
 
 Why a custom server instead of `python -m http.server`?

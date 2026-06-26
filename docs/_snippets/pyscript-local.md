@@ -8,7 +8,7 @@ Open [http://localhost:8000/](http://localhost:8000/) — the hub links to pages
 
 | Page | Local URL | Purpose |
 |------|-----------|---------|
-| Calculator | [localhost:8000/html/example.html?script=calculator](http://localhost:8000/html/example.html?script=calculator) | Run one example by name |
+| Calculator | [localhost:8000/html/index.html?script=calculator](http://localhost:8000/html/index.html?script=calculator) | Run one example by name |
 | Test runner | [localhost:8000/html/test.html](http://localhost:8000/html/test.html) | Example picker |
 | REPL | [localhost:8000/html/repl.html](http://localhost:8000/html/repl.html) | REPL + canvas |
 | Editor | [localhost:8000/html/editor.html](http://localhost:8000/html/editor.html) | mpy-editor with `paint.py` |

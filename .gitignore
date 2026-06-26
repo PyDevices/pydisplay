@@ -3,8 +3,9 @@ src/add_ons/gui
 # Cursor IDE / local debug
 .cursor/
 
-# Local examples (not distributed; spotapi is a symlink)
+# Local examples (not distributed; symlinks to spotapi outside this repo)
 src/examples/spotapi
+src/examples/spotify_remote
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

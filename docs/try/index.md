@@ -18,7 +18,7 @@ Evaluate pydisplay without installing anything on your machine.
 
 | Link | Description |
 |------|-------------|
-| [Calculator](https://PyDevices.github.io/pydisplay/demo/html/example.html?script=calculator) | Async calculator |
+| [Calculator](https://PyDevices.github.io/pydisplay/demo/html/index.html?script=calculator) | Async calculator |
 | [Test runner](https://PyDevices.github.io/pydisplay/demo/html/test.html) | Pick an example |
 | [REPL](https://PyDevices.github.io/pydisplay/demo/html/repl.html) | Interactive REPL + canvas |
 | [Editor](https://PyDevices.github.io/pydisplay/demo/html/editor.html) | mpy-editor with paint.py |

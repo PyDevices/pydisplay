@@ -10,7 +10,7 @@
 
 | Page | URL |
 |------|-----|
-| Calculator | [demo/html/example.html?script=calculator](https://PyDevices.github.io/pydisplay/demo/html/example.html?script=calculator) |
+| Calculator | [demo/html/index.html?script=calculator](https://PyDevices.github.io/pydisplay/demo/html/index.html?script=calculator) |
 | Test runner | [demo/html/test.html](https://PyDevices.github.io/pydisplay/demo/html/test.html) |
 | REPL | [demo/html/repl.html](https://PyDevices.github.io/pydisplay/demo/html/repl.html) |
 | Editor | [demo/html/editor.html](https://PyDevices.github.io/pydisplay/demo/html/editor.html) |
