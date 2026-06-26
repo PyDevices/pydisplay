@@ -13,7 +13,7 @@ the deployed site (the deploy workflow copies `index.html`, `html/**`,
   `# multimer types: async` **or** `all`, and refreshes the index card grids.
 - `tools/serve.py` — CPython dev server (see below).
 - 27 generated example pages in `html/` (5 `async`, 22 `all`), plus hand-written
-  pages (`repl.html`, `editor.html`, `index.html` — parametric `?script=` loader,
+  pages (`repl.html`, `editor.html`, `index.html` — parametric `?modules=` loader,
   `test.html`).
 - `index.html` (demo index) and `demo-pages/index.html` (landing) restyled.
 - `.github/workflows/deploy-demo.yml` — assembles `_site/` and pushes to

@@ -9,8 +9,8 @@ and refresh:
     python tools/serve.py
     # then open:
     #   http://127.0.0.1:8000/index.html            (demo index)
-    #   http://127.0.0.1:8000/html/calculator.html  (a generated example page)
-    #   http://127.0.0.1:8000/html/index.html?script=calculator  (parametric loader)
+    #   http://127.0.0.1:8000/html/index.html?modules=calculator  (parametric loader)
+    #   http://127.0.0.1:8000/html/chango.html  (multi-file example page)
     #   http://127.0.0.1:8000/demo-pages/index.html (landing page)
 
 Why a custom server instead of `python -m http.server`?
@@ -188,7 +188,8 @@ def main(argv: list[str] | None = None) -> int:
     print("Open one of:")
     print(f"  {base}/index.html             (demo index)")
     print(f"  {base}/demo-pages/index.html  (landing page)")
-    print(f"  {base}/html/calculator.html   (example page)")
+    print(f"  {base}/html/index.html?modules=calculator  (parametric loader)")
+    print(f"  {base}/html/index.html?folders=chango  (folder MIP manifest)")
     print("")
     print(PAGE_SNIPPET)
     print("Press Ctrl+C to stop.")

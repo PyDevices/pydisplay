@@ -38,12 +38,13 @@
             <h1 id="example-title">Example</h1>
         </div>
         <p class="example-lede" id="example-lede">
-            Load any single-file example with <code>?script=<em>name</em></code>
-            (e.g. <a href="?script=calculator">?script=calculator</a>).
+            Load with <code>?modules=<em>name</em></code> and/or
+            <code>?folders=<em>name</em></code>
+            (e.g. <a href="?modules=calculator">?modules=calculator</a>,
+            <a href="?folders=chango">?folders=chango</a>).
         </p>
 
-        <!-- MPy reads script name from here (hidden). -->
-        <p name="scriptName" id="script-name" hidden aria-hidden="true"></p>
+        <p id="loader-param" hidden aria-hidden="true"></p>
 
         <div class="play-area">
             <div class="loading" id="loading">
@@ -69,15 +70,17 @@
                 <div class="panel">
                     <h2>How to use</h2>
                     <ul>
-                        <li>Add <code>?script=<em>name</em></code> to the URL (no <code>.py</code> suffix).</li>
-                        <li>Click <strong>Run</strong> to install and import the example.</li>
-                        <li>Output appears in the console panel to the right.</li>
+                        <li><code>?modules=</code> — comma-separated top-level module stems (no <code>.py</code>).</li>
+                        <li><code>?folders=</code> — comma-separated folder examples; each installs <code>html/&lt;name&gt;.json</code> via MIP.</li>
+                        <li>Both may appear; whichever param comes <em>first</em> in the URL supplies the import entry point.</li>
+                        <li>Click <strong>Run</strong> to install everything, then import the entry.</li>
                     </ul>
                 </div>
                 <div class="panel">
                     <h2>Details</h2>
+                    <div class="meta-row"><span class="k">Entry</span><span class="v" id="meta-entry">—</span></div>
                     <div class="meta-row"><span class="k">Source</span><span class="v" id="meta-source">—</span></div>
-                    <div class="meta-row"><span class="k">Install</span><span class="v">1 file</span></div>
+                    <div class="meta-row"><span class="k">Install</span><span class="v" id="meta-install">—</span></div>
                 </div>
                 <div class="actions">
                     <a class="btn" id="source-link" href="https://github.com/PyDevices/pydisplay/tree/main/src/examples" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> View source</a>
@@ -97,48 +100,129 @@
 
     <script>
         (function () {
-            const params = new URLSearchParams(window.location.search);
-            const scriptParam = (params.get('script') || '').trim();
-            const nameEl = document.getElementById('script-name');
-            if (nameEl) {
-                nameEl.textContent = scriptParam;
+            function parseCommaList(raw) {
+                return raw.split(',').map(function (s) {
+                    s = s.trim();
+                    if (s.toLowerCase().endsWith('.py')) {
+                        s = s.slice(0, -3);
+                    }
+                    return s;
+                }).filter(Boolean);
             }
-            if (!scriptParam) {
-                return;
+
+            function titleCaseStem(stem) {
+                return stem.replace(/_/g, ' ').replace(/\b\w/g, function (c) {
+                    return c.toUpperCase();
+                });
             }
-            const label = scriptParam.replace(/_/g, ' ').replace(/\b\w/g, function (c) {
-                return c.toUpperCase();
-            });
-            document.title = label + ' — pydisplay demo';
-            const meta = document.querySelector('meta[name="description"]');
-            if (meta) {
-                meta.content = label + ': a pydisplay example running in the browser via PyScript.';
+
+            function parseLoaderQuery(search) {
+                const modules = [];
+                const folders = [];
+                let entryKind = null;
+                let entryName = null;
+                const raw = search.startsWith('?') ? search.slice(1) : search;
+                for (const part of raw.split('&')) {
+                    if (!part) {
+                        continue;
+                    }
+                    const eq = part.indexOf('=');
+                    const key = eq === -1 ? part : decodeURIComponent(part.slice(0, eq));
+                    const val = eq === -1 ? '' : decodeURIComponent(part.slice(eq + 1).replace(/\+/g, ' '));
+                    if (key === 'modules') {
+                        const list = parseCommaList(val);
+                        if (entryKind === null && list.length) {
+                            entryKind = 'module';
+                            entryName = list[0];
+                        }
+                        modules.push.apply(modules, list);
+                    } else if (key === 'folders') {
+                        const list = parseCommaList(val);
+                        if (entryKind === null && list.length) {
+                            entryKind = 'folder';
+                            entryName = list[0];
+                        }
+                        folders.push.apply(folders, list);
+                    }
+                }
+                return { modules: modules, folders: folders, entryKind: entryKind, entryName: entryName };
             }
-            const crumb = document.getElementById('crumb-name');
-            const title = document.getElementById('example-title');
-            const lede = document.getElementById('example-lede');
-            const metaSource = document.getElementById('meta-source');
-            const sourceLink = document.getElementById('source-link');
-            if (crumb) crumb.textContent = label;
-            if (title) title.textContent = label;
-            if (lede) {
-                lede.textContent = 'Running src/examples/' + scriptParam + '.py via the parametric example loader.';
+
+            const plan = parseLoaderQuery(window.location.search);
+            window.__pydisplayModules = plan.modules.join(',');
+            window.__pydisplayFolders = plan.folders.join(',');
+            window.__pydisplayEntryKind = plan.entryKind || '';
+            window.__pydisplayEntry = plan.entryName || '';
+
+            const paramEl = document.getElementById('loader-param');
+            if (paramEl) {
+                paramEl.textContent = window.location.search;
             }
-            if (metaSource) metaSource.textContent = scriptParam + '.py';
-            if (sourceLink) {
-                sourceLink.href =
-                    'https://github.com/PyDevices/pydisplay/blob/main/src/examples/' +
-                    scriptParam +
-                    '.py';
+
+            function updateMeta() {
+                const entry = plan.entryName;
+                if (!entry) {
+                    return;
+                }
+                const label = titleCaseStem(entry);
+                document.title = label + ' — pydisplay demo';
+                const meta = document.querySelector('meta[name="description"]');
+                if (meta) {
+                    meta.content = label + ': a pydisplay example running in the browser via PyScript.';
+                }
+                const crumb = document.getElementById('crumb-name');
+                const title = document.getElementById('example-title');
+                const lede = document.getElementById('example-lede');
+                const metaEntry = document.getElementById('meta-entry');
+                const metaSource = document.getElementById('meta-source');
+                const metaInstall = document.getElementById('meta-install');
+                const sourceLink = document.getElementById('source-link');
+                if (crumb) crumb.textContent = label;
+                if (title) title.textContent = label;
+                if (metaEntry) {
+                    metaEntry.textContent = plan.entryKind === 'folder'
+                        ? 'import ' + entry
+                        : 'import ' + entry + ' (module)';
+                }
+                const installParts = [];
+                if (plan.modules.length) {
+                    installParts.push(plan.modules.length + ' module(s)');
+                }
+                if (plan.folders.length) {
+                    installParts.push(plan.folders.length + ' folder(s)');
+                }
+                if (lede) {
+                    lede.textContent = 'Parametric loader: ' + installParts.join(', ') +
+                        '. Entry: import ' + entry + '.';
+                }
+                if (metaSource) {
+                    metaSource.textContent = plan.entryKind === 'folder'
+                        ? entry + '/'
+                        : entry + '.py';
+                }
+                if (metaInstall) {
+                    metaInstall.textContent = installParts.length
+                        ? installParts.join(' + ')
+                        : '—';
+                }
+                if (sourceLink) {
+                    sourceLink.href = plan.entryKind === 'folder'
+                        ? 'https://github.com/PyDevices/pydisplay/tree/main/src/examples/' + entry
+                        : 'https://github.com/PyDevices/pydisplay/blob/main/src/examples/' + entry + '.py';
+                }
             }
-            window.__pydisplayScript = scriptParam;
+
+            updateMeta();
         })();
     </script>
 
     <script type="mpy" config="./pyscript.toml" output="log">
         import builtins
+        import json
         from js import document
         from pyscript.ffi import create_proxy
+
+        FOLDER_MIP_TARGET = "examples"
 
         def _log_print(*args, **kwargs):
             el = document.getElementById("log")
@@ -158,42 +242,88 @@
             if _status:
                 _status.textContent = msg
 
-        def _script_name():
+        def _from_window(name, default=""):
             from js import window
-            name = getattr(window, "__pydisplayScript", "") or ""
-            if not name:
-                el = document.getElementById("script-name")
-                if el is not None:
-                    name = el.textContent
-            return str(name).strip()
+            val = getattr(window, name, default)
+            return str(val or default).strip()
+
+        def _parse_comma(raw):
+            names = []
+            for part in str(raw).split(","):
+                name = part.strip()
+                if name.lower().endswith(".py"):
+                    name = name[:-3]
+                if name:
+                    names.append(name)
+            return names
+
+        def _loader_plan():
+            modules = _parse_comma(_from_window("__pydisplayModules"))
+            folders = _parse_comma(_from_window("__pydisplayFolders"))
+            entry_kind = _from_window("__pydisplayEntryKind")
+            entry = _from_window("__pydisplayEntry")
+            if not entry and modules:
+                entry_kind = entry_kind or "module"
+                entry = modules[0]
+            elif not entry and folders:
+                entry_kind = entry_kind or "folder"
+                entry = folders[0]
+            return modules, folders, entry_kind, entry
+
+        def _repo_context():
+            _host = document.location.hostname
+            _path = document.location.pathname
+            _demo_root = _path.split("/html/")[0] if "/html/" in _path else ""
+            _repo_base = document.location.origin + _demo_root
+            _origin = _host in ("127.0.0.1", "localhost") or _host.endswith(".github.io")
+            return _repo_base, _origin
+
+        def _fetch_json(url):
+            from js import XMLHttpRequest
+            xhr = XMLHttpRequest.new()
+            xhr.open("GET", url, False)
+            xhr.send(None)
+            if xhr.status != 200:
+                raise RuntimeError("HTTP " + str(xhr.status) + " fetching " + url)
+            return json.loads(xhr.responseText)
+
+        def _install_folder_origin(mip, repo_base, folder):
+            manifest = _fetch_json(repo_base + "/html/" + folder + ".json")
+            for dest, _src in manifest["urls"]:
+                mip.install(repo_base + "/src/examples/" + dest, target=FOLDER_MIP_TARGET)
 
         def _start(*_):
             global _started
             if _started:
                 return
-            script_name = _script_name()
-            if not script_name:
-                _log_print("Missing ?script= parameter in the URL.")
-                _set("Error — add ?script=name to the URL.")
+            modules, folders, entry_kind, entry = _loader_plan()
+            if not entry:
+                _log_print("Missing ?modules= and/or ?folders= in the URL.")
+                _set("Error — add ?modules= and/or ?folders=.")
                 return
             _started = True
             _btn.disabled = True
             _btn.textContent = "Running…"
             try:
-                _set("Installing modules…")
+                _set("Installing…")
                 import mip
-                _host = document.location.hostname
-                _path = document.location.pathname
-                _demo_root = _path.split("/html/")[0] if "/html/" in _path else ""
-                _repo_base = document.location.origin + _demo_root
-                _origin = _host in ("127.0.0.1", "localhost") or _host.endswith(".github.io")
-                if _origin:
-                    mip.install(_repo_base + "/src/examples/" + script_name + ".py")
-                else:
-                    mip.install("github:PyDevices/pydisplay/src/examples/" + script_name + ".py")
-                _set("Importing " + script_name + "…")
+                repo_base, origin = _repo_context()
+                for folder in folders:
+                    if origin:
+                        _install_folder_origin(mip, repo_base, folder)
+                    else:
+                        mip.install(
+                            "github:PyDevices/pydisplay/html/" + folder + ".json",
+                            target=FOLDER_MIP_TARGET,
+                        )
+                for name in modules:
+                    if origin:
+                        mip.install(repo_base + "/src/examples/" + name + ".py")
+                    else:
+                        mip.install("github:PyDevices/pydisplay/src/examples/" + name + ".py")
+                _set("Importing " + entry + "…")
                 import lib.path
-                __import__(script_name)
+                __import__(entry)
                 _set("Running.")
             except Exception as e:
                 _log_print("Run failed:", e)
@@ -210,14 +340,16 @@
     </script>
 
     <script>
-        const _btn = document.getElementById('run-btn');
-        const _spin = document.querySelector('#loading .spinner');
-        const _t = setInterval(() => {
-            if (_btn && !_btn.disabled) {
-                if (_spin) _spin.style.display = 'none';
-                clearInterval(_t);
-            }
-        }, 150);
+        (function () {
+            const _btn = document.getElementById('run-btn');
+            const _spin = document.querySelector('#loading .spinner');
+            const _t = setInterval(() => {
+                if (_btn && !_btn.disabled) {
+                    if (_spin) _spin.style.display = 'none';
+                    clearInterval(_t);
+                }
+            }, 150);
+        })();
     </script>
 
     <script>

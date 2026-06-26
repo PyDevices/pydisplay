@@ -4,9 +4,12 @@ gen_demo_pages.py — generate the PyScript demo pages for pydisplay examples.
 
 For every example whose header comment is ``# multimer types: async`` or
 ``# multimer types: all`` (the browser-runnable set), **and** whose
-``# pyscript files:`` list contains only ``.py`` paths, this writes a styled,
-self-contained page under ``html/`` and refreshes the card grids in
-``index.html`` between the ``GEN:`` markers.
+``# pyscript files:`` list contains only ``.py`` paths, this refreshes the
+card grids in ``index.html`` between the ``GEN:`` markers.
+
+Top-level examples link to ``html/index.html?modules=<entry>[,<helper>,…]``.
+Folder examples get a MIP manifest at ``html/<name>.json`` (same layout as
+``packages/*.json``) and link to ``html/index.html?folders=<name>``.
 
 Run from anywhere:
 
@@ -37,6 +40,8 @@ This script is CPython standard library only.
 from __future__ import annotations
 
 import argparse
+from collections.abc import Callable
+import json
 from pathlib import Path
 import shutil
 import sys
@@ -46,6 +51,10 @@ EXAMPLES_DIR = REPO_ROOT / "src" / "examples"
 HTML_DIR = REPO_ROOT / "html"
 INDEX = REPO_ROOT / "index.html"
 BOARD_CONFIG = REPO_ROOT / "src" / "lib" / "board_config.py"
+
+MIP_REPO = "github:PyDevices/pydisplay/"
+MIP_MANIFEST_VERSION = "0.0.1"
+FOLDER_MIP_TARGET = "examples"
 
 
 def path_is_binary(path: str) -> bool:
@@ -178,7 +187,7 @@ class Example:
         self.name = name  # page/file stem, e.g. "calculator"
         self.import_name = import_name  # python import target, e.g. "chango"
         self.source_rel = source_rel  # path under repo, e.g. "src/examples/x.py"
-        self.kind = kind  # "module" or "package"
+        self.kind = kind  # "module" or "folder"
         self.mtype = ""  # "async" | "all" | ...
         self.docstring_blurb = ""
         self.blocks = False  # blocking while-True without await
@@ -232,6 +241,36 @@ class Example:
         return not self.depends_on_binary_files
 
     @property
+    def uses_parametric_modules_loader(self) -> bool:
+        """Top-level ``.py`` files — ``?modules=`` installs all, imports first when entry."""
+        if self.kind != "module" or not self.pyscript_files:
+            return False
+        for path in self.pyscript_files:
+            if "/" in path or not path.lower().endswith(".py"):
+                return False
+        return Path(self.pyscript_files[0]).stem == self.name
+
+    @property
+    def uses_parametric_folder_loader(self) -> bool:
+        """Subfolder example — ``?folders=`` installs ``html/<name>.json``, imports folder name."""
+        if self.kind != "folder" or not self.pyscript_files:
+            return False
+        prefix = f"{self.name}/"
+        return all(
+            path.startswith(prefix) and path.lower().endswith(".py")
+            for path in self.pyscript_files
+        )
+
+    @property
+    def uses_parametric_loader(self) -> bool:
+        return self.uses_parametric_modules_loader or self.uses_parametric_folder_loader
+
+    @property
+    def parametric_modules_query(self) -> str:
+        """Comma-separated module stems for ``?modules=`` (entry point first)."""
+        return ",".join(Path(p).stem for p in self.pyscript_files)
+
+    @property
     def install_line(self) -> str:
         return render_mip_installs(self.pyscript_files)
 
@@ -244,6 +283,18 @@ class Example:
     @property
     def source_url(self) -> str:
         return f"https://github.com/PyDevices/pydisplay/blob/main/{self.source_rel}"
+
+
+def folder_mip_manifest(ex: Example) -> dict:
+    """MIP manifest for a folder example (install with ``target=\"examples\"``)."""
+    return {
+        "urls": [[path, f"{MIP_REPO}src/examples/{path}"] for path in ex.pyscript_files],
+        "version": MIP_MANIFEST_VERSION,
+    }
+
+
+def render_folder_mip_manifest(ex: Example) -> str:
+    return json.dumps(folder_mip_manifest(ex), indent=2) + "\n"
 
 
 def parse_pyscript_files(lines: list[str]) -> list[str]:
@@ -339,10 +390,10 @@ def parse_example(path: Path) -> Example | None:
         import_name = path.stem
         kind = "module"
     else:
-        # Sub-package example, e.g. chango/chango.py -> import "chango".
+        # Folder example, e.g. chango/chango.py -> import "chango".
         name = path.parent.name
         import_name = path.parent.name
-        kind = "package"
+        kind = "folder"
 
     ex = Example(name, import_name, rel, kind)
     ex.mtype = chosen
@@ -388,7 +439,7 @@ def discover_parsed() -> list[Example]:
     """All browser-runnable examples (async/all), including binary-dependent ones."""
     found: dict[str, Example] = {}
     for path in sorted(EXAMPLES_DIR.rglob("*.py")):
-        # Only top-level files and one-level sub-package entry files.
+        # Only top-level files and one-level folder entry files.
         rel = path.relative_to(EXAMPLES_DIR)
         if len(rel.parts) == 1 or (len(rel.parts) == 2 and rel.parts[0] == rel.stem):
             ex = parse_example(path)
@@ -648,9 +699,17 @@ def render_page(ex: Example) -> str:
 '''
 
 
+def example_href(ex: Example, base: str = "html/") -> str:
+    if ex.uses_parametric_modules_loader:
+        return f"{base}index.html?modules={ex.parametric_modules_query}"
+    if ex.uses_parametric_folder_loader:
+        return f"{base}index.html?folders={ex.name}"
+    return f"{base}{ex.name}.html"
+
+
 def render_card(ex: Example, base: str = "html/") -> str:
     cls, label = ex.primary_tag
-    return f'''                <a class="card" href="{base}{ex.name}.html">
+    return f'''                <a class="card" href="{example_href(ex, base)}">
                     <div class="card-top">
                         <span class="card-icon">{icon_svg(ex.icon)}</span>
                         <span class="tag {cls}">{label}</span>
@@ -673,6 +732,42 @@ def replace_block(text: str, key: str, payload: str) -> str:
     if si == -1 or ei == -1:
         raise SystemExit(f"index.html is missing the {start}/{end} markers")
     return text[: si + len(start)] + "\n" + payload + "\n            " + text[ei:]
+
+
+def remove_obsolete_html(examples: list[Example], stale: list[str], check: bool) -> None:
+    """Drop per-example HTML superseded by the parametric loader."""
+    for ex in examples:
+        if not ex.uses_parametric_loader:
+            continue
+        path = HTML_DIR / f"{ex.name}.html"
+        if not path.exists():
+            continue
+        rel = str(path.relative_to(REPO_ROOT))
+        if check:
+            stale.append(rel)
+            continue
+        path.unlink()
+        print(f"removed {rel}")
+
+
+def write_folder_manifests(
+    examples: list[Example], write: Callable[[Path, str], None], stale: list[str], check: bool
+) -> None:
+    """Write ``html/<folder>.json`` MIP manifests; drop manifests for removed folders."""
+    keep = {ex.name for ex in examples if ex.uses_parametric_folder_loader}
+    for ex in examples:
+        if not ex.uses_parametric_folder_loader:
+            continue
+        write(HTML_DIR / f"{ex.name}.json", render_folder_mip_manifest(ex))
+    for path in HTML_DIR.glob("*.json"):
+        if path.stem in keep:
+            continue
+        rel = str(path.relative_to(REPO_ROOT))
+        if check:
+            stale.append(rel)
+            continue
+        path.unlink()
+        print(f"removed {rel}")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -711,8 +806,15 @@ def main(argv: list[str] | None = None) -> int:
         path.write_text(content, encoding="utf-8")
         print(f"wrote {path.relative_to(REPO_ROOT)}")
 
-    for ex in examples:
+    dedicated = [ex for ex in examples if not ex.uses_parametric_loader]
+    parametric = [ex for ex in examples if ex.uses_parametric_loader]
+    folder_parametric = [ex for ex in examples if ex.uses_parametric_folder_loader]
+
+    for ex in dedicated:
         write(HTML_DIR / f"{ex.name}.html", render_page(ex))
+
+    write_folder_manifests(examples, write, stale, args.check)
+    remove_obsolete_html(examples, stale, args.check)
 
     index_text = INDEX.read_text(encoding="utf-8")
     index_text = replace_block(index_text, "async", render_cards(by_type["async"]))
@@ -720,8 +822,10 @@ def main(argv: list[str] | None = None) -> int:
     write(INDEX, index_text)
 
     print(
-        f"\n{len(examples)} example pages "
-        f"({len(by_type['async'])} async, {len(by_type['all'])} all)."
+        f"\n{len(examples)} gallery example(s) "
+        f"({len(parametric) - len(folder_parametric)} module, {len(folder_parametric)} folder; "
+        f"{len(dedicated)} dedicated HTML; "
+        f"{len(by_type['async'])} async, {len(by_type['all'])} all)."
     )
     if skipped_binary:
         print(
