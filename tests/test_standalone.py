@@ -19,10 +19,10 @@ import unittest
 
 import _env
 
-_MULTIMER_SIBLINGS = ("displaysys", "eventsys", "graphics", "pdwidgets", "palettes")
-_EVENTSYS_SIBLINGS = ("displaysys", "graphics", "multimer", "pdwidgets", "palettes")
-_GRAPHICS_SIBLINGS = ("displaysys", "eventsys", "multimer", "pdwidgets", "palettes")
-_DISPLAYSYS_SIBLINGS = ("eventsys", "graphics", "multimer", "pdwidgets", "palettes")
+_MULTIMER_SIBLINGS = ("displaysys", "eventsys", "graphics")
+_EVENTSYS_SIBLINGS = ("displaysys", "graphics", "multimer")
+_GRAPHICS_SIBLINGS = ("displaysys", "eventsys", "multimer")
+_DISPLAYSYS_SIBLINGS = ("eventsys", "graphics", "multimer")
 
 _MULTIMER_CHILD = textwrap.dedent(
     """

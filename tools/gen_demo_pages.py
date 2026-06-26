@@ -33,7 +33,7 @@ HTML_DIR = REPO_ROOT / "html"
 INDEX = REPO_ROOT / "index.html"
 
 MIP_REPO = "github:PyDevices/pydisplay/"
-MIP_MANIFEST_VERSION = "0.0.1"
+MIP_MANIFEST_VERSION = "0.0.5"
 
 TARGET_TYPES = ("async", "all")
 BINARY_SUFFIXES = frozenset({".bmp", ".bin", ".pbm", ".png", ".jpg", ".jpeg", ".gif", ".webp"})
@@ -71,6 +71,11 @@ CURATED: dict[str, dict] = {
         "blurb": "An Apollo Guidance Computer DSKY emulator rendered from a BMP565 sprite sheet, with a live clock.",
         "experimental": True,
         "icon": "rocket",
+    },
+    "frogger": {
+        "title": "Frogger",
+        "blurb": "Classic Frogger at 640x480 — arrow keys and touch d-pad, async multimer loop.",
+        "icon": "shapes",
     },
     "lv_test_timer_async": {
         "title": "LVGL Timer (async)",
@@ -230,7 +235,10 @@ def parse_example(path: Path) -> Example | None:
     if path.parent.name == "examples":
         name = path.stem
         kind = "module"
-    elif len(rel_in_examples.parts) == 2 and rel_in_examples.parts[0] == rel_in_examples.stem:
+    elif len(rel_in_examples.parts) == 2 and (
+        rel_in_examples.parts[0] == rel_in_examples.stem
+        or rel_in_examples.parts[0] == path.parent.name
+    ):
         name = path.parent.name
         kind = "manifest"
     else:
@@ -246,9 +254,26 @@ def parse_example(path: Path) -> Example | None:
     return ex
 
 
+def example_py_files() -> list[Path]:
+    """All ``*.py`` under ``src/examples/``, including symlinked trees (e.g. frogger)."""
+    paths: list[Path] = []
+    seen: set[str] = set()
+    for path in sorted(EXAMPLES_DIR.rglob("*.py")):
+        paths.append(path)
+        seen.add(str(path))
+    for child in sorted(EXAMPLES_DIR.iterdir()):
+        if child.is_symlink():
+            for path in sorted(child.rglob("*.py")):
+                key = str(path)
+                if key not in seen:
+                    paths.append(path)
+                    seen.add(key)
+    return paths
+
+
 def discover_parsed() -> list[Example]:
     found: dict[str, Example] = {}
-    for path in sorted(EXAMPLES_DIR.rglob("*.py")):
+    for path in example_py_files():
         ex = parse_example(path)
         if ex and ex.name not in found:
             found[ex.name] = ex
@@ -260,8 +285,9 @@ def discover() -> list[Example]:
 
 
 def example_mip_manifest(ex: Example) -> dict:
+    # Paths relative to html/ where the manifest is served (../src/examples/ → repo root).
     return {
-        "urls": [[path, f"{MIP_REPO}src/examples/{path}"] for path in ex.pyscript_files],
+        "urls": [[path, f"../src/examples/{path}"] for path in ex.pyscript_files],
         "version": MIP_MANIFEST_VERSION,
     }
 

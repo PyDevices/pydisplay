@@ -11,7 +11,7 @@ from pyscript.ffi import create_proxy
 
 from displaysys import DisplayDriver, color_rgb
 from eventsys import events
-from eventsys.keys import Keys, chord_matches, key_to_keycode, mod_mask
+from eventsys.keys import Keys, chord_matches, dom_key_scrolls_page, key_to_keycode, mod_mask
 
 try:  # Gamepad polling is optional and only available in a browser.
     from js import navigator
@@ -58,8 +58,9 @@ class PSDevices:
       browser/page intercepts the chord, pick a different one.
 
     Note:
-        The element must be focused (e.g. clicked) to receive key events; the
-        constructor sets ``tabindex`` to make the canvas focusable.
+        The element must be focused to receive key events.  The constructor sets
+        ``tabindex`` and calls :meth:`_focus_canvas` so keyboard input goes to the
+        game; pointer down on the canvas refocuses it.
 
     Args:
         id (str): The id of the element to watch (usually the canvas).
@@ -96,6 +97,14 @@ class PSDevices:
         }
         for name, proxy in self._proxies.items():
             self.canvas.addEventListener(name, proxy)
+        self._focus_canvas()
+
+    def _focus_canvas(self):
+        """Move keyboard focus to the canvas so keys reach the game, not the page."""
+        try:
+            self.canvas.focus()
+        except Exception:
+            pass
 
     def read(self):
         """
@@ -155,6 +164,7 @@ class PSDevices:
             return (xdi, ydi)
 
     def _on_pointer_down(self, e):
+        self._focus_canvas()
         try:
             self.canvas.setPointerCapture(e.pointerId)
         except Exception:
@@ -216,9 +226,17 @@ class PSDevices:
     def _enqueue_key(self, type, keycode, mod):
         self._queue.append(events.Key(type, Keys.keyname(keycode), keycode, mod, 0, None))
 
+    def _suppress_browser_scroll(self, e, keycode):
+        if dom_key_scrolls_page(keycode):
+            try:
+                e.preventDefault()
+            except Exception:
+                pass
+
     def _on_keydown(self, e):
         keycode = key_to_keycode(e.key, e.location)
         mod = mod_mask(e.ctrlKey, e.shiftKey, e.altKey, e.metaKey)
+        self._suppress_browser_scroll(e, keycode)
         if chord_matches(self.quit_chord, keycode, mod):
             try:
                 e.preventDefault()
@@ -234,6 +252,7 @@ class PSDevices:
     def _on_keyup(self, e):
         keycode = key_to_keycode(e.key, e.location)
         mod = mod_mask(e.ctrlKey, e.shiftKey, e.altKey, e.metaKey)
+        self._suppress_browser_scroll(e, keycode)
         self._pressed.discard(keycode)
         self._enqueue_key(events.KEYUP, keycode, mod)
 

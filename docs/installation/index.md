@@ -23,7 +23,7 @@ The [installer.py](installer.md) script combines GitHub and micropython-lib inst
 
 **Optional packages:**
 
-- `add_ons` — framebuf shim, console, pdwidgets, displaybuf, etc.
+- `add_ons` — optional extensions (`palettes/`, framebuf shim, console, pdwidgets, displaybuf, tft_config, …)
 - `examples` — demo scripts
 - `spibus` / `i80bus` — MicroPython bus drivers (viper; GitHub only)
 

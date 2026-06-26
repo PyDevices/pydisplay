@@ -89,7 +89,7 @@ target-version = "py38"  # walrus operator (:=) used throughout src/lib
 
 
 [tool.ruff.lint.isort]
-known-first-party = ["displaysys", "eventsys", "graphics", "multimer", "palettes"]
+known-first-party = ["displaysys", "eventsys", "graphics", "multimer"]
 force-sort-within-sections = true
 
 [tool.ruff.lint.mccabe]

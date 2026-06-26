@@ -48,8 +48,9 @@ import lib.path         # adds lib/, add_ons/, examples/ to sys.path
 import <module>         # module-level code runs (schedules async main, or blocks)
 ```
 
-Library deps (graphics, eventsys, displaysys, multimer, palettes, touch_keypad,
-tft_config, console, framebuf, fonts …) are pre-mounted by `html/pyscript.toml`
+Library deps: core `src/lib` packages (`displaysys`, `eventsys`, `graphics`, `multimer`)
+and add-ons (`palettes`, `touch_keypad`, `tft_config`, `console`, `framebuf`, fonts …)
+are pre-mounted by `html/pyscript.toml`
 `[files]`, so single-file installs resolve. Multi-file examples install sibling
 `.py` modules via per-file `mip.install` (e.g. `chango/`, `noto_fonts/`).
 Examples that need **binary** assets (`.bmp`, `.bin`, `.pbm`, …) are excluded

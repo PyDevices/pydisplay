@@ -2,24 +2,24 @@
   "urls": [
     [
       "noto_fonts/__init__.py",
-      "github:PyDevices/pydisplay/src/examples/noto_fonts/__init__.py"
+      "../src/examples/noto_fonts/__init__.py"
     ],
     [
       "noto_fonts/noto_fonts.py",
-      "github:PyDevices/pydisplay/src/examples/noto_fonts/noto_fonts.py"
+      "../src/examples/noto_fonts/noto_fonts.py"
     ],
     [
       "noto_fonts/NotoSans_32.py",
-      "github:PyDevices/pydisplay/src/examples/noto_fonts/NotoSans_32.py"
+      "../src/examples/noto_fonts/NotoSans_32.py"
     ],
     [
       "noto_fonts/NotoSerif_32.py",
-      "github:PyDevices/pydisplay/src/examples/noto_fonts/NotoSerif_32.py"
+      "../src/examples/noto_fonts/NotoSerif_32.py"
     ],
     [
       "noto_fonts/NotoSansMono_32.py",
-      "github:PyDevices/pydisplay/src/examples/noto_fonts/NotoSansMono_32.py"
+      "../src/examples/noto_fonts/NotoSansMono_32.py"
     ]
   ],
-  "version": "0.0.1"
+  "version": "0.0.5"
 }
