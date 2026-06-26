@@ -39,14 +39,22 @@
         </div>
         <p class="example-lede" id="example-lede">
             Load with <code>?modules=<em>name</em></code> and/or
-            <code>?folders=<em>name</em></code>
+            <code>?manifests=<em>name</em></code>
             (e.g. <a href="?modules=calculator">?modules=calculator</a>,
-            <a href="?folders=chango">?folders=chango</a>).
+            <a href="?manifests=chango">?manifests=chango</a>).
         </p>
 
         <p id="loader-param" hidden aria-hidden="true"></p>
 
-        <div class="play-area">
+        <div id="loader-query-error" class="panel" hidden>
+            <h1>400 Bad Request</h1>
+            <p id="loader-query-error-detail"></p>
+            <p><code>?modules=</code> and <code>?manifests=</code> names must be simple identifiers
+            (letters, digits, underscore; no slashes or dots).</p>
+            <p><a class="btn" href="../index.html">Back to demos</a></p>
+        </div>
+
+        <div class="play-area" id="play-area">
             <div class="loading" id="loading">
                 <span class="spinner"></span> <span id="status">Loading PyScript runtime…</span>
             </div>
@@ -71,7 +79,7 @@
                     <h2>How to use</h2>
                     <ul>
                         <li><code>?modules=</code> — comma-separated top-level module stems (no <code>.py</code>).</li>
-                        <li><code>?folders=</code> — comma-separated folder examples; each installs <code>html/&lt;name&gt;.json</code> via MIP.</li>
+                        <li><code>?manifests=</code> — comma-separated MIP manifest names; each installs <code>html/&lt;name&gt;.json</code>.</li>
                         <li>Both may appear; whichever param comes <em>first</em> in the URL supplies the import entry point.</li>
                         <li>Click <strong>Run</strong> to install everything, then import the entry.</li>
                     </ul>
@@ -100,6 +108,8 @@
 
     <script>
         (function () {
+            var SAFE_LOADER_NAME = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+
             function parseCommaList(raw) {
                 return raw.split(',').map(function (s) {
                     s = s.trim();
@@ -118,7 +128,7 @@
 
             function parseLoaderQuery(search) {
                 const modules = [];
-                const folders = [];
+                const manifests = [];
                 let entryKind = null;
                 let entryName = null;
                 const raw = search.startsWith('?') ? search.slice(1) : search;
@@ -136,21 +146,77 @@
                             entryName = list[0];
                         }
                         modules.push.apply(modules, list);
-                    } else if (key === 'folders') {
+                    } else if (key === 'manifests') {
                         const list = parseCommaList(val);
                         if (entryKind === null && list.length) {
-                            entryKind = 'folder';
+                            entryKind = 'manifest';
                             entryName = list[0];
                         }
-                        folders.push.apply(folders, list);
+                        manifests.push.apply(manifests, list);
                     }
                 }
-                return { modules: modules, folders: folders, entryKind: entryKind, entryName: entryName };
+                return { modules: modules, manifests: manifests, entryKind: entryKind, entryName: entryName };
+            }
+
+            function invalidLoaderNames(plan) {
+                var bad = [];
+                plan.modules.forEach(function (name) {
+                    if (!SAFE_LOADER_NAME.test(name)) {
+                        bad.push(name);
+                    }
+                });
+                plan.manifests.forEach(function (name) {
+                    if (!SAFE_LOADER_NAME.test(name)) {
+                        bad.push(name);
+                    }
+                });
+                return bad;
+            }
+
+            function showLoaderQueryError(bad) {
+                var detail = 'Unsafe ?modules= / ?manifests= value(s): ' +
+                    bad.map(function (n) { return JSON.stringify(n); }).join(', ');
+                document.title = '400 Bad Request — pydisplay demo';
+                var err = document.getElementById('loader-query-error');
+                var errDetail = document.getElementById('loader-query-error-detail');
+                var play = document.getElementById('play-area');
+                var meta = document.querySelector('.meta-layout');
+                var lede = document.getElementById('example-lede');
+                var head = document.querySelector('.example-head');
+                var crumbs = document.querySelector('.crumbs');
+                if (errDetail) {
+                    errDetail.textContent = detail;
+                }
+                if (err) {
+                    err.hidden = false;
+                }
+                if (play) {
+                    play.hidden = true;
+                }
+                if (meta) {
+                    meta.hidden = true;
+                }
+                if (lede) {
+                    lede.hidden = true;
+                }
+                if (head) {
+                    head.hidden = true;
+                }
+                if (crumbs) {
+                    crumbs.hidden = true;
+                }
+                window.__pydisplayQueryRejected = detail;
             }
 
             const plan = parseLoaderQuery(window.location.search);
+            const badNames = invalidLoaderNames(plan);
+            if (badNames.length) {
+                showLoaderQueryError(badNames);
+                return;
+            }
+
             window.__pydisplayModules = plan.modules.join(',');
-            window.__pydisplayFolders = plan.folders.join(',');
+            window.__pydisplayManifests = plan.manifests.join(',');
             window.__pydisplayEntryKind = plan.entryKind || '';
             window.__pydisplayEntry = plan.entryName || '';
 
@@ -180,7 +246,7 @@
                 if (crumb) crumb.textContent = label;
                 if (title) title.textContent = label;
                 if (metaEntry) {
-                    metaEntry.textContent = plan.entryKind === 'folder'
+                    metaEntry.textContent = plan.entryKind === 'manifest'
                         ? 'import ' + entry
                         : 'import ' + entry + ' (module)';
                 }
@@ -188,15 +254,15 @@
                 if (plan.modules.length) {
                     installParts.push(plan.modules.length + ' module(s)');
                 }
-                if (plan.folders.length) {
-                    installParts.push(plan.folders.length + ' folder(s)');
+                if (plan.manifests.length) {
+                    installParts.push(plan.manifests.length + ' manifest(s)');
                 }
                 if (lede) {
                     lede.textContent = 'Parametric loader: ' + installParts.join(', ') +
                         '. Entry: import ' + entry + '.';
                 }
                 if (metaSource) {
-                    metaSource.textContent = plan.entryKind === 'folder'
+                    metaSource.textContent = plan.entryKind === 'manifest'
                         ? entry + '/'
                         : entry + '.py';
                 }
@@ -206,7 +272,7 @@
                         : '—';
                 }
                 if (sourceLink) {
-                    sourceLink.href = plan.entryKind === 'folder'
+                    sourceLink.href = plan.entryKind === 'manifest'
                         ? 'https://github.com/PyDevices/pydisplay/tree/main/src/examples/' + entry
                         : 'https://github.com/PyDevices/pydisplay/blob/main/src/examples/' + entry + '.py';
                 }
@@ -222,7 +288,7 @@
         from js import document
         from pyscript.ffi import create_proxy
 
-        FOLDER_MIP_TARGET = "examples"
+        MANIFEST_MIP_TARGET = "examples"
 
         def _log_print(*args, **kwargs):
             el = document.getElementById("log")
@@ -259,16 +325,16 @@
 
         def _loader_plan():
             modules = _parse_comma(_from_window("__pydisplayModules"))
-            folders = _parse_comma(_from_window("__pydisplayFolders"))
+            manifests = _parse_comma(_from_window("__pydisplayManifests"))
             entry_kind = _from_window("__pydisplayEntryKind")
             entry = _from_window("__pydisplayEntry")
             if not entry and modules:
                 entry_kind = entry_kind or "module"
                 entry = modules[0]
-            elif not entry and folders:
-                entry_kind = entry_kind or "folder"
-                entry = folders[0]
-            return modules, folders, entry_kind, entry
+            elif not entry and manifests:
+                entry_kind = entry_kind or "manifest"
+                entry = manifests[0]
+            return modules, manifests, entry_kind, entry
 
         def _repo_context():
             _host = document.location.hostname
@@ -287,19 +353,19 @@
                 raise RuntimeError("HTTP " + str(xhr.status) + " fetching " + url)
             return json.loads(xhr.responseText)
 
-        def _install_folder_origin(mip, repo_base, folder):
-            manifest = _fetch_json(repo_base + "/html/" + folder + ".json")
+        def _install_manifest_origin(mip, repo_base, name):
+            manifest = _fetch_json(repo_base + "/html/" + name + ".json")
             for dest, _src in manifest["urls"]:
-                mip.install(repo_base + "/src/examples/" + dest, target=FOLDER_MIP_TARGET)
+                mip.install(repo_base + "/src/examples/" + dest, target=MANIFEST_MIP_TARGET)
 
         def _start(*_):
             global _started
             if _started:
                 return
-            modules, folders, entry_kind, entry = _loader_plan()
+            modules, manifests, entry_kind, entry = _loader_plan()
             if not entry:
-                _log_print("Missing ?modules= and/or ?folders= in the URL.")
-                _set("Error — add ?modules= and/or ?folders=.")
+                _log_print("Missing ?modules= and/or ?manifests= in the URL.")
+                _set("Error — add ?modules= and/or ?manifests=.")
                 return
             _started = True
             _btn.disabled = True
@@ -308,13 +374,13 @@
                 _set("Installing…")
                 import mip
                 repo_base, origin = _repo_context()
-                for folder in folders:
+                for name in manifests:
                     if origin:
-                        _install_folder_origin(mip, repo_base, folder)
+                        _install_manifest_origin(mip, repo_base, name)
                     else:
                         mip.install(
-                            "github:PyDevices/pydisplay/html/" + folder + ".json",
-                            target=FOLDER_MIP_TARGET,
+                            "github:PyDevices/pydisplay/html/" + name + ".json",
+                            target=MANIFEST_MIP_TARGET,
                         )
                 for name in modules:
                     if origin:
@@ -333,10 +399,42 @@
                 _btn.textContent = "Run"
                 raise
 
-        _btn.addEventListener("click", create_proxy(_start))
-        _btn.disabled = False
-        _set("Runtime ready — click Run.")
-        print("PyScript runtime ready. Click Run to start the example.")
+        def _safe_loader_name(name):
+            if not name:
+                return False
+            if not (name[0].isalpha() or name[0] == "_"):
+                return False
+            for ch in name[1:]:
+                if not (ch.isalnum() or ch == "_"):
+                    return False
+            return True
+
+        def _reject_unsafe_loader_query():
+            rejected = _from_window("__pydisplayQueryRejected")
+            if rejected:
+                _log_print(rejected)
+                _set("400 Bad Request")
+                return True
+            modules = _parse_comma(_from_window("__pydisplayModules"))
+            manifests = _parse_comma(_from_window("__pydisplayManifests"))
+            bad = []
+            for name in modules + manifests:
+                if not _safe_loader_name(name):
+                    bad.append(name)
+            if bad:
+                detail = "Unsafe ?modules= / ?manifests= value(s): " + ", ".join(repr(n) for n in bad)
+                _log_print(detail)
+                _set("400 Bad Request")
+                return True
+            return False
+
+        if _reject_unsafe_loader_query():
+            pass
+        else:
+            _btn.addEventListener("click", create_proxy(_start))
+            _btn.disabled = False
+            _set("Runtime ready — click Run.")
+            print("PyScript runtime ready. Click Run to start the example.")
     </script>
 
     <script>

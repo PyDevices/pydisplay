@@ -8,8 +8,8 @@ For every example whose header comment is ``# multimer types: async`` or
 card grids in ``index.html`` between the ``GEN:`` markers.
 
 Top-level examples link to ``html/index.html?modules=<entry>[,<helper>,…]``.
-Folder examples get a MIP manifest at ``html/<name>.json`` (same layout as
-``packages/*.json``) and link to ``html/index.html?folders=<name>``.
+Manifest-backed examples get a MIP manifest at ``html/<name>.json`` (same layout as
+``packages/*.json``) and link to ``html/index.html?manifests=<name>``.
 
 Run from anywhere:
 
@@ -187,7 +187,7 @@ class Example:
         self.name = name  # page/file stem, e.g. "calculator"
         self.import_name = import_name  # python import target, e.g. "chango"
         self.source_rel = source_rel  # path under repo, e.g. "src/examples/x.py"
-        self.kind = kind  # "module" or "folder"
+        self.kind = kind  # "module" or "manifest"
         self.mtype = ""  # "async" | "all" | ...
         self.docstring_blurb = ""
         self.blocks = False  # blocking while-True without await
@@ -251,9 +251,9 @@ class Example:
         return Path(self.pyscript_files[0]).stem == self.name
 
     @property
-    def uses_parametric_folder_loader(self) -> bool:
-        """Subfolder example — ``?folders=`` installs ``html/<name>.json``, imports folder name."""
-        if self.kind != "folder" or not self.pyscript_files:
+    def uses_parametric_manifest_loader(self) -> bool:
+        """Manifest-backed example — ``?manifests=`` installs ``html/<name>.json``, imports entry name."""
+        if self.kind != "manifest" or not self.pyscript_files:
             return False
         prefix = f"{self.name}/"
         return all(
@@ -263,7 +263,7 @@ class Example:
 
     @property
     def uses_parametric_loader(self) -> bool:
-        return self.uses_parametric_modules_loader or self.uses_parametric_folder_loader
+        return self.uses_parametric_modules_loader or self.uses_parametric_manifest_loader
 
     @property
     def parametric_modules_query(self) -> str:
@@ -285,16 +285,16 @@ class Example:
         return f"https://github.com/PyDevices/pydisplay/blob/main/{self.source_rel}"
 
 
-def folder_mip_manifest(ex: Example) -> dict:
-    """MIP manifest for a folder example (install with ``target=\"examples\"``)."""
+def example_mip_manifest(ex: Example) -> dict:
+    """MIP manifest for a manifest-backed example (install with ``target=\"examples\"``)."""
     return {
         "urls": [[path, f"{MIP_REPO}src/examples/{path}"] for path in ex.pyscript_files],
         "version": MIP_MANIFEST_VERSION,
     }
 
 
-def render_folder_mip_manifest(ex: Example) -> str:
-    return json.dumps(folder_mip_manifest(ex), indent=2) + "\n"
+def render_example_mip_manifest(ex: Example) -> str:
+    return json.dumps(example_mip_manifest(ex), indent=2) + "\n"
 
 
 def parse_pyscript_files(lines: list[str]) -> list[str]:
@@ -390,10 +390,10 @@ def parse_example(path: Path) -> Example | None:
         import_name = path.stem
         kind = "module"
     else:
-        # Folder example, e.g. chango/chango.py -> import "chango".
+        # Manifest-backed example, e.g. chango/chango.py -> import "chango".
         name = path.parent.name
         import_name = path.parent.name
-        kind = "folder"
+        kind = "manifest"
 
     ex = Example(name, import_name, rel, kind)
     ex.mtype = chosen
@@ -439,7 +439,7 @@ def discover_parsed() -> list[Example]:
     """All browser-runnable examples (async/all), including binary-dependent ones."""
     found: dict[str, Example] = {}
     for path in sorted(EXAMPLES_DIR.rglob("*.py")):
-        # Only top-level files and one-level folder entry files.
+        # Only top-level files and one-level manifest entry files.
         rel = path.relative_to(EXAMPLES_DIR)
         if len(rel.parts) == 1 or (len(rel.parts) == 2 and rel.parts[0] == rel.stem):
             ex = parse_example(path)
@@ -702,8 +702,8 @@ def render_page(ex: Example) -> str:
 def example_href(ex: Example, base: str = "html/") -> str:
     if ex.uses_parametric_modules_loader:
         return f"{base}index.html?modules={ex.parametric_modules_query}"
-    if ex.uses_parametric_folder_loader:
-        return f"{base}index.html?folders={ex.name}"
+    if ex.uses_parametric_manifest_loader:
+        return f"{base}index.html?manifests={ex.name}"
     return f"{base}{ex.name}.html"
 
 
@@ -750,15 +750,15 @@ def remove_obsolete_html(examples: list[Example], stale: list[str], check: bool)
         print(f"removed {rel}")
 
 
-def write_folder_manifests(
+def write_html_mip_manifests(
     examples: list[Example], write: Callable[[Path, str], None], stale: list[str], check: bool
 ) -> None:
-    """Write ``html/<folder>.json`` MIP manifests; drop manifests for removed folders."""
-    keep = {ex.name for ex in examples if ex.uses_parametric_folder_loader}
+    """Write ``html/<name>.json`` MIP manifests; drop manifests for removed examples."""
+    keep = {ex.name for ex in examples if ex.uses_parametric_manifest_loader}
     for ex in examples:
-        if not ex.uses_parametric_folder_loader:
+        if not ex.uses_parametric_manifest_loader:
             continue
-        write(HTML_DIR / f"{ex.name}.json", render_folder_mip_manifest(ex))
+        write(HTML_DIR / f"{ex.name}.json", render_example_mip_manifest(ex))
     for path in HTML_DIR.glob("*.json"):
         if path.stem in keep:
             continue
@@ -808,12 +808,12 @@ def main(argv: list[str] | None = None) -> int:
 
     dedicated = [ex for ex in examples if not ex.uses_parametric_loader]
     parametric = [ex for ex in examples if ex.uses_parametric_loader]
-    folder_parametric = [ex for ex in examples if ex.uses_parametric_folder_loader]
+    manifest_parametric = [ex for ex in examples if ex.uses_parametric_manifest_loader]
 
     for ex in dedicated:
         write(HTML_DIR / f"{ex.name}.html", render_page(ex))
 
-    write_folder_manifests(examples, write, stale, args.check)
+    write_html_mip_manifests(examples, write, stale, args.check)
     remove_obsolete_html(examples, stale, args.check)
 
     index_text = INDEX.read_text(encoding="utf-8")
@@ -823,7 +823,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print(
         f"\n{len(examples)} gallery example(s) "
-        f"({len(parametric) - len(folder_parametric)} module, {len(folder_parametric)} folder; "
+        f"({len(parametric) - len(manifest_parametric)} module, {len(manifest_parametric)} manifest; "
         f"{len(dedicated)} dedicated HTML; "
         f"{len(by_type['async'])} async, {len(by_type['all'])} all)."
     )
