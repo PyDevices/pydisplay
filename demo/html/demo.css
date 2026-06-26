@@ -1,8 +1,7 @@
 /*
  * pydisplay PyScript demo — shared stylesheet
  *
- * Used by the demo index (demo/index.html) and every example page in
- * demo/html/. Keep this file dependency-free so it ships as a single asset.
+ * Used by the demo index (index.html) and the parametric loader (html/).
  */
 
 :root {
@@ -414,9 +413,9 @@ kbd {
   color: var(--muted);
 }
 
-/* ---------- Example page ---------- */
+/* ---------- Loader page (html/) ---------- */
 
-.example-main {
+.loader-main {
   padding: 30px 0 60px;
 }
 
@@ -437,7 +436,7 @@ kbd {
   opacity: 0.5;
 }
 
-.example-head {
+.loader-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -445,13 +444,13 @@ kbd {
   margin-bottom: 6px;
 }
 
-.example-head h1 {
+.loader-head h1 {
   margin: 0;
   font-size: clamp(1.6rem, 3.2vw, 2.2rem);
   letter-spacing: -0.025em;
 }
 
-.example-lede {
+.loader-lede {
   margin: 0 0 26px;
   max-width: 680px;
   color: var(--ink-soft);
