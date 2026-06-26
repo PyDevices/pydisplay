@@ -9,8 +9,7 @@ and refresh:
     python tools/serve.py
     # then open:
     #   http://127.0.0.1:8000/index.html            (demo index)
-    #   http://127.0.0.1:8000/html/index.html?modules=calculator  (parametric loader)
-    #   http://127.0.0.1:8000/html/chango.html  (multi-file example page)
+    #   http://127.0.0.1:8000/html/?modules=calculator  (parametric loader)
     #   http://127.0.0.1:8000/demo-pages/index.html (landing page)
 
 Why a custom server instead of `python -m http.server`?
@@ -44,17 +43,6 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
 import sys
-from urllib.parse import urlparse
-
-_TOOLS = Path(__file__).resolve().parent
-if str(_TOOLS) not in sys.path:
-    sys.path.insert(0, str(_TOOLS))
-
-from loader_query import (  # noqa: E402
-    loader_index_path,
-    loader_query_error,
-    render_bad_request_html,
-)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -118,17 +106,6 @@ class DemoRequestHandler(SimpleHTTPRequestHandler):
             # Lightweight health check for debug tooling.
             self._send_cors(200)
             return
-        parsed = urlparse(self.path)
-        if loader_index_path(parsed.path):
-            err = loader_query_error(parsed.query)
-            if err:
-                body = render_bad_request_html(err).encode("utf-8")
-                self.send_response(400)
-                self.send_header("Content-Type", "text/html; charset=utf-8")
-                self.send_header("Content-Length", str(len(body)))
-                self.end_headers()
-                self.wfile.write(body)
-                return
         super().do_GET()
 
     def do_HEAD(self) -> None:  # noqa: N802 - http.server hook
@@ -210,8 +187,8 @@ def main(argv: list[str] | None = None) -> int:
     print("Open one of:")
     print(f"  {base}/index.html             (demo index)")
     print(f"  {base}/demo-pages/index.html  (landing page)")
-    print(f"  {base}/html/index.html?modules=calculator  (parametric loader)")
-    print(f"  {base}/html/index.html?manifests=chango  (MIP manifest example)")
+    print(f"  {base}/html/?modules=calculator  (parametric loader)")
+    print(f"  {base}/html/?manifests=chango  (MIP manifest example)")
     print("")
     print(PAGE_SNIPPET)
     print("Press Ctrl+C to stop.")

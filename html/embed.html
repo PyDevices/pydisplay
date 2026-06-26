@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./mini-coi-fd.js"></script>
+<script type="module" src="./pyscript/core.js"></script>
+<link rel="stylesheet" href="./pyscript/core.css">
+</head>
+<body>
+<canvas id="display_canvas" width="320" height="480"></canvas>
+<div id="log" style="display:none;white-space:pre-wrap;overflow:auto;max-height:40vh;border:1px solid #888;padding:8px;margin-top:8px;font-family:monospace;font-size:12px"></div>
+<script>
+(function () {
+    var SAFE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+
+    function parseList(raw) {
+        return raw.split(',').map(function (s) {
+            s = s.trim();
+            if (s.toLowerCase().endsWith('.py')) {
+                s = s.slice(0, -3);
+            }
+            return s;
+        }).filter(Boolean);
+    }
+
+    function parseQuery(search) {
+        var modules = [];
+        var manifests = [];
+        var entryKind = null;
+        var entryName = null;
+        var debug = false;
+        var raw = search.startsWith('?') ? search.slice(1) : search;
+        raw.split('&').forEach(function (part) {
+            if (!part) {
+                return;
+            }
+            var eq = part.indexOf('=');
+            var key = eq === -1 ? part : decodeURIComponent(part.slice(0, eq));
+            var val = eq === -1 ? '' : decodeURIComponent(part.slice(eq + 1).replace(/\+/g, ' '));
+            if (key === 'modules') {
+                var list = parseList(val);
+                if (!entryKind && list.length) {
+                    entryKind = 'module';
+                    entryName = list[0];
+                }
+                modules.push.apply(modules, list);
+            } else if (key === 'manifests') {
+                var list = parseList(val);
+                if (!entryKind && list.length) {
+                    entryKind = 'manifest';
+                    entryName = list[0];
+                }
+                manifests.push.apply(manifests, list);
+            } else if (key === 'debug') {
+                debug = val === '' || /^(1|true|yes)$/i.test(val);
+            }
+        });
+        return {
+            modules: modules,
+            manifests: manifests,
+            entryKind: entryKind,
+            entryName: entryName,
+            debug: debug,
+        };
+    }
+
+    function invalidNames(plan) {
+        var bad = [];
+        plan.modules.forEach(function (name) {
+            if (!SAFE.test(name)) {
+                bad.push(name);
+            }
+        });
+        plan.manifests.forEach(function (name) {
+            if (!SAFE.test(name)) {
+                bad.push(name);
+            }
+        });
+        return bad;
+    }
+
+    var plan = parseQuery(window.location.search);
+    if (invalidNames(plan).length) {
+        window.__pydisplayLoaderDisabled = true;
+        return;
+    }
+
+    var log = document.getElementById('log');
+    if (plan.debug) {
+        log.style.display = 'block';
+    }
+
+    window.__pydisplayModules = plan.modules.join(',');
+    window.__pydisplayManifests = plan.manifests.join(',');
+    window.__pydisplayEntryKind = plan.entryKind || '';
+    window.__pydisplayEntry = plan.entryName || '';
+})();
+</script>
+<script type="mpy" config="./pyscript.toml" output="log">
+import builtins
+import json
+from js import document
+
+MANIFEST_MIP_TARGET = "examples"
+
+def _log_print(*args, **kwargs):
+    el = document.getElementById("log")
+    if el is not None:
+        sep = kwargs.get("sep", " ")
+        end = kwargs.get("end", "\n")
+        el.textContent += sep.join(str(a) for a in args) + end
+        el.scrollTop = el.scrollHeight
+
+builtins.print = _log_print
+
+def _from_window(name, default=""):
+    from js import window
+    return str(getattr(window, name, default) or default).strip()
+
+def _parse_comma(raw):
+    names = []
+    for part in str(raw).split(","):
+        name = part.strip()
+        if name.lower().endswith(".py"):
+            name = name[:-3]
+        if name:
+            names.append(name)
+    return names
+
+def _loader_plan():
+    modules = _parse_comma(_from_window("__pydisplayModules"))
+    manifests = _parse_comma(_from_window("__pydisplayManifests"))
+    entry = _from_window("__pydisplayEntry")
+    if not entry and modules:
+        entry = modules[0]
+    elif not entry and manifests:
+        entry = manifests[0]
+    return modules, manifests, entry
+
+def _repo_context():
+    host = document.location.hostname
+    path = document.location.pathname
+    demo_root = path.split("/html/")[0] if "/html/" in path else ""
+    repo_base = document.location.origin + demo_root
+    origin = host in ("127.0.0.1", "localhost") or host.endswith(".github.io")
+    return repo_base, origin
+
+def _fetch_json(url):
+    from js import XMLHttpRequest
+    xhr = XMLHttpRequest.new()
+    xhr.open("GET", url, False)
+    xhr.send(None)
+    if xhr.status != 200:
+        raise RuntimeError("HTTP " + str(xhr.status) + " fetching " + url)
+    return json.loads(xhr.responseText)
+
+def _install_manifest_origin(mip, repo_base, name):
+    manifest = _fetch_json(repo_base + "/html/" + name + ".json")
+    for dest, _src in manifest["urls"]:
+        mip.install(repo_base + "/src/examples/" + dest, target=MANIFEST_MIP_TARGET)
+
+def _run():
+    if _from_window("__pydisplayLoaderDisabled"):
+        return
+    modules, manifests, entry = _loader_plan()
+    if not entry:
+        return
+    import mip
+    repo_base, origin = _repo_context()
+    for name in manifests:
+        if origin:
+            _install_manifest_origin(mip, repo_base, name)
+        else:
+            mip.install(
+                "github:PyDevices/pydisplay/html/" + name + ".json",
+                target=MANIFEST_MIP_TARGET,
+            )
+    for name in modules:
+        if origin:
+            mip.install(repo_base + "/src/examples/" + name + ".py")
+        else:
+            mip.install("github:PyDevices/pydisplay/src/examples/" + name + ".py")
+    import lib.path
+    __import__(entry)
+
+_run()
+</script>
+</body>
+</html>

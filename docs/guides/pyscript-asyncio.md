@@ -70,7 +70,7 @@ If `broker.poll()` is synchronous, call it inside the async loop and **await a y
 | `eventsys_simpletest.py` | Minimal poll + await |
 | `paint.py` | Touch drawing with asyncio |
 
-Try via: `html/index.html?modules=eventsys_simpletest`
+Try via: `html/?modules=eventsys_simpletest`
 
 ## Common failures
 

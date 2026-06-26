@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Example — pydisplay demo</title>
-    <meta name="description" content="Run a pydisplay example by name via PyScript.">
+    <title>Loader — pydisplay demo</title>
+    <meta name="description" content="Run pydisplay demos by name via the parametric PyScript loader.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="./demo.css">
@@ -27,17 +27,17 @@
         </div>
     </header>
 
-    <main class="wrap example-main">
+    <main class="wrap loader-main">
         <nav class="crumbs">
             <a href="../index.html">Demos</a>
             <span class="sep">/</span>
-            <span id="crumb-name">Example</span>
+            <span id="crumb-name">Loader</span>
         </nav>
 
-        <div class="example-head">
-            <h1 id="example-title">Example</h1>
+        <div class="loader-head">
+            <h1 id="loader-title">Loader</h1>
         </div>
-        <p class="example-lede" id="example-lede">
+        <p class="loader-lede" id="loader-lede">
             Load with <code>?modules=<em>name</em></code> and/or
             <code>?manifests=<em>name</em></code>
             (e.g. <a href="?modules=calculator">?modules=calculator</a>,
@@ -45,14 +45,6 @@
         </p>
 
         <p id="loader-param" hidden aria-hidden="true"></p>
-
-        <div id="loader-query-error" class="panel" hidden>
-            <h1>400 Bad Request</h1>
-            <p id="loader-query-error-detail"></p>
-            <p><code>?modules=</code> and <code>?manifests=</code> names must be simple identifiers
-            (letters, digits, underscore; no slashes or dots).</p>
-            <p><a class="btn" href="../index.html">Back to demos</a></p>
-        </div>
 
         <div class="play-area" id="play-area">
             <div class="loading" id="loading">
@@ -173,48 +165,36 @@
                 return bad;
             }
 
-            function showLoaderQueryError(bad) {
-                var detail = 'Unsafe ?modules= / ?manifests= value(s): ' +
-                    bad.map(function (n) { return JSON.stringify(n); }).join(', ');
-                document.title = '400 Bad Request — pydisplay demo';
-                var err = document.getElementById('loader-query-error');
-                var errDetail = document.getElementById('loader-query-error-detail');
-                var play = document.getElementById('play-area');
-                var meta = document.querySelector('.meta-layout');
-                var lede = document.getElementById('example-lede');
-                var head = document.querySelector('.example-head');
-                var crumbs = document.querySelector('.crumbs');
-                if (errDetail) {
-                    errDetail.textContent = detail;
-                }
-                if (err) {
-                    err.hidden = false;
-                }
-                if (play) {
-                    play.hidden = true;
-                }
+            function abortLoader(bad) {
+                var main = document.querySelector('main.loader-main');
+                var names = bad.map(function (n) { return JSON.stringify(n); }).join(', ');
+                document.title = 'Invalid query — pydisplay demo';
+                var meta = document.querySelector('meta[name="description"]');
                 if (meta) {
-                    meta.hidden = true;
+                    meta.content = 'Invalid parametric loader query.';
                 }
-                if (lede) {
-                    lede.hidden = true;
+                if (main) {
+                    main.innerHTML =
+                        '<div class="loader-head"><h1>Invalid query</h1></div>' +
+                        '<div class="panel">' +
+                        '<p>Unsafe <code>?modules=</code> or <code>?manifests=</code> value(s): ' +
+                        names + '.</p>' +
+                        '<p>Names must be simple identifiers (letters, digits, underscore; ' +
+                        'no slashes or dots).</p>' +
+                        '<p><a class="btn" href="../index.html">Back to demos</a></p>' +
+                        '</div>';
                 }
-                if (head) {
-                    head.hidden = true;
-                }
-                if (crumbs) {
-                    crumbs.hidden = true;
-                }
-                window.__pydisplayQueryRejected = detail;
+                window.__pydisplayLoaderDisabled = true;
             }
 
             const plan = parseLoaderQuery(window.location.search);
             const badNames = invalidLoaderNames(plan);
             if (badNames.length) {
-                showLoaderQueryError(badNames);
+                abortLoader(badNames);
                 return;
             }
 
+            window.__pydisplayLoaderReady = true;
             window.__pydisplayModules = plan.modules.join(',');
             window.__pydisplayManifests = plan.manifests.join(',');
             window.__pydisplayEntryKind = plan.entryKind || '';
@@ -234,11 +214,11 @@
                 document.title = label + ' — pydisplay demo';
                 const meta = document.querySelector('meta[name="description"]');
                 if (meta) {
-                    meta.content = label + ': a pydisplay example running in the browser via PyScript.';
+                    meta.content = label + ': a pydisplay demo running in the browser via PyScript.';
                 }
                 const crumb = document.getElementById('crumb-name');
-                const title = document.getElementById('example-title');
-                const lede = document.getElementById('example-lede');
+                const title = document.getElementById('loader-title');
+                const lede = document.getElementById('loader-lede');
                 const metaEntry = document.getElementById('meta-entry');
                 const metaSource = document.getElementById('meta-source');
                 const metaInstall = document.getElementById('meta-install');
@@ -358,9 +338,12 @@
             for dest, _src in manifest["urls"]:
                 mip.install(repo_base + "/src/examples/" + dest, target=MANIFEST_MIP_TARGET)
 
+        def _loader_disabled():
+            return bool(_from_window("__pydisplayLoaderDisabled"))
+
         def _start(*_):
             global _started
-            if _started:
+            if _started or _loader_disabled():
                 return
             modules, manifests, entry_kind, entry = _loader_plan()
             if not entry:
@@ -399,42 +382,11 @@
                 _btn.textContent = "Run"
                 raise
 
-        def _safe_loader_name(name):
-            if not name:
-                return False
-            if not (name[0].isalpha() or name[0] == "_"):
-                return False
-            for ch in name[1:]:
-                if not (ch.isalnum() or ch == "_"):
-                    return False
-            return True
-
-        def _reject_unsafe_loader_query():
-            rejected = _from_window("__pydisplayQueryRejected")
-            if rejected:
-                _log_print(rejected)
-                _set("400 Bad Request")
-                return True
-            modules = _parse_comma(_from_window("__pydisplayModules"))
-            manifests = _parse_comma(_from_window("__pydisplayManifests"))
-            bad = []
-            for name in modules + manifests:
-                if not _safe_loader_name(name):
-                    bad.append(name)
-            if bad:
-                detail = "Unsafe ?modules= / ?manifests= value(s): " + ", ".join(repr(n) for n in bad)
-                _log_print(detail)
-                _set("400 Bad Request")
-                return True
-            return False
-
-        if _reject_unsafe_loader_query():
-            pass
-        else:
+        if not _loader_disabled():
             _btn.addEventListener("click", create_proxy(_start))
             _btn.disabled = False
             _set("Runtime ready — click Run.")
-            print("PyScript runtime ready. Click Run to start the example.")
+            print("PyScript runtime ready. Click Run to start the demo.")
     </script>
 
     <script>

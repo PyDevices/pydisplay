@@ -1,40 +1,21 @@
 #!/usr/bin/env python3
 """
-gen_demo_pages.py — generate the PyScript demo pages for pydisplay examples.
+gen_demo_pages.py — refresh the pydisplay browser demo gallery.
 
-For every example whose header comment is ``# multimer types: async`` or
-``# multimer types: all`` (the browser-runnable set), **and** whose
-``# pyscript files:`` list contains only ``.py`` paths, this refreshes the
-card grids in ``index.html`` between the ``GEN:`` markers.
+Scans ``src/examples/`` for ``# multimer types: async|all`` and ``# pyscript files:``
+headers, then:
 
-Top-level examples link to ``html/index.html?modules=<entry>[,<helper>,…]``.
-Manifest-backed examples get a MIP manifest at ``html/<name>.json`` (same layout as
-``packages/*.json``) and link to ``html/index.html?manifests=<name>``.
+  - Updates demo cards in ``index.html`` (between ``GEN:`` markers)
+  - Writes ``html/<name>.json`` MIP manifests for multi-file demos
+  - Deletes stale ``html/*.html`` from the old per-demo page generator
 
-Run from anywhere:
+Every gallery demo opens the parametric loader at ``html/?modules=…`` or ``html/?manifests=…``.
 
-    python tools/gen_demo_pages.py            # write pages + update index
-    python tools/gen_demo_pages.py --check    # fail if anything is stale
+Examples whose ``# pyscript files:`` list includes binary assets are excluded.
 
-Why pages are gated behind a "Run" button
-------------------------------------------
-Many examples (especially the ``all`` set) run a blocking ``while True`` loop at
-import time. On PyScript's single main thread that would freeze the browser tab
-on load. Each generated page therefore loads the runtime first and only
-installs + imports the example when the user clicks **Run**, so nothing hangs
-unexpectedly and the user opts in per example.
-
-Each example declares install paths on line 2::
-
-    # multimer types: async
-    # pyscript files: calculator.py
-
-Use comma-separated paths relative to ``src/examples/``. List non-``.py`` assets
-too (``.bmp``, ``.bin``, …) for device installs; any example whose list
-includes a binary file is **excluded** from the browser gallery (see
-``BINARY_SUFFIXES`` / ``depends_on_binary_files``).
-
-This script is CPython standard library only.
+    python tools/gen_demo_pages.py
+    python tools/gen_demo_pages.py --check
+    python tools/gen_demo_pages.py --copy-examples DIR   # GitHub Pages deploy
 """
 
 from __future__ import annotations
@@ -50,111 +31,58 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES_DIR = REPO_ROOT / "src" / "examples"
 HTML_DIR = REPO_ROOT / "html"
 INDEX = REPO_ROOT / "index.html"
-BOARD_CONFIG = REPO_ROOT / "src" / "lib" / "board_config.py"
 
 MIP_REPO = "github:PyDevices/pydisplay/"
 MIP_MANIFEST_VERSION = "0.0.1"
-FOLDER_MIP_TARGET = "examples"
 
-
-def path_is_binary(path: str) -> bool:
-    return Path(path).suffix.lower() in BINARY_SUFFIXES
-
-
-def board_display_size() -> tuple[int, int]:
-    """Read ``width`` / ``height`` from the PyScript ``board_config`` (layout hint only)."""
-    width = height = None
-    for line in BOARD_CONFIG.read_text(encoding="utf-8").splitlines():
-        stripped = line.strip()
-        if stripped.startswith("width = "):
-            width = int(stripped.split("=", 1)[1].strip())
-        elif stripped.startswith("height = "):
-            height = int(stripped.split("=", 1)[1].strip())
-    return width or 320, height or 480
-
-
-# Example types we build pages for (anything async-compatible runs in PyScript).
 TARGET_TYPES = ("async", "all")
-
-# Non-Python install paths — browser demos skip these (mip + GitHub Pages cannot
-# reliably serve binary assets today).
 BINARY_SUFFIXES = frozenset({".bmp", ".bin", ".pbm", ".png", ".jpg", ".jpeg", ".gif", ".webp"})
+KEEP_HTML = frozenset({"index", "repl", "editor", "test", "embed"})
 
-# Curated copy. Anything omitted falls back to the module docstring + defaults.
-# Fields: title, blurb, howto (list), experimental (bool), note (str), icon.
+ARROW = (
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
+)
+
+# Curated card copy. Omitted fields fall back to defaults / docstring.
 CURATED: dict[str, dict] = {
     "pydisplay_demo_async": {
         "title": "pydisplay Demo",
         "blurb": "The flagship showcase: auto-scrolling notes with on-screen buttons to rotate the display and cycle the accent color.",
-        "howto": [
-            "The notes panel scrolls automatically.",
-            "Tap <strong>Rotate</strong> to turn the screen 90&deg;.",
-            "Tap <strong>Color</strong> to cycle the accent.",
-        ],
         "icon": "display",
     },
     "calculator": {
         "title": "Calculator",
         "blurb": "A touch calculator drawn with <code>graphics.FrameBuffer</code> and the material-design palette.",
-        "howto": [
-            "Click the number and operator keys.",
-            "<code>C</code> clears, <code>=</code> evaluates.",
-            "<code>Sqrt</code>, <code>%</code> and <code>+/-</code> act on the current entry.",
-        ],
         "icon": "calc",
     },
     "paint": {
         "title": "Paint",
         "blurb": "A minimal paint program showing how <code>displaysys</code> handles pointer events.",
-        "howto": [
-            "Click a color block in the palette strip to select it.",
-            "Left-drag on the canvas to paint.",
-            "Right-click a swatch to flood-fill the canvas.",
-        ],
         "icon": "paint",
-        "extra_action": ('<a class="btn" href="./editor.html">Open in editor</a>'),
     },
     "eventsys_simpletest": {
         "title": "Event System",
         "blurb": "The smallest <code>eventsys</code> example &mdash; prints every pointer event it polls.",
-        "howto": [
-            "Hover and click over the black display area.",
-            "Events are printed in the console panel to the right.",
-            "This example has no on-screen drawing by design.",
-        ],
         "icon": "event",
     },
     "apollo": {
         "title": "Apollo DSKY",
         "blurb": "An Apollo Guidance Computer DSKY emulator rendered from a BMP565 sprite sheet, with a live clock.",
-        "howto": [
-            "Tap the keypad buttons on the panel.",
-            "The status lights and clock update live.",
-            "The bottom key scrolls the readout.",
-        ],
         "experimental": True,
-        "note": "Depends on the apollo_dsky package and a binary BMP asset; designed for a 320&times;480 display.",
         "icon": "rocket",
     },
     "lv_test_timer_async": {
         "title": "LVGL Timer (async)",
         "blurb": "Drives an LVGL UI from a <code>multimer.aio</code> timer on the asyncio loop.",
-        "howto": [
-            "Builds a small LVGL UI and refreshes it from an async timer.",
-            "Requires an <code>lvgl</code> binding in the runtime.",
-            "Provided as a reference for async LVGL integration.",
-        ],
         "experimental": True,
-        "note": "LVGL is a native binding; this needs an <code>lvgl</code>-enabled runtime, which the bundled PyScript MicroPython does not include.",
         "icon": "timer",
     },
     "nano_gui_simpletest": {
         "experimental": True,
-        "note": "Imports the <code>gui</code> (nano-gui) package, which is not bundled in <code>pyscript.toml</code>; expect an import error until it is added.",
     },
 }
 
-# Small inline SVG icon set, keyed by name.
 ICONS = {
     "display": '<rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M7 14h6"/>',
     "calc": '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h4"/>',
@@ -169,10 +97,6 @@ ICONS = {
     "scroll": '<path d="M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2M9 12h6M9 16h6M9 8h6"/>',
 }
 
-ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
-BRAND_LOGO = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>'
-SRC_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>'
-
 
 def icon_svg(name: str) -> str:
     body = ICONS.get(name, ICONS["monitor"])
@@ -183,18 +107,16 @@ def icon_svg(name: str) -> str:
 
 
 class Example:
-    def __init__(self, name: str, import_name: str, source_rel: str, kind: str):
-        self.name = name  # page/file stem, e.g. "calculator"
-        self.import_name = import_name  # python import target, e.g. "chango"
-        self.source_rel = source_rel  # path under repo, e.g. "src/examples/x.py"
-        self.kind = kind  # "module" or "manifest"
-        self.mtype = ""  # "async" | "all" | ...
-        self.docstring_blurb = ""
-        self.blocks = False  # blocking while-True without await
-        self.is_async = False
-        self.pyscript_files: list[str] = []  # paths relative to src/examples/
+    """One browser-gallery demo discovered from ``src/examples/``."""
 
-    # ---- derived metadata ----
+    def __init__(self, name: str, source_rel: str, kind: str):
+        self.name = name
+        self.source_rel = source_rel
+        self.kind = kind  # "module" | "manifest"
+        self.mtype = ""
+        self.docstring_blurb = ""
+        self.pyscript_files: list[str] = []
+
     @property
     def curated(self) -> dict:
         return CURATED.get(self.name, {})
@@ -208,7 +130,7 @@ class Example:
         return (
             self.curated.get("blurb")
             or self.docstring_blurb
-            or (f"The <code>{self.name}</code> example running in the browser via PyScript.")
+            or f"The <code>{self.name}</code> demo running in the browser via PyScript."
         )
 
     @property
@@ -234,67 +156,23 @@ class Example:
 
     @property
     def depends_on_binary_files(self) -> bool:
-        return any(path_is_binary(path) for path in self.pyscript_files)
+        return any(Path(path).suffix.lower() in BINARY_SUFFIXES for path in self.pyscript_files)
 
     @property
     def browser_eligible(self) -> bool:
         return not self.depends_on_binary_files
 
-    @property
-    def uses_parametric_modules_loader(self) -> bool:
-        """Top-level ``.py`` files — ``?modules=`` installs all, imports first when entry."""
-        if self.kind != "module" or not self.pyscript_files:
-            return False
-        for path in self.pyscript_files:
-            if "/" in path or not path.lower().endswith(".py"):
-                return False
-        return Path(self.pyscript_files[0]).stem == self.name
-
-    @property
-    def uses_parametric_manifest_loader(self) -> bool:
-        """Manifest-backed example — ``?manifests=`` installs ``html/<name>.json``, imports entry name."""
-        if self.kind != "manifest" or not self.pyscript_files:
-            return False
-        prefix = f"{self.name}/"
-        return all(
-            path.startswith(prefix) and path.lower().endswith(".py")
-            for path in self.pyscript_files
-        )
-
-    @property
-    def uses_parametric_loader(self) -> bool:
-        return self.uses_parametric_modules_loader or self.uses_parametric_manifest_loader
-
-    @property
-    def parametric_modules_query(self) -> str:
-        """Comma-separated module stems for ``?modules=`` (entry point first)."""
-        return ",".join(Path(p).stem for p in self.pyscript_files)
-
-    @property
-    def install_line(self) -> str:
-        return render_mip_installs(self.pyscript_files)
+    def loader_href(self, base: str = "html/") -> str:
+        if self.kind == "module":
+            stems = ",".join(Path(path).stem for path in self.pyscript_files)
+            return f"{base}?modules={stems}"
+        return f"{base}?manifests={self.name}"
 
     @property
     def primary_tag(self) -> tuple[str, str]:
         if self.experimental:
             return ("warn", "experimental")
         return ("async", "async") if self.mtype == "async" else ("all", "all")
-
-    @property
-    def source_url(self) -> str:
-        return f"https://github.com/PyDevices/pydisplay/blob/main/{self.source_rel}"
-
-
-def example_mip_manifest(ex: Example) -> dict:
-    """MIP manifest for a manifest-backed example (install with ``target=\"examples\"``)."""
-    return {
-        "urls": [[path, f"{MIP_REPO}src/examples/{path}"] for path in ex.pyscript_files],
-        "version": MIP_MANIFEST_VERSION,
-    }
-
-
-def render_example_mip_manifest(ex: Example) -> str:
-    return json.dumps(example_mip_manifest(ex), indent=2) + "\n"
 
 
 def parse_pyscript_files(lines: list[str]) -> list[str]:
@@ -306,110 +184,7 @@ def parse_pyscript_files(lines: list[str]) -> list[str]:
     return []
 
 
-def mip_install_target(examples_rel: str) -> str | None:
-    if "/" in examples_rel:
-        return f"examples/{examples_rel.split('/', maxsplit=1)[0]}"
-    return None
-
-
-def render_mip_install_preamble(ind: str) -> list[str]:
-    """JS prelude: repo base URL and whether to install from origin vs GitHub."""
-    return [
-        "from js import document",
-        f"{ind}_host = document.location.hostname",
-        f"{ind}_path = document.location.pathname",
-        f'{ind}_demo_root = _path.split("/html/")[0] if "/html/" in _path else ""',
-        f"{ind}_repo_base = document.location.origin + _demo_root",
-        # serve.py (repo root) or GitHub Pages (gallery examples under demo/src/examples/)
-        f'{ind}_origin = _host in ("127.0.0.1", "localhost") or _host.endswith(".github.io")',
-    ]
-
-
-def render_mip_installs(pyscript_files: list[str]) -> str:
-    ind = "                "
-    br = "                    "
-    lines = render_mip_install_preamble(ind)
-    for path in pyscript_files:
-        target = mip_install_target(path)
-        url = f'_repo_base + "/src/examples/{path}"'
-        if target:
-            origin = f'mip.install({url}, target="{target}")'
-            gh = (
-                f'mip.install("github:PyDevices/pydisplay/src/examples/{path}", target="{target}")'
-            )
-        else:
-            origin = f"mip.install({url})"
-            gh = f'mip.install("github:PyDevices/pydisplay/src/examples/{path}")'
-        lines.append(f"{ind}if _origin:")
-        lines.append(f"{br}{origin}")
-        lines.append(f"{ind}else:")
-        lines.append(f"{br}{gh}")
-    return "\n".join(lines)
-
-
-def gallery_example_files() -> list[str]:
-    """All ``# pyscript files:`` paths for browser-gallery examples (Python only)."""
-    files: set[str] = set()
-    for ex in discover():
-        files.update(ex.pyscript_files)
-    return sorted(files)
-
-
-def copy_gallery_examples(dest: Path) -> int:
-    """Copy gallery example sources into ``dest`` (for GitHub Pages deploy)."""
-    n = 0
-    for rel in gallery_example_files():
-        src = EXAMPLES_DIR / rel
-        dst = dest / rel
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src, dst)
-        n += 1
-    return n
-
-
-def parse_example(path: Path) -> Example | None:
-    text = path.read_text(encoding="utf-8", errors="replace")
-    lines = text.splitlines()
-    mtype = ""
-    for line in lines[:5]:
-        s = line.strip()
-        if s.startswith("# multimer types:"):
-            mtype = s.split(":", 1)[1].strip().lower()
-            break
-    if not mtype:
-        return None
-    # Normalise: treat the set membership loosely.
-    type_tokens = {t.strip() for t in mtype.replace(";", ",").split(",")}
-    chosen = next((t for t in TARGET_TYPES if t in type_tokens), None)
-    if chosen is None:
-        return None
-
-    rel = path.relative_to(REPO_ROOT).as_posix()
-    if path.parent.name == "examples":
-        name = path.stem
-        import_name = path.stem
-        kind = "module"
-    else:
-        # Manifest-backed example, e.g. chango/chango.py -> import "chango".
-        name = path.parent.name
-        import_name = path.parent.name
-        kind = "manifest"
-
-    ex = Example(name, import_name, rel, kind)
-    ex.mtype = chosen
-    ex.is_async = (chosen == "async") or ("multimer.aio" in text) or ("async def main" in text)
-    ex.blocks = ("while True" in text) and not ex.is_async
-    ex.docstring_blurb = extract_blurb(text, name)
-    examples_rel = path.relative_to(EXAMPLES_DIR).as_posix()
-    ex.pyscript_files = parse_pyscript_files(lines) or [examples_rel]
-    for entry in ex.pyscript_files:
-        if not (EXAMPLES_DIR / entry).is_file():
-            raise SystemExit(f"{rel}: missing pyscript file {entry}")
-    return ex
-
-
 def extract_blurb(text: str, name: str) -> str:
-    """Pull a short human sentence out of the module docstring."""
     start = None
     for q in ('"""', "'''"):
         i = text.find(q)
@@ -429,22 +204,52 @@ def extract_blurb(text: str, name: str) -> str:
             continue
         if line.startswith((".. ", ":", "-", "*", "https://", "http://")):
             continue
-        # Trim to one sentence-ish, escape angle brackets.
         line = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         return line[:160]
     return ""
 
 
+def parse_example(path: Path) -> Example | None:
+    text = path.read_text(encoding="utf-8", errors="replace")
+    lines = text.splitlines()
+    mtype = ""
+    for line in lines[:5]:
+        s = line.strip()
+        if s.startswith("# multimer types:"):
+            mtype = s.split(":", 1)[1].strip().lower()
+            break
+    if not mtype:
+        return None
+    type_tokens = {t.strip() for t in mtype.replace(";", ",").split(",")}
+    chosen = next((t for t in TARGET_TYPES if t in type_tokens), None)
+    if chosen is None:
+        return None
+
+    rel = path.relative_to(REPO_ROOT).as_posix()
+    rel_in_examples = path.relative_to(EXAMPLES_DIR)
+    if path.parent.name == "examples":
+        name = path.stem
+        kind = "module"
+    elif len(rel_in_examples.parts) == 2 and rel_in_examples.parts[0] == rel_in_examples.stem:
+        name = path.parent.name
+        kind = "manifest"
+    else:
+        return None
+
+    ex = Example(name, rel, kind)
+    ex.mtype = chosen
+    ex.docstring_blurb = extract_blurb(text, name)
+    ex.pyscript_files = parse_pyscript_files(lines) or [rel_in_examples.as_posix()]
+    for entry in ex.pyscript_files:
+        if not (EXAMPLES_DIR / entry).is_file():
+            raise SystemExit(f"{rel}: missing pyscript file {entry}")
+    return ex
+
+
 def discover_parsed() -> list[Example]:
-    """All browser-runnable examples (async/all), including binary-dependent ones."""
     found: dict[str, Example] = {}
     for path in sorted(EXAMPLES_DIR.rglob("*.py")):
-        # Only top-level files and one-level manifest entry files.
-        rel = path.relative_to(EXAMPLES_DIR)
-        if len(rel.parts) == 1 or (len(rel.parts) == 2 and rel.parts[0] == rel.stem):
-            ex = parse_example(path)
-        else:
-            ex = None
+        ex = parse_example(path)
         if ex and ex.name not in found:
             found[ex.name] = ex
     return list(found.values())
@@ -454,262 +259,16 @@ def discover() -> list[Example]:
     return [ex for ex in discover_parsed() if ex.browser_eligible]
 
 
-# --------------------------------------------------------------------------- #
-# Rendering
-# --------------------------------------------------------------------------- #
-
-
-def render_howto(ex: Example) -> str:
-    items = ex.curated.get("howto")
-    if not items:
-        if ex.blocks:
-            items = [
-                "Click <strong>Run</strong> to install and start the example.",
-                "This example runs a continuous loop &mdash; see the note.",
-                "Interact over the display where supported.",
-            ]
-        else:
-            items = [
-                "Click <strong>Run</strong> to install and start the example.",
-                "Output (if any) appears in the console panel to the right.",
-            ]
-    return "\n".join(f"                        <li>{i}</li>" for i in items)
-
-
-def render_note(ex: Example) -> str:
-    notes = []
-    if ex.curated.get("note"):
-        notes.append(ex.curated["note"])
-    if ex.blocks:
-        notes.append(
-            "Runs a blocking animation loop, so the browser tab may become "
-            "unresponsive after <strong>Run</strong>. Reload the page to stop it."
-        )
-    if not notes:
-        return ""
-    body = " ".join(notes)
-    return f"""                <div class="panel">
-                    <h2>Note</h2>
-                    <ul><li>{body}</li></ul>
-                </div>
-"""
-
-
-def render_tags(ex: Example) -> str:
-    tags = []
-    cls, label = ("async", "async") if ex.mtype == "async" else ("all", "all")
-    tags.append(f'<span class="tag {cls}">{label}</span>')
-    if ex.experimental:
-        tags.append('<span class="tag warn">experimental</span>')
-    if ex.blocks:
-        tags.append('<span class="tag loops">loops</span>')
-    return "\n            ".join(tags)
-
-
-def render_install_meta(ex: Example) -> str:
-    n = len(ex.pyscript_files)
-    return "1 file" if n == 1 else f"{n} files"
-
-
-def render_page(ex: Example) -> str:
-    extra_action = (
-        ex.curated.get("extra_action") or '<a class="btn" href="../index.html">Back to demos</a>'
-    )
-    note_html = render_note(ex)
-    display_w, display_h = board_display_size()
-    return f'''<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{ex.title} — pydisplay demo</title>
-    <meta name="description" content="{ex.title}: a pydisplay example running in the browser via PyScript.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-    <link rel="stylesheet" href="./demo.css">
-    <link rel="stylesheet" href="./pyscript/core.css">
-    <script src="./mini-coi-fd.js"></script>
-    <script type="module" src="./pyscript/core.js"></script>
-</head>
-<body>
-    <header class="site-header">
-        <div class="wrap">
-            <a class="brand" href="../index.html">
-                <span class="logo">{BRAND_LOGO}</span>
-                py<span class="accent">display</span>
-            </a>
-            <nav class="nav">
-                <a href="../index.html">Demos</a>
-                <a href="https://pydisplay.readthedocs.io">Docs</a>
-                <a href="https://github.com/PyDevices/pydisplay">GitHub</a>
-            </nav>
-        </div>
-    </header>
-
-    <main class="wrap example-main">
-        <nav class="crumbs">
-            <a href="../index.html">Demos</a>
-            <span class="sep">/</span>
-            <span>{ex.title}</span>
-        </nav>
-
-        <div class="example-head">
-            <h1>{ex.title}</h1>
-            {render_tags(ex)}
-        </div>
-        <p class="example-lede">{ex.blurb}</p>
-
-        <div class="play-area">
-            <div class="loading" id="loading">
-                <span class="spinner"></span> <span id="status">Loading PyScript runtime…</span>
-            </div>
-            <div class="display-column">
-                <div class="device">
-                    <canvas id="display_canvas" width="{display_w}" height="{display_h}"></canvas>
-                </div>
-                <div class="run-bar">
-                    <button id="run-btn" class="btn primary" disabled>Run</button>
-                </div>
-            </div>
-
-            <section class="console-panel" aria-label="Console output">
-                <h2 class="console-label">Console output</h2>
-                <div id="log" class="log"></div>
-            </section>
-        </div>
-
-        <div class="meta-layout">
-            <aside class="aside">
-                <div class="panel">
-                    <h2>How to use</h2>
-                    <ul>
-{render_howto(ex)}
-                    </ul>
-                </div>
-{note_html}                <div class="panel">
-                    <h2>Details</h2>
-                    <div class="meta-row"><span class="k">Source</span><span class="v">{Path(ex.source_rel).name}</span></div>
-                    <div class="meta-row"><span class="k">Type</span><span class="v">{ex.mtype}</span></div>
-                    <div class="meta-row"><span class="k">Install</span><span class="v">{render_install_meta(ex)}</span></div>
-                </div>
-                <div class="actions">
-                    <a class="btn" href="{ex.source_url}" target="_blank" rel="noopener">{SRC_ICON} View source</a>
-                    {extra_action}
-                </div>
-            </aside>
-        </div>
-
-    </main>
-
-    <footer class="site-footer">
-        <div class="wrap">
-            <span>pydisplay — cross-platform display &amp; event drivers</span>
-            <span><a href="https://github.com/PyDevices/pydisplay">PyDevices/pydisplay</a></span>
-        </div>
-    </footer>
-
-    <!-- Loader is gated behind the Run button so blocking examples never hang on load. -->
-    <script type="mpy" config="./pyscript.toml" output="log">
-        import builtins
-        from js import document
-        from pyscript.ffi import create_proxy
-
-        def _log_print(*args, **kwargs):
-            el = document.getElementById("log")
-            if el is not None:
-                sep = kwargs.get("sep", " ")
-                end = kwargs.get("end", "\\n")
-                el.textContent += sep.join(str(a) for a in args) + end
-                el.scrollTop = el.scrollHeight
-
-        builtins.print = _log_print
-
-        _status = document.getElementById("status")
-        _btn = document.getElementById("run-btn")
-        _started = False
-
-        def _set(msg):
-            if _status:
-                _status.textContent = msg
-
-        def _start(*_):
-            global _started
-            if _started:
-                return
-            _started = True
-            _btn.disabled = True
-            _btn.textContent = "Running…"
-            try:
-                _set("Installing modules…")
-                import mip
-                {ex.install_line}
-                _set("Importing {ex.import_name}…")
-                import lib.path
-                import {ex.import_name}
-                _set("Running.")
-            except Exception as e:
-                _log_print("Run failed:", e)
-                _set("Error — see console.")
-                raise
-
-        _btn.addEventListener("click", create_proxy(_start))
-        _btn.disabled = False
-        _set("Runtime ready — click Run.")
-        print("PyScript runtime ready. Click Run to start {ex.name}.")
-    </script>
-
-    <script>
-        // Stop the spinner once the runtime is ready (Run button enabled).
-        const _btn = document.getElementById('run-btn');
-        const _spin = document.querySelector('#loading .spinner');
-        const _t = setInterval(() => {{
-            if (_btn && !_btn.disabled) {{
-                if (_spin) _spin.style.display = 'none';
-                clearInterval(_t);
-            }}
-        }}, 150);
-    </script>
-
-    <script>
-        // Match console chrome height to the display bezel; log fills the remainder.
-        (function () {{
-            const device = document.querySelector('.play-area .device');
-            const panel = document.querySelector('.play-area .console-panel');
-            const log = document.getElementById('log');
-            if (!device || !panel || !log) return;
-            function syncConsoleHeight() {{
-                if (window.innerWidth <= 880) {{
-                    panel.style.height = '';
-                    return;
-                }}
-                const h = device.getBoundingClientRect().height;
-                if (h > 0) {{
-                    panel.style.height = h + 'px';
-                }}
-            }}
-            syncConsoleHeight();
-            window.addEventListener('resize', syncConsoleHeight);
-            if (typeof ResizeObserver !== 'undefined') {{
-                new ResizeObserver(syncConsoleHeight).observe(device);
-            }}
-        }})();
-    </script>
-</body>
-</html>
-'''
-
-
-def example_href(ex: Example, base: str = "html/") -> str:
-    if ex.uses_parametric_modules_loader:
-        return f"{base}index.html?modules={ex.parametric_modules_query}"
-    if ex.uses_parametric_manifest_loader:
-        return f"{base}index.html?manifests={ex.name}"
-    return f"{base}{ex.name}.html"
+def example_mip_manifest(ex: Example) -> dict:
+    return {
+        "urls": [[path, f"{MIP_REPO}src/examples/{path}"] for path in ex.pyscript_files],
+        "version": MIP_MANIFEST_VERSION,
+    }
 
 
 def render_card(ex: Example, base: str = "html/") -> str:
     cls, label = ex.primary_tag
-    return f'''                <a class="card" href="{example_href(ex, base)}">
+    return f'''                <a class="card" href="{ex.loader_href(base)}">
                     <div class="card-top">
                         <span class="card-icon">{icon_svg(ex.icon)}</span>
                         <span class="tag {cls}">{label}</span>
@@ -734,31 +293,14 @@ def replace_block(text: str, key: str, payload: str) -> str:
     return text[: si + len(start)] + "\n" + payload + "\n            " + text[ei:]
 
 
-def remove_obsolete_html(examples: list[Example], stale: list[str], check: bool) -> None:
-    """Drop per-example HTML superseded by the parametric loader."""
-    for ex in examples:
-        if not ex.uses_parametric_loader:
-            continue
-        path = HTML_DIR / f"{ex.name}.html"
-        if not path.exists():
-            continue
-        rel = str(path.relative_to(REPO_ROOT))
-        if check:
-            stale.append(rel)
-            continue
-        path.unlink()
-        print(f"removed {rel}")
-
-
 def write_html_mip_manifests(
     examples: list[Example], write: Callable[[Path, str], None], stale: list[str], check: bool
 ) -> None:
-    """Write ``html/<name>.json`` MIP manifests; drop manifests for removed examples."""
-    keep = {ex.name for ex in examples if ex.uses_parametric_manifest_loader}
+    keep = {ex.name for ex in examples if ex.kind == "manifest"}
     for ex in examples:
-        if not ex.uses_parametric_manifest_loader:
+        if ex.kind != "manifest":
             continue
-        write(HTML_DIR / f"{ex.name}.json", render_example_mip_manifest(ex))
+        write(HTML_DIR / f"{ex.name}.json", json.dumps(example_mip_manifest(ex), indent=2) + "\n")
     for path in HTML_DIR.glob("*.json"):
         if path.stem in keep:
             continue
@@ -768,6 +310,37 @@ def write_html_mip_manifests(
             continue
         path.unlink()
         print(f"removed {rel}")
+
+
+def remove_stale_demo_html(stale: list[str], check: bool) -> None:
+    """Remove leftover ``html/<demo>.html`` files from the old per-demo generator."""
+    for path in HTML_DIR.glob("*.html"):
+        if path.stem in KEEP_HTML:
+            continue
+        rel = str(path.relative_to(REPO_ROOT))
+        if check:
+            stale.append(rel)
+            continue
+        path.unlink()
+        print(f"removed {rel}")
+
+
+def gallery_example_files() -> list[str]:
+    files: set[str] = set()
+    for ex in discover():
+        files.update(ex.pyscript_files)
+    return sorted(files)
+
+
+def copy_gallery_examples(dest: Path) -> int:
+    n = 0
+    for rel in gallery_example_files():
+        src = EXAMPLES_DIR / rel
+        dst = dest / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+        n += 1
+    return n
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -790,7 +363,7 @@ def main(argv: list[str] | None = None) -> int:
     parsed = discover_parsed()
     skipped_binary = sorted(ex.name for ex in parsed if ex.depends_on_binary_files)
     examples = [ex for ex in parsed if ex.browser_eligible]
-    by_type = {"async": [], "all": []}
+    by_type: dict[str, list[Example]] = {"async": [], "all": []}
     for ex in sorted(examples, key=lambda e: (e.experimental, e.title.lower())):
         by_type[ex.mtype].append(ex)
 
@@ -806,31 +379,24 @@ def main(argv: list[str] | None = None) -> int:
         path.write_text(content, encoding="utf-8")
         print(f"wrote {path.relative_to(REPO_ROOT)}")
 
-    dedicated = [ex for ex in examples if not ex.uses_parametric_loader]
-    parametric = [ex for ex in examples if ex.uses_parametric_loader]
-    manifest_parametric = [ex for ex in examples if ex.uses_parametric_manifest_loader]
-
-    for ex in dedicated:
-        write(HTML_DIR / f"{ex.name}.html", render_page(ex))
-
     write_html_mip_manifests(examples, write, stale, args.check)
-    remove_obsolete_html(examples, stale, args.check)
+    remove_stale_demo_html(stale, args.check)
 
     index_text = INDEX.read_text(encoding="utf-8")
     index_text = replace_block(index_text, "async", render_cards(by_type["async"]))
     index_text = replace_block(index_text, "all", render_cards(by_type["all"]))
     write(INDEX, index_text)
 
+    n_module = sum(1 for ex in examples if ex.kind == "module")
+    n_manifest = sum(1 for ex in examples if ex.kind == "manifest")
     print(
-        f"\n{len(examples)} gallery example(s) "
-        f"({len(parametric) - len(manifest_parametric)} module, {len(manifest_parametric)} manifest; "
-        f"{len(dedicated)} dedicated HTML; "
+        f"\n{len(examples)} gallery demo(s) "
+        f"({n_module} module, {n_manifest} manifest; "
         f"{len(by_type['async'])} async, {len(by_type['all'])} all)."
     )
     if skipped_binary:
         print(
-            f"Skipped {len(skipped_binary)} binary-dependent example(s): "
-            + ", ".join(skipped_binary)
+            f"Skipped {len(skipped_binary)} binary-dependent demo(s): " + ", ".join(skipped_binary)
         )
     if args.check and stale:
         print("STALE:\n  " + "\n  ".join(stale))
