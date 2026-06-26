@@ -6,6 +6,7 @@ src/add_ons/gui
 # Local examples (not distributed; symlinks to spotapi outside this repo)
 src/examples/spotapi
 src/examples/spotify_remote
+src/examples/frogger
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
