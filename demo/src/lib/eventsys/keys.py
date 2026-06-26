@@ -711,7 +711,31 @@ def chord_matches(chord, keycode, mod):
     chord_key, chord_mod = chord
     if keycode != chord_key:
         return False
-    for group in _MOD_GROUPS:
-        if (chord_mod & group) and not (mod & group):
-            return False
-    return True
+    return all(not (chord_mod & group and not mod & group) for group in _MOD_GROUPS)
+
+
+# Keys that scroll or pan the page when a focusable element does not call
+# ``preventDefault`` (arrow keys, space, page up/down, home/end).
+_BROWSER_SCROLL_KEYCODES = frozenset(
+    (
+        Keys.K_UP,
+        Keys.K_DOWN,
+        Keys.K_LEFT,
+        Keys.K_RIGHT,
+        Keys.K_SPACE,
+        Keys.K_PAGEUP,
+        Keys.K_PAGEDOWN,
+        Keys.K_HOME,
+        Keys.K_END,
+    )
+)
+
+
+def dom_key_scrolls_page(keycode):
+    """
+    Return True if the browser may scroll the page for this key code.
+
+    Used by PyScript / notebook backends to suppress default scrolling while
+    the game canvas is focused.
+    """
+    return keycode in _BROWSER_SCROLL_KEYCODES
