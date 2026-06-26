@@ -40,8 +40,9 @@ Shared copy-paste blocks: `docs/_snippets/` (included via pymdownx Snippets).
 
 ### Embedding the Jupyter notebook
 
-The LVGL example notebook ([`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb))
-is rendered as a docs page at [Platforms → Jupyter notebook](platforms/jupyter.md).
+The example notebook ([`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb))
+is rendered as a static docs page at [Platforms → Jupyter notebook](platforms/jupyter-notebook.ipynb).
+Users run it live via [Run the notebook interactively](platforms/jupyter-run.md).
 It is wired up with three pieces:
 
 | Piece | Role |
@@ -57,14 +58,11 @@ rendered page shows **markdown and code cells only** — no live output or the
 interactive touch widget.
 
 !!! note "Why the docs don't execute the notebook"
-    Executing it at build time would need a desktop LVGL runtime
-    ([`PyDevices/lv_cpython_mod`](https://github.com/PyDevices/lv_cpython_mod)),
-    the `JNDisplay` backend, `ipywidgets`/`ipyevents`, and a running asyncio event
-    loop with an interactive display — none of which work in a headless
-    ReadTheDocs builder. To see live output, run the notebook locally (see
-    [Platforms → Jupyter](platforms/jupyter.md)). Installing `lv_cpython_mod` is
-    what makes `import lvgl` work in desktop CPython / Jupyter; it is a separate,
-    source-built C extension and is **not** required to build the docs.
+    Executing it at build time would need the `JNDisplay` backend,
+    `ipywidgets`/`ipyevents`, and a running asyncio event loop with an interactive
+    display — none of which work in a headless ReadTheDocs builder. To see live
+    output, run the notebook locally (see
+    [Run the notebook interactively](platforms/jupyter-run.md)).
 
 To embed another notebook, add its path to `tools/gen_notebook_pages.py` (or a
 similar gen-files script), reference the copied path in the `nav:` in `mkdocs.yml`,

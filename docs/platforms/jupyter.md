@@ -2,11 +2,14 @@
 
 Run pydisplay examples in VS Code or Jupyter with the `JNDisplay` backend.
 
-!!! tip "Read the notebook online"
-    The example notebook is rendered directly in these docs at
-    [Jupyter notebook](jupyter-notebook.ipynb) (markdown and code cells; not executed
-    during the build). Use the **download** button at the top of that page to grab
-    the `.ipynb`, or open [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb)
+!!! tip "Run it live"
+    The [notebook preview](jupyter-notebook.ipynb) on ReadTheDocs is **not interactive**.
+    Follow **[Run the notebook interactively](jupyter-run.md)** for JupyterLab or VS Code setup.
+
+!!! note "Read the notebook online"
+    [Jupyter notebook](jupyter-notebook.ipynb) shows markdown and code cells only (not executed
+    during the build). Use the **download** button on that page, or open
+    [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb)
     from the repo.
 
 ## Limitations
@@ -16,16 +19,11 @@ Run pydisplay examples in VS Code or Jupyter with the `JNDisplay` backend.
 
 ## Setup
 
-1. Install Jupyter (VS Code Python + Jupyter extensions, or classic JupyterLab).
-2. In your notebook kernel environment:
+See **[Run the notebook interactively](jupyter-run.md)** for install commands, JupyterLab in the browser, and VS Code / Cursor widget settings. Summary:
 
-   ```bash
-   pip install pillow ipywidgets ipyevents
-   ```
-
-3. Clone the repo or install packages into an environment on the path.
-4. Open [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb).
-5. Run cells starting with `import lib.path`.
+1. `pip install pillow ipywidgets ipyevents jupyterlab`
+2. Open [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb) from the repo clone.
+3. Run cells starting with `import lib.path`.
 
 Board config: `board_configs/jndisplay/board_config.py` (registers `JNDevices` as a `QUEUE` device).
 

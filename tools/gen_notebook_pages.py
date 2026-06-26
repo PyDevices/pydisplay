@@ -1,4 +1,4 @@
-"""Copy the LVGL Jupyter notebook into the docs site so mkdocs-jupyter can render it.
+"""Copy the Jupyter notebook into the docs site so mkdocs-jupyter can render it.
 
 The notebook is maintained at ``src/jupyter_notebook.ipynb`` (next to the source it
 imports, so it can be executed locally). MkDocs only renders files under ``docs_dir``,

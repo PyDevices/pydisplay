@@ -101,6 +101,7 @@ nav:
     - CircuitPython: platforms/circuitpython.md
     - CPython desktop: platforms/cpython-desktop.md
     - Jupyter: platforms/jupyter.md
+    - Run interactively: platforms/jupyter-run.md
     - Jupyter notebook: platforms/jupyter-notebook.ipynb
     - PyScript: platforms/pyscript.md
   - Examples:

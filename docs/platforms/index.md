@@ -39,6 +39,7 @@ See [Displays](../concepts/displays.md) for backend details and [Architecture](.
 - [CircuitPython](circuitpython.md) — MCUs and Unix; `framebufferio` and the `framebuf` shim.
 - [CPython desktop](cpython-desktop.md) — SDL2 / PyGame setup for Linux, macOS, and Windows.
 - [Jupyter Notebook](jupyter.md) — interactive display widget and async execution model.
+- [Run the notebook interactively](jupyter-run.md) — JupyterLab / VS Code setup (the RTD notebook page is static).
 - [PyScript](pyscript.md) — running in the browser.
 
 ## Build GUIs across platforms

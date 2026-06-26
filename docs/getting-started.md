@@ -18,7 +18,7 @@ This page is a **router**. Pick the path that matches how you want to use pydisp
 | Browser + local PyScript dev | [PyScript guide](guides/pyscript.md) |
 | Wokwi only (no local install) | [Wokwi guide](guides/wokwi.md) |
 | CircuitPython board | [CircuitPython platform](platforms/circuitpython.md) |
-| Jupyter notebook | [Jupyter platform](platforms/jupyter.md) |
+| Jupyter notebook | [Jupyter platform](platforms/jupyter.md) · [Run interactively](platforms/jupyter-run.md) |
 
 ## Learn the model
 
