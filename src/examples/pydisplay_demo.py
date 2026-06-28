@@ -9,7 +9,7 @@ Uses only src/lib modules (board_config, graphics, multimer, eventsys).
 from board_config import broker, display_drv
 from displaysys import color565
 from graphics import Area, Font, FrameBuffer, RGB565
-from multimer import get_timer, run_queued, sleep_ms
+from multimer import get_timer, run_forever
 
 TOP, BOT = 36, 20
 ROW, ACCENT = 20, 4
@@ -130,32 +130,33 @@ def on_tick(_=None):
     display_drv.vscroll = state["scroll"]
 
 
+def handle_events():
+    if elist := broker.poll():
+        for e in elist:
+            if e.type != broker.events.MOUSEBUTTONDOWN:
+                continue
+            if rotate_btn.contains(e.pos):
+                pause_scroll()
+                state["rotation"] = (state["rotation"] + 90) % 360
+                state["scroll"] = 0
+                display_drv.rotation = state["rotation"]
+                setup_scroll()
+                redraw()
+                resume_scroll()
+            elif color_btn.contains(e.pos):
+                pause_scroll()
+                state["color_i"] = (state["color_i"] + 1) % len(ACCENTS)
+                redraw()
+                resume_scroll()
+
+
 def main():
     setup_scroll()
     redraw()
 
     get_timer(on_tick, period=40, warn=False)
 
-    while True:
-        run_queued()
-        if elist := broker.poll():
-            for e in elist:
-                if e.type != broker.events.MOUSEBUTTONDOWN:
-                    continue
-                if rotate_btn.contains(e.pos):
-                    pause_scroll()
-                    state["rotation"] = (state["rotation"] + 90) % 360
-                    state["scroll"] = 0
-                    display_drv.rotation = state["rotation"]
-                    setup_scroll()
-                    redraw()
-                    resume_scroll()
-                elif color_btn.contains(e.pos):
-                    pause_scroll()
-                    state["color_i"] = (state["color_i"] + 1) % len(ACCENTS)
-                    redraw()
-                    resume_scroll()
-        sleep_ms(1)
+    run_forever(handle_events)
 
 
 main()

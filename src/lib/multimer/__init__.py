@@ -20,7 +20,7 @@ Returns None if the platform is not supported rather than raising an ImportError
 the client can handle the error more gracefully (e.g. by using `if Timer is not None:`).
 
 Usage:
-    from multimer import Timer, get_timer, schedule, run_queued, ticks_ms, ticks_diff
+    from multimer import Timer, get_timer, schedule, run_queued, run_forever, ticks_ms, ticks_diff
     tim = Timer()
     tim.init(mode=Timer.PERIODIC, period=500, callback=lambda t: print("."))
     ....
@@ -117,3 +117,20 @@ def get_timer(callback, period=33, *, asynchronous=None, warn=True):
     if warn and getattr(TimerCls, "REQUIRES_RUN_QUEUED", False):
         print("Timer:  callbacks require run_queued(); call it from your main loop")
     return t
+
+
+def run_forever(poll=None, *, delay_ms=1):
+    """Run the standard queued-backend main loop until interrupted.
+
+    Each iteration calls ``run_queued()``, optionally ``poll()``, then sleeps
+    for ``delay_ms`` milliseconds.
+
+    Args:
+        poll: Optional callable invoked once per iteration after ``run_queued()``.
+        delay_ms: Sleep between iterations in milliseconds.
+    """
+    while True:
+        run_queued()
+        if poll is not None:
+            poll()
+        sleep_ms(delay_ms)
