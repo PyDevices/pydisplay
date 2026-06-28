@@ -14,6 +14,16 @@ From the repository root:
 ./tools/regenerate.sh
 ```
 
+### Demo launchers
+
+| Script | Purpose |
+|---|---|
+| [`jupyter.sh`](jupyter.sh) | JupyterLab or Cursor notebooks — `./tools/jupyter.sh calculator`, `./tools/jupyter.sh calculator --cursor` |
+| [`pyscript.sh`](pyscript.sh) | PyScript browser dev server — `./tools/pyscript.sh calculator`, `./tools/pyscript.sh chango` |
+| [`serve.py`](serve.py) | HTTP server with Cross-Origin-Isolation headers (used by `pyscript.sh`) |
+
+See [Run the notebook interactively](../docs/platforms/jupyter-run.md) and [PyScript local development](../docs/guides/pyscript.md).
+
 ---
 
 ## Regeneration cheat sheet

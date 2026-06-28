@@ -19,7 +19,7 @@ Run pydisplay examples in VS Code or Jupyter with the `JNDisplay` backend.
 
 ## Setup
 
-See **[Run the notebook interactively](jupyter-run.md)** for install commands, JupyterLab in the browser, and VS Code / Cursor widget settings. Summary:
+See **[Run the notebook interactively](jupyter-run.md)** for install commands, `./tools/jupyter.sh`, JupyterLab in the browser, and VS Code / Cursor widget settings. Summary:
 
 1. `pip install pillow ipywidgets ipyevents jupyterlab`
 2. Open [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb) from the repo clone.

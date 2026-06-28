@@ -13,14 +13,16 @@ python3 -m venv .venv
 .venv/bin/jupyter lab --no-browser
 ```
 
-Or use the helper script (starts JupyterLab and opens a demo):
+Or use the helper script from the repo root (starts JupyterLab and opens a demo):
 
 ```bash
-jupyter.sh calculator
-jupyter.sh calculator --cursor
+./tools/jupyter.sh calculator
+./tools/jupyter.sh calculator --cursor
 ```
 
-Open the URL printed in the terminal (for example `http://127.0.0.1:8888/lab?token=…`) in a browser. In the file browser, open **`src/jupyter_notebook.ipynb`**.
+Generated demo notebooks are written to `src/run-{demo}.ipynb` (gitignored). The hub notebook is `src/jupyter_notebook.ipynb`.
+
+Open the URL printed in the terminal (for example `http://127.0.0.1:8888/lab/tree/run-calculator.ipynb`) in a browser, or use `--cursor` to open in the editor instead.
 
 Select the **`.venv`** kernel (**Kernel → Change Kernel**), then run cells top to bottom.
 
