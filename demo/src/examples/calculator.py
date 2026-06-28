@@ -1,5 +1,4 @@
 # multimer types: async
-# pyscript files: calculator.py
 """
 Simple calculator example to demonstrate the use of graphics.FrameBuffer
 """

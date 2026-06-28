@@ -5,52 +5,60 @@
       "../src/examples/frogger/__init__.py"
     ],
     [
-      "frogger/frogger_async.py",
-      "../src/examples/frogger/frogger_async.py"
-    ],
-    [
-      "frogger/path.py",
-      "../src/examples/frogger/path.py"
+      "frogger/ai.py",
+      "../src/examples/frogger/ai.py"
     ],
     [
       "frogger/board_config.py",
       "../src/examples/frogger/board_config.py"
     ],
     [
-      "frogger/game_cfg.py",
-      "../src/examples/frogger/game_cfg.py"
-    ],
-    [
       "frogger/config_data.py",
       "../src/examples/frogger/config_data.py"
     ],
     [
-      "frogger/layout.py",
-      "../src/examples/frogger/layout.py"
+      "frogger/frogger.py",
+      "../src/examples/frogger/frogger.py"
     ],
     [
-      "frogger/state.py",
-      "../src/examples/frogger/state.py"
-    ],
-    [
-      "frogger/render.py",
-      "../src/examples/frogger/render.py"
-    ],
-    [
-      "frogger/tiles.py",
-      "../src/examples/frogger/tiles.py"
+      "frogger/game_cfg.py",
+      "../src/examples/frogger/game_cfg.py"
     ],
     [
       "frogger/input.py",
       "../src/examples/frogger/input.py"
     ],
     [
+      "frogger/layout.py",
+      "../src/examples/frogger/layout.py"
+    ],
+    [
       "frogger/modes.py",
       "../src/examples/frogger/modes.py"
     ],
     [
-      "frogger/ai.py",
-      "../src/examples/frogger/ai.py"
+      "frogger/render.py",
+      "../src/examples/frogger/render.py"
+    ],
+    [
+      "frogger/state.py",
+      "../src/examples/frogger/state.py"
+    ],
+    [
+      "frogger/tiles.py",
+      "../src/examples/frogger/tiles.py"
+    ],
+    [
+      "frogger/assets/__init__.py",
+      "../src/examples/frogger/assets/__init__.py"
+    ],
+    [
+      "frogger/assets/sprites_data.py",
+      "../src/examples/frogger/assets/sprites_data.py"
+    ],
+    [
+      "frogger/assets/tiles_data.py",
+      "../src/examples/frogger/assets/tiles_data.py"
     ],
     [
       "frogger/variants/__init__.py",
@@ -59,18 +67,6 @@
     [
       "frogger/variants/two_player.py",
       "../src/examples/frogger/variants/two_player.py"
-    ],
-    [
-      "frogger/assets/__init__.py",
-      "../src/examples/frogger/assets/__init__.py"
-    ],
-    [
-      "frogger/assets/tiles_data.py",
-      "../src/examples/frogger/assets/tiles_data.py"
-    ],
-    [
-      "frogger/assets/sprites_data.py",
-      "../src/examples/frogger/assets/sprites_data.py"
     ]
   ],
   "version": "0.0.5"

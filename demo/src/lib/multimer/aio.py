@@ -11,11 +11,11 @@ then falls back to ``asyncio``.
 
 This module is self-contained: the public API is ``Timer`` (an asyncio software
 timer with the same ``machine.Timer``-style API as the rest of multimer) plus
-two optional helpers, ``run`` and ``run_queued``.
+optional helpers ``run``, ``run_queued``, ``run_forever``, and ``dual_main``.
 
 Quick start (helpers are optional)::
 
-    from multimer.aio import Timer, run_queued, run
+    from multimer.aio import Timer, run_queued, run, run_forever, dual_main
 
     async def main():
         t = Timer()
@@ -74,6 +74,25 @@ async def run_queued():
     Not related to sync ``multimer.run_queued()`` from the top-level package.
     """
     await _sleep_ms(0)
+
+
+async def run_forever(poll=None, *, delay_ms=10):
+    """Run the standard asyncio main loop until interrupted.
+
+    Each iteration yields with ``run_queued()``, optionally runs ``poll()`` (awaiting
+    if it returns a coroutine), then sleeps for ``delay_ms`` milliseconds.
+
+    Args:
+        poll: Optional callable invoked once per iteration after ``run_queued()``.
+        delay_ms: Sleep between iterations in milliseconds.
+    """
+    while True:
+        await run_queued()
+        if poll is not None:
+            result = poll()
+            if hasattr(result, "__await__"):
+                await result
+        await _sleep_ms(delay_ms)
 
 
 # Strong references to background tasks scheduled by run() on an already-running
@@ -138,6 +157,20 @@ def run(main):
     if hasattr(asyncio, "run"):
         return asyncio.run(main())
     return asyncio.get_event_loop().run_until_complete(main())
+
+
+def dual_main(sync_main, async_main, *, async_mode=False):
+    """Run ``sync_main()`` or schedule ``async_main()`` under asyncio.
+
+    Args:
+        sync_main: Callable for the blocking / ``run_queued`` main loop.
+        async_main: Async coroutine function for the asyncio main loop.
+        async_mode: When ``True``, call ``run(async_main)``; otherwise ``sync_main()``.
+    """
+    if async_mode:
+        run(async_main)
+    else:
+        sync_main()
 
 
 class Timer(_TimerBase):

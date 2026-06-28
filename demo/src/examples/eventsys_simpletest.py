@@ -1,5 +1,4 @@
 # multimer types: async
-# pyscript files: eventsys_simpletest.py
 import board_config
 
 board_config.TIMER_ASYNC = True

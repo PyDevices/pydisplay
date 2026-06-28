@@ -129,9 +129,11 @@ class DisplayDriver:
     Args:
         auto_refresh: If ``True`` or an integer period in ms, starts a ``multimer`` timer
             that calls ``show()`` automatically.
+        asynchronous: When ``auto_refresh`` is enabled, use ``multimer.aio.Timer`` if
+            ``True``, otherwise sync ``multimer.Timer``. Defaults to ``False``.
     """
 
-    def __init__(self, auto_refresh=False):
+    def __init__(self, auto_refresh=False, *, asynchronous=False):
         if not getattr(self, "_quiet", False):
             print(f"Initializing {self.__class__.__name__}...")
         gc.collect()
@@ -140,6 +142,9 @@ class DisplayDriver:
         self._vssa = False  # False means no vertical scroll
         self._auto_byteswap = self.requires_byteswap
         self._touch_device = None
+        self._timer = None
+        self.init()
+        gc.collect()
         if auto_refresh:
             period = (
                 _DEFAULT_AUTO_REFRESH_PERIOD if isinstance(auto_refresh, bool) else auto_refresh
@@ -147,14 +152,14 @@ class DisplayDriver:
             try:
                 from multimer import get_timer
 
-                self._timer = get_timer(self.show, period=period)
+                self._timer = get_timer(
+                    self.show,
+                    period=period,
+                    asynchronous=asynchronous,
+                )
             except ImportError:
                 raise ImportError("multimer is required for auto_refresh") from None
-        else:
-            self._timer = None
         self._deinitialized = False
-        self.init()
-        gc.collect()
         if not getattr(self, "_quiet", False):
             print(f"{self.__class__.__name__}: initialized.")
             print(f"{self.__class__.__name__}: requires_byteswap = {self.requires_byteswap}")

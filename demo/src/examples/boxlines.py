@@ -1,5 +1,4 @@
 # multimer types: all
-# pyscript files: boxlines.py
 """
 boxlines.py
 ===========

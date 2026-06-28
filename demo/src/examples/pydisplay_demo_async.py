@@ -1,5 +1,4 @@
 # multimer types: async
-# pyscript files: pydisplay_demo_async.py
 """
 pydisplay_demo_async.py — asyncio version of pydisplay_demo.
 
@@ -11,16 +10,11 @@ import board_config
 
 board_config.TIMER_ASYNC = True
 
-try:
-    import asyncio
-except ImportError:
-    import uasyncio as asyncio
-
 from board_config import broker, display_drv
 from displaysys import color565
 from graphics import Area, Font, FrameBuffer, RGB565
 from multimer import get_timer
-from multimer.aio import run_queued, run
+from multimer.aio import run, run_forever
 
 TOP, BOT = 36, 20
 ROW, ACCENT = 20, 4
@@ -141,31 +135,33 @@ def on_tick(_=None):
     display_drv.vscroll = state["scroll"]
 
 
+def handle_events():
+    if elist := broker.poll():
+        for e in elist:
+            if e.type != broker.events.MOUSEBUTTONDOWN:
+                continue
+            if rotate_btn.contains(e.pos):
+                pause_scroll()
+                state["rotation"] = (state["rotation"] + 90) % 360
+                state["scroll"] = 0
+                display_drv.rotation = state["rotation"]
+                setup_scroll()
+                redraw()
+                resume_scroll()
+            elif color_btn.contains(e.pos):
+                pause_scroll()
+                state["color_i"] = (state["color_i"] + 1) % len(ACCENTS)
+                redraw()
+                resume_scroll()
+
+
 async def main():
     setup_scroll()
     redraw()
 
     get_timer(on_tick, period=40, asynchronous=True, warn=False)
 
-    while True:
-        if elist := broker.poll():
-            for e in elist:
-                if e.type != broker.events.MOUSEBUTTONDOWN:
-                    continue
-                if rotate_btn.contains(e.pos):
-                    pause_scroll()
-                    state["rotation"] = (state["rotation"] + 90) % 360
-                    state["scroll"] = 0
-                    display_drv.rotation = state["rotation"]
-                    setup_scroll()
-                    redraw()
-                    resume_scroll()
-                elif color_btn.contains(e.pos):
-                    pause_scroll()
-                    state["color_i"] = (state["color_i"] + 1) % len(ACCENTS)
-                    redraw()
-                    resume_scroll()
-        await asyncio.sleep(0.02)
+    await run_forever(handle_events, delay_ms=20)
 
 
 run(main)

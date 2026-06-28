@@ -1,5 +1,4 @@
 # multimer types: all
-# pyscript files: graphics_area_test.py
 """
 Test the Area return type of the shapes functions.
 

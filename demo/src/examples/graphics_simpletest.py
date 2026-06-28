@@ -1,5 +1,4 @@
 # multimer types: all
-# pyscript files: graphics_simpletest.py
 """
 Simple test example to demonstrate the use of graphics.
 """
