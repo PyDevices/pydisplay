@@ -2,7 +2,7 @@
 # pyscript binaries: assets/longstreet.bmp
 from board_config import display_drv
 from bmp565 import BMP565
-from multimer import run_queued, sleep_ms
+from multimer import pump, sleep_ms
 
 display_drv.rotation = 0
 
@@ -30,6 +30,6 @@ while True:
     display_drv.vscsad(i % display_drv.height)
     draw_bg(0, i % display_drv.height, 0, i % image.height)
     display_drv.show()
-    run_queued()
+    pump()
     sleep_ms(1)
     i += 1

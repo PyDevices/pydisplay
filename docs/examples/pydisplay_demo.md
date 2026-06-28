@@ -11,9 +11,9 @@ It demonstrates:
 - **Input** — touch or mouse clicks via `eventsys` and `graphics.Area`
 - **Rotation** — `display_drv.rotation` in 90° steps
 - **Hardware-style scrolling** — fixed top/bottom chrome with a scrolling middle panel
-- **Timers** — default `multimer.Timer` with a `run_queued()` main loop
+- **Timers** — default `multimer.Timer` with a `pump()` main loop
 
-Tagged `# multimer types: queued, sync` (not `multimer.aio` / PyScript).
+Tagged `# multimer types: queued, sync` (not `multimer` / PyScript).
 
 ## Run it
 
@@ -68,7 +68,7 @@ Constants in the script: `TOP = 36`, `BOT = 20`, `ROW = 20` (height of each tip 
 | `displaysys.color565` | RGB → RGB565 color values |
 | `graphics.Area` | Rectangle hit-testing for buttons |
 | `graphics.Font`, `FrameBuffer`, `RGB565` | Text rendered in RAM, blitted once |
-| `multimer.Timer`, `run_queued`, `sleep_ms` | Periodic scroll + queue drain |
+| `multimer.Timer`, `pump`, `sleep_ms` | Periodic scroll + queue drain |
 
 ## Code walkthrough
 
@@ -125,10 +125,10 @@ def main():
     setup_scroll()
     redraw()
 
-    get_timer(on_tick, period=40, warn=False)
+    periodic(on_tick, period=40, warn=False)
 
     while True:
-        run_queued()
+        pump()
         if elist := broker.poll():
             ...
         sleep_ms(1)
@@ -137,16 +137,16 @@ main()
 ```
 
 - **`setup_scroll()`** — calls `display_drv.set_vscroll(TOP, BOT)` to define fixed regions.
-- **`get_timer(on_tick, period=40)`** — allocates the next timer id after `display_drv` (SDLDisplay `auto_refresh` already took id 1 via `get_timer(show, …)`). No need to pick a timer number yourself.
-- **`on_tick(_=None)`** — every 40 ms, increments `state["scroll"]` and sets `display_drv.vscroll`. The optional timer argument matches the `machine.Timer` / `get_timer` callback contract.
-- **`run_queued()`** — drains multimer callbacks on backends that queue timer work to the main thread ([multimer](../concepts/multimer.md)).
+- **`periodic(on_tick, period=40)`** — allocates the next timer id after `display_drv` (SDLDisplay `auto_refresh` already took id 1 via `periodic(show, …)`). No need to pick a timer number yourself.
+- **`on_tick(_=None)`** — every 40 ms, increments `state["scroll"]` and sets `display_drv.vscroll`. The optional timer argument matches the `machine.Timer` / `periodic` callback contract.
+- **`pump()`** — drains multimer callbacks on backends that queue timer work to the main thread ([multimer](../concepts/multimer.md)).
 - **`broker.poll()`** — returns touch/mouse events; the demo handles `MOUSEBUTTONDOWN` only.
 
 **Rotate** pauses scroll, updates `display_drv.rotation`, resets scroll to 0, calls `setup_scroll()` and `redraw()`, then resumes scroll.
 
 **Color** pauses scroll, advances `color_i`, `redraw()`, resumes scroll.
 
-`get_timer` in [`multimer`](../concepts/multimer.md) hands out the next available timer id (`-1` on RP2). pydisplay drivers use it for `auto_refresh`, so app timers created afterward do not collide.
+`periodic()` in [`multimer`](../concepts/multimer.md) hands out the next available timer id (`-1` on RP2). pydisplay drivers use it for `auto_refresh`, so app timers created afterward do not collide.
 
 ---
 
@@ -241,7 +241,7 @@ This script is intentionally **not** a multimer test, but it uses the default ti
 
 ```python
 while True:
-    run_queued()      # deliver timer callbacks on queued backends
+    pump()      # deliver timer callbacks on queued backends
     ...               # poll input, update UI
     sleep_ms(1)
 ```
@@ -250,24 +250,24 @@ See [multimer](../concepts/multimer.md) for `queued` vs `sync` vs `async` tags o
 
 ## Async variant
 
-[`pydisplay_demo_async.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo_async.py) is the same demo with an **asyncio** main loop and **`multimer.aio.Timer`** for scrolling (tagged `# multimer types: async`). Use it on PyScript or any port where the app already runs under `asyncio` / `uasyncio`:
+[`pydisplay_demo_async.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo_async.py) is the same demo with an **asyncio** main loop and **`multimer.AsyncTimer`** for scrolling (tagged `# multimer types: async`). Use it on PyScript or any port where the app already runs under `asyncio` / `uasyncio`:
 
 ```python
 import lib.path
 import pydisplay_demo_async
 ```
 
-The script sets `board_config.TIMER_ASYNC = True`, starts the scroll timer inside `async def main()` (required for `aio.Timer.init`), and yields with `await run_queued()` each frame. UI, colours, scroll pause during redraw, and buffered text are unchanged.
+The script sets `board_config.TIMER_ASYNC = True`, starts the scroll timer inside `async def main()` (required for `aio.Timer.init`), and yields with `await pump()` each frame. UI, colours, scroll pause during redraw, and buffered text are unchanged.
 
 To migrate from sync to async, compare the two `main()` functions side by side:
 
 | Sync (`pydisplay_demo`) | Async (`pydisplay_demo_async`) |
 |-------------------------|------------------------------|
 | `def main():` | `async def main():` |
-| `from multimer import get_timer, run_queued, sleep_ms` | `from multimer import get_timer` + `from multimer.aio import run_queued, run` |
-| `get_timer(on_tick, period=40, warn=False)` | `get_timer(on_tick, period=40, asynchronous=True, warn=False)` |
-| `run_queued()` at top of loop | `await run_queued()` at end of loop |
-| `sleep_ms(1)` | (omit — `await run_queued()` yields) |
+| `from multimer import periodic, pump, sleep_ms` | `from multimer import periodic` + `from multimer import run` |
+| `periodic(on_tick, period=40, warn=False)` | `periodic(on_tick, period=40, async_=True, warn=False)` |
+| `pump()` at top of loop | `await pump()` at end of loop |
+| `sleep_ms(1)` | (omit — `await pump()` yields) |
 | `main()` at bottom | `run(main)` at bottom |
 
 ## Related docs

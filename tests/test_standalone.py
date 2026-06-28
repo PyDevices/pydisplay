@@ -31,32 +31,32 @@ _MULTIMER_CHILD = textwrap.dedent(
     import multimer
     from multimer import (
         Timer,
-        get_timer,
-        run_queued,
+        periodic,
+        pump,
         schedule,
         sleep_ms,
         ticks_add,
         ticks_diff,
         ticks_less,
         ticks_ms,
+        AsyncTimer,
     )
-    import multimer.aio  # opt-in asyncio backend must also be standalone
 
     forbidden = [m for m in {siblings!r} if m in sys.modules]
     assert not forbidden, "multimer pulled in pydisplay modules: %r" % forbidden
 
     assert ticks_ms() >= 0
-    if Timer is not None:
-        hits = []
-        t = get_timer(lambda tmr: hits.append(1), period=10, warn=False)
-        import time
-        end = time.time() + 0.2
-        while time.time() < end:
-            run_queued()
-            time.sleep(0.005)
-        run_queued()
-        t.deinit()
-        assert hits, "standalone timer never fired"
+    hits = []
+    t = periodic(lambda tmr: hits.append(1), period=10)
+    import time
+    end = time.time() + 0.2
+    while time.time() < end:
+        pump()
+        time.sleep(0.005)
+    pump()
+    t.deinit()
+    assert hits, "standalone timer never fired"
+    assert AsyncTimer is not None, "AsyncTimer should be available on CPython"
 
     print("STANDALONE_OK")
     """

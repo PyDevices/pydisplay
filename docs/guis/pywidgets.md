@@ -46,9 +46,9 @@ while i < 60:
 pd.run_forever()
 ```
 
-On queued/SDL backends (CircuitPython SDL, CPython desktop), `Display.refresh()` calls `display_drv.show()` after blitting when `multimer.REQUIRES_RUN_QUEUED` is true (same pattern as [`color_setup.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/color_setup.py)).
+On queued/SDL backends (CircuitPython SDL, CPython desktop), `Display.refresh()` calls `display_drv.show()` after blitting when `multimer.needs_pump()` is true (same pattern as [`color_setup.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/color_setup.py)).
 
-On **CPython Linux** (`multimer._ctypes`), `run_forever()` drives `tick()` from the main loop instead of a pdwidgets timer — the module `REQUIRES_RUN_QUEUED` flag is true while `Timer.REQUIRES_RUN_QUEUED` is false on that backend. Library code checks both flags where relevant.
+On **CPython Linux** (`multimer._ctypes`), `run_forever()` drives `tick()` from the main loop instead of a pdwidgets timer — the module `needs_pump()` flag is true while `Timer.needs_pump()` is false on that backend. Library code checks both flags where relevant.
 
 ## Examples
 

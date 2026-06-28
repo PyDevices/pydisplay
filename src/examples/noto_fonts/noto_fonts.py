@@ -27,7 +27,7 @@ The fonts were converted from True Type fonts using the
 
 import tft_config
 from board_config import broker
-from multimer import Timer, run_queued
+from multimer import Timer, needs_pump, pump
 
 palette = tft_config.palette
 import NotoSans_32 as noto_sans
@@ -75,8 +75,8 @@ def main():
     row += noto_mono.HEIGHT
 
     tft.show()
-    if getattr(Timer, "REQUIRES_RUN_QUEUED", False):
-        run_queued()
+    if needs_pump():
+        pump()
     broker.poll()
 
 

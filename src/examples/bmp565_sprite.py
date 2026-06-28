@@ -5,7 +5,7 @@ from random import choice
 
 from board_config import display_drv
 from bmp565 import BMP565
-from multimer import run_queued, sleep_ms
+from multimer import pump, sleep_ms
 
 image = BMP565("examples/assets/warrior.bmp", streamed=True)
 print(f"\n{image.width=}, {image.height=}, {image.bpp=}")
@@ -82,5 +82,5 @@ while True:
             location = point(location.x + step, location.y)
         draw_sprite(*location, pos, dir)
         display_drv.show()
-        run_queued()
+        pump()
         sleep_ms(100)

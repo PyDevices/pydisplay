@@ -36,6 +36,13 @@ else:
 class Timer(_TimerBase):
     """Thread-based software Timer."""
 
+    BACKEND = "thread"
+    NEEDS_PUMP = True
+
+    def _wait_for_callback(self):
+        while self._busy:
+            sleep_ms(1)
+
     def _start(self):
         self._running = True
         _spawn(self._loop)
@@ -44,7 +51,7 @@ class Timer(_TimerBase):
         self._running = False
 
     def _dispatch(self, arg):
-        schedule(self._callback, arg)
+        schedule(self._invoke_callback, arg)
 
     def _loop(self):
         next_t = ticks_add(ticks_ms(), self._interval)
@@ -57,9 +64,8 @@ class Timer(_TimerBase):
             self._busy = True
             try:
                 self._dispatch(self)
-            except Exception:
-                pass
-            self._busy = False
+            finally:
+                self._busy = False
             if self._mode == self.ONE_SHOT:
                 self._running = False
                 break

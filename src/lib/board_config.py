@@ -7,7 +7,7 @@ https://github.com/PyDevices/pydisplay/tree/main/board_configs
 """
 
 # False: default multimer.Timer (MCU, desktop Linux, etc.)
-# True: multimer.aio.Timer — PyScript and asyncio-native apps
+# True: multimer.AsyncTimer — PyScript and asyncio-native apps
 TIMER_ASYNC = False
 
 width = 320

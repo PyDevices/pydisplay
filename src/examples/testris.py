@@ -20,7 +20,7 @@ try:
 except ImportError:
     from multimer import ticks_diff, ticks_ms
 
-from multimer import run_queued, sleep_ms
+from multimer import pump, sleep_ms
 
 if display_drv.width > display_drv.height:
     display_drv.rotation += 90
@@ -316,7 +316,7 @@ def main():  # noqa: C901, PLR0915
             str: The key that was pressed.
         """
         while True:  # Wait for the user to press a key
-            run_queued()
+            pump()
             broker.poll()
             keys = joystick_keypad.read()
             keys.extend(keypad.read_held())
@@ -483,7 +483,7 @@ def main():  # noqa: C901, PLR0915
                 while (
                     current_piece == old_piece and current_position == old_position
                 ):  # Inner loop - while the piece hasn't moved
-                    run_queued()
+                    pump()
                     # If it has been DELAY ms since the last read, then read the keypads
                     if (ticks_diff(ticks_ms(), last_read) >= DELAY):
                         broker.poll()

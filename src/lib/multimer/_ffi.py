@@ -153,6 +153,9 @@ def timer_settime(tid, period_ms, periodic):
 class Timer(_TimerBase):
     """POSIX librt Timer via uctypes (MicroPython unix)."""
 
+    BACKEND = "posix_ffi"
+    NEEDS_PUMP = False
+
     def _start(self):
         self.id = (
             self.id if self.id != -1 else 0xF

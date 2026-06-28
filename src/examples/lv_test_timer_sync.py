@@ -2,12 +2,12 @@
 """
 lv_test_timer_sync.py
 
-LVGL timer test — sync only (no run_queued loop).
+LVGL timer test — sync only (no pump loop).
 
 Works on MCU, MicroPython unix, and CPython Linux where the default
-multimer.Timer delivers callbacks without a run_queued() drain loop.
+multimer.Timer delivers callbacks without a pump() drain loop.
 
-On platforms where Timer.REQUIRES_RUN_QUEUED is True (e.g. CPython
+On platforms where ``needs_pump()`` is True (e.g. CPython
 Win/mac), this script exits with a message — use lv_test_timer_queued.py
 or lv_test_timer_async.py instead.
 """
@@ -18,13 +18,13 @@ import board_config
 
 board_config.TIMER_ASYNC = False
 
-# Import Timer only to check REQUIRES_RUN_QUEUED before starting the test.
+# Import Timer only to check needs_pump() before starting the test.
 # Normal apps do not need this guard — use lv_test_timer_queued.py or
 # lv_test_timer_async.py when your platform requires it.
 from multimer import Timer
 
-if getattr(Timer, "REQUIRES_RUN_QUEUED", False):
-    print("lv_test_timer_sync: default Timer requires run_queued() on this platform.")
+if needs_pump():
+    print("lv_test_timer_sync: default Timer requires pump() on this platform.")
     print("Use lv_test_timer_queued.py instead, or lv_test_timer_async.py with asyncio.")
     raise SystemExit(1)
 

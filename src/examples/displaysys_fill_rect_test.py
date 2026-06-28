@@ -4,7 +4,7 @@
 from random import getrandbits
 
 from board_config import display_drv
-from multimer import run_queued, sleep_ms
+from multimer import pump, sleep_ms
 import gc
 import time
 
@@ -48,7 +48,7 @@ def main():
             )
             if display_drv._timer is None:
                 display_drv.show()
-            run_queued()
+            pump()
             count += 1
             if count % 1000 == 0:
                 rate = count / (time.time() - start_time)

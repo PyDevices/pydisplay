@@ -5,7 +5,7 @@ from random import choice
 
 from color_setup import ssd as canvas
 from bmp565 import BMP565
-from multimer import run_queued, sleep_ms
+from multimer import pump, sleep_ms
 
 image = BMP565("examples/assets/warrior.bmp", streamed=True)
 print(f"\n{image.width=}, {image.height=}, {image.bpp=}")
@@ -78,5 +78,5 @@ while True:
             location = point(location.x + step, location.y)
         dirty += draw_sprite(*location, pos, dir)
         canvas.show(dirty)
-        run_queued()
+        pump()
         sleep_ms(100)

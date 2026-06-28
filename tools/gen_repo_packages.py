@@ -46,7 +46,7 @@ WOKWI_BUNDLE_EXCLUDE_DESTS = {
     "lib/multimer/_polling.py",
     "lib/multimer/_sdl2.py",
     "lib/multimer/_threading.py",
-    "lib/multimer/aio.py",
+    "lib/multimer/_async.py",
 }
 WOKWI_BUNDLE_EXCLUDE_PREFIXES = ("lib/displaysys/sdldisplay/",)
 # Dest paths added only to wokwi/pydisplay-bundle.json (not in pydisplay-bundle).

@@ -8,7 +8,7 @@ Usage:
 from board_config import display_drv
 from displaybuf import DisplayBuffer as SSD
 
-from multimer import REQUIRES_RUN_QUEUED
+from multimer import capabilities
 
 # SSD.RGB565 is supported by all implementations, so set it as the default format
 # Micropython also supports SSD.GS4_HMSB and SSD.GS8
@@ -20,8 +20,8 @@ ssd = SSD(display_drv, format)
 
 # DisplayBuffer.show() blits to the driver texture; on queued/SDL backends
 # display_drv.show() is also required to present the frame.  MCU BusDisplay
-# show() is a no-op, so this is safe everywhere run_queued is required.
-if REQUIRES_RUN_QUEUED:
+# show() is a no-op, so this is safe everywhere the schedule queue is active.
+if capabilities()["schedule_queue"]:
     _orig_show = ssd.show
 
     def show(area=None):

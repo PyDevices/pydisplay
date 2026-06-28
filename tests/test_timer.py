@@ -8,14 +8,13 @@ import unittest
 import _env  # noqa: F401
 from _support import pump
 
-import multimer
-from multimer import Timer, run_queued
+from multimer import Timer
+from multimer import pump as drain
 
 
-@unittest.skipIf(Timer is None, "no Timer backend on this platform")
 class TestTimer(unittest.TestCase):
     def setUp(self):
-        run_queued()
+        drain()
         self._timers = []
 
     def tearDown(self):
@@ -24,7 +23,7 @@ class TestTimer(unittest.TestCase):
                 t.deinit()
             except Exception:
                 pass
-        run_queued()
+        drain()
 
     def _make(self, **kwargs):
         t = Timer(-1)
@@ -69,7 +68,6 @@ class TestTimer(unittest.TestCase):
     def test_freq_sets_period(self):
         t = self._make()
         t.init(mode=Timer.PERIODIC, freq=50, callback=lambda tmr: None)
-        # 50 Hz -> 20 ms period
         self.assertEqual(t._interval, 20)
 
     def test_invalid_mode_raises(self):
@@ -81,6 +79,15 @@ class TestTimer(unittest.TestCase):
         t = self._make()
         with self.assertRaises(ValueError):
             t.init(mode=Timer.PERIODIC, period=0, callback=lambda tmr: None)
+
+    def test_context_manager_deinit(self):
+        hits = []
+
+        with Timer(-1) as t:
+            t.init(mode=Timer.PERIODIC, period=20, callback=lambda tmr: hits.append(1))
+            pump(0.05)
+        pump(0.1)
+        self.assertTrue(hits)
 
 
 if __name__ == "__main__":

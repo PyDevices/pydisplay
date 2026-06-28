@@ -1,12 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Tests for the optional ``auto_refresh`` timer wiring in ``DisplayDriver``.
-
-``DisplayDriver(auto_refresh=...)`` lazily imports ``multimer`` and schedules
-``show()`` on a timer. These tests cover that integration and are skipped when
-``multimer`` is not importable.
-"""
+"""Tests for the optional ``auto_refresh`` timer wiring in ``DisplayDriver``."""
 
 import time
 import unittest
@@ -26,13 +21,13 @@ except ImportError:
 
 
 class CountingDisplay(DisplayDriver):
-    def __init__(self, auto_refresh=False, *, asynchronous=False):
+    def __init__(self, auto_refresh=False, *, async_=False):
         self._width = 4
         self._height = 4
         self._rotation = 0
         self._requires_byteswap = False
         self.show_count = 0
-        super().__init__(auto_refresh=auto_refresh, asynchronous=asynchronous)
+        super().__init__(auto_refresh=auto_refresh, async_=async_)
 
     def init(self):
         self._vssa = 0
@@ -52,9 +47,9 @@ class TestAutoRefresh(unittest.TestCase):
     def _pump(self, duration_s, step_s=0.005):
         end = time.monotonic() + duration_s
         while time.monotonic() < end:
-            multimer.run_queued()
+            multimer.pump()
             time.sleep(step_s)
-        multimer.run_queued()
+        multimer.pump()
 
     def test_no_timer_when_disabled(self):
         with quiet():
@@ -85,25 +80,25 @@ class TestAutoRefresh(unittest.TestCase):
 
         fake_timer = mock.Mock()
         with quiet(), mock.patch.object(
-            multimer, "get_timer", return_value=fake_timer
-        ) as get_timer:
+            multimer, "periodic", return_value=fake_timer
+        ) as periodic_fn:
             d = CountingDisplay(auto_refresh=20)
         self.addCleanup(d.deinit)
-        get_timer.assert_called_once()
-        self.assertFalse(get_timer.call_args.kwargs["asynchronous"])
+        periodic_fn.assert_called_once()
+        self.assertFalse(periodic_fn.call_args.kwargs["async_"])
         self.assertIs(d._timer, fake_timer)
 
-    def test_explicit_async_passes_asynchronous_to_get_timer(self):
+    def test_explicit_async_passes_async_to_periodic(self):
         import multimer
 
         fake_timer = mock.Mock()
         with quiet(), mock.patch.object(
-            multimer, "get_timer", return_value=fake_timer
-        ) as get_timer:
-            d = CountingDisplay(auto_refresh=20, asynchronous=True)
+            multimer, "periodic", return_value=fake_timer
+        ) as periodic_fn:
+            d = CountingDisplay(auto_refresh=20, async_=True)
         self.addCleanup(d.deinit)
-        get_timer.assert_called_once()
-        self.assertTrue(get_timer.call_args.kwargs["asynchronous"])
+        periodic_fn.assert_called_once()
+        self.assertTrue(periodic_fn.call_args.kwargs["async_"])
         self.assertIs(d._timer, fake_timer)
 
 

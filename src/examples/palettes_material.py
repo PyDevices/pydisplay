@@ -1,6 +1,6 @@
 # multimer types: queued, sync
 from board_config import display_drv
-from multimer import run_queued, sleep_ms
+from multimer import pump, sleep_ms
 from palettes import get_palette
 
 if display_drv.requires_byteswap:
@@ -22,5 +22,5 @@ def main():
 
 while True:
     main()
-    run_queued()
+    pump()
     sleep_ms(1)

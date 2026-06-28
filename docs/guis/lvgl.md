@@ -53,13 +53,13 @@ Set **`TIMER_ASYNC`** in `board_config.py` to choose the timer backend:
 | `TIMER_ASYNC` | Use when |
 |---------------|----------|
 | `False` (default) | MCU, MicroPython unix, CPython Linux — default `multimer.Timer` |
-| `True` | PyScript and other asyncio-native apps — `multimer.aio.Timer` |
+| `True` | PyScript and other asyncio-native apps — `multimer.AsyncTimer` |
 
-[`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py) passes this to `lv_utils.event_loop(asynchronous=TIMER_ASYNC)`.
+[`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py) passes this to `lv_utils.event_loop(async_=TIMER_ASYNC)`.
 
-When **`TIMER_ASYNC = True`**, `display_driver` disables SDL's sync `auto_refresh` timer and calls `display.show()` from the aio LVGL refresh loop instead. CircuitPython's default `multimer.Timer` uses a background thread and requires `run_queued()` — which an asyncio app does not call — so the window would never be presented otherwise.
+When **`TIMER_ASYNC = True`**, `display_driver` disables SDL's sync `auto_refresh` timer and calls `display.show()` from the aio LVGL refresh loop instead. CircuitPython's default `multimer.Timer` uses a background thread and requires `pump()` — which an asyncio app does not call — so the window would never be presented otherwise.
 
-On CPython Win/mac (`TIMER_ASYNC = False`), call **`multimer.run_queued()`** from your main loop when using threaded timer backends — see [multimer](../concepts/multimer.md). Full apps call **`display_driver.run()`** after UI setup: it returns immediately on MicroPython unix and CPython Linux (REPL stays live) and blocks only on Windows SDL or macOS.
+On CPython Win/mac (`TIMER_ASYNC = False`), call **`multimer.pump()`** from your main loop when using threaded timer backends — see [multimer](../concepts/multimer.md). Full apps call **`display_driver.run()`** after UI setup: it returns immediately on MicroPython unix and CPython Linux (REPL stays live) and blocks only on Windows SDL or macOS.
 
 Override before import:
 
@@ -76,7 +76,7 @@ Three scripts share the same UI via `lv_test_timer_common.build_ui()` and differ
 | Script | When to run |
 |--------|-------------|
 | [`lv_test_timer_sync.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_sync.py) | MCU, MP-unix, CPython Linux — no main loop; **exits** on queued-only platforms |
-| [`lv_test_timer_queued.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_queued.py) | CPython Win/mac — `run_queued()` drain loop only |
+| [`lv_test_timer_queued.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_queued.py) | CPython Win/mac — `pump()` drain loop only |
 | [`lv_test_timer_async.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_async.py) | PyScript / asyncio — `TIMER_ASYNC = True`, deferred `import display_driver`, `await asyncio.sleep(0)` loop |
 
 The shared UI ([`lv_test_timer_common.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_common.py)) shows autodetected **runtime**, **OS**, **display** driver class, **timer** backend, and **LVGL** version.

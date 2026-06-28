@@ -36,7 +36,7 @@ try:
 except ImportError:
     import uasyncio as asyncio  # noqa: E402
 
-from multimer.aio import run as aio_run  # noqa: E402
+from multimer import run as aio_run  # noqa: E402
 
 
 async def write_time():

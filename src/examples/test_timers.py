@@ -17,7 +17,7 @@ reported as SKIP.
 
 import sys
 
-from multimer._schedule import run_queued
+from multimer import pump
 from multimer._ticks import sleep_ms as wait_ms
 
 TEST_PERIOD_MS = 50
@@ -70,11 +70,11 @@ def _run_timer_test(TimerClass):
     timer = TimerClass(_timer_id())
     timer.init(mode=TimerClass.PERIODIC, period=TEST_PERIOD_MS, callback=callback)
 
-    requires_run = getattr(TimerClass, "REQUIRES_RUN_QUEUED", False)
+    requires_pump = getattr(TimerClass, "NEEDS_PUMP", False)
     elapsed = 0
     while elapsed < TEST_DURATION_MS:
-        if requires_run:
-            run_queued()
+        if requires_pump:
+            pump()
         wait_ms(10)
         elapsed += 10
 
@@ -89,7 +89,7 @@ def _run_timer_test(TimerClass):
 
 
 async def _run_async_timer_test(TimerClass):
-    from multimer.aio import _sleep_ms
+    from multimer._async import sleep_ms as _sleep_ms
 
     counter = [0]
 
@@ -104,8 +104,8 @@ async def _run_async_timer_test(TimerClass):
 
 
 def _run_async_loop_test(TimerClass):
-    """Exercise Timer + run_queued() in a sync-work / async-yield loop."""
-    from multimer.aio import run, run_queued
+    """Exercise AsyncTimer + async yield in a sync-work loop."""
+    from multimer import run, sleep_ms
 
     counter = [0]
 
@@ -118,7 +118,7 @@ def _run_async_loop_test(TimerClass):
         elapsed = 0
         while elapsed < TEST_DURATION_MS:
             wait_ms(10)
-            await run_queued()
+            await sleep_ms(0)
             elapsed += 10
         timer.deinit()
         return counter[0]
@@ -156,7 +156,7 @@ def _probe(name, import_fn, *, async_test=False, async_loop_test=False):
         print()
         return
 
-    print(f"  REQUIRES_RUN_QUEUED: {getattr(TimerClass, 'REQUIRES_RUN_QUEUED', False)}")
+    print(f"  NEEDS_PUMP: {getattr(TimerClass, 'NEEDS_PUMP', False)}")
 
     try:
         if async_loop_test:
@@ -209,8 +209,10 @@ def _import_ctypes_timer():
     return _import_timer("_ctypes")
 
 
-def _import_aio_timer():
-    return _import_timer("aio")
+def _import_async_timer():
+    from multimer import AsyncTimer
+
+    return AsyncTimer
 
 
 def _import_polling_timer():
@@ -233,8 +235,8 @@ def main():
         ("_threading.Timer", _import_threading_timer, False, False),
         ("_polling.Timer", _import_polling_timer, False, False),
         ("_ctypes.Timer", _import_ctypes_timer, False, False),
-        ("aio.Timer", _import_aio_timer, True, False),
-        ("aio.Timer (run_queued loop)", _import_aio_timer, False, True),
+        ("AsyncTimer", _import_async_timer, True, False),
+        ("AsyncTimer (yield loop)", _import_async_timer, False, True),
         ("multimer.Timer (default)", _import_multimer_timer, False, False),
     )
 

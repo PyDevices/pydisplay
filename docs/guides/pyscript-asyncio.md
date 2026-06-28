@@ -25,42 +25,23 @@ This blocks the browser event loop. PyScript needs `async def`, `await`, and yie
 ```python
 import board_config
 from board_config import display, broker
-from multimer.aio import Timer, run_queued, run
+import multimer
 
 async def main():
     while True:
         for event in broker.poll():
             ...  # handle event
         display.show()
-        await run_queued()  # yield to the event loop (optional if you await elsewhere)
+        await multimer.sleep_ms(0)  # yield to the event loop
 
-run(main)
+multimer.run(main)
 ```
-
-You can use stdlib asyncio instead of the helpers — see [multimer.aio](../concepts/multimer.md#multimeraio-asyncio-timers).
-
-Legacy pattern with raw asyncio:
-
-```python
-import asyncio
-import board_config
-from board_config import display, broker
-
-async def main():
-    while True:
-        for event in broker.poll():
-            ...  # handle event
-        display.show()
-        await asyncio.sleep(0)  # yield to PyScript
-
-asyncio.get_event_loop().run_until_complete(main())
-```
-
-Use `await asyncio.sleep_ms(n)` (MicroPython-style) or `await asyncio.sleep(n/1000)` depending on your PyScript build.
 
 ## Broker polling
 
-If `broker.poll()` is synchronous, call it inside the async loop and **await a yield each iteration** so touch redraw and timers run. Use `await run_queued()` from `multimer.aio`, or `await asyncio.sleep(0)` — both are equivalent.
+If `broker.poll()` is synchronous, call it inside the async loop and **await a yield each iteration** so touch redraw and timers run. Use `await multimer.sleep_ms(0)` — no need to import asyncio.
+
+For periodic callbacks, use `multimer.AsyncTimer` or `multimer.periodic(..., async_=True)` inside `async def main()` after the loop is running.
 
 ## Examples to study
 
@@ -84,7 +65,7 @@ Regenerate manifest after adding examples: `./tools/regenerate.sh`.
 
 ## Next
 
-- [multimer.aio](../concepts/multimer.md#multimeraio-asyncio-timers)
+- [multimer](../concepts/multimer.md)
 - [Try pydisplay](../try/index.md)
 - [Troubleshooting](../troubleshooting.md)
 - [Contributing](../contributing.md) — PyScript PRs welcome

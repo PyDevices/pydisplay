@@ -34,10 +34,10 @@ python tests/test_ticks.py
 | Module | Area |
 |--------|------|
 | `test_ticks.py` | `ticks_ms` / `ticks_add` / `ticks_diff` / `ticks_less` / `sleep_ms` |
-| `test_schedule.py` | `schedule` / `run_queued` and the `REQUIRES_RUN_QUEUED` flag |
+| `test_schedule.py` | `schedule` / `pump` and `capabilities()` |
 | `test_timer.py` | the default `multimer.Timer` (whichever backend is selected) |
-| `test_get_timer.py` | the `get_timer` convenience helper |
-| `test_aio.py` | the opt-in `multimer.aio` asyncio timer |
+| `test_periodic.py` | the `periodic` convenience helper |
+| `test_aio.py` | `AsyncTimer` and async helpers |
 | `test_events.py` | the `events` types/classes and `eventsys.custom_type` |
 | `test_devices.py` | `Broker` and the `Queue`/`Touch`/`Encoder`/`Keypad` devices plus `devices.custom_type` |
 | `test_keys.py` | the `Keys` key/modifier tables and `keyname`/`key`/`modname`/`mod` helpers |

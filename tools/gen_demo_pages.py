@@ -98,7 +98,7 @@ CURATED: dict[str, dict] = {
     },
     "lv_test_timer_async": {
         "title": "LVGL Timer (async)",
-        "blurb": "Drives an LVGL UI from a <code>multimer.aio</code> timer on the asyncio loop.",
+        "blurb": "Drives an LVGL UI from a <code>multimer</code> timer on the asyncio loop.",
         "experimental": True,
         "icon": "timer",
     },

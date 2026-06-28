@@ -6,7 +6,7 @@ POSIX librt Timer for CPython on Linux (ctypes).
 
 Like ``_ffi`` on MicroPython unix: timer signals are delivered to the thread
 that created the timer (the main thread), so callbacks run without
-``run_queued()``.
+``pump()``.
 """
 
 import signal
@@ -120,7 +120,8 @@ def _timer_settime(tid, period_ms, periodic):
 class Timer(_TimerBase):
     """POSIX librt Timer via ctypes (CPython Linux)."""
 
-    REQUIRES_RUN_QUEUED = False
+    BACKEND = "posix_ctypes"
+    NEEDS_PUMP = False
 
     def _start(self):
         self.id = self.id if self.id != -1 else 0xF

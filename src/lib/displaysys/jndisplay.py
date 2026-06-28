@@ -277,7 +277,7 @@ class JNDisplay(DisplayDriver):
     Args:
         width (int): The width of the display.
         height (int): The height of the display.
-        asynchronous (bool): Use ``multimer.aio.Timer`` for ``auto_refresh``. Defaults
+        async_ (bool): Use ``multimer.AsyncTimer`` for ``auto_refresh``. Defaults
             to ``True`` (Jupyter async demos run under asyncio).
 
     Attributes:
@@ -286,7 +286,7 @@ class JNDisplay(DisplayDriver):
 
     _next_display_id = 0
 
-    def __init__(self, width, height, *, asynchronous=True):
+    def __init__(self, width, height, *, async_=True):
         self._display_id = f"JNDisplay_{JNDisplay._next_display_id}"
         JNDisplay._next_display_id += 1
         self._width = width
@@ -299,7 +299,7 @@ class JNDisplay(DisplayDriver):
         self._jn_devices = None
         self._static_shown = False
 
-        super().__init__(auto_refresh=True, asynchronous=asynchronous)
+        super().__init__(auto_refresh=True, async_=async_)
 
     ############### Required API Methods ################
 

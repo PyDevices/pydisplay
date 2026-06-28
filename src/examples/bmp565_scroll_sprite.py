@@ -4,7 +4,7 @@ from collections import namedtuple
 
 from board_config import display_drv, broker
 from bmp565 import BMP565
-from multimer import run_queued, sleep_ms
+from multimer import pump, sleep_ms
 
 point = namedtuple("point", "x y")
 
@@ -63,7 +63,7 @@ def main():
         i += 1
         if i < display_drv.width:
             display_drv.show()
-            run_queued()
+            pump()
             sleep_ms(1)
             continue
         elist = broker.poll()
@@ -94,7 +94,7 @@ def main():
                 )
                 shot_location = 0
         display_drv.show()
-        run_queued()
+        pump()
         sleep_ms(50)
 
 

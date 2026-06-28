@@ -1,6 +1,6 @@
 # multimer types: queued, sync
 from board_config import display_drv
-from multimer import run_queued, sleep_ms
+from multimer import pump, sleep_ms
 from palettes import get_palette
 
 if display_drv.requires_byteswap:
@@ -24,7 +24,7 @@ def main():
             display_drv.vscsad((line_height + i) % display_drv.height)
         display_drv.fill_rect(0, i % display_drv.height, display_drv.width, line_height, color)
         display_drv.show()
-        run_queued()
+        pump()
         sleep_ms(1)
         i += line_height
 

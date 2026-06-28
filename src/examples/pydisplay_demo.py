@@ -8,7 +8,7 @@ Uses only src/lib modules (board_config, graphics, multimer, eventsys).
 from board_config import broker, display_drv
 from displaysys import color565
 from graphics import Area, Font, FrameBuffer, RGB565
-from multimer import get_timer, run_forever
+from multimer import periodic, run_forever
 
 TOP, BOT = 36, 20
 ROW, ACCENT = 20, 4
@@ -153,7 +153,7 @@ def main():
     setup_scroll()
     redraw()
 
-    get_timer(on_tick, period=40, warn=False)
+    periodic(on_tick, period=40)
 
     run_forever(handle_events)
 

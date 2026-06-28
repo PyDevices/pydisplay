@@ -104,12 +104,12 @@ class event_loop:
             self.scheduled = 0
 
     def _init_async_timers(self):
-        from multimer.aio import Timer as AioTimer
+        from multimer import AsyncTimer
 
         self.refresh_event = asyncio.Event()
         self.refresh_task = asyncio.create_task(self.async_refresh())
-        self._aio_timer = AioTimer(-1)
-        self._aio_timer.init(mode=AioTimer.PERIODIC, period=self.delay, callback=self._aio_tick)
+        self._aio_timer = AsyncTimer(-1)
+        self._aio_timer.init(mode=AsyncTimer.PERIODIC, period=self.delay, callback=self._aio_tick)
 
     def init_async(self):
         self._init_async_timers()

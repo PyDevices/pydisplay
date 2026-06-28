@@ -11,9 +11,10 @@ _active = []
 
 
 class Timer(_TimerBase):
-    """Software timer advanced by ``run_queued()`` and ``sleep_ms()``."""
+    """Software timer advanced by ``pump()`` and ``sleep_ms()``."""
 
-    REQUIRES_RUN_QUEUED = True
+    BACKEND = "polling"
+    NEEDS_PUMP = True
 
     def _start(self):
         self._next = ticks_add(ticks_ms(), self._interval)
@@ -27,7 +28,7 @@ class Timer(_TimerBase):
             pass
 
     def _dispatch(self, arg):
-        schedule(self._callback, arg)
+        schedule(self._invoke_callback, arg)
 
 
 def _tick(max_items=None):
@@ -49,9 +50,8 @@ def _tick(max_items=None):
         timer._busy = True
         try:
             timer._dispatch(timer)
-        except Exception:
-            pass
-        timer._busy = False
+        finally:
+            timer._busy = False
 
         if timer._mode == timer.ONE_SHOT:
             timer._stop()

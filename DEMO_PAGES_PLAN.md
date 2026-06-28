@@ -153,7 +153,7 @@ Verify rendering and confirm the spinner/Run flow.
 **Status (2026-06):** Section A verified in Cursor browser via `tools/serve.py`
 (local). Fixed along the way: localhost `mip.install`, console `#log` hook, 1:1
 canvas layout (no CSS scaling), `PSDevices` + `map_pointer`, scroll compositing on
-`PSDisplay`, async `sleep(0.02)` in tight loops, `multimer.aio.run()` on
+`PSDisplay`, async `sleep(0.02)` in tight loops, `multimer.run()` on
 PyScript. Clicks and auto-scroll confirmed on `calculator` and
 `pydisplay_demo_async` locally.
 
@@ -180,7 +180,7 @@ they never yield to the browser event loop — the tab becomes unresponsive unti
 reload. The Run gate already prevents an on-load hang.
 
 **Not blocking:** `chango`, `noto_fonts` (draw once, then `broker.poll()` /
-`run_queued()` — no `while True`).
+`pump()` — no `while True`).
 
 | Demo | Loop style | Browser decision |
 |------|------------|------------------|

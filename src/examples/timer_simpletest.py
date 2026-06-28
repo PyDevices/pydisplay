@@ -5,7 +5,7 @@ This is a simple test script that tests the basic functionality of the timer cla
 It creates a periodic timer in a class instance and a one-shot timer that stops the periodic timer.
 """
 
-from multimer import Timer, run_queued, sleep_ms
+from multimer import Timer, needs_pump, pump, sleep_ms
 from sys import platform
 
 _done = False
@@ -39,5 +39,5 @@ tim2 = Timer(-1 if platform == "rp2" else 2)
 tim2.init(mode=Timer.ONE_SHOT, period=5000, callback=tt.stop)
 
 while not _done:
-    run_queued()
+    pump()
     sleep_ms(1)

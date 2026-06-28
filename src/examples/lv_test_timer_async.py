@@ -2,7 +2,7 @@
 """
 lv_test_timer_async.py
 
-LVGL timer test — multimer.aio via board_config.TIMER_ASYNC and asyncio.
+LVGL timer test — multimer.AsyncTimer via board_config.TIMER_ASYNC and asyncio.
 
 Import display_driver inside the async main coroutine so the asyncio
 event loop is already running when lv_utils starts aio timers.
@@ -19,7 +19,7 @@ try:
 except ImportError:
     import uasyncio as asyncio
 
-from multimer.aio import run
+from multimer import run
 
 
 async def main():

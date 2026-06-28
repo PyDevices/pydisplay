@@ -1,31 +1,32 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Tests for the opt-in ``multimer.aio`` asyncio timer."""
+"""Tests for ``multimer.AsyncTimer`` and async helpers."""
 
 import asyncio
 import unittest
 
 import _env  # noqa: F401
 
-from multimer.aio import Timer, run
+from multimer import AsyncTimer, run
 
 
-class TestAioTimer(unittest.TestCase):
-    def test_requires_run_queued_is_false(self):
-        self.assertFalse(Timer.REQUIRES_RUN_QUEUED)
+@unittest.skipIf(AsyncTimer is None, "async support not available")
+class TestAsyncTimer(unittest.TestCase):
+    def test_needs_pump_is_false(self):
+        self.assertFalse(AsyncTimer(-1).needs_pump)
 
     def test_init_without_running_loop_raises(self):
-        t = Timer(-1)
+        t = AsyncTimer(-1)
         with self.assertRaises(RuntimeError):
-            t.init(mode=Timer.PERIODIC, period=20, callback=lambda tmr: None)
+            t.init(mode=AsyncTimer.PERIODIC, period=20, callback=lambda tmr: None)
 
     def test_periodic_fires_repeatedly(self):
         hits = []
 
         async def main():
-            t = Timer(-1)
-            t.init(mode=Timer.PERIODIC, period=20, callback=lambda tmr: hits.append(1))
+            t = AsyncTimer(-1)
+            t.init(mode=AsyncTimer.PERIODIC, period=20, callback=lambda tmr: hits.append(1))
             await asyncio.sleep(0.25)
             t.deinit()
 
@@ -36,8 +37,8 @@ class TestAioTimer(unittest.TestCase):
         hits = []
 
         async def main():
-            t = Timer(-1)
-            t.init(mode=Timer.ONE_SHOT, period=30, callback=lambda tmr: hits.append(1))
+            t = AsyncTimer(-1)
+            t.init(mode=AsyncTimer.ONE_SHOT, period=30, callback=lambda tmr: hits.append(1))
             await asyncio.sleep(0.25)
 
         asyncio.run(main())
@@ -47,8 +48,8 @@ class TestAioTimer(unittest.TestCase):
         seen = []
 
         async def main():
-            t = Timer(-1)
-            t.init(mode=Timer.PERIODIC, period=20, callback=seen.append)
+            t = AsyncTimer(-1)
+            t.init(mode=AsyncTimer.PERIODIC, period=20, callback=seen.append)
             await asyncio.sleep(0.1)
             t.deinit()
             return t
@@ -61,8 +62,8 @@ class TestAioTimer(unittest.TestCase):
         hits = []
 
         async def main():
-            t = Timer(-1)
-            t.init(mode=Timer.PERIODIC, period=20, callback=lambda tmr: hits.append(1))
+            t = AsyncTimer(-1)
+            t.init(mode=AsyncTimer.PERIODIC, period=20, callback=lambda tmr: hits.append(1))
             await asyncio.sleep(0.1)
             t.deinit()
             count = len(hits)

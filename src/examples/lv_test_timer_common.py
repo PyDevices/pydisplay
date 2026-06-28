@@ -89,7 +89,7 @@ def _timer_class():
         import board_config
 
         if getattr(board_config, "TIMER_ASYNC", False):
-            from multimer.aio import Timer
+            from multimer import AsyncTimer as Timer
 
             return Timer
     except ImportError:

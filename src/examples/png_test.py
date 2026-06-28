@@ -5,7 +5,7 @@ from collections import namedtuple
 import png
 from color_setup import ssd
 from displaybuf import alloc_buffer
-from multimer import REQUIRES_RUN_QUEUED, run_queued, sleep_ms
+from multimer import capabilities, pump, sleep_ms
 
 png_image = namedtuple("png_image", ["width", "height", "pixels", "metadata"])
 
@@ -53,5 +53,5 @@ while True:
         sleep_ms(1000)
         ssd.fill_rect(pos_x, pos_y, p.width, p.height, bg_color)
         ssd.fill_rect(0, 0, ssd.width, 32, bg_color)
-        if REQUIRES_RUN_QUEUED:
-            run_queued()
+        if capabilities()["schedule_queue"]:
+            pump()

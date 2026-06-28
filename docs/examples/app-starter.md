@@ -82,7 +82,7 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
 
 === "Async (asyncio)"
 
-    Asyncio main loop via `multimer.aio.run_forever()`. Use on PyScript or any port where the app already runs under `asyncio` / `uasyncio`. Tagged `# multimer types: async`.
+    Asyncio main loop via `multimer.run_forever()`. Use on PyScript or any port where the app already runs under `asyncio` / `uasyncio`. Tagged `# multimer types: async`.
 
     ```python
     # multimer types: async
@@ -90,7 +90,7 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
     my_app_async.py — asyncio starting point for a pydisplay app.
 
     Copy and rename to build your own project. Uses board_config, graphics,
-    multimer.aio, and eventsys only.
+    multimer, and eventsys only.
     """
 
     import board_config
@@ -99,7 +99,7 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
 
     from board_config import broker, display_drv
     from graphics import Area
-    from multimer.aio import run, run_forever
+    from multimer import run, run_forever
 
     # --- customize: colors and layout ---
     BG = 0
@@ -149,7 +149,7 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
 
 === "Dual (sync + async)"
 
-    One entry file for desktop **and** PyScript. `board_config.TIMER_ASYNC` selects the path; `dual_main()` calls `main_sync()` or schedules `main_async()`. Tagged `# multimer types: async` (PyScript gallery convention). Pass `asynchronous=TIMER_ASYNC` to `get_timer()` when you add periodic timers.
+    One entry file for desktop **and** PyScript. `board_config.TIMER_ASYNC` selects the path; `dual_main()` calls `main_sync()` or schedules `main_async()`. Tagged `# multimer types: async` (PyScript gallery convention). Pass `async_=TIMER_ASYNC` to `periodic()` when you add periodic timers.
 
     ```python
     # multimer types: async
@@ -157,13 +157,13 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
     my_app_dual.py — one file for sync desktop and async PyScript.
 
     Copy and rename to build your own project. Uses board_config, graphics,
-    multimer, multimer.aio, and eventsys only.
+    multimer, multimer, and eventsys only.
     """
 
     from board_config import TIMER_ASYNC, broker, display_drv
     from graphics import Area
     from multimer import run_forever
-    from multimer.aio import dual_main, run_forever as aio_run_forever
+    from multimer import dual_main, run_forever as aio_run_forever
 
     # --- customize: colors and layout ---
     BG = 0
@@ -290,11 +290,11 @@ All three boilerplate tabs use the shared **`run_forever(poll)`** helpers instea
 
 | Tab | Helper | Each iteration |
 |-----|--------|----------------|
-| Sync | `multimer.run_forever(poll_events)` | `run_queued()` → `poll_events()` → `sleep_ms(1)` |
-| Async | `await multimer.aio.run_forever(poll_events, delay_ms=10)` | yield to asyncio → `poll_events()` → short sleep |
+| Sync | `multimer.run_forever(poll_events)` | `pump()` → `poll_events()` → `sleep_ms(1)` |
+| Async | `await multimer.run_forever(poll_events, delay_ms=10)` | yield to asyncio → `poll_events()` → short sleep |
 | Dual | `dual_main(main_sync, main_async, async_mode=TIMER_ASYNC)` | picks sync or async path from [board config](../hardware/board-configs.md) |
 
-On backends that queue timer callbacks to the main thread, `run_queued()` inside `run_forever` delivers them — see [multimer](../concepts/multimer.md).
+On backends that queue timer callbacks to the main thread, `pump()` inside `run_forever` delivers them — see [multimer](../concepts/multimer.md).
 
 For the **dual** tab, `board_config` sets `TIMER_ASYNC = True` on PyScript and Jupyter; desktop MCU/SDL configs leave it `False`. Your app reads that flag and passes it to `dual_main()` — multimer does not import `board_config`.
 
@@ -305,7 +305,7 @@ To migrate between styles, compare the tabs above or see the sync/async table in
 1. **Rename** the file and module docstring; keep the multimer first-line tag accurate if you add timers later.
 2. **Layout** — add more `Area` regions, sprites, or shapes in `redraw()`.
 3. **Text** — for labels and lists, use `Font` + `FrameBuffer` + `blit_rect` ([Drawing and fonts](../concepts/drawing-and-fonts.md), [`font_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/font_simpletest.py)).
-4. **Timers** — call `get_timer(callback, period=…, asynchronous=TIMER_ASYNC)` when you need periodic updates (use the **dual** tab pattern and import `TIMER_ASYNC` from `board_config`); see [multimer](../concepts/multimer.md) and [**pydisplay_demo**](pydisplay_demo.md) for scrolling.
+4. **Timers** — call `periodic(callback, period=…, async_=TIMER_ASYNC)` when you need periodic updates (use the **dual** tab pattern and import `TIMER_ASYNC` from `board_config`); see [multimer](../concepts/multimer.md) and [**pydisplay_demo**](pydisplay_demo.md) for scrolling.
 
 !!! tip "Next steps beyond this template"
     - **Rotation and hardware scroll** — [pydisplay_demo](pydisplay_demo.md)

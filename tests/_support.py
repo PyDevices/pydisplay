@@ -19,15 +19,15 @@ def pump(duration_s, step_s=0.005):
     Works across every synchronous backend:
 
     - threading / SDL / polling backends deliver callbacks through the schedule
-      queue, which ``multimer.run_queued()`` drains here on the main thread;
+      queue, which ``multimer.pump()`` drains here on the main thread;
     - the POSIX ``_ctypes``/``_ffi`` backends deliver callbacks on the main
-      thread during ``time.sleep`` (``run_queued`` is then a harmless no-op).
+      thread during ``time.sleep`` (``pump`` is then a harmless no-op).
     """
     end = time.monotonic() + duration_s
     while time.monotonic() < end:
-        multimer.run_queued()
+        multimer.pump()
         time.sleep(step_s)
-    multimer.run_queued()
+    multimer.pump()
 
 
 def scripted(*values):

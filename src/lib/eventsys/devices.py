@@ -387,7 +387,7 @@ class Broker(Device):
         display driver's ``quit()`` when a display is registered.  When a display
         driver is registered, ``quit()`` ends with ``os._exit(0)`` if the driver
         returns instead of terminating (for example when ``SystemExit`` is swallowed
-        from a timer or ``run_queued`` callback).
+        from a timer or ``pump`` callback).
         """
         display_quit = False
         try:

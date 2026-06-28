@@ -73,9 +73,9 @@ def init_timer(period=10):
         period (int): The period in milliseconds to call the tick function.
     """
     if Display.timer is None:
-        from multimer import get_timer
+        from multimer import periodic
 
-        Display.timer = get_timer(tick, period)
+        Display.timer = periodic(tick, period)
 
 
 def pump():
@@ -85,10 +85,12 @@ def pump():
     On queued backends, drains the multimer callback queue. In poll mode
     (no ``init_timer``), also calls ``tick()``.
     """
-    from multimer import REQUIRES_RUN_QUEUED, Timer, run_queued
+    from multimer import capabilities, needs_pump
+    from multimer import pump as multimer_pump
 
-    if REQUIRES_RUN_QUEUED or getattr(Timer, "REQUIRES_RUN_QUEUED", False):
-        run_queued()
+    caps = capabilities()
+    if caps["schedule_queue"] or needs_pump():
+        multimer_pump()
     if Display.timer is None:
         tick()
 
@@ -97,18 +99,20 @@ def run_forever():
     """
     Keep the widget loop alive on all platforms.
 
-    On queued/SDL backends, runs ``run_queued()`` forever. In poll mode
+    On queued/SDL backends, runs ``pump()`` forever. In poll mode
     (no ``init_timer``), also calls ``tick()`` each iteration. On sync
     MCU with an active timer, returns immediately (the timer drives
     ``tick()``).
     """
-    from multimer import REQUIRES_RUN_QUEUED, Timer, run_queued, sleep_ms
+    from multimer import capabilities, needs_pump, sleep_ms
+    from multimer import pump as multimer_pump
 
-    timer_req = getattr(Timer, "REQUIRES_RUN_QUEUED", False)
-    needs_queue_loop = REQUIRES_RUN_QUEUED or timer_req
-    # CPython linux ctypes: module requires run_queued but timer fires on main thread;
+    caps = capabilities()
+    timer_req = needs_pump()
+    needs_queue_loop = caps["schedule_queue"] or timer_req
+    # CPython linux ctypes: schedule queue active but timer fires on main thread;
     # drive tick from the main loop instead of the timer to avoid signal/reentrancy issues.
-    cpython_main_loop_tick = REQUIRES_RUN_QUEUED and not timer_req
+    cpython_main_loop_tick = caps["schedule_queue"] and not timer_req
     has_timer = Display.timer is not None
     if cpython_main_loop_tick and Display.timer:
         try:
@@ -120,7 +124,7 @@ def run_forever():
 
     if needs_queue_loop:
         while Display.displays:
-            run_queued()
+            pump()
             if not has_timer or cpython_main_loop_tick:
                 tick()
             sleep_ms(1)
@@ -674,9 +678,10 @@ class Display(Widget):
             self.display_drv.fill_rect(x, y + h - 2, w, 2, c)
             self.display_drv.fill_rect(x, y, 2, h, c)
             self.display_drv.fill_rect(x + w - 2, y, 2, h, c)
-        from multimer import REQUIRES_RUN_QUEUED, Timer
+        from multimer import capabilities, needs_pump
 
-        needs_show = REQUIRES_RUN_QUEUED or getattr(Timer, "REQUIRES_RUN_QUEUED", False)
+        caps = capabilities()
+        needs_show = caps["schedule_queue"] or needs_pump()
         if needs_show:
             self.display_drv.show()
 

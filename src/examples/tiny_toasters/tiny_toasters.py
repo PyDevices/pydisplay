@@ -34,7 +34,7 @@ from random import getrandbits
 import tft_bitmap
 import tft_config
 from board_config import broker
-from multimer import Timer, run_queued, sleep_ms
+from multimer import Timer, needs_pump, pump, sleep_ms
 
 palette = tft_config.palette
 import tiny_toasters_bitmaps as toast_bitmaps
@@ -218,8 +218,8 @@ def main():
             sprite.draw()
 
         tft.show()
-        if getattr(Timer, "REQUIRES_RUN_QUEUED", False):
-            run_queued()
+        if needs_pump():
+            pump()
         broker.poll()
         gc.collect()
         sleep_ms(50)

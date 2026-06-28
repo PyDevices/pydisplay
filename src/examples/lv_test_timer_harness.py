@@ -410,14 +410,12 @@ def _run_sync():
 
     board_config.TIMER_ASYNC = False
 
-    from multimer import Timer
-
-    if getattr(Timer, "REQUIRES_RUN_QUEUED", False):
+    from multimer import Timer, needs_pump
         _print_result(
             {
                 "mode": "sync",
                 "status": "skip",
-                "reason": "REQUIRES_RUN_QUEUED",
+                "reason": "needs_pump",
                 "backend": _timer_backend(),
             }
         )
@@ -460,15 +458,15 @@ def _run_queued():
 
     import display_driver  # noqa: F401
     from lv_test_timer_common import build_ui, get_state
-    from multimer import Timer, run_queued, sleep_ms
+    from multimer import Timer, needs_pump, pump, sleep_ms
 
-    timer_req = getattr(Timer, "REQUIRES_RUN_QUEUED", False)
+    timer_req = needs_pump()
 
     def queued_pump(n=5, delay_s=0):
         import lvgl as lv
 
         for _ in range(n):
-            run_queued()
+            pump()
             if timer_req:
                 broker.poll()
             if lv._nesting.value == 0:
@@ -484,7 +482,7 @@ def _run_queued():
     input_tests = None
 
     while time.time() < deadline:
-        run_queued()
+        pump()
         if timer_req:
             broker.poll()
         sleep_ms(1)
@@ -510,7 +508,7 @@ def _run_async():
 
     board_config.TIMER_ASYNC = True
 
-    from multimer.aio import run
+    from multimer import run
 
     try:
         import asyncio

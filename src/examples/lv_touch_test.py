@@ -52,8 +52,8 @@ for alignment in alignments:
     label.center()
 
 from multimer import Timer
-if getattr(Timer, "REQUIRES_RUN_QUEUED", False):
-    from multimer import run_queued, sleep_ms
+if needs_pump():
+    from multimer import pump, sleep_ms
     while True:
-        run_queued()
+        pump()
         sleep_ms(1)

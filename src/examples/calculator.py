@@ -18,7 +18,7 @@ try:
 except ImportError:
     import uasyncio as asyncio
 
-from multimer.aio import run
+from multimer import run
 
 
 async def main():
