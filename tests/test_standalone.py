@@ -209,8 +209,6 @@ class TestStandalone(unittest.TestCase):
             shutil.copytree(_env.EVENTSYS_DIR, os.path.join(tmp, "eventsys"))
 
             env = dict(os.environ)
-            # The child sees ONLY the temp dir (plus the stdlib) — no src/lib
-            # and no src/add_ons, so the rest of pydisplay is unreachable.
             env["PYTHONPATH"] = tmp
 
             proc = subprocess.run(
