@@ -2,10 +2,10 @@ import os
 import sys
 
 from board_config import display_drv
+from palettes import get_palette
 import tft_text
 
 from graphics import Draw
-from palettes import get_palette
 
 sep = os.sep if hasattr(os, "sep") else "/"  # PyScipt doesn't have os.sep
 
@@ -19,7 +19,7 @@ BUFFERED = False
 if BUFFERED:
     from displaybuf import DisplayBuffer
 
-    from multimer import REQUIRES_RUN_QUEUED, Timer
+    from multimer import Timer, capabilities
 
 
 font_dir = sep.join(tft_text.__file__.split(sep)[:-1]) + sep + "fonts"
@@ -53,7 +53,7 @@ def config(rotation=None, buffer_size=0, options=0):
         display_drv.rotation = rotation
     if BUFFERED:
         display = DisplayBuffer(display_drv)
-        if REQUIRES_RUN_QUEUED:
+        if capabilities()["schedule_queue"]:
             _orig_show = display.show
 
             def show(area=None):

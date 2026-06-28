@@ -28,7 +28,7 @@ import chango_16 as font_16
 import chango_32 as font_32
 import chango_64 as font_64
 from board_config import broker
-from multimer import Timer, run_queued
+from multimer import Timer, needs_pump, pump
 import tft_config
 import tft_write
 
@@ -53,8 +53,8 @@ def main():
     row += font_64.HEIGHT
 
     tft.show()
-    if getattr(Timer, "REQUIRES_RUN_QUEUED", False):
-        run_queued()
+    if needs_pump():
+        pump()
     broker.poll()
 
 

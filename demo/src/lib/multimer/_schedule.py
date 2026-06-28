@@ -6,7 +6,7 @@
 import sys
 
 if sys.implementation.name in ("cpython", "circuitpython"):
-    REQUIRES_RUN_QUEUED = True
+    SCHEDULE_QUEUE = True
     _MAX_PENDING = 32
 
     try:
@@ -85,7 +85,7 @@ if sys.implementation.name in ("cpython", "circuitpython"):
         except _QueueFull as err:
             raise RuntimeError("schedule queue full") from err
 
-    def run_queued(max_items=None):
+    def _drain_schedule(max_items=None):
         n = 0
         while max_items is None or n < max_items:
             try:
@@ -94,15 +94,12 @@ if sys.implementation.name in ("cpython", "circuitpython"):
                 break
             cb(arg)
             n += 1
+        return n
+
 else:
     from micropython import schedule
 
-    REQUIRES_RUN_QUEUED = False
+    SCHEDULE_QUEUE = False
 
-    def run_queued(max_items=None):
-        try:
-            from ._polling import _tick
-
-            _tick(max_items)
-        except ImportError:
-            pass
+    def _drain_schedule(max_items=None):
+        return 0

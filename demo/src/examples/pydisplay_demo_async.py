@@ -2,7 +2,7 @@
 """
 pydisplay_demo_async.py — asyncio version of pydisplay_demo.
 
-Same UI and behaviour; uses multimer.aio.Timer and an async main loop.
+Same UI and behaviour; uses multimer.AsyncTimer and an async main loop.
 Uses only src/lib modules (board_config, graphics, multimer, eventsys).
 """
 
@@ -13,8 +13,8 @@ board_config.TIMER_ASYNC = True
 from board_config import broker, display_drv
 from displaysys import color565
 from graphics import Area, Font, FrameBuffer, RGB565
-from multimer import get_timer
-from multimer.aio import run, run_forever
+from multimer import periodic
+from multimer import run, run_forever_async
 
 TOP, BOT = 36, 20
 ROW, ACCENT = 20, 4
@@ -53,7 +53,7 @@ TIPS = (
     "or the mouse.",
     "Display: board_config",
     "Events: eventsys",
-    "Timers: multimer.aio",
+    "Timers: multimer.AsyncTimer",
 )
 
 state = {"rotation": 0, "scroll": 0, "color_i": 0}
@@ -159,9 +159,9 @@ async def main():
     setup_scroll()
     redraw()
 
-    get_timer(on_tick, period=40, asynchronous=True, warn=False)
+    periodic(on_tick, period=40, async_=True)
 
-    await run_forever(handle_events, delay_ms=20)
+    await run_forever_async(handle_events, delay_ms=20)
 
 
 run(main)

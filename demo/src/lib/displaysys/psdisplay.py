@@ -303,11 +303,11 @@ class PSDisplay(DisplayDriver):
         id (str): The id of the canvas element.
         width (int, optional): The width of the display. Defaults to None.
         height (int, optional): The height of the display. Defaults to None.
-        asynchronous (bool): Use ``multimer.aio.Timer`` for ``auto_refresh``. Defaults
+        async_ (bool): Use ``multimer.AsyncTimer`` for ``auto_refresh``. Defaults
             to ``True`` (PyScript runs under asyncio).
     """
 
-    def __init__(self, id, width=None, height=None, *, asynchronous=True):
+    def __init__(self, id, width=None, height=None, *, async_=True):
         self._canvas = document.getElementById(id)
         self._vis_ctx = self._canvas.getContext("2d")
         self._buffer = None
@@ -319,7 +319,7 @@ class PSDisplay(DisplayDriver):
         self._quiet = True
         self.color_depth = 16
 
-        super().__init__(auto_refresh=33, asynchronous=asynchronous)
+        super().__init__(auto_refresh=33, async_=async_)
 
     ############### Required API Methods ################
 

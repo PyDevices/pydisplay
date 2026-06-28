@@ -305,7 +305,7 @@ class PGDisplay(DisplayDriver):
         Release pygame-ce resources and terminate the process.
 
         Uses ``os._exit`` when ``SystemExit`` would be swallowed (e.g. quit
-        invoked from a ``run_queued`` callback while ``import`` is blocked in
+        invoked from a ``pump`` callback while ``import`` is blocked in
         a module-level loop).
         """
         self.deinit()

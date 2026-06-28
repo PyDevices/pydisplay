@@ -7,14 +7,14 @@ Then it prints the touch_rotation_table that should be set in board_config.py.
 
 On asyncio-native hosts (PyScript, Jupyter Notebook) the test runs an async main
 loop that yields to the event loop so input/widget events can be dispatched.  On
-MCU/desktop it runs the classic blocking loop with run_queued() + sleep_ms().
+MCU/desktop it runs the classic blocking loop with pump() + sleep_ms().
 """
 
 import board_config
 from board_config import display_drv, broker
 from eventsys.devices import types
 from graphics import round_rect, text16
-from multimer import run_queued, sleep_ms
+from multimer import pump, sleep_ms
 
 TIMER_ASYNC = getattr(board_config, "TIMER_ASYNC", False)
 
@@ -141,7 +141,7 @@ def loop():
                 touched_point = None
                 while not touched_point:
                     touched_point = _poll_touch()
-                    run_queued()
+                    pump()
                     sleep_ms(1)
                 _record_zone(touched_point, touched_zones, half_width, half_height)
                 _clear_target(x, y, half_width, half_height)
@@ -190,13 +190,13 @@ async def loop_async():
 
 
 async def main_async():
-    from multimer.aio import run_queued as aio_run_queued
+    from multimer import sleep_ms
 
     completed = False
     while not completed:
         display_drv.show()
         completed = await loop_async()
-        await aio_run_queued()
+        await sleep_ms(0)
 
 
 def run_sync():
@@ -205,7 +205,7 @@ def run_sync():
         while not completed:
             display_drv.show()
             completed = loop()
-            run_queued()
+            pump()
             sleep_ms(1)
     except KeyboardInterrupt:
         print("\nStopped.")
@@ -217,7 +217,7 @@ if not demo:
 if TIMER_ASYNC:
     # On a host with a running loop (Jupyter, PyScript) this schedules the test
     # as a background task and returns; otherwise it runs to completion.
-    from multimer.aio import run
+    from multimer import run
 
     run(main_async)
 else:

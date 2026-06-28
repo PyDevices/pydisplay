@@ -129,11 +129,11 @@ class DisplayDriver:
     Args:
         auto_refresh: If ``True`` or an integer period in ms, starts a ``multimer`` timer
             that calls ``show()`` automatically.
-        asynchronous: When ``auto_refresh`` is enabled, use ``multimer.aio.Timer`` if
+        async_: When ``auto_refresh`` is enabled, use ``multimer.AsyncTimer`` if
             ``True``, otherwise sync ``multimer.Timer``. Defaults to ``False``.
     """
 
-    def __init__(self, auto_refresh=False, *, asynchronous=False):
+    def __init__(self, auto_refresh=False, *, async_=False):
         if not getattr(self, "_quiet", False):
             print(f"Initializing {self.__class__.__name__}...")
         gc.collect()
@@ -150,12 +150,12 @@ class DisplayDriver:
                 _DEFAULT_AUTO_REFRESH_PERIOD if isinstance(auto_refresh, bool) else auto_refresh
             )
             try:
-                from multimer import get_timer
+                from multimer import periodic
 
-                self._timer = get_timer(
+                self._timer = periodic(
                     self.show,
                     period=period,
-                    asynchronous=asynchronous,
+                    async_=async_,
                 )
             except ImportError:
                 raise ImportError("multimer is required for auto_refresh") from None
@@ -603,7 +603,7 @@ class DisplayDriver:
         event.  The base implementation deinitializes the display and raises
         ``SystemExit``, which is correct when quit runs on the main thread.
         Drivers where ``SystemExit`` would be swallowed when quit is invoked
-        from a timer or ``run_queued`` callback (e.g. ``SDLDisplay``,
+        from a timer or ``pump`` callback (e.g. ``SDLDisplay``,
         ``PGDisplay``) should override this with a hard process exit.
         """
         self.deinit()

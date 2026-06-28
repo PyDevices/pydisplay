@@ -28,8 +28,8 @@ def main():
     if not lv.is_initialized():
         lv.init()
     if not lv_utils.event_loop.is_running():
-        # Async apps use multimer.aio for LVGL ticks; SDL auto_refresh uses sync
-        # multimer.Timer (_threading on CircuitPython) which requires run_queued().
+        # Async apps use multimer.AsyncTimer for LVGL ticks; SDL auto_refresh uses sync
+        # multimer.Timer (_threading on CircuitPython) which requires pump().
         # Present the frame from the aio refresh loop instead.
         refresh_cb = None
         if TIMER_ASYNC:
@@ -191,12 +191,12 @@ def run():
     a periodic timer at ``import display_driver`` time — this returns immediately
     so the REPL stays usable while the UI runs.
 
-    On Windows (MicroPython and CPython), blocks in ``run_queued()`` +
+    On Windows (MicroPython and CPython), blocks in ``pump()`` +
     ``broker.poll()`` because the SDL message pump needs the main thread.
 
     On macOS, blocks in ``lv_utils.event_loop.run()`` (manual tick loop).
     """
-    from multimer import Timer, run_queued, sleep_ms
+    from multimer import needs_pump, pump, sleep_ms
 
     inst = lv_utils.event_loop.current_instance()
     if inst is not None:
@@ -206,10 +206,9 @@ def run():
         if sys.platform != "win32":
             return
 
-    timer_req = getattr(Timer, "REQUIRES_RUN_QUEUED", False)
     while True:
-        if timer_req:
-            run_queued()
+        if needs_pump():
+            pump()
         broker.poll()
         sleep_ms(1)
 
