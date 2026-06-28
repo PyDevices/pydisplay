@@ -5,8 +5,8 @@
       "../src/examples/frogger/__init__.py"
     ],
     [
-      "frogger/frogger_async.py",
-      "../src/examples/frogger/frogger_async.py"
+      "frogger/frogger.py",
+      "../src/examples/frogger/frogger.py"
     ],
     [
       "frogger/path.py",

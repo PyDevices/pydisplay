@@ -11,11 +11,11 @@ then falls back to ``asyncio``.
 
 This module is self-contained: the public API is ``Timer`` (an asyncio software
 timer with the same ``machine.Timer``-style API as the rest of multimer) plus
-optional helpers ``run``, ``run_queued``, and ``run_forever``.
+optional helpers ``run``, ``run_queued``, ``run_forever``, and ``dual_main``.
 
 Quick start (helpers are optional)::
 
-    from multimer.aio import Timer, run_queued, run, run_forever
+    from multimer.aio import Timer, run_queued, run, run_forever, dual_main
 
     async def main():
         t = Timer()
@@ -157,6 +157,20 @@ def run(main):
     if hasattr(asyncio, "run"):
         return asyncio.run(main())
     return asyncio.get_event_loop().run_until_complete(main())
+
+
+def dual_main(sync_main, async_main, *, async_mode=False):
+    """Run ``sync_main()`` or schedule ``async_main()`` under asyncio.
+
+    Args:
+        sync_main: Callable for the blocking / ``run_queued`` main loop.
+        async_main: Async coroutine function for the asyncio main loop.
+        async_mode: When ``True``, call ``run(async_main)``; otherwise ``sync_main()``.
+    """
+    if async_mode:
+        run(async_main)
+    else:
+        sync_main()
 
 
 class Timer(_TimerBase):

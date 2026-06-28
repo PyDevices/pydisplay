@@ -5,6 +5,7 @@ Copy one of the scripts below to start your first pydisplay app. Each is a singl
 | Use this | When you want… |
 |----------|----------------|
 | **App starter** (this page) | A minimal template: draw the UI, handle clicks, run the recommended main loop |
+| **Dual tab** | One file for desktop and PyScript (`dual_main` + `board_config.TIMER_ASYNC`) |
 | [**pydisplay_demo**](pydisplay_demo.md) | A feature tour: rotation, hardware scrolling, buffered text, timers |
 
 ## Prerequisites
@@ -18,7 +19,7 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
 
 === "Sync (queued / sync)"
 
-    Blocking main loop with `run_queued()` and `sleep_ms(1)`. Use on MCU, desktop CPython, and any port where your app is not asyncio-native. Tagged `# multimer types: queued, sync`.
+    Blocking main loop via `multimer.run_forever()`. Use on MCU, desktop CPython, and any port where your app is not asyncio-native. Tagged `# multimer types: queued, sync`.
 
     ```python
     # multimer types: queued, sync
@@ -31,7 +32,7 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
 
     from board_config import broker, display_drv
     from graphics import Area
-    from multimer import run_queued, sleep_ms
+    from multimer import run_forever
 
     # --- customize: colors and layout ---
     BG = 0
@@ -65,14 +66,15 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
         #     return True  # exit main loop if you add a break
 
 
+    def poll_events():
+        if elist := broker.poll():
+            for e in elist:
+                handle_event(e)
+
+
     def main():
         redraw()
-        while True:
-            run_queued()
-            if elist := broker.poll():
-                for e in elist:
-                    handle_event(e)
-            sleep_ms(1)
+        run_forever(poll_events)
 
 
     main()
@@ -80,7 +82,7 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
 
 === "Async (asyncio)"
 
-    Asyncio main loop with `await run_queued()`. Use on PyScript or any port where the app already runs under `asyncio` / `uasyncio`. Tagged `# multimer types: async`.
+    Asyncio main loop via `multimer.aio.run_forever()`. Use on PyScript or any port where the app already runs under `asyncio` / `uasyncio`. Tagged `# multimer types: async`.
 
     ```python
     # multimer types: async
@@ -95,14 +97,9 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
 
     board_config.TIMER_ASYNC = True
 
-    try:
-        import asyncio
-    except ImportError:
-        import uasyncio as asyncio
-
     from board_config import broker, display_drv
     from graphics import Area
-    from multimer.aio import run_queued, run
+    from multimer.aio import run, run_forever
 
     # --- customize: colors and layout ---
     BG = 0
@@ -136,16 +133,87 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
         #     return True
 
 
+    def poll_events():
+        if elist := broker.poll():
+            for e in elist:
+                handle_event(e)
+
+
     async def main():
         redraw()
-        while True:
-            if elist := broker.poll():
-                for e in elist:
-                    handle_event(e)
-            await run_queued()
+        await run_forever(poll_events, delay_ms=10)
 
 
     run(main)
+    ```
+
+=== "Dual (sync + async)"
+
+    One entry file for desktop **and** PyScript. `board_config.TIMER_ASYNC` selects the path; `dual_main()` calls `main_sync()` or schedules `main_async()`. Tagged `# multimer types: async` (PyScript gallery convention). Pass `asynchronous=TIMER_ASYNC` to `get_timer()` when you add periodic timers.
+
+    ```python
+    # multimer types: async
+    """
+    my_app_dual.py — one file for sync desktop and async PyScript.
+
+    Copy and rename to build your own project. Uses board_config, graphics,
+    multimer, multimer.aio, and eventsys only.
+    """
+
+    from board_config import TIMER_ASYNC, broker, display_drv
+    from graphics import Area
+    from multimer import run_forever
+    from multimer.aio import dual_main, run_forever as aio_run_forever
+
+    # --- customize: colors and layout ---
+    BG = 0
+    BTN = 0xF800       # red
+    BTN_ON = 0x07E0    # green
+
+    button = None
+    pressed = False
+
+
+    def redraw():
+        global button
+        w, h = display_drv.width, display_drv.height
+        display_drv.fill(BG)
+        color = BTN_ON if pressed else BTN
+        button = Area(display_drv.fill_rect(w // 2 - 50, h // 2 - 25, 100, 50, color))
+        display_drv.show()
+
+
+    def handle_event(e):
+        global pressed
+        if e.type == broker.events.MOUSEBUTTONDOWN:
+            if button.contains(e.pos):
+                pressed = not pressed
+                redraw()
+        # elif e.type == broker.events.KEYDOWN:
+        #     ...
+        # elif e.type == broker.events.ENCODER:
+        #     ...
+        # elif e.type == broker.events.QUIT:
+        #     return True
+
+
+    def poll_events():
+        if elist := broker.poll():
+            for e in elist:
+                handle_event(e)
+
+
+    def main_sync():
+        redraw()
+        run_forever(poll_events)
+
+
+    async def main_async():
+        redraw()
+        await aio_run_forever(poll_events, delay_ms=10)
+
+
+    dual_main(main_sync, main_async, async_mode=TIMER_ASYNC)
     ```
 
 ## Hit testing and `graphics.Area`
@@ -212,28 +280,32 @@ Clears the screen, draws one clickable rectangle, and calls `display_drv.show()`
 
 Recreate `Area` objects whenever you change layout (same pattern as real apps with moving widgets).
 
-### `handle_event(e)`
+### `handle_event(e)` and `poll_events()`
 
-Drain logic lives in `main()`; per-event handling stays in one function. The starter handles `MOUSEBUTTONDOWN` only. Uncomment the stubs or add branches for keys, encoders, and quit — see [Events](../concepts/events.md).
+Per-event handling stays in `handle_event()`. The main loop calls `poll_events()`, which drains `broker.poll()` and dispatches each event. The starter handles `MOUSEBUTTONDOWN` only. Uncomment the stubs or add branches for keys, encoders, and quit — see [Events](../concepts/events.md).
 
 ### Main loop
 
-**Sync** — each frame:
+All three boilerplate tabs use the shared **`run_forever(poll)`** helpers instead of hand-rolled `while True` loops:
 
-1. `run_queued()` — delivers timer callbacks on backends that queue multimer work to the main thread ([multimer](../concepts/multimer.md)).
-2. `broker.poll()` — returns touch, mouse, and other input events.
-3. `sleep_ms(1)` — yields so the loop does not spin at full CPU.
+| Tab | Helper | Each iteration |
+|-----|--------|----------------|
+| Sync | `multimer.run_forever(poll_events)` | `run_queued()` → `poll_events()` → `sleep_ms(1)` |
+| Async | `await multimer.aio.run_forever(poll_events, delay_ms=10)` | yield to asyncio → `poll_events()` → short sleep |
+| Dual | `dual_main(main_sync, main_async, async_mode=TIMER_ASYNC)` | picks sync or async path from [board config](../hardware/board-configs.md) |
 
-**Async** — poll events, then `await run_queued()` so the event loop can run timer tasks and other coroutines. No separate `sleep_ms` — the `await` yields.
+On backends that queue timer callbacks to the main thread, `run_queued()` inside `run_forever` delivers them — see [multimer](../concepts/multimer.md).
 
-To migrate between styles, compare the two tabs above or see the sync/async table in [pydisplay_demo → Async variant](pydisplay_demo.md#async-variant).
+For the **dual** tab, `board_config` sets `TIMER_ASYNC = True` on PyScript and Jupyter; desktop MCU/SDL configs leave it `False`. Your app reads that flag and passes it to `dual_main()` — multimer does not import `board_config`.
+
+To migrate between styles, compare the tabs above or see the sync/async table in [pydisplay_demo → Async variant](pydisplay_demo.md#async-variant).
 
 ## Customize
 
 1. **Rename** the file and module docstring; keep the multimer first-line tag accurate if you add timers later.
 2. **Layout** — add more `Area` regions, sprites, or shapes in `redraw()`.
 3. **Text** — for labels and lists, use `Font` + `FrameBuffer` + `blit_rect` ([Drawing and fonts](../concepts/drawing-and-fonts.md), [`font_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/font_simpletest.py)).
-4. **Timers** — call `get_timer(callback, period=…)` inside `main()` when you need periodic updates; see [multimer](../concepts/multimer.md) and [**pydisplay_demo**](pydisplay_demo.md) for a full example with scrolling.
+4. **Timers** — call `get_timer(callback, period=…, asynchronous=TIMER_ASYNC)` when you need periodic updates (use the **dual** tab pattern and import `TIMER_ASYNC` from `board_config`); see [multimer](../concepts/multimer.md) and [**pydisplay_demo**](pydisplay_demo.md) for scrolling.
 
 !!! tip "Next steps beyond this template"
     - **Rotation and hardware scroll** — [pydisplay_demo](pydisplay_demo.md)
