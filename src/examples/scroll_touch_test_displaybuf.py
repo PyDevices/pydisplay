@@ -1,5 +1,4 @@
 # multimer types: queued, sync
-# pyscript files: scroll_touch_test_displaybuf.py
 from board_config import display_drv, broker
 from graphics import Draw
 from palettes import get_palette

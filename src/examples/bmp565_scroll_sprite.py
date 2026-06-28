@@ -1,5 +1,5 @@
 # multimer types: queued, sync
-# pyscript files: bmp565_scroll_sprite.py, assets/longstreet.bmp, assets/runner.bmp
+# pyscript binaries: assets/longstreet.bmp, assets/runner.bmp
 from collections import namedtuple
 
 from board_config import display_drv, broker

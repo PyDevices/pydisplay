@@ -1,5 +1,4 @@
 # multimer types: queued, sync
-# pyscript files: pydisplay_demo.py
 """
 pydisplay_demo.py — minimal board_config demo: clicks, rotation, scrolling.
 

@@ -1,5 +1,5 @@
 # multimer types: all
-# pyscript files: font_simpletest3.py, assets/font_8x8.bin, assets/font_8x14.bin, assets/font_8x16.bin
+# pyscript binaries: assets/font_8x8.bin, assets/font_8x14.bin, assets/font_8x16.bin
 """
 font_simpletest.py -- Simple test of the Font class.
 inspired by Russ Hughes's hello.py

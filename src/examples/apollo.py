@@ -1,5 +1,5 @@
 # multimer types: async
-# pyscript files: apollo.py, apollo_dsky/__init__.py, apollo_dsky/Apollo_DSKY_interface.bmp
+# pyscript binaries: apollo_dsky/Apollo_DSKY_interface.bmp
 """
 apollo.py — Apollo Guidance Computer DSKY emulator.
 

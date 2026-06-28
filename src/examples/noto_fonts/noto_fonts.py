@@ -1,5 +1,4 @@
 # multimer types: all
-# pyscript files: noto_fonts/__init__.py, noto_fonts/noto_fonts.py, noto_fonts/NotoSans_32.py, noto_fonts/NotoSerif_32.py, noto_fonts/NotoSansMono_32.py
 """
 noto_fonts.py
 =============

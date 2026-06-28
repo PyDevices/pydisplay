@@ -34,6 +34,14 @@ header, derives a blurb from the module docstring, and applies curated overrides
 `<!-- GEN:async:start -->` / `<!-- GEN:all:start -->` markers the generator fills.
 To tweak copy for a specific example, edit its entry in `CURATED` and rerun.
 
+PyScript file lists are resolved automatically: single-file demos use the entry
+`.py`; package demos (`examples/<pkg>/<pkg>.py`) include every `.py` under
+`examples/<pkg>/` (optional `# pyscript skip:` omits dev tools or whole
+directories such as `frogger/dev`); multi-module
+root demos add same-directory imports (e.g. `lv_test_timer_common`). Declare
+`# pyscript binaries:` when a demo needs non-`.py` assets — those demos are
+gallery-excluded. Use `# pyscript files:` only as a full explicit override.
+
 ### How loading works (Run button)
 
 Every example page loads the PyScript runtime first and only installs + imports
@@ -197,7 +205,8 @@ poll-loop examples (`displaysys_simpletest`, `eventsys_encoder_test`).
 `loops` tag and page notes; no generator or example changes required.
 
 ### C. Binary-asset examples — excluded from browser gallery
-Examples whose `# pyscript files:` list includes a non-`.py` path are skipped by
+Examples that declare non-`.py` assets via `# pyscript binaries:` (or a legacy
+`# pyscript files:` list that includes binary paths) are skipped by
 `tools/gen_demo_pages.py` (`depends_on_binary_files`). Device installs still use
 the full path list; the browser gallery only ships Python-only installs.
 

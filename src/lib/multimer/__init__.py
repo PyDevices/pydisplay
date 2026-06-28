@@ -20,7 +20,7 @@ Returns None if the platform is not supported rather than raising an ImportError
 the client can handle the error more gracefully (e.g. by using `if Timer is not None:`).
 
 Usage:
-    from multimer import Timer, get_timer, schedule, run_queued, run_forever, ticks_ms, ticks_diff
+    from multimer import Timer, get_timer, schedule, run_queued, run_forever, dual_main, ticks_ms, ticks_diff
     tim = Timer()
     tim.init(mode=Timer.PERIODIC, period=500, callback=lambda t: print("."))
     ....
@@ -134,3 +134,28 @@ def run_forever(poll=None, *, delay_ms=1):
         if poll is not None:
             poll()
         sleep_ms(delay_ms)
+
+
+def dual_main(sync_main, async_main, *, async_mode=False):
+    """Run ``sync_main()`` or schedule ``async_main()`` under asyncio.
+
+    When ``async_mode`` is false, only ``sync_main()`` runs and ``multimer.aio`` is
+    not imported. When true, delegates to ``multimer.aio.dual_main``; if asyncio is
+    unavailable, falls back to ``sync_main()``.
+
+    Startup is posted with ``schedule`` so MicroPython can finish import before game
+    timers run; on CPython the main thread runs the callback immediately.
+    """
+
+    def _run(_=None):
+        if not async_mode:
+            sync_main()
+            return
+        try:
+            from multimer.aio import dual_main as _aio_dual_main
+
+            _aio_dual_main(sync_main, async_main, async_mode=True)
+        except ImportError:
+            sync_main()
+
+    schedule(_run, None)

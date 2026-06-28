@@ -1,5 +1,4 @@
 # multimer types: queued, sync
-# pyscript files: lv_touch_test.py
 """
 lv_touch_test.py
 Tests touchscreen and allows changing touch driver rotation

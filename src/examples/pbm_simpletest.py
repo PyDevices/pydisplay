@@ -1,5 +1,5 @@
 # multimer types: all
-# pyscript files: pbm_simpletest.py, assets/micropython.pbm
+# pyscript binaries: assets/micropython.pbm
 from board_config import display_drv
 from framebuf import FrameBuffer, RGB565
 from pbm import PBM

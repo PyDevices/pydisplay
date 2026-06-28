@@ -1,5 +1,5 @@
 # multimer types: all
-# pyscript files: font_list.py, assets/font_8x8.bin, assets/font_8x14.bin, assets/font_8x16.bin
+# pyscript binaries: assets/font_8x8.bin, assets/font_8x14.bin, assets/font_8x16.bin
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 #
 # SPDX-License-Identifier: MIT

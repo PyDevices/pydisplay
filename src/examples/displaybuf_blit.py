@@ -1,5 +1,4 @@
 # multimer types: all
-# pyscript files: displaybuf_blit.py
 from color_setup import ssd
 from graphics import FrameBuffer, RGB565
 

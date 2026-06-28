@@ -1,5 +1,4 @@
 # multimer types: all
-# pyscript files: eventsys_encoder_test.py
 """
 A simple test of an encoder in eventsys.
 """

@@ -142,6 +142,9 @@ class DisplayDriver:
         self._vssa = False  # False means no vertical scroll
         self._auto_byteswap = self.requires_byteswap
         self._touch_device = None
+        self._timer = None
+        self.init()
+        gc.collect()
         if auto_refresh:
             period = (
                 _DEFAULT_AUTO_REFRESH_PERIOD if isinstance(auto_refresh, bool) else auto_refresh
@@ -156,11 +159,7 @@ class DisplayDriver:
                 )
             except ImportError:
                 raise ImportError("multimer is required for auto_refresh") from None
-        else:
-            self._timer = None
         self._deinitialized = False
-        self.init()
-        gc.collect()
         if not getattr(self, "_quiet", False):
             print(f"{self.__class__.__name__}: initialized.")
             print(f"{self.__class__.__name__}: requires_byteswap = {self.requires_byteswap}")

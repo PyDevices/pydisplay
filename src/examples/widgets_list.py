@@ -1,5 +1,4 @@
 # multimer types: queued, sync
-# pyscript files: widgets_list.py
 """
 Test ListView widget
 """

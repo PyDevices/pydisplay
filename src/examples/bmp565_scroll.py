@@ -1,5 +1,5 @@
 # multimer types: queued, sync
-# pyscript files: bmp565_scroll.py, assets/longstreet.bmp
+# pyscript binaries: assets/longstreet.bmp
 from board_config import display_drv
 from bmp565 import BMP565
 from multimer import run_queued, sleep_ms

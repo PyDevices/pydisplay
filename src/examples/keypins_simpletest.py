@@ -1,5 +1,4 @@
 # multimer types: queued, sync
-# pyscript files: keypins_simpletest.py
 from board_config import broker
 from keypins import KeyPins, Keys
 

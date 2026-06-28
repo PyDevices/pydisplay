@@ -7,7 +7,7 @@ import sys
 
 if sys.implementation.name in ("cpython", "circuitpython"):
     REQUIRES_RUN_QUEUED = True
-    _MAX_PENDING = 8
+    _MAX_PENDING = 32
 
     try:
         import threading

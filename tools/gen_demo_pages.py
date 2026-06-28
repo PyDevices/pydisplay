@@ -2,16 +2,34 @@
 """
 gen_demo_pages.py — refresh the pydisplay browser demo gallery.
 
-Scans ``src/examples/`` for ``# multimer types: async|all`` and ``# pyscript files:``
-headers, then:
+Scans ``src/examples/`` for ``# multimer types: async|all`` headers, then
+resolves PyScript file lists automatically (with optional header overrides):
+
+  - **Single-file demos** — the entry ``.py`` only
+  - **Package demos** (``examples/<pkg>/<pkg>.py``) — all ``.py`` files under
+    ``examples/<pkg>/``, minus any ``# pyscript skip:`` paths
+  - **Multi-module demos** — entry plus same-directory imports discovered from
+    ``import`` / ``from … import`` (e.g. ``lv_test_timer_async`` + ``common``)
+
+Optional headers (first 10 lines):
+
+  - ``# pyscript files:`` — explicit override (legacy; still used when listing
+    both Python and binary paths in one comment)
+  - ``# pyscript binaries:`` — non-``.py`` assets; demo is excluded from the
+    browser gallery when any path has a binary suffix
+  - ``# pyscript skip:`` — ``examples/``-relative ``.py`` paths or directories
+    omitted from package auto-discovery (e.g. ``frogger/dev`` skips all ``.py``
+    files under that tree)
+  - ``# pyscript modules:`` — extra ``examples/``-relative ``.py`` paths for
+    multi-module loaders when import scanning is insufficient
+
+Then:
 
   - Updates demo cards in ``index.html`` (between ``GEN:`` markers)
   - Writes ``html/<name>.json`` MIP manifests for multi-file demos
   - Deletes stale ``html/*.html`` from the old per-demo page generator
 
 Every gallery demo opens the parametric loader at ``html/?modules=…`` or ``html/?manifests=…``.
-
-Examples whose ``# pyscript files:`` list includes binary assets are excluded.
 
     python tools/gen_demo_pages.py
     python tools/gen_demo_pages.py --check
@@ -24,6 +42,7 @@ import argparse
 from collections.abc import Callable
 import json
 from pathlib import Path
+import re
 import shutil
 import sys
 
@@ -121,6 +140,7 @@ class Example:
         self.mtype = ""
         self.docstring_blurb = ""
         self.pyscript_files: list[str] = []
+        self.pyscript_binaries: list[str] = []
 
     @property
     def curated(self) -> dict:
@@ -161,7 +181,8 @@ class Example:
 
     @property
     def depends_on_binary_files(self) -> bool:
-        return any(Path(path).suffix.lower() in BINARY_SUFFIXES for path in self.pyscript_files)
+        paths = self.pyscript_files + self.pyscript_binaries
+        return any(Path(path).suffix.lower() in BINARY_SUFFIXES for path in paths)
 
     @property
     def browser_eligible(self) -> bool:
@@ -180,13 +201,124 @@ class Example:
         return ("async", "async") if self.mtype == "async" else ("all", "all")
 
 
-def parse_pyscript_files(lines: list[str]) -> list[str]:
-    for line in lines[:5]:
+HEADER_SCAN_LINES = 10
+
+LOCAL_IMPORT_RE = re.compile(
+    r"^\s*(?:from\s+([\w.]+)\s+import|import\s+([\w.]+))",
+    re.MULTILINE,
+)
+
+
+def parse_header_list(lines: list[str], prefix: str) -> list[str]:
+    for line in lines[:HEADER_SCAN_LINES]:
         s = line.strip()
-        if s.startswith("# pyscript files:"):
+        if s.startswith(prefix):
             body = s.split(":", 1)[1].strip()
             return [part.strip() for part in body.split(",") if part.strip()]
     return []
+
+
+def _py_sort_key(rel: str) -> tuple:
+    parts = rel.split("/")
+    name = parts[-1]
+    init_first = 0 if name == "__init__.py" else 1
+    return (parts[:-1], init_first, name)
+
+
+def _is_skipped(rel: str, skip: set[str]) -> bool:
+    if rel in skip:
+        return True
+    for entry in skip:
+        prefix = entry.rstrip("/")
+        if rel.startswith(prefix + "/"):
+            return True
+    return False
+
+
+def discover_package_py_files(name: str, skip: set[str]) -> list[str]:
+    pkg_dir = EXAMPLES_DIR / name
+    if not pkg_dir.is_dir():
+        raise SystemExit(f"examples/{name}: package directory missing")
+    paths: list[str] = []
+    for path in sorted(pkg_dir.rglob("*.py")):
+        rel = path.relative_to(EXAMPLES_DIR).as_posix()
+        if not _is_skipped(rel, skip):
+            paths.append(rel)
+    return sorted(paths, key=_py_sort_key)
+
+
+def discover_local_py_imports(entry_path: Path, text: str) -> list[str]:
+    """Same-directory modules and ``examples/<pkg>/`` packages imported by entry."""
+    found: list[str] = []
+    seen: set[str] = set()
+    parent = entry_path.parent
+
+    def add(rel: str) -> None:
+        if rel not in seen:
+            seen.add(rel)
+            found.append(rel)
+
+    for match in LOCAL_IMPORT_RE.finditer(text):
+        mod = match.group(1) or match.group(2)
+        if not mod or mod.startswith("."):
+            continue
+        top = mod.split(".")[0]
+        same_dir = parent / f"{top}.py"
+        if same_dir.is_file():
+            add(same_dir.relative_to(EXAMPLES_DIR).as_posix())
+            continue
+        pkg_init = EXAMPLES_DIR / top / "__init__.py"
+        if pkg_init.is_file():
+            add(pkg_init.relative_to(EXAMPLES_DIR).as_posix())
+    return found
+
+
+def normalize_py_path(raw: str) -> str:
+    return raw if raw.endswith(".py") else f"{raw}.py"
+
+
+def finalize_py_files(py_files: list[str], entry_rel: str) -> list[str]:
+    ordered: list[str] = []
+    seen: set[str] = set()
+    if entry_rel in py_files:
+        ordered.append(entry_rel)
+        seen.add(entry_rel)
+    for rel in sorted(py_files, key=_py_sort_key):
+        if rel not in seen:
+            ordered.append(rel)
+            seen.add(rel)
+    return ordered
+
+
+def resolve_pyscript_paths(
+    path: Path, kind: str, name: str, lines: list[str], text: str
+) -> tuple[list[str], list[str]]:
+    explicit = parse_header_list(lines, "# pyscript files:")
+    extra_binaries = parse_header_list(lines, "# pyscript binaries:")
+    if explicit:
+        py_files = [
+            entry for entry in explicit if Path(entry).suffix.lower() not in BINARY_SUFFIXES
+        ]
+        binaries = [entry for entry in explicit if Path(entry).suffix.lower() in BINARY_SUFFIXES]
+        binaries.extend(extra_binaries)
+        return py_files, binaries
+
+    skip = set(parse_header_list(lines, "# pyscript skip:"))
+    extra_modules = parse_header_list(lines, "# pyscript modules:")
+    entry_rel = path.relative_to(EXAMPLES_DIR).as_posix()
+
+    if kind == "manifest":
+        py_files = discover_package_py_files(name, skip)
+    else:
+        py_files = [entry_rel]
+        py_files.extend(discover_local_py_imports(path, text))
+        for raw in extra_modules:
+            rel = normalize_py_path(raw)
+            if rel not in py_files:
+                py_files.append(rel)
+        py_files = finalize_py_files(py_files, entry_rel)
+
+    return py_files, extra_binaries
 
 
 def extract_blurb(text: str, name: str) -> str:
@@ -247,10 +379,13 @@ def parse_example(path: Path) -> Example | None:
     ex = Example(name, rel, kind)
     ex.mtype = chosen
     ex.docstring_blurb = extract_blurb(text, name)
-    ex.pyscript_files = parse_pyscript_files(lines) or [rel_in_examples.as_posix()]
+    ex.pyscript_files, ex.pyscript_binaries = resolve_pyscript_paths(path, kind, name, lines, text)
     for entry in ex.pyscript_files:
         if not (EXAMPLES_DIR / entry).is_file():
             raise SystemExit(f"{rel}: missing pyscript file {entry}")
+    for entry in ex.pyscript_binaries:
+        if not (EXAMPLES_DIR / entry).is_file():
+            raise SystemExit(f"{rel}: missing pyscript binary {entry}")
     return ex
 
 

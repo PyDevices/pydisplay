@@ -1,5 +1,4 @@
 # multimer types: all
-# pyscript files: fonts.py
 """
 fonts.py
 ========

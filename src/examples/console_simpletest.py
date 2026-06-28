@@ -1,5 +1,4 @@
 # multimer types: all
-# pyscript files: console_simpletest.py
 """
 console_simpletest.py
 

@@ -1,5 +1,4 @@
 # multimer types: all
-# pyscript files: feathers.py
 """
 feathers.py
 ===========

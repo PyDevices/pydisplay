@@ -1,5 +1,4 @@
 # multimer types: async
-# pyscript files: pydisplay_demo_async.py
 """
 pydisplay_demo_async.py — asyncio version of pydisplay_demo.
 

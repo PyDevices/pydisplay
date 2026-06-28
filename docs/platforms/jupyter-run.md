@@ -8,14 +8,21 @@ From a clone of [PyDevices/pydisplay](https://github.com/PyDevices/pydisplay):
 
 ```bash
 cd pydisplay
-python3 -m venv .venv-jupyter
-.venv-jupyter/bin/pip install pillow ipywidgets ipyevents jupyterlab
-.venv-jupyter/bin/jupyter lab --no-browser
+python3 -m venv .venv
+.venv/bin/pip install pillow ipywidgets ipyevents jupyterlab
+.venv/bin/jupyter lab --no-browser
+```
+
+Or use the helper script (starts JupyterLab and opens a demo):
+
+```bash
+jupyter.sh calculator
+jupyter.sh calculator --cursor
 ```
 
 Open the URL printed in the terminal (for example `http://127.0.0.1:8888/lab?token=…`) in a browser. In the file browser, open **`src/jupyter_notebook.ipynb`**.
 
-Select the **`.venv-jupyter`** kernel (**Kernel → Change Kernel**), then run cells top to bottom.
+Select the **`.venv`** kernel (**Kernel → Change Kernel**), then run cells top to bottom.
 
 ## Requirements
 
@@ -41,7 +48,7 @@ After a cell runs, an **Image** widget appears below the output. **Click that wi
 You can run the same notebook in the editor instead of a browser tab:
 
 1. Open `src/jupyter_notebook.ipynb`.
-2. Choose the `.venv-jupyter` interpreter as the notebook kernel.
+2. Choose the `.venv` interpreter as the notebook kernel.
 3. If the widget area is blank, set [`jupyter.widgetScriptSources`](https://github.com/microsoft/vscode-jupyter/wiki/IPyWidget-Support-in-VS-Code-Python) to load widget JavaScript (this repo’s [`.vscode/settings.json`](https://github.com/PyDevices/pydisplay/blob/main/.vscode/settings.json) uses `jsdelivr.com` and `unpkg.com`).
 4. Reload the window, restart the kernel, and re-run.
 

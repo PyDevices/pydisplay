@@ -1,5 +1,4 @@
 # multimer types: queued, sync
-# pyscript files: joystick_list_select.py
 import board_config
 from eventsys.devices import types
 import pdwidgets as pd

@@ -1,5 +1,5 @@
 # multimer types: all
-# pyscript files: bmp565_blit.py, assets/warrior.bmp
+# pyscript binaries: assets/warrior.bmp
 from color_setup import ssd
 from bmp565 import BMP565
 from graphics import FrameBuffer, RGB565

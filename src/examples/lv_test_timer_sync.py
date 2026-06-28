@@ -1,5 +1,4 @@
 # multimer types: sync
-# pyscript files: lv_test_timer_sync.py, lv_test_timer_common.py
 """
 lv_test_timer_sync.py
 

@@ -1,5 +1,4 @@
 # multimer types: queued, sync
-# pyscript files: widgets_test.py
 import board_config
 import pdwidgets as pd
 

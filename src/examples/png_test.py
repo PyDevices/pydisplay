@@ -1,5 +1,4 @@
 # multimer types: queued, sync
-# pyscript files: png_test.py
 import os
 from collections import namedtuple
 
