@@ -105,8 +105,7 @@ class JNDevices:
             from ipywidgets import Image, Layout, VBox
         except ImportError as exc:
             raise ImportError(
-                "Jupyter input requires ipywidgets and ipyevents. "
-                f"Install with: {_JN_DEPS}"
+                f"Jupyter input requires ipywidgets and ipyevents. Install with: {_JN_DEPS}"
             ) from exc
 
         self._display_drv = display_drv
@@ -278,6 +277,8 @@ class JNDisplay(DisplayDriver):
     Args:
         width (int): The width of the display.
         height (int): The height of the display.
+        asynchronous (bool): Use ``multimer.aio.Timer`` for ``auto_refresh``. Defaults
+            to ``True`` (Jupyter async demos run under asyncio).
 
     Attributes:
         color_depth (int): The color depth of the display
@@ -285,7 +286,7 @@ class JNDisplay(DisplayDriver):
 
     _next_display_id = 0
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, *, asynchronous=True):
         self._display_id = f"JNDisplay_{JNDisplay._next_display_id}"
         JNDisplay._next_display_id += 1
         self._width = width
@@ -298,7 +299,7 @@ class JNDisplay(DisplayDriver):
         self._jn_devices = None
         self._static_shown = False
 
-        super().__init__(auto_refresh=True)
+        super().__init__(auto_refresh=True, asynchronous=asynchronous)
 
     ############### Required API Methods ################
 

@@ -10,6 +10,7 @@
 
 import time
 import unittest
+from unittest import mock
 
 import _env  # noqa: F401
 from _support import quiet
@@ -25,13 +26,13 @@ except ImportError:
 
 
 class CountingDisplay(DisplayDriver):
-    def __init__(self, auto_refresh=False):
+    def __init__(self, auto_refresh=False, *, asynchronous=False):
         self._width = 4
         self._height = 4
         self._rotation = 0
         self._requires_byteswap = False
         self.show_count = 0
-        super().__init__(auto_refresh=auto_refresh)
+        super().__init__(auto_refresh=auto_refresh, asynchronous=asynchronous)
 
     def init(self):
         self._vssa = 0
@@ -78,6 +79,32 @@ class TestAutoRefresh(unittest.TestCase):
         count_after_deinit = d.show_count
         self._pump(0.2)
         self.assertEqual(d.show_count, count_after_deinit)
+
+    def test_default_uses_sync_timer(self):
+        import multimer
+
+        fake_timer = mock.Mock()
+        with quiet(), mock.patch.object(
+            multimer, "get_timer", return_value=fake_timer
+        ) as get_timer:
+            d = CountingDisplay(auto_refresh=20)
+        self.addCleanup(d.deinit)
+        get_timer.assert_called_once()
+        self.assertFalse(get_timer.call_args.kwargs["asynchronous"])
+        self.assertIs(d._timer, fake_timer)
+
+    def test_explicit_async_passes_asynchronous_to_get_timer(self):
+        import multimer
+
+        fake_timer = mock.Mock()
+        with quiet(), mock.patch.object(
+            multimer, "get_timer", return_value=fake_timer
+        ) as get_timer:
+            d = CountingDisplay(auto_refresh=20, asynchronous=True)
+        self.addCleanup(d.deinit)
+        get_timer.assert_called_once()
+        self.assertTrue(get_timer.call_args.kwargs["asynchronous"])
+        self.assertIs(d._timer, fake_timer)
 
 
 if __name__ == "__main__":
