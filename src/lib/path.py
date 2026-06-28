@@ -11,10 +11,13 @@ On microcontrollers, you may include it in your boot.py, main.py or code.py, whi
 
 Edit the 'directories' tuple to include the directories you want to add to the path.
 Only directories that already exist in the current working directory will be added to the path.
+Run from ``src/`` (``python -i lib/path.py``), then import or run examples under ``examples/``.
+With a local ``examples/frogger`` symlink to the Frogger game tree, flat imports
+(``board_config``, ``layout``, …) and ``import frogger`` both work.
 """
 
 # Edit this list to include the directories you want to add to the path.
-directories = ["lib", "add_ons", "examples"]
+directories = ["lib", "add_ons", "examples", "examples/frogger"]
 
 # Set to True to use relative paths instead of absolute paths.
 RELPATH = True
