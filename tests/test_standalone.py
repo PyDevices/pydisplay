@@ -76,6 +76,7 @@ _EVENTSYS_CHILD = textwrap.dedent(
     assert not forbidden, "eventsys pulled in pydisplay modules: %r" % forbidden
     assert "micropython" not in sys.modules, "eventsys requires the micropython shim"
 
+    # Exercise a real flow: a keypad device feeding a broker.
     broker = Broker()
     presses = [set([65]), set()]
     kp = KeypadDevice(read=lambda: presses.pop(0) if presses else set())
@@ -208,6 +209,8 @@ class TestStandalone(unittest.TestCase):
             shutil.copytree(_env.EVENTSYS_DIR, os.path.join(tmp, "eventsys"))
 
             env = dict(os.environ)
+            # The child sees ONLY the temp dir (plus the stdlib) — no src/lib
+            # and no src/add_ons, so the rest of pydisplay is unreachable.
             env["PYTHONPATH"] = tmp
 
             proc = subprocess.run(
