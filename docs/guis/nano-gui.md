@@ -56,6 +56,7 @@ On hardware, install Nano-GUI into the same directory as `color_setup.py` (typic
 ```python
 import mip
 mip.install("github:peterhinch/micropython-nano-gui", target="./add_ons")
+# or: mip.install("github:PyDevices/pydisplay/packages/nano_gui.json", target="./add_ons")
 mip.install("github:PyDevices/pydisplay/packages/add_ons.json", target="./add_ons")
 ```
 
@@ -64,6 +65,8 @@ Adjust `target=` so `gui/` and `color_setup.py` sit in the same path root.
 ## Example
 
 [`src/examples/nano_gui_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/nano_gui_simpletest.py) — hardware verification script from the [upstream Nano-GUI docs](https://github.com/peterhinch/micropython-nano-gui#23-verifying-hardware-configuration).
+
+On MicroPython (including the [example test matrix](../testing/example-runtimes.md)), the example calls [`ensure_nano_gui.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/ensure_nano_gui.py) before importing `gui.*`, which runs the upstream `mip.install` into `add_ons/` when `gui/` is missing. First run needs network access.
 
 Run from a full clone:
 

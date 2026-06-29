@@ -9,6 +9,22 @@
       "github:PyDevices/pydisplay/src/lib/graphics/_area.py"
     ],
     [
+      "graphics/_blit_hooks.py",
+      "github:PyDevices/pydisplay/src/lib/graphics/_blit_hooks.py"
+    ],
+    [
+      "graphics/_bmp565.py",
+      "github:PyDevices/pydisplay/src/lib/graphics/_bmp565.py"
+    ],
+    [
+      "graphics/_capabilities.py",
+      "github:PyDevices/pydisplay/src/lib/graphics/_capabilities.py"
+    ],
+    [
+      "graphics/_clip.py",
+      "github:PyDevices/pydisplay/src/lib/graphics/_clip.py"
+    ],
+    [
       "graphics/_draw.py",
       "github:PyDevices/pydisplay/src/lib/graphics/_draw.py"
     ],

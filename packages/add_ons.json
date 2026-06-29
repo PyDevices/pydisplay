@@ -25,12 +25,20 @@
       "github:PyDevices/pydisplay/src/add_ons/displaybuf.py"
     ],
     [
+      "ensure_nano_gui.py",
+      "github:PyDevices/pydisplay/src/add_ons/ensure_nano_gui.py"
+    ],
+    [
       "framebuf.py",
       "github:PyDevices/pydisplay/src/add_ons/framebuf.py"
     ],
     [
       "hardware_setup.py",
       "github:PyDevices/pydisplay/src/add_ons/hardware_setup.py"
+    ],
+    [
+      "itertools.py",
+      "github:PyDevices/pydisplay/src/add_ons/itertools.py"
     ],
     [
       "joystick_keypad.py",
