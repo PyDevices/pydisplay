@@ -89,6 +89,10 @@
       "github:PyDevices/pydisplay/src/add_ons/touch_keypad.py"
     ],
     [
+      "uctypes.py",
+      "github:PyDevices/pydisplay/src/add_ons/uctypes.py"
+    ],
+    [
       "viper_tools.py",
       "github:PyDevices/pydisplay/src/add_ons/viper_tools.py"
     ],
