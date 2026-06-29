@@ -571,7 +571,7 @@ class Display(Widget):
         display_drv.set_vscroll(tfa, bfa)
         display_drv.vscroll = 0
         self.broker = broker
-        broker.quit_func = self.quit
+        broker.on_quit = self.quit
         self._buffer = memoryview(
             bytearray(display_drv.width * display_drv.height * display_drv.color_depth // 8)
         )

@@ -7,7 +7,8 @@ from machine import I2C, Pin
 from spibus import SPIBus
 from st7796 import ST7796
 
-from eventsys import devices
+from add_ons.quit_handler import wire_display_quit
+import eventsys
 
 display_bus = SPIBus(
     id=1,
@@ -47,11 +48,13 @@ touch_read_func = touch_drv.get_point
 # Set to (0,0,0,0), reset and run pydisplay_touch_test.py if touch rotation is wrong
 touch_rotation_table = (0, 5, 6, 3)
 
-broker = devices.Broker()
+broker = eventsys.Broker()
 
-touch_dev = broker.create_device(
-    type=devices.types.TOUCH,
+touch_dev = broker.create(
+    type=eventsys.TOUCH,
     read=touch_read_func,
     data=display_drv,
     data2=touch_rotation_table,
 )
+
+wire_display_quit(broker)

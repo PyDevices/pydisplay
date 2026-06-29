@@ -4,9 +4,10 @@ Board configuration for PyGame.
 
 import sys
 
+from add_ons.quit_handler import wire_display_quit
 from displaysys.pgdisplay import PGDisplay as DTDisplay
 from displaysys.pgdisplay import poll
-from eventsys import devices
+import eventsys
 
 width = 320
 height = 480
@@ -21,13 +22,15 @@ display_drv = DTDisplay(
     scale=scale,
 )
 
-broker = devices.Broker()
+broker = eventsys.Broker()
 
-events_dev = broker.create_device(
-    type=devices.types.QUEUE,
+events_dev = broker.create(
+    type=eventsys.QUEUE,
     read=poll,
     data=display_drv,
     # data2=events.filter,
 )
+
+wire_display_quit(broker)
 
 display_drv.fill(0)

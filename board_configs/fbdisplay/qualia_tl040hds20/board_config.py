@@ -6,8 +6,9 @@ from machine import I2C, Pin
 from pca9554 import PCA9554
 from rgbframebuffer import RGBFrameBuffer
 
+from add_ons.quit_handler import wire_display_quit
 from displaysys.fbdisplay import FBDisplay
-from eventsys import devices
+import eventsys
 
 
 def send_init_sequence(init_sequence, mosi, sck, cs):
@@ -88,11 +89,13 @@ display_drv = FBDisplay(fb)
 
 touch_rotation_table = (0, 0, 0, 0)
 
-broker = devices.Broker()
+broker = eventsys.Broker()
 
-touch_dev = broker.create_device(
-    type=devices.types.TOUCH,
+touch_dev = broker.create(
+    type=eventsys.TOUCH,
     read=touch_read_func,
     data=display_drv,
     data2=touch_rotation_table,
 )
+
+wire_display_quit(broker)

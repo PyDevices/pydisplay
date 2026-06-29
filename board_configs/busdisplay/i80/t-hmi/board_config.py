@@ -5,7 +5,8 @@ from machine import SPI, Pin  # See the note about reset below
 from st7789 import ST7789
 from xpt2046 import Touch
 
-from eventsys import devices
+from add_ons.quit_handler import wire_display_quit
+import eventsys
 
 display_bus = I80Bus(
     dc=7,
@@ -55,11 +56,13 @@ touch_drv.calibrate(
 touch_read_func = touch_drv.get_touch
 touch_rotation_table = None
 
-broker = devices.Broker()
+broker = eventsys.Broker()
 
-touch_dev = broker.create_device(
-    type=devices.types.TOUCH,
+touch_dev = broker.create(
+    type=eventsys.TOUCH,
     read=touch_read_func,
     data=display_drv,
     data2=touch_rotation_table,
 )
+
+wire_display_quit(broker)

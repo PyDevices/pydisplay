@@ -17,7 +17,7 @@ Usage:
         fire=Keys.K_SPACE,
     )
 
-    broker.subscribe(buttons, event_types=[broker.events.KEYDOWN, broker.events.KEYUP])
+    broker.on([broker.events.KEYDOWN, broker.events.KEYUP], buttons)
 
     while True:
         _ = broker.poll()

@@ -5,7 +5,8 @@ from i80bus import I80Bus
 from machine import I2C, Pin, freq  # See the note about reset below
 from st7796 import ST7796
 
-from eventsys import devices
+from add_ons.quit_handler import wire_display_quit
+import eventsys
 
 freq(240_000_000)
 # The WT32-SC01 Plus has the reset pins of the display IC and the touch IC both
@@ -48,11 +49,13 @@ touch_drv = FT6x36(i2c)
 touch_read_func = touch_drv.get_positions
 touch_rotation_table = None
 
-broker = devices.Broker()
+broker = eventsys.Broker()
 
-touch_dev = broker.create_device(
-    type=devices.types.TOUCH,
+touch_dev = broker.create(
+    type=eventsys.TOUCH,
     read=touch_read_func,
     data=display_drv,
     data2=touch_rotation_table,
 )
+
+wire_display_quit(broker)

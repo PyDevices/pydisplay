@@ -5,8 +5,40 @@
       "github:PyDevices/pydisplay/src/lib/eventsys/__init__.py"
     ],
     [
-      "eventsys/devices.py",
-      "github:PyDevices/pydisplay/src/lib/eventsys/devices.py"
+      "eventsys/_broker.py",
+      "github:PyDevices/pydisplay/src/lib/eventsys/_broker.py"
+    ],
+    [
+      "eventsys/_capabilities.py",
+      "github:PyDevices/pydisplay/src/lib/eventsys/_capabilities.py"
+    ],
+    [
+      "eventsys/_device.py",
+      "github:PyDevices/pydisplay/src/lib/eventsys/_device.py"
+    ],
+    [
+      "eventsys/_encoder.py",
+      "github:PyDevices/pydisplay/src/lib/eventsys/_encoder.py"
+    ],
+    [
+      "eventsys/_events.py",
+      "github:PyDevices/pydisplay/src/lib/eventsys/_events.py"
+    ],
+    [
+      "eventsys/_joystick.py",
+      "github:PyDevices/pydisplay/src/lib/eventsys/_joystick.py"
+    ],
+    [
+      "eventsys/_keypad.py",
+      "github:PyDevices/pydisplay/src/lib/eventsys/_keypad.py"
+    ],
+    [
+      "eventsys/_queue.py",
+      "github:PyDevices/pydisplay/src/lib/eventsys/_queue.py"
+    ],
+    [
+      "eventsys/_touch.py",
+      "github:PyDevices/pydisplay/src/lib/eventsys/_touch.py"
     ],
     [
       "eventsys/keys.py",

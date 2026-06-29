@@ -64,10 +64,10 @@ class _FakeEvent:
 
 def _queue_device():
     from board_config import broker
-    from eventsys import devices
+    import eventsys
 
     for dev in broker.devices:
-        if dev.type == devices.types.QUEUE:
+        if dev.type == eventsys.QUEUE:
             return dev
     return None
 

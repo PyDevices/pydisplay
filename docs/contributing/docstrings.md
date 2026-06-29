@@ -57,7 +57,7 @@ Griffe warnings mean a docstring parameter does not appear in the signature — 
 
 | Tier | Modules |
 |------|---------|
-| P0 | `displaysys`, `eventsys.devices`, `graphics.FrameBuffer`, `graphics._shapes` |
+| P0 | `displaysys`, `eventsys`, `graphics.FrameBuffer`, `graphics._shapes` |
 | P1 | `graphics.Draw`, `displaybuf`, `eventsys` helpers |
 | P2 | `pdwidgets` lifecycle (`Display.tick`, `refresh`, event registration) |
 

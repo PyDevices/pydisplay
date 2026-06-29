@@ -1,23 +1,25 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Tests for ``eventsys.devices`` (Broker and the concrete device types)."""
+"""Tests for ``eventsys`` Broker and built-in device types."""
 
 import unittest
 
 import _env  # noqa: F401
 from _support import FakeDisplay, scripted
 
-from eventsys import devices, events
-from eventsys.devices import (
+import eventsys
+from eventsys import (
     Broker,
     Device,
     EncoderDevice,
     KeypadDevice,
     QueueDevice,
     TouchDevice,
+    events,
     types,
 )
+from eventsys._device import _mapping as device_mapping
 
 
 class TestDeviceBase(unittest.TestCase):
@@ -27,7 +29,7 @@ class TestDeviceBase(unittest.TestCase):
             dev.subscribe("not callable", [events.KEYDOWN])
 
     def test_subscribe_rejects_unsupported_event_type(self):
-        dev = EncoderDevice()  # responds to wheel + buttons, not KEYDOWN
+        dev = EncoderDevice()
         with self.assertRaises(ValueError):
             dev.subscribe(lambda e: None, [events.KEYDOWN])
 
@@ -37,14 +39,14 @@ class TestDeviceBase(unittest.TestCase):
         seen = []
         cb = seen.append
         dev.subscribe(cb, [events.KEYDOWN])
-        dev.poll()  # KEYDOWN -> callback fires
+        dev.poll()
         self.assertEqual(len(seen), 1)
 
         dev.unsubscribe(cb, [events.KEYDOWN])
         keys2 = [{66}]
         dev._read = scripted(*keys2)
         dev.poll()
-        self.assertEqual(len(seen), 1)  # no further callbacks
+        self.assertEqual(len(seen), 1)
 
     def test_user_data_roundtrip(self):
         dev = QueueDevice(read=scripted(None))
@@ -60,30 +62,28 @@ class TestKeypadDevice(unittest.TestCase):
         self.assertEqual(down[0].type, events.KEYDOWN)
         self.assertEqual(down[0].key, 65)
         self.assertEqual(down[0].name, "A")
-        self.assertEqual(down[0].window, None)
 
         up = dev.poll()
         self.assertEqual(up[0].type, events.KEYUP)
         self.assertEqual(up[0].key, 65)
 
-    def test_no_change_returns_none(self):
+    def test_no_change_returns_empty_list(self):
         dev = KeypadDevice(read=scripted(set()))
-        self.assertIsNone(dev.poll())
+        self.assertEqual(dev.poll(), [])
 
 
 class TestEncoderDevice(unittest.TestCase):
     def test_turn_emits_wheel(self):
         dev = EncoderDevice(read=scripted(0, 3), read2=scripted(False))
-        self.assertIsNone(dev.poll())  # first poll establishes baseline
+        self.assertEqual(dev.poll(), [])
         wheel = dev.poll()
         self.assertEqual(wheel[0].type, events.MOUSEWHEEL)
-        # default button 2 (even) -> vertical movement
         self.assertEqual(wheel[0].y, 3)
         self.assertEqual(wheel[0].x, 0)
 
     def test_press_emits_button(self):
         dev = EncoderDevice(read=scripted(0), read2=scripted(False, True))
-        self.assertIsNone(dev.poll())
+        self.assertEqual(dev.poll(), [])
         btn = dev.poll()
         self.assertEqual(btn[0].type, events.MOUSEBUTTONDOWN)
         self.assertEqual(btn[0].button, 2)
@@ -97,9 +97,9 @@ class TestQueueDevice(unittest.TestCase):
         self.assertEqual(len(out), 1)
         self.assertEqual(out[0].type, events.KEYDOWN)
 
-    def test_empty_read_returns_none(self):
+    def test_empty_read_returns_empty_list(self):
         dev = QueueDevice(read=scripted(None))
-        self.assertIsNone(dev.poll())
+        self.assertEqual(dev.poll(), [])
 
     def test_touch_scale_on_display_data(self):
         class ScaledDisplay:
@@ -133,7 +133,6 @@ class TestTouchDevice(unittest.TestCase):
     def test_rotation_transforms_coordinates(self):
         disp = FakeDisplay(width=320, height=240, rotation=90)
         dev = TouchDevice(read=scripted((5, 7)), data=disp)
-        # 90 deg -> swap_xy + reverse_y: (5, 7) -> swap (7, 5) -> y = 240-5-1
         down = dev.poll()
         self.assertEqual(down[0].pos, (7, 234))
 
@@ -143,80 +142,78 @@ class TestTouchDevice(unittest.TestCase):
 
 
 class TestBroker(unittest.TestCase):
-    def test_subscribe_requires_exactly_one_of_event_or_device_types(self):
+    def test_on_rejects_non_callable(self):
         broker = Broker()
         with self.assertRaises(ValueError):
-            broker.subscribe(lambda e: None)
-        with self.assertRaises(ValueError):
-            broker.subscribe(
-                lambda e: None, event_types=[events.KEYDOWN], device_types=[types.KEYPAD]
-            )
+            broker.on(events.KEYDOWN, "nope")
 
     def test_poll_aggregates_registered_devices(self):
         broker = Broker()
         kp = KeypadDevice(read=scripted({65}, set()))
-        broker.register_device(kp)
+        broker.register(kp)
         self.assertIs(kp.broker, broker)
 
         out = broker.poll()
         self.assertEqual(len(out), 1)
         self.assertEqual(out[0].type, events.KEYDOWN)
 
+    def test_poll_empty_is_list(self):
+        broker = Broker()
+        self.assertEqual(broker.poll(), [])
+
     def test_device_type_subscription(self):
         broker = Broker()
         kp = KeypadDevice(read=scripted({66}, set()))
-        broker.register_device(kp)
+        broker.register(kp)
         seen = []
-        broker.subscribe(seen.append, device_types=[types.KEYPAD])
+        broker.on_device(types.KEYPAD, seen.append)
         broker.poll()
         self.assertEqual(len(seen), 1)
         self.assertEqual(seen[0].key, 66)
 
-    def test_create_device_registers_it(self):
+    def test_create_registers_device(self):
         broker = Broker()
-        dev = broker.create_device(types.QUEUE, read=scripted(None))
+        dev = broker.create(types.QUEUE, read=scripted(None))
         self.assertIn(dev, broker.devices)
         self.assertIsInstance(dev, QueueDevice)
 
-    def test_create_device_invalid_type_raises(self):
+    def test_create_invalid_type_raises(self):
         broker = Broker()
         with self.assertRaises(ValueError):
-            broker.create_device(0x999)
+            broker.create(0x999)
 
-    def test_unregister_device(self):
+    def test_unregister(self):
         broker = Broker()
-        dev = broker.create_device(types.QUEUE, read=scripted(None))
-        broker.unregister_device(dev)
+        dev = broker.create(types.QUEUE, read=scripted(None))
+        broker.unregister(dev)
         self.assertNotIn(dev, broker.devices)
         self.assertIsNone(dev.broker)
 
-    def test_quit_func_must_be_callable(self):
+    def test_on_quit_must_be_callable(self):
         broker = Broker()
         with self.assertRaises(ValueError):
-            broker.quit_func = 5
+            broker.on_quit = 5
 
-    def test_quit_calls_custom_quit_func(self):
+    def test_on_quit_handler_runs(self):
         broker = Broker()
         called = []
-        broker.quit_func = lambda: called.append(True)
+        broker.on_quit = lambda: called.append(True)
         broker.quit()
         self.assertTrue(called)
 
 
-class TestDevicesCustomType(unittest.TestCase):
+class TestRegisterDevice(unittest.TestCase):
     def setUp(self):
         self._names = []
 
     def tearDown(self):
-        # devices.custom_type() mutates the module-level ``types`` class and the
-        # ``_mapping`` registry; undo both so tests stay independent.
         for name, value in self._names:
             if hasattr(types, name):
                 delattr(types, name)
-            devices._mapping.pop(value, None)
+            device_mapping.pop(value, None)
 
     def test_create_custom_device_type(self):
-        cls = devices.custom_type("MYPAD", [events.KEYDOWN, events.KEYUP])
+        cls = eventsys.register_device("MYPAD", [events.KEYDOWN, events.KEYUP])
         self._names.append(("MYPAD", cls.type))
         self.assertTrue(issubclass(cls, Device))
         self.assertEqual(cls.__name__, "MypadDevice")
@@ -225,11 +222,11 @@ class TestDevicesCustomType(unittest.TestCase):
 
     def test_invalid_arguments_raise(self):
         with self.assertRaises(ValueError):
-            devices.custom_type(123, [])
+            eventsys.register_device(123, [])
         with self.assertRaises(ValueError):
-            devices.custom_type("OK", "not a list")
+            eventsys.register_device("OK", "not a list")
         with self.assertRaises(ValueError):
-            devices.custom_type("OK", ["not an int"])
+            eventsys.register_device("OK", ["not an int"])
 
 
 if __name__ == "__main__":

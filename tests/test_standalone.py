@@ -67,9 +67,7 @@ _EVENTSYS_CHILD = textwrap.dedent(
     import sys
 
     import eventsys
-    from eventsys import events
-    from eventsys import devices
-    from eventsys.devices import Broker, KeypadDevice, types
+    from eventsys import Broker, KeypadDevice, events, types
     from eventsys.keys import Keys
 
     forbidden = [m for m in {siblings!r} if m in sys.modules]
@@ -80,10 +78,10 @@ _EVENTSYS_CHILD = textwrap.dedent(
     broker = Broker()
     presses = [set([65]), set()]
     kp = KeypadDevice(read=lambda: presses.pop(0) if presses else set())
-    broker.register_device(kp)
+    broker.register(kp)
 
     seen = []
-    broker.subscribe(seen.append, device_types=[types.KEYPAD])
+    broker.on_device(types.KEYPAD, seen.append)
 
     down = broker.poll()
     assert down and down[0].type == events.KEYDOWN, down

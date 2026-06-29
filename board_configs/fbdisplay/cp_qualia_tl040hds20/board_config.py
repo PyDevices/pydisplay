@@ -8,8 +8,9 @@ from displayio import release_displays
 import dotclockframebuffer
 from framebufferio import FramebufferDisplay
 
+from add_ons.quit_handler import wire_display_quit
 from displaysys.fbdisplay import FBDisplay
-from eventsys import devices
+import eventsys
 
 # This first part is particular to CircuitPython-based framebuffer-based displays
 
@@ -62,11 +63,13 @@ def touch_read_func():
 
 touch_rotation_table = (0, 0, 0, 0)
 
-broker = devices.Broker()
+broker = eventsys.Broker()
 
-touch_dev = broker.create_device(
-    type=devices.types.TOUCH,
+touch_dev = broker.create(
+    type=eventsys.TOUCH,
     read=touch_read_func,
     data=display_drv,
     data2=touch_rotation_table,
 )
+
+wire_display_quit(broker)

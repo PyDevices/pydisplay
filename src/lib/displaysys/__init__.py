@@ -599,7 +599,7 @@ class DisplayDriver:
         """
         Release resources and terminate the program.
 
-        Called by ``eventsys.devices.Broker.quit()`` on a window-close (QUIT)
+        Called by ``eventsys.eventsys.Broker.quit()`` on a window-close (QUIT)
         event.  The base implementation deinitializes the display and raises
         ``SystemExit``, which is correct when quit runs on the main thread.
         Drivers where ``SystemExit`` would be swallowed when quit is invoked

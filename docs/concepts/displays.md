@@ -74,11 +74,11 @@ converts each event to an `eventsys.events` object:
 
 ```python
 from displaysys.sdldisplay import SDLDisplay, poll
-from eventsys import devices
+import eventsys
 
 display_drv = SDLDisplay(...)
-broker = devices.Broker()
-broker.create_device(type=devices.types.QUEUE, read=poll, data=display_drv)
+broker = eventsys.Broker()
+broker.create(type=eventsys.QUEUE, read=poll, data=display_drv)
 ```
 
 This captures mouse motion/buttons, the wheel, the keyboard, the window-close
@@ -94,12 +94,12 @@ through `read()`:
 
 ```python
 from displaysys.psdisplay import PSDevices, PSDisplay
-from eventsys import devices
+import eventsys
 
 display_drv = PSDisplay("display_canvas", width, height)
-broker = devices.Broker()
+broker = eventsys.Broker()
 devices_drv = PSDevices("display_canvas", display_drv)
-broker.create_device(type=devices.types.QUEUE, read=devices_drv.read, data=display_drv)
+broker.create(type=eventsys.QUEUE, read=devices_drv.read, data=display_drv)
 ```
 
 Each captures:

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Tests for the ``eventsys`` event types/classes and ``custom_type``."""
+"""Tests for the ``eventsys`` event types/classes and ``register_event``."""
 
 import unittest
 
@@ -41,7 +41,7 @@ class TestCustomType(unittest.TestCase):
         self._added_classes = []
 
     def tearDown(self):
-        # custom_type() mutates the shared ``events`` class; undo it so the
+        # register_event() mutates the shared ``events`` class; undo it so the
         # tests stay independent and idempotent within a single process.
         for name in self._added_types + self._added_classes:
             if hasattr(events, name):
@@ -58,7 +58,7 @@ class TestCustomType(unittest.TestCase):
     def test_create_type_and_class(self):
         tname, tval = self._add_type("MYEVT", 0x9100)
         cname = self._add_class("Myevt")
-        eventsys.custom_type(types={tname: tval}, classes={cname: "type a b"})
+        eventsys.register_event(types={tname: tval}, classes={cname: "type a b"})
 
         self.assertEqual(events.MYEVT, 0x9100)
         instance = events.Myevt(events.MYEVT, 1, 2)
@@ -69,21 +69,21 @@ class TestCustomType(unittest.TestCase):
     def test_auto_allocated_value_uses_user_base(self):
         base = events._USER_TYPE_BASE
         tname, _ = self._add_type("MYAUTO", 0)  # value 0/None -> auto allocate
-        eventsys.custom_type(types={tname: 0})
+        eventsys.register_event(types={tname: 0})
         self.assertEqual(events.MYAUTO, base)
         self.assertEqual(events._USER_TYPE_BASE, base + 1)
 
     def test_duplicate_type_raises(self):
         tname, tval = self._add_type("MYDUP", 0x9200)
-        eventsys.custom_type(types={tname: tval})
+        eventsys.register_event(types={tname: tval})
         with self.assertRaises(ValueError):
-            eventsys.custom_type(types={tname: tval})
+            eventsys.register_event(types={tname: tval})
 
     def test_duplicate_class_raises(self):
         cname = self._add_class("Mydupcls")
-        eventsys.custom_type(classes={cname: "type a"})
+        eventsys.register_event(classes={cname: "type a"})
         with self.assertRaises(ValueError):
-            eventsys.custom_type(classes={cname: "type a"})
+            eventsys.register_event(classes={cname: "type a"})
 
 
 if __name__ == "__main__":

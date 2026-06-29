@@ -5,7 +5,8 @@ from rotary_irq_esp import RotaryIRQ
 from spibus import SPIBus
 from st7789 import ST7789
 
-from eventsys import devices
+from add_ons.quit_handler import wire_display_quit
+import eventsys
 
 display_bus = SPIBus(
     id=1,
@@ -47,10 +48,12 @@ def encoder_button_func():
     return not encoder_button.value()
 
 
-broker = devices.Broker()
+broker = eventsys.Broker()
 
-encoder_dev = broker.create_device(
-    type=devices.types.ENCODER,
+encoder_dev = broker.create(
+    type=eventsys.ENCODER,
     read=encoder_read_func,
     read2=encoder_button_func,
 )
+
+wire_display_quit(broker)
