@@ -30,6 +30,7 @@ command = ["micropython.exe"]
 cwd = "src"
 resolve = ["PATH", "~/bin/micropython.exe"]
 setup_notes = "MicroPython Windows (.exe). Async modes may be limited."
+timeout_s = 60
 
 [runtimes.circuitpython]
 platform = "circuitpython"

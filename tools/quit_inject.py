@@ -77,6 +77,10 @@ def pump_lvgl(count=5, delay_s=0):
         pump_multimer(count, delay_s or 0.02)
         return
 
+    if not lv.is_initialized():
+        pump_multimer(count, delay_s or 0.02)
+        return
+
     for _ in range(count):
         if lv._nesting.value == 0:
             lv.task_handler()

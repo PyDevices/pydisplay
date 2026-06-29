@@ -189,6 +189,56 @@ def _circuitpython_lvgl_cooperative(kind):
         return False
 
 
+def _touch_delay_s(duration_s):
+    return min(duration_s * 0.2, max(0.5, duration_s - 1.0))
+
+
+def _inject_quit_now(quit_inject, kind, injected, *, pump_count=20):
+    lvgl = kind == "lvgl"
+    if quit_inject.inject_quit(
+        broker_poll=False,
+        pump_count=pump_count,
+        pump_delay=0.02,
+        lvgl=lvgl,
+    ):
+        injected[0] = True
+
+
+def _start_multimer_quit_schedule(duration_s, quit_mode, kind, injected):
+    """Schedule delayed quit/touch injection when threads are unavailable."""
+    try:
+        import quit_inject
+
+        import multimer
+    except ImportError:
+        return False
+
+    def on_quit(_timer):
+        # Leave Quit on the QUEUE mock; the example's broker.poll() delivers it.
+        # Avoid pump_multimer here — nested pump() can overflow micropython.schedule.
+        _inject_quit_now(quit_inject, kind, injected, pump_count=0)
+
+    def on_touch(_timer):
+        quit_inject.inject_synthetic_touch(broker_poll=False, pump_count=0)
+
+    touch_delay = _touch_delay_s(duration_s)
+    if quit_mode == "inject" and touch_delay > 0:
+        touch_timer = multimer.Timer(-1)
+        touch_timer.init(
+            mode=multimer.ONE_SHOT,
+            period=int(touch_delay * 1000),
+            callback=on_touch,
+        )
+
+    quit_timer = multimer.Timer(-1)
+    quit_timer.init(
+        mode=multimer.ONE_SHOT,
+        period=int(duration_s * 1000),
+        callback=on_quit,
+    )
+    return True
+
+
 def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode):
     import quit_inject
 
@@ -196,19 +246,12 @@ def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode
     cooperative = _circuitpython_lvgl_cooperative(kind)
 
     def delayed_inject():
-        touch_delay = min(duration_s * 0.2, max(0.5, duration_s - 1.0))
+        touch_delay = _touch_delay_s(duration_s)
         if quit_mode == "inject" and touch_delay > 0:
             _sleep(touch_delay)
             quit_inject.inject_synthetic_touch(broker_poll=False)
         _sleep(max(0, duration_s - touch_delay))
-        lvgl = kind == "lvgl"
-        if quit_inject.inject_quit(
-            broker_poll=False,
-            pump_count=20,
-            pump_delay=0.02,
-            lvgl=lvgl,
-        ):
-            injected[0] = True
+        _inject_quit_now(quit_inject, kind, injected)
 
     if not cooperative:
         try:
@@ -216,20 +259,10 @@ def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode
 
             threading.Thread(target=delayed_inject, daemon=True).start()
         except ImportError:
-            if not _start_daemon(delayed_inject):
-                touch_delay = min(duration_s * 0.2, max(0.5, duration_s - 1.0))
-                if quit_mode == "inject" and touch_delay > 0:
-                    _sleep(touch_delay)
-                    quit_inject.inject_synthetic_touch(broker_poll=False)
-                _sleep(max(0, duration_s - touch_delay))
-                lvgl = kind == "lvgl"
-                if quit_inject.inject_quit(
-                    broker_poll=False,
-                    pump_count=20,
-                    pump_delay=0.02,
-                    lvgl=lvgl,
-                ):
-                    injected[0] = True
+            if not _start_daemon(delayed_inject) and not _start_multimer_quit_schedule(
+                duration_s, quit_mode, kind, injected
+            ):
+                delayed_inject()
     else:
         try:
             import pydisplay_test_mode

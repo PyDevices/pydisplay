@@ -37,6 +37,7 @@ DEFAULT_TIMEOUT = 30
 DEFAULT_ONESHOT_TIMEOUT = 15
 PYSCRIPT_PORT = 8000
 SUBPROCESS_RUNTIME_KIND = "subprocess"
+RUNTIME_TIMING_KEYS = ("duration_s", "timeout_s", "oneshot_timeout_s")
 
 
 def load_toml(path: Path) -> dict:
@@ -237,6 +238,15 @@ def summarize(result: dict | None, returncode: int, timed_out: bool) -> str:
     return status
 
 
+def runtime_timing_defaults(global_defaults: dict, runtime_meta: dict) -> dict:
+    """Merge per-runtime timing overrides from example_runtimes.toml."""
+    merged = dict(global_defaults)
+    for key in RUNTIME_TIMING_KEYS:
+        if key in runtime_meta:
+            merged[key] = runtime_meta[key]
+    return merged
+
+
 def example_timing(
     example_meta: dict, manifest_defaults: dict, runtime_defaults: dict
 ) -> tuple[float, float]:
@@ -244,8 +254,9 @@ def example_timing(
     duration = float(
         example_meta.get(
             "duration_s",
-            manifest_defaults.get(
-                "duration_s", runtime_defaults.get("duration_s", DEFAULT_DURATION)
+            runtime_defaults.get(
+                "duration_s",
+                manifest_defaults.get("duration_s", DEFAULT_DURATION),
             ),
         )
     )
@@ -255,9 +266,9 @@ def example_timing(
                 "oneshot_timeout_s",
                 example_meta.get(
                     "timeout_s",
-                    manifest_defaults.get(
+                    runtime_defaults.get(
                         "oneshot_timeout_s",
-                        runtime_defaults.get("oneshot_timeout_s", DEFAULT_ONESHOT_TIMEOUT),
+                        manifest_defaults.get("oneshot_timeout_s", DEFAULT_ONESHOT_TIMEOUT),
                     ),
                 ),
             )
@@ -266,8 +277,9 @@ def example_timing(
         timeout = float(
             example_meta.get(
                 "timeout_s",
-                manifest_defaults.get(
-                    "timeout_s", runtime_defaults.get("timeout_s", DEFAULT_TIMEOUT)
+                runtime_defaults.get(
+                    "timeout_s",
+                    manifest_defaults.get("timeout_s", DEFAULT_TIMEOUT),
                 ),
             )
         )
@@ -357,7 +369,7 @@ def _server_ready(port: int = PYSCRIPT_PORT) -> bool:
     try:
         with urllib.request.urlopen(f"http://127.0.0.1:{port}/html/embed.html", timeout=2) as resp:
             return resp.status == 200
-    except (urllib.error.URLError, TimeoutError):
+    except (urllib.error.URLError, TimeoutError, OSError, ConnectionError):
         return False
 
 
@@ -477,7 +489,7 @@ def run_pyscript_case(
     }
 
 
-def _write_jupyter_notebook(example_id: str, example_meta: dict) -> Path:
+def _write_jupyter_notebook(example_id: str, example_meta: dict, duration_s: float) -> Path:
     import_line = f"import {example_meta.get('import', example_id)}"
     script = example_meta.get("script", f"examples/{example_id}.py")
     py = SRC / script
@@ -485,6 +497,18 @@ def _write_jupyter_notebook(example_id: str, example_meta: dict) -> Path:
         pkg = example_meta["import"].rsplit(".", 1)[0]
         if (SRC / "examples" / pkg / f"{pkg.split('.')[-1]}.py").exists():
             import_line = f"import {example_meta['import']}"
+
+    tools_rel = os.path.relpath(TOOLS, SRC)
+    test_mode_source = "\n".join(
+        [
+            "import sys",
+            f"sys.path.insert(0, {tools_rel!r})",
+            "import pydisplay_test_mode",
+            "pydisplay_test_mode.ENABLED = True",
+            f"pydisplay_test_mode.DURATION_S = {duration_s}",
+            "",
+        ]
+    )
 
     out = SRC / f"run-{example_id}.ipynb"
     cells = [
@@ -494,6 +518,13 @@ def _write_jupyter_notebook(example_id: str, example_meta: dict) -> Path:
             "execution_count": None,
             "outputs": [],
             "source": ["import lib.path\n"],
+        },
+        {
+            "cell_type": "code",
+            "metadata": {},
+            "execution_count": None,
+            "outputs": [],
+            "source": [test_mode_source],
         },
         {
             "cell_type": "code",
@@ -542,7 +573,7 @@ def run_jupyter_case(
             "stderr_tail": "Jupyter venv not found",
         }
 
-    nb_path = _write_jupyter_notebook(example_id, example_meta)
+    nb_path = _write_jupyter_notebook(example_id, example_meta, duration)
     cmd = [
         str(jupyter),
         "nbconvert",
@@ -611,7 +642,8 @@ def run_case(
     manifest_defaults: dict,
     runtime_defaults: dict,
 ) -> dict:
-    duration, timeout = example_timing(example_meta, manifest_defaults, runtime_defaults)
+    effective_defaults = runtime_timing_defaults(runtime_defaults, runtime_meta)
+    duration, timeout = example_timing(example_meta, manifest_defaults, effective_defaults)
     kind = runtime_meta.get("kind", SUBPROCESS_RUNTIME_KIND)
 
     if kind == SUBPROCESS_RUNTIME_KIND:

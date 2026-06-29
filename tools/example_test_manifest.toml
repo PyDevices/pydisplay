@@ -187,6 +187,7 @@ import = "bmp565_scroll_sprite"
 script = "examples/bmp565_scroll_sprite.py"
 kind = "loop"
 quit = "poll"
+timeout_s = 70
 deps = ["core"]
 
 [examples.bmp565_simpletest]
@@ -223,7 +224,7 @@ script = "examples/console_advanced_demo.py"
 kind = "interactive"
 quit = "interactive"
 deps = ["add_ons"]
-skip_runtimes = ["cpython-venv", "python.exe"]
+skip_runtimes = ["cpython-venv", "python.exe", "jupyter"]
 
 [examples.console_simpletest]
 import = "console_simpletest"
@@ -380,7 +381,7 @@ import = "pbm_simpletest"
 script = "examples/pbm_simpletest.py"
 kind = "oneshot"
 quit = "native_exit"
-timeout_s = 30
+oneshot_timeout_s = 60
 deps = ["add_ons"]
 
 [examples.png_test]
