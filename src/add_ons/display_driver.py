@@ -23,8 +23,11 @@ import lvgl as lv
 import eventsys
 from eventsys import events
 
+_driver_ref = None
+
 
 def main():
+    global _driver_ref
     gc.collect()
     if not lv.is_initialized():
         lv.init()
@@ -33,17 +36,20 @@ def main():
         # multimer.Timer (_threading on CircuitPython) which requires pump().
         # Present the frame from the aio refresh loop instead.
         refresh_cb = None
-        if TIMER_ASYNC:
+        use_async = TIMER_ASYNC
+        if sys.implementation.name == "circuitpython":
+            use_async = False
+        if use_async:
             if getattr(display_drv, "_timer", None) is not None:
                 display_drv._timer.deinit()
                 display_drv._timer = None
             refresh_cb = display_drv.show
-        lv_utils.event_loop(asynchronous=TIMER_ASYNC, refresh_cb=refresh_cb)
+        lv_utils.event_loop(asynchronous=use_async, refresh_cb=refresh_cb)
 
     if lv.group_get_default() is None:
         lv.group_create().set_default()
 
-    _dd = DisplayDriver(
+    _driver_ref = DisplayDriver(
         display_drv,
         broker.devices,
     )

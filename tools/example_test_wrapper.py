@@ -182,10 +182,18 @@ def _use_main_thread_for_bounded():
     return name in ("cpython", "micropython", "circuitpython")
 
 
+def _circuitpython_lvgl_cooperative(kind):
+    try:
+        return sys.implementation.name == "circuitpython" and kind == "lvgl"
+    except AttributeError:
+        return False
+
+
 def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode):
     import quit_inject
 
     injected = [False]
+    cooperative = _circuitpython_lvgl_cooperative(kind)
 
     def delayed_inject():
         touch_delay = min(duration_s * 0.2, max(0.5, duration_s - 1.0))
@@ -202,28 +210,38 @@ def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode
         ):
             injected[0] = True
 
-    try:
-        import threading
+    if not cooperative:
+        try:
+            import threading
 
-        threading.Thread(target=delayed_inject, daemon=True).start()
-    except ImportError:
-        if not _start_daemon(delayed_inject):
-            touch_delay = min(duration_s * 0.2, max(0.5, duration_s - 1.0))
-            if quit_mode == "inject" and touch_delay > 0:
-                _sleep(touch_delay)
-                quit_inject.inject_synthetic_touch(broker_poll=False)
-            _sleep(max(0, duration_s - touch_delay))
-            lvgl = kind == "lvgl"
-            if quit_inject.inject_quit(
-                broker_poll=False,
-                pump_count=20,
-                pump_delay=0.02,
-                lvgl=lvgl,
-            ):
-                injected[0] = True
+            threading.Thread(target=delayed_inject, daemon=True).start()
+        except ImportError:
+            if not _start_daemon(delayed_inject):
+                touch_delay = min(duration_s * 0.2, max(0.5, duration_s - 1.0))
+                if quit_mode == "inject" and touch_delay > 0:
+                    _sleep(touch_delay)
+                    quit_inject.inject_synthetic_touch(broker_poll=False)
+                _sleep(max(0, duration_s - touch_delay))
+                lvgl = kind == "lvgl"
+                if quit_inject.inject_quit(
+                    broker_poll=False,
+                    pump_count=20,
+                    pump_delay=0.02,
+                    lvgl=lvgl,
+                ):
+                    injected[0] = True
+    else:
+        try:
+            import pydisplay_test_mode
+
+            pydisplay_test_mode.DURATION_S = duration_s
+        except ImportError:
+            pass
 
     try:
         _exec_script(script_path)
+        if cooperative:
+            return None, True
         return None, injected[0]
     except SystemExit as exc:
         code = _system_exit_code(exc)
@@ -415,6 +433,7 @@ def main(argv=None):
         import pydisplay_test_mode
 
         pydisplay_test_mode.ENABLED = True
+        pydisplay_test_mode.DURATION_S = args["duration"]
     except Exception:
         pass
 
