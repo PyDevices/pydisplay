@@ -103,7 +103,7 @@ Modes: `sync`, `queued`, `async`.
 | CircuitPython | `circuitpython` on `PATH` |
 | MicroPython (Windows) | `micropython.exe` on `PATH` |
 | CPython (Windows) | `python.exe` on `PATH` |
-| CPython (Linux venv) | `src/.venv/bin/python` |
+| CPython (Linux venv) | `.venv/bin/python` |
 
 Each run uses `cwd=src/`, opens a window for ~4 s of timer/click checks, then injected quit; the child should print `KIT_RESULT=` and exit 0. Missing executables are skipped (`missing` in the summary table).
 

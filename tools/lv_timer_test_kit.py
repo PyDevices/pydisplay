@@ -27,7 +27,7 @@ DEFAULT_TIMEOUT = 45
 INTERPRETERS = {
     "micropython": ["micropython"],
     "circuitpython": ["circuitpython"],
-    "cpython": [str(SRC / ".venv" / "bin" / "python")],
+    "cpython": [str(REPO / ".venv" / "bin" / "python")],
 }
 
 MODES = ("sync", "queued", "async")
@@ -42,10 +42,9 @@ def _resolve_interpreters(only: list[str] | None) -> dict[str, list[str]]:
             sys.exit(2)
         exe = INTERPRETERS[name][0]
         if not Path(exe).exists() and name == "cpython":
-            alt = REPO / ".venv" / "bin" / "python"
-            if alt.exists():
-                out[name] = [str(alt)]
-                continue
+            print(f"CPython venv not found: {exe}", file=sys.stderr)
+            print("Create repo-root .venv: python3 -m venv .venv", file=sys.stderr)
+            sys.exit(2)
         out[name] = INTERPRETERS[name]
     return out
 

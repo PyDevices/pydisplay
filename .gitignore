@@ -131,9 +131,12 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
-# Environments
+# Environments — only repo-root .venv and .venv-docs (no nested venvs)
 .env
-.venv*
+.venv
+.venv-docs
+**/.venv
+**/.venv-*
 env/
 venv/
 ENV/

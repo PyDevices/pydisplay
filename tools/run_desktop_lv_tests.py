@@ -36,9 +36,6 @@ from lv_timer_test_kit import (  # noqa: E402
 
 
 def _cpython_venv_exe() -> str:
-    for p in (REPO / ".venv" / "bin" / "python", SRC / ".venv" / "bin" / "python"):
-        if p.exists():
-            return str(p)
     return str(REPO / ".venv" / "bin" / "python")
 
 
