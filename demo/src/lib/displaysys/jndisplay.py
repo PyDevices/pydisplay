@@ -362,14 +362,34 @@ class JNDisplay(DisplayDriver):
         """
 
         BPP = self.color_depth // 8
-        if x < 0 or y < 0 or x + w > self.width or y + h > self.height:
-            raise ValueError("The provided x, y, w, h values are out of range")
         if len(buf) != w * h * BPP:
             raise ValueError("The source buffer is not the correct size")
 
+        src_w = w
+        src_x0 = 0
+        src_y0 = 0
+        if x < 0:
+            src_x0 = -x
+            w += x
+            x = 0
+        if y < 0:
+            src_y0 = -y
+            h += y
+            y = 0
+        if x + w > self.width:
+            w = self.width - x
+        if y + h > self.height:
+            h = self.height - y
+        if w <= 0 or h <= 0:
+            return (x, y, w, h)
+
         for j in range(h):
             for i in range(w):
-                color = buf[(j * w + i) * BPP : (j * w + i) * BPP + BPP]
+                color = buf[
+                    ((src_y0 + j) * src_w + src_x0 + i) * BPP : ((src_y0 + j) * src_w + src_x0 + i)
+                    * BPP
+                    + BPP
+                ]
                 self.pixel(x + i, y + j, color)
         self.render((x, y, w, h))
         return (x, y, w, h)

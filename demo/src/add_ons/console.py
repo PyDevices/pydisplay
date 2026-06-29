@@ -217,11 +217,33 @@ class Console(io.IOBase):
             if not isinstance(params[0], str):
                 self._write_label(pos, params[0](), params[1], params[2])
 
-    def readinto(self, buf, nbytes=0):
+    def read(self, nbytes=1):
+        """dupterm input: delegate to readobj or block on the primary stdin fd."""
         if self._readobj is not None:
+            if hasattr(self._readobj, "read"):
+                return self._readobj.read(nbytes)
+            buf = bytearray(nbytes if nbytes else 1)
+            got = self.readinto(buf, nbytes)
+            if got:
+                return bytes(buf[:got])
+            return b""
+        try:
+            import sys
+
+            n = nbytes if nbytes else 1
+            return sys.stdin.buffer.read(n)
+        except Exception:
+            return b""
+
+    def readinto(self, buf, nbytes=0):
+        if self._readobj is not None and hasattr(self._readobj, "readinto"):
             return self._readobj.readinto(buf, nbytes)
-        else:
-            return None
+        data = self.read(nbytes or len(buf))
+        if not data:
+            return 0
+        n = min(len(buf), len(data))
+        buf[:n] = data[:n]
+        return n
 
     def write(self, buf, fg=None, bg=None):
         fg = self.fgcolor if fg is None else fg

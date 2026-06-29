@@ -7,7 +7,7 @@ import sys
 
 if sys.implementation.name in ("cpython", "circuitpython"):
     SCHEDULE_QUEUE = True
-    _MAX_PENDING = 32
+    _MAX_PENDING = 128 if sys.implementation.name == "circuitpython" else 32
 
     try:
         import threading

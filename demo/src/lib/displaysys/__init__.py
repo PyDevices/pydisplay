@@ -664,20 +664,15 @@ class DisplayDriver:
         """Subclass resource cleanup hook, called after the timer is stopped."""
         return
 
-    def quit(self, code: int = 0) -> None:
-        """Release display resources (REPL-safe). Called by ``broker.on_quit`` on QUIT."""
+    def quit(self, code: int = 0, force: bool = False) -> None:
+        """Release display resources (REPL-safe unless ``force=True``). Called by ``broker.on_quit`` on QUIT."""
         self.deinit()
+        if force:
+            raise SystemExit(code)
 
     def force_quit(self, code: int = 0) -> None:
-        """
-        Release resources then raise ``SystemExit``.
-
-        pydisplay does not currently use this method. **Agents must not call
-        ``force_quit()`` or wire it into ``broker.on_quit`` without explicit
-        user permission.**
-        """
-        self.deinit()
-        raise SystemExit(code)
+        """Release resources then exit the process (alias for ``quit(code, force=True)``)."""
+        self.quit(code, force=True)
 
     def show(self, *args, **kwargs) -> None:
         """
