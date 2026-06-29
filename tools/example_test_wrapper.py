@@ -299,6 +299,22 @@ def _parse_args(argv):
     return out
 
 
+def _cpython_hard_exit(code):
+    """SDL on CPython can block normal interpreter shutdown; hard-exit after cleanup."""
+    try:
+        if sys.implementation.name != "cpython":
+            return False
+    except AttributeError:
+        return False
+    try:
+        from board_config import display_drv
+
+        display_drv.quit()
+    except Exception:
+        pass
+    os._exit(code)
+
+
 def main(argv=None):
     argv = argv if argv is not None else sys.argv
     try:
@@ -372,7 +388,10 @@ def main(argv=None):
         payload["error"] = error
 
     _print_result(payload)
-    return 0 if status == "ok" else 1
+    code = 0 if status == "ok" else 1
+    if _cpython_hard_exit(code):
+        return code
+    return code
 
 
 if __name__ == "__main__":

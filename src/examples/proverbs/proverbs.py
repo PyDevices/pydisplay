@@ -105,7 +105,7 @@ def main():
                 pump()
             if elist := broker.poll():
                 if any(e.type == broker.events.QUIT for e in elist):
-                    break
+                    return
             sleep_ms(5000)
 
 

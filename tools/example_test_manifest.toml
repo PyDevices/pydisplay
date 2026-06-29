@@ -379,6 +379,7 @@ import = "pbm_simpletest"
 script = "examples/pbm_simpletest.py"
 kind = "oneshot"
 quit = "native_exit"
+timeout_s = 30
 deps = ["add_ons"]
 
 [examples.png_test]

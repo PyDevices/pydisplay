@@ -149,7 +149,7 @@ def inject_quit(*, broker_poll=True, pump_count=15, pump_delay=0.02, lvgl=False)
     def mock_read():
         if pending:
             return [pending.pop(0)]
-        return None
+        return orig_read()
 
     queue_dev._read = mock_read
     try:
@@ -165,7 +165,8 @@ def inject_quit(*, broker_poll=True, pump_count=15, pump_delay=0.02, lvgl=False)
             except Exception:
                 pass
     finally:
-        queue_dev._read = orig_read
+        if not pending:
+            queue_dev._read = orig_read
 
     deinit_display()
     return True
