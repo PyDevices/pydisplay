@@ -52,8 +52,16 @@ for alignment in alignments:
     label.center()
 
 from multimer import Timer, needs_pump
-if needs_pump():
+import sys
+
+display_driver.run()
+if needs_pump() and sys.platform != "win32":
+    from board_config import broker
+    from eventsys import poll_quit_discarding_others
     from multimer import pump, sleep_ms
+
     while True:
         pump()
+        if poll_quit_discarding_others(broker):
+            break
         sleep_ms(1)

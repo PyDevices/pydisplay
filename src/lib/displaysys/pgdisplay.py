@@ -357,26 +357,22 @@ class PGDisplay(DisplayDriver):
                 return
             raise
 
-    def quit(self, code: int = 0) -> None:
-        """Release pygame resources (REPL-safe)."""
+    def quit(self, code: int = 0, force: bool = False) -> None:
+        """Release pygame resources (REPL-safe unless ``force=True``)."""
         self.deinit()
-
-    def force_quit(self, code: int = 0) -> None:
-        """
-        Release pygame resources then hard-exit the process.
-
-        pydisplay does not currently use this method. **Agents must not call
-        ``force_quit()`` or wire it into ``broker.on_quit`` without explicit
-        user permission.**
-        """
-        self.deinit()
+        if not force:
+            return
         try:
             import os
 
             os._exit(code)
         except Exception:
             pass
-        super().force_quit(code)
+        raise SystemExit(code)
+
+    def force_quit(self, code: int = 0) -> None:
+        """Release pygame resources then hard-exit the process."""
+        self.quit(code, force=True)
 
     def _deinit(self) -> None:
         """Release pygame resources."""

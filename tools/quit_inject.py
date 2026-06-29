@@ -157,7 +157,7 @@ def inject_quit(*, broker_poll=True, pump_count=15, pump_delay=0.02, lvgl=False)
             pump_lvgl(pump_count, pump_delay)
         else:
             pump_multimer(pump_count, pump_delay, broker_poll=broker_poll)
-        if broker_poll and not lvgl:
+        if broker_poll:
             try:
                 from board_config import broker
 

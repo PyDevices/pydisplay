@@ -48,12 +48,12 @@ def main():
         broker.devices,
     )
 
-    def _lvgl_deinit():
+    def _lvgl_shutdown_before_quit():
         inst = lv_utils.event_loop.current_instance()
         if inst is not None:
-            inst.deinit()
+            inst.shutdown_for_quit()
 
-    broker.register_quit_cleanup(display_drv, before=_lvgl_deinit)
+    broker.register_quit_cleanup(display_drv, before=_lvgl_shutdown_before_quit)
 
 
 class _TouchState:

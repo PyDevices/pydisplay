@@ -639,18 +639,11 @@ class SDLDisplay(DisplayDriver):
         _restore_tty()
         _ensure_tty_sane()
 
-    def quit(self, code: int = 0) -> None:
-        """Release SDL resources (REPL-safe)."""
-        self.deinit()
-
-    def force_quit(self, code: int = 0) -> None:
-        """
-        Release SDL resources then hard-exit the process.
-
-        pydisplay does not currently use this method. **Agents must not call
-        ``force_quit()`` or wire it into ``broker.on_quit`` without explicit
-        user permission.**
-        """
+    def quit(self, code: int = 0, force: bool = False) -> None:
+        """Release SDL resources (REPL-safe unless ``force=True``)."""
+        if not force:
+            self.deinit()
+            return
         try:
             self.deinit()
         except Exception:
@@ -672,4 +665,8 @@ class SDLDisplay(DisplayDriver):
             os._exit(code)
         except Exception:
             pass
-        super().force_quit(code)
+        raise SystemExit(code)
+
+    def force_quit(self, code: int = 0) -> None:
+        """Release SDL resources then hard-exit the process."""
+        self.quit(code, force=True)

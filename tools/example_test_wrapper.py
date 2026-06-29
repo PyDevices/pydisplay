@@ -371,10 +371,13 @@ def _subprocess_hard_exit(code):
     try:
         from board_config import display_drv
 
-        display_drv.quit()
+        display_drv.quit(code, force=True)
+    except SystemExit:
+        raise
     except Exception:
         pass
     os._exit(code)
+    return False
 
 
 def main(argv=None):

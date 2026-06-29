@@ -9,6 +9,7 @@ from displaysys import alloc_buffer
 from touch_keypad import Keypad
 from joystick_keypad import JoystickKeypad
 from eventsys.keys import Keys
+from eventsys import poll_quit_discarding_others
 from random import choice  # For random piece selection
 from json import load, dump  # For saving the high score
 from sys import exit  # For exiting the game
@@ -317,6 +318,12 @@ def main():  # noqa: C901, PLR0915
         except OSError:
             return 0
 
+    def _quit_if_needed(_where):
+        if not poll_quit_discarding_others(broker):
+            return False
+        display_drv.quit()
+        return True
+
     def wait_for_key(key=None, exclude=[]):
         """
         Waits for the user to press a key.
@@ -338,9 +345,8 @@ def main():  # noqa: C901, PLR0915
 
         while True:  # Wait for the user to press a key
             pump()
-            if elist := broker.poll():
-                if any(e.type == broker.events.QUIT for e in elist):
-                    return None
+            if _quit_if_needed("wait_for_key"):
+                return None
             keys = joystick_keypad.read()
             keys.extend(keypad.read_held())
 
@@ -483,6 +489,9 @@ def main():  # noqa: C901, PLR0915
         # Play the game
         show_score()  # Show the score
         while True:  # Main game loop
+            pump()
+            if _quit_if_needed("main_loop"):
+                return
             #         print("Main game loop")
             current_piece = next_piece  # Set the next piece to the current piece
             current_position = [
@@ -498,6 +507,9 @@ def main():  # noqa: C901, PLR0915
             last_drop = ticks_ms()  # Time of last automatic drop
 
             while current_piece:  # Middle loop - while the piece is in play
+                pump()
+                if _quit_if_needed("piece_loop"):
+                    return
                 #             print("Redraw piece loop")
                 draw_piece(current_piece, current_position)  # Draw the current piece
                 old_piece = current_piece.copy()  # Save the previous piece
@@ -507,11 +519,10 @@ def main():  # noqa: C901, PLR0915
                     current_piece == old_piece and current_position == old_position
                 ):  # Inner loop - while the piece hasn't moved
                     pump()
+                    if _quit_if_needed("inner_loop"):
+                        return
                     # If it has been DELAY ms since the last read, then read the keypads
                     if (ticks_diff(ticks_ms(), last_read) >= DELAY):
-                        if elist := broker.poll():
-                            if any(e.type == broker.events.QUIT for e in elist):
-                                return
                         keys = joystick_keypad.read()
                         keys.extend(keypad.read_held())
 
@@ -552,6 +563,9 @@ def main():  # noqa: C901, PLR0915
                         while not collision(
                             current_piece, current_position, 0, 1
                         ):  # While the piece hasn't hit bottom
+                            pump()
+                            if _quit_if_needed("hard_drop"):
+                                return
                             current_position[1] += 1  # Move the piece down
                         hard_drop = False  # Reset the hard drop flag
                         last_drop = 0  # Unset the last drop time
