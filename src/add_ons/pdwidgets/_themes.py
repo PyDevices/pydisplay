@@ -59,7 +59,7 @@ class IconTheme:
 
     def __getattr__(self, name):
         if name.startswith("_"):
-            return super().__getattr__(name)
+            raise AttributeError(name)
         return lambda size: self._icon(name, size)
 
 

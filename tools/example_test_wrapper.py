@@ -99,7 +99,7 @@ def _system_exit_code(exc):
 
 
 def _exec_script(script_path):
-    with open(script_path) as f:
+    with open(script_path, encoding="utf-8") as f:
         code = f.read()
     namespace = {"__name__": "__main__", "__file__": script_path}
     exec(code, namespace)

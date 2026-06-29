@@ -12,11 +12,15 @@ try:
     # For CircuitPython and MicroPython
     from gc import mem_free
 except ImportError:
-    # For CPython
-    from psutil import virtual_memory
+    try:
+        from psutil import virtual_memory
 
-    def mem_free():
-        return virtual_memory().free
+        def mem_free():
+            return virtual_memory().free
+    except ImportError:
+
+        def mem_free():
+            return 0
 
 
 gc.collect()

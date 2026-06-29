@@ -13,30 +13,74 @@ from multimer import capabilities, pump, sleep_ms
 png_image = namedtuple("png_image", ["width", "height", "pixels", "metadata"])
 
 PNG_DIR = "~/material-design-icons/png"
+PNG_REL = "material-design-icons/png"
 
 
-def _home_dir():
+def _norm_path(path):
+    return path.replace("\\", "/")
+
+
+def _home_dirs():
+    seen = set()
+    for key in ("HOME", "USERPROFILE"):
+        try:
+            val = os.environ[key]
+        except (AttributeError, ImportError, KeyError, TypeError):
+            val = None
+        if not val:
+            getenv = getattr(os, "getenv", None)
+            if getenv is not None:
+                val = getenv(key)
+        if val:
+            val = _norm_path(val).rstrip("/")
+            if val not in seen:
+                seen.add(val)
+                yield val
+
+
+def _wsl_home_roots():
+    yield "U:/home"
+    distro = os.getenv("WSL_DISTRO_NAME") if getattr(os, "getenv", None) else None
+    if not distro:
+        distro = "Ubuntu"
+    for prefix in (f"//wsl.localhost/{distro}/home", f"//wsl$/{distro}/home"):
+        yield prefix
+
+
+def _is_dir(path):
     try:
-        return os.environ["HOME"]
-    except (AttributeError, ImportError, KeyError, TypeError):
-        pass
-    getenv = getattr(os, "getenv", None)
-    if getenv is not None:
-        return getenv("HOME")
-    return None
+        os.listdir(path)
+        return True
+    except OSError:
+        return False
 
 
-def _expand_user(path):
-    if path.startswith("~/"):
-        home = _home_dir()
-        if not home:
-            raise RuntimeError("Cannot expand ~ in png path (HOME not set)")
-        return home + "/" + path[2:]
-    return path
+def _resolve_png_dir():
+    override = os.getenv("PYDISPLAY_PNG_DIR") if getattr(os, "getenv", None) else None
+    if override and _is_dir(override):
+        return _norm_path(override).rstrip("/") + "/"
+
+    if PNG_DIR.startswith("~/"):
+        suffix = PNG_DIR[2:]
+        for home in _home_dirs():
+            cand = home + "/" + suffix
+            if _is_dir(cand):
+                return cand.rstrip("/") + "/"
+
+    for root in _wsl_home_roots():
+        try:
+            for user in os.listdir(root):
+                cand = _join_path(_norm_path(root), user + "/" + PNG_REL)
+                if _is_dir(cand):
+                    return cand.rstrip("/") + "/"
+        except OSError:
+            continue
+
+    raise RuntimeError("Cannot find material-design-icons/png (set PYDISPLAY_PNG_DIR)")
 
 
 def _join_path(a, b):
-    return a.rstrip("/") + "/" + b
+    return _norm_path(a).rstrip("/") + "/" + b
 
 
 def _rel_path(path, base):
@@ -75,9 +119,7 @@ try:
 except ImportError:
     _max_pngs = None
 
-png_path = _expand_user(PNG_DIR)
-if not png_path.endswith("/"):
-    png_path += "/"
+png_path = _resolve_png_dir()
 
 fg_color = 0xFFFF
 bg_color = 0x001F
