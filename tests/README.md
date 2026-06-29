@@ -44,6 +44,7 @@ python tests/test_ticks.py
 | `test_area.py` | the `Area` rectangle helper (containment, overlap, transforms, protocols) |
 | `test_capabilities.py` | `capabilities()` and framebuf backend introspection |
 | `test_blit_hooks.py` | blit dispatch to display hooks and framebuffer fast paths |
+| `test_clip.py` | clip helpers and ``ClippedCanvas`` |
 | `test_framebuf.py` | the pure-Python `graphics._framebuf` fallback (pixels, fill, scroll) |
 | `test_framebuf_plus.py` | the exported `graphics.FrameBuffer` (properties + `Area` returns) |
 | `test_shapes.py` | the drawing primitives (`line`, `rect`, `circle`, `poly`, `blit`, ...) |

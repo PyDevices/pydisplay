@@ -62,6 +62,49 @@ class TestDraw(unittest.TestCase):
         area = self.draw.blit_transparent(buf, 0, 0, 2, 2, key=0)
         self.assertEqual(area, Area(0, 0, 2, 2))
 
+    def test_clip_fill_rect(self):
+        with self.draw.clip(2, 2, 4, 4):
+            self.draw.fill_rect(0, 0, 16, 16, _WHITE)
+        self.assertEqual(self.canvas.pixel(1, 1), 0)
+        self.assertEqual(self.canvas.pixel(2, 2), _WHITE)
+        self.assertEqual(self.canvas.pixel(5, 5), _WHITE)
+        self.assertEqual(self.canvas.pixel(6, 6), 0)
+
+    def test_clip_pixel_outside_is_noop(self):
+        with self.draw.clip(4, 4, 2, 2):
+            self.draw.pixel(0, 0, _WHITE)
+            self.draw.pixel(4, 4, _WHITE)
+        self.assertEqual(self.canvas.pixel(0, 0), 0)
+        self.assertEqual(self.canvas.pixel(4, 4), _WHITE)
+
+    def test_nested_clip_intersects(self):
+        with self.draw.clip(0, 0, 8, 8), self.draw.clip(4, 4, 8, 8):
+            self.draw.fill_rect(0, 0, 16, 16, _WHITE)
+        self.assertEqual(self.canvas.pixel(3, 3), 0)
+        self.assertEqual(self.canvas.pixel(4, 4), _WHITE)
+        self.assertEqual(self.canvas.pixel(7, 7), _WHITE)
+        self.assertEqual(self.canvas.pixel(8, 8), 0)
+
+    def test_clip_restored_after_context(self):
+        with self.draw.clip(2, 2, 2, 2):
+            self.draw.fill_rect(2, 2, 2, 2, _WHITE)
+        self.draw.pixel(0, 0, _WHITE)
+        self.assertEqual(self.canvas.pixel(0, 0), _WHITE)
+
+    def test_clip_fill_only_region(self):
+        self.canvas.fill(0)
+        with self.draw.clip(1, 1, 3, 3):
+            self.draw.fill(_WHITE)
+        self.assertEqual(self.canvas.pixel(0, 0), 0)
+        self.assertEqual(self.canvas.pixel(2, 2), _WHITE)
+        self.assertEqual(self.canvas.pixel(4, 4), 0)
+
+    def test_clip_accepts_area(self):
+        with self.draw.clip(Area(2, 2, 2, 2)):
+            self.draw.fill_rect(0, 0, 16, 16, _WHITE)
+        self.assertEqual(self.canvas.pixel(2, 2), _WHITE)
+        self.assertEqual(self.canvas.pixel(4, 4), 0)
+
 
 if __name__ == "__main__":
     unittest.main()
