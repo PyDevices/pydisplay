@@ -179,7 +179,7 @@ def _use_main_thread_for_bounded():
         name = sys.implementation.name
     except AttributeError:
         return False
-    return name in ("cpython", "micropython")
+    return name in ("cpython", "micropython", "circuitpython")
 
 
 def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode):
@@ -364,10 +364,13 @@ def _subprocess_hard_exit(code):
         name = sys.implementation.name
     except AttributeError:
         return False
-    if name not in ("cpython", "micropython"):
+    if name not in ("cpython", "micropython", "circuitpython"):
         return False
     if not hasattr(os, "_exit"):
         return False
+    # CircuitPython SDL teardown can block past the harness timeout.
+    if name == "circuitpython":
+        os._exit(code)
     try:
         from board_config import display_drv
 

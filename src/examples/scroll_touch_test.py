@@ -3,6 +3,7 @@ from board_config import display_drv, broker
 from graphics import Draw
 from palettes import get_palette
 from random import getrandbits
+from multimer import needs_pump, pump
 
 
 canvas = display_drv
@@ -47,6 +48,8 @@ def main():
     canvas.show()
 
     while True:
+        if needs_pump():
+            pump()
         if elist := broker.poll():
             quit_requested = False
             for e in elist:

@@ -805,7 +805,7 @@ def compute_exit_code(rows: list[dict]) -> int:
             return 1
         if row["summary"].endswith(", ok"):
             continue
-        if row.get("result", {}).get("status") == "ok":
+        if row.get("result") and row["result"].get("status") == "ok":
             continue
         return 1
     return 0

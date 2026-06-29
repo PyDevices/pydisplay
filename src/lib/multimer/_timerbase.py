@@ -68,8 +68,14 @@ class _TimerBase:
         self._timer = None
 
     def _wait_for_callback(self):
-        while self._busy:
-            pass
+        if getattr(type(self), "NEEDS_PUMP", False):
+            from ._schedule import _drain_schedule
+
+            while self._busy:
+                _drain_schedule()
+        else:
+            while self._busy:
+                pass
 
     def _invoke_callback(self, arg):
         if self._callback is None:

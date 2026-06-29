@@ -25,14 +25,27 @@ Writes "Hello!" in a tiny font in random colors at random locations on the Displ
 
 from random import getrandbits
 
-from multimer import sleep_ms
+from multimer import sleep_ms, needs_pump, pump
 import tft_text
 import tft_config
+
+try:
+    import pydisplay_test_mode
+
+    _iterations = 4 if pydisplay_test_mode.ENABLED else 128
+except ImportError:
+    _iterations = 128
 
 palette = tft_config.palette
 import vga1_8x8 as font
 
 tft = tft_config.config(tft_config.WIDE)
+
+
+def _quit_requested():
+    if needs_pump():
+        pump()
+    return poll_quit_discarding_others(broker)
 
 
 def randint(a, b):
@@ -72,19 +85,28 @@ def main():
         tft.draw.rect(0, 0, tft.width, tft.height, palette.WHITE)
         center("Hello!", palette.WHITE, color)
         tft.show()
-        if poll_quit_discarding_others(broker):
-            break
-        sleep_ms(1000)
+        if _quit_requested():
+            return
+        for _ in range(100):
+            if _quit_requested():
+                return
+            sleep_ms(10)
 
     while True:
+        if _quit_requested():
+            return
         for rotation in range(4):
+            if _quit_requested():
+                return
             tft.rotation = rotation
             tft.draw.fill(0)
             tft.show()
+            if _quit_requested():
+                return
             col_max = tft.width - font.WIDTH * 6
             row_max = tft.height - font.HEIGHT
 
-            for _ in range(128):
+            for _ in range(_iterations):
                 tft_text.text(
                     tft,
                     font,
@@ -103,7 +125,7 @@ def main():
                     ),
                 )
                 tft.show()
-                if poll_quit_discarding_others(broker):
+                if _quit_requested():
                     return
 
 

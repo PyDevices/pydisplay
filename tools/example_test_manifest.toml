@@ -338,6 +338,7 @@ kind = "lvgl"
 quit = "inject"
 deps = ["lvgl"]
 timeout_s = 45
+skip_runtimes = ["circuitpython"]
 
 [examples.nano_gui_simpletest]
 import = "nano_gui_simpletest"
