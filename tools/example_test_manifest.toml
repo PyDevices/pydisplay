@@ -313,10 +313,9 @@ deps = ["core"]
 [examples.hello]
 import = "hello"
 script = "examples/hello.py"
-kind = "legacy"
-quit = "pending"
+kind = "loop"
+quit = "poll"
 deps = ["add_ons", "tft_config"]
-matrix = false
 
 [examples.joystick_list_select]
 import = "joystick_list_select"

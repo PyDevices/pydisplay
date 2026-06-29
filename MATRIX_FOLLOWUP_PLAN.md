@@ -12,15 +12,15 @@
 
 | Runtime | Pass (excl. `matrix=false`) | Status | Notes |
 |---------|----------------------------|--------|-------|
-| **micropython** | **60/60** | ✅ | Reference runtime (full matrix) |
-| **circuitpython** | **60/60** | ✅ | `pbm_simpletest` `oneshot_timeout_s = 60` on branch |
-| **cpython-venv** | **59/59** | ✅ | Skips `console_advanced_demo` only (manifest) |
-| **python.exe** | **59/59** | ✅ | Skips `console_advanced_demo` only (manifest) |
-| **micropython.exe** | **49/60** (stale) | 🔄 | Pre-fix full matrix; spot-checks green; column re-run pending |
+| **micropython** | **61/61** | ✅ | Reference runtime (full matrix) |
+| **circuitpython** | **61/61** | ✅ | `pbm_simpletest` `oneshot_timeout_s = 60` on branch |
+| **cpython-venv** | **60/60** | ✅ | Skips `console_advanced_demo` only (manifest) |
+| **python.exe** | **60/60** | ✅ | Skips `console_advanced_demo` only (manifest) |
+| **micropython.exe** | **49/61** (stale) | 🔄 | Pre-fix full matrix; spot-checks green; column re-run pending |
 | **pyscript** | **30/52** | 🔄 | Playwright OK; 22 `Page.goto` networkidle timeouts (heavy/loop demos) |
 | **jupyter** | **23/57** | 🔄 | 34 cell timeouts; blit clip helps `pbm_simpletest` ✅ |
 
-Excluded by design: `hello`, `keypins_simpletest` (`matrix=false`). See [Skipped examples (by design)](#skipped-examples-by-design) below.
+Excluded by design: `keypins_simpletest` (`matrix=false`). See [Skipped examples (by design)](#skipped-examples-by-design) below.
 
 ---
 
@@ -170,13 +170,12 @@ Results: `.cursor/example_test_results.json`
 
 Inventory from [`tools/example_test_manifest.toml`](tools/example_test_manifest.toml), [`tools/example_test_kit.py`](tools/example_test_kit.py) (`example_allowed_on_runtime`, `missing`, `needs_playwright`, matrix `—` dash), and [`tools/example_runtimes.toml`](tools/example_runtimes.toml).
 
-**Summary count:** **11** global exclusions (2 `matrix=false` examples + 9 harnesses) · **12** per-runtime manifest skip cells (**8** examples) · **1** wrapper expected non-pass · **4** launcher skip categories.
+**Summary count:** **10** global exclusions (1 `matrix=false` example + 9 harnesses) · **12** per-runtime manifest skip cells (**8** examples) · **1** wrapper expected non-pass · **4** launcher skip categories.
 
 ### Globally excluded from matrix (`matrix=false`)
 
 | Example | Reason |
 |---------|--------|
-| `hello` | Legacy example with `quit=pending`; not ready for automated smoke (needs manual quit strategy). |
 | `keypins_simpletest` | GPIO / key-pin hardware test; not suitable for desktop SDL matrix. |
 | `lv_test_timer_harness` | LVGL timer unit harness (`kind=harness`); never in matrix. |
 | `lv_test_timer_sync` | LVGL timer sync harness. |
@@ -188,7 +187,7 @@ Inventory from [`tools/example_test_manifest.toml`](tools/example_test_manifest.
 | `displaysys_fill_rect_test` | DisplaySys fill_rect unit harness. |
 | `test_timers` | General timer unit harness. |
 
-Harness rows appear only when using `--all-except-harness`; default matrix shows `hello` / `keypins_simpletest` as `matrix=false` labels without executing.
+Harness rows appear only when using `--all-except-harness`; default matrix shows `keypins_simpletest` as `matrix=false` label without executing.
 
 ### Per-runtime manifest skips (`skip_runtimes` → matrix `—`)
 
