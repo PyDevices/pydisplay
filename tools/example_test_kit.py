@@ -373,6 +373,22 @@ def _server_ready(port: int = PYSCRIPT_PORT) -> bool:
         return False
 
 
+HTML_DIR = REPO / "html"
+
+
+def pyscript_embed_query(example_id: str, example_meta: dict) -> str:
+    """Build ``manifests=`` or ``modules=`` query fragment for embed.html."""
+    if (HTML_DIR / f"{example_id}.json").is_file():
+        return f"manifests={example_id}"
+    script = example_meta.get("script", f"examples/{example_id}.py")
+    script_path = SRC / script
+    if script_path.is_file() and script_path.parent != SRC / "examples":
+        pkg = script_path.parent.name
+        if (HTML_DIR / f"{pkg}.json").is_file():
+            return f"manifests={pkg}"
+    return f"modules={example_id}"
+
+
 def ensure_pyscript_server(port: int = PYSCRIPT_PORT) -> None:
     global _server_pid
     if _server_ready(port):
@@ -400,10 +416,8 @@ def run_pyscript_case(
     port: int = PYSCRIPT_PORT,
 ) -> dict:
     ensure_pyscript_server(port)
-    url = (
-        f"http://127.0.0.1:{port}/html/embed.html"
-        f"?modules={example_id}&autotest=1&duration={int(duration)}"
-    )
+    query = pyscript_embed_query(example_id, example_meta)
+    url = f"http://127.0.0.1:{port}/html/embed.html?{query}&autotest=1&duration={int(duration)}"
 
     try:
         from playwright.sync_api import sync_playwright
@@ -439,26 +453,29 @@ def run_pyscript_case(
 
             page.on("console", on_console)
             page.on("pageerror", lambda exc: page_error.append(str(exc)))
-            page.goto(url, wait_until="networkidle", timeout=int(timeout * 1000))
-            deadline = time.monotonic() + timeout
+            page.goto(url, wait_until="load", timeout=int(timeout * 1000))
+            deadline = time.monotonic() + timeout + duration
             while time.monotonic() < deadline:
                 for line in captured:
-                    if line.startswith("EXAMPLE_RESULT="):
-                        result = json.loads(line.split("=", 1)[1])
-                        browser.close()
-                        summary = summarize(result, 0, False)
-                        return {
-                            "example": example_id,
-                            "runtime": "pyscript",
-                            "summary": summary,
-                            "returncode": 0 if result.get("status") == "ok" else 1,
-                            "timed_out": False,
-                            "duration_s": duration,
-                            "timeout_s": timeout,
-                            "result": result,
-                            "stdout_tail": line[-2000:],
-                            "stderr_tail": "\n".join(page_error)[-1000:],
-                        }
+                    if not line.startswith("EXAMPLE_RESULT="):
+                        continue
+                    result = json.loads(line.split("=", 1)[1])
+                    if result.get("smoke") == "js_timer":
+                        continue
+                    browser.close()
+                    summary = summarize(result, 0, False)
+                    return {
+                        "example": example_id,
+                        "runtime": "pyscript",
+                        "summary": summary,
+                        "returncode": 0 if result.get("status") == "ok" else 1,
+                        "timed_out": False,
+                        "duration_s": duration,
+                        "timeout_s": timeout,
+                        "result": result,
+                        "stdout_tail": line[-2000:],
+                        "stderr_tail": "\n".join(page_error)[-1000:],
+                    }
                 page.wait_for_timeout(200)
             browser.close()
     except Exception as exc:

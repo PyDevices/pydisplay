@@ -26,6 +26,7 @@ https://www.youtube.com/watch?v=atBa0BYPAAc
 
 from random import getrandbits
 
+from multimer import sleep_ms
 import tft_config
 import tft_text
 import vga2_bold_16x32 as font
@@ -85,6 +86,7 @@ def main():
                 tft.show()
                 if poll_quit_discarding_others(broker):
                     return
+                sleep_ms(1)
 
 
 main()
