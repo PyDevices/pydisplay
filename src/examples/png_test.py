@@ -1,3 +1,4 @@
+from eventsys import poll_quit_discarding_others
 # multimer types: queued, sync
 import os
 from collections import namedtuple
@@ -50,6 +51,8 @@ while True:
         ssd.text16(lines[0] + "/", 0, 0, 0xFFFF)
         ssd.text16("    " + lines[2], 0, 16, 0xFFFF)
         ssd.show()
+        if poll_quit_discarding_others(broker):
+            break
         sleep_ms(1000)
         ssd.fill_rect(pos_x, pos_y, p.width, p.height, bg_color)
         ssd.fill_rect(0, 0, ssd.width, 32, bg_color)

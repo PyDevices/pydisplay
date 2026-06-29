@@ -8,7 +8,8 @@ Draws on a framebuffer, blits to the display, and calls display_drv.show()
 after each draw (required on queued/SDL backends).
 """
 
-from board_config import display_drv
+from board_config import broker, display_drv
+from eventsys import poll_quit_discarding_others
 from random import getrandbits
 from graphics import Font, FrameBuffer, RGB565
 from palettes import get_palette

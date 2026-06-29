@@ -53,9 +53,7 @@ def main():
         if inst is not None:
             inst.deinit()
 
-    from add_ons.quit_handler import wire_display_quit
-
-    wire_display_quit(broker, before=_lvgl_deinit)
+    broker.register_quit_cleanup(display_drv, before=_lvgl_deinit)
 
 
 class _TouchState:
@@ -212,7 +210,10 @@ def run():
     while True:
         if needs_pump():
             pump()
-        broker.poll()
+        if elist := broker.poll():
+            for e in elist:
+                if e.type == events.QUIT:
+                    return
         sleep_ms(1)
 
 

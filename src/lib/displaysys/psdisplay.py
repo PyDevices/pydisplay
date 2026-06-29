@@ -9,16 +9,14 @@ displaysys.psdisplay
 from js import console, document
 from pyscript.ffi import create_proxy
 
-from displaysys import DisplayDriver, color_rgb
+from displaysys import DisplayDriver, color_rgb, default_quit_chord
 from eventsys import events
-from eventsys.keys import Keys, chord_matches, dom_key_scrolls_page, key_to_keycode, mod_mask
+from eventsys.keys import Keys, dom_key_scrolls_page, key_to_keycode, mod_mask
 
 try:  # Gamepad polling is optional and only available in a browser.
     from js import navigator
 except ImportError:
     navigator = None
-
-_POINTER_SCALE_EPS = 0.001
 
 
 def log(*args):
@@ -50,12 +48,10 @@ class PSDevices:
       modifier masks (left/right modifier variants via key location).
     - **Gamepad** (Gamepad API, polled on each :meth:`read`): ``JOYAXISMOTION``,
       ``JOYBUTTONDOWN`` / ``JOYBUTTONUP``.
-    - **Quit**: an assignable key chord emits ``events.QUIT`` (the equivalent of
-      clicking an SDL window's close button; the broker then deinitializes the
-      display and exits).  ``quit_chord`` is a ``(key_code, modifier_mask)``
-      tuple defaulting to CTRL+C; assign another (e.g.
-      ``(Keys.K_q, Keys.KMOD_CTRL)``) or ``None`` to disable.  If the host
-      browser/page intercepts the chord, pick a different one.
+
+    Quit chord handling is configured on :class:`PSDisplay` via ``quit_chord``
+    (default CTRL+Q); :class:`eventsys.QueueDevice` applies it when ``data=``
+    is the display driver.
 
     Note:
         The element must be focused to receive key events.  The constructor sets
@@ -64,8 +60,8 @@ class PSDevices:
 
     Args:
         id (str): The id of the element to watch (usually the canvas).
-        display (PSDisplay, optional): Display driver for ``map_pointer``; pass the
-            same ``PSDisplay`` instance used as ``QueueDevice`` data.
+        display (PSDisplay, optional): Pass the same ``PSDisplay`` used as
+            ``QueueDevice`` ``data`` (for ``touch_scale`` pointer mapping).
     """
 
     def __init__(self, id, display=None):
@@ -79,7 +75,6 @@ class PSDevices:
 
         self._queue = []
         self._pressed = set()
-        self.quit_chord = (Keys.K_c, Keys.KMOD_CTRL)
 
         # Gamepad state keyed by gamepad index: (axes list, pressed-bool list).
         self._gp_axes = {}
@@ -133,35 +128,15 @@ class PSDevices:
 
     def _map_pos(self, x, y):
         try:
-            xi, yi = int(x), int(y)
+            return (int(x), int(y))
         except Exception:
-            xi, yi = int(float(x)), int(float(y))
-        display = self._display
-        if display is None:
-            return (xi, yi)
-        try:
-            sx, sy = display._pointer_scale()
-            if abs(sx - 1.0) < _POINTER_SCALE_EPS and abs(sy - 1.0) < _POINTER_SCALE_EPS:
-                return (xi, yi)
-            return display.map_pointer(x, y)
-        except Exception:
-            return (xi, yi)
+            return (int(float(x)), int(float(y)))
 
     def _map_rel(self, dx, dy):
         try:
-            xdi, ydi = int(dx), int(dy)
+            return (int(dx), int(dy))
         except Exception:
-            xdi, ydi = int(float(dx)), int(float(dy))
-        display = self._display
-        if display is None:
-            return (xdi, ydi)
-        try:
-            sx, sy = display._pointer_scale()
-            if abs(sx - 1.0) < _POINTER_SCALE_EPS and abs(sy - 1.0) < _POINTER_SCALE_EPS:
-                return (xdi, ydi)
-            return display.map_pointer_rel(dx, dy)
-        except Exception:
-            return (xdi, ydi)
+            return (int(float(dx)), int(float(dy)))
 
     def _on_pointer_down(self, e):
         self._focus_canvas()
@@ -237,13 +212,6 @@ class PSDevices:
         keycode = key_to_keycode(e.key, e.location)
         mod = mod_mask(e.ctrlKey, e.shiftKey, e.altKey, e.metaKey)
         self._suppress_browser_scroll(e, keycode)
-        if chord_matches(self.quit_chord, keycode, mod):
-            try:
-                e.preventDefault()
-            except Exception:
-                pass
-            self._queue.append(events.Quit(events.QUIT))
-            return
         if e.repeat:  # ignore auto-repeat
             return
         self._pressed.add(keycode)
@@ -318,8 +286,10 @@ class PSDisplay(DisplayDriver):
         self._rotation = 0
         self._quiet = True
         self.color_depth = 16
+        self.quit_chord = default_quit_chord()
+        self.touch_scale = 1.0
 
-        super().__init__(auto_refresh=33, async_=async_)
+        super().__init__(auto_refresh=True, async_=async_)
 
     ############### Required API Methods ################
 
@@ -344,6 +314,8 @@ class PSDisplay(DisplayDriver):
                 lut[k + 2] = ((lo << 3) & 0xF8) | ((lo >> 2) & 0x07)
                 lut[k + 3] = 255
             self._rgba_lut = lut
+        sx, _sy = self._pointer_scale()
+        self.touch_scale = sx
 
     def fill_rect(self, x, y, w, h, c):
         """

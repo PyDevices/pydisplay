@@ -97,13 +97,30 @@ broker.on_device(eventsys.JOYSTICK, lambda e: print(e))
 
 ## Quit handling
 
-eventsys does **not** call `sys.exit` or `os._exit`. Handle `events.QUIT` in your loop, or set an application hook:
+eventsys does **not** call `sys.exit` or `os._exit`. Handle `events.QUIT` in your
+loop, or wire display cleanup on the broker:
 
 ```python
-broker.on_quit = cleanup
+broker.register_quit_cleanup(display_drv)
+# LVGL: broker.register_quit_cleanup(display_drv, before=_lvgl_deinit)
 ```
 
-In pydisplay, `add_ons.quit_handler.wire_display_quit(broker)` restores display cleanup and process exit for SDL window close.
+Display-only loops (no input dispatch) may use:
+
+```python
+from eventsys import poll_quit_discarding_others
+
+while True:
+    ...
+    if poll_quit_discarding_others(broker):
+        break
+```
+
+Do **not** use `poll_quit_discarding_others` in interactive apps — it discards
+non-QUIT events. Use full `broker.poll()` dispatch instead.
+
+`display_drv.quit()` only releases resources (REPL-safe); your loop must still
+exit on `events.QUIT`.
 
 ## Custom events and devices
 
@@ -126,7 +143,9 @@ Use `eventsys.capabilities()` to inspect the dialect and built-in device list.
 
 ## pydisplay integration
 
-pydisplay wires a `QUEUE` device to the active display backend in `board_config.py` and calls `wire_display_quit(broker)` for window-close cleanup. See [Architecture](architecture.md) and [Displays](displays.md).
+pydisplay wires a `QUEUE` device and `broker.register_quit_cleanup(display_drv)` in
+`board_config.py`. Display-only MCU configs set `broker = None`. See
+[Architecture](architecture.md) and [Displays](displays.md).
 
 ## Next
 

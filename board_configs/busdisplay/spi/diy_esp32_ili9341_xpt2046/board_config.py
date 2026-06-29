@@ -5,7 +5,6 @@ from machine import SPI, Pin
 from spibus import SPIBus
 from xpt2046 import Touch
 
-from add_ons.quit_handler import wire_display_quit
 import eventsys
 
 display_bus = SPIBus(
@@ -69,4 +68,4 @@ touch_dev = broker.create(
     data2=touch_rotation_table,
 )
 
-wire_display_quit(broker)
+broker.register_quit_cleanup(display_drv)

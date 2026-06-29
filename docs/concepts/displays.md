@@ -61,7 +61,7 @@ platform exposes:
 
 | Backends | Input source | Registered as |
 |----------|--------------|---------------|
-| `SDL2Display`, `PGDisplay` | module-level `poll()` / `get()` draining the native OS event queue | `QUEUE` device with `read=poll`/`read=get` |
+| `SDL2Display`, `PGDisplay` | module-level `get_events()` draining the native OS event queue | `QUEUE` device with `read=get_events` |
 | `JNDisplay`, `PSDisplay` | a `JNDevices` / `PSDevices` instance capturing browser input, drained via `read()` | `QUEUE` device with `read=devices_drv.read` |
 
 Either way your handler sees the same `eventsys.events` objects, so application
@@ -73,13 +73,24 @@ SDL2 and PyGame provide a real OS event queue. The driver module drains it and
 converts each event to an `eventsys.events` object:
 
 ```python
-from displaysys.sdldisplay import SDLDisplay, poll
+from displaysys.sdldisplay import SDLDisplay, get_events
 import eventsys
 
 display_drv = SDLDisplay(...)
 broker = eventsys.Broker()
-broker.create(type=eventsys.QUEUE, read=poll, data=display_drv)
+broker.create(type=eventsys.QUEUE, read=get_events, data=display_drv)
+broker.register_quit_cleanup(display_drv)
 ```
+
+Use `poll_event()` only for optional manual single-event checks — not as the
+QUEUE `read=` callback (it returns one event, not a list).
+
+Default quit chord on event backends is **CTRL+Q** (`display_drv.quit_chord`);
+`QueueDevice` applies it when `data=` is the display driver. Window-close still
+emits `events.QUIT` from SDL/PyGame.
+
+Pointer coordinates use `display_drv.touch_scale` (see `capabilities()` per
+backend); `QueueDevice` divides mouse events by that scale.
 
 This captures mouse motion/buttons, the wheel, the keyboard, the window-close
 (`QUIT`) event, and **joysticks/gamepads** (`JOYAXISMOTION`, `JOYBALLMOTION`,

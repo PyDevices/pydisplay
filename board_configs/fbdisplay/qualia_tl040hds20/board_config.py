@@ -6,7 +6,6 @@ from machine import I2C, Pin
 from pca9554 import PCA9554
 from rgbframebuffer import RGBFrameBuffer
 
-from add_ons.quit_handler import wire_display_quit
 from displaysys.fbdisplay import FBDisplay
 import eventsys
 
@@ -98,4 +97,4 @@ touch_dev = broker.create(
     data2=touch_rotation_table,
 )
 
-wire_display_quit(broker)
+broker.register_quit_cleanup(display_drv)

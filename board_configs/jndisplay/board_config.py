@@ -2,7 +2,6 @@
 Board configuration for Jupyter Notebook.
 """
 
-from add_ons.quit_handler import wire_display_quit
 from displaysys.jndisplay import JNDevices, JNDisplay
 import eventsys
 
@@ -23,6 +22,6 @@ events_dev = broker.create(
     data=display_drv,
 )
 
-wire_display_quit(broker)
+broker.register_quit_cleanup(display_drv)
 
 display_drv.fill(0)

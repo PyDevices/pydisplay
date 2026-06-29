@@ -7,6 +7,17 @@ from ._device import Device, device_class, types
 from ._events import events
 
 
+def poll_quit_discarding_others(broker):
+    """One poll pass; True if QUIT was seen. Other events in the batch are discarded."""
+    if broker is None:
+        return False
+    if elist := broker.poll():
+        for e in elist:
+            if e.type == events.QUIT:
+                return True
+    return False
+
+
 class Broker(Device):
     """Polls registered devices and dispatches events to subscribers."""
 
@@ -92,6 +103,20 @@ class Broker(Device):
         if dev in self.devices:
             self.devices.remove(dev)
             dev.broker = None
+
+    def register_quit_cleanup(self, resource, *, before=None, after=None):
+        """Wire ``resource.quit()`` to run on ``events.QUIT`` (no process exit)."""
+        if not callable(getattr(resource, "quit", None)):
+            raise ValueError("resource must have a callable quit() method")
+
+        def _handler():
+            if before is not None:
+                before()
+            resource.quit()
+            if after is not None:
+                after()
+
+        self.on_quit = _handler
 
     def _handle_quit(self):
         """Invoke the application quit handler without terminating the process."""

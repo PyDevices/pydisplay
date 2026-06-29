@@ -75,7 +75,19 @@ def init_timer(period=10):
     if Display.timer is None:
         from multimer import periodic
 
-        Display.timer = periodic(tick, period)
+        Display.timer = periodic(tick, period=period)
+
+
+def _poll_widgets():
+    """Poll all widget displays; return True when ``events.QUIT`` is seen."""
+    for display in list(Display.displays):
+        if elist := display.broker.poll():
+            for e in elist:
+                if e.type == events.QUIT:
+                    return True
+                if e.type in events.filter:
+                    display.handle_event(e)
+    return False
 
 
 def pump():
@@ -96,41 +108,11 @@ def pump():
 
 
 def run_forever():
-    """
-    Keep the widget loop alive on all platforms.
+    """Run ``multimer.run_forever`` with widget tick + broker poll until quit."""
+    init_timer(10)
+    from multimer import run_forever as multimer_run_forever
 
-    On queued/SDL backends, runs ``pump()`` forever. In poll mode
-    (no ``init_timer``), also calls ``tick()`` each iteration. On sync
-    MCU with an active timer, returns immediately (the timer drives
-    ``tick()``).
-    """
-    from multimer import capabilities, needs_pump, sleep_ms
-    from multimer import pump as multimer_pump
-
-    caps = capabilities()
-    timer_req = needs_pump()
-    needs_queue_loop = caps["schedule_queue"] or timer_req
-    # CPython linux ctypes: schedule queue active but timer fires on main thread;
-    # drive tick from the main loop instead of the timer to avoid signal/reentrancy issues.
-    cpython_main_loop_tick = caps["schedule_queue"] and not timer_req
-    has_timer = Display.timer is not None
-    if cpython_main_loop_tick and Display.timer:
-        try:
-            Display.timer.deinit()
-        except Exception:
-            pass
-        Display.timer = None
-        has_timer = False
-
-    if needs_queue_loop:
-        while Display.displays:
-            pump()
-            if not has_timer or cpython_main_loop_tick:
-                tick()
-            sleep_ms(1)
-    elif not has_timer:
-        while Display.displays:
-            tick()
+    multimer_run_forever(_poll_widgets)
 
 
 _display_drv_get_attrs = {
@@ -571,7 +553,6 @@ class Display(Widget):
         display_drv.set_vscroll(tfa, bfa)
         display_drv.vscroll = 0
         self.broker = broker
-        broker.on_quit = self.quit
         self._buffer = memoryview(
             bytearray(display_drv.width * display_drv.height * display_drv.color_depth // 8)
         )
@@ -698,10 +679,6 @@ class Display(Widget):
                     timer.deinit()
                 except Exception:
                     pass
-        # display_drv.quit() releases SDL resources, restores the TTY, and
-        # performs a low-level process exit.  sys.exit() raised from a timer or
-        # micropython.schedule callback is printed and swallowed on the unix port.
-        self.display_drv.quit()
 
     def tick(self):
         """
@@ -729,11 +706,6 @@ class Display(Widget):
             for dirty in dirty_areas:
                 self.refresh(dirty)
         else:
-            if elist := self.broker.poll():
-                for e in elist:
-                    if e.type in events.filter:
-                        self.handle_event(e)
-
             t = ticks_ms()
             for task in self._tasks:
                 if t >= task.next_run:

@@ -3,7 +3,8 @@
 from collections import namedtuple
 from random import choice
 
-from board_config import display_drv
+from board_config import broker, display_drv
+from eventsys import poll_quit_discarding_others
 from graphics import BMP565
 from multimer import pump, sleep_ms
 
@@ -83,4 +84,6 @@ while True:
         draw_sprite(*location, pos, dir)
         display_drv.show()
         pump()
+        if poll_quit_discarding_others(broker):
+            break
         sleep_ms(100)

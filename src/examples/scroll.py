@@ -1,3 +1,4 @@
+from eventsys import poll_quit_discarding_others
 # multimer types: all
 """
 scroll.py
@@ -68,6 +69,8 @@ def main():
         if scroll == tft.height:
             scroll = 0
 
+        if poll_quit_discarding_others(broker):
+            break
         sleep_ms(10)
 
 

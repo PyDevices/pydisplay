@@ -51,6 +51,8 @@ def main():
         # Check for mouse events
         if elist := broker.poll():
             for e in elist:
+            if e.type == broker.events.QUIT:
+                break
                 if e.type == broker.events.MOUSEBUTTONDOWN:
                     x, y = canvas.translate_point(e.pos)
                     if y < canvas.tfa:

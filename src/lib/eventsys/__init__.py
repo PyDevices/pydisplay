@@ -19,7 +19,7 @@ Quick start::
 """
 
 from . import keys
-from ._broker import Broker
+from ._broker import Broker, poll_quit_discarding_others
 from ._capabilities import capabilities
 from ._device import Device, register_device, register_device_class, types
 from ._encoder import EncoderDevice
@@ -85,6 +85,7 @@ __all__ = [
     "VirtualDevices",
     "capabilities",
     "events",
+    "poll_quit_discarding_others",
     "register_device",
     "register_event",
     "types",

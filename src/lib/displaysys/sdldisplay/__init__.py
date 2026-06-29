@@ -8,7 +8,7 @@ displaysys.sdldisplay
 
 from sys import implementation
 
-from displaysys import DisplayDriver, color_rgb
+from displaysys import DisplayDriver, color_rgb, default_quit_chord
 from eventsys import events
 
 from ._sdl2_lib import (
@@ -204,12 +204,12 @@ def _hat_xy(value):
     return (x, y)
 
 
-def poll():
+def poll_event():
     """
-    Polls for an event and returns the event type and data.
+    Poll for one pending event.
 
     Returns:
-        Optional[events]: The event type and data.
+        Optional[events]: One eventsys event, or ``None``.
     """
     global _event
     if SDL_PollEvent(_event):
@@ -222,12 +222,12 @@ def poll():
     return None
 
 
-def get() -> [events]:
+def get_events():
     """
-    Gets all events from the event queue.
+    Drain all pending events from the SDL queue.
 
     Returns:
-        [events]: A list of events.
+        list | None: A list of eventsys events, or ``None`` if the queue was empty.
     """
     global _event
     eventlist = []
@@ -349,6 +349,8 @@ class SDLDisplay(DisplayDriver):
         self._title = title
         self._window_flags = window_flags
         self._scale = scale
+        self.touch_scale = 1.0
+        self.quit_chord = default_quit_chord()
         self._buffer = None
         self._requires_byteswap = False
 
@@ -634,8 +636,16 @@ class SDLDisplay(DisplayDriver):
         _ensure_tty_sane()
 
     def quit(self, code: int = 0) -> None:
+        """Release SDL resources (REPL-safe)."""
+        self.deinit()
+
+    def force_quit(self, code: int = 0) -> None:
         """
-        Release SDL resources and terminate the process.
+        Release SDL resources then hard-exit the process.
+
+        pydisplay does not currently use this method. **Agents must not call
+        ``force_quit()`` or wire it into ``broker.on_quit`` without explicit
+        user permission.**
         """
         try:
             self.deinit()
@@ -658,4 +668,4 @@ class SDLDisplay(DisplayDriver):
             os._exit(code)
         except Exception:
             pass
-        raise SystemExit(code)
+        super().force_quit(code)

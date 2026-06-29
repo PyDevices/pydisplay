@@ -1,3 +1,4 @@
+from eventsys import poll_quit_discarding_others
 # multimer types: queued, sync
 # pyscript binaries: assets/warrior.bmp
 from collections import namedtuple
@@ -79,4 +80,6 @@ while True:
         dirty += draw_sprite(*location, pos, dir)
         canvas.show(dirty)
         pump()
+        if poll_quit_discarding_others(broker):
+            break
         sleep_ms(100)

@@ -5,7 +5,6 @@ from machine import ADC, Pin
 from spibus import SPIBus
 from st7789 import ST7789
 
-from add_ons.quit_handler import wire_display_quit
 import eventsys
 
 display_bus = SPIBus(
@@ -49,4 +48,4 @@ joystick_dev = broker.create(
     type=eventsys.JOYSTICK, joystick_driver=joystick_driver, emulate_digital=[(0, 1)]
 )
 
-wire_display_quit(broker)
+broker.register_quit_cleanup(display_drv)

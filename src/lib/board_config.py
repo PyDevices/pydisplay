@@ -31,7 +31,6 @@ except ImportError:
 
 if _ps:
     # Running in PyScript
-    from add_ons.quit_handler import wire_display_quit
     from displaysys.psdisplay import PSDevices, PSDisplay
     import eventsys
 
@@ -46,9 +45,9 @@ if _ps:
         read=devices_drv.read,
         data=display_drv,
     )
+    broker.register_quit_cleanup(display_drv)
 elif _jn:
     # Running in Jupyter Notebook
-    from add_ons.quit_handler import wire_display_quit
     from displaysys.jndisplay import JNDevices, JNDisplay
     import eventsys
 
@@ -65,21 +64,21 @@ elif _jn:
         read=devices_drv.read,
         data=display_drv,
     )
+    broker.register_quit_cleanup(display_drv)
 else:
     # Running on the desktop
     import sys
 
-    from add_ons.quit_handler import wire_display_quit
     import eventsys
 
     try:
         # This should load for CPython
         from displaysys.pgdisplay import PGDisplay as DTDisplay
-        from displaysys.pgdisplay import get
+        from displaysys.pgdisplay import get_events
     except ImportError:
         # This should load for MicroPython on the desktop
         from displaysys.sdldisplay import SDLDisplay as DTDisplay
-        from displaysys.sdldisplay import get
+        from displaysys.sdldisplay import get_events
 
     display_drv = DTDisplay(
         width=width,
@@ -93,14 +92,13 @@ else:
 
     events_dev = broker.create(
         type=eventsys.QUEUE,
-        read=get,
+        read=get_events,
         data=display_drv,
         # data2=events.filter,
     )
+    broker.register_quit_cleanup(display_drv)
 
 if _ps:
     TIMER_ASYNC = True
-
-wire_display_quit(broker)
 
 display_drv.fill(0)

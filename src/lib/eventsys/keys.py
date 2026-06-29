@@ -714,6 +714,15 @@ def chord_matches(chord, keycode, mod):
     return all(not (chord_mod & group and not mod & group) for group in _MOD_GROUPS)
 
 
+def key_triggers_quit(event_type, key, mod, quit_chord):
+    """Return True when ``event_type`` is KEYDOWN and ``quit_chord`` matches."""
+    from ._events import events
+
+    if event_type != events.KEYDOWN:
+        return False
+    return chord_matches(quit_chord, key, mod)
+
+
 # Keys that scroll or pan the page when a focusable element does not call
 # ``preventDefault`` (arrow keys, space, page up/down, home/end).
 _BROWSER_SCROLL_KEYCODES = frozenset(

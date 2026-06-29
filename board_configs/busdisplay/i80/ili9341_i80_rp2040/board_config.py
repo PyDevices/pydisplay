@@ -5,7 +5,6 @@ from i80bus import I80Bus
 from ili9341 import ILI9341
 from machine import I2C, Pin  # See the note about reset below
 
-from add_ons.quit_handler import wire_display_quit
 import eventsys
 
 reset = Pin(12, Pin.OUT, value=1)
@@ -52,4 +51,4 @@ touch_dev = broker.create(
     data2=touch_rotation_table,
 )
 
-wire_display_quit(broker)
+broker.register_quit_cleanup(display_drv)

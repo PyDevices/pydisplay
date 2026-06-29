@@ -99,7 +99,9 @@ def main():
             tft.show()
             if needs_pump():
                 pump()
-            broker.poll()
+            if elist := broker.poll():
+                if any(e.type == broker.events.QUIT for e in elist):
+                    break
             sleep_ms(5000)
 
 

@@ -1,3 +1,4 @@
+from eventsys import poll_quit_discarding_others
 # multimer types: all
 """
 rotations.py
@@ -101,6 +102,8 @@ def main():
             )
             tft.show()
             color_idx = (color_idx + 1) % len(colors)
+            if poll_quit_discarding_others(broker):
+                break
             sleep_ms(2000)
 
 

@@ -5,6 +5,7 @@
 
 from ._device import Device, register_device_class, types
 from ._events import events
+from .keys import chord_matches
 
 
 class QueueDevice(Device):
@@ -21,11 +22,21 @@ class QueueDevice(Device):
             self.scale = self._data.touch_scale
         else:
             self.scale = 1
+        self._quit_chord_ok = hasattr(self._data, "quit_chord")
 
     def _poll(self):
         if (dev_events := self._read()) is not None:
             eventlist = []
+            quit_chord = self._data.quit_chord if self._quit_chord_ok else None
+            chord_key = quit_chord[0] if quit_chord else None
             for event in dev_events:
+                if quit_chord:
+                    if event.type == events.KEYDOWN and chord_matches(
+                        quit_chord, event.key, event.mod
+                    ):
+                        event = events.Quit(events.QUIT)
+                    elif event.type == events.KEYUP and event.key == chord_key:
+                        continue
                 if event.type in self._data2:
                     if (
                         event.type

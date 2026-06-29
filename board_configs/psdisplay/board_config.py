@@ -2,7 +2,6 @@
 Board configuration for PyScript.
 """
 
-from add_ons.quit_handler import wire_display_quit
 from displaysys.psdisplay import PSDevices, PSDisplay
 import eventsys
 
@@ -21,6 +20,6 @@ events_dev = broker.create(
     data=display_drv,
 )
 
-wire_display_quit(broker)
+broker.register_quit_cleanup(display_drv)
 
 display_drv.fill(0)

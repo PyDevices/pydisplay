@@ -138,6 +138,8 @@ def on_tick(_=None):
 def handle_events():
     if elist := broker.poll():
         for e in elist:
+            if e.type == broker.events.QUIT:
+                break
             if e.type != broker.events.MOUSEBUTTONDOWN:
                 continue
             if rotate_btn.contains(e.pos):

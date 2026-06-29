@@ -6,7 +6,6 @@ from displayio import release_displays
 from fourwire import FourWire
 from ili9341 import ILI9341
 
-from add_ons.quit_handler import wire_display_quit
 import eventsys
 
 release_displays()
@@ -62,4 +61,4 @@ touch_dev = broker.create(
     data2=touch_rotation_table,
 )
 
-wire_display_quit(broker)
+broker.register_quit_cleanup(display_drv)

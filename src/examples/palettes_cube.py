@@ -1,5 +1,6 @@
 # multimer types: queued, sync
-from board_config import display_drv
+from board_config import broker, display_drv
+from eventsys import poll_quit_discarding_others
 from multimer import pump, sleep_ms
 from palettes import get_palette
 from graphics import FrameBuffer, RGB565
@@ -36,6 +37,8 @@ def main():
         display_drv.blit_rect(ba, 0, y % display_drv.height, display_drv.width, line_height)
         display_drv.show()
         pump()
+        if poll_quit_discarding_others(broker):
+            break
         sleep_ms(100)
         y += line_height
 

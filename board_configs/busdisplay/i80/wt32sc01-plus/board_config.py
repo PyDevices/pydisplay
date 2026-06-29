@@ -5,7 +5,6 @@ from i80bus import I80Bus
 from machine import I2C, Pin, freq  # See the note about reset below
 from st7796 import ST7796
 
-from add_ons.quit_handler import wire_display_quit
 import eventsys
 
 freq(240_000_000)
@@ -58,4 +57,4 @@ touch_dev = broker.create(
     data2=touch_rotation_table,
 )
 
-wire_display_quit(broker)
+broker.register_quit_cleanup(display_drv)

@@ -8,6 +8,8 @@ display_drv.show()
 while True:
     if elist := broker.poll():
         for e in elist:
+            if e.type == broker.events.QUIT:
+                break
             if e.type == broker.events.MOUSEBUTTONDOWN:
                 if button_area.contains(e.pos):
                     display_drv.fill_rect(*button_area, getrandbits(16))

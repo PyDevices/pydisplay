@@ -5,7 +5,6 @@ from machine import Pin
 from rotary_irq_esp import RotaryIRQ
 from st7789 import ST7789
 
-from add_ons.quit_handler import wire_display_quit
 import eventsys
 
 display_rd_pin = Pin(7, Pin.OUT, value=1)
@@ -55,4 +54,4 @@ encoder_dev = broker.create(
     read2=encoder_button_func,
 )
 
-wire_display_quit(broker)
+broker.register_quit_cleanup(display_drv)

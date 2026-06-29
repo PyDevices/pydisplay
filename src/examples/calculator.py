@@ -151,7 +151,9 @@ async def main():
 
     # Main loop
     while True:
-        broker.poll()
+        if elist := broker.poll():
+            if any(e.type == broker.events.QUIT for e in elist):
+                break
         if codes := keypad.read():
             for code in codes:
                 if code not in button_codes:

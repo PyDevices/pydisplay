@@ -11,9 +11,9 @@ from io import BytesIO
 from IPython.display import display, update_display
 from PIL import Image, ImageDraw
 
-from displaysys import DisplayDriver, color_rgb
+from displaysys import DisplayDriver, color_rgb, default_quit_chord
 from eventsys import events
-from eventsys.keys import Keys, chord_matches, key_to_keycode, mod_mask
+from eventsys.keys import Keys, key_to_keycode, mod_mask
 
 _JN_DEPS = "pip install ipywidgets ipyevents"
 
@@ -80,12 +80,10 @@ class JNDevices:
     - **Wheel**: ``MOUSEWHEEL`` (also consumed by encoder devices).
     - **Keyboard**: ``KEYDOWN`` / ``KEYUP`` with SDL-style key codes, names and
       modifier masks (left/right modifier variants via key location).
-    - **Quit**: an assignable key chord emits ``events.QUIT`` (the equivalent of
-      clicking an SDL window's close button; the broker then deinitializes the
-      display and exits).  ``quit_chord`` is a ``(key_code, modifier_mask)``
-      tuple defaulting to CTRL+C; assign another (e.g.
-      ``(Keys.K_q, Keys.KMOD_CTRL)``) or ``None`` to disable.  If the notebook
-      front end intercepts the chord, pick a different one.
+
+    Quit chord handling is configured on :class:`JNDisplay` via ``quit_chord``
+    (default CTRL+Q); :class:`eventsys.QueueDevice` applies it when ``data=``
+    is the display driver.
 
     This class also owns the display widget: ``JNDisplay`` pushes frames to it
     via :meth:`update_buffer`.
@@ -116,7 +114,6 @@ class JNDevices:
 
         self._queue = []
         self._pressed = set()
-        self.quit_chord = (Keys.K_c, Keys.KMOD_CTRL)
 
         self.image = Image(format="png")
         self.image.add_class("pydisplay-jn-image")
@@ -255,9 +252,6 @@ class JNDevices:
             event.get("metaKey"),
         )
         if kind == "keydown":
-            if chord_matches(self.quit_chord, keycode, mod):
-                self._queue.append(events.Quit(events.QUIT))
-                return
             if event.get("repeat"):  # ignore auto-repeat
                 return
             self._pressed.add(keycode)
@@ -274,6 +268,10 @@ class JNDisplay(DisplayDriver):
     """
     A class to emulate a display on Jupyter Notebook.
 
+    Supports ILI9341-style vertical scroll emulation (same band compositing as
+    SDL/PG/PS). Interactive output uses :class:`JNDevices`; static notebooks can
+    call :meth:`show` without a device.
+
     Args:
         width (int): The width of the display.
         height (int): The height of the display.
@@ -282,6 +280,8 @@ class JNDisplay(DisplayDriver):
 
     Attributes:
         color_depth (int): The color depth of the display
+        touch_scale (float): Pointer scale for ``QueueDevice`` (always ``1.0``).
+        quit_chord: Keyboard chord for quit (default CTRL+Q); ``None`` disables.
     """
 
     _next_display_id = 0
@@ -298,6 +298,9 @@ class JNDisplay(DisplayDriver):
         self._draw = ImageDraw.Draw(self._buffer)
         self._jn_devices = None
         self._static_shown = False
+        self.touch_scale = 1.0
+        self.quit_chord = default_quit_chord()
+        self._visible = None
 
         super().__init__(auto_refresh=True, async_=async_)
 
@@ -311,8 +314,11 @@ class JNDisplay(DisplayDriver):
             self._buffer = Image.new("RGB", (self.width, self.height))
             self._draw = ImageDraw.Draw(self._buffer)
             self._jn_devices._last_png = b""
-            self._jn_devices.update_buffer(self._buffer)
-        # Static PIL output is deferred to show() so touch mode only gets one widget.
+            self._jn_devices.update_buffer(self.render())
+        else:
+            super().vscrdef(0, self.height, 0)
+            self.vscsad(False)
+            self._visible = None
 
     def fill_rect(self, x, y, w, h, c):
         """
@@ -337,6 +343,7 @@ class JNDisplay(DisplayDriver):
         bottom = max(y, y2)
         right = max(x, x2)
         self._draw.rectangle([(left, top), (right, bottom)], fill=(r, g, b))
+        self.render((x, y, w, h))
         return (x, y, w, h)
 
     def blit_rect(self, buf, x, y, w, h):
@@ -364,6 +371,7 @@ class JNDisplay(DisplayDriver):
             for i in range(w):
                 color = buf[(j * w + i) * BPP : (j * w + i) * BPP + BPP]
                 self.pixel(x + i, y + j, color)
+        self.render((x, y, w, h))
         return (x, y, w, h)
 
     def pixel(self, x, y, c):
@@ -382,14 +390,57 @@ class JNDisplay(DisplayDriver):
         self._draw.point((x, y), fill=(r, g, b))
         return (x, y, 1, 1)
 
+    ############### Scrolling (ILI9341-style, like PG/PS/SDL) ################
+
+    def vscrdef(self, tfa: int, vsa: int, bfa: int) -> None:
+        super().vscrdef(tfa, vsa, bfa)
+        self.render()
+
+    def vscsad(self, vssa=None) -> int:
+        if vssa is not None:
+            super().vscsad(vssa)
+            self.render()
+        return self._vssa
+
+    def render(self, render_rect=None):
+        """Composite offscreen buffer to visible frame, applying vertical scroll."""
+        y_start = self.vscsad()
+        if not y_start:
+            return self._buffer
+
+        w, h = self.width, self.height
+        if self._visible is None or self._visible.size != (w, h):
+            self._visible = Image.new("RGB", (w, h))
+
+        tfa = self._tfa
+        vsa = self._vsa
+        bfa = self._bfa
+        buf = self._buffer
+        vis = self._visible
+
+        if tfa > 0:
+            vis.paste(buf.crop((0, 0, w, tfa)), (0, 0))
+
+        vsa_top_height = vsa + tfa - y_start
+        vis.paste(buf.crop((0, y_start, w, y_start + vsa_top_height)), (0, tfa))
+
+        vsa_btm_height = vsa - vsa_top_height
+        vis.paste(buf.crop((0, tfa, w, tfa + vsa_btm_height)), (0, tfa + vsa_top_height))
+
+        if bfa > 0:
+            vis.paste(buf.crop((0, tfa + vsa, w, tfa + vsa + bfa)), (0, tfa + vsa))
+
+        return vis
+
     ############### Optional API Methods ################
 
     def show(self, _timer=None) -> None:
         """
         Updates the display with the current buffer.
         """
+        frame = self.render()
         if self._jn_devices is not None:
-            self._jn_devices.update_buffer(self._buffer)
+            self._jn_devices.update_buffer(frame)
         elif not self._static_shown:
             if _timer is not None:
                 # Auto-refresh timer fired before a device or explicit show().
@@ -397,7 +448,7 @@ class JNDisplay(DisplayDriver):
                 # widget that JNDevices is about to display.  Wait for an
                 # explicit show() (non-interactive use) or device attach.
                 return
-            display(self._buffer, display_id=self._display_id)
+            display(frame, display_id=self._display_id)
             self._static_shown = True
         else:
-            update_display(self._buffer, display_id=self._display_id)
+            update_display(frame, display_id=self._display_id)
