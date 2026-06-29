@@ -125,6 +125,42 @@ class event_loop:
                 self.timer.deinit()
         event_loop._current_instance = None
 
+    def shutdown_for_quit(self, *, pump_rounds=30, pump_delay_ms=1):
+        """Stop LVGL scheduling, drain in-flight work, then release the event loop."""
+        if self.asynchronous:
+            if self._aio_timer is not None:
+                self._aio_timer.deinit()
+                self._aio_timer = None
+        elif Timer and getattr(self, "timer", None):
+            self.timer.deinit()
+            self.timer = None
+
+        try:
+            from multimer import pump, sleep_ms
+        except ImportError:
+
+            def pump():
+                return None
+
+            def sleep_ms(_ms):
+                return None
+
+        for _ in range(pump_rounds):
+            pump()
+            if lv._nesting.value == 0 and (self.asynchronous or self.scheduled <= 0):
+                break
+            sleep_ms(pump_delay_ms)
+
+        if lv._nesting.value == 0:
+            try:
+                lv.task_handler()
+            except Exception:
+                pass
+
+        if self.asynchronous:
+            self.refresh_task.cancel()
+        event_loop._current_instance = None
+
     def disable(self):
         self.scheduled += self.max_scheduled
 

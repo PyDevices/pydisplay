@@ -3,21 +3,11 @@
 A simple paint application demonstrating the use of displaysys.
 """
 
-import board_config
-
-board_config.TIMER_ASYNC = True
-
 from board_config import display_drv, broker
-
-try:
-    import asyncio
-except ImportError:
-    import uasyncio as asyncio
-
-from multimer import run
+from multimer import dual_main, run_forever
 
 
-async def main():
+def _setup_paint():
     colors = [0xFFFF, 0xF800, 0x07E0, 0x001F, 0x07FF, 0xF81F, 0xFFE0, 0x0000]
 
     on_x_axis = display_drv.width < display_drv.height
@@ -50,7 +40,9 @@ async def main():
 
     display_drv.show()
     print("Application loaded.  Select a color and PAINT!")
-    while True:
+
+    def poll():
+        nonlocal selected
         if elist := broker.poll():
             for e in elist:
                 if e.type == broker.events.MOUSEBUTTONDOWN:
@@ -88,9 +80,31 @@ async def main():
                     if (on_x_axis and y > block_size) or (not on_x_axis and x > block_size):
                         paint(x, y, colors[selected])
                 elif e.type == broker.events.QUIT:
-                    return
+                    return True
         display_drv.show()
+        return False
+
+    return poll
+
+
+def main_sync():
+    poll = _setup_paint()
+    run_forever(poll, delay_ms=20)
+
+
+async def main_async():
+    try:
+        import asyncio
+    except ImportError:
+        import uasyncio as asyncio
+
+    poll = _setup_paint()
+    while True:
+        if poll():
+            return
         await asyncio.sleep(0.02)
 
 
-run(main)
+from board_config import TIMER_ASYNC
+
+dual_main(main_sync, main_async, async_mode=TIMER_ASYNC)

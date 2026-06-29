@@ -27,14 +27,16 @@ def main():
         display_drv.show()
         pump()
         if poll_quit_discarding_others(broker):
-            break
+            return True
         sleep_ms(1)
         i += line_height
+    return False
 
 
 def loop():
     while True:
-        main()
+        if main():
+            break
 
 
 loop()

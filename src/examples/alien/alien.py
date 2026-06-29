@@ -40,6 +40,9 @@ import tft_config
 import tft_bitmap
 
 palette = tft_config.palette
+import sys
+
+sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
 import alien_bitmap as alien
 
 SPEED_X = 3

@@ -246,6 +246,39 @@ Both runners invoke [`src/examples/lv_test_timer_harness.py`](../src/examples/lv
 
 ---
 
+## Cross-runtime example tests
+
+Smoke-test [`src/examples/`](../src/examples/) across desktop **runtimes** (MicroPython, CircuitPython, CPython, PyScript, Jupyter). Full guide: [docs/testing/example-runtimes.md](../docs/testing/example-runtimes.md).
+
+| File | Role |
+|------|------|
+| [`example_runtimes.toml`](example_runtimes.toml) | Canonical runtime list (agents read this first) |
+| [`example_test_manifest.toml`](example_test_manifest.toml) | Per-example kind, quit handling, timeouts, skip lists |
+| [`example_test_kit.py`](example_test_kit.py) | Orchestrator: `test_all_examples()` / `test_all_runtimes()` |
+| [`example_test_wrapper.py`](example_test_wrapper.py) | Subprocess entry; prints `EXAMPLE_RESULT=` |
+| [`quit_inject.py`](quit_inject.py) | QUEUE-device Quit injection (shared with LVGL harness) |
+
+```bash
+# Unit tests (gate) + curated example matrix
+python tools/example_test_kit.py --curated-only
+
+# All runnable examples; matrix=false / legacy/pending shown in table, not run
+python tools/example_test_kit.py
+
+# Execute every manifest example except kind=harness
+python tools/example_test_kit.py --all-except-harness
+
+# Runtime-major order
+python tools/example_test_kit.py --curated-only --order runtimes
+
+# Subset
+python tools/example_test_kit.py --only-example calculator --only-runtime micropython
+```
+
+Results: `.cursor/example_test_results.json`. PyScript headless runs need `playwright` (`pip install playwright && playwright install chromium`).
+
+---
+
 ## `convert_md_png_to_pbm.py`
 
 Bulk-converts [Material Design Icons](https://github.com/google/material-design-icons) PNGs to `.pbm` files for `pdwidgets` / `icons/`.

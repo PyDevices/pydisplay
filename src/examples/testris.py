@@ -9,11 +9,22 @@ from displaysys import alloc_buffer
 from touch_keypad import Keypad
 from joystick_keypad import JoystickKeypad
 from eventsys.keys import Keys
-from random import choice  # For random piece selection
+from eventsys import poll_quit_discarding_others
+try:
+    from random import choice  # For random piece selection
+except ImportError:
+    def choice(seq):
+        return seq[0]
 from json import load, dump  # For saving the high score
 from sys import exit  # For exiting the game
-from framebuf import FrameBuffer, RGB565  # For drawing text boxes
-from micropython import const  # For constant values
+from graphics import FrameBuffer, RGB565  # For drawing text boxes
+
+try:
+    from micropython import const  # For constant values
+except ImportError:
+
+    def const(x):
+        return x
 
 try:
     from time import ticks_ms, ticks_diff  # For timing
@@ -93,6 +104,13 @@ def main():  # noqa: C901, PLR0915
         GREY = 0x8410 if not needs_swap else 0x1084
 
     # Define other constants
+    try:
+        import pydisplay_test_mode
+
+        show_splash_screen = not pydisplay_test_mode.ENABLED
+    except ImportError:
+        show_splash_screen = True
+
     SPLASH_ENABLED = const(1)  # Set to 1 to show the splash screen, 0 to skip it
     DELAY = const(250)  # Delay in ms so we don't read the keypad too quickly
     SPEEDUP = const(
@@ -304,6 +322,12 @@ def main():  # noqa: C901, PLR0915
         except OSError:
             return 0
 
+    def _quit_if_needed(_where):
+        if not poll_quit_discarding_others(broker):
+            return False
+        display_drv.quit()
+        return True
+
     def wait_for_key(key=None, exclude=[]):
         """
         Waits for the user to press a key.
@@ -315,11 +339,18 @@ def main():  # noqa: C901, PLR0915
         Returns:
             str: The key that was pressed.
         """
+        try:
+            import pydisplay_test_mode
+
+            if pydisplay_test_mode.ENABLED:
+                return key if key is not None else START
+        except ImportError:
+            pass
+
         while True:  # Wait for the user to press a key
             pump()
-            if elist := broker.poll():
-                if any(e.type == broker.events.QUIT for e in elist):
-                    return None
+            if _quit_if_needed("wait_for_key"):
+                return None
             keys = joystick_keypad.read()
             keys.extend(keypad.read_held())
 
@@ -420,7 +451,7 @@ def main():  # noqa: C901, PLR0915
 
     high_score = load_high_score()  # Load the high score
 
-    if SPLASH_ENABLED:  # Show the splash screen and wait for the user to press a key
+    if SPLASH_ENABLED and show_splash_screen:  # Show the splash screen and wait for the user to press a key
         clear_screen()  # Clear the screen
         show_splash()  # Show the splash screen
         draw_banner(
@@ -462,6 +493,9 @@ def main():  # noqa: C901, PLR0915
         # Play the game
         show_score()  # Show the score
         while True:  # Main game loop
+            pump()
+            if _quit_if_needed("main_loop"):
+                return
             #         print("Main game loop")
             current_piece = next_piece  # Set the next piece to the current piece
             current_position = [
@@ -477,6 +511,9 @@ def main():  # noqa: C901, PLR0915
             last_drop = ticks_ms()  # Time of last automatic drop
 
             while current_piece:  # Middle loop - while the piece is in play
+                pump()
+                if _quit_if_needed("piece_loop"):
+                    return
                 #             print("Redraw piece loop")
                 draw_piece(current_piece, current_position)  # Draw the current piece
                 old_piece = current_piece.copy()  # Save the previous piece
@@ -486,11 +523,10 @@ def main():  # noqa: C901, PLR0915
                     current_piece == old_piece and current_position == old_position
                 ):  # Inner loop - while the piece hasn't moved
                     pump()
+                    if _quit_if_needed("inner_loop"):
+                        return
                     # If it has been DELAY ms since the last read, then read the keypads
                     if (ticks_diff(ticks_ms(), last_read) >= DELAY):
-                        if elist := broker.poll():
-                            if any(e.type == broker.events.QUIT for e in elist):
-                                return
                         keys = joystick_keypad.read()
                         keys.extend(keypad.read_held())
 
@@ -531,6 +567,9 @@ def main():  # noqa: C901, PLR0915
                         while not collision(
                             current_piece, current_position, 0, 1
                         ):  # While the piece hasn't hit bottom
+                            pump()
+                            if _quit_if_needed("hard_drop"):
+                                return
                             current_position[1] += 1  # Move the piece down
                         hard_drop = False  # Reset the hard drop flag
                         last_drop = 0  # Unset the last drop time

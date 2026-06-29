@@ -2,8 +2,13 @@ from eventsys import poll_quit_discarding_others
 # multimer types: queued, sync
 # pyscript binaries: assets/warrior.bmp
 from collections import namedtuple
-from random import choice
+try:
+    from random import choice
+except ImportError:
+    def choice(seq):
+        return seq[0]
 
+from board_config import broker
 from color_setup import ssd as canvas
 from graphics import BMP565
 from multimer import pump, sleep_ms
@@ -56,6 +61,8 @@ canvas.show(draw_sprite(*location, *sprite))
 step = 3
 dir = choice(directions)
 while True:
+    if poll_quit_discarding_others(broker):
+        break
     if choice((True, False, False, False, False)):
         dir = choice(directions)
     if dir == fwd and location.y + sprite_height > canvas.height - step * pos_per_step:
@@ -83,3 +90,6 @@ while True:
         if poll_quit_discarding_others(broker):
             break
         sleep_ms(100)
+    else:
+        continue
+    break

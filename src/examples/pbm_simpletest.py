@@ -1,7 +1,7 @@
 # multimer types: all
 # pyscript binaries: assets/micropython.pbm
 from board_config import display_drv
-from framebuf import FrameBuffer, RGB565
+from graphics import FrameBuffer, RGB565
 from pbm import PBM
 
 
@@ -34,7 +34,7 @@ palette = FrameBuffer(memoryview(bytearray(2 * 2)), 2, 1, RGB565)
 palette.pixel(0, 0, 0x0FF0)
 palette.pixel(1, 0, 0xFFFF)
 fb.fill(0x000F)
-fb.blit(logo, 0, 0, palette.pixel(0, 0), palette)
+logo.render(fb, 0, 0, palette.pixel(1, 0), palette.pixel(0, 0))
 
 # blit the frame buffer to the display
 display_drv.blit_rect(buf, display_drv.width * 2 // 3, 0, logo.width, logo.height)

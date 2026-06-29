@@ -109,6 +109,22 @@
       "github:PyDevices/pydisplay/src/lib/graphics/_area.py"
     ],
     [
+      "lib/graphics/_blit_hooks.py",
+      "github:PyDevices/pydisplay/src/lib/graphics/_blit_hooks.py"
+    ],
+    [
+      "lib/graphics/_bmp565.py",
+      "github:PyDevices/pydisplay/src/lib/graphics/_bmp565.py"
+    ],
+    [
+      "lib/graphics/_capabilities.py",
+      "github:PyDevices/pydisplay/src/lib/graphics/_capabilities.py"
+    ],
+    [
+      "lib/graphics/_clip.py",
+      "github:PyDevices/pydisplay/src/lib/graphics/_clip.py"
+    ],
+    [
       "lib/graphics/_draw.py",
       "github:PyDevices/pydisplay/src/lib/graphics/_draw.py"
     ],
@@ -149,6 +165,14 @@
       "github:PyDevices/pydisplay/src/lib/multimer/__init__.py"
     ],
     [
+      "lib/multimer/_async.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_async.py"
+    ],
+    [
+      "lib/multimer/_capabilities.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_capabilities.py"
+    ],
+    [
       "lib/multimer/_ctypes.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_ctypes.py"
     ],
@@ -179,10 +203,6 @@
     [
       "lib/multimer/_timerbase.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_timerbase.py"
-    ],
-    [
-      "lib/multimer/aio.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/aio.py"
     ],
     [
       "jupyter_notebook.ipynb",

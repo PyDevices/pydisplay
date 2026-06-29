@@ -65,6 +65,22 @@
       "github:PyDevices/pydisplay/src/lib/graphics/_area.py"
     ],
     [
+      "lib/graphics/_blit_hooks.py",
+      "github:PyDevices/pydisplay/src/lib/graphics/_blit_hooks.py"
+    ],
+    [
+      "lib/graphics/_bmp565.py",
+      "github:PyDevices/pydisplay/src/lib/graphics/_bmp565.py"
+    ],
+    [
+      "lib/graphics/_capabilities.py",
+      "github:PyDevices/pydisplay/src/lib/graphics/_capabilities.py"
+    ],
+    [
+      "lib/graphics/_clip.py",
+      "github:PyDevices/pydisplay/src/lib/graphics/_clip.py"
+    ],
+    [
       "lib/graphics/_draw.py",
       "github:PyDevices/pydisplay/src/lib/graphics/_draw.py"
     ],
@@ -103,6 +119,10 @@
     [
       "lib/multimer/__init__.py",
       "github:PyDevices/pydisplay/src/lib/multimer/__init__.py"
+    ],
+    [
+      "lib/multimer/_capabilities.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_capabilities.py"
     ],
     [
       "lib/multimer/_schedule.py",

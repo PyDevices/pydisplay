@@ -27,12 +27,15 @@ The fonts were converted from True Type fonts using the
 
 """
 
+import sys
+
 import tft_write
 import tft_config
 from board_config import broker
 from multimer import Timer, needs_pump, pump, sleep_ms
 
 palette = tft_config.palette
+sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
 import proverbs_20 as font20
 import proverbs_30 as font30
 
@@ -101,7 +104,7 @@ def main():
                 pump()
             if elist := broker.poll():
                 if any(e.type == broker.events.QUIT for e in elist):
-                    break
+                    return
             sleep_ms(5000)
 
 

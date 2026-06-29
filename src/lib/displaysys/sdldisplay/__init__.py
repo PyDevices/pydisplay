@@ -39,6 +39,7 @@ from ._sdl2_lib import (
     SDL_QUIT,
     SDL_RENDERER_ACCELERATED,
     SDL_RENDERER_PRESENTVSYNC,
+    SDL_RENDERER_SOFTWARE,
     SDL_TEXTUREACCESS_TARGET,
     SDL_WINDOW_SHOWN,
     SDL_WINDOWPOS_CENTERED,
@@ -354,6 +355,11 @@ class SDLDisplay(DisplayDriver):
         self._buffer = None
         self._requires_byteswap = False
 
+        # CircuitPython + usdl2 accelerated GL cannot attach swapped-dimension render
+        # targets during rotation (SetRenderTarget -> glFramebufferTexture2DEXT).
+        if implementation.name == "circuitpython" and (render_flags & SDL_RENDERER_ACCELERATED):
+            render_flags = (render_flags & ~SDL_RENDERER_ACCELERATED) | SDL_RENDERER_SOFTWARE
+
         # Determine the pixel format
         if color_depth == 32:
             self._px_format = SDL_PIXELFORMAT_ARGB8888
@@ -466,6 +472,10 @@ class SDLDisplay(DisplayDriver):
         fillRect = SDL_Rect(x, y, w, h)
         r, g, b = color_rgb(c)
 
+        try:
+            retcheck(SDL_SetRenderTarget(self._renderer, None))
+        except RuntimeError:
+            pass
         retcheck(
             SDL_SetRenderTarget(self._renderer, self._buffer)
         )  # Set the render target to the texture
@@ -591,7 +601,6 @@ class SDLDisplay(DisplayDriver):
         if not self._sdl_active():
             return
         # Single SDL_RenderCopy was disabled: not working on Chromebooks, Ubuntu, Raspberry Pi OS.
-        # Ignore renderRect and render the entire texture to the window in four steps.
         y_start = self.vscsad()
         if self._tfa > 0:
             tfaRect = SDL_Rect(0, 0, self.width, self._tfa)
@@ -635,18 +644,11 @@ class SDLDisplay(DisplayDriver):
         _restore_tty()
         _ensure_tty_sane()
 
-    def quit(self, code: int = 0) -> None:
-        """Release SDL resources (REPL-safe)."""
-        self.deinit()
-
-    def force_quit(self, code: int = 0) -> None:
-        """
-        Release SDL resources then hard-exit the process.
-
-        pydisplay does not currently use this method. **Agents must not call
-        ``force_quit()`` or wire it into ``broker.on_quit`` without explicit
-        user permission.**
-        """
+    def quit(self, code: int = 0, force: bool = False) -> None:
+        """Release SDL resources (REPL-safe unless ``force=True``)."""
+        if not force:
+            self.deinit()
+            return
         try:
             self.deinit()
         except Exception:
@@ -668,4 +670,8 @@ class SDLDisplay(DisplayDriver):
             os._exit(code)
         except Exception:
             pass
-        super().force_quit(code)
+        raise SystemExit(code)
+
+    def force_quit(self, code: int = 0) -> None:
+        """Release SDL resources then hard-exit the process."""
+        self.quit(code, force=True)

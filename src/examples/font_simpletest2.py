@@ -1,10 +1,14 @@
 # multimer types: all
 # pyscript binaries: assets/font_8x8.bin, assets/font_8x14.bin, assets/font_8x16.bin
 """
-font_simpletest.py -- Simple test of the Font class.
+font_simpletest2.py -- Simple test of the Font class.
 inspired by Russ Hughes's hello.py
 
-Draws directly to the display without using a framebuffer.
+Rendering path (per-pixel → live display):
+  Font.text draws each glyph with per-pixel fill_rect directly on display_drv.
+  Every set font bit becomes a separate fill_rect on the hardware buffer — no
+  off-screen aggregation and no partial blit. Slowest upload pattern of the
+  three font_simpletest variants. display_drv.show() follows each draw.
 """
 
 from board_config import broker, display_drv
@@ -30,9 +34,7 @@ BPP = display_drv.color_depth // 8  # Bytes per pixel
 
 
 def write(font, string, x, y, fg_color, bg_color, scale):
-    """
-    Write text to the display.
-    """
+    """Draw string straight onto display_drv (per-pixel fill_rect on the live buffer)."""
     font.text(display_drv, string, x, y, fg_color, scale)
 
 
@@ -78,5 +80,8 @@ def main():
                     scale,
                 )
                 display_drv.show()
+                if poll_quit_discarding_others(broker):
+                    return
+
 
 main()

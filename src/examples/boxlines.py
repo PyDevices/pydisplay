@@ -1,3 +1,4 @@
+from board_config import broker
 from eventsys import poll_quit_discarding_others
 # multimer types: all
 """
@@ -67,6 +68,8 @@ def main():
             palette.color565(getrandbits(8), getrandbits(8), getrandbits(8)),
         )
         tft.show()
+        if poll_quit_discarding_others(broker):
+            break
 
 
 main()

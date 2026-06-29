@@ -5,6 +5,14 @@
       "github:PyDevices/pydisplay/src/lib/multimer/__init__.py"
     ],
     [
+      "multimer/_async.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_async.py"
+    ],
+    [
+      "multimer/_capabilities.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_capabilities.py"
+    ],
+    [
       "multimer/_ctypes.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_ctypes.py"
     ],
@@ -35,10 +43,6 @@
     [
       "multimer/_timerbase.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_timerbase.py"
-    ],
-    [
-      "multimer/aio.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/aio.py"
     ]
   ],
   "deps": [],

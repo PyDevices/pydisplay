@@ -1,3 +1,4 @@
+from board_config import broker
 from eventsys import poll_quit_discarding_others
 # multimer types: all
 """
@@ -43,6 +44,8 @@ def main():
     tft.vscrdef(0, tft.height, 0)
 
     while True:
+        if poll_quit_discarding_others(broker):
+            return
         for font in (font1, font2, font3, font4):
             tft.draw.fill(palette.BLUE)
             tft.show()
@@ -59,7 +62,7 @@ def main():
 
                     if line > tft.height - font.HEIGHT:
                         if poll_quit_discarding_others(broker):
-                            break
+                            return
                         sleep_ms(3000)
                         tft.draw.fill(palette.BLUE)
                         tft.show()
@@ -67,7 +70,7 @@ def main():
                         col = 0
 
             if poll_quit_discarding_others(broker):
-                break
+                return
             sleep_ms(3000)
 
 

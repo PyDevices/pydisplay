@@ -3,6 +3,7 @@ from board_config import display_drv, broker
 from graphics import Draw
 from palettes import get_palette
 from random import getrandbits
+from multimer import needs_pump, pump
 
 
 canvas = display_drv
@@ -47,11 +48,14 @@ def main():
     canvas.show()
 
     while True:
-        # Check for mouse events
+        if needs_pump():
+            pump()
         if elist := broker.poll():
+            quit_requested = False
             for e in elist:
-            if e.type == broker.events.QUIT:
-                break
+                if e.type == broker.events.QUIT:
+                    quit_requested = True
+                    break
                 if e.type == broker.events.MOUSEBUTTONDOWN:
                     x, y = canvas.translate_point(e.pos)
                     if y < canvas.tfa:
@@ -64,6 +68,8 @@ def main():
                             canvas.width - 20, y_pos + 2, 12, 12, getrandbits(canvas.color_depth)
                         )
                     canvas.show()
+            if quit_requested:
+                break
 
 
 main()

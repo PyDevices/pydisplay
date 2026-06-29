@@ -1,0 +1,85 @@
+# Canonical runtime targets for cross-runtime example tests.
+# Agents: read this file and docs/testing/example-runtimes.md before running the matrix.
+#
+# Run from repo root:
+#   python tools/example_test_kit.py
+
+[defaults]
+duration_s = 5
+timeout_s = 30
+oneshot_timeout_s = 15
+
+# Subprocess interpreters — cwd is src/ unless noted.
+
+[runtimes.micropython]
+platform = "micropython"
+display_backend = "SDLDisplay"
+available_on = ["linux", "wsl", "macos"]
+kind = "subprocess"
+command = ["micropython"]
+cwd = "src"
+resolve = ["PATH", "~/bin/micropython"]
+setup_notes = "MicroPython unix build with SDL display support."
+
+[runtimes."micropython.exe"]
+platform = "micropython"
+display_backend = "SDLDisplay"
+available_on = ["windows", "wsl"]
+kind = "subprocess"
+command = ["micropython.exe"]
+cwd = "src"
+resolve = ["PATH", "~/bin/micropython.exe"]
+setup_notes = "MicroPython Windows (.exe). Async modes may be limited."
+timeout_s = 60
+
+[runtimes.circuitpython]
+platform = "circuitpython"
+display_backend = "SDLDisplay"
+available_on = ["linux", "wsl", "macos"]
+kind = "subprocess"
+command = ["circuitpython"]
+cwd = "src"
+resolve = ["PATH", "~/bin/circuitpython"]
+setup_notes = "CircuitPython unix with SDL."
+
+[runtimes.cpython-venv]
+platform = "cpython"
+display_backend = "SDLDisplay"
+available_on = ["linux", "wsl", "macos"]
+kind = "subprocess"
+command = [".venv/bin/python"]
+cwd = "src"
+resolve = ["repo:.venv/bin/python"]
+setup_notes = "Repo-root .venv (source .venv/bin/activate equivalent)."
+
+[runtimes."python.exe"]
+platform = "cpython"
+display_backend = "SDLDisplay"
+available_on = ["windows", "wsl"]
+kind = "subprocess"
+command = ["python.exe"]
+cwd = "src"
+resolve = ["PATH", "~/bin/python.exe"]
+setup_notes = "Windows CPython on PATH."
+
+# Launcher runtimes — cwd is repo root.
+
+[runtimes.pyscript]
+platform = "pyscript"
+display_backend = "PSDisplay"
+available_on = ["linux", "wsl", "macos", "windows"]
+kind = "pyscript"
+status = "active"
+command_template = ["./tools/pyscript.sh", "--module", "{example}", "--no-open"]
+cwd = "."
+setup_notes = "Requires tools/serve.py on port 8000. Autotest uses embed.html?autotest=1. Optional: pip install playwright for headless kit runs."
+
+[runtimes.jupyter]
+platform = "jupyter"
+display_backend = "JNDisplay"
+available_on = ["linux", "wsl", "macos"]
+kind = "jupyter"
+status = "active"
+command_template = ["./tools/jupyter.sh", "{example}", "--no-open"]
+cwd = "."
+setup_notes = "Requires .venv with jupyterlab, ipywidgets, ipyevents, pillow. Executes generated src/run-{example}.ipynb."

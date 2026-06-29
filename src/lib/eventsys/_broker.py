@@ -110,6 +110,13 @@ class Broker(Device):
             raise ValueError("resource must have a callable quit() method")
 
         def _handler():
+            try:
+                import pydisplay_test_mode
+
+                if pydisplay_test_mode.ENABLED:
+                    return
+            except ImportError:
+                pass
             if before is not None:
                 before()
             resource.quit()
