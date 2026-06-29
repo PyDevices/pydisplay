@@ -111,9 +111,9 @@ class Broker(Device):
 
         def _handler():
             try:
-                import os
+                import pydisplay_test_mode
 
-                if os.environ.get("PYDISPLAY_EXAMPLE_TEST"):
+                if pydisplay_test_mode.ENABLED:
                     return
             except ImportError:
                 pass

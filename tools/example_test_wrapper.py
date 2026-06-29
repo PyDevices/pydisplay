@@ -328,7 +328,9 @@ def main(argv=None):
         return 1
 
     try:
-        os.environ["PYDISPLAY_EXAMPLE_TEST"] = "1"
+        import pydisplay_test_mode
+
+        pydisplay_test_mode.ENABLED = True
     except Exception:
         pass
 
