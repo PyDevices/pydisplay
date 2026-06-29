@@ -39,6 +39,7 @@ from ._sdl2_lib import (
     SDL_QUIT,
     SDL_RENDERER_ACCELERATED,
     SDL_RENDERER_PRESENTVSYNC,
+    SDL_RENDERER_SOFTWARE,
     SDL_TEXTUREACCESS_TARGET,
     SDL_WINDOW_SHOWN,
     SDL_WINDOWPOS_CENTERED,
@@ -354,6 +355,11 @@ class SDLDisplay(DisplayDriver):
         self._buffer = None
         self._requires_byteswap = False
 
+        # CircuitPython + usdl2 accelerated GL cannot attach swapped-dimension render
+        # targets during rotation (SetRenderTarget -> glFramebufferTexture2DEXT).
+        if implementation.name == "circuitpython" and (render_flags & SDL_RENDERER_ACCELERATED):
+            render_flags = (render_flags & ~SDL_RENDERER_ACCELERATED) | SDL_RENDERER_SOFTWARE
+
         # Determine the pixel format
         if color_depth == 32:
             self._px_format = SDL_PIXELFORMAT_ARGB8888
@@ -595,7 +601,6 @@ class SDLDisplay(DisplayDriver):
         if not self._sdl_active():
             return
         # Single SDL_RenderCopy was disabled: not working on Chromebooks, Ubuntu, Raspberry Pi OS.
-        # Ignore renderRect and render the entire texture to the window in four steps.
         y_start = self.vscsad()
         if self._tfa > 0:
             tfaRect = SDL_Rect(0, 0, self.width, self._tfa)
