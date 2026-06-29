@@ -8,17 +8,20 @@ CPython: PBM (MONO_HLSB) and PGM (grayscale).
 """
 
 import os
+import struct
 import tempfile
 import unittest
 
 import _env  # noqa: F401
 
 from graphics import (
+    BMP565,
     GS2_HMSB,
     GS8,
     MONO_HLSB,
     RGB565,
     FrameBuffer,
+    bmp_to_framebuffer,
     pbm_to_framebuffer,
     pgm_to_framebuffer,
 )
@@ -111,6 +114,48 @@ class TestConverters(_TmpDirTest):
             f.write(b"XX\n1 1\n\x00")
         with self.assertRaises(ValueError):
             pbm_to_framebuffer(path)
+
+
+class TestBmp565(_TmpDirTest):
+    def _write_minimal_bmp(self, path, width, height, pixels):
+        from graphics._bmp565 import write_bmp565_file
+
+        with open(path, "wb") as f:
+            write_bmp565_file(f, pixels, width, height)
+
+    def test_bmp_to_framebuffer(self):
+        path = self._path("tiny.bmp")
+        pixels = bytearray([0x34, 0x12, 0x78, 0x56])  # two RGB565 pixels, top row
+        self._write_minimal_bmp(path, 2, 1, pixels)
+        fb = bmp_to_framebuffer(path)
+        self.assertEqual((fb.width, fb.height), (2, 1))
+        self.assertEqual(fb.format, RGB565)
+        self.assertEqual(fb.pixel(0, 0), 0x1234)
+        self.assertEqual(fb.pixel(1, 0), 0x5678)
+
+    def test_bmp565_roundtrip(self):
+        path = self._path("asset.bmp")
+        pixels = bytearray(4 * 2 * 2)
+        for i in range(4):
+            struct.pack_into("<H", pixels, i * 2, 0x1000 + i)
+        bmp = BMP565(source=pixels, width=2, height=2)
+        saved = bmp.save(path)
+        loaded = BMP565(saved)
+        self.assertEqual(loaded.width, 2)
+        self.assertEqual(loaded.height, 2)
+        self.assertEqual(loaded[0, 0], 0x1000)
+        self.assertEqual(loaded[1, 1], 0x1003)
+
+    def test_bmp565_matches_framebuffer_save(self):
+        path_fb = self._path("fb.bmp")
+        path_bmp = self._path("bmp.bmp")
+        fb = FrameBuffer(bytearray(2 * 2 * 2), 2, 2, RGB565)
+        fb.pixel(0, 0, 0xABCD)
+        fb.pixel(1, 1, 0x1234)
+        fb.save(path_fb)
+        BMP565(source=bytearray(fb.buffer), width=2, height=2).save(path_bmp)
+        with open(path_fb, "rb") as a, open(path_bmp, "rb") as b:
+            self.assertEqual(a.read(), b.read())
 
 
 class TestFromFileDispatch(_TmpDirTest):

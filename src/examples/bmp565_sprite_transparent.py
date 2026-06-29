@@ -4,7 +4,7 @@ from collections import namedtuple
 from random import choice
 
 from color_setup import ssd as canvas
-from bmp565 import BMP565
+from graphics import BMP565
 from multimer import pump, sleep_ms
 
 image = BMP565("examples/assets/warrior.bmp", streamed=True)

@@ -1,8 +1,7 @@
 # multimer types: all
 # pyscript binaries: assets/warrior.bmp
 from color_setup import ssd
-from bmp565 import BMP565
-from graphics import FrameBuffer, RGB565
+from graphics import BMP565, FrameBuffer, RGB565
 from multimer import sleep_ms
 
 ssd.fill(0x0)

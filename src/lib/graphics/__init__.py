@@ -18,6 +18,7 @@ Quick start::
 """
 
 from ._area import Area
+from ._bmp565 import BMP565
 from ._capabilities import capabilities, framebuf_backend
 from ._draw import Draw
 from ._files import bmp_to_framebuffer, pbm_to_framebuffer, pgm_to_framebuffer
@@ -54,6 +55,7 @@ from ._shapes import (
 )
 
 __all__ = [
+    "BMP565",
     "GS2_HMSB",
     "GS4_HMSB",
     "GS8",

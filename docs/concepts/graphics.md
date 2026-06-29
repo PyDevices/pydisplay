@@ -89,7 +89,7 @@ fb = graphics.FrameBuffer.from_file("image.bmp")
 
 `FrameBuffer.save()` writes PBM/PGM/BMP for supported formats (RGB565 and grayscale variants). Other formats raise `ValueError`.
 
-For streaming/large BMP assets, pydisplay's separate `add_ons/bmp565.BMP565` class supports slicing — see [Graphics files](graphics-files.md).
+For streaming/large BMP assets, use `graphics.BMP565` (sliceable, optional streaming reads) — see [Graphics files](graphics-files.md).
 
 ## pydisplay integration
 
@@ -97,7 +97,7 @@ For streaming/large BMP assets, pydisplay's separate `add_ons/bmp565.BMP565` cla
 |------|-----|
 | Scrollable full-screen buffer | `add_ons/displaybuf.DisplayBuffer` |
 | TFT proportional fonts | `tft_text` / `tft_write` add-ons |
-| Large BMP sprites | `add_ons/bmp565.BMP565` |
+| Large BMP sprites | `graphics.BMP565` |
 
 See [Drawing and fonts](drawing-and-fonts.md) for the wider pydisplay drawing stack.
 
@@ -109,6 +109,6 @@ See [Drawing and fonts](drawing-and-fonts.md) for the wider pydisplay drawing st
 
 ## Next
 
-- [Graphics files](graphics-files.md) — loaders vs add-on BMP565
+- [Graphics files](graphics-files.md) — loaders and BMP565
 - [Displays](displays.md)
 - [API reference](../reference/) → `graphics`

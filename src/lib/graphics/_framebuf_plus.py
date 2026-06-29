@@ -593,34 +593,12 @@ class FrameBuffer(_FrameBuffer):
                 f.write(b"255\n")
                 f.write(self.buffer)
         elif self.format == RGB565:
+            from ._bmp565 import write_bmp565_file
+
             if file_ext != "bmp":
                 filename += ".bmp"
             with open(filename, "wb") as f:
-                f.write(b"BM")  # Offset 0: Signature
-                f.write((54 + len(self.buffer)).to_bytes(4, "little"))  # Offset 2: File size
-                f.write(b"\x00\x00\x00\x00")  # Offset 6: Unused
-                f.write(b"\x36\x00\x00\x00")  # Offset 10: Offset to image data
-                f.write(b"\x28\x00\x00\x00")  # Offset 14: DIB header size
-                f.write(self.width.to_bytes(4, "little"))  # Offset 18: Width
-                f.write(self.height.to_bytes(4, "little"))  # Offset 22: Height
-                f.write(b"\x01\x00")  # Offset 26: Planes
-                f.write(b"\x10\x00")  # Offset 28: Bits per pixel
-                f.write(b"\x00\x00\x00\x00")  # Offset 30: Compression
-                f.write(len(self.buffer).to_bytes(4, "little"))  # Offset 34: Image size
-                f.write(
-                    b"\x00\x00\x00\x00\x00\x00\x00\x00"
-                )  # Offset 38: Horizontal and vertical resolution
-                f.write(b"\x00\x00\x00\x00")  # Offset 46: Colors in palette
-                f.write(b"\x00\x00\x00\x00")  # Offset 50: Important colors
-                # The order of the lines is reversed.  We need to reverse them back.
-                for i in range(self.height):
-                    f.write(
-                        self.buffer[
-                            (self.height - i - 1) * self.width * 2 : (self.height - i)
-                            * self.width
-                            * 2
-                        ]
-                    )
+                write_bmp565_file(f, self.buffer, self.width, self.height)
         else:
             raise ValueError(f"Save method not implemented for format {self.format}")
 

@@ -1,7 +1,7 @@
 # multimer types: queued, sync
 # pyscript binaries: assets/longstreet.bmp
 from board_config import display_drv
-from bmp565 import BMP565
+from graphics import BMP565
 from multimer import pump, sleep_ms
 
 display_drv.rotation = 0

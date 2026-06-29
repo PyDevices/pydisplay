@@ -140,7 +140,7 @@ Anything you can draw on implements the framebuf API:
 
 - The display itself
 - `framebuf` bytearrays
-- `bmp565.BMP565` bitmap files
+- `graphics.BMP565` bitmap files
 - `displaybuf.DisplayBuffer` (see [add-ons](../add-ons.md))
 
 ## Timing

@@ -3,7 +3,7 @@
 from collections import namedtuple
 
 from board_config import display_drv, broker
-from bmp565 import BMP565
+from graphics import BMP565
 from multimer import pump, sleep_ms
 
 point = namedtuple("point", "x y")

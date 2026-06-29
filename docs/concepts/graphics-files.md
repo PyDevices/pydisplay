@@ -16,9 +16,9 @@ Built into [`graphics`](graphics.md):
 
 Use these for icons and sprites that fit in RAM on MCU or desktop.
 
-## add_ons: BMP565 (streaming)
+## BMP565 (streaming)
 
-Class in `add_ons/bmp565.py` — reads/writes Windows BMP files in RGB565 format (export from GIMP).
+`graphics.BMP565` reads/writes Windows BMP files in RGB565 format (export from GIMP). Shared header/row logic also powers `bmp_to_framebuffer` and `FrameBuffer.save()` for RGB565.
 
 Features:
 
@@ -27,8 +27,6 @@ Features:
 - Use an existing bytearray as buffer (screenshots)
 
 Examples: `bmp565_simpletest.py`, `bmp565_sprite.py`, `bmp565_scroll.py`
-
-BMP565 and `bmp_to_framebuffer` both parse RGB565 BMP; consolidation into shared internals is planned as a follow-up.
 
 ## tft_text / tft_write bitmap helpers
 

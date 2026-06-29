@@ -1,5 +1,6 @@
 import struct
 
+from ._bmp565 import load_bmp565_buffer, read_bmp565_header
 from ._framebuf_plus import GS2_HMSB, GS4_HMSB, GS8, MONO_HLSB, RGB565, FrameBuffer
 
 
@@ -60,28 +61,12 @@ def pgm_to_framebuffer(filename):
 
 def bmp_to_framebuffer(filename):
     """
-    Convert a BMP file to a RGB565 FrameBuffer.
-    First ensures planes is 1, bits per pixel is 16, and compression is 0.
+    Convert an RGB565 BMP file to a FrameBuffer.
 
     Args:
-        filename (str): Filename of the
+        filename (str): Path to the BMP file.
     """
     with open(filename, "rb") as f:
-        if f.read(2) != b"BM":
-            raise ValueError("Not a BMP file")
-        f.seek(10)
-        data_offset = struct.unpack("<I", f.read(4))[0]
-        f.seek(14)
-        width, height = struct.unpack("<II", f.read(8))
-        planes = struct.unpack("<H", f.read(2))[0]
-        if planes != 1:
-            raise ValueError("Invalid BMP file")
-        bpp = struct.unpack("<H", f.read(2))[0]
-        if bpp != 16:
-            raise ValueError("Invalid color depth")
-        f.seek(data_offset)
-        buffer = memoryview(bytearray(width * height * 2))
-        f.seek(54)
-        for i in range(height):
-            buffer[(height - i - 1) * width * 2 : (height - i) * width * 2] = f.read(width * 2)
+        width, height, data_offset = read_bmp565_header(f)
+        buffer = load_bmp565_buffer(f, width, height, data_offset)
     return FrameBuffer(buffer, width, height, RGB565)
