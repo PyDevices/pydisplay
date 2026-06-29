@@ -21,7 +21,7 @@ board_config.TIMER_ASYNC = False
 # Import Timer only to check needs_pump() before starting the test.
 # Normal apps do not need this guard — use lv_test_timer_queued.py or
 # lv_test_timer_async.py when your platform requires it.
-from multimer import Timer
+from multimer import Timer, needs_pump
 
 if needs_pump():
     print("lv_test_timer_sync: default Timer requires pump() on this platform.")

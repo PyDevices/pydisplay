@@ -25,10 +25,14 @@ from multimer import run
 async def main():
     import display_driver  # noqa: F401
 
+    from board_config import broker
+    from eventsys import poll_quit_discarding_others
     from lv_test_timer_common import build_ui
 
     build_ui()
     while True:
+        if poll_quit_discarding_others(broker):
+            break
         await asyncio.sleep(0)
 
 

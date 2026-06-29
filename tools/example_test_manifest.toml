@@ -76,7 +76,6 @@ script = "examples/color_test.py"
 kind = "loop"
 quit = "poll"
 deps = ["add_ons", "tft_config"]
-skip_runtimes = ["pyscript"]
 
 [examples.timer_simpletest]
 import = "timer_simpletest"
@@ -93,7 +92,6 @@ script = "examples/chango/chango.py"
 kind = "loop"
 quit = "inject"
 deps = ["add_ons", "tft_config"]
-skip_runtimes = ["pyscript", "jupyter"]
 
 # --- harnesses (excluded from matrix) ---
 
@@ -105,59 +103,73 @@ quit = "inject"
 deps = ["lvgl"]
 matrix = false
 
-[examples.lv_test_timer_sync]
-import = "lv_test_timer_sync"
-script = "examples/lv_test_timer_sync.py"
-kind = "harness"
-quit = "inject"
-deps = ["lvgl"]
-matrix = false
-
-[examples.lv_test_timer_queued]
-import = "lv_test_timer_queued"
-script = "examples/lv_test_timer_queued.py"
-kind = "harness"
-quit = "inject"
-deps = ["lvgl"]
-matrix = false
-
-[examples.lv_test_timer_async]
-import = "lv_test_timer_async"
-script = "examples/lv_test_timer_async.py"
-kind = "harness"
-quit = "inject"
-deps = ["lvgl"]
-matrix = false
-
 [examples.lv_test_timer_common]
 import = "lv_test_timer_common"
 script = "examples/lv_test_timer_common.py"
 kind = "harness"
 matrix = false
 
+# --- LVGL timer mode scripts (matrix) ---
+
+[examples.lv_test_timer_sync]
+import = "lv_test_timer_sync"
+script = "examples/lv_test_timer_sync.py"
+kind = "oneshot"
+quit = "native_exit"
+deps = ["lvgl"]
+oneshot_timeout_s = 20
+
+[examples.lv_test_timer_queued]
+import = "lv_test_timer_queued"
+script = "examples/lv_test_timer_queued.py"
+kind = "lvgl"
+quit = "inject"
+deps = ["lvgl"]
+duration_s = 5
+timeout_s = 45
+
+[examples.lv_test_timer_async]
+import = "lv_test_timer_async"
+script = "examples/lv_test_timer_async.py"
+kind = "async"
+quit = "inject"
+deps = ["lvgl"]
+duration_s = 5
+timeout_s = 45
+
+# --- displaysys harness scripts (matrix) ---
+
 [examples.displaysys_deinit_test]
 import = "displaysys_deinit_test"
 script = "examples/displaysys_deinit_test.py"
-kind = "harness"
-matrix = false
+kind = "oneshot"
+quit = "native_exit"
+deps = ["core"]
+oneshot_timeout_s = 15
 
 [examples.displaysys_block_test]
 import = "displaysys_block_test"
 script = "examples/displaysys_block_test.py"
-kind = "harness"
-matrix = false
+kind = "loop"
+quit = "inject"
+deps = ["core"]
+duration_s = 5
 
 [examples.displaysys_fill_rect_test]
 import = "displaysys_fill_rect_test"
 script = "examples/displaysys_fill_rect_test.py"
-kind = "harness"
-matrix = false
+kind = "loop"
+quit = "inject"
+deps = ["core"]
+duration_s = 5
 
 [examples.test_timers]
 import = "test_timers"
 script = "examples/test_timers.py"
-kind = "harness"
-matrix = false
+kind = "oneshot"
+quit = "native_exit"
+deps = ["core"]
+oneshot_timeout_s = 30
 
 # --- expanded runnable set ---
 
@@ -502,7 +514,6 @@ script = "examples/alien/alien.py"
 kind = "loop"
 quit = "inject"
 deps = ["add_ons", "tft_config"]
-skip_runtimes = ["pyscript"]
 
 [examples.proverbs]
 import = "proverbs.proverbs"
@@ -510,7 +521,6 @@ script = "examples/proverbs/proverbs.py"
 kind = "loop"
 quit = "inject"
 deps = ["add_ons", "tft_config"]
-skip_runtimes = ["pyscript"]
 
 [examples.tiny_toasters]
 import = "tiny_toasters.tiny_toasters"
@@ -518,7 +528,6 @@ script = "examples/tiny_toasters/tiny_toasters.py"
 kind = "loop"
 quit = "inject"
 deps = ["add_ons", "tft_config"]
-skip_runtimes = ["pyscript"]
 
 [examples.noto_fonts]
 import = "noto_fonts.noto_fonts"
