@@ -102,14 +102,11 @@ def main():  # noqa: C901, PLR0915
     try:
         import pydisplay_test_mode
 
-        _example_test = pydisplay_test_mode.ENABLED
+        show_splash_screen = not pydisplay_test_mode.ENABLED
     except ImportError:
-        _example_test = False
+        show_splash_screen = True
 
-    if _example_test:
-        SPLASH_ENABLED = const(0)
-    else:
-        SPLASH_ENABLED = const(1)  # Set to 1 to show the splash screen, 0 to skip it
+    SPLASH_ENABLED = const(1)  # Set to 1 to show the splash screen, 0 to skip it
     DELAY = const(250)  # Delay in ms so we don't read the keypad too quickly
     SPEEDUP = const(
         25
@@ -444,7 +441,7 @@ def main():  # noqa: C901, PLR0915
 
     high_score = load_high_score()  # Load the high score
 
-    if SPLASH_ENABLED:  # Show the splash screen and wait for the user to press a key
+    if SPLASH_ENABLED and show_splash_screen:  # Show the splash screen and wait for the user to press a key
         clear_screen()  # Clear the screen
         show_splash()  # Show the splash screen
         draw_banner(
