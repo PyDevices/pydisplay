@@ -1,170 +1,234 @@
 # Matrix Follow-up Plan
 
-**Source:** [`.cursor/example_matrix_run.log`](.cursor/example_matrix_run.log) and [`.cursor/example_test_results.json`](.cursor/example_test_results.json)  
 **Branch:** `examples-post-refactor`  
-**Matrix command:** `python tools/example_test_kit.py --no-unit-tests --order runtimes`
+**PR:** [#39 Example matrix harness and post-refactor example fixes](https://github.com/PyDevices/pydisplay/pull/39) — **OPEN**, mergeable, CI ✅  
+**Latest commits:** `302e975c` (harness + mp.exe quit inject), `82c3ab4a` (dual_main + choice shims)  
+**Matrix command:** `python tools/example_test_kit.py --no-unit-tests --order runtimes`  
+**Sources:** [`.cursor/example_matrix_run.log`](.cursor/example_matrix_run.log) (full matrix, subprocess runtimes), [`.cursor/example_test_results.json`](.cursor/example_test_results.json) (latest column run: jupyter), `/tmp/pyscript_run.log` (pyscript column)
 
 ---
 
 ## Results summary
 
-| Runtime | Pass (excl. `matrix=false`) | Notes |
-|---------|----------------------------|-------|
-| **micropython** | **60/60** | Reference runtime |
-| **circuitpython** | **60/60** | `pbm_simpletest` needs `oneshot_timeout_s = 60` |
-| **cpython-venv** | **58/58** | Skips `console_advanced_demo`, `nano_gui_simpletest` |
-| **python.exe** | **58/58** | Skips `chango`, `png_test` |
-| **micropython.exe** | **49/60** → improving | Harness fixes below; async examples need `dual_main()` |
-| **pyscript** | **0/52** | Chromium launch blocked — missing `libnspr4.so` (WSL); see §5 |
-| **jupyter** | **22/58** | Harness + JNDisplay gaps |
+| Runtime | Pass (excl. `matrix=false`) | Status | Notes |
+|---------|----------------------------|--------|-------|
+| **micropython** | **60/60** | ✅ | Reference runtime (full matrix) |
+| **circuitpython** | **60/60** | ✅ | `pbm_simpletest` `oneshot_timeout_s = 60` on branch |
+| **cpython-venv** | **58/58** | ✅ | Skips `console_advanced_demo`, `nano_gui_simpletest` (manifest) |
+| **python.exe** | **58/58** | ✅ | Skips `console_advanced_demo`, `nano_gui_simpletest` (manifest) |
+| **micropython.exe** | **49/60** (stale) | 🔄 | Pre-fix full matrix; spot-checks green; column re-run pending |
+| **pyscript** | **30/52** | 🔄 | Playwright OK; 22 `Page.goto` networkidle timeouts (heavy/loop demos) |
+| **jupyter** | **23/57** | 🔄 | 34 cell timeouts; blit clip helps `pbm_simpletest` ✅ |
+
+Excluded by design: `hello`, `keypins_simpletest` (`matrix=false`). See [Skipped examples (by design)](#skipped-examples-by-design) below.
 
 ---
 
-## §4 micropython.exe — debug results and fixes
+## Session status
 
-### `lv_touch_test` — **FIXED** (test apparatus)
+| Item | Status |
+|------|--------|
+| PR #39 opened | ✅ [OPEN](https://github.com/PyDevices/pydisplay/pull/39) — commits through `82c3ab4a` |
+| `pbm_simpletest` `oneshot_timeout_s = 60` | ✅ On branch (`302e975c`) |
+| `lv_touch_test` mp.exe harness | ✅ multimer quit + `pump_lvgl` guard |
+| `bmp565_scroll_sprite` `timeout_s = 70` | ✅ ~53s mp.exe spot-check |
+| `dual_main()` async examples (5) | ✅ mp.exe + micropython spot-check |
+| `choice` shims (sprite ×2, testris) | ✅ mp.exe spot-check |
+| Jupyter `pydisplay_test_mode` cell | ✅ `_write_jupyter_notebook()` |
+| Jupyter `console_advanced_demo` skip | ✅ manifest `skip_runtimes` |
+| JNDisplay `blit_rect` clip | 🔄 **Unstaged** in `jndisplay.py` — `pbm_simpletest` jupyter ✅; `bmp565_scroll_sprite` still times out |
+| mp.exe full column re-run | ⏳ Pending |
+| PyScript column re-run | ✅ **Done** — 30/52 (`/tmp/pyscript_run.log`) |
+| Jupyter full column re-run | ✅ **Done** — 23/57 (`.cursor/example_test_results.json`) |
+| Skipped-examples inventory | ✅ Documented below |
 
-**Root cause:** `micropython.exe` has no `threading` or `_thread`. The wrapper fell back to **synchronous** quit injection *before* the example ran, calling `lv.task_handler()` via `pump_lvgl()` while LVGL was still uninitialized → `SystemExit(5)`.
+**Active jobs:** none (jupyter + pyscript columns finished 2026-06-29).
 
-**Fix applied (no example/lib changes):**
+**Uncommitted:** `src/lib/displaysys/jndisplay.py` (blit clip), `MATRIX_FOLLOWUP_PLAN.md`.
 
-- [`tools/example_test_wrapper.py`](tools/example_test_wrapper.py): `_start_multimer_quit_schedule()` — `multimer.Timer` one-shots inject touch/quit while `display_driver.run()` pumps on the main thread.
-- [`tools/quit_inject.py`](tools/quit_inject.py): `pump_lvgl()` guards with `lv.is_initialized()`.
-
-**Verified:** `lv_touch_test` → **SDLDisplay, ok** on `micropython.exe` (~8s).
-
-**Optional hardening (needs permission — example or add_ons):** `lv_touch_test.py` line 66 skips the cooperative duration loop on `win32`; if multimer scheduling ever fails, the example could hang until harness timeout.
-
-### `bmp565_scroll_sprite` — **FIXED** (manifest timeout)
-
-**Root cause:** Not a true hang — example is **very slow** on `micropython.exe` (~55s to cooperative quit). Kit timeout is `timeout_s + 5` = **35s** (default 30s), so subprocess is killed before `EXAMPLE_RESULT` prints. Linux `micropython` finishes in ~5s.
-
-**Fix applied (test apparatus only):**
-
-```toml
-# tools/example_test_manifest.toml
-[examples.bmp565_scroll_sprite]
-timeout_s = 70
-```
-
-Side effect: `schedule queue full` timer noise on slow ports is benign; test still passes.
-
-**Verified:** `bmp565_scroll_sprite` → **SDLDisplay, ok** on `micropython.exe` (~56s).
-
-### Async examples — **`dual_main()` rewrite** (needs permission — examples)
-
-| Example | Failure |
-|---------|---------|
-| `apollo`, `calculator`, `eventsys_simpletest`, `paint` | `no module named 'uasyncio'` |
-| `pydisplay_demo_async` | multimer async requires asyncio |
-
-See [app-starter dual pattern](docs/examples/app-starter.md). Remove forced `board_config.TIMER_ASYNC = True` at module top; use `dual_main(main_sync, main_async, async_mode=TIMER_ASYNC)`.
-
-### Other micropython.exe edge cases
-
-| Example | Approach |
-|---------|----------|
-| `bmp565_sprite`, `bmp565_sprite_transparent`, `testris` | `random.choice` shim (example or small lib helper — needs permission) |
-| `console_advanced_demo` | Skipped on cpython-venv/python.exe/jupyter; `interactive_requires_thread` on mp.exe |
+**Commit note (`jndisplay.py`):** Blit clip is working for at least `pbm_simpletest` and `bmp565_blit` on jupyter. Recommend committing after Brad spot-checks `pbm_simpletest alien bmp565_scroll_sprite` — do not commit until satisfied; `bmp565_scroll_sprite` still cell-timeout at 70s (no blit crash).
 
 ---
 
-## §5 PyScript — re-run results (2026-06-29)
+## §4 micropython.exe
 
-**Command:** `.venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime pyscript`
+### Fixed (verified 2026-06-29)
 
-Playwright is installed in repo **`.venv`** (not system `python`). Kit auto-starts `tools/serve.py` on port 8000 when needed.
+| Example / area | Fix | Commit |
+|----------------|-----|--------|
+| `lv_touch_test` | multimer.Timer quit schedule; `pump_lvgl()` guard | `302e975c` |
+| `bmp565_scroll_sprite` | manifest `timeout_s = 70` | `302e975c` |
+| `apollo`, `calculator`, `eventsys_simpletest`, `paint`, `pydisplay_demo_async` | `dual_main()` sync fallbacks | `82c3ab4a` |
+| `bmp565_sprite`, `bmp565_sprite_transparent`, `testris` | example-local `choice` shim | `82c3ab4a` |
 
-### Result counts (52 runnable; 2 manifest skips)
+### Remaining (1 expected non-pass)
+
+| Example | Outcome | Approach |
+|---------|---------|----------|
+| `console_advanced_demo` | `interactive_requires_thread` | Expected — no threading on mp.exe (see [Harness / environment skips](#harness--environment-skips)) |
+
+**Target after full re-run:** **59/60** (only `console_advanced_demo`).
+
+Stale full-matrix row (pre-fix): 49 ok / 11 bad — see `.cursor/example_matrix_run.log` line 688.
+
+---
+
+## §5 PyScript
+
+### OS deps — ✅ installed (2026-06-29)
+
+User ran `sudo .venv/bin/python -m playwright install-deps chromium`; `libnspr4.so` / `libnss3.so` present.
+
+### Latest column run (2026-06-29)
 
 | Outcome | Count |
 |---------|------:|
-| **ok** | 0 |
-| **needs_playwright** | 0 (with `.venv/bin/python`) |
-| **error** (BrowserType.launch) | **52** |
-| **timeout / hang** | 0 |
-| **matrix=false** (not runnable) | 2 — `hello`, `keypins_simpletest` |
+| **PSDisplay, ok** | **30** |
+| **`Page.goto` networkidle timeout** | **22** |
+| **manifest `—` (not run)** | **8** |
+| **matrix=false (display only)** | **2** |
 
-**Pass rate: 0/52 (0%).** No example-level failures yet — Chromium never launched.
+Runnable: **52**. Pass rate: **30/52** (58%).
 
-### Root cause — OS browser deps (not pydisplay)
+Failures are load-time timeouts on loop/pdwidgets/heavy demos (`boxlines`, `displaysys_simpletest`, all `widgets_*`, etc.) — not `needs_playwright` or browser launch errors.
 
-Every runnable case failed the same way:
-
-```
-chrome-headless-shell: error while loading shared libraries: libnspr4.so: cannot open shared object file
-```
-
-- `pip install playwright` + `playwright install chromium` are present in `.venv`.
-- WSL is missing NSS/NSPR system libraries Chromium needs.
-- `sudo .venv/bin/playwright install-deps chromium` failed here (sudo password required).
-
-### Harness notes (applied)
-
-- [`tools/example_test_kit.py`](tools/example_test_kit.py): `_server_ready()` now treats `OSError` / `ConnectionError` (e.g. stale listener on port 8000) as not-ready instead of crashing with `RemoteDisconnected`.
-- Kill a broken server before re-run: `fuser -k 8000/tcp`.
-
-### Real failures (examples)
-
-None — all 52 errors are infrastructure (`BrowserType.launch`), not `EXAMPLE_RESULT` failures.
-
-### Next steps
-
-1. **Install OS deps** (one-time, needs sudo on WSL):
-   ```bash
-   sudo .venv/bin/playwright install-deps chromium
-   # or: sudo apt install libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2
-   ```
-2. **Re-run column:**
-   ```bash
-   .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime pyscript
-   ```
-3. After Chromium launches, triage any true example failures (async demos, LVGL, missing PyScript shims) from `EXAMPLE_RESULT` / page errors.
+Log: `/tmp/pyscript_run.log`
 
 ---
 
-## Other priorities
+## Jupyter
 
-### P0 — Ship core refactor PR
+### Harness — ✅ done
 
-Core four subprocess runtimes green. Commit `pbm_simpletest` `oneshot_timeout_s = 60`.
+- `pydisplay_test_mode` injected in notebook generator ([`example_test_kit.py`](tools/example_test_kit.py))
+- `console_advanced_demo` skipped (manifest)
 
-### P1 — Jupyter harness (test apparatus)
+### JNDisplay blit — 🔄 fix in working tree
 
-1. Add `pydisplay_test_mode` cell to `_write_jupyter_notebook()` in [`example_test_kit.py`](tools/example_test_kit.py).
-2. ~~Add `skip_runtimes = ["jupyter"]` to `console_advanced_demo` (matches cpython-venv/python.exe).~~ **Done**
-3. Re-run jupyter column.
+[`jndisplay.py`](src/lib/displaysys/jndisplay.py): clip `blit_rect` to framebuffer (SDL-style) instead of raising on partial OOB.
 
-### P2 — JNDisplay blit bounds (needs permission — `src/lib/displaysys/jndisplay.py`)
+### Latest column run (2026-06-29)
 
-Clip `blit_rect` like SDL, or fix example layouts for 320px width.
+| Outcome | Count |
+|---------|------:|
+| **JNDisplay, ok** | **23** |
+| **cell timeout** | **33** |
+| **manifest skip (not run)** | **3** (`chango`, `console_advanced_demo`, `png_test`) |
+| **matrix=false (display only)** | **2** |
 
-### P4 — PyScript (blocked on OS deps)
+Runnable: **57**. Pass rate: **23/57** (40%).
 
-Playwright + Chromium binaries are in `.venv`; **52/52 launch errors** until `libnspr4` et al. are installed. See §5.
+Still timing out: loop demos, pdwidgets suite, `alien`, `bmp565_scroll_sprite` (70s).
+
+Results: `.cursor/example_test_results.json`, `/tmp/jupyter_run_postfix.log`
+
+---
+
+## Remaining work
+
+- [ ] Commit + push `jndisplay.py` blit clip (after Brad spot-check)
+- [x] Finish **jupyter** column re-run → **23/57**
+- [x] Finish **pyscript** column re-run → **30/52**; triage: networkidle timeouts on heavy demos
+- [ ] **mp.exe** full column re-run → confirm 59/60
+- [ ] Merge PR #39 when columns green enough for Brad
 
 ---
 
 ## Verification
 
 ```bash
-python tools/example_test_kit.py --no-unit-tests --only-example lv_touch_test --only-runtime micropython.exe
-python tools/example_test_kit.py --no-unit-tests --only-example bmp565_scroll_sprite --only-runtime micropython.exe  # after timeout_s=70
-.venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime pyscript
+# Full matrix (after local fixes committed)
+python tools/example_test_kit.py --no-unit-tests --order runtimes
+
+# Targeted
+python tools/example_test_kit.py --no-unit-tests --only-runtime micropython.exe
 python tools/example_test_kit.py --no-unit-tests --only-runtime jupyter
+.venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime pyscript
+
+# mp.exe spot-checks (already green)
+python tools/example_test_kit.py --no-unit-tests \
+  --only-example apollo calculator eventsys_simpletest paint pydisplay_demo_async \
+  --only-runtime micropython.exe
+python tools/example_test_kit.py --no-unit-tests \
+  --only-example bmp565_sprite bmp565_sprite_transparent testris lv_touch_test \
+  --only-runtime micropython.exe
+python tools/example_test_kit.py --no-unit-tests \
+  --only-example bmp565_scroll_sprite --only-runtime micropython.exe
+
+# JNDisplay blit retest (after commit)
+python tools/example_test_kit.py --no-unit-tests \
+  --only-example pbm_simpletest alien bmp565_scroll_sprite --only-runtime jupyter
+
+fuser -k 8000/tcp   # stale PyScript server
 ```
 
 Results: `.cursor/example_test_results.json`
 
 ---
 
-## Session status (2026-06-29)
+## Skipped examples (by design)
 
-| Item | Status |
-|------|--------|
-| `lv_touch_test` mp.exe harness | **Done** |
-| `bmp565_scroll_sprite` timeout_s=70 | **Done** (~56s mp.exe) |
-| `dual_main()` async examples | **Pending** (needs permission) |
-| Jupyter harness + console skip | **Partial** — console `jupyter` skip done; harness cell pending |
-| PyScript re-run | **Blocked** — `libnspr4.so` missing; 0/52 until `playwright install-deps` |
-| `MATRIX_FOLLOWUP_PLAN.md` | **This file** |
+Inventory from [`tools/example_test_manifest.toml`](tools/example_test_manifest.toml), [`tools/example_test_kit.py`](tools/example_test_kit.py) (`example_allowed_on_runtime`, `missing`, `needs_playwright`, matrix `—` dash), and [`tools/example_runtimes.toml`](tools/example_runtimes.toml).
+
+**Summary count:** **11** global exclusions (2 `matrix=false` examples + 9 harnesses) · **15** per-runtime manifest skip cells (**9** examples) · **1** wrapper expected non-pass · **4** launcher skip categories.
+
+### Globally excluded from matrix (`matrix=false`)
+
+| Example | Reason |
+|---------|--------|
+| `hello` | Legacy example with `quit=pending`; not ready for automated smoke (needs manual quit strategy). |
+| `keypins_simpletest` | GPIO / key-pin hardware test; not suitable for desktop SDL matrix. |
+| `lv_test_timer_harness` | LVGL timer unit harness (`kind=harness`); never in matrix. |
+| `lv_test_timer_sync` | LVGL timer sync harness. |
+| `lv_test_timer_queued` | LVGL timer queued harness. |
+| `lv_test_timer_async` | LVGL timer async harness. |
+| `lv_test_timer_common` | LVGL timer shared helpers harness. |
+| `displaysys_deinit_test` | DisplaySys deinit unit harness. |
+| `displaysys_block_test` | DisplaySys block API unit harness. |
+| `displaysys_fill_rect_test` | DisplaySys fill_rect unit harness. |
+| `test_timers` | General timer unit harness. |
+
+Harness rows appear only when using `--all-except-harness`; default matrix shows `hello` / `keypins_simpletest` as `matrix=false` labels without executing.
+
+### Per-runtime manifest skips (`skip_runtimes` → matrix `—`)
+
+| Example | Skipped on | Reason |
+|---------|------------|--------|
+| `console_advanced_demo` | `cpython-venv`, `python.exe`, `jupyter` | Interactive REPL + `os.dupterm`; not supported in headless CPython kit or Jupyter (no dupterm). |
+| `nano_gui_simpletest` | `pyscript`, `cpython-venv`, `python.exe` | Requires external `micropython-nano-gui` stack; not available on PyScript or desktop CPython runtimes. |
+| `chango` | `pyscript`, `jupyter` | Board `tft_config` + add-on font/game assets; not wired for browser embed or notebook kit. |
+| `png_test` | `pyscript`, `jupyter` | PNG decode via add-ons; too heavy / unsupported path for PyScript and Jupyter autotest. |
+| `color_test` | `pyscript` | TFT color calibration via `tft_config`; no PyScript board profile. |
+| `alien` | `pyscript` | SPI sprite demo with `tft_config`; assets not in PyScript embed. |
+| `proverbs` | `pyscript` | Scrolling text with `tft_config`; not in PyScript embed. |
+| `tiny_toasters` | `pyscript` | Animation with `tft_config`; not in PyScript embed. |
+| `noto_fonts` | `pyscript` | Large Noto font bundle + inject-quit loop; unreliable in headless PyScript autotest. |
+
+**Per-runtime runnable counts** (62 matrix columns − 2 `matrix=false` − manifest dashes): micropython / circuitpython / micropython.exe **60**; cpython-venv / python.exe **58**; pyscript **52**; jupyter **57**.
+
+### Harness / environment skips
+
+Cases where the kit schedules a cell but the wrapper or runtime cannot complete smoke testing (distinct from manifest `—` dashes):
+
+| Example | Runtime | Reason |
+|---------|---------|--------|
+| `console_advanced_demo` | `micropython.exe` | `interactive_requires_thread` — mp.exe build has no `threading`/`_thread`; wrapper cannot run timed interactive pass. |
+| `console_advanced_demo` | `micropython`, `circuitpython` | Runs with daemon finisher thread on SDL; passes smoke. |
+| `nano_gui_simpletest` | `micropython`, `circuitpython`, `jupyter` | Runs where `ensure_nano_gui` / notebook path exists; skipped elsewhere via manifest. |
+
+Manifest-listed skips in the previous table are also environment-driven (dupterm, tft_config, nano_gui deps); they are not executed so no failure row is recorded.
+
+### Launcher skips
+
+| Condition | When | Reason |
+|-----------|------|--------|
+| `needs_playwright` | `pyscript` | Playwright not installed in the invoking Python env; kit records skip (not a hard fail). **Current run:** playwright OK — **0** cells. |
+| `missing` | any runtime | Interpreter/launcher not found (`micropython` not on PATH, no `.venv/bin/python`, no `.venv/bin/jupyter`, or `tools/serve.py` missing for pyscript). Kit emits one `missing` row per (example, runtime). |
+| Platform `available_on` | `micropython.exe`, `python.exe` | Windows/WSL-only subprocess runtimes; absent on plain Linux → all cells `missing`. |
+| Platform `available_on` | `jupyter` | Linux/WSL/macOS only; not listed for Windows. |
+
+Matrix table `—` cells: **15** total (manifest `skip_runtimes`); not run, not counted in pass denominators.
+
+---
+
+*Plan pointer:* Cursor plan file `.cursor/plans/matrix_follow-up_plan_ed602266.plan.md` not present in repo; this doc is the canonical follow-up tracker.
