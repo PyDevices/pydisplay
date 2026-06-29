@@ -4,7 +4,7 @@
 """Tests for ``graphics`` image file I/O (save / from_file and the converters).
 
 Covers the formats whose pure-Python read/write paths round-trip cleanly on
-CPython: PBM (MONO_HLSB) and PGM (grayscale).
+CPython: PBM (MONO_HLSB), PGM (grayscale), and BMP (RGB565).
 """
 
 import os
@@ -17,13 +17,17 @@ import _env  # noqa: F401
 from graphics import (
     BMP565,
     GS2_HMSB,
+    GS4_HMSB,
     GS8,
     MONO_HLSB,
+    MONO_VLSB,
     RGB565,
     FrameBuffer,
     bmp_to_framebuffer,
+    load_image,
     pbm_to_framebuffer,
     pgm_to_framebuffer,
+    save_image,
 )
 
 
@@ -84,6 +88,38 @@ class TestSaveLoadRoundTrip(_TmpDirTest):
         with open(path, "rb") as f:
             self.assertEqual(f.read(2), b"BM")
 
+    def test_gs4_roundtrip(self):
+        buf = bytearray((8 + 1) // 2 * 8)
+        buf[0] = 0x1E
+        buf[4] = 0xF0
+        fb = FrameBuffer(buf, 8, 8, GS4_HMSB)
+        path = self._path("img.pgm")
+        fb.save(path)
+        loaded = FrameBuffer.from_file(path)
+        self.assertEqual(loaded.format, GS4_HMSB)
+        self.assertEqual(bytes(loaded.buffer), bytes(fb.buffer))
+
+    def test_gs8_roundtrip(self):
+        buf = bytearray(8 * 8)
+        buf[10] = 200
+        buf[63] = 42
+        fb = FrameBuffer(buf, 8, 8, GS8)
+        path = self._path("img.pgm")
+        save_image(fb, path)
+        loaded = load_image(path)
+        self.assertEqual(loaded.format, GS8)
+        self.assertEqual(bytes(loaded.buffer), bytes(fb.buffer))
+
+    def test_rgb565_roundtrip(self):
+        fb = FrameBuffer(bytearray(4 * 4 * 2), 4, 4, RGB565)
+        fb.pixel(1, 2, 0xBEEF)
+        path = self._path("img.bmp")
+        fb.save(path)
+        loaded = load_image(path)
+        self.assertEqual(loaded.format, RGB565)
+        self.assertEqual(loaded.pixel(1, 2), 0xBEEF)
+        self.assertEqual(bytes(loaded.buffer), bytes(fb.buffer))
+
 
 class TestConverters(_TmpDirTest):
     def test_pbm_to_framebuffer(self):
@@ -107,6 +143,21 @@ class TestConverters(_TmpDirTest):
         self.assertEqual(fb.format, GS8)
         self.assertEqual(fb.pixel(0, 0), 10)
         self.assertEqual(fb.pixel(1, 1), 40)
+
+    def test_pgm_to_framebuffer_gs4(self):
+        path = self._path("hand.pgm")
+        with open(path, "wb") as f:
+            f.write(b"P5\n2 2\n15\n")
+            f.write(bytes([0x1E, 0x00]))
+        fb = pgm_to_framebuffer(path)
+        self.assertEqual((fb.width, fb.height), (2, 2))
+        self.assertEqual(fb.format, GS4_HMSB)
+        self.assertEqual(bytes(fb.buffer), b"\x1e\x00")
+
+    def test_save_unsupported_format_raises(self):
+        fb = FrameBuffer(bytearray(8), 8, 8, MONO_VLSB)
+        with self.assertRaises(ValueError):
+            save_image(fb, self._path("out.pbm"))
 
     def test_pbm_bad_magic_raises(self):
         path = self._path("bad.pbm")

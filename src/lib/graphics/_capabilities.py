@@ -21,6 +21,10 @@ _CAPS = {
     "framebuf": "pure_python",
     "dialect": _DIALECT,
     "formats": list(_FORMAT_NAMES),
+    "image_io": {
+        "load": ["pbm", "pgm", "bmp"],
+        "save": ["pbm", "pgm", "bmp"],
+    },
 }
 
 

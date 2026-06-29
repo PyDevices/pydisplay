@@ -1,7 +1,72 @@
 import struct
 
-from ._bmp565 import load_bmp565_buffer, read_bmp565_header
+from ._bmp565 import load_bmp565_buffer, read_bmp565_header, write_bmp565_file
 from ._framebuf_plus import GS2_HMSB, GS4_HMSB, GS8, MONO_HLSB, RGB565, FrameBuffer
+
+# Framebuffer formats that ``save_image`` can write, keyed by file extension.
+_SAVE_FORMATS = {
+    MONO_HLSB: "pbm",
+    GS2_HMSB: "pgm",
+    GS4_HMSB: "pgm",
+    GS8: "pgm",
+    RGB565: "bmp",
+}
+
+
+def load_image(filename):
+    """Load a ``FrameBuffer`` from a PBM, PGM, or RGB565 BMP file."""
+    with open(filename, "rb") as f:
+        header = f.read(2)
+    if header == b"P4":
+        return pbm_to_framebuffer(filename)
+    if header == b"P5":
+        return pgm_to_framebuffer(filename)
+    if header == b"BM":
+        return bmp_to_framebuffer(filename)
+    raise ValueError(f"Unsupported image file {filename!r} (header {header!r})")
+
+
+def save_image(fb, filename=None):
+    """Save a ``FrameBuffer`` to PBM, PGM, or BMP based on its format.
+
+    MONO_HLSB → PBM, GS2/GS4/GS8 → PGM, RGB565 → BMP. Other formats raise
+    ``ValueError``.
+    """
+    if filename is None:
+        filename = "screenshot"
+    ext = _SAVE_FORMATS.get(fb.format)
+    if ext is None:
+        raise ValueError(f"Save not supported for format {fb.format}")
+    file_ext = filename.rsplit(".", 1)[-1]
+    if file_ext != ext:
+        filename += f".{ext}"
+    if fb.format == MONO_HLSB:
+        with open(filename, "wb") as f:
+            f.write(b"P4\n")
+            f.write(f"{fb.width} {fb.height}\n".encode())
+            f.write(fb.buffer)
+    elif fb.format == GS2_HMSB:
+        with open(filename, "wb") as f:
+            f.write(b"P5\n")
+            f.write(f"{fb.width} {fb.height}\n".encode())
+            f.write(b"3\n")
+            f.write(fb.buffer)
+    elif fb.format == GS4_HMSB:
+        with open(filename, "wb") as f:
+            f.write(b"P5\n")
+            f.write(f"{fb.width} {fb.height}\n".encode())
+            f.write(b"15\n")
+            f.write(fb.buffer)
+    elif fb.format == GS8:
+        with open(filename, "wb") as f:
+            f.write(b"P5\n")
+            f.write(f"{fb.width} {fb.height}\n".encode())
+            f.write(b"255\n")
+            f.write(fb.buffer)
+    elif fb.format == RGB565:
+        with open(filename, "wb") as f:
+            write_bmp565_file(f, fb.buffer, fb.width, fb.height)
+    return filename
 
 
 def pbm_to_framebuffer(filename):

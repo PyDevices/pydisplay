@@ -29,6 +29,11 @@ class TestCapabilities(unittest.TestCase):
     def test_formats_include_rgb565(self):
         self.assertIn("RGB565", capabilities()["formats"])
 
+    def test_image_io_extensions(self):
+        io_caps = capabilities()["image_io"]
+        self.assertEqual(io_caps["load"], ["pbm", "pgm", "bmp"])
+        self.assertEqual(io_caps["save"], ["pbm", "pgm", "bmp"])
+
     def test_cpython_uses_pure_python_framebuf(self):
         if sys.implementation.name != "cpython":
             self.skipTest("CPython-only assertion")

@@ -21,7 +21,13 @@ from ._area import Area
 from ._bmp565 import BMP565
 from ._capabilities import capabilities, framebuf_backend
 from ._draw import Draw
-from ._files import bmp_to_framebuffer, pbm_to_framebuffer, pgm_to_framebuffer
+from ._files import (
+    bmp_to_framebuffer,
+    load_image,
+    pbm_to_framebuffer,
+    pgm_to_framebuffer,
+    save_image,
+)
 from ._font import Font, text, text8, text14, text16
 from ._framebuf_plus import (
     GS2_HMSB,
@@ -81,6 +87,7 @@ __all__ = [
     "gradient_rect",
     "hline",
     "line",
+    "load_image",
     "pbm_to_framebuffer",
     "pgm_to_framebuffer",
     "pixel",
@@ -88,6 +95,7 @@ __all__ = [
     "polygon",
     "rect",
     "round_rect",
+    "save_image",
     "text",
     "text8",
     "text14",

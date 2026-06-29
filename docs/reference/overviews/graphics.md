@@ -13,6 +13,7 @@ graphics extends `framebuf` with extra drawing helpers (rounded rectangles, grad
 - `graphics.Area` — dirty rectangle with union/clip helpers
 - `graphics.capabilities()` — `native` vs `pure_python` framebuf backend
 - Module functions — `circle`, `rect`, `text8`, … (same primitives as FrameBuffer)
+- `load_image`, `save_image` — auto-detect load / format-aware save
 - `bmp_to_framebuffer`, `pbm_to_framebuffer`, `pgm_to_framebuffer` — image loaders
 - `BMP565` — sliceable/streaming RGB565 BMP asset
 

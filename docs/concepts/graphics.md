@@ -84,10 +84,10 @@ Eager loaders in the `graphics` package (full image in RAM):
 fb = graphics.bmp_to_framebuffer("sprite.bmp")
 fb = graphics.pbm_to_framebuffer("icon.pbm")
 fb = graphics.pgm_to_framebuffer("gray.pgm")
-fb = graphics.FrameBuffer.from_file("image.bmp")
+fb = graphics.load_image("image.bmp")  # or FrameBuffer.from_file(...)
 ```
 
-`FrameBuffer.save()` writes PBM/PGM/BMP for supported formats (RGB565 and grayscale variants). Other formats raise `ValueError`.
+`save_image(fb, path)` and `FrameBuffer.save()` write PBM/PGM/BMP for the formats in [Graphics files](graphics-files.md). Other framebuffer formats raise `ValueError`.
 
 For streaming/large BMP assets, use `graphics.BMP565` (sliceable, optional streaming reads) — see [Graphics files](graphics-files.md).
 

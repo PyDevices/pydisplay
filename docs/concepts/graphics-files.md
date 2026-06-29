@@ -11,8 +11,22 @@ Built into [`graphics`](graphics.md):
 | `graphics.bmp_to_framebuffer(path)` | Windows BMP → `FrameBuffer` |
 | `graphics.pbm_to_framebuffer(path)` | PBM (1-bit) |
 | `graphics.pgm_to_framebuffer(path)` | PGM (grayscale) |
-| `graphics.FrameBuffer.from_file(path)` | Auto-detect PBM/PGM/BMP from header |
-| `graphics.FrameBuffer.save(path)` | Write PBM/PGM/BMP for supported formats |
+| `graphics.load_image(path)` | Auto-detect PBM/PGM/BMP from header |
+| `graphics.save_image(fb, path)` | Write PBM/PGM/BMP for supported formats |
+| `graphics.FrameBuffer.from_file(path)` | Same as `load_image` |
+| `graphics.FrameBuffer.save(path)` | Same as `save_image` |
+
+### Save/load matrix
+
+| Framebuffer format | File | Notes |
+|--------------------|------|-------|
+| `MONO_HLSB` | PBM (P4) | 1-bit portable bitmap |
+| `GS2_HMSB` | PGM (P5, max 3) | 2-bit grayscale |
+| `GS4_HMSB` | PGM (P5, max 15) | 4-bit grayscale |
+| `GS8` | PGM (P5, max 255) | 8-bit grayscale |
+| `RGB565` | BMP | 16-bit RGB565 Windows BMP |
+
+`MONO_VLSB`, `MONO_HMSB`, and other display-native formats are not saved directly — convert or blit to a supported buffer first. `graphics.capabilities()["image_io"]` lists supported file extensions.
 
 Use these for icons and sprites that fit in RAM on MCU or desktop.
 

@@ -558,49 +558,7 @@ class FrameBuffer(_FrameBuffer):
         Args:
             filename (str): Filename to save to
         """
-        if filename is None:
-            filename = "screenshot"
-        file_ext = filename.split(".")[-1]
-        if self.format == MONO_HLSB:
-            if file_ext != "pbm":
-                filename += ".pbm"
-            with open(filename, "wb") as f:
-                f.write(b"P4\n")
-                f.write(f"{self.width} {self.height}\n".encode())
-                f.write(self.buffer)
-        elif self.format == GS2_HMSB:
-            if file_ext != "pgm":
-                filename += ".pgm"
-            with open(filename, "wb") as f:
-                f.write(b"P5\n")
-                f.write(f"{self.width} {self.height}\n".encode())
-                f.write(b"3\n")
-                f.write(self.buffer)
-        elif self.format == GS4_HMSB:
-            if file_ext != "pgm":
-                filename += ".pgm"
-            with open(filename, "wb") as f:
-                f.write(b"P5\n")
-                f.write(f"{self.width} {self.height}\n".encode())
-                f.write(b"15\n")
-                f.write(self.buffer)
-        elif self.format == GS8:
-            if file_ext != "pgm":
-                filename += ".pgm"
-            with open(filename, "wb") as f:
-                f.write(b"P5\n")
-                f.write(f"{self.width} {self.height}\n".encode())
-                f.write(b"255\n")
-                f.write(self.buffer)
-        elif self.format == RGB565:
-            from ._bmp565 import write_bmp565_file
-
-            if file_ext != "bmp":
-                filename += ".bmp"
-            with open(filename, "wb") as f:
-                write_bmp565_file(f, self.buffer, self.width, self.height)
-        else:
-            raise ValueError(f"Save method not implemented for format {self.format}")
+        return _files.save_image(self, filename)
 
     @staticmethod
     def from_file(filename):
@@ -610,15 +568,4 @@ class FrameBuffer(_FrameBuffer):
         Args:
             filename (str): Filename to load from
         """
-        # Read the first two bytes to determine the file type
-        with open(filename, "rb") as f:
-            header = f.read(2)
-
-        if header == b"P4":
-            return _files.pbm_to_framebuffer(filename)
-        elif header == b"P5":
-            return _files.pgm_to_framebuffer(filename)
-        elif header == b"BM":
-            return _files.bmp_to_framebuffer(filename)
-        else:
-            raise ValueError(f"Unsupported file type {header}")
+        return _files.load_image(filename)
