@@ -21,7 +21,7 @@ cwd = "src"
 resolve = ["PATH", "~/bin/micropython"]
 setup_notes = "MicroPython unix build with SDL display support."
 
-[runtimes.micropython.exe]
+[runtimes."micropython.exe"]
 platform = "micropython"
 display_backend = "SDLDisplay"
 available_on = ["windows", "wsl"]
@@ -51,7 +51,7 @@ cwd = "src"
 resolve = ["repo:.venv/bin/python"]
 setup_notes = "Repo-root .venv (source .venv/bin/activate equivalent)."
 
-[runtimes.python.exe]
+[runtimes."python.exe"]
 platform = "cpython"
 display_backend = "SDLDisplay"
 available_on = ["windows", "wsl"]
