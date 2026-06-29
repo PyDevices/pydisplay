@@ -1,25 +1,23 @@
 # Drawing and fonts
 
+**Start here for the `graphics` library:** [graphics](graphics.md) — quick start, FrameBuffer vs Draw, Area bounds, fonts, and loaders.
+
+This page covers how `graphics` fits into the wider pydisplay stack.
+
 ## Which API?
 
 | Need | Use |
 |------|-----|
-| Basic pixels, lines, rects, text | `framebuf` API on display or buffer |
-| Rounded rects, gradients, `Area` bounds | `graphics.FrameBuffer` or `graphics.Draw` |
+| Buffer + shapes + Area bounds | [`graphics`](graphics.md) — `FrameBuffer` or `Draw` |
+| Basic pixels on a display | `framebuf` API on display or buffer |
 | Peter Hinch scrollable buffer | `add_ons/displaybuf.DisplayBuffer` |
-| CPython / CircuitPython without framebuf | `add_ons/framebuf.py` shim |
+| CPython without importing add-ons | `graphics` (bundles pure-Python framebuf) |
 
 See [Architecture](architecture.md).
 
-## framebuf everywhere
-
-All drawing targets support MicroPython's `framebuf.FrameBuffer` methods: `pixel`, `hline`, `vline`, `line`, `rect`, `fill_rect`, `text`, `blit`, etc.
-
-CPython and CircuitPython lack a compatible built-in `framebuf` — use `add_ons/framebuf.py`.
-
 ## graphics module
 
-`graphics` subclasses FrameBuffer and adds helpers (e.g. `round_rect`). Methods return an **Area** object (`x`, `y`, `w`, `h`) describing the bounding box of what changed — useful for partial updates and e-paper (future).
+`graphics` subclasses FrameBuffer and adds helpers (e.g. `round_rect`, `gradient_rect`). Methods return an **Area** object (`x`, `y`, `w`, `h`) describing the bounding box of what changed — useful for partial updates and e-paper.
 
 Use `Draw(canvas)` when you prefer a separate drawer object over subclassing.
 
@@ -40,4 +38,4 @@ Peter Hinch's API — full display as a logical framebuffer with 4/8/16-bit buff
 
 ## API reference
 
-[API reference (core)](../reference/) → `graphics`. [Add-ons API](../reference/add_ons/) → `displaybuf`, `framebuf`.
+[API reference (core)](../reference/) → `graphics`. [Add-ons API](../reference/add_ons/) → `displaybuf`.

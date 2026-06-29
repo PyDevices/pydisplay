@@ -42,8 +42,8 @@ class Draw:
         """Blit a raw rectangle buffer. Returns Area bounds."""
         return _shapes.blit_rect(self.canvas, buf, x, y, w, h)
 
-    def blit_tranparent(self, buf, x, y, w, h, key=None):
-        """Blit with transparency (typo preserved for compatibility). Returns Area bounds."""
+    def blit_transparent(self, buf, x, y, w, h, key=None):
+        """Blit with transparency. Returns Area bounds."""
         return _shapes.blit_transparent(self.canvas, buf, x, y, w, h, key)
 
     def circle(self, x, y, r, c, f=False):

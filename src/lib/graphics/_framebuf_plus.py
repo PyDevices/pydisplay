@@ -1,5 +1,8 @@
 from . import _files, _font, _shapes
 from ._area import Area
+from ._capabilities import init_capabilities
+
+_NATIVE_FRAMEBUF = False
 
 try:  # Try to import framebuf from MicroPython
     from framebuf import (
@@ -14,6 +17,8 @@ try:  # Try to import framebuf from MicroPython
     from framebuf import (
         FrameBuffer as _FrameBuffer,
     )
+
+    _NATIVE_FRAMEBUF = True
 except ImportError:  # If framebuf is not available, import from _framebuf.py
     from ._framebuf import (
         GS2_HMSB,
@@ -27,6 +32,19 @@ except ImportError:  # If framebuf is not available, import from _framebuf.py
     from ._framebuf import (
         FrameBuffer as _FrameBuffer,
     )
+
+init_capabilities(
+    framebuf_backend="native" if _NATIVE_FRAMEBUF else "pure_python",
+    formats=[
+        "MONO_VLSB",
+        "MONO_HLSB",
+        "MONO_HMSB",
+        "RGB565",
+        "GS2_HMSB",
+        "GS4_HMSB",
+        "GS8",
+    ],
+)
 
 
 class FrameBuffer(_FrameBuffer):
@@ -341,8 +359,10 @@ class FrameBuffer(_FrameBuffer):
             raise ValueError("The provided x, y, w, h values are out of range")
 
         if len(buf) != w * h * BPP:
-            print(f"len(buf)={len(buf)} w={w} h={h} self.color_depth={self.color_depth}")
-            raise ValueError("The source buffer is not the correct size")
+            raise ValueError(
+                f"The source buffer is not the correct size "
+                f"(got {len(buf)} bytes, expected {w * h * BPP})"
+            )
 
         for row in range(h):
             source_begin = row * w * BPP
@@ -521,6 +541,11 @@ class FrameBuffer(_FrameBuffer):
             Area: The area that was drawn to.
         """
         return _font.text16(self, s, x, y, c, scale, inverted, font_data)
+
+    def scroll(self, xstep, ystep):
+        """Scroll buffer contents. Returns the full buffer bounds."""
+        super().scroll(xstep, ystep)
+        return Area(0, 0, self.width, self.height)
 
     def save(self, filename=None):
         """

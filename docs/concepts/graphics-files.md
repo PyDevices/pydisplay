@@ -1,8 +1,22 @@
 # Graphics files
 
-Three ways to get bitmaps onto the display.
+Two layers: **graphics package loaders** (eager, full image in RAM) and **pydisplay add-ons** (streaming and TFT-specific helpers).
 
-## BMP565
+## graphics package loaders
+
+Built into [`graphics`](graphics.md):
+
+| Function | Format |
+|----------|--------|
+| `graphics.bmp_to_framebuffer(path)` | Windows BMP → `FrameBuffer` |
+| `graphics.pbm_to_framebuffer(path)` | PBM (1-bit) |
+| `graphics.pgm_to_framebuffer(path)` | PGM (grayscale) |
+| `graphics.FrameBuffer.from_file(path)` | Auto-detect PBM/PGM/BMP from header |
+| `graphics.FrameBuffer.save(path)` | Write PBM/PGM/BMP for supported formats |
+
+Use these for icons and sprites that fit in RAM on MCU or desktop.
+
+## add_ons: BMP565 (streaming)
 
 Class in `add_ons/bmp565.py` — reads/writes Windows BMP files in RGB565 format (export from GIMP).
 
@@ -14,6 +28,8 @@ Features:
 
 Examples: `bmp565_simpletest.py`, `bmp565_sprite.py`, `bmp565_scroll.py`
 
+BMP565 and `bmp_to_framebuffer` both parse RGB565 BMP; consolidation into shared internals is planned as a follow-up.
+
 ## tft_text / tft_write bitmap helpers
 
 From @russhughes st7789py_mpy:
@@ -23,4 +39,4 @@ From @russhughes st7789py_mpy:
 
 ## PNG
 
-Experimental support in add_ons — see [`png_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/png_test.py) (CPython only; requires `pypng` and a checkout of [material-design-icons](https://github.com/google/material-design-icons) at `~/github/material-design-icons/png/`). Tagged `queued, sync` for the slideshow loop.
+Experimental support in add_ons — see [`png_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/png_test.py) (CPython only; requires `pypng` and a checkout of [material-design-icons](https://github.com/google/material-design-icons) at `~/github/material-design-icons/png/`).

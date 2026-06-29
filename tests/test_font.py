@@ -72,6 +72,10 @@ class TestTextSelector(unittest.TestCase):
         with self.assertRaises(ValueError):
             text(self.fb, "X", 0, 0, 0xFFFF, height=13)
 
+    def test_missing_font_file_raises(self):
+        with self.assertRaises(FileNotFoundError):
+            Font("/nonexistent/font8x8.bin", 8)
+
 
 if __name__ == "__main__":
     unittest.main()

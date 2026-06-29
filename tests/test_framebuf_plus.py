@@ -95,6 +95,10 @@ class TestMethodsReturnArea(unittest.TestCase):
         self.assertEqual(self.fb.blit(src, 2, 2), Area(2, 2, 4, 4))
         self.assertEqual(self.fb.pixel(2, 2), 0xABCD)
 
+    def test_scroll_returns_area(self):
+        self.fb.fill_rect(0, 0, 4, 4, 0xFFFF)
+        self.assertEqual(self.fb.scroll(1, 0), Area(0, 0, 16, 16))
+
 
 class TestDrawingEffects(unittest.TestCase):
     def setUp(self):

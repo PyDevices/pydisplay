@@ -134,8 +134,10 @@ def blit_rect(canvas, buf, x, y, w, h):
             raise ValueError("The provided x, y, w, h values are out of range")
 
         if len(buf) != w * h * BPP:
-            print(f"len(buf)={len(buf)} w={w} h={h} self.color_depth={canvas.color_depth}")
-            raise ValueError("The source buffer is not the correct size")
+            raise ValueError(
+                f"The source buffer is not the correct size "
+                f"(got {len(buf)} bytes, expected {w * h * BPP})"
+            )
 
         for row in range(h):
             source_begin = row * w * BPP

@@ -2,13 +2,17 @@ graphics extends `framebuf` with extra drawing helpers (rounded rectangles, grad
 
 ## Narrative docs
 
-- [Drawing and fonts](../../concepts/drawing-and-fonts.md) — framebuf vs graphics vs Draw
-- [Graphics files](../../concepts/graphics-files.md) — BMP, PBM loaders
+- [graphics concept](../../concepts/graphics.md) — quick start, FrameBuffer vs Draw, capabilities
+- [Drawing and fonts](../../concepts/drawing-and-fonts.md) — pydisplay drawing stack
+- [Graphics files](../../concepts/graphics-files.md) — loaders vs add-on BMP565
 
 ## Key entry points
 
-- `FrameBuffer` — framebuf subclass with shape helpers
-- `Draw` — draws on any canvas (display or buffer)
-- `_shapes` module functions — low-level primitives (also used by `Draw`)
+- `graphics.FrameBuffer` — framebuf subclass with shape helpers and Area returns
+- `graphics.Draw` — draws on any framebuf-compatible canvas
+- `graphics.Area` — dirty rectangle with union/clip helpers
+- `graphics.capabilities()` — `native` vs `pure_python` framebuf backend
+- Module functions — `circle`, `rect`, `text8`, … (same primitives as FrameBuffer)
+- `bmp_to_framebuffer`, `pbm_to_framebuffer`, `pgm_to_framebuffer` — image loaders
 
 Generated API pages for each module appear below (build time).

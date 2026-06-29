@@ -55,9 +55,12 @@ class TestDraw(unittest.TestCase):
         self.assertIsInstance(self.draw.text("Hi", 0, 0, _WHITE), Area)
         self.assertGreater(count_set(self.canvas), 0)
 
-    def test_blit_transparent_typo_alias_exists(self):
-        # The historical misspelling is intentionally preserved.
-        self.assertTrue(hasattr(self.draw, "blit_tranparent"))
+    def test_blit_transparent(self):
+        buf = bytearray(2 * 2 * 2)
+        buf[0:2] = (0xFF, 0xFF)
+        buf[2:4] = (0x00, 0x00)
+        area = self.draw.blit_transparent(buf, 0, 0, 2, 2, key=0)
+        self.assertEqual(area, Area(0, 0, 2, 2))
 
 
 if __name__ == "__main__":

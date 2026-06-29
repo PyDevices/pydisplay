@@ -195,9 +195,8 @@ class Font:
                 raise RuntimeError(
                     f"Invalid font file: {self.font_data} is {filesize} bytes, expected {256 * self.height}"
                 )
-        except OSError:
-            print("Could not find font file", self.font_data)
-            raise
+        except OSError as err:
+            raise FileNotFoundError(f"Could not find font file: {self.font_data}") from err
         except OverflowError:
             # os.stat can throw this on boards without long int support
             # just hope the font file is valid and press on
@@ -367,4 +366,3 @@ class Font:
                     f.write(f"\\x{mv[(i * self.height) + j]:02x}")
                 f.write("'\\\n")
             f.write("\nFONT = memoryview(_FONT)\n")
-        print(f"Font data saved to {filename}")

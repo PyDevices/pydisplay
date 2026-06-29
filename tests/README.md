@@ -42,6 +42,7 @@ python tests/test_ticks.py
 | `test_devices.py` | `Broker` and the `Queue`/`Touch`/`Encoder`/`Keypad` devices plus `devices.custom_type` |
 | `test_keys.py` | the `Keys` key/modifier tables and `keyname`/`key`/`modname`/`mod` helpers |
 | `test_area.py` | the `Area` rectangle helper (containment, overlap, transforms, protocols) |
+| `test_capabilities.py` | `capabilities()` and framebuf backend introspection |
 | `test_framebuf.py` | the pure-Python `graphics._framebuf` fallback (pixels, fill, scroll) |
 | `test_framebuf_plus.py` | the exported `graphics.FrameBuffer` (properties + `Area` returns) |
 | `test_shapes.py` | the drawing primitives (`line`, `rect`, `circle`, `poly`, `blit`, ...) |
