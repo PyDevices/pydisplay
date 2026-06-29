@@ -65,7 +65,9 @@ def main():
         tft.show()
         if needs_pump():
             pump()
-        broker.poll()
+        if elist := broker.poll():
+            if any(e.type == broker.events.QUIT for e in elist):
+                break
         last_col, old_row = col, row
         col, row = col + xd, row + yd
         xd = -xd if col <= 0 or col >= width - alien.WIDTH else xd

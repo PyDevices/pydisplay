@@ -1,3 +1,4 @@
+from eventsys import poll_quit_discarding_others
 # multimer types: all
 """
 color_test.py
@@ -86,6 +87,8 @@ def main():
                 tft.draw.pixel(tft.width - 1, y, color)
 
             tft.show()
+            if poll_quit_discarding_others(broker):
+                break
             sleep_ms(1000)
 
 

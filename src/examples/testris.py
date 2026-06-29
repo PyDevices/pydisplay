@@ -317,7 +317,9 @@ def main():  # noqa: C901, PLR0915
         """
         while True:  # Wait for the user to press a key
             pump()
-            broker.poll()
+            if elist := broker.poll():
+                if any(e.type == broker.events.QUIT for e in elist):
+                    return None
             keys = joystick_keypad.read()
             keys.extend(keypad.read_held())
 
@@ -486,7 +488,9 @@ def main():  # noqa: C901, PLR0915
                     pump()
                     # If it has been DELAY ms since the last read, then read the keypads
                     if (ticks_diff(ticks_ms(), last_read) >= DELAY):
-                        broker.poll()
+                        if elist := broker.poll():
+                            if any(e.type == broker.events.QUIT for e in elist):
+                                return
                         keys = joystick_keypad.read()
                         keys.extend(keypad.read_held())
 

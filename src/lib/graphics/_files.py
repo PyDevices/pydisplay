@@ -1,6 +1,72 @@
 import struct
 
+from ._bmp565 import load_bmp565_buffer, read_bmp565_header, write_bmp565_file
 from ._framebuf_plus import GS2_HMSB, GS4_HMSB, GS8, MONO_HLSB, RGB565, FrameBuffer
+
+# Framebuffer formats that ``save_image`` can write, keyed by file extension.
+_SAVE_FORMATS = {
+    MONO_HLSB: "pbm",
+    GS2_HMSB: "pgm",
+    GS4_HMSB: "pgm",
+    GS8: "pgm",
+    RGB565: "bmp",
+}
+
+
+def load_image(filename):
+    """Load a ``FrameBuffer`` from a PBM, PGM, or RGB565 BMP file."""
+    with open(filename, "rb") as f:
+        header = f.read(2)
+    if header == b"P4":
+        return pbm_to_framebuffer(filename)
+    if header == b"P5":
+        return pgm_to_framebuffer(filename)
+    if header == b"BM":
+        return bmp_to_framebuffer(filename)
+    raise ValueError(f"Unsupported image file {filename!r} (header {header!r})")
+
+
+def save_image(fb, filename=None):
+    """Save a ``FrameBuffer`` to PBM, PGM, or BMP based on its format.
+
+    MONO_HLSB → PBM, GS2/GS4/GS8 → PGM, RGB565 → BMP. Other formats raise
+    ``ValueError``.
+    """
+    if filename is None:
+        filename = "screenshot"
+    ext = _SAVE_FORMATS.get(fb.format)
+    if ext is None:
+        raise ValueError(f"Save not supported for format {fb.format}")
+    file_ext = filename.rsplit(".", 1)[-1]
+    if file_ext != ext:
+        filename += f".{ext}"
+    if fb.format == MONO_HLSB:
+        with open(filename, "wb") as f:
+            f.write(b"P4\n")
+            f.write(f"{fb.width} {fb.height}\n".encode())
+            f.write(fb.buffer)
+    elif fb.format == GS2_HMSB:
+        with open(filename, "wb") as f:
+            f.write(b"P5\n")
+            f.write(f"{fb.width} {fb.height}\n".encode())
+            f.write(b"3\n")
+            f.write(fb.buffer)
+    elif fb.format == GS4_HMSB:
+        with open(filename, "wb") as f:
+            f.write(b"P5\n")
+            f.write(f"{fb.width} {fb.height}\n".encode())
+            f.write(b"15\n")
+            f.write(fb.buffer)
+    elif fb.format == GS8:
+        with open(filename, "wb") as f:
+            f.write(b"P5\n")
+            f.write(f"{fb.width} {fb.height}\n".encode())
+            f.write(b"255\n")
+            f.write(fb.buffer)
+    elif fb.format == RGB565:
+        with open(filename, "wb") as f:
+            write_bmp565_file(f, fb.buffer, fb.width, fb.height)
+    return filename
 
 
 def pbm_to_framebuffer(filename):
@@ -60,28 +126,12 @@ def pgm_to_framebuffer(filename):
 
 def bmp_to_framebuffer(filename):
     """
-    Convert a BMP file to a RGB565 FrameBuffer.
-    First ensures planes is 1, bits per pixel is 16, and compression is 0.
+    Convert an RGB565 BMP file to a FrameBuffer.
 
     Args:
-        filename (str): Filename of the
+        filename (str): Path to the BMP file.
     """
     with open(filename, "rb") as f:
-        if f.read(2) != b"BM":
-            raise ValueError("Not a BMP file")
-        f.seek(10)
-        data_offset = struct.unpack("<I", f.read(4))[0]
-        f.seek(14)
-        width, height = struct.unpack("<II", f.read(8))
-        planes = struct.unpack("<H", f.read(2))[0]
-        if planes != 1:
-            raise ValueError("Invalid BMP file")
-        bpp = struct.unpack("<H", f.read(2))[0]
-        if bpp != 16:
-            raise ValueError("Invalid color depth")
-        f.seek(data_offset)
-        buffer = memoryview(bytearray(width * height * 2))
-        f.seek(54)
-        for i in range(height):
-            buffer[(height - i - 1) * width * 2 : (height - i) * width * 2] = f.read(width * 2)
+        width, height, data_offset = read_bmp565_header(f)
+        buffer = load_bmp565_buffer(f, width, height, data_offset)
     return FrameBuffer(buffer, width, height, RGB565)

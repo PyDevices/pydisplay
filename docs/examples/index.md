@@ -206,12 +206,12 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 
 | Script | Description | Platforms | Packages |
 |--------|-------------|-----------|----------|
-| `bmp565_simpletest.py` | BMP565 load/draw | CPython · MCU | add_ons |
-| `bmp565_blit.py` | Blit operations | CPython · MCU | add_ons |
-| `bmp565_sprite.py` | Sprite animation | CPython · MCU | add_ons |
-| `bmp565_sprite_transparent.py` | Transparency | CPython · MCU | add_ons |
-| `bmp565_scroll.py` | Scrolling bitmap | CPython · MCU | add_ons |
-| `bmp565_scroll_sprite.py` | Scrolling sprite | CPython · MCU | add_ons |
+| `bmp565_simpletest.py` | BMP565 load/draw | CPython · MCU | graphics |
+| `bmp565_blit.py` | Blit operations | CPython · MCU | graphics |
+| `bmp565_sprite.py` | Sprite animation | CPython · MCU | graphics |
+| `bmp565_sprite_transparent.py` | Transparency | CPython · MCU | graphics |
+| `bmp565_scroll.py` | Scrolling bitmap | CPython · MCU | graphics |
+| `bmp565_scroll_sprite.py` | Scrolling sprite | CPython · MCU | graphics |
 | `palettes_material.py` | Material palette | CPython · MCU | add_ons |
 | `palettes_wheel.py` | Color wheel | CPython · MCU | add_ons |
 | `palettes_cube.py` | RGB cube | CPython · MCU | add_ons |

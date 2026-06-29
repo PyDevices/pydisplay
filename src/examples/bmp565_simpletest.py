@@ -5,8 +5,7 @@
 # See bmp565_scroll_sprite.py for an example of streaming one line at
 # a time instead of the full bitmap.
 from board_config import display_drv
-from bmp565 import BMP565
-from graphics import hline
+from graphics import BMP565, hline
 
 
 try:

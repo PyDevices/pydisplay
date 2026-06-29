@@ -6,7 +6,7 @@ from displayio import release_displays
 from fourwire import FourWire
 from ili9341 import ILI9341
 
-from eventsys import devices
+import eventsys
 
 release_displays()
 
@@ -52,11 +52,13 @@ def touch_read_func():
 
 touch_rotation_table = (6, 3, 0, 5)
 
-broker = devices.Broker()
+broker = eventsys.Broker()
 
-touch_dev = broker.create_device(
-    type=devices.types.TOUCH,
+touch_dev = broker.create(
+    type=eventsys.TOUCH,
     read=touch_read_func,
     data=display_drv,
     data2=touch_rotation_table,
 )
+
+broker.register_quit_cleanup(display_drv)

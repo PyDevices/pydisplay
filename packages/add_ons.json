@@ -5,10 +5,6 @@
       "github:PyDevices/pydisplay/src/add_ons/README.md"
     ],
     [
-      "bmp565.py",
-      "github:PyDevices/pydisplay/src/add_ons/bmp565.py"
-    ],
-    [
       "byteswap.py",
       "github:PyDevices/pydisplay/src/add_ons/byteswap.py"
     ],

@@ -73,8 +73,9 @@ with multimer.Timer(-1) as t:
     t.init(mode=multimer.PERIODIC, period=100, callback=cb)
     ...
 
-# Blocking main loop
+# Blocking main loop (``poll()`` may return ``True`` to exit cleanly)
 multimer.run_forever(poll=broker.poll, delay_ms=1)
+multimer.run_forever(poll=lambda: eventsys.poll_quit_discarding_others(broker))
 
 # Async main loop
 await multimer.run_forever_async(poll=broker.poll, delay_ms=10)

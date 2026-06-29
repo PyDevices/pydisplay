@@ -38,10 +38,14 @@ python tests/test_ticks.py
 | `test_timer.py` | the default `multimer.Timer` (whichever backend is selected) |
 | `test_periodic.py` | the `periodic` convenience helper |
 | `test_aio.py` | `AsyncTimer` and async helpers |
-| `test_events.py` | the `events` types/classes and `eventsys.custom_type` |
-| `test_devices.py` | `Broker` and the `Queue`/`Touch`/`Encoder`/`Keypad` devices plus `devices.custom_type` |
+| `test_events.py` | the `events` types/classes and `eventsys.register_event` |
+| `test_devices.py` | `Broker` and the `Queue`/`Touch`/`Encoder`/`Keypad` devices plus `register_device` |
+| `test_joystick.py` | `JoystickDevice` with a mock driver |
 | `test_keys.py` | the `Keys` key/modifier tables and `keyname`/`key`/`modname`/`mod` helpers |
 | `test_area.py` | the `Area` rectangle helper (containment, overlap, transforms, protocols) |
+| `test_capabilities.py` | `capabilities()` and framebuf backend introspection |
+| `test_blit_hooks.py` | blit dispatch to display hooks and framebuffer fast paths |
+| `test_clip.py` | clip helpers and ``ClippedCanvas`` |
 | `test_framebuf.py` | the pure-Python `graphics._framebuf` fallback (pixels, fill, scroll) |
 | `test_framebuf_plus.py` | the exported `graphics.FrameBuffer` (properties + `Area` returns) |
 | `test_shapes.py` | the drawing primitives (`line`, `rect`, `circle`, `poly`, `blit`, ...) |

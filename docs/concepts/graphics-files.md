@@ -1,10 +1,38 @@
 # Graphics files
 
-Three ways to get bitmaps onto the display.
+Two layers: **graphics package loaders** (eager, full image in RAM) and **pydisplay add-ons** (streaming and TFT-specific helpers).
 
-## BMP565
+## graphics package loaders
 
-Class in `add_ons/bmp565.py` — reads/writes Windows BMP files in RGB565 format (export from GIMP).
+Built into [`graphics`](graphics.md):
+
+| Function | Format |
+|----------|--------|
+| `graphics.bmp_to_framebuffer(path)` | Windows BMP → `FrameBuffer` |
+| `graphics.pbm_to_framebuffer(path)` | PBM (1-bit) |
+| `graphics.pgm_to_framebuffer(path)` | PGM (grayscale) |
+| `graphics.load_image(path)` | Auto-detect PBM/PGM/BMP from header |
+| `graphics.save_image(fb, path)` | Write PBM/PGM/BMP for supported formats |
+| `graphics.FrameBuffer.from_file(path)` | Same as `load_image` |
+| `graphics.FrameBuffer.save(path)` | Same as `save_image` |
+
+### Save/load matrix
+
+| Framebuffer format | File | Notes |
+|--------------------|------|-------|
+| `MONO_HLSB` | PBM (P4) | 1-bit portable bitmap |
+| `GS2_HMSB` | PGM (P5, max 3) | 2-bit grayscale |
+| `GS4_HMSB` | PGM (P5, max 15) | 4-bit grayscale |
+| `GS8` | PGM (P5, max 255) | 8-bit grayscale |
+| `RGB565` | BMP | 16-bit RGB565 Windows BMP |
+
+`MONO_VLSB`, `MONO_HMSB`, and other display-native formats are not saved directly — convert or blit to a supported buffer first. `graphics.capabilities()["image_io"]` lists supported file extensions.
+
+Use these for icons and sprites that fit in RAM on MCU or desktop.
+
+## BMP565 (streaming)
+
+`graphics.BMP565` reads/writes Windows BMP files in RGB565 format (export from GIMP). Shared header/row logic also powers `bmp_to_framebuffer` and `FrameBuffer.save()` for RGB565.
 
 Features:
 
@@ -23,4 +51,4 @@ From @russhughes st7789py_mpy:
 
 ## PNG
 
-Experimental support in add_ons — see [`png_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/png_test.py) (CPython only; requires `pypng` and a checkout of [material-design-icons](https://github.com/google/material-design-icons) at `~/github/material-design-icons/png/`). Tagged `queued, sync` for the slideshow loop.
+Experimental support in add_ons — see [`png_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/png_test.py) (CPython only; requires `pypng` and a checkout of [material-design-icons](https://github.com/google/material-design-icons) at `~/github/material-design-icons/png/`).

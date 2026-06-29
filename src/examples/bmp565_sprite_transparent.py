@@ -1,10 +1,11 @@
+from eventsys import poll_quit_discarding_others
 # multimer types: queued, sync
 # pyscript binaries: assets/warrior.bmp
 from collections import namedtuple
 from random import choice
 
 from color_setup import ssd as canvas
-from bmp565 import BMP565
+from graphics import BMP565
 from multimer import pump, sleep_ms
 
 image = BMP565("examples/assets/warrior.bmp", streamed=True)
@@ -79,4 +80,6 @@ while True:
         dirty += draw_sprite(*location, pos, dir)
         canvas.show(dirty)
         pump()
+        if poll_quit_discarding_others(broker):
+            break
         sleep_ms(100)

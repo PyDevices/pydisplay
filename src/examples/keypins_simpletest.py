@@ -29,13 +29,13 @@ print(f"{buttons.fire.keyname=}\n")
 
 # Subscribe the to the display driver so _KeyPin states are updated
 # on KEYDOWN and KEYUP events when broker.poll() is called.
-broker.subscribe(buttons, event_types=[broker.events.KEYDOWN, broker.events.KEYUP])
+broker.on([broker.events.KEYDOWN, broker.events.KEYUP], buttons)
 
 print(f"Press any of these keys:  {[button.keyname for button in buttons]}")
 while True:
-    # Call broker.poll() frequently.  We don't need the return
-    # value because the information we need is in the buttons object.
-    _ = broker.poll()
+    if elist := broker.poll():
+        if any(e.type == broker.events.QUIT for e in elist):
+            break
     for button in buttons:
         if button.value():
             print(f"{button.name} ({button.keyname}) pressed")

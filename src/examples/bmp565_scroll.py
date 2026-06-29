@@ -1,7 +1,8 @@
 # multimer types: queued, sync
 # pyscript binaries: assets/longstreet.bmp
-from board_config import display_drv
-from bmp565 import BMP565
+from board_config import broker, display_drv
+from eventsys import poll_quit_discarding_others
+from graphics import BMP565
 from multimer import pump, sleep_ms
 
 display_drv.rotation = 0
@@ -31,5 +32,7 @@ while True:
     draw_bg(0, i % display_drv.height, 0, i % image.height)
     display_drv.show()
     pump()
+    if poll_quit_discarding_others(broker):
+        break
     sleep_ms(1)
     i += 1

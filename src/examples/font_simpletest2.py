@@ -7,7 +7,8 @@ inspired by Russ Hughes's hello.py
 Draws directly to the display without using a framebuffer.
 """
 
-from board_config import display_drv
+from board_config import broker, display_drv
+from eventsys import poll_quit_discarding_others
 from graphics import Font
 from random import getrandbits
 from palettes import get_palette

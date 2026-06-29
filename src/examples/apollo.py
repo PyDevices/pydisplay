@@ -75,7 +75,9 @@ async def main():
     display_drv.show()
 
     while True:
-        broker.poll()
+        if elist := broker.poll():
+            if any(e.type == broker.events.QUIT for e in elist):
+                break
         if keys := dsky.keypad.read():
             for key in keys:
                 dsky.set_acty(True)

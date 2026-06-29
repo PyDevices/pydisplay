@@ -1,5 +1,8 @@
 from . import _files, _font, _shapes
 from ._area import Area
+from ._capabilities import init_capabilities
+
+_NATIVE_FRAMEBUF = False
 
 try:  # Try to import framebuf from MicroPython
     from framebuf import (
@@ -14,6 +17,8 @@ try:  # Try to import framebuf from MicroPython
     from framebuf import (
         FrameBuffer as _FrameBuffer,
     )
+
+    _NATIVE_FRAMEBUF = True
 except ImportError:  # If framebuf is not available, import from _framebuf.py
     from ._framebuf import (
         GS2_HMSB,
@@ -27,6 +32,19 @@ except ImportError:  # If framebuf is not available, import from _framebuf.py
     from ._framebuf import (
         FrameBuffer as _FrameBuffer,
     )
+
+init_capabilities(
+    framebuf_backend="native" if _NATIVE_FRAMEBUF else "pure_python",
+    formats=[
+        "MONO_VLSB",
+        "MONO_HLSB",
+        "MONO_HMSB",
+        "RGB565",
+        "GS2_HMSB",
+        "GS4_HMSB",
+        "GS8",
+    ],
+)
 
 
 class FrameBuffer(_FrameBuffer):
@@ -297,8 +315,7 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             (Area): Bounding box of the blitted buffer
         """
-        super().blit(buf, x, y, key, palette)
-        return Area(x, y, buf.width, buf.height)
+        return _shapes.blit(self, buf, x, y, key, palette)
 
     ########### Additional methods
 
@@ -335,22 +352,7 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             (Area): The bounding box of the blitted area.
         """
-        BPP = 2
-
-        if x < 0 or y < 0 or x + w > self.width or y + h > self.height:
-            raise ValueError("The provided x, y, w, h values are out of range")
-
-        if len(buf) != w * h * BPP:
-            print(f"len(buf)={len(buf)} w={w} h={h} self.color_depth={self.color_depth}")
-            raise ValueError("The source buffer is not the correct size")
-
-        for row in range(h):
-            source_begin = row * w * BPP
-            source_end = source_begin + w * BPP
-            dest_begin = ((y + row) * self.width + x) * BPP
-            dest_end = dest_begin + w * BPP
-            self.buffer[dest_begin:dest_end] = buf[source_begin:source_end]
-        return Area(x, y, w, h)
+        return _shapes.blit_rect(self, buf, x, y, w, h)
 
     def blit_transparent(self, buf, x, y, w, h, key):
         """
@@ -522,6 +524,11 @@ class FrameBuffer(_FrameBuffer):
         """
         return _font.text16(self, s, x, y, c, scale, inverted, font_data)
 
+    def scroll(self, xstep, ystep):
+        """Scroll buffer contents. Returns the full buffer bounds."""
+        super().scroll(xstep, ystep)
+        return Area(0, 0, self.width, self.height)
+
     def save(self, filename=None):
         """
         Save the framebuffer to a file.  The file extension must match the format, otherwise
@@ -533,71 +540,7 @@ class FrameBuffer(_FrameBuffer):
         Args:
             filename (str): Filename to save to
         """
-        if filename is None:
-            filename = "screenshot"
-        file_ext = filename.split(".")[-1]
-        if self.format == MONO_HLSB:
-            if file_ext != "pbm":
-                filename += ".pbm"
-            with open(filename, "wb") as f:
-                f.write(b"P4\n")
-                f.write(f"{self.width} {self.height}\n".encode())
-                f.write(self.buffer)
-        elif self.format == GS2_HMSB:
-            if file_ext != "pgm":
-                filename += ".pgm"
-            with open(filename, "wb") as f:
-                f.write(b"P5\n")
-                f.write(f"{self.width} {self.height}\n".encode())
-                f.write(b"3\n")
-                f.write(self.buffer)
-        elif self.format == GS4_HMSB:
-            if file_ext != "pgm":
-                filename += ".pgm"
-            with open(filename, "wb") as f:
-                f.write(b"P5\n")
-                f.write(f"{self.width} {self.height}\n".encode())
-                f.write(b"15\n")
-                f.write(self.buffer)
-        elif self.format == GS8:
-            if file_ext != "pgm":
-                filename += ".pgm"
-            with open(filename, "wb") as f:
-                f.write(b"P5\n")
-                f.write(f"{self.width} {self.height}\n".encode())
-                f.write(b"255\n")
-                f.write(self.buffer)
-        elif self.format == RGB565:
-            if file_ext != "bmp":
-                filename += ".bmp"
-            with open(filename, "wb") as f:
-                f.write(b"BM")  # Offset 0: Signature
-                f.write((54 + len(self.buffer)).to_bytes(4, "little"))  # Offset 2: File size
-                f.write(b"\x00\x00\x00\x00")  # Offset 6: Unused
-                f.write(b"\x36\x00\x00\x00")  # Offset 10: Offset to image data
-                f.write(b"\x28\x00\x00\x00")  # Offset 14: DIB header size
-                f.write(self.width.to_bytes(4, "little"))  # Offset 18: Width
-                f.write(self.height.to_bytes(4, "little"))  # Offset 22: Height
-                f.write(b"\x01\x00")  # Offset 26: Planes
-                f.write(b"\x10\x00")  # Offset 28: Bits per pixel
-                f.write(b"\x00\x00\x00\x00")  # Offset 30: Compression
-                f.write(len(self.buffer).to_bytes(4, "little"))  # Offset 34: Image size
-                f.write(
-                    b"\x00\x00\x00\x00\x00\x00\x00\x00"
-                )  # Offset 38: Horizontal and vertical resolution
-                f.write(b"\x00\x00\x00\x00")  # Offset 46: Colors in palette
-                f.write(b"\x00\x00\x00\x00")  # Offset 50: Important colors
-                # The order of the lines is reversed.  We need to reverse them back.
-                for i in range(self.height):
-                    f.write(
-                        self.buffer[
-                            (self.height - i - 1) * self.width * 2 : (self.height - i)
-                            * self.width
-                            * 2
-                        ]
-                    )
-        else:
-            raise ValueError(f"Save method not implemented for format {self.format}")
+        return _files.save_image(self, filename)
 
     @staticmethod
     def from_file(filename):
@@ -607,15 +550,4 @@ class FrameBuffer(_FrameBuffer):
         Args:
             filename (str): Filename to load from
         """
-        # Read the first two bytes to determine the file type
-        with open(filename, "rb") as f:
-            header = f.read(2)
-
-        if header == b"P4":
-            return _files.pbm_to_framebuffer(filename)
-        elif header == b"P5":
-            return _files.pgm_to_framebuffer(filename)
-        elif header == b"BM":
-            return _files.bmp_to_framebuffer(filename)
-        else:
-            raise ValueError(f"Unsupported file type {header}")
+        return _files.load_image(filename)

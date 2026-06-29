@@ -22,6 +22,11 @@ object has these methods.
 import math
 
 from ._area import Area
+from ._blit_hooks import (
+    blit_rect_dispatch,
+    canvas_accepts_blit_transparent,
+    try_fast_framebuffer_blit,
+)
 
 
 def arc(canvas, x, y, r, a0, a1, c):
@@ -80,34 +85,31 @@ def blit(canvas, source, x, y, key=-1, palette=None):
     Returns:
         (Area): The bounding box of the blitted area.
     """
-    if (
-        (-x >= source.width)
-        or (-y >= source.height)
-        or (x >= canvas.width)
-        or (y >= canvas.height)
-    ):
-        # Out of bounds, no-op.
-        return
+    fast = try_fast_framebuffer_blit(canvas, source, x, y, key, palette)
+    if fast is not None:
+        return fast
 
-    # Clip.
-    x0 = max(0, x)
-    y0 = max(0, y)
-    x1 = max(0, -x)
-    y1 = max(0, -y)
-    x0end = min(canvas.width, x + source.width)
-    y0end = min(canvas.height, y + source.height)
+    from ._blit_hooks import clip_blit_bounds
+
+    clipped = clip_blit_bounds(canvas, source, x, y)
+    if clipped is None:
+        return None
+
+    x0, y0, w, h, src_x, src_y = clipped
+    x0end = x0 + w
+    y0end = y0 + h
 
     for cy0 in range(y0, y0end):
-        cx1 = x1
+        cx1 = src_x + (cy0 - y0)
+        src_row = src_y + (cy0 - y0)
         for cx0 in range(x0, x0end):
-            col = source.pixel(cx1, y1)
+            col = source.pixel(cx1, src_row)
             if palette:
                 col = palette.pixel(col, 0)
             if col != key:
                 pixel(canvas, cx0, cy0, col)
             cx1 += 1
-        y1 += 1
-    return Area(x0, y0, x0end - x0, y0end - y0)
+    return Area(x0, y0, w, h)
 
 
 def blit_rect(canvas, buf, x, y, w, h):
@@ -125,25 +127,7 @@ def blit_rect(canvas, buf, x, y, w, h):
     Returns:
         (Area): The bounding box of the blitted area.
     """
-    if hasattr(canvas, "blit_rect"):
-        canvas.blit_rect(buf, x, y, w, h)
-    else:
-        BPP = 2
-
-        if x < 0 or y < 0 or x + w > canvas.width or y + h > canvas.height:
-            raise ValueError("The provided x, y, w, h values are out of range")
-
-        if len(buf) != w * h * BPP:
-            print(f"len(buf)={len(buf)} w={w} h={h} self.color_depth={canvas.color_depth}")
-            raise ValueError("The source buffer is not the correct size")
-
-        for row in range(h):
-            source_begin = row * w * BPP
-            source_end = source_begin + w * BPP
-            dest_begin = ((y + row) * canvas.width + x) * BPP
-            dest_end = dest_begin + w * BPP
-            canvas.buffer[dest_begin:dest_end] = buf[source_begin:source_end]
-    return Area(x, y, w, h)
+    return blit_rect_dispatch(canvas, buf, x, y, w, h)
 
 
 def blit_transparent(canvas, buf, x, y, w, h, key):
@@ -161,6 +145,10 @@ def blit_transparent(canvas, buf, x, y, w, h, key):
     Returns:
         (Area): The bounding box of the blitted area.
     """
+    if canvas_accepts_blit_transparent(canvas):
+        canvas.blit_transparent(buf, x, y, w, h, key)
+        return Area(x, y, w, h)
+
     BPP = canvas.color_depth // 8
     key_bytes = key.to_bytes(BPP, "little")
     stride = w * BPP

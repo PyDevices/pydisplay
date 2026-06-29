@@ -5,7 +5,7 @@ from machine import ADC, Pin
 from spibus import SPIBus
 from st7789 import ST7789
 
-from eventsys import devices
+import eventsys
 
 display_bus = SPIBus(
     id=1,
@@ -42,8 +42,10 @@ joystick_driver = GPIOJoystick(
     ],
 )
 
-broker = devices.Broker()
+broker = eventsys.Broker()
 
-joystick_dev = broker.create_device(
-    type=devices.types.JOYSTICK, joystick_driver=joystick_driver, emulate_digital=[(0, 1)]
+joystick_dev = broker.create(
+    type=eventsys.JOYSTICK, joystick_driver=joystick_driver, emulate_digital=[(0, 1)]
 )
+
+broker.register_quit_cleanup(display_drv)

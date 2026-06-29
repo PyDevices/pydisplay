@@ -67,9 +67,7 @@ _EVENTSYS_CHILD = textwrap.dedent(
     import sys
 
     import eventsys
-    from eventsys import events
-    from eventsys import devices
-    from eventsys.devices import Broker, KeypadDevice, types
+    from eventsys import Broker, KeypadDevice, events, types
     from eventsys.keys import Keys
 
     forbidden = [m for m in {siblings!r} if m in sys.modules]
@@ -80,10 +78,10 @@ _EVENTSYS_CHILD = textwrap.dedent(
     broker = Broker()
     presses = [set([65]), set()]
     kp = KeypadDevice(read=lambda: presses.pop(0) if presses else set())
-    broker.register_device(kp)
+    broker.register(kp)
 
     seen = []
-    broker.subscribe(seen.append, device_types=[types.KEYPAD])
+    broker.on_device(types.KEYPAD, seen.append)
 
     down = broker.poll()
     assert down and down[0].type == events.KEYDOWN, down
@@ -108,6 +106,7 @@ _GRAPHICS_CHILD = textwrap.dedent(
         FrameBuffer,
         Font,
         RGB565,
+        capabilities,
         circle,
         rect,
         text8,
@@ -115,6 +114,10 @@ _GRAPHICS_CHILD = textwrap.dedent(
 
     forbidden = [m for m in {siblings!r} if m in sys.modules]
     assert not forbidden, "graphics pulled in pydisplay modules: %r" % forbidden
+
+    caps = capabilities()
+    assert caps["framebuf"] in ("native", "pure_python")
+    assert "RGB565" in caps["formats"]
 
     fb = FrameBuffer(bytearray(16 * 16 * 2), 16, 16, RGB565)
     fb.fill(0)

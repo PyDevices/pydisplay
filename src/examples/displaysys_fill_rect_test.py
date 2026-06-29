@@ -3,7 +3,8 @@
 
 from random import getrandbits
 
-from board_config import display_drv
+from board_config import broker, display_drv
+from eventsys import poll_quit_discarding_others
 from multimer import pump, sleep_ms
 import gc
 import time
@@ -53,6 +54,8 @@ def main():
             if count % 1000 == 0:
                 rate = count / (time.time() - start_time)
                 print(f"blocks/sec: {rate:5.2f}")
+            if poll_quit_discarding_others(broker):
+                break
             sleep_ms(1)
     except KeyboardInterrupt:
         print("\nStopped.")

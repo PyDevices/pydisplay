@@ -31,9 +31,9 @@ class JoystickKeypad:
                     self._state[key] = False
             for b in j["buttons"].values():
                 self._state[b] = False
-        self._broker.subscribe(
+        self._broker.on(
+            [events.JOYHATMOTION, events.JOYBUTTONDOWN, events.JOYBUTTONUP],
             self.callback,
-            event_types=[events.JOYHATMOTION, events.JOYBUTTONDOWN, events.JOYBUTTONUP],
         )
 
     def callback(self, event):

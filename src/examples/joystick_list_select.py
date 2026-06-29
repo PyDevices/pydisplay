@@ -1,6 +1,6 @@
 # multimer types: queued, sync
 import board_config
-from eventsys.devices import types
+import eventsys
 import pdwidgets as pd
 
 display = pd.Display(board_config.display_drv, board_config.broker,40)
@@ -36,6 +36,6 @@ def joystick_callback(event):
             if event.value[1] != 0:
                 select_item(event.value[1] > 0)
 
-board_config.broker.subscribe(joystick_callback,device_types=[types.JOYSTICK])
+board_config.broker.on_device(eventsys.JOYSTICK, joystick_callback)
 
 pd.run_forever()

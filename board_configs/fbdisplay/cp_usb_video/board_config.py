@@ -34,3 +34,5 @@ display.root_group = None
 display_drv = FBDisplay(fb, reverse_bytes_in_word=True)
 display_drv.fill(0x000F)
 display_drv.show()
+
+broker = None

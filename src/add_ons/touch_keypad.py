@@ -57,14 +57,9 @@ class Keypad:
             ]
         self._state = dict.fromkeys(self._keys, False)
         self._clicks = []
-        self._broker.subscribe(
+        self._broker.on(
+            [events.MOUSEBUTTONDOWN, events.MOUSEBUTTONUP, events.KEYDOWN, events.KEYUP],
             self.callback,
-            event_types=[
-                events.MOUSEBUTTONDOWN,
-                events.MOUSEBUTTONUP,
-                events.KEYDOWN,
-                events.KEYUP,
-            ],
         )
 
     def callback(self, event):

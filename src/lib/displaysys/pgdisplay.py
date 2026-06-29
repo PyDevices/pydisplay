@@ -8,33 +8,88 @@ displaysys.pgdisplay
 
 import pygame as pg
 
-from displaysys import DisplayDriver, color_rgb
+from displaysys import DisplayDriver, color_rgb, default_quit_chord
+from eventsys import events
 
 
-def poll():
-    """
-    Polls for an event and returns the event type and data.
-
-    Returns:
-        Optional[pg.event.Event | False]: The event type and data.
-    """
-    return pg.event.poll()
+def _pg_key_name(key):
+    try:
+        return pg.key.name(key)
+    except Exception:
+        return str(key)
 
 
-def get() -> [pg.event.Event]:
-    """
-    Gets all events from the event queue.
+def _convert(e):
+    """Convert a pygame event to an eventsys namedtuple."""
+    t = e.type
+    if t == pg.QUIT:
+        return events.Quit(events.QUIT)
+    if t == pg.MOUSEMOTION:
+        return events.Motion(
+            t,
+            e.pos,
+            e.rel,
+            e.buttons,
+            bool(getattr(e, "touch", False)),
+            getattr(e, "window", None),
+        )
+    if t in (pg.MOUSEBUTTONDOWN, pg.MOUSEBUTTONUP):
+        return events.Button(
+            t,
+            e.pos,
+            e.button,
+            bool(getattr(e, "touch", False)),
+            getattr(e, "window", None),
+        )
+    if t == pg.MOUSEWHEEL:
+        return events.Wheel(
+            t,
+            bool(getattr(e, "flipped", False)),
+            getattr(e, "x", 0),
+            getattr(e, "y", 0),
+            getattr(e, "precise_x", getattr(e, "x", 0)),
+            getattr(e, "precise_y", getattr(e, "y", 0)),
+            bool(getattr(e, "touch", False)),
+            getattr(e, "window", None),
+        )
+    if t in (pg.KEYDOWN, pg.KEYUP):
+        return events.Key(t, _pg_key_name(e.key), e.key, e.mod, getattr(e, "scancode", 0), None)
+    if t == pg.JOYAXISMOTION:
+        return events.JoyAxisMotion(t, e.instance_id, e.axis, e.value / 32767.0)
+    if t == pg.JOYBALLMOTION:
+        return events.JoyBallMotion(t, e.instance_id, e.ball, e.rel)
+    if t == pg.JOYHATMOTION:
+        return events.JoyHatMotion(t, e.instance_id, e.hat, e.value)
+    if t == pg.JOYBUTTONDOWN:
+        return events.JoyButtonDown(t, e.instance_id, e.button)
+    if t == pg.JOYBUTTONUP:
+        return events.JoyButtonUp(t, e.instance_id, e.button)
+    return events.Unknown(t)
 
-    Returns:
-        [pg.event.Event]: A list of events.
-    """
-    return pg.event.get()
+
+def poll_event():
+    """Non-blocking poll; return one eventsys event or ``None`` (not for QUEUE ``read``)."""
+    e = pg.event.poll()
+    if e.type == pg.NOEVENT:
+        return None
+    if e.type in events.filter:
+        return _convert(e)
+    return None
+
+
+def get_events():
+    """Drain the pygame queue; return a list of eventsys events or ``None``."""
+    raw = pg.event.get()
+    if not raw:
+        return None
+    eventlist = [_convert(e) for e in raw if e.type in events.filter]
+    return eventlist if eventlist else None
 
 
 # Opened joystick handles, kept referenced so PyGame keeps delivering their
 # events.  PyGame's joystick events (JOYAXISMOTION, JOYBUTTONDOWN, ...) already
 # share eventsys's numeric types and attribute names, so they flow through
-# poll()/get() unchanged once the joysticks are opened.
+# share eventsys's numeric types once joysticks are opened.
 _joysticks = []
 
 
@@ -95,15 +150,17 @@ class PGDisplay(DisplayDriver):
         self._window_flags = window_flags
         self._scale = scale
         self.touch_scale = scale
+        self.quit_chord = default_quit_chord()
         self._buffer = None
         self._requires_byteswap = False
 
         self._bytes_per_pixel = color_depth // 8
 
         if self._scale != 1 and not hasattr(pg.transform, "scale_by"):
-            print(
-                f"PGDisplay:  Scaling is set to {self._scale}, but pygame {pg.ver} does not support it."
-            )
+            if not getattr(self, "_quiet", False):
+                print(
+                    f"PGDisplay:  Scaling is set to {self._scale}, but pygame {pg.ver} does not support it."
+                )
             self._scale = 1
 
         pg.init()
@@ -301,12 +358,16 @@ class PGDisplay(DisplayDriver):
             raise
 
     def quit(self, code: int = 0) -> None:
-        """
-        Release pygame-ce resources and terminate the process.
+        """Release pygame resources (REPL-safe)."""
+        self.deinit()
 
-        Uses ``os._exit`` when ``SystemExit`` would be swallowed (e.g. quit
-        invoked from a ``pump`` callback while ``import`` is blocked in
-        a module-level loop).
+    def force_quit(self, code: int = 0) -> None:
+        """
+        Release pygame resources then hard-exit the process.
+
+        pydisplay does not currently use this method. **Agents must not call
+        ``force_quit()`` or wire it into ``broker.on_quit`` without explicit
+        user permission.**
         """
         self.deinit()
         try:
@@ -315,7 +376,7 @@ class PGDisplay(DisplayDriver):
             os._exit(code)
         except Exception:
             pass
-        raise SystemExit(code)
+        super().force_quit(code)
 
     def _deinit(self) -> None:
         """Release pygame resources."""

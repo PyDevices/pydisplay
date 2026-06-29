@@ -5,7 +5,7 @@ from machine import SPI, Pin
 from spibus import SPIBus
 from xpt2046 import Touch
 
-from eventsys import devices
+import eventsys
 
 display_bus = SPIBus(
     id=1,
@@ -59,11 +59,13 @@ touch_drv.calibrate(
 touch_read_func = (touch_drv.get_touch,)
 touch_rotation_table = (0b000, 0b000, 0b000, 0b100)
 
-broker = devices.Broker()
+broker = eventsys.Broker()
 
-touch_dev = broker.create_device(
-    type=devices.types.TOUCH,
+touch_dev = broker.create(
+    type=eventsys.TOUCH,
     read=touch_read_func,
     data=display_drv,
     data2=touch_rotation_table,
 )
+
+broker.register_quit_cleanup(display_drv)

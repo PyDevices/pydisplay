@@ -3,33 +3,98 @@
 # SPDX-License-Identifier: MIT
 
 """
-`displaysys`
-====================================================
+displaysys — shared display core for *Python.
 
-A collection of classes and functions for working with displays and input devices
-in *Python.  The goal is to provide a common API for working with displays and
-input devices across different platforms including MicroPython, CircuitPython and
-CPython.  It works on microcontrollers, desktops, web browsers and Jupyter notebooks.
+Each backend is a separate submodule; import only what your target needs::
+
+    from displaysys import DisplayDriver, color565, capabilities
+    from displaysys.busdisplay import BusDisplay
 """
 
 import gc
+import sys
 
 try:
-    from byteswap import byteswap
+    from byteswap import byteswap as _byteswap_native
+
+    byteswap = _byteswap_native
+    _BYTESWAP_BACKEND = "native"
 except ImportError:
 
     def byteswap(buf):
         """Swap 16-bit pixel bytes in place (portable fallback)."""
-        n = len(buf) & ~1  # only complete 16-bit pairs
+        n = len(buf) & ~1
         for i in range(0, n, 2):
             b0 = buf[i]
             buf[i] = buf[i + 1]
             buf[i + 1] = b0
 
+    _BYTESWAP_BACKEND = "pure_python"
 
-gc.collect()
+__all__ = [
+    "DisplayDriver",
+    "alloc_buffer",
+    "byteswap",
+    "capabilities",
+    "color332",
+    "color565",
+    "color565_swapped",
+    "color_rgb",
+    "default_quit_chord",
+]
 
 _DEFAULT_AUTO_REFRESH_PERIOD = 33
+
+
+def capabilities():
+    """Static metadata for the modular displaysys install model (no backend imports)."""
+    return {
+        "dialect": sys.implementation.name,
+        "byteswap": _BYTESWAP_BACKEND,
+        "modules": {
+            "busdisplay": {"eventsys": False, "auto_refresh": False},
+            "fbdisplay": {"eventsys": False, "auto_refresh": False},
+            "sdldisplay": {
+                "eventsys": True,
+                "auto_refresh": True,
+                "default_period_ms": _DEFAULT_AUTO_REFRESH_PERIOD,
+                "async_default": False,
+                "touch_scale": "1.0 (logical renderer size)",
+                "scroll_emulation": True,
+            },
+            "pgdisplay": {
+                "eventsys": True,
+                "auto_refresh": True,
+                "default_period_ms": _DEFAULT_AUTO_REFRESH_PERIOD,
+                "async_default": False,
+                "touch_scale": "window scale",
+                "scroll_emulation": True,
+            },
+            "psdisplay": {
+                "eventsys": True,
+                "auto_refresh": True,
+                "default_period_ms": _DEFAULT_AUTO_REFRESH_PERIOD,
+                "async_default": True,
+                "touch_scale": "canvas layout scale",
+                "scroll_emulation": True,
+            },
+            "jndisplay": {
+                "eventsys": True,
+                "auto_refresh": True,
+                "default_period_ms": _DEFAULT_AUTO_REFRESH_PERIOD,
+                "async_default": True,
+                "touch_scale": "1.0",
+                "scroll_emulation": True,
+            },
+        },
+    }
+
+
+def default_quit_chord():
+    """Default CTRL+Q quit chord for event-backend displays (lazy-imports eventsys.keys)."""
+    from eventsys.keys import Keys
+
+    return (Keys.K_q, Keys.KMOD_CTRL)
 
 
 def alloc_buffer(size):
@@ -134,11 +199,14 @@ class DisplayDriver:
     """
 
     def __init__(self, auto_refresh=False, *, async_=False):
-        if not getattr(self, "_quiet", False):
+        if not hasattr(self, "_quiet"):
+            self._quiet = False
+        if not self._quiet:
             print(f"Initializing {self.__class__.__name__}...")
         gc.collect()
 
         self.byteswap = byteswap
+        self.touch_scale = 1.0
         self._vssa = False  # False means no vertical scroll
         self._auto_byteswap = self.requires_byteswap
         self._touch_device = None
@@ -160,7 +228,7 @@ class DisplayDriver:
             except ImportError:
                 raise ImportError("multimer is required for auto_refresh") from None
         self._deinitialized = False
-        if not getattr(self, "_quiet", False):
+        if not self._quiet:
             print(f"{self.__class__.__name__}: initialized.")
             print(f"{self.__class__.__name__}: requires_byteswap = {self.requires_byteswap}")
 
@@ -205,10 +273,10 @@ class DisplayDriver:
         if value == self._rotation:
             return
 
-        if not getattr(self, "_quiet", False):
+        if not self._quiet:
             print(f"{self.__class__.__name__}.rotation():  Setting rotation to {value}")
         self._rotation_helper(value)
-        if not getattr(self, "_quiet", False):
+        if not self._quiet:
             print("done setting rotation")
 
         self._rotation = value
@@ -292,7 +360,8 @@ class DisplayDriver:
             self._auto_byteswap = not value
         else:
             self._auto_byteswap = False
-        print(f"{self.__class__.__name__}:  auto byte swapping = {self._auto_byteswap}")
+        if not self._quiet:
+            print(f"{self.__class__.__name__}:  auto byte swapping = {self._auto_byteswap}")
         return not self._auto_byteswap
 
     @property
@@ -596,15 +665,16 @@ class DisplayDriver:
         return
 
     def quit(self, code: int = 0) -> None:
-        """
-        Release resources and terminate the program.
+        """Release display resources (REPL-safe). Called by ``broker.on_quit`` on QUIT."""
+        self.deinit()
 
-        Called by ``eventsys.devices.Broker.quit()`` on a window-close (QUIT)
-        event.  The base implementation deinitializes the display and raises
-        ``SystemExit``, which is correct when quit runs on the main thread.
-        Drivers where ``SystemExit`` would be swallowed when quit is invoked
-        from a timer or ``pump`` callback (e.g. ``SDLDisplay``,
-        ``PGDisplay``) should override this with a hard process exit.
+    def force_quit(self, code: int = 0) -> None:
+        """
+        Release resources then raise ``SystemExit``.
+
+        pydisplay does not currently use this method. **Agents must not call
+        ``force_quit()`` or wire it into ``broker.on_quit`` without explicit
+        user permission.**
         """
         self.deinit()
         raise SystemExit(code)

@@ -32,3 +32,5 @@ display_drv = ST7735(
     power_pin=None,
     power_on_high=True,
 )
+
+broker = None

@@ -7,7 +7,8 @@ inspired by Russ Hughes's hello.py
 Draws to a DisplayBuffer and only updates the area that has changed.
 """
 
-from board_config import display_drv
+from board_config import broker, display_drv
+from eventsys import poll_quit_discarding_others
 from graphics import Font
 from random import getrandbits
 from displaybuf import DisplayBuffer

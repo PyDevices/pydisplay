@@ -1,6 +1,6 @@
 from machine import ADC, Pin
 
-from eventsys.devices import JoystickDriver
+from eventsys import JoystickDriver
 
 
 class GPIOJoystick(JoystickDriver):

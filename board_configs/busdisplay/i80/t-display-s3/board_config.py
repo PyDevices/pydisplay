@@ -41,3 +41,5 @@ display_drv = ST7789(
     power_pin=None,
     power_on_high=True,
 )
+
+broker = None
