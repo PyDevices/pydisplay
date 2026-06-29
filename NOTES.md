@@ -66,3 +66,4 @@ from <xyz> import <clever_install_fn>  # name TBD
 - [ ] Jupyter install notebook: add `board_config.py` to the `displaysys` TestPyPI package (may need default `board_config` to work without eventsys)
 - [ ] Ensure each `src/lib` package is installable alone — no hard dependency on the other pydisplay libs being installed
 - [ ] Make sure all desktop backends exit gracefully in `displaysys`
+- [x] Compile MicroPython with `os.dupterm` enabled

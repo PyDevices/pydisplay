@@ -30,7 +30,6 @@ Tiny Flying Toasters for smaller displays using a converted BMP spritesheet modu
 """
 
 import gc
-import os
 import sys
 from random import getrandbits
 import tft_bitmap
@@ -39,7 +38,7 @@ from board_config import broker
 from multimer import Timer, needs_pump, pump, sleep_ms
 
 palette = tft_config.palette
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
 import tiny_toasters_bitmaps as toast_bitmaps
 
 TOASTER_FRAMES = [0, 1, 2, 3]

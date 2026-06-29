@@ -94,6 +94,10 @@ def _sleep(seconds):
         time.sleep(seconds)
 
 
+def _system_exit_code(exc):
+    return getattr(exc, "code", None)
+
+
 def _exec_script(script_path):
     with open(script_path) as f:
         code = f.read()
@@ -114,8 +118,9 @@ def _run_script_in_thread(script_path):
         try:
             _exec_script(script_path)
         except SystemExit as exc:
-            if exc.code not in (0, None):
-                state["error"] = "exit_{}".format(exc.code)
+            code = _system_exit_code(exc)
+            if code not in (0, None):
+                state["error"] = "exit_{}".format(code)
         except Exception as exc:
             state["error"] = "{}: {}".format(type(exc).__name__, exc)
         finally:
@@ -161,18 +166,20 @@ def _run_oneshot(script_path, timeout_s):
         _exec_script(script_path)
         return None
     except SystemExit as exc:
-        if exc.code in (0, None):
+        code = _system_exit_code(exc)
+        if code in (0, None):
             return None
-        return "exit_{}".format(exc.code)
+        return "exit_{}".format(code)
     except Exception as exc:
         return "{}: {}".format(type(exc).__name__, exc)
 
 
 def _use_main_thread_for_bounded():
     try:
-        return sys.implementation.name == "cpython"
+        name = sys.implementation.name
     except AttributeError:
         return False
+    return name in ("cpython", "micropython")
 
 
 def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode):
@@ -200,29 +207,81 @@ def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode
 
         threading.Thread(target=delayed_inject, daemon=True).start()
     except ImportError:
-        touch_delay = min(duration_s * 0.2, max(0.5, duration_s - 1.0))
-        if quit_mode == "inject" and touch_delay > 0:
-            _sleep(touch_delay)
-            quit_inject.inject_synthetic_touch(broker_poll=False)
-        _sleep(max(0, duration_s - touch_delay))
-        lvgl = kind == "lvgl"
-        if quit_inject.inject_quit(
-            broker_poll=False,
-            pump_count=20,
-            pump_delay=0.02,
-            lvgl=lvgl,
-        ):
-            injected[0] = True
+        if not _start_daemon(delayed_inject):
+            touch_delay = min(duration_s * 0.2, max(0.5, duration_s - 1.0))
+            if quit_mode == "inject" and touch_delay > 0:
+                _sleep(touch_delay)
+                quit_inject.inject_synthetic_touch(broker_poll=False)
+            _sleep(max(0, duration_s - touch_delay))
+            lvgl = kind == "lvgl"
+            if quit_inject.inject_quit(
+                broker_poll=False,
+                pump_count=20,
+                pump_delay=0.02,
+                lvgl=lvgl,
+            ):
+                injected[0] = True
 
     try:
         _exec_script(script_path)
         return None, injected[0]
     except SystemExit as exc:
-        if exc.code in (0, None):
+        code = _system_exit_code(exc)
+        if code in (0, None):
             return None, injected[0]
-        return "exit_{}".format(exc.code), injected[0]
+        return "exit_{}".format(code), injected[0]
     except Exception as exc:
         return "{}: {}".format(type(exc).__name__, exc), injected[0]
+
+
+def _start_daemon(target):
+    try:
+        import threading
+
+        threading.Thread(target=target, daemon=True).start()
+        return True
+    except ImportError:
+        pass
+    try:
+        import _thread
+
+        _thread.start_new_thread(target, ())
+        return True
+    except ImportError:
+        return False
+
+
+def _run_interactive(script_path, duration_s, example, kind):
+    """Run on main thread (SDL); pass after duration_s even if script blocks in help()/REPL."""
+
+    def finisher():
+        _sleep(duration_s)
+        backend = _backend_name()
+        _print_result(
+            {
+                "example": example,
+                "status": "ok",
+                "kind": kind,
+                "backend": backend,
+                "duration_s": duration_s,
+                "quit_injected": False,
+            }
+        )
+        _subprocess_hard_exit(0)
+
+    if not _start_daemon(finisher):
+        return "interactive_requires_thread"
+
+    try:
+        _exec_script(script_path)
+        return None
+    except SystemExit as exc:
+        code = _system_exit_code(exc)
+        if code in (0, None):
+            return None
+        return "exit_{}".format(code)
+    except Exception as exc:
+        return "{}: {}".format(type(exc).__name__, exc)
 
 
 def _run_bounded(script_path, kind, duration_s, timeout_s, quit_mode):
@@ -299,12 +358,15 @@ def _parse_args(argv):
     return out
 
 
-def _cpython_hard_exit(code):
-    """SDL on CPython can block normal interpreter shutdown; hard-exit after cleanup."""
+def _subprocess_hard_exit(code):
+    """SDL on desktop CPython/MicroPython can block normal interpreter shutdown."""
     try:
-        if sys.implementation.name != "cpython":
-            return False
+        name = sys.implementation.name
     except AttributeError:
+        return False
+    if name not in ("cpython", "micropython"):
+        return False
+    if not hasattr(os, "_exit"):
         return False
     try:
         from board_config import display_drv
@@ -368,6 +430,8 @@ def main(argv=None):
 
     if args["kind"] == "oneshot":
         error = _run_oneshot(script_path, args["timeout"])
+    elif args["kind"] == "interactive":
+        error = _run_interactive(script_path, args["duration"], args["example"], args["kind"])
     elif args["kind"] in ("loop", "async", "lvgl", "pdwidgets", "legacy"):
         error, quit_injected = _run_bounded(
             script_path, args["kind"], args["duration"], args["timeout"], args["quit"]
@@ -389,7 +453,7 @@ def main(argv=None):
 
     _print_result(payload)
     code = 0 if status == "ok" else 1
-    if _cpython_hard_exit(code):
+    if _subprocess_hard_exit(code):
         return code
     return code
 

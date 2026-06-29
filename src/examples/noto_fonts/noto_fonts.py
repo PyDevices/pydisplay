@@ -25,7 +25,6 @@ The fonts were converted from True Type fonts using the
 
 """
 
-import os
 import sys
 
 import tft_config
@@ -33,7 +32,7 @@ from board_config import broker
 from multimer import Timer, needs_pump, pump
 
 palette = tft_config.palette
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
 import NotoSans_32 as noto_sans
 import NotoSerif_32 as noto_serif
 import NotoSansMono_32 as noto_mono

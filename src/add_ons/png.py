@@ -157,7 +157,22 @@ except ImportError:
 try:
     import zlib
 except ImportError:
-    import uzlib as zlib
+    try:
+        import uzlib as zlib
+    except ImportError:
+        try:
+            import deflate
+
+            class _ZlibFromDeflate:
+                @staticmethod
+                def decompress(data):
+                    buf = io.BytesIO(data)
+                    with deflate.DeflateIO(buf, deflate.ZLIB) as stream:
+                        return stream.read()
+
+            zlib = _ZlibFromDeflate
+        except ImportError as exc:
+            raise ImportError("PNG support requires zlib, uzlib, or deflate") from exc
 
 from array import array
 # from functools import reduce

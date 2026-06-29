@@ -2,7 +2,8 @@
 # Inventory of all files: packages/examples.json (regenerate via ./tools/regenerate.sh)
 #
 # kind: oneshot | loop | async | lvgl | pdwidgets | harness | legacy
-# quit: native_exit | poll | inject | pending
+# quit: native_exit | poll | inject | pending | interactive
+# kind: oneshot | loop | async | lvgl | pdwidgets | legacy | interactive
 
 [defaults]
 duration_s = 5
@@ -219,8 +220,8 @@ deps = ["core"]
 [examples.console_advanced_demo]
 import = "console_advanced_demo"
 script = "examples/console_advanced_demo.py"
-kind = "oneshot"
-quit = "native_exit"
+kind = "interactive"
+quit = "interactive"
 deps = ["add_ons"]
 skip_runtimes = ["cpython-venv", "python.exe"]
 
@@ -256,7 +257,7 @@ deps = ["core"]
 import = "eventsys_touch_test"
 script = "examples/eventsys_touch_test.py"
 kind = "loop"
-quit = "poll"
+quit = "inject"
 deps = ["core"]
 
 [examples.feathers]
@@ -388,7 +389,7 @@ script = "examples/png_test.py"
 kind = "loop"
 quit = "poll"
 deps = ["add_ons"]
-skip_runtimes = ["cpython-venv", "python.exe", "pyscript", "jupyter"]
+skip_runtimes = ["pyscript", "jupyter"]
 
 [examples.rotations]
 import = "rotations"
