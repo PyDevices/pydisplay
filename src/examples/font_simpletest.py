@@ -4,8 +4,11 @@
 font_simpletest.py -- Simple test of the Font class.
 inspired by Russ Hughes's hello.py
 
-Draws on a framebuffer, blits to the display, and calls display_drv.show()
-after each draw (required on queued/SDL backends).
+Rendering path (string → blit):
+  Font.text draws each glyph with per-pixel fill_rect into a small off-screen
+  FrameBuffer sized for the whole string. One display_drv.blit_rect uploads the
+  entire string in a single transfer. display_drv.show() follows each draw on
+  queued/SDL backends.
 """
 
 from board_config import broker, display_drv
@@ -34,9 +37,7 @@ BPP = display_drv.color_depth // 8  # Bytes per pixel
 
 
 def write(font, string, x, y, fg_color, bg_color, scale):
-    """
-    Write text to the display.
-    """
+    """Render string in RAM, then blit the whole glyph box to the display once."""
     buffer_width = font.width * scale * len(string)
     buffer_height = font.height * scale
     buffer = bytearray(buffer_width * buffer_height * BPP)

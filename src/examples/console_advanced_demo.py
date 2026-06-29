@@ -7,7 +7,6 @@ from board_config import display_drv
 from palettes import get_palette
 from console import Console
 from sys import implementation, platform
-from graphics import text16
 
 SSID = "<ssid>"
 PASSPHRASE = "<passphrase>"
@@ -15,9 +14,10 @@ PASSPHRASE = "<passphrase>"
 
 pal = get_palette()
 
-# Have to use a lambda to map the way Console calls char_writer to the way display_drv.text expects it
-char_writer = lambda char, x, y, fg, bg: text16(display_drv, char, x, y, fg)  # noqa: E731
-console = Console(display_drv, char_writer, cwidth=8, lheight=16)
+# Default Console char path: render each glyph into an 8x8 FrameBuffer, then
+# blit_rect once per character (fast). Custom text8/text16 writers draw with
+# Font.fill_rect per pixel directly on the display (slow — see font_simpletest2).
+console = Console(display_drv, cwidth=8, lheight=8)
 
 maj, min, *_ = implementation.version
 try:
@@ -45,7 +45,13 @@ try:
     import os
 
     os.dupterm(console)
-    help()
+    try:
+        import pydisplay_test_mode
+
+        if not pydisplay_test_mode.ENABLED:
+            help()
+    except ImportError:
+        help()
 except ImportError:
     console.write("REPL not available.\n", pal.YELLOW)
 

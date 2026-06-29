@@ -1,10 +1,15 @@
 # multimer types: all
 # pyscript binaries: assets/font_8x8.bin, assets/font_8x14.bin, assets/font_8x16.bin
 """
-font_simpletest.py -- Simple test of the Font class.
+font_simpletest3.py -- Simple test of the Font class.
 inspired by Russ Hughes's hello.py
 
-Draws to a DisplayBuffer and only updates the area that has changed.
+Rendering path (string → dirty blit):
+  Font.text draws each glyph with per-pixel fill_rect into a full-screen
+  DisplayBuffer in RAM. display.show(dirty) blits only the dirty rectangle
+  (row by row) to display_drv, then display_drv.show() presents the frame.
+  Fastest of the three variants because most work stays in RAM and upload is
+  limited to the changed region.
 """
 
 from board_config import broker, display_drv
@@ -33,9 +38,7 @@ BPP = display.color_depth // 8  # Bytes per pixel
 
 
 def write(font, string, x, y, fg_color, bg_color, scale):
-    """
-    Write text to the display.
-    """
+    """Render string in DisplayBuffer RAM, then blit only the dirty area to the display."""
     dirty = font.text(display, string, x, y, fg_color, scale)
     display.show(dirty)
     display_drv.show()
