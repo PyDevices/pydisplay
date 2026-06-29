@@ -14,8 +14,8 @@
 |---------|----------------------------|--------|-------|
 | **micropython** | **60/60** | ✅ | Reference runtime (full matrix) |
 | **circuitpython** | **60/60** | ✅ | `pbm_simpletest` `oneshot_timeout_s = 60` on branch |
-| **cpython-venv** | **58/58** | ✅ | Skips `console_advanced_demo`, `nano_gui_simpletest` (manifest) |
-| **python.exe** | **58/58** | ✅ | Skips `console_advanced_demo`, `nano_gui_simpletest` (manifest) |
+| **cpython-venv** | **59/59** | ✅ | Skips `console_advanced_demo` only (manifest) |
+| **python.exe** | **59/59** | ✅ | Skips `console_advanced_demo` only (manifest) |
 | **micropython.exe** | **49/60** (stale) | 🔄 | Pre-fix full matrix; spot-checks green; column re-run pending |
 | **pyscript** | **30/52** | 🔄 | Playwright OK; 22 `Page.goto` networkidle timeouts (heavy/loop demos) |
 | **jupyter** | **23/57** | 🔄 | 34 cell timeouts; blit clip helps `pbm_simpletest` ✅ |
@@ -170,7 +170,7 @@ Results: `.cursor/example_test_results.json`
 
 Inventory from [`tools/example_test_manifest.toml`](tools/example_test_manifest.toml), [`tools/example_test_kit.py`](tools/example_test_kit.py) (`example_allowed_on_runtime`, `missing`, `needs_playwright`, matrix `—` dash), and [`tools/example_runtimes.toml`](tools/example_runtimes.toml).
 
-**Summary count:** **11** global exclusions (2 `matrix=false` examples + 9 harnesses) · **15** per-runtime manifest skip cells (**9** examples) · **1** wrapper expected non-pass · **4** launcher skip categories.
+**Summary count:** **11** global exclusions (2 `matrix=false` examples + 9 harnesses) · **12** per-runtime manifest skip cells (**8** examples) · **1** wrapper expected non-pass · **4** launcher skip categories.
 
 ### Globally excluded from matrix (`matrix=false`)
 
@@ -195,7 +195,6 @@ Harness rows appear only when using `--all-except-harness`; default matrix shows
 | Example | Skipped on | Reason |
 |---------|------------|--------|
 | `console_advanced_demo` | `cpython-venv`, `python.exe`, `jupyter` | Interactive REPL + `os.dupterm`; not supported in headless CPython kit or Jupyter (no dupterm). |
-| `nano_gui_simpletest` | `pyscript`, `cpython-venv`, `python.exe` | Requires external `micropython-nano-gui` stack; not available on PyScript or desktop CPython runtimes. |
 | `chango` | `pyscript`, `jupyter` | Board `tft_config` + add-on font/game assets; not wired for browser embed or notebook kit. |
 | `png_test` | `pyscript`, `jupyter` | PNG decode via add-ons; too heavy / unsupported path for PyScript and Jupyter autotest. |
 | `color_test` | `pyscript` | TFT color calibration via `tft_config`; no PyScript board profile. |
@@ -204,7 +203,7 @@ Harness rows appear only when using `--all-except-harness`; default matrix shows
 | `tiny_toasters` | `pyscript` | Animation with `tft_config`; not in PyScript embed. |
 | `noto_fonts` | `pyscript` | Large Noto font bundle + inject-quit loop; unreliable in headless PyScript autotest. |
 
-**Per-runtime runnable counts** (62 matrix columns − 2 `matrix=false` − manifest dashes): micropython / circuitpython / micropython.exe **60**; cpython-venv / python.exe **58**; pyscript **52**; jupyter **57**.
+**Per-runtime runnable counts** (62 matrix columns − 2 `matrix=false` − manifest dashes): micropython / circuitpython / micropython.exe **60**; cpython-venv / python.exe **59**; pyscript **53**; jupyter **57**.
 
 ### Harness / environment skips
 
@@ -214,9 +213,8 @@ Cases where the kit schedules a cell but the wrapper or runtime cannot complete 
 |---------|---------|--------|
 | `console_advanced_demo` | `micropython.exe` | `interactive_requires_thread` — mp.exe build has no `threading`/`_thread`; wrapper cannot run timed interactive pass. |
 | `console_advanced_demo` | `micropython`, `circuitpython` | Runs with daemon finisher thread on SDL; passes smoke. |
-| `nano_gui_simpletest` | `micropython`, `circuitpython`, `jupyter` | Runs where `ensure_nano_gui` / notebook path exists; skipped elsewhere via manifest. |
 
-Manifest-listed skips in the previous table are also environment-driven (dupterm, tft_config, nano_gui deps); they are not executed so no failure row is recorded.
+Manifest-listed skips in the previous table are also environment-driven (dupterm, tft_config); they are not executed so no failure row is recorded.
 
 ### Launcher skips
 
@@ -227,7 +225,7 @@ Manifest-listed skips in the previous table are also environment-driven (dupterm
 | Platform `available_on` | `micropython.exe`, `python.exe` | Windows/WSL-only subprocess runtimes; absent on plain Linux → all cells `missing`. |
 | Platform `available_on` | `jupyter` | Linux/WSL/macOS only; not listed for Windows. |
 
-Matrix table `—` cells: **15** total (manifest `skip_runtimes`); not run, not counted in pass denominators.
+Matrix table `—` cells: **12** total (manifest `skip_runtimes`); not run, not counted in pass denominators.
 
 ---
 

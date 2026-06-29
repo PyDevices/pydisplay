@@ -346,7 +346,6 @@ script = "examples/nano_gui_simpletest.py"
 kind = "oneshot"
 quit = "native_exit"
 deps = ["nano_gui"]
-skip_runtimes = ["pyscript", "cpython-venv", "python.exe"]
 
 [examples.palettes_cube]
 import = "palettes_cube"
