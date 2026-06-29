@@ -14,8 +14,8 @@
 |---------|----------------------------|--------|-------|
 | **micropython** | **61/61** | ✅ | Reference runtime (full matrix) |
 | **circuitpython** | **61/61** | ✅ | `pbm_simpletest` `oneshot_timeout_s = 60` on branch |
-| **cpython-venv** | **60/60** | ✅ | Skips `console_advanced_demo` only (manifest) |
-| **python.exe** | **60/60** | ✅ | Skips `console_advanced_demo` only (manifest) |
+| **cpython-venv** | **61/61** | ✅ | Full matrix |
+| **python.exe** | **61/61** | ✅ | Full matrix |
 | **micropython.exe** | **49/61** (stale) | 🔄 | Pre-fix full matrix; spot-checks green; column re-run pending |
 | **pyscript** | **30/52** | 🔄 | Playwright OK; 22 `Page.goto` networkidle timeouts (heavy/loop demos) |
 | **jupyter** | **23/57** | 🔄 | 34 cell timeouts; blit clip helps `pbm_simpletest` ✅ |
@@ -35,7 +35,6 @@ Excluded by design: `keypins_simpletest` (`matrix=false`). See [Skipped examples
 | `dual_main()` async examples (5) | ✅ mp.exe + micropython spot-check |
 | `choice` shims (sprite ×2, testris) | ✅ mp.exe spot-check |
 | Jupyter `pydisplay_test_mode` cell | ✅ `_write_jupyter_notebook()` |
-| Jupyter `console_advanced_demo` skip | ✅ manifest `skip_runtimes` |
 | JNDisplay `blit_rect` clip | 🔄 **Unstaged** in `jndisplay.py` — `pbm_simpletest` jupyter ✅; `bmp565_scroll_sprite` still times out |
 | mp.exe full column re-run | ⏳ Pending |
 | PyScript column re-run | ✅ **Done** — 30/52 (`/tmp/pyscript_run.log`) |
@@ -60,14 +59,9 @@ Excluded by design: `keypins_simpletest` (`matrix=false`). See [Skipped examples
 | `bmp565_scroll_sprite` | manifest `timeout_s = 70` | `302e975c` |
 | `apollo`, `calculator`, `eventsys_simpletest`, `paint`, `pydisplay_demo_async` | `dual_main()` sync fallbacks | `82c3ab4a` |
 | `bmp565_sprite`, `bmp565_sprite_transparent`, `testris` | example-local `choice` shim | `82c3ab4a` |
+| `console_advanced_demo` | test-mode `run_forever` + `broker.poll()` quit; manifest `kind=loop` | (this commit) |
 
-### Remaining (1 expected non-pass)
-
-| Example | Outcome | Approach |
-|---------|---------|----------|
-| `console_advanced_demo` | `interactive_requires_thread` | Expected — no threading on mp.exe (see [Harness / environment skips](#harness--environment-skips)) |
-
-**Target after full re-run:** **59/60** (only `console_advanced_demo`).
+**Target after full re-run:** **61/61** on all desktop runtimes.
 
 Stale full-matrix row (pre-fix): 49 ok / 11 bad — see `.cursor/example_matrix_run.log` line 688.
 
@@ -101,7 +95,6 @@ Log: `/tmp/pyscript_run.log`
 ### Harness — ✅ done
 
 - `pydisplay_test_mode` injected in notebook generator ([`example_test_kit.py`](tools/example_test_kit.py))
-- `console_advanced_demo` skipped (manifest)
 
 ### JNDisplay blit — 🔄 fix in working tree
 
@@ -113,7 +106,7 @@ Log: `/tmp/pyscript_run.log`
 |---------|------:|
 | **JNDisplay, ok** | **23** |
 | **cell timeout** | **33** |
-| **manifest skip (not run)** | **3** (`chango`, `console_advanced_demo`, `png_test`) |
+| **manifest skip (not run)** | **2** (`chango`, `png_test`) |
 | **matrix=false (display only)** | **2** |
 
 Runnable: **57**. Pass rate: **23/57** (40%).
@@ -129,7 +122,7 @@ Results: `.cursor/example_test_results.json`, `/tmp/jupyter_run_postfix.log`
 - [ ] Commit + push `jndisplay.py` blit clip (after Brad spot-check)
 - [x] Finish **jupyter** column re-run → **23/57**
 - [x] Finish **pyscript** column re-run → **30/52**; triage: networkidle timeouts on heavy demos
-- [ ] **mp.exe** full column re-run → confirm 59/60
+- [ ] **mp.exe** full column re-run → confirm 61/61
 - [ ] Merge PR #39 when columns green enough for Brad
 
 ---
@@ -170,7 +163,7 @@ Results: `.cursor/example_test_results.json`
 
 Inventory from [`tools/example_test_manifest.toml`](tools/example_test_manifest.toml), [`tools/example_test_kit.py`](tools/example_test_kit.py) (`example_allowed_on_runtime`, `missing`, `needs_playwright`, matrix `—` dash), and [`tools/example_runtimes.toml`](tools/example_runtimes.toml).
 
-**Summary count:** **10** global exclusions (1 `matrix=false` example + 9 harnesses) · **12** per-runtime manifest skip cells (**8** examples) · **1** wrapper expected non-pass · **4** launcher skip categories.
+**Summary count:** **10** global exclusions (1 `matrix=false` example + 9 harnesses) · **9** per-runtime manifest skip cells (**7** examples) · **4** launcher skip categories.
 
 ### Globally excluded from matrix (`matrix=false`)
 
@@ -193,7 +186,6 @@ Harness rows appear only when using `--all-except-harness`; default matrix shows
 
 | Example | Skipped on | Reason |
 |---------|------------|--------|
-| `console_advanced_demo` | `cpython-venv`, `python.exe`, `jupyter` | Interactive REPL + `os.dupterm`; not supported in headless CPython kit or Jupyter (no dupterm). |
 | `chango` | `pyscript`, `jupyter` | Board `tft_config` + add-on font/game assets; not wired for browser embed or notebook kit. |
 | `png_test` | `pyscript`, `jupyter` | PNG decode via add-ons; too heavy / unsupported path for PyScript and Jupyter autotest. |
 | `color_test` | `pyscript` | TFT color calibration via `tft_config`; no PyScript board profile. |
@@ -202,18 +194,15 @@ Harness rows appear only when using `--all-except-harness`; default matrix shows
 | `tiny_toasters` | `pyscript` | Animation with `tft_config`; not in PyScript embed. |
 | `noto_fonts` | `pyscript` | Large Noto font bundle + inject-quit loop; unreliable in headless PyScript autotest. |
 
-**Per-runtime runnable counts** (62 matrix columns − 2 `matrix=false` − manifest dashes): micropython / circuitpython / micropython.exe **60**; cpython-venv / python.exe **59**; pyscript **53**; jupyter **57**.
+**Per-runtime runnable counts** (62 matrix columns − 2 `matrix=false` − manifest dashes): micropython / circuitpython / micropython.exe / cpython-venv / python.exe **61**; pyscript **54**; jupyter **58**.
 
 ### Harness / environment skips
 
 Cases where the kit schedules a cell but the wrapper or runtime cannot complete smoke testing (distinct from manifest `—` dashes):
 
-| Example | Runtime | Reason |
-|---------|---------|--------|
-| `console_advanced_demo` | `micropython.exe` | `interactive_requires_thread` — mp.exe build has no `threading`/`_thread`; wrapper cannot run timed interactive pass. |
-| `console_advanced_demo` | `micropython`, `circuitpython` | Runs with daemon finisher thread on SDL; passes smoke. |
+_None currently expected for `console_advanced_demo` — test mode uses cooperative `broker.poll()` quit (no daemon thread)._
 
-Manifest-listed skips in the previous table are also environment-driven (dupterm, tft_config); they are not executed so no failure row is recorded.
+Manifest-listed skips in the previous table are also environment-driven (tft_config, etc.); they are not executed so no failure row is recorded.
 
 ### Launcher skips
 
@@ -224,7 +213,7 @@ Manifest-listed skips in the previous table are also environment-driven (dupterm
 | Platform `available_on` | `micropython.exe`, `python.exe` | Windows/WSL-only subprocess runtimes; absent on plain Linux → all cells `missing`. |
 | Platform `available_on` | `jupyter` | Linux/WSL/macOS only; not listed for Windows. |
 
-Matrix table `—` cells: **12** total (manifest `skip_runtimes`); not run, not counted in pass denominators.
+Matrix table `—` cells: **9** total (manifest `skip_runtimes`); not run, not counted in pass denominators.
 
 ---
 

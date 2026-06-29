@@ -221,10 +221,9 @@ deps = ["core"]
 [examples.console_advanced_demo]
 import = "console_advanced_demo"
 script = "examples/console_advanced_demo.py"
-kind = "interactive"
-quit = "interactive"
+kind = "loop"
+quit = "poll"
 deps = ["add_ons"]
-skip_runtimes = ["cpython-venv", "python.exe", "jupyter"]
 
 [examples.console_simpletest]
 import = "console_simpletest"

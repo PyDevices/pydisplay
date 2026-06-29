@@ -35,29 +35,50 @@ except ImportError:
 try:
     import gc
 
-    console.label(Console.RIGHT, lambda: f"mf={gc.mem_free():,}", pal.BLUE)
+    if hasattr(gc, "mem_free"):
+        console.label(Console.RIGHT, lambda: f"mf={gc.mem_free():,}", pal.BLUE)
+    else:
+        raise ImportError
 except ImportError:
     from psutil import virtual_memory
 
     console.label(Console.RIGHT, lambda: f"mf={virtual_memory().free:,}", pal.BLUE)
 
 try:
-    import os
+    import pydisplay_test_mode
 
-    os.dupterm(console)
-    try:
-        import pydisplay_test_mode
-
-        if not pydisplay_test_mode.ENABLED:
-            help()
-    except ImportError:
-        help()
+    _test_mode = pydisplay_test_mode.ENABLED
 except ImportError:
-    console.write("REPL not available.\n", pal.YELLOW)
+    _test_mode = False
+
+if not _test_mode:
+    try:
+        import os
+
+        os.dupterm(console)
+        help()
+    except ImportError:
+        console.write("REPL not available.\n", pal.YELLOW)
 
 console.label(Console.LEFT, platform, pal.RED)
 
 display_drv.show()
+
+if _test_mode:
+    from board_config import broker
+    from multimer import run_forever
+
+    console.write("console_advanced_demo: smoke test\n", pal.GREEN)
+    display_drv.show()
+
+    def _poll():
+        if elist := broker.poll():
+            for e in elist:
+                if e.type == broker.events.QUIT:
+                    return True
+        return False
+
+    run_forever(_poll, delay_ms=20)
 
 #### Example commands
 # console.cls()                   # Clear the console screen
