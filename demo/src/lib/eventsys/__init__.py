@@ -2,113 +2,91 @@
 #
 # SPDX-License-Identifier: MIT
 """
-`eventsys`
-====================================================
-An Event System including event types and device types for *Python.
-"""
+eventsys — SDL2/PyGame-style input events for *Python.
 
-from collections import namedtuple
+Quick start::
 
-try:
-    from micropython import const
-except ImportError:
-
-    def const(x):
-        return x
-
-
-def custom_type(types=None, classes=None):
-    """
-    Create new event types and classes for the events class.
-
-    For example, to recreate the events for the keypad device:
-    ```
     import eventsys
 
-    types = [("KEYDOWN", 0x300), ("KEYUP", 0x301)]
-    classes = {"Key": "type name key mod scancode window"}
-    eventsys.custom_type(types, classes)
+    broker = eventsys.Broker()
+    keypad = eventsys.KeypadDevice(read=lambda: pressed_keys)
+    broker.register(keypad)
 
-    # Optionally update the filter
-    events.filter += [events.KEYDOWN, events.KEYUP]
-    ```
+    while True:
+        for event in broker.poll():
+            if event.type == eventsys.QUIT:
+                break
+"""
 
-    Args:
-        types (dict[str, int] | list[tuple[str, int]]): Event type names and values.
-            Pass a dict or a list of `(name, value)` tuples.
-        classes (dict[str, str]): Event class names mapped to namedtuple field strings.
-    """
-    if classes is None:
-        classes = {}
-    if types is None:
-        types = {}
-    for type_name, value in types.items():
-        type_name = type_name.upper()
-        if hasattr(events, type_name):
-            raise ValueError(f"Event type {type_name} already exists in events class.")
-        else:
-            setattr(events, type_name, value or events._USER_TYPE_BASE)
-            if not value:
-                events._USER_TYPE_BASE += 1
+from . import keys
+from ._broker import Broker, poll_quit_discarding_others
+from ._capabilities import capabilities
+from ._device import Device, register_device, register_device_class, types
+from ._encoder import EncoderDevice
+from ._events import events, register_event
+from ._joystick import JoystickDevice, JoystickDriver
+from ._keypad import KeypadDevice
+from ._queue import QueueDevice, VirtualDevices
+from ._touch import TouchDevice
 
-    for event_class_name, event_class_fields in classes.items():
-        event_class_name = event_class_name[0].upper() + event_class_name[1:].lower()
-        if hasattr(events, event_class_name):
-            raise ValueError(f"Event class {event_class_name} already exists in events class.")
-        else:
-            event_class_fields = event_class_fields.lower()
-            setattr(
-                events,
-                event_class_name,
-                namedtuple(event_class_name, event_class_fields),  # noqa: PYI024
-            )
+register_device_class(types.BROKER, Broker)
 
+Keys = keys.Keys
 
-class events:
-    """
-    A container for event types and classes.  Similar to a C enum and struct.
-    """
+# Device type constants (also available as eventsys.types.*)
+BROKER = types.BROKER
+QUEUE = types.QUEUE
+TOUCH = types.TOUCH
+ENCODER = types.ENCODER
+KEYPAD = types.KEYPAD
+JOYSTICK = types.JOYSTICK
 
-    # Event types (from SDL2 / PyGame, not complete)
-    QUIT = const(0x100)  # User clicked the window close button
-    KEYDOWN = const(0x300)  # Key pressed
-    KEYUP = const(0x301)  # Key released
-    MOUSEMOTION = const(0x400)  # Mouse moved
-    MOUSEBUTTONDOWN = const(0x401)  # Mouse button pressed
-    MOUSEBUTTONUP = const(0x402)  # Mouse button released
-    MOUSEWHEEL = const(0x403)  # Mouse wheel motion
-    JOYAXISMOTION = const(0x600)  # Joystick axis motion
-    JOYBALLMOTION = const(0x601)  # Joystick trackball motion
-    JOYHATMOTION = const(0x602)  # Joystick hat position change
-    JOYBUTTONDOWN = const(0x603)  # Joystick button pressed
-    JOYBUTTONUP = const(0x604)  # Joystick button released
-    _USER_TYPE_BASE = 0x8000
+# Event type constants
+QUIT = events.QUIT
+KEYDOWN = events.KEYDOWN
+KEYUP = events.KEYUP
+MOUSEMOTION = events.MOUSEMOTION
+MOUSEBUTTONDOWN = events.MOUSEBUTTONDOWN
+MOUSEBUTTONUP = events.MOUSEBUTTONUP
+MOUSEWHEEL = events.MOUSEWHEEL
+JOYAXISMOTION = events.JOYAXISMOTION
+JOYBALLMOTION = events.JOYBALLMOTION
+JOYHATMOTION = events.JOYHATMOTION
+JOYBUTTONDOWN = events.JOYBUTTONDOWN
+JOYBUTTONUP = events.JOYBUTTONUP
 
-    filter = [
-        QUIT,
-        KEYDOWN,
-        KEYUP,
-        MOUSEMOTION,
-        MOUSEBUTTONDOWN,
-        MOUSEBUTTONUP,
-        MOUSEWHEEL,
-        JOYAXISMOTION,
-        JOYBALLMOTION,
-        JOYHATMOTION,
-        JOYBUTTONDOWN,
-        JOYBUTTONUP,
-    ]
-
-    # Event classes from PyGame
-    Unknown = namedtuple("Common", "type")  # noqa: PYI024
-    Motion = namedtuple("Motion", "type pos rel buttons touch window")  # noqa: PYI024
-    Button = namedtuple("Button", "type pos button touch window")  # noqa: PYI024
-    Wheel = namedtuple("Wheel", "type flipped x y precise_x precise_y touch window")  # noqa: PYI024
-    Key = namedtuple("Key", "type name key mod scancode window")  # noqa: PYI024
-    Quit = namedtuple("Quit", "type")  # noqa: PYI024
-    Any = namedtuple("Any", "type")  # noqa: PYI024
-    JoyAxisMotion = namedtuple("JoyAxisMotion", "type instance_id axis value")  # noqa: PYI024
-    JoyButtonUp = namedtuple("JoyButtonUp", "type instance_id button")  # noqa: PYI024
-    JoyButtonDown = namedtuple("JoyButtonDown", "type instance_id button")  # noqa: PYI024
-    JoyHatMotion = namedtuple("JoyHatMotion", "type instance_id hat value")  # noqa: PYI024
-    JoyBallMotion = namedtuple("JoyBallMotion", "type instance_id ball rel")  # noqa: PYI024
+__all__ = [
+    "BROKER",
+    "ENCODER",
+    "JOYAXISMOTION",
+    "JOYBALLMOTION",
+    "JOYBUTTONDOWN",
+    "JOYBUTTONUP",
+    "JOYHATMOTION",
+    "JOYSTICK",
+    "KEYDOWN",
+    "KEYPAD",
+    "KEYUP",
+    "MOUSEBUTTONDOWN",
+    "MOUSEBUTTONUP",
+    "MOUSEMOTION",
+    "MOUSEWHEEL",
+    "QUEUE",
+    "QUIT",
+    "TOUCH",
+    "Broker",
+    "Device",
+    "EncoderDevice",
+    "JoystickDevice",
+    "JoystickDriver",
+    "Keys",
+    "QueueDevice",
+    "TouchDevice",
+    "VirtualDevices",
+    "capabilities",
+    "events",
+    "poll_quit_discarding_others",
+    "register_device",
+    "register_event",
+    "types",
+]

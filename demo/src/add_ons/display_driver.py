@@ -20,7 +20,8 @@ except ImportError:
 import lv_utils
 import lvgl as lv
 
-from eventsys import devices, events
+import eventsys
+from eventsys import events
 
 
 def main():
@@ -47,12 +48,12 @@ def main():
         broker.devices,
     )
 
-    def _quit_hook():
+    def _lvgl_deinit():
         inst = lv_utils.event_loop.current_instance()
         if inst is not None:
             inst.deinit()
 
-    broker.quit_func = _quit_hook
+    broker.register_quit_cleanup(display_drv, before=_lvgl_deinit)
 
 
 class _TouchState:
@@ -110,23 +111,23 @@ def create_devices(devs, lv_display):
     #     indev.set_group(new_group)
     #     indev.set_display(new_display)
     for device in devs:
-        if device.type in (devices.types.TOUCH, devices.types.ENCODER, devices.types.KEYPAD):
+        if device.type in (eventsys.TOUCH, eventsys.ENCODER, eventsys.KEYPAD):
             indev = lv.indev_create()
             indev.set_display(lv_display)
             device.user_data = indev
-            if device.type == devices.types.TOUCH:
+            if device.type == eventsys.TOUCH:
                 device.subscribe(_touch_cb)  # Called by device
                 indev.set_type(lv.INDEV_TYPE.POINTER)
-            elif device.type == devices.types.ENCODER:
+            elif device.type == eventsys.ENCODER:
                 device.subscribe(_encoder_cb)  # Called by device
                 indev.set_type(lv.INDEV_TYPE.ENCODER)
-            elif device.type == devices.types.KEYPAD:
+            elif device.type == eventsys.KEYPAD:
                 device.subscribe(_keypad_cb)  # Called by device
                 indev.set_type(lv.INDEV_TYPE.KEYPAD)
             indev.set_group(lv.group_get_default())
             indev.set_read_cb(device.poll)  # Called by lv task handler
-        elif device.type == devices.types.QUEUE:
-            vd = devices.VirtualDevices(device)
+        elif device.type == eventsys.QUEUE:
+            vd = eventsys.VirtualDevices(device)
             create_devices(vd.devices, lv_display)
 
 
@@ -209,7 +210,10 @@ def run():
     while True:
         if needs_pump():
             pump()
-        broker.poll()
+        if elist := broker.poll():
+            for e in elist:
+                if e.type == events.QUIT:
+                    return
         sleep_ms(1)
 
 

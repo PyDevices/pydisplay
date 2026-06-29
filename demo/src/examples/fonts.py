@@ -1,3 +1,4 @@
+from eventsys import poll_quit_discarding_others
 # multimer types: all
 """
 fonts.py
@@ -57,12 +58,16 @@ def main():
                     line += font.HEIGHT
 
                     if line > tft.height - font.HEIGHT:
+                        if poll_quit_discarding_others(broker):
+                            break
                         sleep_ms(3000)
                         tft.draw.fill(palette.BLUE)
                         tft.show()
                         line = 0
                         col = 0
 
+            if poll_quit_discarding_others(broker):
+                break
             sleep_ms(3000)
 
 

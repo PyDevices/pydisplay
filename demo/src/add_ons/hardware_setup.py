@@ -23,7 +23,7 @@ def screenshot(event):
         ssd.screenshot()
 
 
-broker.subscribe(screenshot, event_types=[broker.events.MOUSEBUTTONDOWN])
+broker.on(broker.events.MOUSEBUTTONDOWN, screenshot)
 # End screenshot functionality
 
 
@@ -49,13 +49,9 @@ class Poller:
 
 
 tpad = Poller(broker.poll)
-broker.subscribe(
+broker.on(
+    [broker.events.MOUSEMOTION, broker.events.MOUSEBUTTONDOWN, broker.events.MOUSEBUTTONUP],
     tpad.callback,
-    event_types=[
-        broker.events.MOUSEMOTION,
-        broker.events.MOUSEBUTTONDOWN,
-        broker.events.MOUSEBUTTONUP,
-    ],
 )
 
 from gui.core.tgui import Display  # noqa: E402

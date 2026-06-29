@@ -1,3 +1,4 @@
+from eventsys import poll_quit_discarding_others
 # multimer types: all
 """
 tiny_hello.py
@@ -70,6 +71,8 @@ def main():
         tft.draw.rect(0, 0, tft.width, tft.height, palette.WHITE)
         center("Hello!", palette.WHITE, color)
         tft.show()
+        if poll_quit_discarding_others(broker):
+            break
         sleep_ms(1000)
 
     while True:

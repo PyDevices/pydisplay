@@ -201,11 +201,11 @@ def periodic(callback, period=33, *, async_=False, verbose=False):
 
 
 def run_forever(poll=None, *, delay_ms=1):
-    """Run the standard sync main loop until interrupted."""
+    """Run the standard sync main loop until ``poll()`` returns True or interrupted."""
     while True:
         pump()
-        if poll is not None:
-            poll()
+        if poll is not None and poll() is True:
+            break
         _sync_sleep_ms(delay_ms)
 
 

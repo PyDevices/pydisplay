@@ -29,6 +29,8 @@ while True:
     if not (elist := broker.poll()):
         continue
     for e in elist:
+            if e.type == broker.events.QUIT:
+                break
         if e.type == broker.events.MOUSEWHEEL:
             if e.y != 0:
                 direction = factor if e.y > 0 else -factor

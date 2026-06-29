@@ -40,13 +40,15 @@ async def sleep_ms(ms):
 
 
 async def run_forever_async(poll=None, *, delay_ms=10):
-    """Run the standard asyncio main loop until interrupted."""
+    """Run the standard asyncio main loop until ``poll()`` returns True or interrupted."""
     while True:
         await sleep_ms(0)
         if poll is not None:
             result = poll()
             if hasattr(result, "__await__"):
-                await result
+                result = await result
+            if result is True:
+                break
         await sleep_ms(delay_ms)
 
 

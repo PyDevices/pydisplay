@@ -12,7 +12,7 @@ MCU/desktop it runs the classic blocking loop with pump() + sleep_ms().
 
 import board_config
 from board_config import display_drv, broker
-from eventsys.devices import types
+import eventsys
 from graphics import round_rect, text16
 from multimer import pump, sleep_ms
 
@@ -44,7 +44,7 @@ _ZONE_MASKS = {
 
 def set_rotation_table(table):
     if display_drv.touch_device is not None:
-        if display_drv.touch_device.type == types.TOUCH:
+        if display_drv.touch_device.type == eventsys.TOUCH:
             display_drv.touch_device.rotation_table = table
 
 
