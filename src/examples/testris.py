@@ -10,7 +10,11 @@ from touch_keypad import Keypad
 from joystick_keypad import JoystickKeypad
 from eventsys.keys import Keys
 from eventsys import poll_quit_discarding_others
-from random import choice  # For random piece selection
+try:
+    from random import choice  # For random piece selection
+except ImportError:
+    def choice(seq):
+        return seq[0]
 from json import load, dump  # For saving the high score
 from sys import exit  # For exiting the game
 from graphics import FrameBuffer, RGB565  # For drawing text boxes

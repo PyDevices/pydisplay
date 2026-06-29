@@ -2,7 +2,11 @@ from eventsys import poll_quit_discarding_others
 # multimer types: queued, sync
 # pyscript binaries: assets/warrior.bmp
 from collections import namedtuple
-from random import choice
+try:
+    from random import choice
+except ImportError:
+    def choice(seq):
+        return seq[0]
 
 from board_config import broker
 from color_setup import ssd as canvas
