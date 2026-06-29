@@ -5,6 +5,7 @@ Image source:  https://commons.wikimedia.org/wiki/File:Apollo_DSKY_interface.svg
 """
 
 from board_config import display_drv, broker
+from touch_keypad import Keypad
 from graphics import Area, BMP565
 
 try:

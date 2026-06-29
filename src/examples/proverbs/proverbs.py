@@ -27,12 +27,16 @@ The fonts were converted from True Type fonts using the
 
 """
 
+import os
+import sys
+
 import tft_write
 import tft_config
 from board_config import broker
 from multimer import Timer, needs_pump, pump, sleep_ms
 
 palette = tft_config.palette
+sys.path.insert(0, os.path.dirname(__file__))
 import proverbs_20 as font20
 import proverbs_30 as font30
 

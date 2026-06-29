@@ -83,6 +83,8 @@ def _clear_target(x, y, half_width, half_height):
 def _poll_touch():
     if elist := broker.poll():
         for event in elist:
+            if event.type == broker.events.QUIT:
+                raise SystemExit(0)
             if event.type == broker.events.MOUSEBUTTONDOWN and event.button == 1:
                 return event.pos
     return None

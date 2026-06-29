@@ -82,6 +82,8 @@ def main():
                     pal[randint(0, len(pal) - 1)],
                     scale,
                 )
+                if poll_quit_discarding_others(broker):
+                    return
 
 
 main()

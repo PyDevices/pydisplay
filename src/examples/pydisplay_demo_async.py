@@ -139,7 +139,7 @@ def handle_events():
     if elist := broker.poll():
         for e in elist:
             if e.type == broker.events.QUIT:
-                break
+                return True
             if e.type != broker.events.MOUSEBUTTONDOWN:
                 continue
             if rotate_btn.contains(e.pos):
@@ -155,6 +155,7 @@ def handle_events():
                 state["color_i"] = (state["color_i"] + 1) % len(ACCENTS)
                 redraw()
                 resume_scroll()
+    return False
 
 
 async def main():

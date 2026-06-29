@@ -4,6 +4,7 @@ import os
 from collections import namedtuple
 
 import png
+from board_config import broker
 from color_setup import ssd
 from displaybuf import alloc_buffer
 from multimer import capabilities, pump, sleep_ms

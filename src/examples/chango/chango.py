@@ -24,6 +24,10 @@ See the :ref:`write_font_converter.py<write_font_converter>` program in the util
 """
 
 import gc
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(__file__))
 import chango_16 as font_16
 import chango_32 as font_32
 import chango_64 as font_64

@@ -1,3 +1,4 @@
+from board_config import broker
 from eventsys import poll_quit_discarding_others
 # multimer types: all
 """
@@ -103,7 +104,7 @@ def main():
             tft.show()
             color_idx = (color_idx + 1) % len(colors)
             if poll_quit_discarding_others(broker):
-                break
+                return
             sleep_ms(2000)
 
 

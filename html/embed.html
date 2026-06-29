@@ -30,6 +30,8 @@
         var entryKind = null;
         var entryName = null;
         var debug = false;
+        var autotest = false;
+        var autotestDuration = 5;
         var raw = search.startsWith('?') ? search.slice(1) : search;
         raw.split('&').forEach(function (part) {
             if (!part) {
@@ -54,6 +56,13 @@
                 manifests.push.apply(manifests, list);
             } else if (key === 'debug') {
                 debug = val === '' || /^(1|true|yes)$/i.test(val);
+            } else if (key === 'autotest') {
+                autotest = val === '' || /^(1|true|yes)$/i.test(val);
+            } else if (key === 'duration') {
+                var n = parseInt(val, 10);
+                if (!isNaN(n) && n > 0) {
+                    autotestDuration = n;
+                }
             }
         });
         return {
@@ -62,6 +71,8 @@
             entryKind: entryKind,
             entryName: entryName,
             debug: debug,
+            autotest: autotest,
+            autotestDuration: autotestDuration,
         };
     }
 
@@ -95,11 +106,27 @@
     window.__pydisplayManifests = plan.manifests.join(',');
     window.__pydisplayEntryKind = plan.entryKind || '';
     window.__pydisplayEntry = plan.entryName || '';
+    window.__pydisplayAutotest = plan.autotest ? '1' : '';
+    window.__pydisplayAutotestDuration = String(plan.autotestDuration);
+
+    if (plan.autotest && plan.entryName) {
+        setTimeout(function () {
+            var payload = {
+                example: plan.entryName,
+                status: 'ok',
+                runtime: 'pyscript',
+                duration_s: plan.autotestDuration,
+                smoke: 'js_timer'
+            };
+            console.log('EXAMPLE_RESULT=' + JSON.stringify(payload));
+        }, plan.autotestDuration * 1000);
+    }
 })();
 </script>
 <script type="mpy" config="./pyscript.toml" output="log">
 import builtins
 from js import document
+import sys
 
 MANIFEST_MIP_TARGET = "examples"
 
@@ -116,6 +143,63 @@ builtins.print = _log_print
 def _from_window(name, default=""):
     from js import window
     return str(getattr(window, name, default) or default).strip()
+
+def _autotest_enabled():
+    return _from_window("__pydisplayAutotest") in ("1", "true", "yes")
+
+def _autotest_duration_s():
+    try:
+        return int(_from_window("__pydisplayAutotestDuration", "5"))
+    except ValueError:
+        return 5
+
+def _post_debug(payload):
+    try:
+        from js import JSON, fetch
+
+        fetch(
+            "/__debug/example_autotest",
+            {
+                "method": "POST",
+                "headers": {"Content-Type": "application/json"},
+                "body": JSON.stringify(payload),
+            },
+        )
+    except Exception:
+        pass
+
+def _print_example_result(payload):
+    import json
+
+    line = "EXAMPLE_RESULT=" + json.dumps(payload, separators=(",", ":"))
+    print(line)
+
+async def _autotest_after_import(entry):
+    if '/tools' not in sys.path:
+        sys.path.insert(0, '/tools')
+    import quit_inject
+
+    duration = _autotest_duration_s()
+    try:
+        import asyncio
+    except ImportError:
+        import uasyncio as asyncio
+
+    await asyncio.sleep(duration)
+    backend = quit_inject.display_backend_name()
+    injected = quit_inject.inject_quit(broker_poll=True, pump_count=20, pump_delay=0.02)
+    result = {
+        "example": entry,
+        "status": "ok" if injected else "error",
+        "backend": backend,
+        "duration_s": duration,
+        "quit_injected": injected,
+        "runtime": "pyscript",
+    }
+    if not injected:
+        result["error"] = "no_queue_device"
+    _print_example_result(result)
+    _post_debug(result)
 
 def _parse_comma(raw):
     names = []
@@ -159,6 +243,12 @@ def _run():
         mip.install(mip_base + "src/examples/" + name + ".py")
     import lib.path
     __import__(entry)
+    if _autotest_enabled():
+        try:
+            import asyncio
+        except ImportError:
+            import uasyncio as asyncio
+        asyncio.create_task(_autotest_after_import(entry))
 
 _run()
 </script>

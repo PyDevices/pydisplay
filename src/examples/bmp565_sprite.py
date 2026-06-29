@@ -53,6 +53,8 @@ draw_sprite(*location, *sprite)
 step = 3
 dir = choice(directions)
 while True:
+    if poll_quit_discarding_others(broker):
+        break
     if choice((True, False, False, False, False)):
         dir = choice(directions)
     if dir == fwd and location.y + sprite_height > display_drv.height - step * 4:
@@ -87,3 +89,6 @@ while True:
         if poll_quit_discarding_others(broker):
             break
         sleep_ms(100)
+    else:
+        continue
+    break

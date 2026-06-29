@@ -466,6 +466,10 @@ class SDLDisplay(DisplayDriver):
         fillRect = SDL_Rect(x, y, w, h)
         r, g, b = color_rgb(c)
 
+        try:
+            retcheck(SDL_SetRenderTarget(self._renderer, None))
+        except RuntimeError:
+            pass
         retcheck(
             SDL_SetRenderTarget(self._renderer, self._buffer)
         )  # Set the render target to the texture

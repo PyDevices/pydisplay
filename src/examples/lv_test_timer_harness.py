@@ -20,6 +20,10 @@ else:
 if _src not in sys.path:
     sys.path.insert(0, _src)
 
+_tools = _src + "/../tools"
+if _tools not in sys.path:
+    sys.path.insert(0, _tools)
+
 import lib.path  # noqa: F401 — must be first
 
 import json
@@ -63,13 +67,9 @@ class _FakeEvent:
 
 
 def _queue_device():
-    from board_config import broker
-    import eventsys
+    import quit_inject
 
-    for dev in broker.devices:
-        if dev.type == eventsys.QUEUE:
-            return dev
-    return None
+    return quit_inject.queue_device()
 
 
 def _pump_lvgl(n=5, delay_s=0):
@@ -316,10 +316,9 @@ def _inject_quit_and_exit(pump, *, broker_poll=False, mode="?"):
     Inject events.Quit via the queue read path, then pump LVGL so VirtualDevices
     drain the queue (production window-close path).  Process should not return.
     """
-    from eventsys import events
+    import quit_inject
 
-    queue_dev = _queue_device()
-    if queue_dev is None:
+    if not quit_inject.inject_quit(broker_poll=broker_poll, pump_count=15, pump_delay=0.02, lvgl=True):
         _print_result(
             {
                 "mode": mode,
@@ -330,23 +329,11 @@ def _inject_quit_and_exit(pump, *, broker_poll=False, mode="?"):
         )
         raise SystemExit(1)
 
-    pending = [events.Quit(events.QUIT)]
-    orig_read = queue_dev._read
+    pump(5, 0.02)
+    if broker_poll:
+        from board_config import broker
 
-    def mock_read():
-        if pending:
-            return [pending.pop(0)]
-        return None
-
-    queue_dev._read = mock_read
-    try:
-        pump(15, 0.02)
-        if broker_poll:
-            from board_config import broker
-
-            broker.poll()
-    finally:
-        queue_dev._read = orig_read
+        broker.poll()
 
     _deinit_display()
     _print_result(

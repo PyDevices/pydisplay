@@ -79,6 +79,7 @@ interpreter = "./pyscript/micropython/micropython.mjs"
 
 "../src/lib/board_config.py" = "/lib/"
 "../src/lib/path.py" = "/lib/"
+"../tools/quit_inject.py" = "/tools/"
 "../src/lib/displaysys/__init__.py" = "/lib/displaysys/"
 "../src/lib/displaysys/busdisplay.py" = "/lib/displaysys/"
 "../src/lib/displaysys/fbdisplay.py" = "/lib/displaysys/"

@@ -1,3 +1,4 @@
+from board_config import broker
 from eventsys import poll_quit_discarding_others
 # multimer types: all
 """
@@ -102,6 +103,8 @@ def main():
             tft.draw.pixel(half - tween, (scroll + y_offset) % height, palette[wheel + (i << 2)])
 
         tft.show()
+        if poll_quit_discarding_others(broker):
+            break
         scroll = (scroll + 1) % height
         wheel = (wheel + 1) % 256
         counter += 1

@@ -3,6 +3,8 @@
 Testris game implemented in MicroPython by Brad Barnett.
 """
 
+import os
+
 # For the display & optional touch drivers
 from board_config import display_drv, broker
 from displaysys import alloc_buffer
@@ -12,8 +14,14 @@ from eventsys.keys import Keys
 from random import choice  # For random piece selection
 from json import load, dump  # For saving the high score
 from sys import exit  # For exiting the game
-from framebuf import FrameBuffer, RGB565  # For drawing text boxes
-from micropython import const  # For constant values
+from graphics import FrameBuffer, RGB565  # For drawing text boxes
+
+try:
+    from micropython import const  # For constant values
+except ImportError:
+
+    def const(x):
+        return x
 
 try:
     from time import ticks_ms, ticks_diff  # For timing
@@ -93,7 +101,9 @@ def main():  # noqa: C901, PLR0915
         GREY = 0x8410 if not needs_swap else 0x1084
 
     # Define other constants
-    SPLASH_ENABLED = const(1)  # Set to 1 to show the splash screen, 0 to skip it
+    SPLASH_ENABLED = const(
+        0 if os.environ.get("PYDISPLAY_EXAMPLE_TEST") else 1
+    )  # Set to 1 to show the splash screen, 0 to skip it
     DELAY = const(250)  # Delay in ms so we don't read the keypad too quickly
     SPEEDUP = const(
         25
@@ -315,6 +325,9 @@ def main():  # noqa: C901, PLR0915
         Returns:
             str: The key that was pressed.
         """
+        if os.environ.get("PYDISPLAY_EXAMPLE_TEST"):
+            return key if key is not None else START
+
         while True:  # Wait for the user to press a key
             pump()
             if elist := broker.poll():

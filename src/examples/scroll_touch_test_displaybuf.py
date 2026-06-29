@@ -48,11 +48,12 @@ def main():
         display_drv.show()
 
     while True:
-        # Check for mouse events
         if elist := broker.poll():
+            quit_requested = False
             for e in elist:
-            if e.type == broker.events.QUIT:
-                break
+                if e.type == broker.events.QUIT:
+                    quit_requested = True
+                    break
                 if e.type == broker.events.MOUSEBUTTONDOWN:
                     x, y = canvas.translate_point(e.pos)
                     if y < canvas.tfa:
@@ -66,6 +67,8 @@ def main():
                         )
                     canvas.show()
                     display_drv.show()
+            if quit_requested:
+                break
 
 
 main()

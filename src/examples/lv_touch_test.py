@@ -51,7 +51,7 @@ for alignment in alignments:
     label.set_text(f"Btn{i}")
     label.center()
 
-from multimer import Timer
+from multimer import Timer, needs_pump
 if needs_pump():
     from multimer import pump, sleep_ms
     while True:

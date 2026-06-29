@@ -77,7 +77,7 @@ def _native_framebuffer_blit(canvas, source, x, y, key=-1, palette=None):
     """Call the underlying ``framebuf.FrameBuffer.blit`` (C on MCU)."""
     from ._framebuf_plus import FrameBuffer as _GfxFrameBuffer
 
-    type(_GfxFrameBuffer.__mro__[1]).blit(canvas, source, x, y, key, palette)
+    _GfxFrameBuffer.__mro__[1].blit(canvas, source, x, y, key, palette)
 
 
 def _extract_rgb565_rows(source, src_x, src_y, w, h):

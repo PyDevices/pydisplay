@@ -88,5 +88,8 @@ def main():
                     scale,
                 )
                 display_drv.show()
+                if poll_quit_discarding_others(broker):
+                    return
+
 
 main()

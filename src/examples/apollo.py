@@ -55,11 +55,10 @@ async def write_time():
 
 
 async def scroll():
-    if vscsad := display_drv.vscsad():
-        scroll_range = (vscsad, display_drv.height + 1, 1)
-    else:
-        scroll_range = (display_drv.height, dsky.height - 1, -1)
-    for i in range(*scroll_range):
+    start = display_drv.vscsad()
+    if start is False:
+        return
+    for i in range(start, display_drv.height + 1):
         display_drv.vscsad(i)
         display_drv.show()
         await asyncio.sleep(0.001)
@@ -96,7 +95,15 @@ async def main():
 
 
 async def run():
-    await asyncio.gather(main(), write_time())
+    write_task = asyncio.create_task(write_time())
+    try:
+        await main()
+    finally:
+        write_task.cancel()
+        try:
+            await write_task
+        except asyncio.CancelledError:
+            pass
 
 
 aio_run(run)
