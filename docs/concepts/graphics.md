@@ -89,6 +89,18 @@ fb = graphics.load_image("image.bmp")  # or FrameBuffer.from_file(...)
 
 `save_image(fb, path)` and `FrameBuffer.save()` write PBM/PGM/BMP for the formats in [Graphics files](graphics-files.md). Other framebuffer formats raise `ValueError`.
 
+## Blit fast paths
+
+`graphics.blit()`, `Draw.blit()`, and `blit_rect()` dispatch to faster implementations when available:
+
+| Destination | Fast path |
+|-------------|-----------|
+| Display driver (`blit_rect` / `blit_transparent`) | SPI/SDL/pygame bulk copy |
+| `FrameBuffer` (MCU) | Native `framebuf.blit` when available |
+| `FrameBuffer` (CPython) | Row-wise `blit_rect` into buffer |
+
+Use `Draw(display_drv).blit(sprite_fb, x, y)` instead of a per-pixel loop — it routes to `display_drv.blit_rect` for RGB565 sprites. `graphics.capabilities()["blit"]` reports `framebuf` backend and `rect_hook` support.
+
 For streaming/large BMP assets, use `graphics.BMP565` (sliceable, optional streaming reads) — see [Graphics files](graphics-files.md).
 
 ## pydisplay integration

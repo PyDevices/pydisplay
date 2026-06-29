@@ -34,6 +34,11 @@ class TestCapabilities(unittest.TestCase):
         self.assertEqual(io_caps["load"], ["pbm", "pgm", "bmp"])
         self.assertEqual(io_caps["save"], ["pbm", "pgm", "bmp"])
 
+    def test_blit_capabilities(self):
+        blit_caps = capabilities()["blit"]
+        self.assertEqual(blit_caps["framebuf"], capabilities()["framebuf"])
+        self.assertTrue(blit_caps["rect_hook"])
+
     def test_cpython_uses_pure_python_framebuf(self):
         if sys.implementation.name != "cpython":
             self.skipTest("CPython-only assertion")

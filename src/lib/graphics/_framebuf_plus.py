@@ -315,8 +315,7 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             (Area): Bounding box of the blitted buffer
         """
-        super().blit(buf, x, y, key, palette)
-        return Area(x, y, buf.width, buf.height)
+        return _shapes.blit(self, buf, x, y, key, palette)
 
     ########### Additional methods
 
@@ -353,24 +352,7 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             (Area): The bounding box of the blitted area.
         """
-        BPP = 2
-
-        if x < 0 or y < 0 or x + w > self.width or y + h > self.height:
-            raise ValueError("The provided x, y, w, h values are out of range")
-
-        if len(buf) != w * h * BPP:
-            raise ValueError(
-                f"The source buffer is not the correct size "
-                f"(got {len(buf)} bytes, expected {w * h * BPP})"
-            )
-
-        for row in range(h):
-            source_begin = row * w * BPP
-            source_end = source_begin + w * BPP
-            dest_begin = ((y + row) * self.width + x) * BPP
-            dest_end = dest_begin + w * BPP
-            self.buffer[dest_begin:dest_end] = buf[source_begin:source_end]
-        return Area(x, y, w, h)
+        return _shapes.blit_rect(self, buf, x, y, w, h)
 
     def blit_transparent(self, buf, x, y, w, h, key):
         """

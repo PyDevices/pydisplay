@@ -25,6 +25,10 @@ _CAPS = {
         "load": ["pbm", "pgm", "bmp"],
         "save": ["pbm", "pgm", "bmp"],
     },
+    "blit": {
+        "framebuf": "pure_python",
+        "rect_hook": True,
+    },
 }
 
 
@@ -32,6 +36,7 @@ def init_capabilities(*, framebuf_backend, formats=None):
     """Record the selected framebuf backend and supported formats."""
     _CAPS["framebuf"] = framebuf_backend
     _CAPS["dialect"] = _DIALECT
+    _CAPS["blit"]["framebuf"] = framebuf_backend
     if formats is not None:
         _CAPS["formats"] = list(formats)
 
