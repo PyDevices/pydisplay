@@ -39,7 +39,19 @@ import re
 import shutil
 import sys
 
-from build import ensure_path_exists, error_color
+_COLOR_ERROR_ON = "\033[1;31m"
+_COLOR_ERROR_OFF = "\033[0m"
+
+
+def ensure_path_exists(file_path):
+    path = os.path.dirname(file_path)
+    if path and not os.path.isdir(path):
+        os.makedirs(path)
+
+
+def error_color(s):
+    return _COLOR_ERROR_ON + s + _COLOR_ERROR_OFF
+
 
 DEFAULT_AUTHOR = "micropython-lib <contact@micropython.org>"
 DEFAULT_LICENSE = "MIT"
@@ -205,6 +217,9 @@ def main():
     cmd_parser.add_argument("--micropython", default=None, help="path to micropython repo")
     cmd_parser.add_argument("manifest", help="input package path")
     args = cmd_parser.parse_args()
+
+    _scripts_dir = os.path.dirname(os.path.abspath(__file__))
+    sys.path.insert(0, _scripts_dir)
 
     if args.micropython:
         sys.path.append(os.path.join(args.micropython, "tools"))  # for manifestfile

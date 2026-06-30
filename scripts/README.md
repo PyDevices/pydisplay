@@ -19,7 +19,7 @@ Repo and site maintenance scripts. Each runnable script uses a **domain prefix**
 | `MICROPYTHON_LIB_DEPLOY_TOKEN` | yes | PAT with `contents:write` on [PyDevices/micropython-lib](https://github.com/PyDevices/micropython-lib) |
 | `TESTPYPI_API_TOKEN` | no | TestPyPI upload when workflow input “Upload TestPyPI wheels” is enabled |
 
-Dispatch from **Actions → Publish micropython-lib → Run workflow**. Defaults: sync sources + rebuild `mip/PyDevices` (no TestPyPI).
+Dispatch from **Actions → Publish micropython-lib → Run workflow**. Defaults: sync sources + rebuild `mip/PyDevices` (no TestPyPI). Full walkthrough: [Publishing micropython-lib](../docs/publishing-micropython-lib.md) (also on [ReadTheDocs](https://pydisplay.readthedocs.io/en/latest/publishing-micropython-lib/)).
 
 ## Quick start
 

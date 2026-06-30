@@ -66,7 +66,7 @@ if [[ -z "$COMMIT_MESSAGE" ]] && [[ -t 0 ]]; then
     INTERACTIVE_COMMIT=1
 fi
 
-VERSION=0.0.2
+VERSION=0.0.3
 DESCRIPTION_PREFIX="PyDisplay"
 AUTHOR="Brad Barnett <contact@pydevices.com>"
 LICENSE="MIT"
@@ -186,10 +186,12 @@ package("$package")
 EOF
         echo "require(\"$package\")" >> $BUNDLE_MANIFEST
         cp $README_FULL_PATH $DEST_DIR/$package/README.md
-        ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package $DEST_DIR/$package/manifest.py
-        pushd $PYPI_DIR/$package
-        build_and_upload_pypi
-        popd
+        if [[ "$SKIP_PYPI" -eq 0 ]]; then
+            ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package $DEST_DIR/$package/manifest.py
+            pushd $PYPI_DIR/$package
+            build_and_upload_pypi
+            popd
+        fi
     fi
 done
 
@@ -223,10 +225,12 @@ package("displaysys")
 EOF
         echo "require(\"$package\")" >> $BUNDLE_MANIFEST
         cp $README_FULL_PATH $DEST_DIR/displaysys/$package/README.md
-        ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package  $DEST_DIR/displaysys/$package/manifest.py
-        pushd $PYPI_DIR/$package
-        build_and_upload_pypi
-        popd
+        if [[ "$SKIP_PYPI" -eq 0 ]]; then
+            ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package $DEST_DIR/displaysys/$package/manifest.py
+            pushd $PYPI_DIR/$package
+            build_and_upload_pypi
+            popd
+        fi
         cp $SOURCE_DIR/examples/$package*.py $DEST_DIR/displaysys/$package/examples/
     else
         cat <<EOF > $DEST_DIR/displaysys/$package/manifest.py
