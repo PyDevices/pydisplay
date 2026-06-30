@@ -5,7 +5,7 @@ lv_test_timer_queued.py
 LVGL timer test — default multimer.Timer with a pump() drain loop when
 the platform requires it (``needs_pump()`` is True).
 
-On CPython Linux and MicroPython unix (``_ctypes`` / ``_ffi`` timers), callbacks
+On CPython Linux and MicroPython unix (``_posix`` timers), callbacks
 run on the main thread without a blocking loop — same as ``lv_test_timer_sync.py``.
 
 On CPython Win/mac and other queued platforms, blocks in ``display_driver.run()``

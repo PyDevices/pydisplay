@@ -20,7 +20,7 @@ def pump(duration_s, step_s=0.005):
 
     - threading / SDL / polling backends deliver callbacks through the schedule
       queue, which ``multimer.pump()`` drains here on the main thread;
-    - the POSIX ``_ctypes``/``_ffi`` backends deliver callbacks on the main
+    - the POSIX ``_posix`` backend delivers callbacks on the main
       thread during ``time.sleep`` (``pump`` is then a harmless no-op).
     """
     end = time.monotonic() + duration_s

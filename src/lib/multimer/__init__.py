@@ -65,7 +65,7 @@ except ImportError:
     Timer = None
     if sys.implementation.name == "micropython":
         try:
-            from ._ffi import Timer
+            from ._posix import Timer
 
             _BACKEND = Timer.BACKEND
             _NEEDS_PUMP = Timer.NEEDS_PUMP
@@ -82,7 +82,7 @@ except ImportError:
                 _NEEDS_PUMP = Timer.NEEDS_PUMP
     elif sys.implementation.name == "cpython":
         try:
-            from ._ctypes import Timer
+            from ._posix import Timer
 
             _BACKEND = Timer.BACKEND
             _NEEDS_PUMP = Timer.NEEDS_PUMP
@@ -160,6 +160,23 @@ def pump(max_items=None):
     return n
 
 
+def _async_loop_running(aio):
+    """Return True when ``aio`` has a running event loop (uasyncio or asyncio)."""
+    if hasattr(aio, "get_running_loop"):
+        try:
+            aio.get_running_loop()
+            return True
+        except RuntimeError:
+            return False
+    current_task = getattr(aio, "current_task", None)
+    if current_task is not None:
+        try:
+            return current_task() is not None
+        except RuntimeError:
+            return False
+    return False
+
+
 def sleep_ms(ms):
     """Sleep for ``ms`` milliseconds.
 
@@ -167,16 +184,69 @@ def sleep_ms(ms):
     ``await multimer.sleep_ms(ms)``.  Otherwise blocks and advances cooperative
     sync timers.
     """
+
+    # #region agent log
+    def _agent_log(message, data, hypothesis_id):
+        try:
+            import json
+            import time
+
+            with open(
+                "/home/brad/github/pydisplay/.cursor/debug-39b49e.log", "a", encoding="utf-8"
+            ) as _f:
+                _f.write(
+                    json.dumps(
+                        {
+                            "sessionId": "39b49e",
+                            "hypothesisId": hypothesis_id,
+                            "location": "multimer/__init__.py:sleep_ms",
+                            "message": message,
+                            "data": data,
+                            "timestamp": int(time.time() * 1000),
+                        }
+                    )
+                    + "\n"
+                )
+        except Exception:
+            pass
+
+    # #endregion
     if _async_sleep_ms is not None:
         try:
             from ._async import _require_asyncio
 
             aio = _require_asyncio()
-            if hasattr(aio, "get_running_loop"):
-                aio.get_running_loop()
+            has_grl = hasattr(aio, "get_running_loop")
+            has_ct = hasattr(aio, "current_task")
+            ct = aio.current_task() if has_ct else None
+            # #region agent log
+            _agent_log(
+                "sleep_ms asyncio probe",
+                {
+                    "ms": ms,
+                    "has_get_running_loop": has_grl,
+                    "has_current_task": has_ct,
+                    "current_task": repr(ct),
+                },
+                "H1",
+            )
+            # #endregion
+            if _async_loop_running(aio):
+                # #region agent log
+                _agent_log(
+                    "async branch via loop detection",
+                    {"ms": ms, "used_get_running_loop": has_grl},
+                    "H1",
+                )
+                # #endregion
                 return _async_sleep_ms(ms)
-        except (ImportError, RuntimeError):
-            pass
+        except ImportError as err:
+            # #region agent log
+            _agent_log("asyncio import failed", {"err": repr(err)}, "H2")
+            # #endregion
+    # #region agent log
+    _agent_log("sync branch (no awaitable returned)", {"ms": ms}, "H1")
+    # #endregion
     _sync_sleep_ms(ms)
 
 

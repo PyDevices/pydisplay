@@ -50,7 +50,7 @@ Ask one question: **`multimer.needs_pump()`**
 
 ### Schedule queue vs pump
 
-On CPython and CircuitPython unix, **`multimer.capabilities()["schedule_queue"]`** is `True`: callbacks posted from worker threads are queued until the main thread calls **`pump()`**. Some backends (for example CPython Linux `_ctypes`) deliver timer signals on the main thread — **`needs_pump()`** is `False` there — but other code may still use **`multimer.schedule`**, so library code that presents frames may still call **`pump()`** when `schedule_queue` is true.
+On CPython and CircuitPython unix, **`multimer.capabilities()["schedule_queue"]`** is `True`: callbacks posted from worker threads are queued until the main thread calls **`pump()`**. Some backends (for example Linux **`_posix`**) deliver timer signals on the main thread — **`needs_pump()`** is `False` there — but other code may still use **`multimer.schedule`**, so library code that presents frames may still call **`pump()`** when `schedule_queue` is true.
 
 Inspect the platform:
 
@@ -117,13 +117,29 @@ pydisplay uses multimer for `auto_refresh`, LVGL ticks, and frame pacing. Displa
 
 Backend selection at import (first match wins):
 
-| Backend | Module | `needs_pump` |
-|---------|--------|--------------|
-| MCU hardware | `machine.Timer` | False |
-| MicroPython unix POSIX | `_ffi` | False |
-| CPython Linux POSIX | `_ctypes` | False |
-| Thread / SDL / polling | `_threading`, `_sdl2`, `_polling` | True |
-| Asyncio | `_async.AsyncTimer` | False |
+| Backend | Module | `needs_pump` | Notes |
+|---------|--------|--------------|-------|
+| MCU hardware | `machine.Timer` | False | On-device only |
+| Linux POSIX | `_posix` | False | librt timers; ctypes on CPython, ffi/uctypes on MicroPython unix. Replaces former **`_ffi`** and **`_ctypes`** modules. |
+| Thread | `_threading` | True | Background thread + `schedule` queue |
+| SDL2 | `_sdl2` | True | `SDL_AddTimer` via **`usdl2`** |
+| Polling | `_polling` | True | Cooperative tick list |
+| Asyncio | `_async.AsyncTimer` | False | Software timer on the event loop |
+
+`examples/test_timers.py` probes each row (plus `multimer.Timer` default) when the module imports on the host. Run `python tools/run_test_timers.py` for a per-runtime matrix.
+
+### POSIX backend (`_posix`)
+
+Linux **`timer_create`** / **`timer_settime`** with thread-directed signals (`SIGEV_THREAD_ID`). Callbacks run on the main thread without **`pump()`**.
+
+Binding path inside **`_posix.py`**:
+
+| Host | Binding |
+|------|---------|
+| CPython linux | ctypes → `libc.so.6` / `librt.so.1` |
+| MicroPython unix | ffi + uctypes |
+
+This single module replaced the older split **`multimer._ffi`** (MicroPython) and **`multimer._ctypes`** (CPython) timer backends.
 
 ### SDL2 bindings (`usdl2`)
 
@@ -131,8 +147,8 @@ Desktop SDL2 access is shared between display and timer code:
 
 | Consumer | Import chain |
 |----------|--------------|
-| `displaysys.sdldisplay._sdl2` | `usdl2` → `._ffi` (MicroPython only) → `._ctypes` |
-| `multimer._sdl2` | `usdl2` → inline ctypes against system libSDL2 |
+| `displaysys.sdldisplay` | built-in `usdl2` → `add_ons/usdl2.py` |
+| `multimer._sdl2` | `usdl2` (native or `add_ons/usdl2.py`) |
 
 Both prefer the native **`usdl2`** module when it is frozen or built into the interpreter. Pure-Python fallbacks keep CPython and MicroPython Unix working without it. See [Displays — SDLDisplay](displays.md#sdldisplay) and [MicroPython — usdl2](../platforms/micropython.md#usdl2-native-sdl2).
 

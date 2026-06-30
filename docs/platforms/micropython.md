@@ -46,9 +46,9 @@ Use `board_configs/sdldisplay/` or the default `src/lib/board_config.py` for SDL
 
 ## usdl2 (native SDL2)
 
-For best SDL2 performance on MicroPython Unix, CircuitPython Unix, and `micropython.exe`, build with the optional native **`usdl2`** module from [PyDevices/usdl2](https://github.com/PyDevices/usdl2). It provides the SDL2 subset used by **`SDLDisplay`** (`displaysys.sdldisplay._sdl2`) and, when the host selects the SDL timer backend, **`multimer._sdl2`**.
+For best SDL2 performance on MicroPython Unix, CircuitPython Unix, and `micropython.exe`, build with the optional native **`usdl2`** module from [PyDevices/usdl2](https://github.com/PyDevices/usdl2). It provides the SDL2 subset used by **`SDLDisplay`** and, when the host selects the SDL timer backend, **`multimer._sdl2`**.
 
-Without **`usdl2`**, `SDLDisplay` falls back to pure-Python ffi/ctypes bindings; timer selection is unchanged (`multimer` still picks `_ffi`, `_ctypes`, or threading backends first on each platform).
+Without **`usdl2`**, `SDLDisplay` falls back to pure-Python ffi/ctypes bindings; timer selection is unchanged (`multimer` still picks `_posix` or threading backends first on each platform).
 
 ## Frozen firmware
 

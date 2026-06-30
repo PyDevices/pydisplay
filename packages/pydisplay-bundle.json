@@ -33,24 +33,8 @@
       "github:PyDevices/pydisplay/src/lib/displaysys/psdisplay.py"
     ],
     [
-      "lib/displaysys/sdldisplay/__init__.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/__init__.py"
-    ],
-    [
-      "lib/displaysys/sdldisplay/_sdl2/__init__.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2/__init__.py"
-    ],
-    [
-      "lib/displaysys/sdldisplay/_sdl2/_constants.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2/_constants.py"
-    ],
-    [
-      "lib/displaysys/sdldisplay/_sdl2/_ctypes.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2/_ctypes.py"
-    ],
-    [
-      "lib/displaysys/sdldisplay/_sdl2/_ffi.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2/_ffi.py"
+      "lib/displaysys/sdldisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay.py"
     ],
     [
       "lib/eventsys/__init__.py",
@@ -165,16 +149,16 @@
       "github:PyDevices/pydisplay/src/lib/multimer/_async.py"
     ],
     [
+      "lib/multimer/_mpasyncio.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_mpasyncio.py"
+    ],
+    [
       "lib/multimer/_capabilities.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_capabilities.py"
     ],
     [
-      "lib/multimer/_ctypes.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_ctypes.py"
-    ],
-    [
-      "lib/multimer/_ffi.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_ffi.py"
+      "lib/multimer/_posix.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_posix.py"
     ],
     [
       "lib/multimer/_polling.py",

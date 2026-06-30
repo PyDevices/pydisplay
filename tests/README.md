@@ -60,7 +60,7 @@ python tests/test_ticks.py
 | `test_standalone.py` | proves each package imports and runs with **none** of the rest of pydisplay on the path |
 
 The timer tests run on whichever synchronous backend the host selects
-(`_ctypes`/`_ffi`/`_threading`/`_sdl2`/`_polling`); `_sdl2` prefers the
+(`_posix`/`_threading`/`_sdl2`/`_polling`); `_sdl2` prefers the
 native `usdl2` module when present. `_support.pump()` drives them uniformly. Tests that need a real `machine.Timer` are skipped when no
 backend is available.
 

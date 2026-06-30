@@ -4,11 +4,26 @@
 """
 Probe every multimer Timer backend available on this Python port.
 
+Backends exercised (when importable on the host):
+
+- ``machine.Timer`` — MCU hardware
+- ``multimer._posix.Timer`` — Linux librt timers (unified ``_ffi`` + ``_ctypes`` replacement)
+- ``multimer._threading.Timer`` — background thread + schedule queue
+- ``multimer._sdl2.Timer`` — SDL2 ``SDL_AddTimer`` (via ``usdl2``)
+- ``multimer._polling.Timer`` — cooperative tick list
+- ``multimer.AsyncTimer`` — asyncio / uasyncio
+- ``multimer.Timer`` — platform default (first match at import)
+
 From ``src/`` with ``lib.path`` configured::
 
     python
     >>> import lib.path
     >>> import test_timers
+
+Run the full desktop matrix (always includes ``micropython.exe`` and
+``python.exe`` from ``~/bin`` when present)::
+
+    python tools/run_test_timers.py
 
 Each implementation is imported and exercised inside its own try block so one
 failure does not stop the rest.  Implementations that cannot be imported are
@@ -23,6 +38,9 @@ from multimer._ticks import sleep_ms as wait_ms
 TEST_PERIOD_MS = 50
 TEST_DURATION_MS = 300
 MIN_CALLBACKS = 2
+
+# Canonical sync backend modules (``_posix`` replaces the former ``_ffi`` and ``_ctypes`` modules).
+SYNC_TIMER_BACKENDS = ("_posix", "_threading", "_sdl2", "_polling")
 
 
 def _timer_id():
@@ -127,14 +145,9 @@ def _run_async_loop_test(TimerClass):
 
 
 def _run_async_timer_test_sync(TimerClass):
-    try:
-        import asyncio
-    except ImportError:
-        try:
-            import uasyncio as asyncio
-        except ImportError:
-            raise ImportError("asyncio or uasyncio required") from None
+    from multimer._async import _require_asyncio
 
+    asyncio = _require_asyncio()
     if hasattr(asyncio, "run"):
         return asyncio.run(_run_async_timer_test(TimerClass))
     loop = asyncio.get_event_loop()
@@ -193,8 +206,8 @@ def _import_machine_timer():
     return Timer
 
 
-def _import_ffi_timer():
-    return _import_timer("_ffi")
+def _import_posix_timer():
+    return _import_timer("_posix")
 
 
 def _import_sdl2_timer():
@@ -205,18 +218,14 @@ def _import_threading_timer():
     return _import_timer("_threading")
 
 
-def _import_ctypes_timer():
-    return _import_timer("_ctypes")
+def _import_polling_timer():
+    return _import_timer("_polling")
 
 
 def _import_async_timer():
     from multimer import AsyncTimer
 
     return AsyncTimer
-
-
-def _import_polling_timer():
-    return _import_timer("_polling")
 
 
 def _import_multimer_timer():
@@ -227,16 +236,19 @@ def _import_multimer_timer():
 
 def main():
     _print_platform()
+    print("sync backends:", ", ".join(SYNC_TIMER_BACKENDS))
+    print()
 
+    # Probe order matters on MicroPython unix: _sdl2 before _posix; _posix last
+    # among sync backends (POSIX timer signals break later probes).
     probes = (
         ("machine.Timer", _import_machine_timer, False, False),
-        ("_ffi.Timer", _import_ffi_timer, False, False),
-        ("_sdl2.Timer", _import_sdl2_timer, False, False),
         ("_threading.Timer", _import_threading_timer, False, False),
+        ("_sdl2.Timer", _import_sdl2_timer, False, False),
         ("_polling.Timer", _import_polling_timer, False, False),
-        ("_ctypes.Timer", _import_ctypes_timer, False, False),
         ("AsyncTimer", _import_async_timer, True, False),
         ("AsyncTimer (yield loop)", _import_async_timer, False, True),
+        ("_posix.Timer", _import_posix_timer, False, False),
         ("multimer.Timer (default)", _import_multimer_timer, False, False),
     )
 
@@ -245,4 +257,5 @@ def main():
         _probe(name, import_fn, async_test=async_test, async_loop_test=async_loop_test)
 
 
-main()
+if __name__ == "__main__":
+    main()

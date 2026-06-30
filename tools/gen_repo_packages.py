@@ -41,14 +41,15 @@ WOKWI_BUNDLE_EXCLUDE_DESTS = {
     "lib/displaysys/jndisplay.py",
     "lib/displaysys/pgdisplay.py",
     "lib/displaysys/psdisplay.py",
-    "lib/multimer/_ctypes.py",
-    "lib/multimer/_ffi.py",
+    "lib/multimer/_posix.py",
     "lib/multimer/_polling.py",
     "lib/multimer/_sdl2.py",
     "lib/multimer/_threading.py",
     "lib/multimer/_async.py",
+    "lib/multimer/_mpasyncio.py",
+    "lib/displaysys/sdldisplay.py",
 }
-WOKWI_BUNDLE_EXCLUDE_PREFIXES = ("lib/displaysys/sdldisplay/",)
+WOKWI_BUNDLE_EXCLUDE_PREFIXES = ()
 # Dest paths added only to wokwi/pydisplay-bundle.json (not in pydisplay-bundle).
 WOKWI_BUNDLE_EXTRA_DESTS = [
     "add_ons/touch_keypad.py",

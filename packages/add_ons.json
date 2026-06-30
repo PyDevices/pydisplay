@@ -89,6 +89,10 @@
       "github:PyDevices/pydisplay/src/add_ons/touch_keypad.py"
     ],
     [
+      "usdl2.py",
+      "github:PyDevices/pydisplay/src/add_ons/usdl2.py"
+    ],
+    [
       "uctypes.py",
       "github:PyDevices/pydisplay/src/add_ons/uctypes.py"
     ],
