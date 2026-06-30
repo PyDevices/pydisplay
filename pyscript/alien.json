@@ -2,15 +2,15 @@
   "urls": [
     [
       "alien/__init__.py",
-      "../src/examples/alien/__init__.py"
+      "../../src/examples/alien/__init__.py"
     ],
     [
       "alien/alien.py",
-      "../src/examples/alien/alien.py"
+      "../../src/examples/alien/alien.py"
     ],
     [
       "alien/alien_bitmap.py",
-      "../src/examples/alien/alien_bitmap.py"
+      "../../src/examples/alien/alien_bitmap.py"
     ]
   ],
   "version": "0.0.5"

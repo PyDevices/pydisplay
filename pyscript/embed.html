@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./mini-coi-fd.js"></script>
-<script type="module" src="./pyscript/core.js"></script>
-<link rel="stylesheet" href="./pyscript/core.css">
+<script type="module" src="./vendor/core.js"></script>
+<link rel="stylesheet" href="./vendor/core.css">
 </head>
 <body>
 <canvas id="display_canvas" width="320" height="480" tabindex="0"></canvas>
@@ -259,10 +259,10 @@ def _loader_plan():
 def _mip_base():
     host = document.location.hostname
     path = document.location.pathname
-    demo_root = path.split("/html/")[0] if "/html/" in path else ""
+    site_root = path[: path.rfind("/") + 1] if "/" in path else "/"
     if host in ("127.0.0.1", "localhost") or host.endswith(".github.io"):
-        return document.location.origin + demo_root + "/"
-    return "github:PyDevices/pydisplay/"
+        return document.location.origin + site_root
+    return "github:PyDevices/pydisplay/web/pyscript/"
 
 def _run():
     if _from_window("__pydisplayLoaderDisabled"):
@@ -273,7 +273,7 @@ def _run():
     import mip
     mip_base = _mip_base()
     for name in manifests:
-        mip.install(mip_base + "html/" + name + ".json", target=MANIFEST_MIP_TARGET)
+        mip.install(mip_base + name + ".json", target=MANIFEST_MIP_TARGET)
     for name in modules:
         mip.install(mip_base + "src/examples/" + name + ".py")
     if _autotest_enabled():
