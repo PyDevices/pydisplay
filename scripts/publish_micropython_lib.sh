@@ -14,6 +14,7 @@ SKIP_PYPI=0
 DO_PUSH=0
 COMMIT_MESSAGE=""
 INTERACTIVE_COMMIT=0
+CLI_VERSION=""
 
 usage() {
     cat <<'EOF'
@@ -24,14 +25,18 @@ build TestPyPI wheels, then commit (and optionally push) on the PyDevices branch
 
 Options:
   --skip-pypi           Sync manifests only; skip hatch/twine TestPyPI uploads.
+  --version X.Y.Z       Release version (overrides tag / PYDISPLAY_VERSION).
   --commit-message MSG  Commit micropython-lib changes (non-interactive).
   --push                Push micropython-lib after commit (requires credentials).
   --help, -h            Show this message.
 
 Environment:
   MICROPYTHON_LIB_DIR   micropython-lib checkout (default: ~/github/micropython-lib)
-  PYDISPLAY_VERSION     Package version (overrides scripts/VERSION file)
+  PYDISPLAY_VERSION     Release version (overrides git tag on current commit)
   TESTPYPI_API_TOKEN    TestPyPI token for twine (when not using --skip-pypi)
+
+Version is read from (first match): --version, PYDISPLAY_VERSION, or an exact vX.Y.Z
+git tag on HEAD. Tag releases: ./scripts/publish_release_tag.sh X.Y.Z
 
 Without --commit-message, prompts interactively when stdin is a TTY.
 EOF
@@ -42,6 +47,10 @@ while [[ $# -gt 0 ]]; do
         --skip-pypi)
             SKIP_PYPI=1
             shift
+            ;;
+        --version)
+            CLI_VERSION=$2
+            shift 2
             ;;
         --commit-message)
             COMMIT_MESSAGE=$2
@@ -69,20 +78,43 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
-VERSION_FILE="$SCRIPT_DIR/VERSION"
 
-if [[ -n "${PYDISPLAY_VERSION:-}" ]]; then
-    VERSION="$PYDISPLAY_VERSION"
-elif [[ -f "$VERSION_FILE" ]]; then
-    VERSION="$(tr -d '[:space:]' < "$VERSION_FILE")"
-else
-    echo "Error: set PYDISPLAY_VERSION or create $VERSION_FILE" >&2
-    exit 1
-fi
+normalize_version() {
+    local v="${1#v}"
+    v="$(echo "$v" | tr -d '[:space:]')"
+    if [[ ! "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+        echo "Error: invalid semver: $1 (expected X.Y.Z)" >&2
+        return 1
+    fi
+    echo "$v"
+}
+
+resolve_version() {
+    local tag=""
+    if [[ -n "$CLI_VERSION" ]]; then
+        normalize_version "$CLI_VERSION"
+        return
+    fi
+    if [[ -n "${PYDISPLAY_VERSION:-}" ]]; then
+        normalize_version "$PYDISPLAY_VERSION"
+        return
+    fi
+    tag="$(git -C "$SOURCE_REPO" describe --tags --exact-match 2>/dev/null || true)"
+    if [[ -n "$tag" ]]; then
+        normalize_version "$tag"
+        return
+    fi
+    echo "Error: no release version. Tag HEAD (vX.Y.Z), pass --version, or set PYDISPLAY_VERSION." >&2
+    echo "  ./scripts/publish_release_tag.sh X.Y.Z   # CI release (push tag triggers publish)" >&2
+    return 1
+}
+
+VERSION="$(resolve_version)" || exit 1
 if [[ -z "$VERSION" ]]; then
-    echo "Error: VERSION is empty ($VERSION_FILE)" >&2
+    echo "Error: release version is empty" >&2
     exit 1
 fi
+echo "Release version: $VERSION"
 
 DESCRIPTION_PREFIX="PyDisplay"
 AUTHOR="Brad Barnett <contact@pydevices.com>"

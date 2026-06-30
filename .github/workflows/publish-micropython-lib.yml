@@ -1,10 +1,10 @@
-# Manual publish to PyDevices/micropython-lib and the mip/PyDevices index.
+# Publish to PyDevices/micropython-lib, mip/PyDevices, and TestPyPI.
+#
+# Release trigger: push an annotated semver tag vX.Y.Z (see scripts/publish_release_tag.sh).
 #
 # Required repository secrets (Settings → Secrets and variables → Actions):
 #   MICROPYTHON_LIB_DEPLOY_TOKEN — PAT with contents:write on PyDevices/micropython-lib
-#
-# Optional:
-#   TESTPYPI_API_TOKEN — TestPyPI API token (when "Upload TestPyPI wheels" is enabled)
+#   TESTPYPI_API_TOKEN — TestPyPI API token (required for tag releases)
 #
 # Index URL after publish:
 #   https://PyDevices.github.io/micropython-lib/mip/PyDevices
@@ -12,14 +12,21 @@
 name: Publish micropython-lib
 
 on:
+  push:
+    tags:
+      - 'v*.*.*'
   workflow_dispatch:
     inputs:
+      version:
+        description: Semver X.Y.Z (required unless the checked-out ref is a vX.Y.Z tag)
+        type: string
+        required: false
       sync_sources:
         description: Sync pydisplay src into micropython-lib PyDevices branch
         type: boolean
         default: true
       upload_testpypi:
-        description: Build and upload wheels to TestPyPI (slow; needs TESTPYPI_API_TOKEN)
+        description: Build and upload wheels to TestPyPI (needs TESTPYPI_API_TOKEN)
         type: boolean
         default: false
       publish_mip_index:
@@ -27,7 +34,7 @@ on:
         type: boolean
         default: true
       commit_message:
-        description: micropython-lib commit message (default includes pydisplay SHA)
+        description: micropython-lib commit message (default includes pydisplay SHA and version)
         type: string
         required: false
 
@@ -40,6 +47,40 @@ jobs:
     if: github.repository == 'PyDevices/pydisplay'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          normalize() {
+            local v="${1#v}"
+            v="$(echo "$v" | tr -d '[:space:]')"
+            if [[ ! "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+              echo "Invalid semver: $1 (expected X.Y.Z)" >&2
+              exit 1
+            fi
+            echo "$v"
+          }
+
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            VERSION="$(normalize "${GITHUB_REF_NAME}")"
+          elif [[ -n "${INPUT_VERSION:-}" ]]; then
+            VERSION="$(normalize "$INPUT_VERSION")"
+          else
+            TAG="$(git describe --tags --exact-match 2>/dev/null || true)"
+            if [[ -z "$TAG" ]]; then
+              echo "Set the version input or run this workflow from a vX.Y.Z tag." >&2
+              exit 1
+            fi
+            VERSION="$(normalize "$TAG")"
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Publishing pydisplay release $VERSION"
 
       - uses: actions/checkout@v4
         with:
@@ -53,7 +94,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install publish tools
-        if: inputs.upload_testpypi == true
+        if: github.event_name == 'push' || inputs.upload_testpypi == true
         run: pip install hatch twine
 
       - name: Configure micropython-lib git
@@ -64,23 +105,25 @@ jobs:
             "https://x-access-token:${{ secrets.MICROPYTHON_LIB_DEPLOY_TOKEN }}@github.com/PyDevices/micropython-lib.git"
 
       - name: Sync pydisplay into micropython-lib
-        if: inputs.sync_sources == true
+        if: github.event_name == 'push' || inputs.sync_sources == true
         env:
           MICROPYTHON_LIB_DIR: ${{ github.workspace }}/micropython-lib
+          PYDISPLAY_VERSION: ${{ steps.version.outputs.version }}
           TESTPYPI_API_TOKEN: ${{ secrets.TESTPYPI_API_TOKEN }}
         run: |
+          VERSION="${{ steps.version.outputs.version }}"
           MSG="${{ inputs.commit_message }}"
           if [[ -z "$MSG" ]]; then
-            MSG="pydisplay: Sync from PyDevices/pydisplay ${GITHUB_SHA}."
+            MSG="pydisplay: Release v${VERSION} from PyDevices/pydisplay ${GITHUB_SHA}."
           fi
           EXTRA=(--commit-message "$MSG" --push)
-          if [[ "${{ inputs.upload_testpypi }}" != "true" ]]; then
+          if [[ "${{ github.event_name }}" != "push" && "${{ inputs.upload_testpypi }}" != "true" ]]; then
             EXTRA=(--skip-pypi --commit-message "$MSG" --push)
           fi
           ./scripts/publish_micropython_lib.sh "${EXTRA[@]}"
 
       - name: Publish MIP index to gh-pages
-        if: inputs.publish_mip_index == true
+        if: github.event_name == 'push' || inputs.publish_mip_index == true
         env:
           MICROPYTHON_LIB_DIR: ${{ github.workspace }}/micropython-lib
           PYDISPLAY_DIR: ${{ github.workspace }}

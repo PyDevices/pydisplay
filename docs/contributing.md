@@ -46,7 +46,7 @@ Public API docstrings: [Docstring conventions](contributing/docstrings.md).
 
 ## Documentation
 
-Publishing, micropython-lib, and TestPyPI: [tools/README.md](https://github.com/PyDevices/pydisplay/blob/main/tools/README.md).
+**Maintainer releases** (micropython-lib, MIP index, TestPyPI): [How to release](publishing-micropython-lib.md#how-to-release) in [Publishing micropython-lib](publishing-micropython-lib.md). CI and scripts: [`scripts/README.md`](https://github.com/PyDevices/pydisplay/blob/main/scripts/README.md).
 
 ## License
 
