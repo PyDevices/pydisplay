@@ -147,6 +147,8 @@ def _from_window(name, default=""):
 def _autotest_enabled():
     return _from_window("__pydisplayAutotest") in ("1", "true", "yes")
 
+_autotest_sent = [False]
+
 def _autotest_duration_s():
     try:
         return int(_from_window("__pydisplayAutotestDuration", "5"))
@@ -173,19 +175,22 @@ def _print_example_result(payload):
 
     line = "EXAMPLE_RESULT=" + json.dumps(payload, separators=(",", ":"))
     print(line)
+    try:
+        from js import console
 
-async def _autotest_after_import(entry):
+        console.log(line)
+    except Exception:
+        pass
+
+def _finish_autotest(entry):
+    if _autotest_sent[0]:
+        return
+    _autotest_sent[0] = True
     if '/tools' not in sys.path:
         sys.path.insert(0, '/tools')
     import quit_inject
 
     duration = _autotest_duration_s()
-    try:
-        import asyncio
-    except ImportError:
-        import uasyncio as asyncio
-
-    await asyncio.sleep(duration)
     backend = quit_inject.display_backend_name()
     injected = quit_inject.inject_quit(broker_poll=True, pump_count=20, pump_delay=0.02)
     result = {
@@ -200,6 +205,36 @@ async def _autotest_after_import(entry):
         result["error"] = "no_queue_device"
     _print_example_result(result)
     _post_debug(result)
+
+
+async def _autotest_after_import(entry):
+    try:
+        import asyncio
+    except ImportError:
+        import uasyncio as asyncio
+
+    await asyncio.sleep(_autotest_duration_s())
+    _finish_autotest(entry)
+
+
+def _schedule_pyscript_autotest(entry):
+    """Arm quit injection before import — loop demos block the asyncio loop."""
+    duration = _autotest_duration_s()
+    try:
+        import multimer
+    except ImportError:
+        try:
+            import asyncio
+        except ImportError:
+            import uasyncio as asyncio
+        asyncio.create_task(_autotest_after_import(entry))
+        return
+
+    def on_quit(_timer):
+        _finish_autotest(entry)
+
+    quit_timer = multimer.Timer(-1)
+    quit_timer.init(mode=multimer.ONE_SHOT, period=int(duration * 1000), callback=on_quit)
 
 def _parse_comma(raw):
     names = []
@@ -241,9 +276,11 @@ def _run():
         mip.install(mip_base + "html/" + name + ".json", target=MANIFEST_MIP_TARGET)
     for name in modules:
         mip.install(mip_base + "src/examples/" + name + ".py")
+    if _autotest_enabled():
+        _schedule_pyscript_autotest(entry)
     import lib.path
     __import__(entry)
-    if _autotest_enabled():
+    if _autotest_enabled() and not _autotest_sent[0]:
         try:
             import asyncio
         except ImportError:

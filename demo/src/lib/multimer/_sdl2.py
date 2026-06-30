@@ -2,7 +2,10 @@
 #
 # SPDX-License-Identifier: MIT
 """
-Timer using SDL2 for CPython with the same API as machine.Timer in MicroPython.
+SDL2 timer backend for CPython (last resort after POSIX and threading).
+
+Imports timer APIs from ``usdl2`` when available, otherwise binds
+``SDL_AddTimer`` / ``SDL_RemoveTimer`` via ctypes against system libSDL2.
 """
 
 import ctypes
@@ -10,26 +13,35 @@ from sys import platform
 
 from ._timerbase import _TimerBase
 
-if platform == "win32":
-    _libSDL2 = ctypes.CDLL("SDL2.dll")
-else:
-    _libSDL2 = ctypes.CDLL("libSDL2-2.0.so.0")
+try:
+    from usdl2 import (
+        SDL_INIT_TIMER,
+        SDL_AddTimer,
+        SDL_Init,
+        SDL_RemoveTimer,
+        SDL_TimerCallback,
+    )
+except ImportError:
+    if platform == "win32":
+        _libSDL2 = ctypes.CDLL("SDL2.dll")
+    else:
+        _libSDL2 = ctypes.CDLL("libSDL2-2.0.so.0")
 
-SDL_INIT_TIMER = 0x00000001
+    SDL_INIT_TIMER = 0x00000001
 
-_libSDL2.SDL_Init.argtypes = [ctypes.c_uint]
-_libSDL2.SDL_Init.restype = ctypes.c_int
-SDL_Init = _libSDL2.SDL_Init
+    _libSDL2.SDL_Init.argtypes = [ctypes.c_uint]
+    _libSDL2.SDL_Init.restype = ctypes.c_int
+    SDL_Init = _libSDL2.SDL_Init
 
-_libSDL2.SDL_AddTimer.argtypes = [ctypes.c_uint32, ctypes.c_void_p, ctypes.c_void_p]
-_libSDL2.SDL_AddTimer.restype = ctypes.c_void_p
-SDL_AddTimer = _libSDL2.SDL_AddTimer
+    _libSDL2.SDL_AddTimer.argtypes = [ctypes.c_uint32, ctypes.c_void_p, ctypes.c_void_p]
+    _libSDL2.SDL_AddTimer.restype = ctypes.c_void_p
+    SDL_AddTimer = _libSDL2.SDL_AddTimer
 
-_libSDL2.SDL_RemoveTimer.argtypes = [ctypes.c_void_p]
-_libSDL2.SDL_RemoveTimer.restype = ctypes.c_int
-SDL_RemoveTimer = _libSDL2.SDL_RemoveTimer
+    _libSDL2.SDL_RemoveTimer.argtypes = [ctypes.c_void_p]
+    _libSDL2.SDL_RemoveTimer.restype = ctypes.c_int
+    SDL_RemoveTimer = _libSDL2.SDL_RemoveTimer
 
-SDL_TimerCallback = ctypes.CFUNCTYPE(ctypes.c_uint32, ctypes.c_uint32, ctypes.c_void_p)
+    SDL_TimerCallback = ctypes.CFUNCTYPE(ctypes.c_uint32, ctypes.c_uint32, ctypes.c_void_p)
 
 
 class Timer(_TimerBase):

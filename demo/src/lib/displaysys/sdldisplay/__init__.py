@@ -11,7 +11,7 @@ from sys import implementation
 from displaysys import DisplayDriver, color_rgb, default_quit_chord
 from eventsys import events
 
-from ._sdl2_lib import (
+from ._sdl2 import (
     SDL_BLENDMODE_NONE,
     SDL_BUTTON_LMASK,
     SDL_BUTTON_MMASK,
@@ -72,7 +72,7 @@ from ._sdl2_lib import (
 # native usdl2 module may omit them).  Import them separately so their absence
 # only disables joystick input instead of breaking the whole module.
 try:
-    from ._sdl2_lib import (
+    from ._sdl2 import (
         SDL_InitSubSystem,
         SDL_JoystickClose,
         SDL_JoystickInstanceID,
