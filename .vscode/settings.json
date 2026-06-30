@@ -24,5 +24,6 @@
     "jupyter.widgetScriptSources": [
         "jsdelivr.com",
         "unpkg.com"
-    ]
+    ],
+    "git.ignoreLimitWarning": true
 }
