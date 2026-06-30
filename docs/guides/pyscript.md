@@ -19,20 +19,26 @@
 
 --8<-- "_snippets/pyscript-local.md"
 
-Examples are still fetched from GitHub at runtime via `mip.install` in the HTML pages — local edits to `src/examples/` do not appear until pushed (or you change the HTML). Library code under `src/lib/` and `src/add_ons/` is mounted from your working tree via `html/pyscript.toml`.
+Examples in the [browser gallery](https://PyDevices.github.io/pydisplay/demo/) are copied to the deploy site and installed from the same origin on GitHub Pages. Locally, `tools/serve.py` serves your working tree — gallery pages load `src/examples/` via `html/?modules=…`. Non-gallery pages (`repl.html`, `editor.html`) may still use `github:` installs.
 
 ## asyncio requirement
 
-PyScript runs on asyncio. Blocking `while True:` loops without `await` will hang the tab. See [PyScript asyncio guide](pyscript-asyncio.md).
+PyScript runs on asyncio. **`async`-tagged gallery demos** (`calculator`, `paint`, `eventsys_simpletest`, …) use `multimer.dual_main` / `run_forever_async`. **`all`-tagged demos** run blocking loops after you click **Run** — many now exit on `events.QUIT` via `poll_quit_discarding_others(broker)` or full `broker.poll()` dispatch. See [PyScript asyncio guide](pyscript-asyncio.md).
 
-## Compatible examples today
+## Gallery examples (2026-06)
 
-| Script | Notes |
-|--------|-------|
-| `calculator.py` | Best starting point |
-| `paint.py` | Used by `html/editor.html` |
-| `eventsys_simpletest.py` | Minimal event loop |
-| `apollo.py` | Heavier demo |
+Regenerate the card list with `python tools/gen_demo_pages.py`. Current gallery: **6 async**, **42 all** (48 total). Highlights:
+
+| Script | Tag | Notes |
+|--------|-----|-------|
+| `calculator.py` | async | Best starting point |
+| `paint.py` | async | Used by `html/editor.html` |
+| `eventsys_simpletest.py` | async | Minimal event loop |
+| `pydisplay_demo_async.py` | async | Flagship showcase |
+| `hello.py`, `scroll.py`, `displaysys_simpletest.py` | all | Quit-aware blocking loops |
+| `chango`, `noto_fonts` | all | One-shot draws (package manifests) |
+
+Binary-dependent demos are excluded via `# pyscript binaries:` in the example header. Use `# pyscript skip: gallery` to omit a demo from the card grid. See `tools/gen_demo_pages.py`.
 
 ## Board config
 

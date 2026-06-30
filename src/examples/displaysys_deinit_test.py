@@ -1,3 +1,4 @@
+# multimer types: sync
 """displaysys_deinit_test.py — verify idempotent display teardown."""
 
 import sys

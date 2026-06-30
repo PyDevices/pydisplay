@@ -15,6 +15,7 @@ flowchart TB
     DS[displaysys]
     ES[eventsys]
     GR[graphics optional]
+    MT[multimer]
   end
   subgraph app [Your code]
     EX[examples / your app]
@@ -26,8 +27,10 @@ flowchart TB
   TD --> ES
   DS --> EX
   ES --> EX
+  MT --> EX
   DS --> GUI
   ES --> GUI
+  MT --> GUI
   GR --> EX
   GR --> GUI
 ```
@@ -40,6 +43,7 @@ flowchart TB
 | **`displaysys`** | Display backends (`BusDisplay`, `SDLDisplay`, `PGDisplay`, `PSDisplay`, `JNDisplay`, `FBDisplay`) with a unified drawing API. |
 | **`eventsys`** | Brokers poll hardware and enqueue PyGame/SDL2-style events; your loop calls `Broker.poll()`. |
 | **`graphics`** | Optional helpers on top of `framebuf` (rounded rects, gradients, `Area` bounding boxes). |
+| **`multimer`** | Cross-platform timers, `pump()`, and sync/async main-loop helpers (`run_forever`, `dual_main`). |
 | **`add_ons`** | Optional shims and integrations (`framebuf` on CPython, `displaybuf`, `pdwidgets`, config templates). |
 
 ## Typical boot sequence
@@ -47,17 +51,24 @@ flowchart TB
 1. Install packages (MIP, clone, or Wokwi `mip.install`).
 2. Import or install `board_config.py` for your hardware.
 3. `board_config` constructs `display` and brokers.
-4. Your main loop: draw on `display`, call `broker.poll()`, handle events.
+4. Your main loop: draw on `display`, poll input, call `multimer.pump()` when `needs_pump()` is true.
 
 ```python
 from board_config import display_drv, broker
+import multimer
 
 while True:
     for event in broker.poll():
+        if event.type == broker.events.QUIT:
+            break
         ...  # handle touch, keys, etc.
     display_drv.fill_rect(0, 0, 10, 10, 0xF800)
     display_drv.show()
+    if multimer.needs_pump():
+        multimer.pump()
 ```
+
+Or use `multimer.run_forever(poll=…)` / `poll_quit_discarding_others(broker)` — see [multimer](multimer.md) and [Events](events.md).
 
 On desktop, `board_config` selects `PGDisplay` (CPython, PyGame) or `SDLDisplay` (SDL2). On ESP32, `BusDisplay` talks to the panel over SPI or I80. See [Portability & platforms](../platforms/index.md) for the full backend matrix.
 

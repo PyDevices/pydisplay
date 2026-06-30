@@ -9,6 +9,7 @@ eventsys unifies input from touchscreens, mice, keypads, keyboards, encoders, an
 ## Key entry points
 
 - `Broker` — aggregates devices; `poll()` always returns a list
+- `poll_quit_discarding_others(broker)` — one poll pass; `True` if `QUIT` seen (display-only loops)
 - `TouchDevice`, `KeypadDevice`, `EncoderDevice`, `QueueDevice`, `JoystickDevice`
 - `events` — event type constants and namedtuple event classes
 - `Keys` — SDL key code table

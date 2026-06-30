@@ -19,7 +19,8 @@ Optional headers (first 10 lines):
     browser gallery when any path has a binary suffix
   - ``# pyscript skip:`` — ``examples/``-relative ``.py`` paths or directories
     omitted from package auto-discovery (e.g. ``frogger/dev`` skips all ``.py``
-    files under that tree)
+    files under that tree); the token ``gallery`` excludes the demo from the
+    browser card grid (multimer tag unchanged)
   - ``# pyscript modules:`` — extra ``examples/``-relative ``.py`` paths for
     multi-module loaders when import scanning is insufficient
 
@@ -360,6 +361,8 @@ def parse_example(path: Path) -> Example | None:
     type_tokens = {t.strip() for t in mtype.replace(";", ",").split(",")}
     chosen = next((t for t in TARGET_TYPES if t in type_tokens), None)
     if chosen is None:
+        return None
+    if "gallery" in parse_header_list(lines, "# pyscript skip:"):
         return None
 
     rel = path.relative_to(REPO_ROOT).as_posix()

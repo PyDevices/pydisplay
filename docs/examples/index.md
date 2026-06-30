@@ -25,8 +25,8 @@ Every runnable example (top-level scripts under `src/examples/*.py` and the subd
 
 | Tag | Meaning |
 |-----|---------|
-| `all` | Works on sync, queued, and async timer backends without code changes (often one-shot + `display_drv.show()`, or event-poll + `show()`) |
-| `queued, sync` | Blocking loop with `pump()` + `sleep_ms()` (or finite variant in `timer_simpletest.py`) |
+| `all` | Same code on MCU, desktop sync, and PyScript/Jupyter blocking mode — poll/`sleep_ms` loops with quit handling, guarded `needs_pump()`/`pump()`, or library helpers (`pd.run_forever`) that hide pump details |
+| `queued, sync` | Explicit `run_forever`/`periodic` timer loop or pump-centric game/LVGL test (`pydisplay_demo`, `testris`, `timer_simpletest`, `lv_test_timer_*`) |
 | `sync` | Sync-only or one-shot on the main thread (`lv_test_timer_sync.py` exits on queued platforms; `console_advanced_demo.py` uses `os.dupterm` + one `display_drv.show()`) |
 | `async` | `TIMER_ASYNC` + `asyncio` main loop |
 | `NA` | Not applicable — shared module or test harness, not a runnable portability example (`lv_test_timer_common.py`, `lv_test_timer_harness.py`) |
@@ -69,7 +69,38 @@ comm -23 \
 
 ### Canonical patterns
 
-**Event-driven poll** — [`displaysys_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/displaysys_simpletest.py), [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_encoder_test.py):
+**Quit-aware poll loop** — [`hello.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/hello.py), [`scroll.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll.py), [`displaysys_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/displaysys_simpletest.py):
+
+```python
+from eventsys import poll_quit_discarding_others
+
+while True:
+    ...  # draw
+    display_drv.show()
+    if poll_quit_discarding_others(broker):
+        return
+    sleep_ms(1)
+```
+
+Or dispatch all events and break on `events.QUIT` (see `displaysys_simpletest.py`).
+
+**`run_forever` with poll** — [`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py), [`calculator.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/calculator.py):
+
+```python
+from multimer import run_forever
+
+def handle_events():
+    if elist := broker.poll():
+        for e in elist:
+            if e.type == broker.events.QUIT:
+                return True
+            ...
+    return False
+
+run_forever(handle_events, delay_ms=20)
+```
+
+**Event-driven poll** — [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_encoder_test.py):
 
 ```python
 display_drv.show()  # after initial draw
@@ -91,9 +122,9 @@ while not _done:
 **Forever LVGL / library-driven app** — [`lv_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_touch_test.py): setup UI, then drain the queue only when needed:
 
 ```python
-from multimer import Timer
-if getattr(Timer, "needs_pump()", False):
-    from multimer import pump, sleep_ms
+from multimer import Timer, pump, sleep_ms
+
+if getattr(Timer, "NEEDS_PUMP", False):
     while True:
         pump()
         sleep_ms(1)
@@ -105,15 +136,15 @@ On sync platforms the `if` block is skipped; on queued platforms (CPython SDL, C
 
 ```python
 from board_config import broker
-from multimer import Timer, pump, sleep_ms  # sleep_ms in loops only
+from multimer import Timer, needs_pump, pump
 
 tft.show()
-if getattr(Timer, "needs_pump()", False):
+if needs_pump():
     pump()
 broker.poll()  # SDL message pump — required on MicroPython Windows
 ```
 
-On **MicroPython Windows** (and other ports using `multimer._polling`), `multimer.needs_pump()` is false but `Timer.needs_pump()` is true — check the **timer class** flag, not the module flag. Without `broker.poll()`, the SDL window can freeze after the first frame even when the Python loop keeps running.
+On **MicroPython Windows** (and other ports using `multimer._polling`), `multimer.needs_pump()` is false but `Timer.NEEDS_PUMP` is true — check the **timer class** flag when the module flag is false. Without `broker.poll()`, the SDL window can freeze after the first frame even when the Python loop keeps running.
 
 **LVGL apps** — [`lv_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_touch_test.py):
 
@@ -140,7 +171,7 @@ pd.run_forever()
 
 ### Notes
 
-- `displaysys_simpletest.py` and `eventsys_encoder_test.py` are tagged `all` but use event loops: call `display_drv.show()` after draws (no `pump()`). Same pattern as [`scroll_touch_test_displaybuf.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll_touch_test_displaybuf.py).
+- `displaysys_simpletest.py` handles `events.QUIT` in its poll loop (tagged `all`). Same quit pattern as [`scroll_touch_test_displaybuf.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll_touch_test_displaybuf.py).
 - `font_simpletest.py` is tagged `all`; blits a small framebuffer with `display_drv.blit_rect()` and calls `display_drv.show()` after each draw.
 - `nano_gui_simpletest.py` is tagged `all`; requires upstream [`gui/`](../guis/nano-gui.md) in `add_ons/`.
 **Legend:** Platforms = CPython · MCU · PyScript · Wokwi · Packages = core · add_ons · LVGL
@@ -251,11 +282,11 @@ Runnable demos in subfolders use the same multimer markers as top-level examples
 
 | Directory | Script | Tag | Platforms | Notes |
 |-----------|--------|-----|-----------|-------|
-| `alien/` | `alien.py` | `queued, sync` | CPython · MP · MCU | Sprite bounce; `tft.show()` + `Timer`/`pump()` + `broker.poll()` each frame |
-| `chango/` | `chango.py` | `all` | CPython · MP · MCU | One-shot font demo; `tft.show()` + `pump()` + `broker.poll()` after draws |
-| `noto_fonts/` | `noto_fonts.py` | `all` | MP · MCU | One-shot Noto font demo; same tail as `chango` |
-| `proverbs/` | `proverbs.py` | `queued, sync` | CPython · MP · MCU | Chinese proverb slideshow; UTF-8 fonts on MCU |
-| `tiny_toasters/` | `tiny_toasters.py` | `queued, sync` | CPython · MP · MCU | Sprite animation; `getrandbits` `randint` on MP Windows |
+| `alien/` | `alien.py` | `all` | CPython · MP · MCU | Sprite bounce; `needs_pump()` + `broker.poll()` quit each frame |
+| `chango/` | `chango.py` | `all` | CPython · MP · MCU · PyScript | One-shot font demo; `needs_pump()` + `broker.poll()` after draws |
+| `noto_fonts/` | `noto_fonts.py` | `all` | MP · MCU · PyScript | One-shot Noto font demo; same tail as `chango` |
+| `proverbs/` | `proverbs.py` | `all` | CPython · MP · MCU | Chinese proverb slideshow; quit via `broker.poll()` |
+| `tiny_toasters/` | `tiny_toasters.py` | `all` | CPython · MP · MCU | Sprite animation; quit via `broker.poll()` |
 | `apollo_dsky/` | — | — | — | Support module for top-level `apollo.py` |
 | `assets/` | — | — | — | Shared fonts and images |
 

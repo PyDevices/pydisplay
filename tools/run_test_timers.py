@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Run examples/test_timers.py on all desktop subprocess runtimes.
+Run tools/test_timers.py on all desktop subprocess runtimes.
 
 Always includes micropython.exe and python.exe from ~/bin (via example_runtimes.toml).
 

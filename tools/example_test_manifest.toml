@@ -165,7 +165,7 @@ duration_s = 5
 
 [examples.test_timers]
 import = "test_timers"
-script = "examples/test_timers.py"
+script = "../tools/test_timers.py"
 kind = "oneshot"
 quit = "native_exit"
 deps = ["core"]

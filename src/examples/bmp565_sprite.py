@@ -1,4 +1,4 @@
-# multimer types: queued, sync
+# multimer types: all
 # pyscript binaries: assets/warrior.bmp
 from collections import namedtuple
 try:

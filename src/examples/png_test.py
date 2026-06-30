@@ -1,6 +1,6 @@
+# multimer types: all
+# pyscript skip: gallery
 from eventsys import poll_quit_discarding_others
-
-# multimer types: queued, sync
 import os
 from collections import namedtuple
 

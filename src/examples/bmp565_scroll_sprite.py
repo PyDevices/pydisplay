@@ -1,4 +1,4 @@
-# multimer types: queued, sync
+# multimer types: all
 # pyscript binaries: assets/longstreet.bmp, assets/runner.bmp
 from collections import namedtuple
 

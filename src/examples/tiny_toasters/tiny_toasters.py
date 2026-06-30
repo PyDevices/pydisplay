@@ -1,4 +1,4 @@
-# multimer types: queued, sync
+# multimer types: all
 """
 tiny_toasters.py
 ================

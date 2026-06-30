@@ -31,6 +31,7 @@ See [Run the notebook interactively](../docs/platforms/jupyter-run.md) and [PySc
 | You changed… | What to run |
 |---|---|
 | Files under `src/add_ons/`, `src/examples/`, or `src/lib/` | `./tools/regenerate.sh` |
+| Example `# multimer types:` headers or gallery card copy | `python tools/gen_demo_pages.py` |
 | `drivers/bus/i80bus.py` or `gpio_pin.py` | Edit `packages/i80bus.json` by hand |
 | `drivers/bus/spibus.py` | Edit `packages/spibus.json` by hand |
 | Docstrings or modules under `src/lib/` | `mkdocs build` (uses `gen_ref_pages.py` automatically) |
@@ -84,6 +85,25 @@ Chains the most common local maintenance step: refreshing GitHub-install and PyS
 
 ---
 
+## `gen_demo_pages.py`
+
+Refreshes the browser demo gallery from `src/examples/`:
+
+- Scans `# multimer types: async` or `all` (first five lines)
+- Updates card grids in root `index.html` (`<!-- GEN:async:* -->` / `<!-- GEN:all:* -->`)
+- Writes `html/<pkg>.json` MIP manifests for multi-file package demos
+- Removes stale `html/<demo>.html` from the old per-demo page generator
+
+```bash
+python tools/gen_demo_pages.py
+python tools/gen_demo_pages.py --check   # CI freshness
+python tools/gen_demo_pages.py --copy-examples DIR   # GitHub Pages deploy
+```
+
+Gallery demos open the parametric loader at `html/?modules=…` or `html/?manifests=…`. Examples with `# pyscript binaries:` are excluded.
+
+---
+
 ## `gen_repo_packages.py`
 
 Walks configured `src/` trees and writes the JSON/TOML files listed above. Consumed by:
@@ -121,35 +141,11 @@ Current driver layout:
 
 ---
 
-## Audit snapshot (2026-06-18)
+## Audit snapshot (2026-06-30)
 
-Running `./tools/regenerate.sh --audit` before regeneration showed the committed artifacts were behind `src/`:
+After `./tools/regenerate.sh`, committed manifests match `src/`. Prior drift (missing `joystick_keypad.py`, corrupt bundle URLs, stale `pyscript.toml` paths) was fixed by regeneration.
 
-### New source files missing from generated manifests
-
-| Package | Missing dest path | Source file |
-|---|---|---|
-| `add_ons` | `joystick_keypad.py` | `src/add_ons/joystick_keypad.py` |
-| `examples` | `joystick_list_select.py` | `src/examples/joystick_list_select.py` |
-| `multimer` | `multimer/_threading.py` | `src/lib/multimer/_threading.py` |
-| `pydisplay-bundle` | same entries under `lib/…` prefixes (not `add_ons/`) | (bundle composition) |
-
-`eventsys/joystick.py` was already present in `packages/eventsys.json` but had not been propagated into `pydisplay-bundle.json` / `html/pyscript.toml`.
-
-### Corrupt entries (fixed by regeneration)
-
-`packages/pydisplay-bundle.json` contained two bad URLs from an earlier generator bug (absolute paths concatenated into `github:` URLs):
-
-```
-src/lib/board_config.py → github:PyDevices/pydisplay/src/<bad-absolute-path>/src/lib/board_config.py
-src/lib/path.py         → github:PyDevices/pydisplay/src/<bad-absolute-path>/src/lib/path.py
-```
-
-`html/pyscript.toml` also had a stray `../src/src/lib/board_config.py` entry from the same bug. `gen_repo_packages.py` has been corrected; run `./tools/regenerate.sh` to refresh.
-
-### Manual packages
-
-`i80bus.json` and `spibus.json` matched their listed driver files on disk. `_rp2_wip.py` is intentionally not packaged.
+`python tools/gen_demo_pages.py --check` validates `index.html` and `html/*.json` against example headers.
 
 ---
 

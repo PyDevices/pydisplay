@@ -1,11 +1,3 @@
-# Pin the MicroPython interpreter to the copy bundled in this repo
-# (html/pyscript/micropython/) instead of fetching it from the jsDelivr CDN.
-# PyScript resolves this URL relative to each HTML page, so the same value works
-# both when serving html/ locally and under the GitHub Pages /demo/html/ prefix.
-# Rebuild from cmods: ./build_mp.sh --port webassembly --variant pyscript
-# then copy build-pyscript/micropython.{mjs,wasm} into html/pyscript/micropython/.
-interpreter = "./pyscript/micropython/micropython.mjs"
-
 [files]
 "../src/add_ons/README.md" = "/add_ons/"
 "../src/add_ons/byteswap.py" = "/add_ons/"
@@ -29,8 +21,8 @@ interpreter = "./pyscript/micropython/micropython.mjs"
 "../src/add_ons/tft_text.py" = "/add_ons/"
 "../src/add_ons/tft_write.py" = "/add_ons/"
 "../src/add_ons/touch_keypad.py" = "/add_ons/"
-"../src/add_ons/usdl2.py" = "/add_ons/"
 "../src/add_ons/uctypes.py" = "/add_ons/"
+"../src/add_ons/usdl2.py" = "/add_ons/"
 "../src/add_ons/viper_tools.py" = "/add_ons/"
 "../src/add_ons/wifi.py" = "/add_ons/"
 "../src/add_ons/fonts/__init__.py" = "/add_ons/fonts/"
@@ -83,7 +75,6 @@ interpreter = "./pyscript/micropython/micropython.mjs"
 
 "../src/lib/board_config.py" = "/lib/"
 "../src/lib/path.py" = "/lib/"
-"../tools/quit_inject.py" = "/tools/"
 "../src/lib/displaysys/__init__.py" = "/lib/displaysys/"
 "../src/lib/displaysys/busdisplay.py" = "/lib/displaysys/"
 "../src/lib/displaysys/fbdisplay.py" = "/lib/displaysys/"
@@ -122,10 +113,10 @@ interpreter = "./pyscript/micropython/micropython.mjs"
 
 "../src/lib/multimer/__init__.py" = "/lib/multimer/"
 "../src/lib/multimer/_async.py" = "/lib/multimer/"
-"../src/lib/multimer/_mpasyncio.py" = "/lib/multimer/"
 "../src/lib/multimer/_capabilities.py" = "/lib/multimer/"
-"../src/lib/multimer/_posix.py" = "/lib/multimer/"
+"../src/lib/multimer/_mpasyncio.py" = "/lib/multimer/"
 "../src/lib/multimer/_polling.py" = "/lib/multimer/"
+"../src/lib/multimer/_posix.py" = "/lib/multimer/"
 "../src/lib/multimer/_schedule.py" = "/lib/multimer/"
 "../src/lib/multimer/_sdl2.py" = "/lib/multimer/"
 "../src/lib/multimer/_threading.py" = "/lib/multimer/"

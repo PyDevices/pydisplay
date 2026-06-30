@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Thread-based software Timer for MicroPython-Unix and CPython."""
+"""Thread-based software Timer for MicroPython-Unix, CPython, and CircuitPython."""
 
 import sys
 

@@ -217,10 +217,6 @@
       "github:PyDevices/pydisplay/src/examples/scroll_touch_test_displaybuf.py"
     ],
     [
-      "test_timers.py",
-      "github:PyDevices/pydisplay/src/examples/test_timers.py"
-    ],
-    [
       "testris.py",
       "github:PyDevices/pydisplay/src/examples/testris.py"
     ],

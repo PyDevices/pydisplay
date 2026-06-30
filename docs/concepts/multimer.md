@@ -126,7 +126,7 @@ Backend selection at import (first match wins):
 | Polling | `_polling` | True | Cooperative tick list |
 | Asyncio | `_async.AsyncTimer` | False | Software timer on the event loop |
 
-`examples/test_timers.py` probes each row (plus `multimer.Timer` default) when the module imports on the host. Run `python tools/run_test_timers.py` for a per-runtime matrix.
+`tools/test_timers.py` probes each row (plus `multimer.Timer` default) on the host. Run `python tools/run_test_timers.py` for a per-runtime matrix.
 
 ### POSIX backend (`_posix`)
 

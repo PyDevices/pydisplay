@@ -1,5 +1,5 @@
 from eventsys import poll_quit_discarding_others
-# multimer types: queued, sync
+# multimer types: all
 # pyscript binaries: assets/warrior.bmp
 from collections import namedtuple
 try:

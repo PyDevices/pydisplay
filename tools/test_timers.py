@@ -14,12 +14,6 @@ Backends exercised (when importable on the host):
 - ``multimer.AsyncTimer`` — asyncio / uasyncio
 - ``multimer.Timer`` — platform default (first match at import)
 
-From ``src/`` with ``lib.path`` configured::
-
-    python
-    >>> import lib.path
-    >>> import test_timers
-
 Run the full desktop matrix (always includes ``micropython.exe`` and
 ``python.exe`` from ``~/bin`` when present)::
 
@@ -30,10 +24,26 @@ failure does not stop the rest.  Implementations that cannot be imported are
 reported as SKIP.
 """
 
+from __future__ import annotations
+
+from pathlib import Path
 import sys
 
-from multimer import pump
-from multimer._ticks import sleep_ms as wait_ms
+
+def _bootstrap_src_path() -> None:
+    """Allow ``python tools/test_timers.py`` from a dev clone (``src/lib`` on path)."""
+    src = Path(__file__).resolve().parent.parent / "src"
+    lib = src / "lib"
+    if lib.is_dir():
+        lib_s = str(lib)
+        if lib_s not in sys.path:
+            sys.path.insert(0, lib_s)
+
+
+_bootstrap_src_path()
+
+from multimer import pump  # noqa: E402
+from multimer._ticks import sleep_ms as wait_ms  # noqa: E402
 
 TEST_PERIOD_MS = 50
 TEST_DURATION_MS = 300

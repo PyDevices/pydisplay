@@ -1,4 +1,4 @@
-# multimer types: queued, sync
+# multimer types: all
 # pyscript binaries: assets/longstreet.bmp
 from board_config import broker, display_drv
 from eventsys import poll_quit_discarding_others

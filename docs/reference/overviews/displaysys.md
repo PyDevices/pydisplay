@@ -13,5 +13,6 @@ displaysys provides display driver classes (`BusDisplay`, `SDLDisplay`, `PGDispl
 - `SDLDisplay` / `PGDisplay` — desktop backends (SDL2 / PyGame)
 - `PSDisplay` / `JNDisplay` — PyScript browser / Jupyter Notebook
 - `FBDisplay` — CircuitPython framebuffer displays
+- `display_drv.quit()` — release resources on `events.QUIT` (pair with `broker.register_quit_cleanup`)
 
 Generated API pages for each module appear below (build time).

@@ -149,20 +149,20 @@
       "github:PyDevices/pydisplay/src/lib/multimer/_async.py"
     ],
     [
-      "lib/multimer/_mpasyncio.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_mpasyncio.py"
-    ],
-    [
       "lib/multimer/_capabilities.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_capabilities.py"
     ],
     [
-      "lib/multimer/_posix.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_posix.py"
+      "lib/multimer/_mpasyncio.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_mpasyncio.py"
     ],
     [
       "lib/multimer/_polling.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_polling.py"
+    ],
+    [
+      "lib/multimer/_posix.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_posix.py"
     ],
     [
       "lib/multimer/_schedule.py",
