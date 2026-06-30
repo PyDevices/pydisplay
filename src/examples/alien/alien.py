@@ -1,5 +1,4 @@
 # multimer types: queued, sync
-# pyscript binaries: alien/alien.png
 """
 alien.py
 =========

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-A bare implementation of SDL2 written in CPython using ctypes.
+SDL2 subset via ctypes when the native ``usdl2`` module is unavailable.
 """
 
 import ctypes

@@ -44,6 +44,12 @@ Same workflow as [CPython desktop](cpython-desktop.md), but run `micropython -i 
 
 Use `board_configs/sdldisplay/` or the default `src/lib/board_config.py` for SDL2-based desktop display.
 
+## usdl2 (native SDL2)
+
+For best SDL2 performance on MicroPython Unix, CircuitPython Unix, and `micropython.exe`, build with the optional native **`usdl2`** module from [PyDevices/usdl2](https://github.com/PyDevices/usdl2). It provides the SDL2 subset used by **`SDLDisplay`** (`displaysys.sdldisplay._sdl2`) and, when the host selects the SDL timer backend, **`multimer._sdl2`**.
+
+Without **`usdl2`**, `SDLDisplay` falls back to pure-Python ffi/ctypes bindings; timer selection is unchanged (`multimer` still picks `_ffi`, `_ctypes`, or threading backends first on each platform).
+
 ## Frozen firmware
 
 The repo-root `manifest.py` lists packages for frozen MicroPython builds. See [tools/README.md](https://github.com/PyDevices/pydisplay/blob/main/tools/README.md) for maintainer details.

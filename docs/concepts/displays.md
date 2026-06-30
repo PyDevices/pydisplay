@@ -30,6 +30,8 @@ For microcontrollers on **MicroPython and CircuitPython**.
 
 SDL2 desktop backend (CPython, MicroPython Unix, CircuitPython Unix). Uses an SDL texture as GRAM. It is the default on MicroPython Unix and available on CPython via `board_configs/sdldisplay/`.
 
+SDL2 bindings load through `displaysys.sdldisplay._sdl2` in this order: native **`usdl2`** when built in, then MicroPython **`._ffi`**, then **`._ctypes`**. Build **`usdl2`** from [PyDevices/usdl2](https://github.com/PyDevices/usdl2) for frozen MicroPython and CircuitPython Unix — see [MicroPython — usdl2](../platforms/micropython.md#usdl2-native-sdl2).
+
 ### PGDisplay
 
 PyGame desktop backend. The default `board_config.py` selects it first on CPython (it is easier to install on Windows and avoids some SDL glitches on Chromebooks); if PyGame is not installed it falls back to `SDLDisplay`. Config: `board_configs/pgdisplay/`.

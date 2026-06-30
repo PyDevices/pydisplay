@@ -37,24 +37,20 @@
       "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/__init__.py"
     ],
     [
-      "lib/displaysys/sdldisplay/_sdl2_lib/__init__.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/__init__.py"
+      "lib/displaysys/sdldisplay/_sdl2/__init__.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2/__init__.py"
     ],
     [
-      "lib/displaysys/sdldisplay/_sdl2_lib/_constants.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/_constants.py"
+      "lib/displaysys/sdldisplay/_sdl2/_constants.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2/_constants.py"
     ],
     [
-      "lib/displaysys/sdldisplay/_sdl2_lib/_cpython.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/_cpython.py"
+      "lib/displaysys/sdldisplay/_sdl2/_ctypes.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2/_ctypes.py"
     ],
     [
-      "lib/displaysys/sdldisplay/_sdl2_lib/_ffi.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/_ffi.py"
-    ],
-    [
-      "lib/displaysys/sdldisplay/_sdl2_lib/_usdl2.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2_lib/_usdl2.py"
+      "lib/displaysys/sdldisplay/_sdl2/_ffi.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay/_sdl2/_ffi.py"
     ],
     [
       "lib/eventsys/__init__.py",

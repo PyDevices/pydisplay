@@ -33,6 +33,10 @@ except ImportError:
 
 RGB666 (parallel), USB Video, and RGB Matrix devices use `displaysys.fbdisplay.FBDisplay` with CircuitPython's `framebufferio.FramebufferDisplay`. No special patching is needed once CircuitPython sees the hardware.
 
+## Unix desktop (SDL2)
+
+CircuitPython on Unix can use **`SDLDisplay`** with the native **`usdl2`** module — see [MicroPython — usdl2](micropython.md#usdl2-native-sdl2) for build instructions (same `usdl2` repo and patch script).
+
 ## framebuf shim
 
 CircuitPython lacks MicroPython-compatible `framebuf`. Install `add_ons/framebuf.py` or copy it to your `lib/` folder.
