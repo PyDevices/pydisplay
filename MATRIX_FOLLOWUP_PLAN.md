@@ -16,7 +16,7 @@
 | **circuitpython** | **59+** (spot) | **68** | ✅ | tft_config examples ✅ spot (`/tmp/cp-matrix.txt`; run ended on harness crash) |
 | **cpython-venv** | **61/61** (last full) | **68** | ✅ | Full matrix pre-expand; re-run pending for +7 columns |
 | **python.exe** | **61/61** (last full) | **68** | ✅ | Full matrix pre-expand |
-| **micropython.exe** | **58/68** | **68** | 🔄 | Full column 2026-06-30 — **10** failures (hangs + 2 import errors); see §4 |
+| **micropython.exe** | **66/68** | **68** | 🔄 | Full column 2026-06-30 — **2** import errors remain (`displaysys_block_test`, `lv_test_timer_async`); see §4 |
 | **pyscript** | **30/52** (stale full column) | **67** | 🔄 | tft_config examples **6/6** ✅ (`70677fa5`); stale baseline — `noto_fonts` now enabled |
 | **jupyter** | **23/57** (stale) | **67** | 🔄 | `chango` now runs (timeout, not skip); tft_config cell-timeouts at 30s (quit-injection gap) |
 
@@ -48,6 +48,7 @@ Excluded by design: `keypins_simpletest` (`matrix=false`), `lv_test_timer_harnes
 | Harness spot-check (micropython + cpython-venv) | ✅ **14/14** (`5a77c8b6`) — all 7 former harness examples green on both runtimes |
 | **Manifest skip removal (`noto_fonts`)** | ✅ — `skip_runtimes` pyscript removed; `html/noto_fonts.json` already present |
 | mp.exe full column re-run | ✅ **58/68** (2026-06-30) — log `/tmp/mpexe_matrix_run.log` |
+| mp.exe poll-loop hang fixes (8) | ✅ `Broker._poll()` pumps multimer when `needs_pump()` — spot-check 8/8 |
 | Skipped-examples inventory | ✅ Documented below |
 
 **Active jobs:** none. Branch has local edits (manifest + plan).
@@ -58,15 +59,19 @@ Excluded by design: `keypins_simpletest` (`matrix=false`), `lv_test_timer_harnes
 
 ### Full column re-run (2026-06-30)
 
-**Result: 58/68** — log `/tmp/mpexe_matrix_run.log`, JSON `.cursor/example_test_results.json`
+**Result: 66/68** (after poll-loop hang fix) — baseline **58/68** in `/tmp/mpexe_matrix_run.log`, JSON `.cursor/example_test_results.json`
 
 | Outcome | Count | Examples |
 |---------|------:|----------|
-| **SDLDisplay, ok** | **58** | — |
-| **hang** (quit-injection timeout) | **8** | `boxlines`, `displaysys_simpletest`, `eventsys_encoder_test`, `feathers`, `font_simpletest`, `font_simpletest2`, `font_simpletest3`, `scroll_touch_test_displaybuf` |
-| **import error** | **1** | `lv_test_timer_async` (`uasyncio`) |
+| **SDLDisplay, ok** | **66** | — |
+| **hang** (quit-injection timeout) | **0** | *(was 8 — fixed via `Broker._poll()` + `multimer.pump()`)* |
+| **import error** | **2** | `displaysys_block_test` (`choice`), `lv_test_timer_async` (`uasyncio`) |
 
-Target **68/68** not met — hangs are poll-loop examples without mp.exe quit path; import errors need shims like other mp.exe fixes.
+Target **68/68** not met — remaining import errors need shims like other mp.exe fixes.
+
+**Hang root cause:** On micropython.exe (cooperative multimer backend), `_start_multimer_quit_schedule()` injects quit via a one-shot `multimer.Timer`, but tight poll loops never called `pump()`, so the timer never fired and examples hung until harness timeout.
+
+**Fix:** `Broker._poll()` calls `multimer.pump()` when `needs_pump()` — same pattern as `display_driver.run()` and `run_forever()`.
 
 ### Fixed (verified 2026-06-29)
 
@@ -155,7 +160,7 @@ Results: `.cursor/example_test_results.json`, `/tmp/jupyter_run_postfix.log`
 ## Remaining work
 
 - [ ] **Push** `70677fa5` + follow-up commits to `origin/examples-post-refactor`
-- [ ] **mp.exe hang fixes** — poll-loop quit injection for 8 examples (see §4)
+- [x] **mp.exe hang fixes** — poll-loop quit injection for 8 examples (see §4)
 - [ ] **mp.exe import shims** — `lv_test_timer_async` (`uasyncio`)
 - [ ] **Follow-up PR to main** for post-#39 stack through `70677fa5`
 
