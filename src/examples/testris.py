@@ -1,4 +1,4 @@
-# multimer types: queued, sync
+# multimer types: async
 """
 Testris game implemented in MicroPython by Brad Barnett.
 """
@@ -31,7 +31,7 @@ try:
 except ImportError:
     from multimer import ticks_diff, ticks_ms
 
-from multimer import pump, sleep_ms
+from multimer import dual_main, pump, run_forever, run_forever_async
 
 if display_drv.width > display_drv.height:
     display_drv.rotation += 90
@@ -73,7 +73,102 @@ joystick_keypad = JoystickKeypad(
     }
 )
 
-def main():  # noqa: C901, PLR0915
+
+def _quit_if_needed(_where):
+    if not poll_quit_discarding_others(broker):
+        return False
+    display_drv.quit()
+    return True
+
+
+class _Loop:
+    """Cooperative poll helper; sync mode pumps multimer between frames."""
+
+    def __init__(self, *, pump_on_poll):
+        self._pump_on_poll = pump_on_poll
+
+    def poll(self, where):
+        if self._pump_on_poll:
+            pump()
+        return _quit_if_needed(where)
+
+
+def _test_key_for_test_mode(key=None):
+    try:
+        import pydisplay_test_mode
+
+        if pydisplay_test_mode.ENABLED:
+            return key if key is not None else START
+    except ImportError:
+        pass
+    return None
+
+
+def _gather_keys():
+    """Edge + held keys from joystick and touch keypad."""
+    keys = list(joystick_keypad.read())
+    edge = keypad.read()
+    if edge:
+        keys.extend(edge)
+    keys.extend(keypad.read_held())
+    return keys
+
+
+def _iter_wait_for_key(loop, key=None, exclude=None):
+    if exclude is None:
+        exclude = []
+    test_key = _test_key_for_test_mode(key)
+    if test_key is not None:
+        yield test_key
+        return
+    while True:
+        if loop.poll("wait_for_key"):
+            yield True
+            return
+        keys = _gather_keys()
+        if key is not None:
+            if key in keys:
+                yield key
+                return
+            if key == START:
+                for pressed in keys:
+                    if pressed not in exclude:
+                        yield pressed
+                        return
+        else:
+            for pressed in keys:
+                if pressed not in exclude:
+                    yield pressed
+                    return
+        yield False
+
+
+def _yield_wait(loop, key=None, exclude=None):
+    """Cooperative key wait: yields False while polling, True on quit, then the key."""
+    for _key in _iter_wait_for_key(loop, key, exclude):
+        if _key is True:
+            yield True
+            return
+        if _key is False:
+            yield False
+            continue
+        yield _key
+        return
+
+
+class _RoundState:
+    def __init__(self, pieces, grid_width, grid_height):
+        self.grid = [[0 for _ in range(grid_width)] for _ in range(grid_height)]
+        self.bag = []
+        self.next_piece = choice(pieces)
+        self.score = 0
+        self.lines = 0
+        self.drop_time = 1000
+        self.last_read = 0
+        self.hard_drop = False
+
+
+def _build_testris():  # noqa: C901, PLR0915
     # Define the draw_block function
     def draw_block(x, y, index):
         return display_drv.blit_rect(blocks[index], x, y, block_size, block_size)
@@ -240,18 +335,19 @@ def main():  # noqa: C901, PLR0915
             text_buffer, x, y, banner_width, banner_height
         )  # Draw the text buffer on the display
 
-    def show_score(message=""):
+    def show_score(state, message=""):
         """
         Show the score.
 
         Parameters:
+            state: Current round state (_RoundState).
             message (str, optional): The message to display. Defaults to "".
 
         Returns:
             None
         """
         draw_banner(
-            f"{message}\nScore: {score:,}\nLines cleared: {lines}\nDrop time: {drop_time:,} ms"
+            f"{message}\nScore: {state.score:,}\nLines cleared: {state.lines}\nDrop time: {state.drop_time:,} ms"
         )  # Draw the score
 
     def show_splash():
@@ -322,46 +418,7 @@ def main():  # noqa: C901, PLR0915
         except OSError:
             return 0
 
-    def _quit_if_needed(_where):
-        if not poll_quit_discarding_others(broker):
-            return False
-        display_drv.quit()
-        return True
 
-    def wait_for_key(key=None, exclude=[]):
-        """
-        Waits for the user to press a key.
-
-        Parameters:
-            key (str, optional): The key to wait for. If not specified, any key will be accepted. Defaults to None.
-            exclude (list, optional): List of keys to exclude. Defaults to [].
-
-        Returns:
-            str: The key that was pressed.
-        """
-        try:
-            import pydisplay_test_mode
-
-            if pydisplay_test_mode.ENABLED:
-                return key if key is not None else START
-        except ImportError:
-            pass
-
-        while True:  # Wait for the user to press a key
-            pump()
-            if _quit_if_needed("wait_for_key"):
-                return None
-            keys = joystick_keypad.read()
-            keys.extend(keypad.read_held())
-
-            if key is not None:
-                if key in keys:
-                    return key
-            else:
-                for key in keys:
-                    if key not in exclude:
-                        return key
-            sleep_ms(1)
 
     def sample(population, k):
         """
@@ -401,7 +458,7 @@ def main():  # noqa: C901, PLR0915
             else [list(row) for row in reversed(piece)]
         )
 
-    def collision(piece, pos, dx, dy, rotation=0):
+    def collision(grid, piece, pos, dx, dy, rotation=0):
         """
         Check if moving or rotating a piece would cause a collision.
 
@@ -451,195 +508,248 @@ def main():  # noqa: C901, PLR0915
 
     high_score = load_high_score()  # Load the high score
 
-    if SPLASH_ENABLED and show_splash_screen:  # Show the splash screen and wait for the user to press a key
-        clear_screen()  # Clear the screen
-        show_splash()  # Show the splash screen
-        draw_banner(
-            f"High Score {high_score:,}\n\nPress any key\nto continue.",
-            x=(display_width - 5 * block_size) // 2,
-            y=(display_height - 2 * block_size),
-        )
-        display_drv.show()
-        wait_for_key()  # Wait for the user to press a key
+    def play(loop):
+        nonlocal high_score
 
-    while True:  # Outer loop - play the game repeatedly
-        #     print("Outer loop")
-        # Initialize game state
-        # grid is a 2D list of block indices, 0 for empty, 1-7 indicates block color
-        # grid is y, x, not x, y, so grid[y][x] is the block at (x, y).
-        # Allows for easy row clearing with grid[y] = [0 for _ in range(GRID_WIDTH)]
-        grid = [
-            [0 for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)
-        ]  # GRID_HEIGHT x GRID_WIDTH grid
-        bag = []  # Bag of pieces to draw from
-        next_piece = choice(pieces)  # Select the first piece
-        score = 0  # Start with a score of 0
-        lines = 0  # Start with 0 lines cleared
-        drop_time = (
-            1000  # Time between automatic drops in ms, decreases by SPEEDUP as lines are cleared
-        )
-        last_read = 0  # The last time the keypad was read
-        hard_drop = False  # Flag to indicate a hard drop
-
-        # Initialize the game display and wait for the user to press START
-        clear_screen()  # Clear the screen
-        draw_border()  # Draw the border
-        draw_banner(f"High Score {high_score:,}\n\nPress START\nto play.")
-        if str(type(keypad)).find("Touchpad"):  # If we're using the touchpad
-            draw_touch_targets()  # Draw the touch targets
-        display_drv.show()
-        wait_for_key(START)  # Wait for the user to press START
-
-        # Play the game
-        show_score()  # Show the score
-        while True:  # Main game loop
-            pump()
-            if _quit_if_needed("main_loop"):
-                return
-            #         print("Main game loop")
-            current_piece = next_piece  # Set the next piece to the current piece
-            current_position = [
-                GRID_WIDTH // 2 - len(current_piece[0]) // 2,
-                0,
-            ]  # Start position for the piece
-            if collision(current_piece, current_position, 0, 0):  # Check for game over
-                break  # Game over, exit the main loop
-            if not bag:  # If the bag is empty, refill it
-                bag = sample(pieces.copy(), BAG_SIZE)  # Fill the bag with random pieces
-            next_piece = bag.pop()  # Pull the next piece out of the bag
-            draw_piece(next_piece, [7, -3])  # Draw the next piece beside the banner
-            last_drop = ticks_ms()  # Time of last automatic drop
-
-            while current_piece:  # Middle loop - while the piece is in play
-                pump()
-                if _quit_if_needed("piece_loop"):
+        if SPLASH_ENABLED and show_splash_screen:  # Show the splash screen and wait for the user to press a key
+            clear_screen()  # Clear the screen
+            show_splash()  # Show the splash screen
+            draw_banner(
+                f"High Score {high_score:,}\n\nPress any key\nto continue.",
+                x=(display_width - 5 * block_size) // 2,
+                y=(display_height - 2 * block_size),
+            )
+            display_drv.show()
+            for event in _yield_wait(loop):
+                if event is True:
+                    yield True
                     return
-                #             print("Redraw piece loop")
-                draw_piece(current_piece, current_position)  # Draw the current piece
-                old_piece = current_piece.copy()  # Save the previous piece
-                old_position = current_position.copy()  # Save the previous position
+                if event is not False:
+                    break
 
-                while (
-                    current_piece == old_piece and current_position == old_position
-                ):  # Inner loop - while the piece hasn't moved
-                    pump()
-                    if _quit_if_needed("inner_loop"):
+        while True:  # Outer loop - play the game repeatedly
+            #     print("Outer loop")
+            state = _RoundState(pieces, GRID_WIDTH, GRID_HEIGHT)
+            grid = state.grid
+            bag = state.bag
+            next_piece = state.next_piece
+            score = state.score
+            lines = state.lines
+            drop_time = state.drop_time
+            last_read = state.last_read
+            hard_drop = state.hard_drop
+
+            # Initialize the game display and wait for the user to press START
+            clear_screen()  # Clear the screen
+            draw_border()  # Draw the border
+            draw_banner(f"High Score {high_score:,}\n\nPress START\nto play.")
+            if str(type(keypad)).find("Touchpad"):  # If we're using the touchpad
+                draw_touch_targets()  # Draw the touch targets
+            display_drv.show()
+            for event in _yield_wait(loop, START):
+                if event is True:
+                    yield True
+                    return
+                if event is not False:
+                    break
+
+            # Play the game
+            show_score(state)  # Show the score
+            display_drv.show()
+            while True:  # Main game loop
+                if loop.poll("main_loop"):
+                    yield True
+                    return
+                #         print("Main game loop")
+                current_piece = next_piece  # Set the next piece to the current piece
+                current_position = [
+                    GRID_WIDTH // 2 - len(current_piece[0]) // 2,
+                    0,
+                ]  # Start position for the piece
+                if collision(grid, current_piece, current_position, 0, 0):  # Check for game over
+                    break  # Game over, exit the main loop
+                if not bag:  # If the bag is empty, refill it
+                    bag = sample(pieces.copy(), BAG_SIZE)  # Fill the bag with random pieces
+                next_piece = bag.pop()  # Pull the next piece out of the bag
+                draw_piece(next_piece, [7, -3])  # Draw the next piece beside the banner
+                last_drop = ticks_ms()  # Time of last automatic drop
+
+                while current_piece:  # Middle loop - while the piece is in play
+                    if loop.poll("piece_loop"):
+                        yield True
                         return
-                    # If it has been DELAY ms since the last read, then read the keypads
-                    if (ticks_diff(ticks_ms(), last_read) >= DELAY):
-                        keys = joystick_keypad.read()
-                        keys.extend(keypad.read_held())
+                    #             print("Redraw piece loop")
+                    draw_piece(current_piece, current_position)  # Draw the current piece
+                    old_piece = current_piece.copy()  # Save the previous piece
+                    old_position = current_position.copy()  # Save the previous position
 
-                        if len(keys) > 0:  # If keys were pressed
-                            for key in keys:
-                                last_read = ticks_ms()  # Save the time of the last read
-                                if key == LEFT and not collision(current_piece, current_position, -1, 0):
-                                    current_position[0] -= 1  # Move the piece left
-                                elif key == RIGHT and not collision(current_piece, current_position, 1, 0):
-                                    current_position[0] += 1  # Move the piece right
-                                elif key == DOWN and not collision(current_piece, current_position, 0, 1):
-                                    current_position[1] += 1  # Move the piece down
-                                    last_drop = ticks_ms()  # Reset the last drop time
-                                elif key == DROP and not collision(current_piece, current_position, 0, 1):
-                                    hard_drop = True  # Hard drop the piece
-                                elif key == CCW and not collision(
-                                    current_piece, current_position, 0, 0, ROTCCW
-                                ):
-                                    current_piece = rotate(
-                                        current_piece, ROTCCW
-                                    )  # Rotate the piece counter-clockwise
-                                elif key == CW and not collision(
-                                    current_piece, current_position, 0, 0, ROTCW
-                                ):
-                                    current_piece = rotate(current_piece, ROTCW)  # Rotate the piece clockwise
-                                elif key == PAUSE:  # Pause the game
-                                    draw_banner("Paused.\n\nPress START to reset.\nAny key to resume.")
-                                    key = wait_for_key(
-                                        exclude=[PAUSE]
-                                    )  # Wait for the user to press a key, excluding PAUSE
-                                    if key == START:
-                                        clear_screen()  # Clear the screen
-                                        exit()  # Reset the machine
-                                    else:  # Resume the game
-                                        show_score()  # Show the score
+                    while (
+                        current_piece == old_piece and current_position == old_position
+                    ):  # Inner loop - while the piece hasn't moved
+                        if loop.poll("inner_loop"):
+                            yield True
+                            return
+                        # If it has been DELAY ms since the last read, then read the keypads
+                        if (ticks_diff(ticks_ms(), last_read) >= DELAY):
+                            keys = _gather_keys()
 
-                    if hard_drop:  # Hard drop the piece
-                        while not collision(
-                            current_piece, current_position, 0, 1
-                        ):  # While the piece hasn't hit bottom
-                            pump()
-                            if _quit_if_needed("hard_drop"):
-                                return
-                            current_position[1] += 1  # Move the piece down
-                        hard_drop = False  # Reset the hard drop flag
-                        last_drop = 0  # Unset the last drop time
-                    elif ticks_diff(ticks_ms(), last_drop) >= drop_time:  # Automatic drop
-                        if not collision(current_piece, current_position, 0, 1):
-                            current_position[1] += 1  # Move the piece down
-                            last_drop = ticks_ms()  # Reset the last drop time
-                        else:  # Piece hit bottom
-                            # Add the piece to the grid
-                            for y, row in enumerate(current_piece):
-                                for x, block in enumerate(row):
-                                    if block:
-                                        grid[current_position[1] + y][current_position[0] + x] = (
-                                            block  # Add the piece to the grid
-                                        )
-                            current_piece = (
-                                None  # Piece is no longer in play; its now part of the grid
-                            )
-                            # Check for full lines
-                            full_lines = []
-                            for y, row in enumerate(grid):  # Check each row
-                                if all(row):  # If each block in the row is non-zero
-                                    full_lines.append(y)  # Add the row to the list of full lines
-                            if full_lines:
-                                score += [100, 200, 400, 800][
-                                    len(full_lines) - 1
-                                ]  # Update the score
-                                lines += len(full_lines)  # Update the number of lines cleared
-                                drop_time = max(
-                                    DELAY, drop_time - SPEEDUP
-                                )  # Decrease the drop time, but not below DELAY time
-                                show_score()  # Show the score
-                                old_grid = [
-                                    row[:] for row in grid
-                                ]  # Keep a copy of the grid before making any changes
-                                # Shift the remaining lines down
-                                for full_line in full_lines:  # For each full line
-                                    for y in range(
-                                        full_line, 0, -1
-                                    ):  # Working from the full line up to the top
-                                        grid[y] = list(grid[y - 1])  # Copy the line above it
-                                    grid[0] = [0 for _ in range(GRID_WIDTH)]  # Clear the top line
-                                # Redraw only the lines that have changed
-                                for y in range(GRID_HEIGHT):  # For each line
-                                    if grid[y] != old_grid[y]:  # If the line has changed
-                                        for x in range(GRID_WIDTH):  # For each block in the line
-                                            draw_block(
-                                                x * block_size + grid_x_offset,
-                                                y * block_size + grid_y_offset,
-                                                grid[y][x],
+                            if len(keys) > 0:  # If keys were pressed
+                                for key in keys:
+                                    last_read = ticks_ms()  # Save the time of the last read
+                                    if key == LEFT and not collision(grid, current_piece, current_position, -1, 0):
+                                        current_position[0] -= 1  # Move the piece left
+                                    elif key == RIGHT and not collision(grid, current_piece, current_position, 1, 0):
+                                        current_position[0] += 1  # Move the piece right
+                                    elif key == DOWN and not collision(grid, current_piece, current_position, 0, 1):
+                                        current_position[1] += 1  # Move the piece down
+                                        last_drop = ticks_ms()  # Reset the last drop time
+                                    elif key == DROP and not collision(grid, current_piece, current_position, 0, 1):
+                                        hard_drop = True  # Hard drop the piece
+                                    elif key == CCW and not collision(grid, 
+                                        current_piece, current_position, 0, 0, ROTCCW
+                                    ):
+                                        current_piece = rotate(
+                                            current_piece, ROTCCW
+                                        )  # Rotate the piece counter-clockwise
+                                    elif key == CW and not collision(grid, 
+                                        current_piece, current_position, 0, 0, ROTCW
+                                    ):
+                                        current_piece = rotate(current_piece, ROTCW)  # Rotate the piece clockwise
+                                    elif key == PAUSE:  # Pause the game
+                                        draw_banner("Paused.\n\nPress START to reset.\nAny key to resume.")
+                                        pause_key = None
+                                        for event in _yield_wait(loop, exclude=[PAUSE]):
+                                            if event is True:
+                                                yield True
+                                                return
+                                            if event is not False:
+                                                pause_key = event
+                                                break
+                                        if pause_key == START:
+                                            clear_screen()  # Clear the screen
+                                            exit()  # Reset the machine
+                                        else:  # Resume the game
+                                            show_score(state)  # Show the score
+
+                        if hard_drop:  # Hard drop the piece
+                            while not collision(grid, 
+                                current_piece, current_position, 0, 1
+                            ):  # While the piece hasn't hit bottom
+                                if loop.poll("hard_drop"):
+                                    yield True
+                                    return
+                                current_position[1] += 1  # Move the piece down
+                            hard_drop = False  # Reset the hard drop flag
+                            last_drop = 0  # Unset the last drop time
+                        elif ticks_diff(ticks_ms(), last_drop) >= drop_time:  # Automatic drop
+                            if not collision(grid, current_piece, current_position, 0, 1):
+                                current_position[1] += 1  # Move the piece down
+                                last_drop = ticks_ms()  # Reset the last drop time
+                            else:  # Piece hit bottom
+                                # Add the piece to the grid
+                                for y, row in enumerate(current_piece):
+                                    for x, block in enumerate(row):
+                                        if block:
+                                            grid[current_position[1] + y][current_position[0] + x] = (
+                                                block  # Add the piece to the grid
                                             )
+                                current_piece = (
+                                    None  # Piece is no longer in play; its now part of the grid
+                                )
+                                # Check for full lines
+                                full_lines = []
+                                for y, row in enumerate(grid):  # Check each row
+                                    if all(row):  # If each block in the row is non-zero
+                                        full_lines.append(y)  # Add the row to the list of full lines
+                                if full_lines:
+                                    score += [100, 200, 400, 800][
+                                        len(full_lines) - 1
+                                    ]  # Update the score
+                                    lines += len(full_lines)  # Update the number of lines cleared
+                                    drop_time = max(
+                                        DELAY, drop_time - SPEEDUP
+                                    )  # Decrease the drop time, but not below DELAY time
+                                    show_score(state)  # Show the score
+                                    old_grid = [
+                                        row[:] for row in grid
+                                    ]  # Keep a copy of the grid before making any changes
+                                    # Shift the remaining lines down
+                                    for full_line in full_lines:  # For each full line
+                                        for y in range(
+                                            full_line, 0, -1
+                                        ):  # Working from the full line up to the top
+                                            grid[y] = list(grid[y - 1])  # Copy the line above it
+                                        grid[0] = [0 for _ in range(GRID_WIDTH)]  # Clear the top line
+                                    # Redraw only the lines that have changed
+                                    for y in range(GRID_HEIGHT):  # For each line
+                                        if grid[y] != old_grid[y]:  # If the line has changed
+                                            for x in range(GRID_WIDTH):  # For each block in the line
+                                                draw_block(
+                                                    x * block_size + grid_x_offset,
+                                                    y * block_size + grid_y_offset,
+                                                    grid[y][x],
+                                                )
 
-                    sleep_ms(1)
+                        display_drv.show()
+                        yield False
 
-                if (
-                    current_piece
-                ):  # If the piece hasn't hit bottom, erase it from its previous position
-                    draw_piece(old_piece, old_position, BACKGROUND_INDEX)
+                    if (
+                        current_piece
+                    ):  # If the piece hasn't hit bottom, erase it from its previous position
+                        draw_piece(old_piece, old_position, BACKGROUND_INDEX)
 
-            draw_piece(next_piece, [7, -3], BACKGROUND_INDEX)  # Erase the previous next piece
+                draw_piece(next_piece, [7, -3], BACKGROUND_INDEX)  # Erase the previous next piece
 
-        # Game over - show the score and wait for the user to press a key
-        if score > high_score:
-            save_high_score(score)
-            high_score = score
-            message = "New high score!"
-        else:
-            message = "Game over!"
-        show_score(message)  # Show the score
-        wait_for_key(START)  # Wait for the user to press START
+            # Game over - show the score and wait for the user to press a key
+            if score > high_score:
+                save_high_score(score)
+                high_score = score
+                message = "New high score!"
+            else:
+                message = "Game over!"
+            show_score(state, message)  # Show the score
+            display_drv.show()
+            for event in _yield_wait(loop, START):
+                if event is True:
+                    yield True
+                    return
+                if event is not False:
+                    break
+
+    return play
 
 
-main()
+_game = None
+
+
+def _get_game():
+    global _game
+    if _game is None:
+        _game = _build_testris()
+    return _game
+
+
+def _play_poll(play):
+    try:
+        return next(play)
+    except StopIteration:
+        return True
+
+
+def _start_play(*, pump_on_poll):
+    return _get_game()(_Loop(pump_on_poll=pump_on_poll))
+
+
+def main_sync():
+    play = _start_play(pump_on_poll=True)
+    run_forever(lambda: _play_poll(play), delay_ms=1)
+
+
+async def main_async():
+    play = _start_play(pump_on_poll=False)
+    await run_forever_async(lambda: _play_poll(play), delay_ms=1)
+
+
+from board_config import TIMER_ASYNC
+
+dual_main(main_sync, main_async, async_mode=TIMER_ASYNC)

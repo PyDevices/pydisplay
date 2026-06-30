@@ -184,69 +184,15 @@ def sleep_ms(ms):
     ``await multimer.sleep_ms(ms)``.  Otherwise blocks and advances cooperative
     sync timers.
     """
-
-    # #region agent log
-    def _agent_log(message, data, hypothesis_id):
-        try:
-            import json
-            import time
-
-            with open(
-                "/home/brad/github/pydisplay/.cursor/debug-39b49e.log", "a", encoding="utf-8"
-            ) as _f:
-                _f.write(
-                    json.dumps(
-                        {
-                            "sessionId": "39b49e",
-                            "hypothesisId": hypothesis_id,
-                            "location": "multimer/__init__.py:sleep_ms",
-                            "message": message,
-                            "data": data,
-                            "timestamp": int(time.time() * 1000),
-                        }
-                    )
-                    + "\n"
-                )
-        except Exception:
-            pass
-
-    # #endregion
     if _async_sleep_ms is not None:
         try:
             from ._async import _require_asyncio
 
             aio = _require_asyncio()
-            has_grl = hasattr(aio, "get_running_loop")
-            has_ct = hasattr(aio, "current_task")
-            ct = aio.current_task() if has_ct else None
-            # #region agent log
-            _agent_log(
-                "sleep_ms asyncio probe",
-                {
-                    "ms": ms,
-                    "has_get_running_loop": has_grl,
-                    "has_current_task": has_ct,
-                    "current_task": repr(ct),
-                },
-                "H1",
-            )
-            # #endregion
             if _async_loop_running(aio):
-                # #region agent log
-                _agent_log(
-                    "async branch via loop detection",
-                    {"ms": ms, "used_get_running_loop": has_grl},
-                    "H1",
-                )
-                # #endregion
                 return _async_sleep_ms(ms)
-        except ImportError as err:
-            # #region agent log
-            _agent_log("asyncio import failed", {"err": repr(err)}, "H2")
-            # #endregion
-    # #region agent log
-    _agent_log("sync branch (no awaitable returned)", {"ms": ms}, "H1")
-    # #endregion
+        except ImportError:
+            pass
     _sync_sleep_ms(ms)
 
 
