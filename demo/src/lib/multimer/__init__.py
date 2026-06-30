@@ -47,6 +47,11 @@ from ._schedule import _drain_schedule, schedule
 from ._ticks import sleep_ms as _sync_sleep_ms
 from ._ticks import ticks_add, ticks_diff, ticks_less, ticks_ms
 
+try:
+    from ._polling import _tick as _polling_tick
+except ImportError:
+    _polling_tick = None
+
 _BACKEND = None
 _NEEDS_PUMP = False
 
@@ -122,23 +127,36 @@ ONE_SHOT = Timer.ONE_SHOT
 _next_timer_id = 1
 
 
+def _drain_native_scheduler(max_items=None):
+    try:
+        import usdl2
+
+        pump_scheduler = getattr(usdl2, "pump_scheduler", None)
+        if pump_scheduler is None:
+            return 0
+        return pump_scheduler(max_items)
+    except ImportError:
+        return 0
+
+
 def pump(max_items=None):
     """Drain the schedule queue and fire due cooperative timers.
 
     Returns the number of callbacks dispatched.
     """
     n = _drain_schedule(max_items)
-    try:
-        from ._polling import _tick
-
+    n_native = 0
+    remaining = None if max_items is None else max_items - n
+    if remaining is None or remaining > 0:
+        n_native = _drain_native_scheduler(remaining)
+        n += n_native
+    if _polling_tick is not None:
         if max_items is None:
-            n += _tick()
+            n += _polling_tick()
         else:
             remaining = max_items - n
             if remaining > 0:
-                n += _tick(remaining)
-    except ImportError:
-        pass
+                n += _polling_tick(remaining)
     return n
 
 
