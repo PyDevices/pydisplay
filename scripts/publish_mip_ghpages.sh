@@ -37,7 +37,7 @@ rm -rf "$INDEX_OUT"
 mkdir -p "$INDEX_OUT"
 
 echo "Compiling MIP index from $LIB_DIR -> $INDEX_OUT"
-python3 "$PYDISPLAY_DIR/scripts/publish_mip_index.py" \
+python3 "$PYDISPLAY_DIR/scripts/build.py" \
     --lib-dir "$LIB_DIR" \
     --micropython "$MPY_DIR" \
     --mpy-cross "$MPY_CROSS" \

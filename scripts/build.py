@@ -24,11 +24,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+# pydisplay — upstream micropython-lib ``tools/build.py`` (MIP index compiler).
+# Renamed from ``scripts/publish_mip_index.py``; kept as ``build.py`` so
+# ``publish_make_pyproject.py`` can ``from build import ensure_path_exists, error_color``.
+#
+# Used in this repo:
+#   - ``scripts/publish_mip_ghpages.sh`` — build ``mip/PyDevices`` and push gh-pages
+#   - ``.github/workflows/publish-micropython-lib.yml`` — calls publish_mip_ghpages.sh
+#   - ``scripts/publish_make_pyproject.py`` — shared ``ensure_path_exists`` / ``error_color``
+#
+# Direct use (micropython-lib checkout required as ``--lib-dir``):
+#   ./scripts/build.py --lib-dir ~/github/micropython-lib \\
+#       --micropython /tmp/micropython \\
+#       --mpy-cross /tmp/micropython/mpy-cross/build/mpy-cross \\
+#       --output /tmp/mip-out
+
 # This script compiles all packages in this repository (excluding unix-ffi)
 # into a directory suitable for serving to "mip" via a static web server.
 
 # Usage:
-# ./scripts/publish_mip_index.py --output /tmp/micropython-lib/v2
+# ./scripts/build.py --output /tmp/micropython-lib/v2 --lib-dir ~/github/micropython-lib
 
 # The output directory (--output) will have the following layout
 # /

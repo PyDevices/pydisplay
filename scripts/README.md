@@ -40,7 +40,7 @@ python scripts/pyscript_gen_packages.py --check    # CI freshness
 | `install_` | `install_gen_manifests.py`, `install_refresh_manifests.sh` | `src/` tree changes → updates `packages/*.json`, `web/pyscript/pyscript.toml`, `sim/wokwi/pydisplay-bundle.json` |
 | `pyscript_` | `pyscript_gen_packages.py` | Gallery cards + `web/pyscript/*.json` manifests |
 | `mkdocs_` | `mkdocs_gen_ref_pages.py`, `mkdocs_gen_notebook_pages.py` | Automatically on `mkdocs build` |
-| `publish_` | `publish_micropython_lib.sh`, `publish_mip_index.py`, `publish_mip_ghpages.sh`, `publish_make_pyproject.py` | Release to micropython-lib / mip index (manual workflow or local) |
+| `publish_` | `publish_micropython_lib.sh`, `build.py`, `publish_mip_ghpages.sh`, `publish_make_pyproject.py` | Release to micropython-lib / mip index (manual workflow or local) |
 | `assets_` | `assets_convert_md_png_to_pbm.py` | Material Design PNG → PBM under `assets/icons/` (rare) |
 
 `manifestfile.py` is a shared library for the publish scripts (not prefixed).

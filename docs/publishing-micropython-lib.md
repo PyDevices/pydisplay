@@ -80,7 +80,7 @@ Micropython-lib commit messages should follow upstream style when you write your
 **Publish MIP index** ([`scripts/publish_mip_ghpages.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_mip_ghpages.sh)):
 
 - Clones MicroPython and builds `mpy-cross`
-- Runs [`scripts/publish_mip_index.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_mip_index.py) over the micropython-lib tree
+- Runs [`scripts/build.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/build.py) over the micropython-lib tree
 - Pushes the compiled index to **`gh-pages`** at `mip/PyDevices/`
 
 ### Step 4 — Watch the run
@@ -200,7 +200,7 @@ Script options: `./scripts/publish_micropython_lib.sh --help`
 | Script | Role |
 |--------|------|
 | [`scripts/publish_micropython_lib.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_micropython_lib.sh) | Rsync `src/lib` → micropython-lib; optional TestPyPI |
-| [`scripts/publish_mip_index.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_mip_index.py) | Compile MIP index (used by `publish_mip_ghpages.sh`) |
+| [`scripts/build.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/build.py) | Compile MIP index (used by `publish_mip_ghpages.sh`) |
 | [`scripts/publish_mip_ghpages.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_mip_ghpages.sh) | Build index and push `mip/PyDevices` on gh-pages |
 | [`scripts/publish_make_pyproject.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_make_pyproject.py) | Hatch `pyproject.toml` from firmware-style manifests |
 

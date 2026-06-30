@@ -56,7 +56,7 @@ Other scripts (see scripts/README.md):
   pyscript_gen_packages.py  — browser gallery + example JSON manifests
   mkdocs_gen_ref_pages.py   — runs automatically via mkdocs build
   publish_micropython_lib.sh  — micropython-lib / PyPI publishing
-  publish_mip_index.py        — mip index for micropython-lib gh-pages
+  build.py                    — mip index for micropython-lib gh-pages
   assets_convert_md_png_to_pbm.py — Material Design icon conversion
 EOF
 }
