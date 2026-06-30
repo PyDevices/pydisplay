@@ -83,7 +83,15 @@ def wokwi_bundle_from_master(master):
     return {"urls": urls, "version": master["version"]}
 
 
-# Create the data structures
+# Paths in pyscript.toml [files] — relative to web/pyscript/ (browser URL ./src/...).
+PYSCRIPT_TOML_SRC_PREFIX = "./"
+
+
+def pyscript_toml_file_entry(repo_relative_path: str, mount: str) -> str:
+    """repo_relative_path e.g. src/lib/path.py; mount e.g. /lib/ or /lib/graphics/."""
+    return f'"{PYSCRIPT_TOML_SRC_PREFIX}{repo_relative_path}" = "{mount}"'
+
+
 package_dicts = {}
 master_package = {"urls": [], "version": package_ver}
 master_toml = ["[files]"]
@@ -122,7 +130,10 @@ for package_path, deps, extra_files in packages:
             if toml_dest_dir == "//":
                 toml_dest_dir = "/"
             master_toml.append(
-                f'"../../{os.path.relpath(full_file_path, repo_dir)}" = "{toml_dest_dir}"'
+                pyscript_toml_file_entry(
+                    os.path.relpath(full_file_path, repo_dir).replace("\\", "/"),
+                    toml_dest_dir,
+                )
             )
 
     package_skip = PACKAGE_SKIP_DIRS.get(package_name, set())
@@ -150,7 +161,7 @@ for package_path, deps, extra_files in packages:
                 if toml_dest_dir == "//":
                     toml_dest_dir = "/"
                 toml_src_file = src_dir + master_dest_file
-                master_toml.append(f'"../../{toml_src_file}" = "/{toml_dest_dir}/"')
+                master_toml.append(pyscript_toml_file_entry(toml_src_file, f"/{toml_dest_dir}/"))
 
     if package_name not in toml_exclude:
         master_toml.append("")
@@ -164,7 +175,7 @@ for rel_path in extra_files_added_to_master:
     toml_dest_dir = "/" + "/".join(master_dest_file.split("/")[:-1]) + "/"
     if toml_dest_dir == "//":
         toml_dest_dir = "/"
-    master_toml.append(f'"../../{rel_path}" = "{toml_dest_dir}"')
+    master_toml.append(pyscript_toml_file_entry(rel_path, toml_dest_dir))
 
 # Add the master package to the package dictionaries
 package_dicts[master_package_name] = master_package
