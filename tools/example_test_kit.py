@@ -591,6 +591,7 @@ def run_jupyter_case(
         }
 
     nb_path = _write_jupyter_notebook(example_id, example_meta, duration)
+    nbconvert_out = nb_path.with_name(f"{nb_path.stem}.nbconvert.ipynb")
     cmd = [
         str(jupyter),
         "nbconvert",
@@ -605,26 +606,30 @@ def run_jupyter_case(
     env["PYTHONPATH"] = str(SRC)
 
     try:
-        proc = subprocess.run(
-            cmd,
-            cwd=str(SRC),
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=timeout + 30,
-            env=env,
-            check=False,
-        )
-        timed_out = False
-        stdout = proc.stdout or ""
-        stderr = proc.stderr or ""
-        returncode = proc.returncode
-    except subprocess.TimeoutExpired as exc:
-        timed_out = True
-        returncode = -1
-        stdout = (exc.stdout or "") if isinstance(exc.stdout, str) else ""
-        stderr = (exc.stderr or "") if isinstance(exc.stderr, str) else ""
+        try:
+            proc = subprocess.run(
+                cmd,
+                cwd=str(SRC),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=timeout + 30,
+                env=env,
+                check=False,
+            )
+            timed_out = False
+            stdout = proc.stdout or ""
+            stderr = proc.stderr or ""
+            returncode = proc.returncode
+        except subprocess.TimeoutExpired as exc:
+            timed_out = True
+            returncode = -1
+            stdout = (exc.stdout or "") if isinstance(exc.stdout, str) else ""
+            stderr = (exc.stderr or "") if isinstance(exc.stderr, str) else ""
+    finally:
+        nbconvert_out.unlink(missing_ok=True)
+        nb_path.unlink(missing_ok=True)
 
     ok = returncode == 0 and not timed_out
     result = {
