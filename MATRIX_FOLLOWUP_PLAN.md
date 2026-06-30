@@ -2,8 +2,7 @@
 
 **Branch:** `examples-post-refactor`  
 **PR:** [#39 Example matrix harness and post-refactor example fixes](https://github.com/PyDevices/pydisplay/pull/39) — **MERGED** 2026-06-29  
-**Latest commits (pushed):** `5a77c8b6` (harness matrix enablement + tft_config skip removal), `97aab56e` (console_advanced_demo), `a2daa012` (hello), `64a36124` (nano_gui)  
-**Uncommitted (working tree):** tft_config PyScript kit + MIP manifests — see [Session status](#session-status)  
+**Latest commits:** `70677fa5` (tft_config PyScript autotest — **ahead 1, not pushed**), `5a77c8b6` (harness + manifest skips), `97aab56e` (console_advanced_demo)  
 **Matrix command:** `python tools/example_test_kit.py --no-unit-tests --order runtimes`  
 **Sources:** [`.cursor/example_matrix_run.log`](.cursor/example_matrix_run.log) (full matrix, subprocess runtimes), [`.cursor/example_test_results.json`](.cursor/example_test_results.json) (latest column run: harness spot-check), `/tmp/pyscript_run.log` (pyscript column, pre–tft_config enablement), `/tmp/tft_config_pyscript.log` (tft_config pyscript spot run)
 
@@ -17,11 +16,11 @@
 | **circuitpython** | **59+** (spot) | **68** | ✅ | tft_config examples ✅ spot (`/tmp/cp-matrix.txt`; run ended on harness crash) |
 | **cpython-venv** | **61/61** (last full) | **68** | ✅ | Full matrix pre-expand; re-run pending for +7 columns |
 | **python.exe** | **61/61** (last full) | **68** | ✅ | Full matrix pre-expand |
-| **micropython.exe** | **49/61** (stale) | **68** | 🔄 | Pre-fix full matrix; spot-checks green; column re-run pending |
-| **pyscript** | **30/52** (stale) | **67** | 🔄 | **Full column re-run pending** after tft_config enablement; tft_config spot in progress (`/tmp/tft_config_pyscript.log`) |
+| **micropython.exe** | **58/68** | **68** | 🔄 | Full column 2026-06-30 — **10** failures (hangs + 2 import errors); see §4 |
+| **pyscript** | **30/52** (stale full column) | **67** | 🔄 | tft_config examples **6/6** ✅ (`70677fa5`); stale baseline — `noto_fonts` now enabled |
 | **jupyter** | **23/57** (stale) | **67** | 🔄 | `chango` now runs (timeout, not skip); tft_config cell-timeouts at 30s (quit-injection gap) |
 
-Runnable denominators: desktop runtimes **68** (69 matrix columns − 1 `matrix=false`); pyscript / jupyter **67** (only `png_test` + `noto_fonts` manifest skips). PyScript/jupyter pass rates above are from pre–tft_config-enablement column runs — denominators will shift to **67** on next full re-run.
+Runnable denominators: desktop runtimes **68** (69 matrix columns − 1 `matrix=false`); pyscript / jupyter **67** (only `png_test` manifest skip on both).
 
 Excluded by design: `keypins_simpletest` (`matrix=false`), `lv_test_timer_harness`, `lv_test_timer_common` (`kind=harness`). See [Skipped examples (by design)](#skipped-examples-by-design) below.
 
@@ -44,29 +43,30 @@ Excluded by design: `keypins_simpletest` (`matrix=false`), `lv_test_timer_harnes
 | Jupyter `pydisplay_test_mode` cell | ✅ `_write_jupyter_notebook()` |
 | **Manifest skip removal** | ✅ `5a77c8b6` — pyscript skips removed for `color_test`, `chango`, `alien`, `proverbs`, `tiny_toasters`; jupyter skip removed for `chango` |
 | **Harness matrix enablement** | ✅ `5a77c8b6` — `lv_test_timer_sync/queued/async`, `displaysys_*_test`, `test_timers`; LVGL timer script fixes |
-| **tft_config PyScript manifests** | 🔄 **Uncommitted** — `html/alien.json`, `html/proverbs.json`, `html/tiny_toasters.json` (MIP manifests like `html/chango.json`) |
-| **`pyscript_embed_query()`** | 🔄 **Uncommitted** — [`example_test_kit.py`](tools/example_test_kit.py) uses `manifests=<id>` when `html/<id>.json` exists (or parent package json for subdir examples) |
+| **tft_config PyScript autotest** | ✅ `70677fa5` — MIP manifests, `pyscript_embed_query()`, embed autotest fixes, `hello` yield; **6/6** PSDisplay ok |
 | tft_config desktop spot-check | ✅ micropython + circuitpython (`/tmp/mp_matrix3.log`, `/tmp/cp-matrix.txt`) |
-| tft_config pyscript spot-check | 🔄 In progress — color_test, chango, hello, alien, proverbs started; server logs show `manifests=chango`, `manifests=alien`, `manifests=proverbs` loading correctly |
 | Harness spot-check (micropython + cpython-venv) | ✅ **14/14** (`5a77c8b6`) — all 7 former harness examples green on both runtimes |
-| mp.exe full column re-run | ⏳ Pending |
-| PyScript full column re-run | ⏳ Pending (stale **30/52** baseline) |
-| Jupyter full column re-run | ⏳ Pending (stale **23/57** baseline; `chango` no longer skipped) |
+| **Manifest skip removal (`noto_fonts`)** | ✅ — `skip_runtimes` pyscript removed; `html/noto_fonts.json` already present |
+| mp.exe full column re-run | ✅ **58/68** (2026-06-30) — log `/tmp/mpexe_matrix_run.log` |
 | Skipped-examples inventory | ✅ Documented below |
 
-**Active jobs:** none.
-
-**Uncommitted files:**
-
-| File | Change |
-|------|--------|
-| `tools/example_test_kit.py` | Added `pyscript_embed_query()` |
-| `html/alien.json`, `html/proverbs.json`, `html/tiny_toasters.json` | New MIP manifests (untracked) |
-| `src/examples/alien/alien.py` | Minor fix (1 line removed) |
+**Active jobs:** none. Branch has local edits (manifest + plan).
 
 ---
 
 ## §4 micropython.exe
+
+### Full column re-run (2026-06-30)
+
+**Result: 58/68** — log `/tmp/mpexe_matrix_run.log`, JSON `.cursor/example_test_results.json`
+
+| Outcome | Count | Examples |
+|---------|------:|----------|
+| **SDLDisplay, ok** | **58** | — |
+| **hang** (quit-injection timeout) | **8** | `boxlines`, `displaysys_simpletest`, `eventsys_encoder_test`, `feathers`, `font_simpletest`, `font_simpletest2`, `font_simpletest3`, `scroll_touch_test_displaybuf` |
+| **import error** | **2** | `displaysys_block_test` (`choice`), `lv_test_timer_async` (`uasyncio`) |
+
+Target **68/68** not met — hangs are poll-loop examples without mp.exe quit path; import errors need shims like other mp.exe fixes.
 
 ### Fixed (verified 2026-06-29)
 
@@ -78,7 +78,7 @@ Excluded by design: `keypins_simpletest` (`matrix=false`), `lv_test_timer_harnes
 | `bmp565_sprite`, `bmp565_sprite_transparent`, `testris` | example-local `choice` shim | `82c3ab4a` |
 | `console_advanced_demo` | test-mode `run_forever` + `broker.poll()` quit; manifest `kind=loop` | `97aab56e` |
 
-**Target after full re-run:** **68/68** on all desktop runtimes.
+**Target after mp.exe fixes:** **68/68** on all desktop runtimes.
 
 Stale full-matrix row (pre-fix): 49 ok / 11 bad — see `.cursor/example_matrix_run.log` line 688.
 
@@ -90,15 +90,15 @@ Stale full-matrix row (pre-fix): 49 ok / 11 bad — see `.cursor/example_matrix_
 
 User ran `sudo .venv/bin/python -m playwright install-deps chromium`; `libnspr4.so` / `libnss3.so` present.
 
-### tft_config examples — 🔄 enablement uncommitted, spot run in progress
+### tft_config examples — ✅ PyScript autotest (`70677fa5`)
 
 | Item | Status |
 |------|--------|
-| MIP manifests | 🔄 `html/alien.json`, `html/proverbs.json`, `html/tiny_toasters.json` (+ existing `html/chango.json`) |
-| `pyscript_embed_query()` | 🔄 Uses `manifests=<id>` query param when manifest json exists |
-| Manifest skips removed | 🔄 `color_test`, `chango`, `alien`, `proverbs`, `tiny_toasters` no longer pyscript-skipped |
-| Spot run | 🔄 `/tmp/tft_config_pyscript.log` — color_test, chango, hello, alien, proverbs started; server confirms manifest loading |
-| Full column | ⏳ **Re-run needed** — stale baseline below predates enablement |
+| MIP manifests | ✅ `html/alien.json`, `html/proverbs.json`, `html/tiny_toasters.json` (+ `chango.json`) |
+| `pyscript_embed_query()` + kit tweaks | ✅ `manifests=<id>` embed URLs; `wait_until="load"` |
+| `html/embed.html` autotest | ✅ multimer quit before import; `EXAMPLE_RESULT` → `console.log` |
+| Spot run | ✅ **6/6** — `hello`, `color_test`, `chango`, `alien`, `proverbs`, `tiny_toasters` |
+| `noto_fonts` MIP manifest | ✅ `html/noto_fonts.json` — `manifests=noto_fonts` embed path |
 
 ### Latest column run (2026-06-29, **stale** — pre–tft_config enablement)
 
@@ -106,10 +106,10 @@ User ran `sudo .venv/bin/python -m playwright install-deps chromium`; `libnspr4.
 |---------|------:|
 | **PSDisplay, ok** | **30** |
 | **`Page.goto` networkidle timeout** | **22** |
-| **manifest `—` (not run)** | **8** (tft_config + `noto_fonts`; now enabled except `noto_fonts`) |
+| **manifest `—` (not run)** | **8** (tft_config + `noto_fonts` at time of run; both now enabled) |
 | **matrix=false (display only)** | **2** |
 
-Runnable at time of run: **52**. Pass rate: **30/52** (58%). **New runnable: 67** after manifest updates.
+Runnable at time of run: **52**. Pass rate: **30/52** (58%). Current runnable denominator: **67** (`png_test` only skip).
 
 Failures are load-time timeouts on loop/pdwidgets/heavy demos (`boxlines`, `displaysys_simpletest`, all `widgets_*`, etc.) — not `needs_playwright` or browser launch errors.
 
@@ -131,8 +131,9 @@ Log: `/tmp/pyscript_run.log`
 
 | Example | Status |
 |---------|--------|
-| `chango` | ✅ No longer skipped — runs but cell-timeout at 30s (expected until quit injection) |
-| `color_test`, `alien`, `proverbs`, `tiny_toasters` | 🔄 Cell-timeout at 30s (same quit-injection gap) |
+| `chango` | ✅ Passes (inject-quit) |
+| `color_test`, `hello` | 🔄 Cell-timeout — infinite loops block notebook execution (needs notebook quit scheduling like embed autotest) |
+| `alien`, `proverbs`, `tiny_toasters` | 🔄 Cell-timeout at 30s (quit-injection gap) |
 
 ### Latest column run (2026-06-29, **stale** — pre–tft_config/chango enablement)
 
@@ -143,7 +144,7 @@ Log: `/tmp/pyscript_run.log`
 | **manifest skip (not run)** | **2** (`chango`, `png_test` — **`chango` now enabled**) |
 | **matrix=false (display only)** | **2** |
 
-Runnable at time of run: **57**. Pass rate: **23/57** (40%). **New runnable: 67** after manifest updates.
+Runnable at time of run: **57**. Pass rate: **23/57** (40%). Current runnable denominator: **67** (`png_test` only skip).
 
 Still timing out: loop demos, pdwidgets suite, tft_config examples (quit gap), `bmp565_scroll_sprite` (70s).
 
@@ -153,12 +154,10 @@ Results: `.cursor/example_test_results.json`, `/tmp/jupyter_run_postfix.log`
 
 ## Remaining work
 
-- [ ] **Commit + push** tft_config PyScript support (`pyscript_embed_query`, html json manifests, `alien.py` tweak)
-- [ ] **PyScript full column re-run** → 67 runnable (stale **30/52** baseline)
-- [ ] **Jupyter full column re-run** → 67 runnable; triage tft_config quit-injection timeouts
-- [ ] **Jupyter quit injection** for tft_config / loop demos (cell-timeout gap)
-- [ ] **mp.exe full column re-run** → confirm 68/68
-- [ ] **Follow-up PR to main** for post-#39 stack through `5a77c8b6` + tft_config PyScript commit
+- [ ] **Push** `70677fa5` + follow-up commits to `origin/examples-post-refactor`
+- [ ] **mp.exe hang fixes** — poll-loop quit injection for 8 examples (see §4)
+- [ ] **mp.exe import shims** — `displaysys_block_test` (`choice`), `lv_test_timer_async` (`uasyncio`)
+- [ ] **Follow-up PR to main** for post-#39 stack through `70677fa5`
 
 ---
 
@@ -168,8 +167,9 @@ Results: `.cursor/example_test_results.json`, `/tmp/jupyter_run_postfix.log`
 # Full matrix (after tft_config + harness changes committed)
 python tools/example_test_kit.py --no-unit-tests --order runtimes
 
-# Targeted
-python tools/example_test_kit.py --no-unit-tests --only-runtime micropython.exe
+# mp.exe full column (2026-06-30)
+python tools/example_test_kit.py --no-unit-tests --only-runtime micropython.exe --order runtimes
+# log: /tmp/mpexe_matrix_run.log
 python tools/example_test_kit.py --no-unit-tests --only-runtime jupyter
 .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime pyscript
 
@@ -210,7 +210,7 @@ Results: `.cursor/example_test_results.json`
 
 Inventory from [`tools/example_test_manifest.toml`](tools/example_test_manifest.toml), [`tools/example_test_kit.py`](tools/example_test_kit.py) (`example_allowed_on_runtime`, `missing`, `needs_playwright`, matrix `—` dash), and [`tools/example_runtimes.toml`](tools/example_runtimes.toml).
 
-**Summary count:** **3** global exclusions (1 `matrix=false` example + 2 harnesses) · **3** per-runtime manifest skip cells (**2** examples) · **4** launcher skip categories.
+**Summary count:** **3** global exclusions (1 `matrix=false` example + 2 harnesses) · **2** per-runtime manifest skip cells (**1** example) · **4** launcher skip categories.
 
 ### Globally excluded from matrix (`matrix=false`)
 
@@ -229,9 +229,8 @@ Harness rows (`kind=harness`) appear only when using `--all-except-harness`; def
 | Example | Skipped on | Reason |
 |---------|------------|--------|
 | `png_test` | `pyscript`, `jupyter` | PNG decode via add-ons; too heavy / unsupported path for PyScript and Jupyter autotest. |
-| `noto_fonts` | `pyscript` | Large Noto font bundle + inject-quit loop; unreliable in headless PyScript autotest. |
 
-**Enabled on all runtimes (`5a77c8b6` manifest):** `color_test`, `chango`, `alien`, `proverbs`, `tiny_toasters`, `hello` — `tft_config` + `board_config` (PSDisplay / JNDisplay). PyScript subpackage embeds need uncommitted `html/*.json` + `pyscript_embed_query()`.
+**Enabled on all runtimes (`5a77c8b6` manifest, `70677fa5` PyScript autotest):** `color_test`, `chango`, `alien`, `proverbs`, `tiny_toasters`, `hello`, `noto_fonts` — `tft_config` + `board_config` (PSDisplay / JNDisplay); `noto_fonts` via `html/noto_fonts.json` MIP manifest.
 
 **Per-runtime runnable counts** (69 matrix columns − 1 `matrix=false` − manifest dashes): micropython / circuitpython / micropython.exe / cpython-venv / python.exe **68**; pyscript **67**; jupyter **67**.
 
@@ -250,7 +249,7 @@ _None currently expected for `console_advanced_demo` — test mode uses cooperat
 | Platform `available_on` | `micropython.exe`, `python.exe` | Windows/WSL-only subprocess runtimes; absent on plain Linux → all cells `missing`. |
 | Platform `available_on` | `jupyter` | Linux/WSL/macOS only; not listed for Windows. |
 
-Matrix table `—` cells: **3** total (manifest `skip_runtimes`: `png_test` ×2 + `noto_fonts` ×1); not run, not counted in pass denominators.
+Matrix table `—` cells: **2** total (manifest `skip_runtimes`: `png_test` ×2); not run, not counted in pass denominators.
 
 ---
 

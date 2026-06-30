@@ -535,7 +535,6 @@ script = "examples/noto_fonts/noto_fonts.py"
 kind = "loop"
 quit = "inject"
 deps = ["add_ons"]
-skip_runtimes = ["pyscript"]
 
 [examples.keypins_simpletest]
 import = "keypins_simpletest"
