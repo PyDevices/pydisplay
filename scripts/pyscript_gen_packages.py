@@ -441,7 +441,7 @@ def discover() -> list[Example]:
 def example_mip_manifest(ex: Example) -> dict:
     # Paths relative to web/pyscript/ where the manifest is served.
     return {
-        "urls": [[path, f"../../src/examples/{path}"] for path in ex.pyscript_files],
+        "urls": [[path, f"./src/examples/{path}"] for path in ex.pyscript_files],
         "version": MIP_MANIFEST_VERSION,
     }
 
