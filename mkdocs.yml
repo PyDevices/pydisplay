@@ -6,9 +6,13 @@ copyright: "Copyright 2024, Brad Barnett"
 docs_dir: docs
 site_dir: site
 
+exclude_docs: |
+  NOTES.md
+  overrides/**
+
 theme:
   name: material
-  custom_dir: overrides
+  custom_dir: docs/overrides
   palette:
     - scheme: default
       primary: indigo

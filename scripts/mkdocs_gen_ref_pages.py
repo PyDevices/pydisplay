@@ -26,10 +26,14 @@ SOURCE_TREES = (
 )
 
 SKIP_DIR_NAMES = {"__pycache__", "fonts"}
+# Gitignored upstream checkout — same omit as install_gen_manifests PACKAGE_SKIP_DIRS.
+ADD_ONS_SKIP_DIR_NAMES = {"gui"}
 
 
 def _should_skip(path: Path, parts: tuple[str, ...]) -> bool:
     if any(part in SKIP_DIR_NAMES for part in parts):
+        return True
+    if any(part.endswith(".bak") for part in parts):
         return True
     name = parts[-1]
     return name == "__main__" or name.startswith("_")
@@ -40,7 +44,10 @@ for src, ref_prefix, nav_prefix, path_entries in SOURCE_TREES:
         sys.path.append(str(src / entry) if entry else str(src))
 
     for path in sorted(src.rglob("*.py")):
-        if any(p in SKIP_DIR_NAMES for p in path.relative_to(src).parts):
+        rel_parts = path.relative_to(src).parts
+        if any(p in SKIP_DIR_NAMES for p in rel_parts):
+            continue
+        if src == root / "src" / "add_ons" and any(p in ADD_ONS_SKIP_DIR_NAMES for p in rel_parts):
             continue
 
         module_path = path.relative_to(src).with_suffix("")

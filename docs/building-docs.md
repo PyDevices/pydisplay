@@ -49,7 +49,7 @@ It is wired up with three pieces:
 |-------|------|
 | [`mkdocs-jupyter`](https://github.com/danielfrg/mkdocs-jupyter) (in `docs/requirements.txt`) | Converts `.ipynb` files into MkDocs pages |
 | [`scripts/mkdocs_gen_notebook_pages.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/mkdocs_gen_notebook_pages.py) | `mkdocs-gen-files` script that copies the notebook from `src/` into the docs tree at build time (MkDocs only renders files under `docs_dir`) |
-| [`overrides/main.html`](https://github.com/PyDevices/pydisplay/blob/main/overrides/main.html) | Material theme override that adds a **Download notebook** button (uses `page.nb_url` from `include_source: true`) |
+| [`docs/overrides/main.html`](https://github.com/PyDevices/pydisplay/blob/main/docs/overrides/main.html) | Material theme override that adds a **Download notebook** button (uses `page.nb_url` from `include_source: true`) |
 
 The notebook keeps living in `src/` so it can still be **run** there against the
 real source (relative imports like `import lib.path`). The committed copy has its
