@@ -67,7 +67,7 @@ On **CPython Linux** (`multimer._posix`), `run_forever()` drives `tick()` from t
 
 ## Icons
 
-Material Design icons converted to `.pbm` in `icons/` — see `icons/README.md` for attribution.
+Material Design icons converted to `.pbm` in [`assets/icons/`](https://github.com/PyDevices/pydisplay/tree/main/assets/icons) — see [`assets/icons/README.md`](https://github.com/PyDevices/pydisplay/blob/main/assets/icons/README.md) for attribution. Runtime widget icons live under `src/add_ons/pdwidgets/icons/`.
 
 ## PyScript note
 

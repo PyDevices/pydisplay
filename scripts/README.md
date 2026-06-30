@@ -22,7 +22,7 @@ python scripts/pyscript_gen_packages.py --check    # CI freshness
 | `pyscript_` | `pyscript_gen_packages.py` | Gallery cards + `web/pyscript/*.json` manifests |
 | `mkdocs_` | `mkdocs_gen_ref_pages.py`, `mkdocs_gen_notebook_pages.py` | Automatically on `mkdocs build` |
 | `publish_` | `publish_micropython_lib.sh`, `publish_mip_index.py`, `publish_make_pyproject.py` | Release to micropython-lib / mip index (infrequent) |
-| `assets_` | `assets_convert_md_png_to_pbm.py` | Icon PNG → PBM conversion (rare) |
+| `assets_` | `assets_convert_md_png_to_pbm.py` | Material Design PNG → PBM under `assets/icons/` (rare) |
 
 `manifestfile.py` is a shared library for the publish scripts (not prefixed).
 

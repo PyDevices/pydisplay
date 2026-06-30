@@ -10,10 +10,10 @@
   <a href="https://pydisplay.readthedocs.io">Documentation</a> •
   <a href="https://PyDevices.github.io/pydisplay/pyscript/">Browser demo</a> •
   <a href="https://pydisplay.readthedocs.io/en/latest/guides/wokwi/">Wokwi simulator</a> •
-  <a href="screenshots/README.md">Screenshot gallery</a>
+  <a href="assets/screenshots/README.md">Screenshot gallery</a>
 </p>
 
-| ![active.py](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/active.gif) | ![tiny_toasters.py](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/tiny_toasters.gif) |
+| ![active.py](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/active.gif) | ![tiny_toasters.py](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/tiny_toasters.gif) |
 |:--:|:--:|
 | @peterhinch's `active.py` | @russhughes's `tiny_toasters.py` |
 

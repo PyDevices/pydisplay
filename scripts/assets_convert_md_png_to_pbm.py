@@ -12,7 +12,7 @@ import lib.path  # noqa: E402, F401
 
 ROOT = Path(__file__).resolve().parent.parent
 source = Path("/home/brad/github/material-design-icons/png")
-dest = ROOT / "icons"
+dest = ROOT / "assets" / "icons"
 scale = "1x"
 threshold = 160
 

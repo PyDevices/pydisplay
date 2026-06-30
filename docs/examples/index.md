@@ -182,14 +182,14 @@ pd.run_forever()
 |------|--------|-----------|----------|------------|
 | 0 | [**App starter**](app-starter.md) (doc boilerplate) | CPython · MCU · PyScript | core | — |
 | 1 | [`pydisplay_demo.py`](pydisplay_demo.md) | CPython · MCU | core | — |
-| 2 | `color_test.py` | CPython · MCU | core | [color_test](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/color_test.png) |
+| 2 | `color_test.py` | CPython · MCU | core | [color_test](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/color_test.png) |
 | 3 | `displaysys_simpletest.py` | CPython · MCU | core | — |
 | 4 | `eventsys_simpletest.py` | CPython · MCU · PyScript | core | — |
-| 5 | `framebuf_simpletest.py` | CPython · MCU | core | [framebuf](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/framebuf_simpletest.png) |
-| 6 | `graphics_simpletest.py` | CPython · MCU | core | [shapes](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/shapes_simpletest.png) |
+| 5 | `framebuf_simpletest.py` | CPython · MCU | core | [framebuf](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/framebuf_simpletest.png) |
+| 6 | `graphics_simpletest.py` | CPython · MCU | core | [shapes](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/shapes_simpletest.png) |
 | 7 | `eventsys_touch_test.py` | CPython · MCU | core | — |
-| 8 | `calculator.py` | CPython · PyScript | core | [calculator](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/calculator.png) |
-| 9 | `paint.py` | CPython · PyScript | core | [paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/paint.png) |
+| 8 | `calculator.py` | CPython · PyScript | core | [calculator](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/calculator.png) |
+| 9 | `paint.py` | CPython · PyScript | core | [paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/paint.png) |
 | 10 | `widgets_simpletest.py` | CPython · MCU | add_ons | — |
 
 PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-asyncio.md).

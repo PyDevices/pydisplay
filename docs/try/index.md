@@ -42,11 +42,11 @@ Full example catalog: uncomment the two `add_ons` / `examples` lines in `main.py
 
 | | | |
 |--|--|--|
-| ![active](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/active.gif) | ![tiny_toasters](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/tiny_toasters.gif) | ![calculator](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/calculator.png) |
-| ![color_test](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/color_test.png) | ![console_advanced_demo](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/console_advanced_demo.gif) | ![paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/paint.png) |
-| ![circuitpython_usb_video](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/circuitpython_usb_video_chromebook.gif) | ![proverbs](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/proverbs.png) | ![testris](https://raw.githubusercontent.com/PyDevices/pydisplay/main/screenshots/testris.png) |
+| ![active](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/active.gif) | ![tiny_toasters](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/tiny_toasters.gif) | ![calculator](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/calculator.png) |
+| ![color_test](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/color_test.png) | ![console_advanced_demo](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/console_advanced_demo.gif) | ![paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/paint.png) |
+| ![circuitpython_usb_video](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/circuitpython_usb_video_chromebook.gif) | ![proverbs](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/proverbs.png) | ![testris](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/testris.png) |
 
-Full table: [screenshots/README.md](https://github.com/PyDevices/pydisplay/blob/main/screenshots/README.md).
+Full table: [assets/screenshots/README.md](https://github.com/PyDevices/pydisplay/blob/main/assets/screenshots/README.md).
 
 ## Next steps
 

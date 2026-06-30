@@ -3,7 +3,7 @@
 exclude = [
   "drivers/encoder/**",
   "drivers/io_expander/**",
-  "icons/**",
+  "assets/icons/**",
   "src/add_ons/png.py",
   "src/examples/**",
   "tools/typings/**",
