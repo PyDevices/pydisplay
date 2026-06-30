@@ -1,0 +1,40 @@
+name: Manifest freshness
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'packages/**'
+      - 'web/pyscript/**'
+      - 'sim/wokwi/**'
+      - 'scripts/install_*'
+      - 'scripts/pyscript_gen_packages.py'
+      - '.github/workflows/manifests.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'packages/**'
+      - 'web/pyscript/**'
+      - 'sim/wokwi/**'
+      - 'scripts/install_*'
+      - 'scripts/pyscript_gen_packages.py'
+      - '.github/workflows/manifests.yml'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Audit install manifests
+        run: ./scripts/install_refresh_manifests.sh --audit
+
+      - name: Check PyScript gallery and example JSON
+        run: python scripts/pyscript_gen_packages.py --check

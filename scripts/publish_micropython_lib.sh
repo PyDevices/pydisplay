@@ -1,8 +1,70 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 # Copy packages to the micropython-lib directory
 # Install example:  mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
 # Resolves to:  https://pydevices.github.io/micropython-lib/mip/PyDevices/package/6/displaysys/latest.json
 # Repo URL:  https://github.com/PyDevices/micropython-lib/blob/gh-pages/mip/PyDevices/package/6/displaysys/latest.json
+#
+# CI / automation:
+#   MICROPYTHON_LIB_DIR=../micropython-lib ./scripts/publish_micropython_lib.sh \
+#     --skip-pypi --commit-message "pydisplay: Sync from abc123." --push
+
+set -euo pipefail
+
+SKIP_PYPI=0
+DO_PUSH=0
+COMMIT_MESSAGE=""
+INTERACTIVE_COMMIT=0
+
+usage() {
+    cat <<'EOF'
+Usage: ./scripts/publish_micropython_lib.sh [OPTION]
+
+Copy pydisplay src/ into a local PyDevices/micropython-lib checkout, optionally
+build TestPyPI wheels, then commit (and optionally push) on the PyDevices branch.
+
+Options:
+  --skip-pypi           Sync manifests only; skip hatch/twine TestPyPI uploads.
+  --commit-message MSG  Commit micropython-lib changes (non-interactive).
+  --push                Push micropython-lib after commit (requires credentials).
+  --help, -h            Show this message.
+
+Environment:
+  MICROPYTHON_LIB_DIR   micropython-lib checkout (default: ~/github/micropython-lib)
+  TESTPYPI_API_TOKEN    TestPyPI token for twine (when not using --skip-pypi)
+
+Without --commit-message, prompts interactively when stdin is a TTY.
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --skip-pypi)
+            SKIP_PYPI=1
+            shift
+            ;;
+        --commit-message)
+            COMMIT_MESSAGE=$2
+            shift 2
+            ;;
+        --push)
+            DO_PUSH=1
+            shift
+            ;;
+        --help | -h)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            usage >&2
+            exit 1
+            ;;
+    esac
+done
+
+if [[ -z "$COMMIT_MESSAGE" ]] && [[ -t 0 ]]; then
+    INTERACTIVE_COMMIT=1
+fi
 
 VERSION=0.0.2
 DESCRIPTION_PREFIX="PyDisplay"
@@ -76,12 +138,18 @@ prune_skipped_artifacts() {
 }
 
 build_and_upload_pypi() {
+    if [[ "$SKIP_PYPI" -eq 1 ]]; then
+        return 0
+    fi
     rm -rf dist
     hatch build
-    twine upload --repository testpypi dist/*
+    if [[ -n "${TESTPYPI_API_TOKEN:-}" ]]; then
+        TWINE_USERNAME=__token__ TWINE_PASSWORD="$TESTPYPI_API_TOKEN" \
+            twine upload --repository testpypi dist/*
+    else
+        twine upload --repository testpypi dist/*
+    fi
 }
-
-# set -e
 
 # Create the bundle manifest
 mkdir -p $DEST_DIR/$BASENAME-bundle
@@ -206,12 +274,23 @@ done
 
 prune_skipped_artifacts
 
-echo
-echo "To commit changes now, enter your git commit message, otherwise, press enter."
-echo "The commit should be in the format:  '$BASENAME:  At least two words and a period.'"
-read -p "Enter your git commit message: " commit_message
-if [ -n "$commit_message" ]; then
-    git -C $DEST_REPO add .
-    git -C $DEST_REPO commit -s -m "$commit_message"
-    git -C $DEST_REPO push
+if [[ "$INTERACTIVE_COMMIT" -eq 1 ]] || [[ -n "$COMMIT_MESSAGE" ]]; then
+    if [[ "$INTERACTIVE_COMMIT" -eq 1 ]] && [[ -z "$COMMIT_MESSAGE" ]]; then
+        echo
+        echo "To commit changes now, enter your git commit message, otherwise, press enter."
+        echo "The commit should be in the format:  '$BASENAME:  At least two words and a period.'"
+        read -r -p "Enter your git commit message: " commit_message
+        COMMIT_MESSAGE=$commit_message
+    fi
+    if [[ -n "$COMMIT_MESSAGE" ]]; then
+        if git -C "$DEST_REPO" diff --quiet && git -C "$DEST_REPO" diff --cached --quiet; then
+            echo "No changes to commit in $DEST_REPO"
+        else
+            git -C "$DEST_REPO" add .
+            git -C "$DEST_REPO" commit -s -m "$COMMIT_MESSAGE"
+            if [[ "$DO_PUSH" -eq 1 ]]; then
+                git -C "$DEST_REPO" push
+            fi
+        fi
+    fi
 fi

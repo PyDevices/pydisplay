@@ -1,0 +1,89 @@
+# Manual publish to PyDevices/micropython-lib and the mip/PyDevices index.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   MICROPYTHON_LIB_DEPLOY_TOKEN — PAT with contents:write on PyDevices/micropython-lib
+#
+# Optional:
+#   TESTPYPI_API_TOKEN — TestPyPI API token (when "Upload TestPyPI wheels" is enabled)
+#
+# Index URL after publish:
+#   https://PyDevices.github.io/micropython-lib/mip/PyDevices
+
+name: Publish micropython-lib
+
+on:
+  workflow_dispatch:
+    inputs:
+      sync_sources:
+        description: Sync pydisplay src into micropython-lib PyDevices branch
+        type: boolean
+        default: true
+      upload_testpypi:
+        description: Build and upload wheels to TestPyPI (slow; needs TESTPYPI_API_TOKEN)
+        type: boolean
+        default: false
+      publish_mip_index:
+        description: Rebuild mip/PyDevices and push to micropython-lib gh-pages
+        type: boolean
+        default: true
+      commit_message:
+        description: micropython-lib commit message (default includes pydisplay SHA)
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: github.repository == 'PyDevices/pydisplay'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: PyDevices/micropython-lib
+          ref: PyDevices
+          path: micropython-lib
+          token: ${{ secrets.MICROPYTHON_LIB_DEPLOY_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install publish tools
+        if: inputs.upload_testpypi == true
+        run: pip install hatch twine
+
+      - name: Configure micropython-lib git
+        run: |
+          git -C micropython-lib config user.name 'github-actions[bot]'
+          git -C micropython-lib config user.email 'github-actions[bot]@users.noreply.github.com'
+          git -C micropython-lib remote set-url origin \
+            "https://x-access-token:${{ secrets.MICROPYTHON_LIB_DEPLOY_TOKEN }}@github.com/PyDevices/micropython-lib.git"
+
+      - name: Sync pydisplay into micropython-lib
+        if: inputs.sync_sources == true
+        env:
+          MICROPYTHON_LIB_DIR: ${{ github.workspace }}/micropython-lib
+          TESTPYPI_API_TOKEN: ${{ secrets.TESTPYPI_API_TOKEN }}
+        run: |
+          MSG="${{ inputs.commit_message }}"
+          if [[ -z "$MSG" ]]; then
+            MSG="pydisplay: Sync from PyDevices/pydisplay ${GITHUB_SHA}."
+          fi
+          EXTRA=(--commit-message "$MSG" --push)
+          if [[ "${{ inputs.upload_testpypi }}" != "true" ]]; then
+            EXTRA=(--skip-pypi --commit-message "$MSG" --push)
+          fi
+          ./scripts/publish_micropython_lib.sh "${EXTRA[@]}"
+
+      - name: Publish MIP index to gh-pages
+        if: inputs.publish_mip_index == true
+        env:
+          MICROPYTHON_LIB_DIR: ${{ github.workspace }}/micropython-lib
+          PYDISPLAY_DIR: ${{ github.workspace }}
+          MICROPYTHON_DIR: /tmp/micropython
+          MIP_INDEX_OUTPUT: /tmp/mip-index
+        run: ./scripts/publish_mip_ghpages.sh

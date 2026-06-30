@@ -287,7 +287,7 @@ def _update_index_package_metadata(index_package_json, metadata, mpy_version, pa
     index_package_json["path"] = package_path
 
 
-def build(output_path, hash_prefix_len, mpy_cross_path):
+def build(output_path, hash_prefix_len, mpy_cross_path, lib_dir):
     import manifestfile
     import mpy_cross
 
@@ -295,7 +295,7 @@ def build(output_path, hash_prefix_len, mpy_cross_path):
     out_package_dir = os.path.join(output_path, "package")
 
     path_vars = {
-        "MPY_LIB_DIR": os.path.abspath(os.path.join(os.path.dirname(__file__), "..")),
+        "MPY_LIB_DIR": lib_dir,
     }
 
     index_json_path = os.path.join(output_path, "index.json")
@@ -319,120 +319,132 @@ def build(output_path, hash_prefix_len, mpy_cross_path):
     mpy_version = str(mpy_version)
     print("Generating bytecode version", mpy_version)
 
-    for lib_dir in lib_dirs:
-        for manifest_path in glob.glob(os.path.join(lib_dir, "**", "manifest.py"), recursive=True):
-            package_path = os.path.dirname(manifest_path)
-            print("{}".format(package_path))
-            # .../foo/manifest.py -> foo
-            package_name = os.path.basename(os.path.dirname(manifest_path))
+    prev_cwd = os.getcwd()
+    os.chdir(lib_dir)
+    try:
+        for lib_dir_name in lib_dirs:
+            for manifest_path in glob.glob(
+                os.path.join(lib_dir_name, "**", "manifest.py"), recursive=True
+            ):
+                package_path = os.path.dirname(manifest_path)
+                print("{}".format(package_path))
+                # .../foo/manifest.py -> foo
+                package_name = os.path.basename(os.path.dirname(manifest_path))
 
-            # Compile the manifest.
-            manifest = manifestfile.ManifestFile(manifestfile.MODE_COMPILE, path_vars)
-            manifest.execute(manifest_path)
+                # Compile the manifest.
+                manifest = manifestfile.ManifestFile(manifestfile.MODE_COMPILE, path_vars)
+                manifest.execute(manifest_path)
 
-            # Append this package to the index.
-            if not manifest.metadata().version:
-                print(error_color("Warning:"), package_name, "doesn't have a version.")
+                # Append this package to the index.
+                if not manifest.metadata().version:
+                    print(error_color("Warning:"), package_name, "doesn't have a version.")
 
-            # Try to find this package in the previous index.json.
-            for p in index_json["packages"]:
-                if p["name"] == package_name:
-                    index_package_json = p
-                    break
-            else:
-                print("  First-time package")
-                index_package_json = {
-                    "name": package_name,
+                # Try to find this package in the previous index.json.
+                for p in index_json["packages"]:
+                    if p["name"] == package_name:
+                        index_package_json = p
+                        break
+                else:
+                    print("  First-time package")
+                    index_package_json = {
+                        "name": package_name,
+                    }
+                    index_json["packages"].append(index_package_json)
+
+                _update_index_package_metadata(
+                    index_package_json, manifest.metadata(), mpy_version, package_path
+                )
+
+                # This is the package json that mip/mpremote downloads.
+                mpy_package_json = {
+                    "v": _JSON_VERSION_PACKAGE,
+                    "hashes": [],
+                    "version": manifest.metadata().version or "",
                 }
-                index_json["packages"].append(index_package_json)
+                py_package_json = {
+                    "v": _JSON_VERSION_PACKAGE,
+                    "hashes": [],
+                    "version": manifest.metadata().version or "",
+                }
 
-            _update_index_package_metadata(
-                index_package_json, manifest.metadata(), mpy_version, package_path
-            )
+                for result in manifest.files():
+                    # This isn't allowed in micropython-lib anyway.
+                    if result.file_type != manifestfile.FILE_TYPE_LOCAL:
+                        print(
+                            error_color("Error:"), "Non-local file not supported.", file=sys.stderr
+                        )
+                        sys.exit(1)
 
-            # This is the package json that mip/mpremote downloads.
-            mpy_package_json = {
-                "v": _JSON_VERSION_PACKAGE,
-                "hashes": [],
-                "version": manifest.metadata().version or "",
-            }
-            py_package_json = {
-                "v": _JSON_VERSION_PACKAGE,
-                "hashes": [],
-                "version": manifest.metadata().version or "",
-            }
+                    if not result.target_path.endswith(".py"):
+                        print(
+                            error_color("Error:"),
+                            "Target path isn't a .py file:",
+                            result.target_path,
+                            file=sys.stderr,
+                        )
+                        sys.exit(1)
 
-            for result in manifest.files():
-                # This isn't allowed in micropython-lib anyway.
-                if result.file_type != manifestfile.FILE_TYPE_LOCAL:
-                    print(error_color("Error:"), "Non-local file not supported.", file=sys.stderr)
-                    sys.exit(1)
+                    # Tag each file with the package metadata and compile to .mpy
+                    # (and copy the .py directly).
+                    with manifestfile.tagged_py_file(
+                        result.full_path, result.metadata
+                    ) as tagged_path:
+                        _compile_as_mpy(
+                            package_name,
+                            mpy_package_json,
+                            tagged_path,
+                            result.target_path,
+                            result.opt,
+                            mpy_cross,
+                            mpy_cross_path,
+                            out_file_dir,
+                            hash_prefix_len,
+                        )
+                        _copy_as_py(
+                            package_name,
+                            py_package_json,
+                            tagged_path,
+                            result.target_path,
+                            out_file_dir,
+                            hash_prefix_len,
+                        )
 
-                if not result.target_path.endswith(".py"):
-                    print(
-                        error_color("Error:"),
-                        "Target path isn't a .py file:",
-                        result.target_path,
-                        file=sys.stderr,
-                    )
-                    sys.exit(1)
-
-                # Tag each file with the package metadata and compile to .mpy
-                # (and copy the .py directly).
-                with manifestfile.tagged_py_file(result.full_path, result.metadata) as tagged_path:
-                    _compile_as_mpy(
-                        package_name,
-                        mpy_package_json,
-                        tagged_path,
-                        result.target_path,
-                        result.opt,
-                        mpy_cross,
-                        mpy_cross_path,
-                        out_file_dir,
-                        hash_prefix_len,
-                    )
-                    _copy_as_py(
-                        package_name,
-                        py_package_json,
-                        tagged_path,
-                        result.target_path,
-                        out_file_dir,
-                        hash_prefix_len,
-                    )
-
-            # Create/replace {package}/latest.json.
-            _write_package_json(
-                mpy_package_json,
-                out_package_dir,
-                mpy_version,
-                package_name,
-                "latest",
-                replace=True,
-            )
-            _write_package_json(
-                py_package_json, out_package_dir, "py", package_name, "latest", replace=True
-            )
-
-            # Write {package}/{version}.json, but only if it doesn't already
-            # exist. A package version is "locked" the first time it's seen
-            # by this script.
-            if manifest.metadata().version:
+                # Create/replace {package}/latest.json.
                 _write_package_json(
                     mpy_package_json,
                     out_package_dir,
                     mpy_version,
                     package_name,
-                    manifest.metadata().version,
-                    replace=False,
+                    "latest",
+                    replace=True,
                 )
                 _write_package_json(
-                    py_package_json,
-                    out_package_dir,
-                    "py",
-                    package_name,
-                    manifest.metadata().version,
-                    replace=False,
+                    py_package_json, out_package_dir, "py", package_name, "latest", replace=True
                 )
+
+                # Write {package}/{version}.json, but only if it doesn't already
+                # exist. A package version is "locked" the first time it's seen
+                # by this script.
+                if manifest.metadata().version:
+                    _write_package_json(
+                        mpy_package_json,
+                        out_package_dir,
+                        mpy_version,
+                        package_name,
+                        manifest.metadata().version,
+                        replace=False,
+                    )
+                    _write_package_json(
+                        py_package_json,
+                        out_package_dir,
+                        "py",
+                        package_name,
+                        manifest.metadata().version,
+                        replace=False,
+                    )
+
+    finally:
+        os.chdir(prev_cwd)
 
     # Write updated package index json, sorted by package name.
     index_json["packages"].sort(key=lambda p: p["name"])
@@ -447,13 +459,30 @@ def main():
     cmd_parser.add_argument("--hash-prefix", default=8, type=int, help="hash prefix length")
     cmd_parser.add_argument("--mpy-cross", default=None, help="optional path to mpy-cross binary")
     cmd_parser.add_argument("--micropython", default=None, help="path to micropython repo")
+    cmd_parser.add_argument(
+        "--lib-dir",
+        default=None,
+        help="micropython-lib repo root (scan cwd); default: pydisplay repo root",
+    )
     args = cmd_parser.parse_args()
+
+    _scripts_dir = os.path.dirname(os.path.abspath(__file__))
+    sys.path.insert(0, _scripts_dir)
 
     if args.micropython:
         sys.path.append(os.path.join(args.micropython, "tools"))  # for manifestfile
         sys.path.append(os.path.join(args.micropython, "mpy-cross"))  # for mpy_cross
 
-    build(args.output, hash_prefix_len=max(4, args.hash_prefix), mpy_cross_path=args.mpy_cross)
+    lib_dir = os.path.abspath(
+        args.lib_dir or os.path.join(os.path.dirname(__file__), ".."),
+    )
+
+    build(
+        args.output,
+        hash_prefix_len=max(4, args.hash_prefix),
+        mpy_cross_path=args.mpy_cross,
+        lib_dir=lib_dir,
+    )
 
 
 if __name__ == "__main__":

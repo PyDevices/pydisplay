@@ -198,6 +198,12 @@ PY
     cp -a "$tmp/packages/." packages/
     cp "$tmp/pyscript.toml" "$PYSCRIPT_TOML"
     cp "$tmp/wokwi-pydisplay-bundle.json" sim/wokwi/pydisplay-bundle.json
+
+    if [[ "$changed" -ne 0 ]]; then
+        echo
+        echo "ERROR: generated files are stale — run ./scripts/install_refresh_manifests.sh"
+        exit 1
+    fi
 }
 
 regenerate_repo_packages() {

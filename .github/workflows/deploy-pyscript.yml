@@ -20,6 +20,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Verify install manifest freshness
+        run: ./scripts/install_refresh_manifests.sh --audit
+
+      - name: Verify PyScript gallery manifests
+        run: python scripts/pyscript_gen_packages.py --check
+
       - name: Assemble GitHub Pages site
         run: |
           mkdir -p _site/pyscript

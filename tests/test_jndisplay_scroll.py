@@ -3,10 +3,22 @@
 # SPDX-License-Identifier: MIT
 """Tests for JNDisplay vertical scroll compositing."""
 
+import sys
 import unittest
 from unittest import mock
 
 import _env  # noqa: F401
+
+if "IPython" not in sys.modules:
+    _ipy = mock.MagicMock()
+    sys.modules["IPython"] = _ipy
+    sys.modules["IPython.display"] = _ipy.display
+
+if "PIL" not in sys.modules:
+    _pil = mock.MagicMock()
+    sys.modules["PIL"] = _pil
+    sys.modules["PIL.Image"] = _pil.Image
+    sys.modules["PIL.ImageDraw"] = _pil.ImageDraw
 
 from displaysys import capabilities
 from displaysys.jndisplay import JNDisplay
