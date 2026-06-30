@@ -2,7 +2,7 @@
 
 **Branch:** `examples-post-refactor`  
 **PR:** [#39 Example matrix harness and post-refactor example fixes](https://github.com/PyDevices/pydisplay/pull/39) — **MERGED** 2026-06-29  
-**Latest commits:** `70677fa5` (tft_config PyScript autotest — **ahead 1, not pushed**), `5a77c8b6` (harness + manifest skips), `97aab56e` (console_advanced_demo)  
+**Latest commits:** `204a25aa` (mp.exe poll-loop pump), `d2353e10` (displaysys_block_test choice), `efcd08f6` (noto_fonts) — **ahead 4, not pushed**  
 **Matrix command:** `python tools/example_test_kit.py --no-unit-tests --order runtimes`  
 **Sources:** [`.cursor/example_matrix_run.log`](.cursor/example_matrix_run.log) (full matrix, subprocess runtimes), [`.cursor/example_test_results.json`](.cursor/example_test_results.json) (latest column run: harness spot-check), `/tmp/pyscript_run.log` (pyscript column, pre–tft_config enablement), `/tmp/tft_config_pyscript.log` (tft_config pyscript spot run)
 
@@ -16,7 +16,7 @@
 | **circuitpython** | **59+** (spot) | **68** | ✅ | tft_config examples ✅ spot (`/tmp/cp-matrix.txt`; run ended on harness crash) |
 | **cpython-venv** | **61/61** (last full) | **68** | ✅ | Full matrix pre-expand; re-run pending for +7 columns |
 | **python.exe** | **61/61** (last full) | **68** | ✅ | Full matrix pre-expand |
-| **micropython.exe** | **66/68** | **68** | 🔄 | Full column 2026-06-30 — **2** import errors remain (`displaysys_block_test`, `lv_test_timer_async`); see §4 |
+| **micropython.exe** | **67/68** | **68** | 🔄 | **1** import error remains (`lv_test_timer_async` / `uasyncio`); see §4 |
 | **pyscript** | **30/52** (stale full column) | **67** | 🔄 | tft_config examples **6/6** ✅ (`70677fa5`); stale baseline — `noto_fonts` now enabled |
 | **jupyter** | **23/57** (stale) | **67** | 🔄 | `chango` now runs (timeout, not skip); tft_config cell-timeouts at 30s (quit-injection gap) |
 
@@ -48,10 +48,11 @@ Excluded by design: `keypins_simpletest` (`matrix=false`), `lv_test_timer_harnes
 | Harness spot-check (micropython + cpython-venv) | ✅ **14/14** (`5a77c8b6`) — all 7 former harness examples green on both runtimes |
 | **Manifest skip removal (`noto_fonts`)** | ✅ — `skip_runtimes` pyscript removed; `html/noto_fonts.json` already present |
 | mp.exe full column re-run | ✅ **58/68** (2026-06-30) — log `/tmp/mpexe_matrix_run.log` |
-| mp.exe poll-loop hang fixes (8) | ✅ `Broker._poll()` pumps multimer when `needs_pump()` — spot-check 8/8 |
+| mp.exe poll-loop hang fixes (8) | ✅ `204a25aa` — `Broker._poll()` pumps multimer when `needs_pump()`; spot-check 8/8 |
+| mp.exe `displaysys_block_test` choice | ✅ `d2353e10` |
 | Skipped-examples inventory | ✅ Documented below |
 
-**Active jobs:** none. Branch has local edits (manifest + plan).
+**Active jobs:** none. Working tree clean; branch **ahead 4** (`70677fa5`…`204a25aa`).
 
 ---
 
@@ -59,13 +60,13 @@ Excluded by design: `keypins_simpletest` (`matrix=false`), `lv_test_timer_harnes
 
 ### Full column re-run (2026-06-30)
 
-**Result: 66/68** (after poll-loop hang fix) — baseline **58/68** in `/tmp/mpexe_matrix_run.log`, JSON `.cursor/example_test_results.json`
+**Result: 67/68** — baseline **58/68** (`/tmp/mpexe_matrix_run.log`); +8 hang fixes (`204a25aa`), +1 choice shim (`d2353e10`)
 
 | Outcome | Count | Examples |
 |---------|------:|----------|
-| **SDLDisplay, ok** | **66** | — |
+| **SDLDisplay, ok** | **67** | — |
 | **hang** (quit-injection timeout) | **0** | *(was 8 — fixed via `Broker._poll()` + `multimer.pump()`)* |
-| **import error** | **2** | `displaysys_block_test` (`choice`), `lv_test_timer_async` (`uasyncio`) |
+| **import error** | **1** | `lv_test_timer_async` (`uasyncio`) |
 
 Target **68/68** not met — remaining import errors need shims like other mp.exe fixes.
 
@@ -80,7 +81,9 @@ Target **68/68** not met — remaining import errors need shims like other mp.ex
 | `lv_touch_test` | multimer.Timer quit schedule; `pump_lvgl()` guard | `302e975c` |
 | `bmp565_scroll_sprite` | manifest `timeout_s = 70` | `302e975c` |
 | `apollo`, `calculator`, `eventsys_simpletest`, `paint`, `pydisplay_demo_async` | `dual_main()` sync fallbacks | `82c3ab4a` |
-| `bmp565_sprite`, `bmp565_sprite_transparent`, `testris`, `displaysys_block_test` | example-local `choice` shim | `82c3ab4a` / follow-up |
+| `bmp565_sprite`, `bmp565_sprite_transparent`, `testris` | example-local `choice` shim | `82c3ab4a` |
+| `displaysys_block_test` | example-local `choice` shim | `d2353e10` |
+| Poll-loop hang (8 examples) | `multimer.pump()` in `Broker._poll()` | `204a25aa` |
 | `console_advanced_demo` | test-mode `run_forever` + `broker.poll()` quit; manifest `kind=loop` | `97aab56e` |
 
 **Target after mp.exe fixes:** **68/68** on all desktop runtimes.
@@ -159,7 +162,7 @@ Results: `.cursor/example_test_results.json`, `/tmp/jupyter_run_postfix.log`
 
 ## Remaining work
 
-- [ ] **Push** `70677fa5` + follow-up commits to `origin/examples-post-refactor`
+- [ ] **Push** branch to `origin/examples-post-refactor` (ahead 4)
 - [x] **mp.exe hang fixes** — poll-loop quit injection for 8 examples (see §4)
 - [ ] **mp.exe import shims** — `lv_test_timer_async` (`uasyncio`)
 - [ ] **Follow-up PR to main** for post-#39 stack through `70677fa5`

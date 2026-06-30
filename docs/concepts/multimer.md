@@ -125,6 +125,17 @@ Backend selection at import (first match wins):
 | Thread / SDL / polling | `_threading`, `_sdl2`, `_polling` | True |
 | Asyncio | `_async.AsyncTimer` | False |
 
+### SDL2 bindings (`usdl2`)
+
+Desktop SDL2 access is shared between display and timer code:
+
+| Consumer | Import chain |
+|----------|--------------|
+| `displaysys.sdldisplay._sdl2` | `usdl2` → `._ffi` (MicroPython only) → `._ctypes` |
+| `multimer._sdl2` | `usdl2` → inline ctypes against system libSDL2 |
+
+Both prefer the native **`usdl2`** module when it is frozen or built into the interpreter. Pure-Python fallbacks keep CPython and MicroPython Unix working without it. See [Displays — SDLDisplay](displays.md#sdldisplay) and [MicroPython — usdl2](../platforms/micropython.md#usdl2-native-sdl2).
+
 ## Next
 
 - [Displays — timing](displays.md#timing)
