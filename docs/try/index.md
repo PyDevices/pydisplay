@@ -6,22 +6,22 @@ Evaluate pydisplay without installing anything on your machine.
 
 | Path | Best for | Start here |
 |------|----------|------------|
-| **Browser (PyScript)** | Quick look, touch UI in the tab | [Live demo hub](https://PyDevices.github.io/pydisplay/demo/) |
-| **Wokwi simulator** | ESP32 + ILI9341 without hardware | [Wokwi guide](../guides/wokwi.md) · [`wokwi/`](../wokwi/) |
+| **Browser (PyScript)** | Quick look, touch UI in the tab | [Live demo hub](https://PyDevices.github.io/pydisplay/pyscript/) |
+| **Wokwi simulator** | ESP32 + ILI9341 without hardware | [Wokwi guide](../guides/wokwi.md) · [`wokwi/`](../sim/wokwi/) |
 | **Screenshot gallery** | See what examples look like | [Gallery below](#screenshot-gallery) |
 
 ## PyScript (browser)
 
 ### Live demo (online)
 
-**Hub:** [PyDevices.github.io/pydisplay/demo/](https://PyDevices.github.io/pydisplay/demo/)
+**Hub:** [PyDevices.github.io/pydisplay/pyscript/](https://PyDevices.github.io/pydisplay/pyscript/)
 
 | Link | Description |
 |------|-------------|
-| [Calculator](https://PyDevices.github.io/pydisplay/demo/html/?modules=calculator) | Async calculator |
-| [Test runner](https://PyDevices.github.io/pydisplay/demo/html/test.html) | Pick an example |
-| [REPL](https://PyDevices.github.io/pydisplay/demo/html/repl.html) | Interactive REPL + canvas |
-| [Editor](https://PyDevices.github.io/pydisplay/demo/html/editor.html) | mpy-editor with paint.py |
+| [Calculator](https://PyDevices.github.io/pydisplay/pyscript/load.html?modules=calculator) | Async calculator |
+| [Test runner](https://PyDevices.github.io/pydisplay/pyscript/test.html) | Pick an example |
+| [REPL](https://PyDevices.github.io/pydisplay/pyscript/repl.html) | Interactive REPL + canvas |
+| [Editor](https://PyDevices.github.io/pydisplay/pyscript/editor.html) | mpy-editor with paint.py |
 
 ### Run locally
 
@@ -30,11 +30,11 @@ Evaluate pydisplay without installing anything on your machine.
 Full guide (asyncio porting, compatible examples, board config): [PyScript local development](../guides/pyscript.md).
 
 !!! note "Browser gallery"
-    The [live demo hub](https://PyDevices.github.io/pydisplay/demo/) lists examples tagged `# multimer types: async` or `all`. Click **Run** on each page — blocking loops start only after Run. Async examples (`calculator`, `paint`, …) are the smoothest fit. See [PyScript asyncio guide](../guides/pyscript-asyncio.md).
+    The [live demo hub](https://PyDevices.github.io/pydisplay/pyscript/) lists examples tagged `# multimer types: async` or `all`. Click **Run** on each page — blocking loops start only after Run. Async examples (`calculator`, `paint`, …) are the smoothest fit. See [PyScript asyncio guide](../guides/pyscript-asyncio.md).
 
 ## Wokwi (simulator)
 
-Copy [`wokwi/`](../wokwi/) `main.py` and `diagram.json` into a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3).
+Copy [`wokwi/`](../sim/wokwi/) `main.py` and `diagram.json` into a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3).
 
 Full example catalog: uncomment the two `add_ons` / `examples` lines in `main.py` (see [Wokwi guide](../guides/wokwi.md)).
 

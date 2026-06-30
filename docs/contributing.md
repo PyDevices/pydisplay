@@ -17,14 +17,14 @@ python3 -m venv .venv-docs
 After editing files under `src/`:
 
 ```bash
-./tools/regenerate.sh    # refresh packages/*.json and html/pyscript.toml
+./scripts/install_refresh_manifests.sh    # refresh packages/*.json and web/pyscript/pyscript.toml
 ```
 
 ## Pull request workflow
 
 1. Fork [PyDevices/pydisplay](https://github.com/PyDevices/pydisplay)
 2. Create a feature branch
-3. Make changes; run `./tools/regenerate.sh --audit` if you touched `src/`
+3. Make changes; run `./scripts/install_refresh_manifests.sh --audit` if you touched `src/`
 4. For docs: see [Building docs](building-docs.md) — `mkdocs serve` and verify pages build
 5. Open a PR against `main` with a clear description
 

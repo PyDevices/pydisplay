@@ -42,7 +42,7 @@ Develop on your laptop with a mouse, then deploy the *same* code to a touchscree
 - **One API, every platform** — `framebuf`-compatible drawing on MicroPython, CircuitPython, and CPython.
 - **Unified input** — touch, mouse, keyboard, keypad, rotary encoder, and joystick all arrive as the same PyGame/SDL2-style [events](concepts/events.md).
 - **Cross-platform timers** — [`multimer`](concepts/multimer.md) gives you `machine.Timer`-style and `asyncio` timers even on hosts that have neither.
-- **Batteries included** — 30 board configs, 60+ [examples](examples/index.md), a [browser demo](https://PyDevices.github.io/pydisplay/demo/), and a [Wokwi](guides/wokwi.md) project.
+- **Batteries included** — 30 board configs, 60+ [examples](examples/index.md), a [browser demo](https://PyDevices.github.io/pydisplay/pyscript/), and a [Wokwi](guides/wokwi.md) project.
 - **Flexible install** — [full clone](installation/full-clone.md), one-line [MIP packages](installation/mip-github.md), or precompiled `.mpy` bytecode.
 
 ## Build GUIs on top of it
@@ -53,7 +53,7 @@ PyDisplay is the graphics, input, and timing backend for a growing family of LVG
 
 | Resource | URL |
 |----------|-----|
-| Browser demo | [PyDevices.github.io/pydisplay/demo/](https://PyDevices.github.io/pydisplay/demo/) |
+| Browser demo | [PyDevices.github.io/pydisplay/pyscript/](https://PyDevices.github.io/pydisplay/pyscript/) |
 | Source | [github.com/PyDevices/pydisplay](https://github.com/PyDevices/pydisplay) |
 | MIP package index | [PyDevices micropython-lib](https://PyDevices.github.io/micropython-lib/mip/PyDevices) |
 | Issues & roadmap | [GitHub Issues](https://github.com/PyDevices/pydisplay/issues) |

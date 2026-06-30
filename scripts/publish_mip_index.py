@@ -28,7 +28,7 @@
 # into a directory suitable for serving to "mip" via a static web server.
 
 # Usage:
-# ./tools/build.py --output /tmp/micropython-lib/v2
+# ./scripts/publish_mip_index.py --output /tmp/micropython-lib/v2
 
 # The output directory (--output) will have the following layout
 # /

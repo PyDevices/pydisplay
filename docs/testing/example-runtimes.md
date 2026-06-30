@@ -62,7 +62,7 @@ Results: summary table on stderr, full JSON at `.cursor/example_test_results.jso
 
 ## Example manifest
 
-Per-example metadata (kind, quit handling, timeouts, skip lists) is in [`tools/example_test_manifest.toml`](../../tools/example_test_manifest.toml). Inventory of all example *files* is in [`packages/examples.json`](../../packages/examples.json) (regenerate with `./tools/regenerate.sh`).
+Per-example metadata (kind, quit handling, timeouts, skip lists) is in [`tools/example_test_manifest.toml`](../../tools/example_test_manifest.toml). Inventory of all example *files* is in [`packages/examples.json`](../../packages/examples.json) (regenerate with `./scripts/install_refresh_manifests.sh`).
 
 ### Example contract
 

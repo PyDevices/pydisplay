@@ -367,7 +367,9 @@ _server_pid: int | None = None
 
 def _server_ready(port: int = PYSCRIPT_PORT) -> bool:
     try:
-        with urllib.request.urlopen(f"http://127.0.0.1:{port}/html/embed.html", timeout=2) as resp:
+        with urllib.request.urlopen(
+            f"http://127.0.0.1:{port}/web/pyscript/embed.html", timeout=2
+        ) as resp:
             return resp.status == 200
     except (urllib.error.URLError, TimeoutError, OSError, ConnectionError):
         return False
@@ -417,7 +419,7 @@ def run_pyscript_case(
 ) -> dict:
     ensure_pyscript_server(port)
     query = pyscript_embed_query(example_id, example_meta)
-    url = f"http://127.0.0.1:{port}/html/embed.html?{query}&autotest=1&duration={int(duration)}"
+    url = f"http://127.0.0.1:{port}/web/pyscript/embed.html?{query}&autotest=1&duration={int(duration)}"
 
     try:
         from playwright.sync_api import sync_playwright

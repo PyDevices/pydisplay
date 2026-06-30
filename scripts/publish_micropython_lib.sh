@@ -118,7 +118,7 @@ package("$package")
 EOF
         echo "require(\"$package\")" >> $BUNDLE_MANIFEST
         cp $README_FULL_PATH $DEST_DIR/$package/README.md
-        ./tools/makepyproject.py --output $PYPI_DIR/$package $DEST_DIR/$package/manifest.py
+        ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package $DEST_DIR/$package/manifest.py
         pushd $PYPI_DIR/$package
         build_and_upload_pypi
         popd
@@ -155,7 +155,7 @@ package("displaysys")
 EOF
         echo "require(\"$package\")" >> $BUNDLE_MANIFEST
         cp $README_FULL_PATH $DEST_DIR/displaysys/$package/README.md
-        ./tools/makepyproject.py --output $PYPI_DIR/$package  $DEST_DIR/displaysys/$package/manifest.py
+        ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package  $DEST_DIR/displaysys/$package/manifest.py
         pushd $PYPI_DIR/$package
         build_and_upload_pypi
         popd
@@ -175,7 +175,7 @@ EOF
         ## TODO:  After publishing displaysys to PyPi, uncomment the following 7 lines
         # echo "require(\"$package\")" >> $BUNDLE_MANIFEST
         # cp $README_FULL_PATH $DEST_DIR/displaysys/$package/README.md
-        # ./tools/makepyproject.py --output $PYPI_DIR/$package $DEST_DIR/displaysys/$package/manifest.py
+        # ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package $DEST_DIR/displaysys/$package/manifest.py
         # pushd $PYPI_DIR/$package
         # hatch build
         # twine upload --repository testpypi dist/*
@@ -197,7 +197,7 @@ done
 # echo
 # echo "Processing $BASENAME-bundle"
 # cp $README_FULL_PATH $DEST_DIR/$BASENAME-bundle/README.md
-# ./tools/makepyproject.py --output $PYPI_DIR/$BASENAME-bundle $BUNDLE_MANIFEST
+# ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$BASENAME-bundle $BUNDLE_MANIFEST
 # pushd $PYPI_DIR/$BASENAME-bundle
 # rm -rf dist
 # hatch build

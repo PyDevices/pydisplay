@@ -1,40 +1,41 @@
 #!/usr/bin/env python3
 """
-gen_demo_pages.py — refresh the pydisplay browser demo gallery.
+pyscript_gen_packages.py — refresh the pydisplay PyScript browser gallery.
 
 Scans ``src/examples/`` for ``# multimer types: async|all`` headers, then
 resolves PyScript file lists automatically (with optional header overrides):
 
-  - **Single-file demos** — the entry ``.py`` only
-  - **Package demos** (``examples/<pkg>/<pkg>.py``) — all ``.py`` files under
+  - **Single-file examples** — the entry ``.py`` only
+  - **Package examples** (``examples/<pkg>/<pkg>.py``) — all ``.py`` files under
     ``examples/<pkg>/``, minus any ``# pyscript skip:`` paths
-  - **Multi-module demos** — entry plus same-directory imports discovered from
+  - **Multi-module examples** — entry plus same-directory imports discovered from
     ``import`` / ``from … import`` (e.g. ``lv_test_timer_async`` + ``common``)
 
 Optional headers (first 10 lines):
 
   - ``# pyscript files:`` — explicit override (legacy; still used when listing
     both Python and binary paths in one comment)
-  - ``# pyscript binaries:`` — non-``.py`` assets; demo is excluded from the
+  - ``# pyscript binaries:`` — non-``.py`` assets; example is excluded from the
     browser gallery when any path has a binary suffix
   - ``# pyscript skip:`` — ``examples/``-relative ``.py`` paths or directories
     omitted from package auto-discovery (e.g. ``frogger/dev`` skips all ``.py``
-    files under that tree); the token ``gallery`` excludes the demo from the
+    files under that tree); the token ``gallery`` excludes the example from the
     browser card grid (multimer tag unchanged)
   - ``# pyscript modules:`` — extra ``examples/``-relative ``.py`` paths for
     multi-module loaders when import scanning is insufficient
 
 Then:
 
-  - Updates demo cards in ``index.html`` (between ``GEN:`` markers)
-  - Writes ``html/<name>.json`` MIP manifests for multi-file demos
-  - Deletes stale ``html/*.html`` from the old per-demo page generator
+  - Updates gallery cards in ``web/pyscript/index.html`` (between ``GEN:`` markers)
+  - Writes ``web/pyscript/<name>.json`` MIP manifests for multi-file examples
+  - Deletes stale ``web/pyscript/*.html`` from the old per-demo page generator
 
-Every gallery demo opens the parametric loader at ``html/?modules=…`` or ``html/?manifests=…``.
+Every gallery example opens the parametric loader at ``load.html?modules=…`` or
+``load.html?manifests=…``.
 
-    python tools/gen_demo_pages.py
-    python tools/gen_demo_pages.py --check
-    python tools/gen_demo_pages.py --copy-examples DIR   # GitHub Pages deploy
+    python scripts/pyscript_gen_packages.py
+    python scripts/pyscript_gen_packages.py --check
+    python scripts/pyscript_gen_packages.py --copy-examples DIR   # GitHub Pages deploy
 """
 
 from __future__ import annotations
@@ -49,15 +50,16 @@ import sys
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES_DIR = REPO_ROOT / "src" / "examples"
-HTML_DIR = REPO_ROOT / "html"
-INDEX = REPO_ROOT / "index.html"
+PYSCRIPT_DIR = REPO_ROOT / "web" / "pyscript"
+INDEX = PYSCRIPT_DIR / "index.html"
 
 MIP_REPO = "github:PyDevices/pydisplay/"
 MIP_MANIFEST_VERSION = "0.0.5"
 
 TARGET_TYPES = ("async", "all")
 BINARY_SUFFIXES = frozenset({".bmp", ".bin", ".pbm", ".png", ".jpg", ".jpeg", ".gif", ".webp"})
-KEEP_HTML = frozenset({"index", "repl", "editor", "test", "embed"})
+KEEP_HTML = frozenset({"index", "load", "repl", "editor", "test", "embed"})
+LOADER_BASE = "load.html"
 
 ARROW = (
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
@@ -189,7 +191,7 @@ class Example:
     def browser_eligible(self) -> bool:
         return not self.depends_on_binary_files
 
-    def loader_href(self, base: str = "html/") -> str:
+    def loader_href(self, base: str = LOADER_BASE) -> str:
         if self.kind == "module":
             stems = ",".join(Path(path).stem for path in self.pyscript_files)
             return f"{base}?modules={stems}"
@@ -423,14 +425,14 @@ def discover() -> list[Example]:
 
 
 def example_mip_manifest(ex: Example) -> dict:
-    # Paths relative to html/ where the manifest is served (../src/examples/ → repo root).
+    # Paths relative to web/pyscript/ where the manifest is served.
     return {
-        "urls": [[path, f"../src/examples/{path}"] for path in ex.pyscript_files],
+        "urls": [[path, f"../../src/examples/{path}"] for path in ex.pyscript_files],
         "version": MIP_MANIFEST_VERSION,
     }
 
 
-def render_card(ex: Example, base: str = "html/") -> str:
+def render_card(ex: Example, base: str = LOADER_BASE) -> str:
     cls, label = ex.primary_tag
     return f'''                <a class="card" href="{ex.loader_href(base)}">
                     <div class="card-top">
@@ -453,7 +455,7 @@ def replace_block(text: str, key: str, payload: str) -> str:
     si = text.find(start)
     ei = text.find(end)
     if si == -1 or ei == -1:
-        raise SystemExit(f"index.html is missing the {start}/{end} markers")
+        raise SystemExit(f"{INDEX.name} is missing the {start}/{end} markers")
     return text[: si + len(start)] + "\n" + payload + "\n            " + text[ei:]
 
 
@@ -464,8 +466,10 @@ def write_html_mip_manifests(
     for ex in examples:
         if ex.kind != "manifest":
             continue
-        write(HTML_DIR / f"{ex.name}.json", json.dumps(example_mip_manifest(ex), indent=2) + "\n")
-    for path in HTML_DIR.glob("*.json"):
+        write(
+            PYSCRIPT_DIR / f"{ex.name}.json", json.dumps(example_mip_manifest(ex), indent=2) + "\n"
+        )
+    for path in PYSCRIPT_DIR.glob("*.json"):
         if path.stem in keep:
             continue
         rel = str(path.relative_to(REPO_ROOT))
@@ -477,8 +481,8 @@ def write_html_mip_manifests(
 
 
 def remove_stale_demo_html(stale: list[str], check: bool) -> None:
-    """Remove leftover ``html/<demo>.html`` files from the old per-demo generator."""
-    for path in HTML_DIR.glob("*.html"):
+    """Remove leftover ``web/pyscript/<demo>.html`` files from the old per-demo generator."""
+    for path in PYSCRIPT_DIR.glob("*.html"):
         if path.stem in KEEP_HTML:
             continue
         rel = str(path.relative_to(REPO_ROOT))

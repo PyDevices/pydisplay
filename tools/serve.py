@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-serve.py — local development server for the pydisplay PyScript demos.
+serve.py — local development server for the pydisplay PyScript site.
 
-Point it at the root of the repo (the default) and it serves the static demo
+Point it at the repo root (the default) and it serves the static PyScript
 site the same way GitHub Pages does, but from the source tree so you can edit
 and refresh:
 
     python tools/serve.py
     # then open:
-    #   http://127.0.0.1:8000/index.html            (demo index)
-    #   http://127.0.0.1:8000/html/?modules=calculator  (parametric loader)
-    #   http://127.0.0.1:8000/demo-pages/index.html (landing page)
+    #   http://127.0.0.1:8000/web/pyscript/index.html       (gallery)
+    #   http://127.0.0.1:8000/web/pyscript/load.html?modules=calculator
+    #   http://127.0.0.1:8000/web/landing/index.html      (marketing landing)
 
 Why a custom server instead of `python -m http.server`?
 
@@ -50,6 +50,13 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # as a log sink so Cursor Debug mode tooling can pick its own sub-paths.
 DEBUG_PREFIX = "/__debug"
 
+# Legacy paths from before the web/pyscript/ layout (redirect for bookmarks).
+REDIRECTS = {
+    "/index.html": "/web/pyscript/index.html",
+    "/html/": "/web/pyscript/load.html",
+    "/demo-pages/index.html": "/web/landing/index.html",
+}
+
 
 def _stamp() -> str:
     now = datetime.datetime.now(datetime.UTC)
@@ -62,17 +69,14 @@ class DemoRequestHandler(SimpleHTTPRequestHandler):
     # Set per-process from CLI args (see main()).
     coi_enabled = True
 
-    # Keep the demos fresh while editing.
+    # Keep pages fresh while editing.
     def end_headers(self) -> None:  # noqa: D401 - http.server hook
         self.send_header("Cache-Control", "no-store, must-revalidate")
         if self.coi_enabled:
-            # Mirror html/mini-coi-fd.js so local testing matches production.
             self.send_header("Cross-Origin-Opener-Policy", "same-origin")
             self.send_header("Cross-Origin-Embedder-Policy", "require-corp")
             self.send_header("Cross-Origin-Resource-Policy", "cross-origin")
         super().end_headers()
-
-    # ---- Debug log sink -------------------------------------------------
 
     def _is_debug(self) -> bool:
         return self.path == DEBUG_PREFIX or self.path.startswith(DEBUG_PREFIX + "/")
@@ -103,9 +107,23 @@ class DemoRequestHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802 - http.server hook
         if self._is_debug():
-            # Lightweight health check for debug tooling.
             self._send_cors(200)
             return
+        path_only = self.path.split("?", 1)[0]
+        for prefix, target in REDIRECTS.items():
+            if path_only == prefix or path_only.startswith(prefix.rstrip("/") + "/"):
+                query = self.path[len(path_only) :]
+                if prefix == "/html/" and path_only == "/html/":
+                    query = query or ""
+                    if query.startswith("?"):
+                        self.send_response(302)
+                        self.send_header("Location", "/web/pyscript/load.html" + query)
+                        self.end_headers()
+                        return
+                self.send_response(302)
+                self.send_header("Location", target + query)
+                self.end_headers()
+                return
         super().do_GET()
 
     def do_HEAD(self) -> None:  # noqa: N802 - http.server hook
@@ -131,7 +149,6 @@ class DemoRequestHandler(SimpleHTTPRequestHandler):
             sys.stdout.write(f"\n[debug {stamp} {client}] {self.path}\n{text}\n")
         sys.stdout.flush()
 
-    # Quieter, prefixed access log.
     def log_message(self, fmt: str, *args) -> None:  # noqa: A002 - http.server hook
         stamp = _stamp()
         sys.stderr.write(f"[{stamp}] {self.address_string()} {fmt % args}\n")
@@ -141,13 +158,6 @@ PAGE_SNIPPET = """\
 // Page-side beacon for Cursor Debug mode (paste into a demo page or console):
 //   fetch('/__debug', {method: 'POST', body: JSON.stringify({
 //     level: 'log', msg: 'hello from the page', url: location.href})});
-// Hook the console as well:
-//   for (const k of ['log','warn','error']) {
-//     const orig = console[k];
-//     console[k] = (...a) => { try { navigator.sendBeacon('/__debug',
-//       JSON.stringify({level:k, args:a.map(String), url:location.href})); }
-//       catch(_){} orig.apply(console, a); };
-//   }
 """
 
 
@@ -180,15 +190,15 @@ def main(argv: list[str] | None = None) -> int:
     httpd = ThreadingHTTPServer((args.bind, args.port), handler)
     base = f"http://{args.bind}:{args.port}"
 
-    print(f"pydisplay demo server — serving {root}")
+    print(f"pydisplay PyScript server — serving {root}")
     print(f"  cross-origin isolation: {'on' if DemoRequestHandler.coi_enabled else 'off'}")
     print(f"  debug log sink:         POST {base}{DEBUG_PREFIX}")
     print("")
     print("Open one of:")
-    print(f"  {base}/index.html             (demo index)")
-    print(f"  {base}/demo-pages/index.html  (landing page)")
-    print(f"  {base}/html/?modules=calculator  (parametric loader)")
-    print(f"  {base}/html/?manifests=chango  (MIP manifest example)")
+    print(f"  {base}/web/pyscript/index.html")
+    print(f"  {base}/web/pyscript/load.html?modules=calculator")
+    print(f"  {base}/web/pyscript/embed.html?modules=calculator")
+    print(f"  {base}/web/landing/index.html")
     print("")
     print(PAGE_SNIPPET)
     print("Press Ctrl+C to stop.")

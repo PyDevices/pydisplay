@@ -2,23 +2,23 @@
   "urls": [
     [
       "chango/__init__.py",
-      "../src/examples/chango/__init__.py"
+      "../../src/examples/chango/__init__.py"
     ],
     [
       "chango/chango.py",
-      "../src/examples/chango/chango.py"
+      "../../src/examples/chango/chango.py"
     ],
     [
       "chango/chango_16.py",
-      "../src/examples/chango/chango_16.py"
+      "../../src/examples/chango/chango_16.py"
     ],
     [
       "chango/chango_32.py",
-      "../src/examples/chango/chango_32.py"
+      "../../src/examples/chango/chango_32.py"
     ],
     [
       "chango/chango_64.py",
-      "../src/examples/chango/chango_64.py"
+      "../../src/examples/chango/chango_64.py"
     ]
   ],
   "version": "0.0.5"

@@ -6,7 +6,7 @@ Technical reference for the in-repo Wokwi project. For setup steps, see **[Wokwi
 
 | Path | Role |
 |------|------|
-| [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi) | `main.py`, `diagram.json` — bundle + `testris` |
+| [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/sim/wokwi) | `main.py`, `diagram.json` — bundle + `testris` |
 
 ---
 
@@ -54,12 +54,12 @@ If you need a specific MicroPython build, copy the current `env` value from the 
 
 ## MIP install pattern
 
-Matches [`wokwi/main.py`](https://github.com/PyDevices/pydisplay/blob/main/wokwi/main.py):
+Matches [`wokwi/main.py`](https://github.com/PyDevices/pydisplay/blob/main/sim/wokwi/main.py):
 
 ```python
 import mip
 
-mip.install("github:PyDevices/pydisplay/wokwi/pydisplay-bundle.json", target=".")
+mip.install("github:PyDevices/pydisplay/sim/wokwi/pydisplay-bundle.json", target=".")
 mip.install(
     "github:PyDevices/pydisplay/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3",
     target=".",
@@ -92,6 +92,6 @@ Use a display-only `diagram.json` (no touch I2C wires) with that config.
 | Issue | Notes |
 |-------|-------|
 | `touch_keypad.py` IndexError on last row | Wokwi simulator quirk; may not reproduce on hardware |
-| Old hosted wokwi.com project IDs | May be stale; use in-repo [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/wokwi) |
+| Old hosted wokwi.com project IDs | May be stale; use in-repo [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/sim/wokwi) |
 
 See also [Troubleshooting](../troubleshooting.md).

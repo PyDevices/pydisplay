@@ -44,7 +44,7 @@ For production firmware you may freeze modules or install into `/lib` and omit `
 If you edit files under `src/`, maintainers should run from the repo root:
 
 ```bash
-./tools/regenerate.sh
+./scripts/install_refresh_manifests.sh
 ```
 
-This updates `packages/*.json` and `html/pyscript.toml`. See [tools/README.md](https://github.com/PyDevices/pydisplay/blob/main/tools/README.md).
+This updates `packages/*.json` and `web/pyscript/pyscript.toml`. See [tools/README.md](https://github.com/PyDevices/pydisplay/blob/main/tools/README.md).

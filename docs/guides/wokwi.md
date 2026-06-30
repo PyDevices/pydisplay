@@ -2,7 +2,7 @@
 
 Run pydisplay on a simulated ESP32-S3 with an ILI9341 capacitive touch display â€” no hardware required.
 
-**In-repo project:** [`wokwi/`](../wokwi/)
+**In-repo project:** [`wokwi/`](../sim/wokwi/)
 
 **Who:** You want MCU-faithful testing (SPI display, I2C touch, MicroPython `machine` APIs) without flashing a board.
 
@@ -18,7 +18,7 @@ Run pydisplay on a simulated ESP32-S3 with an ILI9341 capacitive touch display â
 ## Run in the browser
 
 1. Create a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3).
-2. Replace **diagram.json** and **main.py** with the files from [`wokwi/`](../wokwi/).
+2. Replace **diagram.json** and **main.py** with the files from [`wokwi/`](../sim/wokwi/).
 3. Start the simulation. Serial shows `mip` downloads, then `testris` appears.
 
 **Full install:** uncomment the two `add_ons` / `examples` lines in `main.py` before starting (several-minute first boot).

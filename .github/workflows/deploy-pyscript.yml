@@ -1,0 +1,40 @@
+name: Deploy PyScript site to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'web/**'
+      - 'src/**'
+      - 'scripts/pyscript_gen_packages.py'
+      - '.github/workflows/deploy-pyscript.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble GitHub Pages site
+        run: |
+          mkdir -p _site/pyscript
+          cp -r web/pyscript/* _site/pyscript/
+          mkdir -p _site/pyscript/src
+          cp -r src/lib src/add_ons _site/pyscript/src/
+          cp src/jupyter_notebook.ipynb _site/pyscript/src/
+          python scripts/pyscript_gen_packages.py --copy-examples _site/pyscript/src/examples
+          cp web/landing/index.html _site/index.html
+          cp web/landing/site.css _site/site.css
+          cp .nojekyll _site/
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _site
+          publish_branch: gh-pages

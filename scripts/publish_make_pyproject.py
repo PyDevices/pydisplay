@@ -29,7 +29,7 @@
 # Requires that the project sets the pypi_publish= kwarg in its metadata().
 
 # Usage:
-# ./tools/makepyproject.py --output /tmp/foo micropython/foo
+# ./scripts/publish_make_pyproject.py --output /tmp/foo micropython/foo
 # python -m build /tmp/foo
 # python -m twine upload /tmp/foo/dist/*.whl
 

@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://pydisplay.readthedocs.io">Documentation</a> •
-  <a href="https://PyDevices.github.io/pydisplay/demo/">Browser demo</a> •
+  <a href="https://PyDevices.github.io/pydisplay/pyscript/">Browser demo</a> •
   <a href="https://pydisplay.readthedocs.io/en/latest/guides/wokwi/">Wokwi simulator</a> •
   <a href="screenshots/README.md">Screenshot gallery</a>
 </p>
@@ -102,7 +102,7 @@ Full details and per-platform notes: **[Portability & platforms](https://pydispl
 
 ### 3.1 Try it in the browser (no install)
 
-Open the **[live PyScript demo](https://PyDevices.github.io/pydisplay/demo/)** or the **[Wokwi simulator](https://pydisplay.readthedocs.io/en/latest/guides/wokwi/)** — both run real PyDisplay code in your browser with nothing to install.
+Open the **[live PyScript demo](https://PyDevices.github.io/pydisplay/pyscript/)** or the **[Wokwi simulator](https://pydisplay.readthedocs.io/en/latest/guides/wokwi/)** — both run real PyDisplay code in your browser with nothing to install.
 
 ### 3.2 Desktop (CPython)
 

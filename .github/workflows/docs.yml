@@ -7,14 +7,14 @@ on:
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
-      - 'tools/gen_ref_pages.py'
+      - 'scripts/mkdocs_gen_ref_pages.py'
       - 'src/lib/**'
       - 'src/add_ons/**'
   pull_request:
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
-      - 'tools/gen_ref_pages.py'
+      - 'scripts/mkdocs_gen_ref_pages.py'
       - 'src/lib/**'
       - 'src/add_ons/**'
 

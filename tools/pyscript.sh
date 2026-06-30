@@ -1,23 +1,21 @@
 #!/usr/bin/env bash
-# Start pydisplay's PyScript dev server and open a demo in the browser.
+# Start pydisplay's PyScript dev server and open an example in the browser.
 #
 # Usage (from repo root):
 #   ./tools/pyscript.sh chango
-#   ./tools/pyscript.sh calculator              # single module (no manifest json)
+#   ./tools/pyscript.sh calculator
 #   ./tools/pyscript.sh --manifest chango
 #   ./tools/pyscript.sh --module calculator
-#   ./tools/pyscript.sh                         # demo hub (index.html)
+#   ./tools/pyscript.sh                         # gallery (index.html)
 #   ./tools/pyscript.sh chango -p 8080
-#   ./tools/pyscript.sh chango --no-open        # print URL only
-#
-# Uses pydisplay/tools/serve.py (COI headers for PyScript). Reuses an existing
-# server on the chosen port when it already serves html/embed.html.
+#   ./tools/pyscript.sh chango --no-open
 
 set -euo pipefail
 
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PYDISPLAY_ROOT="${PYDISPLAY_ROOT:-$(cd "$_SCRIPT_DIR/.." && pwd)}"
 SERVE="$PYDISPLAY_ROOT/tools/serve.py"
+PYSCRIPT_DIR="$PYDISPLAY_ROOT/web/pyscript"
 PORT=8000
 DEMO=""
 MODE="" # manifest | module | hub
@@ -28,9 +26,9 @@ usage() {
   cat <<EOF
 Usage: ./tools/pyscript.sh [DEMO] [options]
 
-  DEMO              manifest or module name (default: open demo hub)
-  --manifest NAME   load html/NAME.json via ?manifests=
-  --module NAME     load src/examples/NAME.py via ?modules=
+  DEMO              manifest or module name (default: open gallery)
+  --manifest NAME   load web/pyscript/NAME.json via embed.html?manifests=
+  --module NAME     load src/examples/NAME.py via embed.html?modules=
   -p, --port PORT   port (default: 8000)
   --debug           append ?debug=1 (show log panel on embed.html)
   --no-open         start server and print URL; do not open a browser
@@ -96,23 +94,23 @@ if [[ ! -f "$SERVE" ]]; then
 fi
 
 if [[ -z "$MODE" && -n "$DEMO" ]]; then
-  if [[ -f "$PYDISPLAY_ROOT/html/${DEMO}.json" ]]; then
+  if [[ -f "$PYSCRIPT_DIR/${DEMO}.json" ]]; then
     MODE=manifest
   elif [[ -f "$PYDISPLAY_ROOT/src/examples/${DEMO}.py" ]]; then
     MODE=module
   else
-    echo "pyscript.sh: no manifest html/${DEMO}.json or module src/examples/${DEMO}.py" >&2
+    echo "pyscript.sh: no manifest web/pyscript/${DEMO}.json or module src/examples/${DEMO}.py" >&2
     exit 1
   fi
 fi
 
 BASE="http://127.0.0.1:${PORT}"
 if [[ -z "$DEMO" || "$MODE" == "hub" ]]; then
-  URL="${BASE}/index.html"
+  URL="${BASE}/web/pyscript/index.html"
 elif [[ "$MODE" == "manifest" ]]; then
-  URL="${BASE}/html/embed.html?manifests=${DEMO}"
+  URL="${BASE}/web/pyscript/embed.html?manifests=${DEMO}"
 elif [[ "$MODE" == "module" ]]; then
-  URL="${BASE}/html/embed.html?modules=${DEMO}"
+  URL="${BASE}/web/pyscript/embed.html?modules=${DEMO}"
 fi
 
 if [[ "$DEBUG" -eq 1 ]]; then
@@ -124,7 +122,7 @@ if [[ "$DEBUG" -eq 1 ]]; then
 fi
 
 server_ready() {
-  curl -sf -o /dev/null "${BASE}/html/embed.html" 2>/dev/null
+  curl -sf -o /dev/null "${BASE}/web/pyscript/embed.html" 2>/dev/null
 }
 
 wait_for_server() {

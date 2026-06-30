@@ -10,7 +10,7 @@ repo_dir = os.getcwd() + "/"
 src_dir = "src/"
 output_dir = repo_dir
 packages_dir = "packages/"
-toml_full_path = output_dir + "html/pyscript.toml"
+toml_full_path = output_dir + "web/pyscript/pyscript.toml"
 master_package_name = "pydisplay-bundle"
 
 # list of package directories, dependencies and extra files in that package
@@ -25,7 +25,7 @@ packages = [
 
 # Packages omitted from pydisplay-bundle.json (still get their own packages/*.json).
 bundle_exclude = ["examples", "add_ons"]
-# Packages omitted from html/pyscript.toml (PyScript mounts add_ons for local demos).
+# Packages omitted from web/pyscript/pyscript.toml (PyScript mounts add_ons for browser examples).
 toml_exclude = ["examples"]
 
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
@@ -33,7 +33,7 @@ SKIP_FILE_SUFFIXES = {".pyc", ".pyo"}
 # Local upstream checkouts (gitignored) — never list in mip manifests.
 PACKAGE_SKIP_DIRS = {"add_ons": {"gui"}}
 
-# Dest paths omitted from wokwi/pydisplay-bundle.json (derived from packages/pydisplay-bundle.json).
+# Dest paths omitted from sim/wokwi/pydisplay-bundle.json (derived from packages/pydisplay-bundle.json).
 WOKWI_BUNDLE_EXCLUDE_DESTS = {
     "jupyter_notebook.ipynb",
     "lib/board_config.py",
@@ -50,7 +50,7 @@ WOKWI_BUNDLE_EXCLUDE_DESTS = {
     "lib/displaysys/sdldisplay.py",
 }
 WOKWI_BUNDLE_EXCLUDE_PREFIXES = ()
-# Dest paths added only to wokwi/pydisplay-bundle.json (not in pydisplay-bundle).
+# Dest paths added only to sim/wokwi/pydisplay-bundle.json (not in pydisplay-bundle).
 WOKWI_BUNDLE_EXTRA_DESTS = [
     "add_ons/touch_keypad.py",
 ]
@@ -112,7 +112,7 @@ for package_path, deps, extra_files in packages:
             if toml_dest_dir == "//":
                 toml_dest_dir = "/"
             master_toml.append(
-                f'"../{os.path.relpath(full_file_path, repo_dir)}" = "{toml_dest_dir}"'
+                f'"../../{os.path.relpath(full_file_path, repo_dir)}" = "{toml_dest_dir}"'
             )
 
     package_skip = PACKAGE_SKIP_DIRS.get(package_name, set())
@@ -140,7 +140,7 @@ for package_path, deps, extra_files in packages:
                 if toml_dest_dir == "//":
                     toml_dest_dir = "/"
                 toml_src_file = src_dir + master_dest_file
-                master_toml.append(f'"../{toml_src_file}" = "/{toml_dest_dir}/"')
+                master_toml.append(f'"../../{toml_src_file}" = "/{toml_dest_dir}/"')
 
     if package_name not in toml_exclude:
         master_toml.append("")
@@ -154,7 +154,7 @@ for rel_path in extra_files_added_to_master:
     toml_dest_dir = "/" + "/".join(master_dest_file.split("/")[:-1]) + "/"
     if toml_dest_dir == "//":
         toml_dest_dir = "/"
-    master_toml.append(f'"../{rel_path}" = "{toml_dest_dir}"')
+    master_toml.append(f'"../../{rel_path}" = "{toml_dest_dir}"')
 
 # Add the master package to the package dictionaries
 package_dicts[master_package_name] = master_package
@@ -172,7 +172,7 @@ with open(toml_full_path, "w") as f:
         f.write(line + "\n")
 
 # Wokwi browser sim: slim copy of pydisplay-bundle (not a packages/ entry).
-wokwi_bundle_path = os.path.join(output_dir, "wokwi", "pydisplay-bundle.json")
+wokwi_bundle_path = os.path.join(output_dir, "sim", "wokwi", "pydisplay-bundle.json")
 os.makedirs(os.path.dirname(wokwi_bundle_path), exist_ok=True)
 with open(wokwi_bundle_path, "w") as f:
     json.dump(wokwi_bundle_from_master(master_package), f, indent=2)

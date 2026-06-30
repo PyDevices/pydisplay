@@ -7,20 +7,20 @@
     <meta name="description" content="Run pydisplay demos by name via the parametric PyScript loader.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-    <link rel="stylesheet" href="./demo.css">
-    <link rel="stylesheet" href="./pyscript/core.css">
+    <link rel="stylesheet" href="./site.css">
+    <link rel="stylesheet" href="./vendor/core.css">
     <script src="./mini-coi-fd.js"></script>
-    <script type="module" src="./pyscript/core.js"></script>
+    <script type="module" src="./vendor/core.js"></script>
 </head>
 <body>
     <header class="site-header">
         <div class="wrap">
-            <a class="brand" href="../index.html">
+            <a class="brand" href="./index.html">
                 <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                 py<span class="accent">display</span>
             </a>
             <nav class="nav">
-                <a href="../index.html">Demos</a>
+                <a href="./index.html">Demos</a>
                 <a href="https://pydisplay.readthedocs.io">Docs</a>
                 <a href="https://github.com/PyDevices/pydisplay">GitHub</a>
             </nav>
@@ -29,7 +29,7 @@
 
     <main class="wrap loader-main">
         <nav class="crumbs">
-            <a href="../index.html">Demos</a>
+            <a href="./index.html">Demos</a>
             <span class="sep">/</span>
             <span id="crumb-name">Loader</span>
         </nav>
@@ -71,7 +71,7 @@
                     <h2>How to use</h2>
                     <ul>
                         <li><code>?modules=</code> — comma-separated top-level module stems (no <code>.py</code>).</li>
-                        <li><code>?manifests=</code> — comma-separated MIP manifest names; each installs <code>html/&lt;name&gt;.json</code>.</li>
+                        <li><code>?manifests=</code> — comma-separated MIP manifest names; each installs <code>&lt;name&gt;.json</code> from this directory.</li>
                         <li>Both may appear; whichever param comes <em>first</em> in the URL supplies the import entry point.</li>
                         <li>Click <strong>Run</strong> to install everything, then import the entry.</li>
                     </ul>
@@ -84,7 +84,7 @@
                 </div>
                 <div class="actions">
                     <a class="btn" id="source-link" href="https://github.com/PyDevices/pydisplay/tree/main/src/examples" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> View source</a>
-                    <a class="btn" href="../index.html">Back to demos</a>
+                    <a class="btn" href="./index.html">Back to demos</a>
                 </div>
             </aside>
         </div>
@@ -181,7 +181,7 @@
                         names + '.</p>' +
                         '<p>Names must be simple identifiers (letters, digits, underscore; ' +
                         'no slashes or dots).</p>' +
-                        '<p><a class="btn" href="../index.html">Back to demos</a></p>' +
+                        '<p><a class="btn" href="./index.html">Back to demos</a></p>' +
                         '</div>';
                 }
                 window.__pydisplayLoaderDisabled = true;
@@ -318,10 +318,10 @@
         def _mip_base():
             _host = document.location.hostname
             _path = document.location.pathname
-            _demo_root = _path.split("/html/")[0] if "/html/" in _path else ""
+            _site_root = _path[: _path.rfind("/") + 1] if "/" in _path else "/"
             if _host in ("127.0.0.1", "localhost") or _host.endswith(".github.io"):
-                return document.location.origin + _demo_root + "/"
-            return "github:PyDevices/pydisplay/"
+                return document.location.origin + _site_root
+            return "github:PyDevices/pydisplay/web/pyscript/"
 
         def _loader_disabled():
             return bool(_from_window("__pydisplayLoaderDisabled"))
@@ -344,7 +344,7 @@
                 mip_base = _mip_base()
                 for name in manifests:
                     mip.install(
-                        mip_base + "html/" + name + ".json",
+                        mip_base + name + ".json",
                         target=MANIFEST_MIP_TARGET,
                     )
                 for name in modules:

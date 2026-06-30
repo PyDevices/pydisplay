@@ -7,7 +7,7 @@ Experimental browser support via [PyScript](https://pyscript.net/) and `displays
 **Asyncio porting:** [PyScript asyncio guide](../guides/pyscript-asyncio.md).
 
 !!! warning "Work in progress"
-    PyScript support is experimental. The [browser gallery](https://PyDevices.github.io/pydisplay/demo/) ships curated `async` and `all` examples (Run-gated). Other scripts may still use blocking `while True` loops and need asyncio porting — see [PyScript asyncio guide](../guides/pyscript-asyncio.md).
+    PyScript support is experimental. The [browser gallery](https://PyDevices.github.io/pydisplay/pyscript/) ships curated `async` and `all` examples (Run-gated). Other scripts may still use blocking `while True` loops and need asyncio porting — see [PyScript asyncio guide](../guides/pyscript-asyncio.md).
 
 ## Board config
 
@@ -15,4 +15,4 @@ Experimental browser support via [PyScript](https://pyscript.net/) and `displays
 
 ## Contributing
 
-Pull requests welcome for `displaysys/psdisplay.py`, asyncio example ports, and files under `html/`.
+Pull requests welcome for `displaysys/psdisplay.py`, asyncio example ports, and files under `web/pyscript/`.

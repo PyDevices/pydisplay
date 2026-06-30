@@ -1,304 +1,56 @@
 # pydisplay `tools/`
 
-Scripts and support files for maintaining derived artifacts, publishing packages, and IDE type checking.
+Developer workflow only — local servers, test harnesses, and IDE typings. For repo maintenance see [`scripts/README.md`](../scripts/README.md).
 
-## Quick start
-
-From the repository root:
-
-```bash
-# See whether generated files are behind src/ (makes no lasting changes)
-./tools/regenerate.sh --audit
-
-# Update packages/*.json and html/pyscript.toml from src/
-./tools/regenerate.sh
-```
-
-### Demo launchers
+## PyScript / Jupyter launchers
 
 | Script | Purpose |
-|---|---|
-| [`jupyter.sh`](jupyter.sh) | JupyterLab or Cursor notebooks — `./tools/jupyter.sh calculator`, `./tools/jupyter.sh calculator --cursor` |
-| [`pyscript.sh`](pyscript.sh) | PyScript browser dev server — `./tools/pyscript.sh calculator`, `./tools/pyscript.sh chango` |
-| [`serve.py`](serve.py) | HTTP server with Cross-Origin-Isolation headers (used by `pyscript.sh`) |
+|--------|---------|
+| [`serve.py`](serve.py) | HTTP server with Cross-Origin-Isolation headers |
+| [`pyscript.sh`](pyscript.sh) | Open one example in the browser — `./tools/pyscript.sh calculator` |
+| [`jupyter.sh`](jupyter.sh) | JupyterLab or Cursor notebooks — `./tools/jupyter.sh calculator` |
+
+From repo root:
+
+```bash
+python tools/serve.py
+# http://127.0.0.1:8000/web/pyscript/index.html
+# http://127.0.0.1:8000/web/pyscript/load.html?modules=calculator
+
+./tools/pyscript.sh calculator
+./tools/jupyter.sh calculator --cursor
+```
 
 See [Run the notebook interactively](../docs/platforms/jupyter-run.md) and [PyScript local development](../docs/guides/pyscript.md).
 
----
+## Example test matrix
 
-## Regeneration cheat sheet
-
-| You changed… | What to run |
-|---|---|
-| Files under `src/add_ons/`, `src/examples/`, or `src/lib/` | `./tools/regenerate.sh` |
-| Example `# multimer types:` headers or gallery card copy | `python tools/gen_demo_pages.py` |
-| `drivers/bus/i80bus.py` or `gpio_pin.py` | Edit `packages/i80bus.json` by hand |
-| `drivers/bus/spibus.py` | Edit `packages/spibus.json` by hand |
-| Docstrings or modules under `src/lib/` | `mkdocs build` (uses `gen_ref_pages.py` automatically) |
-
-### Documentation site
-
-User docs live in `docs/` and publish to [ReadTheDocs](https://pydisplay.readthedocs.io) via `.readthedocs.yaml`.
-
-**Full guide:** [docs/building-docs.md](../docs/building-docs.md) (local preview, RTD setup, rollout checklist).
-
-Check GitHub Actions after a push (requires one-time `gh auth login`):
+| Script | Purpose |
+|--------|---------|
+| [`example_test_kit.py`](example_test_kit.py) | Cross-runtime example matrix |
+| [`example_test_manifest.toml`](example_test_manifest.toml) | Per-example metadata |
+| [`example_runtimes.toml`](example_runtimes.toml) | Runtime command templates |
 
 ```bash
-gh run list --limit 5
-```
-
-```bash
-python3 -m venv .venv-docs
-.venv-docs/bin/pip install -r docs/requirements.txt
-.venv-docs/bin/mkdocs serve    # http://127.0.0.1:8000
-.venv-docs/bin/mkdocs build    # output in site/
-```
-| Publishing to micropython-lib / TestPyPI | `tools/gen_library_packages.sh` |
-| mip index on micropython-lib gh-pages | `tools/build.py` (see below) |
-| Material Design PNG icons | `tools/convert_md_png_to_pbm.py` (update paths first) |
-
----
-
-## `regenerate.sh`
-
-Chains the most common local maintenance step: refreshing GitHub-install and PyScript manifests from `src/`.
-
-```bash
-./tools/regenerate.sh           # apply updates
-./tools/regenerate.sh --audit   # report drift, then restore originals
-./tools/regenerate.sh --help
-```
-
-**Outputs updated by the default mode:**
-
-- `packages/add_ons.json`
-- `packages/displaysys.json`
-- `packages/eventsys.json`
-- `packages/examples.json`
-- `packages/graphics.json`
-- `packages/multimer.json`
-- `packages/pydisplay-bundle.json`
-- `html/pyscript.toml`
-
-**Not touched** (maintained manually): `packages/i80bus.json`, `packages/spibus.json`.
-
----
-
-## `gen_demo_pages.py`
-
-Refreshes the browser demo gallery from `src/examples/`:
-
-- Scans `# multimer types: async` or `all` (first five lines)
-- Updates card grids in root `index.html` (`<!-- GEN:async:* -->` / `<!-- GEN:all:* -->`)
-- Writes `html/<pkg>.json` MIP manifests for multi-file package demos
-- Removes stale `html/<demo>.html` from the old per-demo page generator
-
-```bash
-python tools/gen_demo_pages.py
-python tools/gen_demo_pages.py --check   # CI freshness
-python tools/gen_demo_pages.py --copy-examples DIR   # GitHub Pages deploy
-```
-
-Gallery demos open the parametric loader at `html/?modules=…` or `html/?manifests=…`. Examples with `# pyscript binaries:` are excluded.
-
----
-
-## `gen_repo_packages.py`
-
-Walks configured `src/` trees and writes the JSON/TOML files listed above. Consumed by:
-
-- `installer.py` → `repo_install()` (Wokwi, direct GitHub installs)
-- PyScript demos via `html/pyscript.toml`
-
-### Packages scanned
-
-| Package name | Source path | Notes |
-|---|---|---|
-| `add_ons` | `src/add_ons/` | |
-| `examples` | `src/examples/` | Excluded from bundle |
-| `displaysys` | `src/lib/displaysys/` | Also pulls in `src/lib/board_config.py`, `src/lib/path.py` |
-| `eventsys` | `src/lib/eventsys/` | |
-| `graphics` | `src/lib/graphics/` | |
-| `multimer` | `src/lib/multimer/` | |
-| `pydisplay-bundle` | (composed) | All of the above except `examples` and `add_ons`, plus `src/jupyter_notebook.ipynb` |
-| `wokwi/pydisplay-bundle.json` | (derived) | Copy of `pydisplay-bundle` with desktop/SDL/Jupyter paths removed — see `WOKWI_BUNDLE_EXCLUDE_*` in `gen_repo_packages.py` |
-
-`__pycache__/` directories and `.pyc` / `.pyo` files are skipped.
-
-### Manual bus packages
-
-`packages/i80bus.json` and `packages/spibus.json` point at `drivers/bus/` and are **not** generated by this script. Update them when those driver files change.
-
-Current driver layout:
-
-| File | In package |
-|---|---|
-| `drivers/bus/i80bus.py` | `i80bus.json` |
-| `drivers/bus/gpio_pin.py` | `i80bus.json` |
-| `drivers/bus/spibus.py` | `spibus.json` |
-| `drivers/bus/_rp2_wip.py` | *(not packaged — work in progress)* |
-
----
-
-## Audit snapshot (2026-06-30)
-
-After `./tools/regenerate.sh`, committed manifests match `src/`. Prior drift (missing `joystick_keypad.py`, corrupt bundle URLs, stale `pyscript.toml` paths) was fixed by regeneration.
-
-`python tools/gen_demo_pages.py --check` validates `index.html` and `html/*.json` against example headers.
-
----
-
-## `gen_ref_pages.py`
-
-MkDocs **gen-files** plugin script (configured in `mkdocs.yml`). Scans `src/lib/**/*.py` and generates API reference stubs under `reference/` using mkdocstrings (`::: module` syntax).
-
-**When it runs:** automatically during `mkdocs build` or `mkdocs serve`. You normally do not invoke it directly.
-
----
-
-## `gen_library_packages.sh`
-
-Full **micropython-lib / PyPI publishing** pipeline:
-
-1. Copies `src/lib/*` into a separate `micropython-lib` checkout (`~/github/micropython-lib` by default)
-2. Writes per-package `manifest.py` files
-3. Calls `makepyproject.py` → `hatch build` → `twine upload --repository testpypi`
-4. Optionally commits and pushes the micropython-lib repo
-
-**When to run:** releasing new versions to the [PyDevices micropython-lib](https://github.com/PyDevices/micropython-lib) fork or TestPyPI.
-
-**Paths:**
-
-- `SOURCE_REPO` is derived from this repo (parent of `tools/`)
-- `DEST_REPO` defaults to `~/github/micropython-lib`; override with `MICROPYTHON_LIB_DIR`
-
-**Other caveats:**
-
-- Copies skip `__pycache__/`, `.pyc`, `.pyo`, and common cache directories (same rules as `gen_repo_packages.py`)
-- Sub-packages under `displaysys-*` (except core `displaysys`) have PyPI/bundle steps commented out pending `displaysys` on PyPI
-- Bundle packaging is also commented out
-
----
-
-## `makepyproject.py`
-
-Generates a Hatch-compatible `pyproject.toml` and source tree from a `manifest.py`, suitable for PyPI publishing.
-
-```bash
-./tools/makepyproject.py --output /tmp/foo path/to/manifest.py
-cd /tmp/foo && python -m build
-```
-
-Used by `gen_library_packages.sh` and derived from the MicroPython micropython-lib tooling.
-
----
-
-## `build.py`
-
-Compiles micropython-lib packages to `.mpy` bytecode and builds the static **mip** index layout (`index.json`, `package/`, `file/`).
-
-```bash
-./tools/build.py --output /tmp/micropython-lib/v2
-```
-
-Requires `mpy-cross` and typically a local MicroPython checkout. Run when updating the **gh-pages mip server** after packages land in micropython-lib.
-
----
-
-## `manifestfile.py`
-
-Shared library (from MicroPython micropython-lib) for parsing and executing `manifest.py` files. Used by `build.py` and `makepyproject.py` — not run directly.
-
-The repo-root `manifest.py` is separate: it lists packages for **frozen MicroPython firmware** builds (`make FROZEN_MANIFEST=...`).
-
----
-
-## LVGL desktop test runners
-
-Automated checks for LVGL timer and input behavior across desktop Python ports. Full walkthrough: [LVGL guide — Desktop test suite](../docs/guis/lvgl.md#desktop-test-suite).
-
-### `run_desktop_lv_tests.py`
-
-Nine sequential harness runs (`queued` + `async` on each available desktop executable; async skipped on `micropython.exe`). Each run prints `KIT_RESULT=` then injects `events.Quit` and should exit 0.
-
-```bash
-python tools/run_desktop_lv_tests.py
-```
-
-Requires `micropython`, `circuitpython`, and optionally `micropython.exe` / `python.exe` on `PATH`, plus `.venv/bin/python` (repo root) for the CPython Linux venv. Results: summary table on stdout, JSON at `.cursor/desktop_lv_test_results.json`.
-
-### `lv_timer_test_kit.py`
-
-Smaller matrix for local development — default interpreters (micropython, circuitpython, `.venv/bin/python`) × modes (`sync`, `queued`, `async`):
-
-```bash
-python tools/lv_timer_test_kit.py
-python tools/lv_timer_test_kit.py --only cpython async
-```
-
-Both runners invoke [`src/examples/lv_test_timer_harness.py`](../src/examples/lv_test_timer_harness.py) from `src/` and parse `KIT_RESULT=` lines from stdout.
-
----
-
-## Cross-runtime example tests
-
-Smoke-test [`src/examples/`](../src/examples/) across desktop **runtimes** (MicroPython, CircuitPython, CPython, PyScript, Jupyter). Full guide: [docs/testing/example-runtimes.md](../docs/testing/example-runtimes.md).
-
-| File | Role |
-|------|------|
-| [`example_runtimes.toml`](example_runtimes.toml) | Canonical runtime list (agents read this first) |
-| [`example_test_manifest.toml`](example_test_manifest.toml) | Per-example kind, quit handling, timeouts, skip lists |
-| [`example_test_kit.py`](example_test_kit.py) | Orchestrator: `test_all_examples()` / `test_all_runtimes()` |
-| [`example_test_wrapper.py`](example_test_wrapper.py) | Subprocess entry; prints `EXAMPLE_RESULT=` |
-| [`quit_inject.py`](quit_inject.py) | QUEUE-device Quit injection (shared with LVGL harness) |
-
-```bash
-# Unit tests (gate) + curated example matrix
 python tools/example_test_kit.py --curated-only
-
-# All runnable examples; matrix=false / legacy/pending shown in table, not run
-python tools/example_test_kit.py
-
-# Execute every manifest example except kind=harness
-python tools/example_test_kit.py --all-except-harness
-
-# Runtime-major order
-python tools/example_test_kit.py --curated-only --order runtimes
-
-# Subset
 python tools/example_test_kit.py --only-example calculator --only-runtime micropython
 ```
 
-Results: `.cursor/example_test_results.json`. PyScript headless runs need `playwright` (`pip install playwright && playwright install chromium`).
+## LVGL / timer harnesses
 
----
+| Script | Purpose |
+|--------|---------|
+| [`run_desktop_lv_tests.py`](run_desktop_lv_tests.py) | LVGL desktop executable matrix |
+| [`lv_timer_test_kit.py`](lv_timer_test_kit.py) | Smaller LVGL timer matrix |
+| [`run_test_timers.py`](run_test_timers.py) | multimer backend probes |
+| [`test_timers.py`](test_timers.py) | Host timer probes |
 
-## `convert_md_png_to_pbm.py`
+## Other dev aids
 
-Bulk-converts [Material Design Icons](https://github.com/google/material-design-icons) PNGs to `.pbm` files for `pdwidgets` / `icons/`.
-
-**When to run:** refreshing icon assets.
-
-**Defaults:**
-
-- `dest` → `icons/` in this repository
-- `source` → `~/github/material-design-icons/png` (override with `MATERIAL_DESIGN_ICONS_DIR`)
-
-Clone [material-design-icons](https://github.com/google/material-design-icons) to `~/github/material-design-icons` before running.
-
----
-
-## `typings/`
-
-Vendored MicroPython type stubs for Pylance / IDE support (referenced from `.vscode/settings.json` and excluded from Ruff in `pyproject.toml`). Not a runnable script — update when bumping the MicroPython version you target, not on every source change.
-
----
-
-## Related files outside `tools/`
-
-| File | Role |
-|---|---|
-| `installer.py` | MicroPython installer; reads `packages/*.json` via `repo_install()` |
-| `manifest.py` (repo root) | Frozen-module manifest for firmware builds |
-| `mkdocs.yml` | Wires in `gen_ref_pages.py` for documentation builds |
+| Script | Purpose |
+|--------|---------|
+| [`run_display_teardown_tests.py`](run_display_teardown_tests.py) | Display backend teardown checks |
+| [`test_keypad_*_sim.py`](test_keypad_click_sim.py) | Keypad simulation |
+| [`quit_inject.py`](quit_inject.py) | Inject quit into running examples |
+| [`pydisplay_test_mode.py`](pydisplay_test_mode.py) | Test-mode env for examples |
+| [`typings/`](typings/) | MicroPython type stubs (see `.vscode/settings.json`) |

@@ -30,7 +30,7 @@ One-shot production build (output in `site/`):
 | [`mkdocs.yml`](https://github.com/PyDevices/pydisplay/blob/main/mkdocs.yml) | Site config, theme, navigation |
 | [`docs/requirements.txt`](https://github.com/PyDevices/pydisplay/blob/main/docs/requirements.txt) | Python packages for MkDocs and plugins |
 | [`.readthedocs.yaml`](https://github.com/PyDevices/pydisplay/blob/main/.readthedocs.yaml) | ReadTheDocs build settings (same deps) |
-| [`tools/gen_ref_pages.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/gen_ref_pages.py) | Auto-generates API reference stubs from `src/lib/` and `src/add_ons/` |
+| [`scripts/mkdocs_gen_ref_pages.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/mkdocs_gen_ref_pages.py) | Auto-generates API reference stubs from `src/lib/` and `src/add_ons/` |
 
 Hand-authored pages live under `docs/` and follow a **Try → Quick start → Install → Learn → Reference** structure (see `mkdocs.yml` nav).
 
@@ -48,7 +48,7 @@ It is wired up with three pieces:
 | Piece | Role |
 |-------|------|
 | [`mkdocs-jupyter`](https://github.com/danielfrg/mkdocs-jupyter) (in `docs/requirements.txt`) | Converts `.ipynb` files into MkDocs pages |
-| [`tools/gen_notebook_pages.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/gen_notebook_pages.py) | `mkdocs-gen-files` script that copies the notebook from `src/` into the docs tree at build time (MkDocs only renders files under `docs_dir`) |
+| [`scripts/mkdocs_gen_notebook_pages.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/mkdocs_gen_notebook_pages.py) | `mkdocs-gen-files` script that copies the notebook from `src/` into the docs tree at build time (MkDocs only renders files under `docs_dir`) |
 | [`overrides/main.html`](https://github.com/PyDevices/pydisplay/blob/main/overrides/main.html) | Material theme override that adds a **Download notebook** button (uses `page.nb_url` from `include_source: true`) |
 
 The notebook keeps living in `src/` so it can still be **run** there against the
@@ -64,7 +64,7 @@ interactive touch widget.
     output, run the notebook locally (see
     [Run the notebook interactively](platforms/jupyter-run.md)).
 
-To embed another notebook, add its path to `tools/gen_notebook_pages.py` (or a
+To embed another notebook, add its path to `scripts/mkdocs_gen_notebook_pages.py` (or a
 similar gen-files script), reference the copied path in the `nav:` in `mkdocs.yml`,
 and add it to the `include:` list of the `mkdocs-jupyter` plugin.
 
@@ -146,7 +146,7 @@ In RTD project **Admin** → **Preview documentation from pull requests**, enabl
 |-----|---------|
 | [pydisplay.readthedocs.io](https://pydisplay.readthedocs.io) | Full MkDocs site (Material theme) |
 | [PyDevices.github.io/pydisplay/](https://PyDevices.github.io/pydisplay/) | Landing page with links to docs and demo |
-| [PyDevices.github.io/pydisplay/demo/](https://PyDevices.github.io/pydisplay/demo/) | PyScript calculator / REPL / test pages |
+| [PyDevices.github.io/pydisplay/pyscript/](https://PyDevices.github.io/pydisplay/pyscript/) | PyScript calculator / REPL / test pages |
 
 Pushes to `main` trigger an automatic RTD rebuild and the [deploy-demo workflow](https://github.com/PyDevices/pydisplay/blob/main/.github/workflows/deploy-demo.yml) for GitHub Pages.
 

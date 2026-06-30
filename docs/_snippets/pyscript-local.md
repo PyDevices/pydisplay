@@ -3,7 +3,7 @@ Clone the repo. From the **repository root** (not `src/`):
 ```bash
 ./tools/pyscript.sh calculator
 ./tools/pyscript.sh chango
-./tools/pyscript.sh                    # demo hub (index.html)
+./tools/pyscript.sh                    # gallery (web/pyscript/index.html)
 ./tools/pyscript.sh calculator --no-open
 ```
 
@@ -11,26 +11,26 @@ The script runs [`tools/serve.py`](https://github.com/PyDevices/pydisplay/blob/m
 
 | Page | Command | Purpose |
 |------|---------|---------|
-| Calculator | `./tools/pyscript.sh calculator` | Run one demo by module name |
-| Chango | `./tools/pyscript.sh chango` | Manifest demo (`html/chango.json`) |
-| Hub | `./tools/pyscript.sh` | Links to pages under `html/` |
-| Test runner | open `http://127.0.0.1:8000/html/test.html` | Example picker |
-| REPL | open `http://127.0.0.1:8000/html/repl.html` | REPL + canvas |
-| Editor | open `http://127.0.0.1:8000/html/editor.html` | mpy-editor with `paint.py` |
+| Calculator | `./tools/pyscript.sh calculator` | Run one example by module name |
+| Chango | `./tools/pyscript.sh chango` | Manifest demo (`web/pyscript/chango.json`) |
+| Gallery | `./tools/pyscript.sh` | Example card grid |
+| Test runner | open `http://127.0.0.1:8000/web/pyscript/test.html` | Example picker |
+| REPL | open `http://127.0.0.1:8000/web/pyscript/repl.html` | REPL + canvas |
+| Editor | open `http://127.0.0.1:8000/web/pyscript/editor.html` | mpy-editor with `paint.py` |
 
 Manual URLs (when the server is already running):
 
 | Page | Local URL |
 |------|-----------|
-| Calculator | [127.0.0.1:8000/html/embed.html?modules=calculator](http://127.0.0.1:8000/html/embed.html?modules=calculator) |
+| Calculator | [127.0.0.1:8000/web/pyscript/embed.html?modules=calculator](http://127.0.0.1:8000/web/pyscript/embed.html?modules=calculator) |
 
 After editing files under `src/`, refresh the PyScript file manifest:
 
 ```bash
-./tools/regenerate.sh
+./scripts/install_refresh_manifests.sh
 ```
 
-That updates `html/pyscript.toml`, which mounts `lib/` and `add_ons/` into the browser.
+That updates `web/pyscript/pyscript.toml`, which mounts `lib/` and `add_ons/` into the browser.
 
 !!! tip "Port 8000"
     `mkdocs serve` also defaults to port 8000. Stop one server before starting the other, or pass a different port: `./tools/pyscript.sh calculator -p 8080`.
