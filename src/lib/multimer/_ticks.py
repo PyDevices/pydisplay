@@ -101,16 +101,30 @@ def _tick_polling_timers():
         pass
 
 
+def _tick_native_scheduler():
+    try:
+        import usdl2
+
+        pump_scheduler = getattr(usdl2, "pump_scheduler", None)
+        if pump_scheduler is not None:
+            pump_scheduler(8)
+    except ImportError:
+        pass
+
+
 def sleep_ms(ms):
     if ms <= 0:
         _tick_polling_timers()
+        _tick_native_scheduler()
         return
 
     end = ticks_add(ticks_ms(), ms)
     while True:
         _tick_polling_timers()
+        _tick_native_scheduler()
         delay = ticks_diff(end, ticks_ms())
         if delay <= 0:
             break
         chunk = delay if delay < 10 else 10
         _time_sleep_ms(chunk)
+        _tick_native_scheduler()
