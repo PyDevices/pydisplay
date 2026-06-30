@@ -1,7 +1,12 @@
 # multimer types: queued, sync
 """displaysys_block_test.py"""
 
-from random import choice, getrandbits
+from random import getrandbits
+try:
+    from random import choice
+except ImportError:
+    def choice(seq):
+        return seq[0]
 
 from board_config import broker, display_drv
 from eventsys import poll_quit_discarding_others

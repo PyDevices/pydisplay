@@ -64,7 +64,7 @@ Excluded by design: `keypins_simpletest` (`matrix=false`), `lv_test_timer_harnes
 |---------|------:|----------|
 | **SDLDisplay, ok** | **58** | — |
 | **hang** (quit-injection timeout) | **8** | `boxlines`, `displaysys_simpletest`, `eventsys_encoder_test`, `feathers`, `font_simpletest`, `font_simpletest2`, `font_simpletest3`, `scroll_touch_test_displaybuf` |
-| **import error** | **2** | `displaysys_block_test` (`choice`), `lv_test_timer_async` (`uasyncio`) |
+| **import error** | **1** | `lv_test_timer_async` (`uasyncio`) |
 
 Target **68/68** not met — hangs are poll-loop examples without mp.exe quit path; import errors need shims like other mp.exe fixes.
 
@@ -75,7 +75,7 @@ Target **68/68** not met — hangs are poll-loop examples without mp.exe quit pa
 | `lv_touch_test` | multimer.Timer quit schedule; `pump_lvgl()` guard | `302e975c` |
 | `bmp565_scroll_sprite` | manifest `timeout_s = 70` | `302e975c` |
 | `apollo`, `calculator`, `eventsys_simpletest`, `paint`, `pydisplay_demo_async` | `dual_main()` sync fallbacks | `82c3ab4a` |
-| `bmp565_sprite`, `bmp565_sprite_transparent`, `testris` | example-local `choice` shim | `82c3ab4a` |
+| `bmp565_sprite`, `bmp565_sprite_transparent`, `testris`, `displaysys_block_test` | example-local `choice` shim | `82c3ab4a` / follow-up |
 | `console_advanced_demo` | test-mode `run_forever` + `broker.poll()` quit; manifest `kind=loop` | `97aab56e` |
 
 **Target after mp.exe fixes:** **68/68** on all desktop runtimes.
@@ -156,7 +156,7 @@ Results: `.cursor/example_test_results.json`, `/tmp/jupyter_run_postfix.log`
 
 - [ ] **Push** `70677fa5` + follow-up commits to `origin/examples-post-refactor`
 - [ ] **mp.exe hang fixes** — poll-loop quit injection for 8 examples (see §4)
-- [ ] **mp.exe import shims** — `displaysys_block_test` (`choice`), `lv_test_timer_async` (`uasyncio`)
+- [ ] **mp.exe import shims** — `lv_test_timer_async` (`uasyncio`)
 - [ ] **Follow-up PR to main** for post-#39 stack through `70677fa5`
 
 ---
