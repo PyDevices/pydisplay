@@ -30,6 +30,7 @@ Options:
 
 Environment:
   MICROPYTHON_LIB_DIR   micropython-lib checkout (default: ~/github/micropython-lib)
+  PYDISPLAY_VERSION     Package version (overrides scripts/VERSION file)
   TESTPYPI_API_TOKEN    TestPyPI token for twine (when not using --skip-pypi)
 
 Without --commit-message, prompts interactively when stdin is a TTY.
@@ -66,14 +67,28 @@ if [[ -z "$COMMIT_MESSAGE" ]] && [[ -t 0 ]]; then
     INTERACTIVE_COMMIT=1
 fi
 
-VERSION=0.0.3
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SOURCE_REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
+VERSION_FILE="$SCRIPT_DIR/VERSION"
+
+if [[ -n "${PYDISPLAY_VERSION:-}" ]]; then
+    VERSION="$PYDISPLAY_VERSION"
+elif [[ -f "$VERSION_FILE" ]]; then
+    VERSION="$(tr -d '[:space:]' < "$VERSION_FILE")"
+else
+    echo "Error: set PYDISPLAY_VERSION or create $VERSION_FILE" >&2
+    exit 1
+fi
+if [[ -z "$VERSION" ]]; then
+    echo "Error: VERSION is empty ($VERSION_FILE)" >&2
+    exit 1
+fi
+
 DESCRIPTION_PREFIX="PyDisplay"
 AUTHOR="Brad Barnett <contact@pydevices.com>"
 LICENSE="MIT"
 
 BASENAME=pydisplay
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SOURCE_REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
 DEST_REPO="${MICROPYTHON_LIB_DIR:-$HOME/github/micropython-lib}"
 SOURCE_DIR=$SOURCE_REPO/src
 DEST_DIR=$DEST_REPO/micropython/$BASENAME
@@ -99,6 +114,15 @@ should_skip_name() {
     case "$1" in
         __pycache__ | .git | .mypy_cache | .ruff_cache) return 0 ;;
         *) return 1 ;;
+    esac
+}
+
+# MIP package names (eventsys, graphics, …) may differ from PyPI project names.
+# TestPyPI rejects sdists for names already registered on pypi.org (e.g. graphics).
+pypi_publish_name() {
+    case "$1" in
+        graphics) echo "pydisplay-graphics" ;;
+        *) echo "$1" ;;
     esac
 }
 
@@ -145,9 +169,9 @@ build_and_upload_pypi() {
     hatch build
     if [[ -n "${TESTPYPI_API_TOKEN:-}" ]]; then
         TWINE_USERNAME=__token__ TWINE_PASSWORD="$TESTPYPI_API_TOKEN" \
-            twine upload --repository testpypi dist/*
+            twine upload --repository testpypi --verbose dist/*
     else
-        twine upload --repository testpypi dist/*
+        twine upload --repository testpypi --verbose dist/*
     fi
 }
 
@@ -180,7 +204,7 @@ metadata(
     version="$VERSION",
     author="$AUTHOR",
     license="$LICENSE",
-    pypi_publish="$package",
+    pypi_publish="$(pypi_publish_name "$package")",
 )
 package("$package")
 EOF
@@ -219,7 +243,7 @@ metadata(
     version="$VERSION",
     author="$AUTHOR",
     license="$LICENSE",
-    pypi_publish="$package",
+    pypi_publish="$(pypi_publish_name "$package")",
 )
 package("displaysys")
 EOF
@@ -239,7 +263,7 @@ metadata(
     version="$VERSION",
     author="$AUTHOR",
     license="$LICENSE",
-    pypi_publish="$package",
+    pypi_publish="$(pypi_publish_name "$package")",
 )
 require("displaysys")
 package("displaysys")

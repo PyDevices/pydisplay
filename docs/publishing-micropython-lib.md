@@ -31,7 +31,7 @@ User-facing install docs: [micropython-lib MIP](installation/mip-micropython-lib
    | `MICROPYTHON_LIB_DEPLOY_TOKEN` | yes | PAT with **Contents: read/write** on `PyDevices/micropython-lib` |
    | `TESTPYPI_API_TOKEN` | no | TestPyPI upload when “Upload TestPyPI wheels” is enabled |
 
-3. **Optional: bump version** in [`scripts/publish_micropython_lib.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_micropython_lib.sh) (`VERSION=` near the top). That version is written into micropython-lib `manifest.py` files and affects MIP package versions.
+3. **Optional: bump version** in [`scripts/VERSION`](https://github.com/PyDevices/pydisplay/blob/main/scripts/VERSION) (or set `PYDISPLAY_VERSION` for one-off runs). That version is written into micropython-lib `manifest.py` files and affects MIP package versions.
 
 4. **CI green on `main`** — Manifest freshness and Unit tests should pass. Personal example symlinks (`frogger`, `spotapi`, `spotify_remote`, …) are excluded from automation via [`scripts/personal_examples.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/personal_examples.py).
 
@@ -134,7 +134,7 @@ TestPyPI is for **CPython testing**, not MicroPython on hardware.
 
 **Release with desktop wheels:**
 
-1. Bump `VERSION` in `publish_micropython_lib.sh` if needed
+1. Bump `scripts/VERSION` if needed
 2. Run with **Upload TestPyPI wheels on**
 3. Confirm packages on test.pypi.org
 
@@ -176,8 +176,9 @@ Script options: `./scripts/publish_micropython_lib.sh --help`
 
 | Issue | What to do |
 |--------|------------|
-| Version already exists | Bump `VERSION` in `publish_micropython_lib.sh` — TestPyPI rejects duplicate versions |
-| Upload fails mid-run | micropython-lib may already be committed; fix token/version and re-run |
+| Version already exists | Bump `scripts/VERSION` — TestPyPI rejects duplicate versions |
+| Upload fails mid-run | Partial TestPyPI uploads may succeed before the error; bump `VERSION` and re-run |
+| `graphics` sdist 400 | Name is taken on [pypi.org/project/graphics](https://pypi.org/project/graphics); PyPI project is `pydisplay-graphics` (MIP name stays `graphics`) |
 | Slow | Normal — each lib package gets hatch build + twine upload |
 | Not for devices | Boards use the **MIP index**, not TestPyPI |
 
@@ -190,6 +191,7 @@ Script options: `./scripts/publish_micropython_lib.sh --help`
 | `Resource not accessible` / 403 on checkout | Missing or wrong `MICROPYTHON_LIB_DEPLOY_TOKEN` |
 | Push to `PyDevices` fails | PAT lacks write access or SSO not authorized for PyDevices |
 | TestPyPI 403 | Bad `TESTPYPI_API_TOKEN` |
+| TestPyPI 400 on sdist (wheel OK) | PyPI project name taken on pypi.org — add a mapping in `pypi_publish_name()` in `publish_micropython_lib.sh` |
 | MIP compile error | Bad `manifest.py` in micropython-lib — see job log for package path |
 | `No changes to commit` | Sources already match; MIP step may still run if enabled |
 
