@@ -31,7 +31,10 @@ toml_exclude = ["examples"]
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
 SKIP_FILE_SUFFIXES = {".pyc", ".pyo"}
 # Local upstream checkouts (gitignored) — never list in mip manifests.
-PACKAGE_SKIP_DIRS = {"add_ons": {"gui"}}
+PACKAGE_SKIP_DIRS = {
+    "add_ons": {"gui"},
+    "examples": {"frogger", "spotapi", "spotify_remote"},
+}
 
 # Dest paths omitted from sim/wokwi/pydisplay-bundle.json (derived from packages/pydisplay-bundle.json).
 WOKWI_BUNDLE_EXCLUDE_DESTS = {
