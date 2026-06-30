@@ -46,3 +46,5 @@ python scripts/pyscript_gen_packages.py --check    # CI freshness
 `manifestfile.py` is a shared library for the publish scripts (not prefixed).
 
 Manual packages (not generated): `packages/i80bus.json`, `packages/spibus.json`.
+
+Personal-only example symlinks under `src/examples/` (`frogger`, `spotapi`, `spotify_remote`, …) are listed in [`personal_examples.py`](personal_examples.py) and excluded from `install_gen_manifests`, `pyscript_gen_packages`, and CI.

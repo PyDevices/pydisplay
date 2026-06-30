@@ -18,7 +18,7 @@ Optional headers (first 10 lines):
   - ``# pyscript binaries:`` — non-``.py`` assets; example is excluded from the
     browser gallery when any path has a binary suffix
   - ``# pyscript skip:`` — ``examples/``-relative ``.py`` paths or directories
-    omitted from package auto-discovery (e.g. ``frogger/dev`` skips all ``.py``
+    omitted from package auto-discovery (e.g. ``my_pkg/dev`` skips all ``.py``
     files under that tree); the token ``gallery`` excludes the example from the
     browser card grid (multimer tag unchanged)
   - ``# pyscript modules:`` — extra ``examples/``-relative ``.py`` paths for
@@ -47,6 +47,11 @@ from pathlib import Path
 import re
 import shutil
 import sys
+
+_scripts = Path(__file__).resolve().parent
+if str(_scripts) not in sys.path:
+    sys.path.insert(0, str(_scripts))
+from personal_examples import PERSONAL_EXAMPLE_DIRS  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES_DIR = REPO_ROOT / "src" / "examples"
@@ -93,11 +98,6 @@ CURATED: dict[str, dict] = {
         "blurb": "An Apollo Guidance Computer DSKY emulator rendered from a BMP565 sprite sheet, with a live clock.",
         "experimental": True,
         "icon": "rocket",
-    },
-    "frogger": {
-        "title": "Frogger",
-        "blurb": "Classic Frogger at 640x480 — arrow keys and touch d-pad, async multimer loop.",
-        "icon": "shapes",
     },
     "lv_test_timer_async": {
         "title": "LVGL Timer (async)",
@@ -394,16 +394,30 @@ def parse_example(path: Path) -> Example | None:
     return ex
 
 
+def _is_personal_example(path: Path) -> bool:
+    try:
+        rel = path.relative_to(EXAMPLES_DIR)
+    except ValueError:
+        return False
+    return bool(rel.parts) and rel.parts[0] in PERSONAL_EXAMPLE_DIRS
+
+
 def example_py_files() -> list[Path]:
-    """All ``*.py`` under ``src/examples/``, including symlinked trees (e.g. frogger)."""
+    """All ``*.py`` under ``src/examples/``, excluding personal symlink trees."""
     paths: list[Path] = []
     seen: set[str] = set()
     for path in sorted(EXAMPLES_DIR.rglob("*.py")):
+        if _is_personal_example(path):
+            continue
         paths.append(path)
         seen.add(str(path))
     for child in sorted(EXAMPLES_DIR.iterdir()):
+        if child.name in PERSONAL_EXAMPLE_DIRS:
+            continue
         if child.is_symlink():
             for path in sorted(child.rglob("*.py")):
+                if _is_personal_example(path):
+                    continue
                 key = str(path)
                 if key not in seen:
                     paths.append(path)

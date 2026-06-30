@@ -2,6 +2,13 @@
 
 import json
 import os
+from pathlib import Path
+import sys
+
+_scripts = Path(__file__).resolve().parent
+if str(_scripts) not in sys.path:
+    sys.path.insert(0, str(_scripts))
+from personal_examples import PERSONAL_EXAMPLE_DIRS  # noqa: E402
 
 # Define constants
 package_ver = "0.0.1"
@@ -33,7 +40,7 @@ SKIP_FILE_SUFFIXES = {".pyc", ".pyo"}
 # Local upstream checkouts (gitignored) — never list in mip manifests.
 PACKAGE_SKIP_DIRS = {
     "add_ons": {"gui"},
-    "examples": {"frogger", "spotapi", "spotify_remote"},
+    "examples": set(PERSONAL_EXAMPLE_DIRS),
 }
 
 # Dest paths omitted from sim/wokwi/pydisplay-bundle.json (derived from packages/pydisplay-bundle.json).
