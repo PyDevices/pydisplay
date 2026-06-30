@@ -4,22 +4,41 @@
 """asyncio/uasyncio Timer and helpers for multimer."""
 
 try:
-    import uasyncio as asyncio
-except ImportError:
-    try:
-        import asyncio
-    except ImportError:
-        asyncio = None
-
-try:
     import pyscript
 except ImportError:
     pyscript = None
 
-if asyncio is not None and not hasattr(asyncio, "create_task"):
-    asyncio = None
 
-from ._timerbase import _TimerBase
+def _load_asyncio():
+    try:
+        import uasyncio as aio
+
+        if hasattr(aio, "create_task"):
+            return aio
+    except ImportError:
+        pass
+    try:
+        import asyncio as aio
+
+        if hasattr(aio, "create_task"):
+            return aio
+    except ImportError:
+        pass
+    try:
+        import _asyncio  # noqa: F401
+    except ImportError:
+        return None
+    try:
+        from . import _mpasyncio as aio
+
+        return aio
+    except ImportError:
+        return None
+
+
+asyncio = _load_asyncio()
+
+from ._timerbase import _TimerBase  # noqa: E402
 
 _background_tasks = set()
 
