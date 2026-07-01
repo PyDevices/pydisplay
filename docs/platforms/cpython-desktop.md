@@ -45,7 +45,7 @@ SDL2 native libraries can be awkward on Windows. Recommended path:
 2. Use **PGDisplay** (PyGame) instead of SDL2 — see below.
 3. Or develop in **WSL** with the Linux instructions above.
 
-On Windows and macOS, default **`multimer.Timer`** uses a background thread (not SDL timers). Call **`pump()`** in your main loop so timer callbacks run on the main thread — see [multimer](../concepts/multimer.md). When CPython falls back to the **`multimer._sdl2`** backend, it imports timer APIs from **`usdl2`** first when available, then ctypes against system libSDL2.
+On Windows and macOS, default **`multimer.Timer`** uses **`_win32`** (APC, no pump) when available, otherwise a background thread. Call **`pump()`** only when **`needs_pump()`** is true (thread/SDL/polling backends). When CPython falls back to the **`multimer._sdl2`** backend, it imports timer APIs from **`usdl2`** first when available, then ctypes against system libSDL2.
 
 ## PGDisplay fallback
 

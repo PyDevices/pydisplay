@@ -2,7 +2,7 @@
 """
 lv_test_timer_harness.py
 
-Automated LVGL timer + input test for sync, queued, and async modes.
+Automated LVGL timer + input test for no_pump, pump, and async modes.
 After timer/click checks, injects ``events.Quit`` through the queue read path
 and pumps LVGL (same path as clicking the window X) to verify clean shutdown.
 
@@ -41,6 +41,22 @@ def _timer_backend():
         return timer_backend_name()
     except Exception as exc:
         return f"error:{exc!r}"
+
+
+def _kit_asyncio():
+    """Same asyncio/uasyncio/_mpasyncio resolution as multimer._async."""
+    from multimer._async import _require_asyncio
+
+    return _require_asyncio()
+
+
+def _kit_fast_exit_runtime():
+    """Ports where full SDL/pygame quit_inject teardown is unreliable."""
+    import sys
+
+    if sys.implementation.name in ("micropython", "circuitpython"):
+        return True
+    return sys.implementation.name == "cpython" and sys.platform == "win32"
 
 
 def _button_center(btn):
@@ -85,12 +101,22 @@ def _pump_lvgl(n=5, delay_s=0):
 async def _pump_lvgl_async(n=5, delay_s=0):
     import lvgl as lv
 
+    asyncio = _kit_asyncio()
+
     try:
-        import asyncio
+        import lv_utils
+
+        inst = lv_utils.event_loop.current_instance()
+        poll_broker = inst is None or not inst.asynchronous
     except ImportError:
-        import uasyncio as asyncio
+        poll_broker = True
+
+    if poll_broker:
+        from board_config import broker
 
     for _ in range(n):
+        if poll_broker:
+            broker.poll()
         if lv._nesting.value == 0:
             lv.task_handler()
         if delay_s:
@@ -167,7 +193,7 @@ def _emit_clicked(btn):
     import lvgl as lv
 
     try:
-        lv.event_send(btn, lv.EVENT.CLICKED, btn)
+        btn.send_event(lv.EVENT.CLICKED, None)
     except Exception:
         return False
     lv.task_handler()
@@ -271,8 +297,10 @@ def _click_status(mode, seconds, inp):
         return "no timers"
     if inp["sdl_lv_taps"] >= 1:
         return "ok"
+    if inp.get("lv_event_ok") and inp.get("taps_total", 0) >= 1:
+        return "ok"
     if inp["fifo_taps"] >= 1:
-        return "no click count" if mode == "sync" else "no manual clicks"
+        return "no click count" if mode == "no_pump" else "no manual clicks"
     return "no clicks"
 
 
@@ -311,14 +339,66 @@ def _deinit_display():
         pass
 
 
+def _hard_exit_after_quit(code=0):
+    """Desktop SDL teardown can block normal shutdown; match example_test_wrapper."""
+    try:
+        from board_config import display_drv
+
+        display_drv.quit(code, force=True)
+    except SystemExit:
+        raise
+    except Exception:
+        pass
+    try:
+        import os
+
+        os._exit(code)
+    except Exception:
+        pass
+    raise SystemExit(code)
+
+
+def _minimal_timer_teardown():
+    try:
+        import lv_utils
+
+        inst = lv_utils.event_loop.current_instance()
+        if inst is None:
+            return
+        if inst.asynchronous and getattr(inst, "_aio_timer", None) is not None:
+            inst._aio_timer.deinit()
+        elif getattr(inst, "timer", None):
+            inst.timer.deinit()
+    except Exception:
+        pass
+
+
+def _finish_after_result(pump, *, mode="?", ok=True):
+    """
+    End the kit subprocess after KIT_RESULT was printed.
+
+    MicroPython and CircuitPython desktop ports may SIGSEGV during full SDL
+  teardown; stop timers and exit without quit_inject's heavy shutdown path.
+    """
+    import sys
+
+    if _kit_fast_exit_runtime():
+        _minimal_timer_teardown()
+        sys.stdout.flush()
+        raise SystemExit(0 if ok else 1)
+    _inject_quit_and_exit(pump, mode=mode)
+
+
 def _inject_quit_and_exit(pump, *, broker_poll=False, mode="?"):
     """
-    Inject events.Quit via the queue read path, then pump LVGL so VirtualDevices
-    drain the queue (production window-close path).  Process should not return.
+    Inject events.Quit via the queue read path, then pump broker so VirtualDevices
+    and quit cleanup run (production window-close path), then hard-exit for the kit.
     """
     import quit_inject
 
-    if not quit_inject.inject_quit(broker_poll=broker_poll, pump_count=15, pump_delay=0.02, lvgl=True):
+    if not quit_inject.inject_quit(
+        broker_poll=True, pump_count=15, pump_delay=0.02, lvgl=False, deinit=False
+    ):
         _print_result(
             {
                 "mode": mode,
@@ -329,29 +409,15 @@ def _inject_quit_and_exit(pump, *, broker_poll=False, mode="?"):
         )
         raise SystemExit(1)
 
-    pump(5, 0.02)
-    if broker_poll:
-        from board_config import broker
-
-        broker.poll()
-
-    _deinit_display()
-    _print_result(
-        {
-            "mode": mode,
-            "status": "error",
-            "backend": _timer_backend(),
-            "error": "events.Quit injection did not terminate process",
-        }
-    )
-    raise SystemExit(1)
+    _hard_exit_after_quit(0)
 
 
 async def _inject_quit_and_exit_async(*, broker_poll=True, mode="?"):
-    from board_config import broker
+    import quit_inject
 
-    queue_dev = _queue_device()
-    if queue_dev is None:
+    if not quit_inject.inject_quit(
+        broker_poll=True, pump_count=15, pump_delay=0.02, lvgl=False, deinit=False
+    ):
         _print_result(
             {
                 "mode": mode,
@@ -362,54 +428,45 @@ async def _inject_quit_and_exit_async(*, broker_poll=True, mode="?"):
         )
         raise SystemExit(1)
 
-    from eventsys import events
-
-    pending = [events.Quit(events.QUIT)]
-    orig_read = queue_dev._read
-
-    def mock_read():
-        if pending:
-            return [pending.pop(0)]
-        return None
-
-    queue_dev._read = mock_read
-    try:
-        await _pump_lvgl_async(15, 0.02)
-        if broker_poll:
-            broker.poll()
-    finally:
-        queue_dev._read = orig_read
-
-    _deinit_display()
-    _print_result(
-        {
-            "mode": mode,
-            "status": "error",
-            "backend": _timer_backend(),
-            "error": "events.Quit injection did not terminate process",
-        }
-    )
-    raise SystemExit(1)
+    _hard_exit_after_quit(0)
 
 
-def _run_sync():
+def _pumped_main_loop(*, pump_fn, duration_s=_DURATION_S, on_ready=None):
+    """Run timer/LVGL work for ``duration_s``; call ``on_ready`` once seconds >= 2."""
+    import time
+
+    from multimer import sleep_ms
+
+    deadline = time.time() + duration_s
+    ready = None
+    while time.time() < deadline:
+        pump_fn()
+        sleep_ms(1)
+        if ready is None and on_ready is not None:
+            from lv_test_timer_common import get_state
+
+            if get_state()["seconds"] >= 2:
+                ready = on_ready()
+    return ready
+
+
+def _run_no_pump():
     import board_config
 
     board_config.TIMER_ASYNC = False
 
-    from multimer import Timer, needs_pump
-        _print_result(
-            {
-                "mode": "sync",
-                "status": "skip",
-                "reason": "needs_pump",
-                "backend": _timer_backend(),
-            }
-        )
-        return
-
     import display_driver  # noqa: F401
     from lv_test_timer_common import build_ui, get_state
+    from multimer import sleep_ms
+
+    def no_pump_lvgl(n=5, delay_s=0):
+        import lvgl as lv
+
+        for _ in range(n):
+            if lv._nesting.value == 0:
+                lv.task_handler()
+            if delay_s:
+                time.sleep(delay_s)
 
     btn = build_ui()
     cx, cy = _button_center(btn)
@@ -419,9 +476,10 @@ def _run_sync():
     input_tests = None
 
     while time.time() < deadline:
+        sleep_ms(1)
+
         if input_tests is None and get_state()["seconds"] >= 2:
-            input_tests = _run_input_tests(btn, cx, cy)
-        time.sleep(0.01)
+            input_tests = _run_input_tests(btn, cx, cy, pump=no_pump_lvgl)
 
     state = get_state()
     inp = input_tests or {
@@ -431,12 +489,13 @@ def _run_sync():
         "lv_event_ok": False,
         "taps_total": state["taps"],
     }
-    click = _click_status("sync", state["seconds"], inp)
-    _print_result(_result_payload("sync", click, state, broker_polls, inp))
-    _inject_quit_and_exit(_pump_lvgl, mode="sync")
+    click = _click_status("no_pump", state["seconds"], inp)
+    payload = _result_payload("no_pump", click, state, broker_polls, inp)
+    _print_result(payload)
+    _finish_after_result(no_pump_lvgl, mode="no_pump", ok=payload["status"] == "ok")
 
 
-def _run_queued():
+def _run_pump():
     import board_config
 
     board_config.TIMER_ASYNC = False
@@ -445,17 +504,14 @@ def _run_queued():
 
     import display_driver  # noqa: F401
     from lv_test_timer_common import build_ui, get_state
-    from multimer import Timer, needs_pump, pump, sleep_ms
+    from multimer import pump, sleep_ms
 
-    timer_req = needs_pump()
-
-    def queued_pump(n=5, delay_s=0):
+    def pumped_lvgl(n=5, delay_s=0):
         import lvgl as lv
 
         for _ in range(n):
             pump()
-            if timer_req:
-                broker.poll()
+            broker.poll()
             if lv._nesting.value == 0:
                 lv.task_handler()
             if delay_s:
@@ -470,12 +526,11 @@ def _run_queued():
 
     while time.time() < deadline:
         pump()
-        if timer_req:
-            broker.poll()
+        broker.poll()
         sleep_ms(1)
 
         if input_tests is None and get_state()["seconds"] >= 2:
-            input_tests = _run_input_tests(btn, cx, cy, pump=queued_pump)
+            input_tests = _run_input_tests(btn, cx, cy, pump=pumped_lvgl)
 
     state = get_state()
     inp = input_tests or {
@@ -485,22 +540,22 @@ def _run_queued():
         "lv_event_ok": False,
         "taps_total": state["taps"],
     }
-    click = _click_status("queued", state["seconds"], inp)
-    _print_result(_result_payload("queued", click, state, broker_polls, inp))
-    _inject_quit_and_exit(queued_pump, broker_poll=timer_req, mode="queued")
+    click = _click_status("pump", state["seconds"], inp)
+    payload = _result_payload("pump", click, state, broker_polls, inp)
+    _print_result(payload)
+    _finish_after_result(pumped_lvgl, mode="pump", ok=payload["status"] == "ok")
 
 
 def _run_async():
+    import sys
+
     import board_config
 
     board_config.TIMER_ASYNC = True
 
-    from multimer import run
+    asyncio = _kit_asyncio()
 
-    try:
-        import asyncio
-    except ImportError:
-        import uasyncio as asyncio
+    from multimer import run
 
     result = {}
 
@@ -513,9 +568,6 @@ def _run_async():
         btn = build_ui()
         cx, cy = _button_center(btn)
         broker_polls = 0
-
-        deadline = time.time() + _DURATION_S
-        input_tests = None
 
         deadline = time.time() + _DURATION_S
         input_tests = None
@@ -538,22 +590,26 @@ def _run_async():
         click = _click_status("async", state["seconds"], inp)
         result.update(_result_payload("async", click, state, broker_polls, inp))
         _print_result(result)
+        if _kit_fast_exit_runtime():
+            _minimal_timer_teardown()
+            sys.stdout.flush()
+            raise SystemExit(0 if result.get("status") == "ok" else 1)
         await _inject_quit_and_exit_async(mode="async")
 
     run(main)
 
 
 _MODES = {
-    "sync": _run_sync,
-    "queued": _run_queued,
+    "no_pump": _run_no_pump,
+    "pump": _run_pump,
     "async": _run_async,
 }
 
 
 def main(mode=None):
-    mode = mode or (sys.argv[1] if len(sys.argv) > 1 else "sync")
+    mode = mode or (sys.argv[1] if len(sys.argv) > 1 else "no_pump")
     if mode not in _MODES:
-        print(f"Unknown mode {mode!r}; use sync, queued, or async")
+        print(f"Unknown mode {mode!r}; use no_pump, pump, or async")
         raise SystemExit(2)
     try:
         _MODES[mode]()

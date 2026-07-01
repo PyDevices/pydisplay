@@ -44,8 +44,8 @@ python tools/example_test_kit.py --only-example calculator --only-runtime microp
 
 | Script | Purpose |
 |--------|---------|
-| [`run_desktop_lv_tests.py`](run_desktop_lv_tests.py) | LVGL desktop executable matrix |
-| [`lv_timer_test_kit.py`](lv_timer_test_kit.py) | Smaller LVGL timer matrix |
+| [`run_desktop_lv_tests.py`](run_desktop_lv_tests.py) | LVGL desktop matrix (pump/async, strict clicks) |
+| [`lv_timer_test_kit.py`](lv_timer_test_kit.py) | Full LVGL timer matrix (no_pump/pump/async, all runtimes) |
 | [`run_test_timers.py`](run_test_timers.py) | multimer backend probes |
 | [`test_timers.py`](test_timers.py) | Host timer probes |
 

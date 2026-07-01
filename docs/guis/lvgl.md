@@ -75,8 +75,8 @@ Three scripts share the same UI via `lv_test_timer_common.build_ui()` and differ
 
 | Script | When to run |
 |--------|-------------|
-| [`lv_test_timer_sync.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_sync.py) | MCU, MP-unix, CPython Linux — no main loop; **exits** on queued-only platforms |
-| [`lv_test_timer_queued.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_queued.py) | CPython Win/mac — `pump()` drain loop only |
+| [`lv_test_timer_no_pump.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_no_pump.py) | MCU, MP-unix, CPython Linux — no main loop; **hangs** on pump-required platforms |
+| [`lv_test_timer_pump.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_pump.py) | CPython Win/mac — `pump()` drain loop only |
 | [`lv_test_timer_async.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_async.py) | PyScript / asyncio — `TIMER_ASYNC = True`, deferred `import display_driver`, `await asyncio.sleep(0)` loop |
 
 The shared UI ([`lv_test_timer_common.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_common.py)) shows autodetected **runtime**, **OS**, **display** driver class, **timer** backend, and **LVGL** version.
@@ -87,15 +87,15 @@ The shared UI ([`lv_test_timer_common.py`](https://github.com/PyDevices/pydispla
 
 ```bash
 cd src
-micropython examples/lv_test_timer_harness.py queued
+micropython examples/lv_test_timer_harness.py pump
 .venv/bin/python examples/lv_test_timer_harness.py async
 ```
 
-Modes: `sync`, `queued`, `async`.
+Modes: `no_pump`, `pump`, `async`.
 
 ### Desktop test suite
 
-[`tools/run_desktop_lv_tests.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/run_desktop_lv_tests.py) runs the harness across **five desktop Python+LVGL executables** in sequence (nine subprocess runs total — `queued` and `async` per runtime; **async is omitted on MicroPython Windows** because that port has no asyncio).
+[`tools/run_desktop_lv_tests.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/run_desktop_lv_tests.py) runs the harness across **five desktop Python+LVGL executables** in sequence (ten subprocess runs total — `pump` and `async` per runtime; **async is omitted on MicroPython Windows** because that port has no asyncio).
 
 | Executable | How resolved |
 |------------|--------------|
@@ -122,12 +122,17 @@ From `src/`:
 
 The script prints a summary table (`queued` / `async` columns) and writes full results to `.cursor/desktop_lv_test_results.json`. Exit code **1** if any run hangs, crashes, fails timers, or fails click checks (strict policy).
 
-For a smaller **3×3 matrix** (micropython, circuitpython, cpython-venv × sync/queued/async), use [`tools/lv_timer_test_kit.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/lv_timer_test_kit.py):
+For the full desktop matrix (micropython, circuitpython, cpython-venv, micropython.exe, python.exe × sync/queued/async), use [`tools/lv_timer_test_kit.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/lv_timer_test_kit.py):
 
 ```bash
 python tools/lv_timer_test_kit.py
-python tools/lv_timer_test_kit.py --only cpython queued async
+python tools/lv_timer_test_kit.py --only python.exe sync
+python tools/lv_timer_test_kit.py --only cpython-venv --modes queued async
 ```
+
+On Windows, **sync** uses the default **`multimer._win32`** backend (`needs_pump()` is false); the table shows the timer backend in each cell (e.g. `_win32, ok`).
+
+[`tools/run_desktop_lv_tests.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/run_desktop_lv_tests.py) is a shorter wrapper: same runtimes, **queued** and **async** only, with strict click checks.
 
 ## Next
 

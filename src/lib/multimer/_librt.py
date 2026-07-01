@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: MIT
 """
-POSIX librt Timer for Linux.
+Linux librt Timer (``timer_create`` / ``timer_settime``).
 
 Uses ctypes on CPython and ffi/uctypes on MicroPython unix.  Timer signals are
 delivered to the thread that created the timer (the main thread), so callbacks
@@ -13,7 +13,7 @@ run without ``pump()``.
 import sys
 
 if sys.platform != "linux":
-    raise ImportError("POSIX timer backend requires Linux")
+    raise ImportError("librt timer backend requires Linux")
 
 from ._timerbase import _TimerBase
 
@@ -69,7 +69,7 @@ if _USE_CTYPES:
             ("sigev_notify_thread_id", ctypes.c_int),
         ]
 
-    def _posix_error(name, ret):
+    def _librt_error(name, ret):
         if ret != 0:
             raise RuntimeError(f"{name} failed (errno={ctypes.get_errno()})")
 
@@ -116,7 +116,7 @@ else:
         librt = libc
 
     _timer_create_ = librt.func("i", "timer_create", "ipp")
-    _timer_delete_ = librt.func("i", "timer_delete", "i")
+    _timer_delete_ = librt.func("i", "timer_delete", "P")
     _timer_settime_ = librt.func("i", "timer_settime", "PiPp")
     _sigaction_ = libc.func("i", "sigaction", "iPp")
 
@@ -159,7 +159,7 @@ else:
         buf = bytearray(uctypes.sizeof(desc))
         return uctypes.struct(uctypes.addressof(buf), desc, uctypes.NATIVE)
 
-    def _posix_error(name, ret):
+    def _librt_error(name, ret):
         if ret != 0:
             raise RuntimeError(f"{name} failed (errno={os.errno()})")
 
@@ -173,7 +173,7 @@ def _timer_create(sig_id):
         sev = _sigevent()
         _apply_sigevent(sev, signo)
         timerid = ctypes.c_void_p()
-        _posix_error(
+        _librt_error(
             "timer_create",
             librt.timer_create(_CLOCK_MONOTONIC, ctypes.byref(sev), ctypes.byref(timerid)),
         )
@@ -182,7 +182,7 @@ def _timer_create(sig_id):
     sev = _uctypes_struct(_sigevent_t)
     _apply_sigevent(sev, signo)
     timerid = array.array("P", [0])
-    _posix_error("timer_create", _timer_create_(_CLOCK_MONOTONIC, sev, timerid))
+    _librt_error("timer_create", _timer_create_(_CLOCK_MONOTONIC, sev, timerid))
     return timerid[0]
 
 
@@ -191,10 +191,10 @@ def _timer_settime(tid, period_ms, periodic):
     spec = _itimerspec() if _USE_CTYPES else _uctypes_struct(_itimerspec_t)
     _apply_period(spec, period_sec, period_ns, periodic)
     if _USE_CTYPES:
-        _posix_error("timer_settime", librt.timer_settime(tid, 0, ctypes.byref(spec), None))
+        _librt_error("timer_settime", librt.timer_settime(tid, 0, ctypes.byref(spec), None))
     else:
         old = _uctypes_struct(_itimerspec_t)
-        _posix_error("timer_settime", _timer_settime_(tid, 0, spec, old))
+        _librt_error("timer_settime", _timer_settime_(tid, 0, spec, old))
 
 
 def _timer_disarm(tid):
@@ -203,9 +203,9 @@ def _timer_disarm(tid):
 
 def _timer_delete(tid):
     if _USE_CTYPES:
-        _posix_error("timer_delete", librt.timer_delete(tid))
+        _librt_error("timer_delete", librt.timer_delete(tid))
     else:
-        _posix_error("timer_delete", _timer_delete_(tid))
+        _librt_error("timer_delete", _timer_delete_(tid))
 
 
 def _install_signal(signum, handler):
@@ -217,7 +217,7 @@ def _install_signal(signum, handler):
     sa_old = _uctypes_struct(_sigaction_t)
     cb = ffi.callback("v", handler, "i", lock=True)
     sa.sa_handler = cb.cfun()
-    _posix_error("sigaction", _sigaction_(signum, sa, sa_old))
+    _librt_error("sigaction", _sigaction_(signum, sa, sa_old))
     return cb
 
 
@@ -228,14 +228,15 @@ def _remove_signal(signum):
 
     sa = _uctypes_struct(_sigaction_t)
     sa_old = _uctypes_struct(_sigaction_t)
-    sa.sa_handler = 0
+    # SIG_IGN — absorb any pending RT signal after timer_delete (not SIG_DFL).
+    sa.sa_handler = 1
     _sigaction_(signum, sa, sa_old)
 
 
 class Timer(_TimerBase):
-    """POSIX librt Timer (Linux)."""
+    """Linux librt Timer (timer_create)."""
 
-    BACKEND = "posix"
+    BACKEND = "librt"
     NEEDS_PUMP = False
 
     def _start(self):
@@ -252,7 +253,7 @@ class Timer(_TimerBase):
 
     def _stop(self):
         signum = _SIGRTMIN + (self.id if self.id != -1 else 0xF)
-        if self._timer:
+        if self._timer is not None:
             _timer_disarm(self._timer)
             _timer_delete(self._timer)
             self._timer = None

@@ -149,12 +149,12 @@
       "github:PyDevices/pydisplay/src/examples/lv_test_timer_harness.py"
     ],
     [
-      "lv_test_timer_queued.py",
-      "github:PyDevices/pydisplay/src/examples/lv_test_timer_queued.py"
+      "lv_test_timer_no_pump.py",
+      "github:PyDevices/pydisplay/src/examples/lv_test_timer_no_pump.py"
     ],
     [
-      "lv_test_timer_sync.py",
-      "github:PyDevices/pydisplay/src/examples/lv_test_timer_sync.py"
+      "lv_test_timer_pump.py",
+      "github:PyDevices/pydisplay/src/examples/lv_test_timer_pump.py"
     ],
     [
       "lv_touch_test.py",

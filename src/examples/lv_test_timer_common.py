@@ -2,8 +2,8 @@
 """
 lv_test_timer_common.py
 
-Shared LVGL UI for lv_test_timer_sync, lv_test_timer_async, and
-lv_test_timer_queued.  Not intended to be run directly.
+Shared LVGL UI for lv_test_timer_no_pump, lv_test_timer_pump, and
+lv_test_timer_async.  Not intended to be run directly.
 """
 
 import sys

@@ -43,14 +43,14 @@ Ask one question: **`multimer.needs_pump()`**
 
 | Answer | What to do |
 |--------|------------|
-| `False` | Timer callbacks arrive automatically (MCU `machine.Timer`, POSIX backends on Linux). |
+| `False` | Timer callbacks arrive automatically (MCU `machine.Timer`, librt on Linux, win32 APC on Windows). |
 | `True` | Call **`multimer.pump()`** each main-loop iteration (thread/SDL/polling backends). |
 
 `multimer.sleep_ms()` also advances cooperative polling timers while it waits.
 
 ### Schedule queue vs pump
 
-On CPython and CircuitPython unix, **`multimer.capabilities()["schedule_queue"]`** is `True`: callbacks posted from worker threads are queued until the main thread calls **`pump()`**. Some backends (for example Linux **`_posix`**) deliver timer signals on the main thread — **`needs_pump()`** is `False` there — but other code may still use **`multimer.schedule`**, so library code that presents frames may still call **`pump()`** when `schedule_queue` is true.
+On CPython and CircuitPython unix, **`multimer.capabilities()["schedule_queue"]`** is `True`: callbacks posted from worker threads are queued until the main thread calls **`pump()`**. Some backends (for example Linux **`_librt`**) deliver timer signals on the main thread — **`needs_pump()`** is `False` there — but other code may still use **`multimer.schedule`**, so library code that presents frames may still call **`pump()`** when `schedule_queue` is true.
 
 Inspect the platform:
 
@@ -120,7 +120,8 @@ Backend selection at import (first match wins):
 | Backend | Module | `needs_pump` | Notes |
 |---------|--------|--------------|-------|
 | MCU hardware | `machine.Timer` | False | On-device only |
-| Linux POSIX | `_posix` | False | librt timers; ctypes on CPython, ffi/uctypes on MicroPython unix. Replaces former **`_ffi`** and **`_ctypes`** modules. |
+| Linux librt | `_librt` | False | `timer_create` via librt; ctypes on CPython, ffi/uctypes on MicroPython unix. Replaces former **`_ffi`** and **`_ctypes`** modules. |
+| Windows APC | `_win32` | False | Waitable timer + `QueueUserAPC`; callbacks run on the main thread during alertable `SleepEx` (see **`sleep_ms`** / **`broker.poll`**). |
 | Thread | `_threading` | True | Background thread + `schedule` queue |
 | SDL2 | `_sdl2` | True | `SDL_AddTimer` via **`usdl2`** |
 | Polling | `_polling` | True | Cooperative tick list |
@@ -128,11 +129,11 @@ Backend selection at import (first match wins):
 
 `tools/test_timers.py` probes each row (plus `multimer.Timer` default) on the host. Run `python tools/run_test_timers.py` for a per-runtime matrix.
 
-### POSIX backend (`_posix`)
+### librt backend (`_librt`)
 
 Linux **`timer_create`** / **`timer_settime`** with thread-directed signals (`SIGEV_THREAD_ID`). Callbacks run on the main thread without **`pump()`**.
 
-Binding path inside **`_posix.py`**:
+Binding path inside **`_librt.py`**:
 
 | Host | Binding |
 |------|---------|
@@ -140,6 +141,12 @@ Binding path inside **`_posix.py`**:
 | MicroPython unix | ffi + uctypes |
 
 This single module replaced the older split **`multimer._ffi`** (MicroPython) and **`multimer._ctypes`** (CPython) timer backends.
+
+### win32 backend (`_win32`)
+
+Windows **`CreateWaitableTimer`** + **`QueueUserAPC`**. Callbacks run on the main thread during alertable waits — **`multimer.sleep_ms()`** uses **`SleepEx`**, and **`eventsys` `broker.poll()`** calls **`process_apcs()`** so typical display loops do not need an explicit **`pump()`**.
+
+Tight CPU-only loops (`while True: pass`) still stall timers (unlike Linux librt signals). Use **`sleep_ms(0)`** or **`broker.poll()`** in the loop if needed.
 
 ### SDL2 bindings (`usdl2`)
 

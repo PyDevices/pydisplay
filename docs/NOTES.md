@@ -44,7 +44,7 @@ from <xyz> import <clever_install_fn>  # name TBD
 |------|--------|
 | More packages | `add_ons`, `examples`, `board_config.py`, `path.py`, board_configs, display/touch drivers |
 | System info | Platform, `sys.implementation`, free memory, display backend detected, timer backend (`Timer` vs `AsyncTimer`) |
-| Diagnostics | Run or launch patterns like `lv_test_timer_sync` / `lv_test_timer_async` / harness — platform labels, timer tick, optional touch |
+| Diagnostics | Run or launch patterns like `lv_test_timer_no_pump` / `lv_test_timer_pump` / `lv_test_timer_async` / harness — platform labels, timer tick, optional touch |
 | Integrations | Deep link or install hook for `spotapi_remote` / spotapi (`src/examples/spotapi` is local-only symlink today) |
 | Maintenance | Refresh core libs, show installed versions, clear and reinstall |
 

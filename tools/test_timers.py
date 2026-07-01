@@ -7,7 +7,8 @@ Probe every multimer Timer backend available on this Python port.
 Backends exercised (when importable on the host):
 
 - ``machine.Timer`` — MCU hardware
-- ``multimer._posix.Timer`` — Linux librt timers (unified ``_ffi`` + ``_ctypes`` replacement)
+- ``multimer._librt.Timer`` — Linux librt timers (unified ``_ffi`` + ``_ctypes`` replacement)
+- ``multimer._win32.Timer`` — Windows waitable timer + QueueUserAPC (main thread, no pump)
 - ``multimer._threading.Timer`` — background thread + schedule queue
 - ``multimer._sdl2.Timer`` — SDL2 ``SDL_AddTimer`` (via ``usdl2``)
 - ``multimer._polling.Timer`` — cooperative tick list
@@ -24,20 +25,26 @@ failure does not stop the rest.  Implementations that cannot be imported are
 reported as SKIP.
 """
 
-from __future__ import annotations
-
-from pathlib import Path
 import sys
 
 
-def _bootstrap_src_path() -> None:
+def _bootstrap_src_path():
     """Allow ``python tools/test_timers.py`` from a dev clone (``src/lib`` on path)."""
-    src = Path(__file__).resolve().parent.parent / "src"
-    lib = src / "lib"
-    if lib.is_dir():
-        lib_s = str(lib)
-        if lib_s not in sys.path:
-            sys.path.insert(0, lib_s)
+    f = __file__.replace("\\", "/")
+    if f.endswith(".py"):
+        f = f[:-3]
+    if f.endswith("/tools/test_timers"):
+        lib = f[: -len("/tools/test_timers")] + "/src/lib"
+    else:
+        lib = "../src/lib"
+    try:
+        import os
+
+        os.stat(lib)
+    except Exception:
+        return
+    if lib not in sys.path:
+        sys.path.insert(0, lib)
 
 
 _bootstrap_src_path()
@@ -49,8 +56,8 @@ TEST_PERIOD_MS = 50
 TEST_DURATION_MS = 300
 MIN_CALLBACKS = 2
 
-# Canonical sync backend modules (``_posix`` replaces the former ``_ffi`` and ``_ctypes`` modules).
-SYNC_TIMER_BACKENDS = ("_posix", "_threading", "_sdl2", "_polling")
+# Canonical sync backend modules (``_librt`` replaces the former ``_ffi`` and ``_ctypes`` modules).
+SYNC_TIMER_BACKENDS = ("_librt", "_win32", "_threading", "_sdl2", "_polling")
 
 
 def _timer_id():
@@ -216,8 +223,12 @@ def _import_machine_timer():
     return Timer
 
 
-def _import_posix_timer():
-    return _import_timer("_posix")
+def _import_librt_timer():
+    return _import_timer("_librt")
+
+
+def _import_win32_timer():
+    return _import_timer("_win32")
 
 
 def _import_sdl2_timer():
@@ -249,8 +260,8 @@ def main():
     print("sync backends:", ", ".join(SYNC_TIMER_BACKENDS))
     print()
 
-    # Probe order matters on MicroPython unix: _sdl2 before _posix; _posix last
-    # among sync backends (POSIX timer signals break later probes).
+    # Probe order matters on MicroPython unix: _sdl2 before _librt; _librt last
+    # among sync backends (librt timer signals break later probes).
     probes = (
         ("machine.Timer", _import_machine_timer, False, False),
         ("_threading.Timer", _import_threading_timer, False, False),
@@ -258,7 +269,8 @@ def main():
         ("_polling.Timer", _import_polling_timer, False, False),
         ("AsyncTimer", _import_async_timer, True, False),
         ("AsyncTimer (yield loop)", _import_async_timer, False, True),
-        ("_posix.Timer", _import_posix_timer, False, False),
+        ("_win32.Timer", _import_win32_timer, False, False),
+        ("_librt.Timer", _import_librt_timer, False, False),
         ("multimer.Timer (default)", _import_multimer_timer, False, False),
     )
 

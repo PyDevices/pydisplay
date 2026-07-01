@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 """
-SDL2 timer backend — CPython fallback after ``_posix`` and ``_threading``.
+SDL2 timer backend — CPython fallback after ``_librt`` and ``_threading``.
 
 Selected only when those backends are unavailable. Requires ``usdl2`` (native
 module or ``add_ons/usdl2.py``); it is an import dependency, not a selection

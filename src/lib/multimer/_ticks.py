@@ -112,10 +112,23 @@ def _tick_native_scheduler():
         pass
 
 
+def _win32_sleep_ms(ms):
+    try:
+        from ._win32 import is_active, sleep_ex
+
+        if is_active():
+            sleep_ex(ms)
+            return True
+    except ImportError:
+        pass
+    return False
+
+
 def sleep_ms(ms):
     if ms <= 0:
-        _tick_polling_timers()
-        _tick_native_scheduler()
+        if not _win32_sleep_ms(0):
+            _tick_polling_timers()
+            _tick_native_scheduler()
         return
 
     end = ticks_add(ticks_ms(), ms)
@@ -126,5 +139,6 @@ def sleep_ms(ms):
         if delay <= 0:
             break
         chunk = delay if delay < 10 else 10
-        _time_sleep_ms(chunk)
-        _tick_native_scheduler()
+        if not _win32_sleep_ms(chunk):
+            _time_sleep_ms(chunk)
+            _tick_native_scheduler()

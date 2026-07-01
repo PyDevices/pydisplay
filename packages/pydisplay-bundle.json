@@ -153,16 +153,16 @@
       "github:PyDevices/pydisplay/src/lib/multimer/_capabilities.py"
     ],
     [
+      "lib/multimer/_librt.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_librt.py"
+    ],
+    [
       "lib/multimer/_mpasyncio.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_mpasyncio.py"
     ],
     [
       "lib/multimer/_polling.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_polling.py"
-    ],
-    [
-      "lib/multimer/_posix.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_posix.py"
     ],
     [
       "lib/multimer/_schedule.py",
@@ -183,6 +183,10 @@
     [
       "lib/multimer/_timerbase.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_timerbase.py"
+    ],
+    [
+      "lib/multimer/_win32.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_win32.py"
     ],
     [
       "jupyter_notebook.ipynb",

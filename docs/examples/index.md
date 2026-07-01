@@ -27,7 +27,7 @@ Every runnable example (top-level scripts under `src/examples/*.py` and the subd
 |-----|---------|
 | `all` | Same code on MCU, desktop sync, and PyScript/Jupyter blocking mode — poll/`sleep_ms` loops with quit handling, guarded `needs_pump()`/`pump()`, or library helpers (`pd.run_forever`) that hide pump details |
 | `queued, sync` | Explicit `run_forever`/`periodic` timer loop or pump-centric game/LVGL test (`pydisplay_demo`, `testris`, `timer_simpletest`, `lv_test_timer_*`) |
-| `sync` | Sync-only or one-shot on the main thread (`lv_test_timer_sync.py` exits on queued platforms; `console_advanced_demo.py` uses `os.dupterm` + one `display_drv.show()`) |
+| `sync` | Sync-only or one-shot on the main thread (`lv_test_timer_no_pump.py` hangs on pump backends; `console_advanced_demo.py` uses `os.dupterm` + one `display_drv.show()`) |
 | `async` | `TIMER_ASYNC` + `asyncio` main loop |
 | `NA` | Not applicable — shared module or test harness, not a runnable portability example (`lv_test_timer_common.py`, `lv_test_timer_harness.py`) |
 
@@ -272,8 +272,8 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `timer_simpletest.py` | multimer timer | CPython · MCU | core |
 | `nano_gui_simpletest.py` | Nano-GUI hardware check | CPython · MCU | add_ons + upstream `gui/` |
 | `lv_touch_test.py` | LVGL touch grid | MCU | LVGL |
-| `lv_test_timer_sync.py` | LVGL timer — sync (no loop) | MCU · CPython Linux | LVGL |
-| `lv_test_timer_queued.py` | LVGL timer — sync + `pump()` | CPython · MCU | LVGL |
+| `lv_test_timer_no_pump.py` | LVGL timer — no pump loop | MCU · CPython Linux | LVGL |
+| `lv_test_timer_pump.py` | LVGL timer — `pump()` drain loop | CPython · MCU | LVGL |
 | `lv_test_timer_async.py` | LVGL timer — asyncio / PyScript | CPython · PyScript | LVGL |
 
 ## Subdirectories

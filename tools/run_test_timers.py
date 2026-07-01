@@ -32,10 +32,11 @@ from example_test_kit import (  # noqa: E402
 EXAMPLE_ID = "test_timers"
 REPORT_PATH = REPO / "docs" / "testing" / "test_timers_report.md"
 
-# Probe labels in report column order (_posix is the unified _ffi/_ctypes backend).
+# Probe labels in report column order (_librt is the unified _ffi/_ctypes backend).
 PROBE_COLUMNS = (
     "machine.Timer",
-    "_posix.Timer",
+    "_librt.Timer",
+    "_win32.Timer",
     "_threading.Timer",
     "_sdl2.Timer",
     "_polling.Timer",
@@ -91,7 +92,7 @@ def _write_report(rows: list[dict]) -> None:
         f"Generated: {datetime.now(tz=UTC).date().isoformat()}  ",
         'Command: `export PATH="$HOME/bin:$PATH" && python tools/run_test_timers.py`',
         "",
-        "`_posix.Timer` is the unified Linux librt backend (replaces former `_ffi` and `_ctypes`).",
+        "`_librt.Timer` is the unified Linux librt backend (replaces former `_ffi` and `_ctypes`).",
         "",
         "## Summary matrix",
         "",

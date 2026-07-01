@@ -14,10 +14,9 @@ import board_config
 
 board_config.TIMER_ASYNC = True
 
-try:
-    import asyncio
-except ImportError:
-    import uasyncio as asyncio
+from multimer._async import _require_asyncio
+
+asyncio = _require_asyncio()
 
 from multimer import run
 

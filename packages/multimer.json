@@ -13,16 +13,16 @@
       "github:PyDevices/pydisplay/src/lib/multimer/_capabilities.py"
     ],
     [
+      "multimer/_librt.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_librt.py"
+    ],
+    [
       "multimer/_mpasyncio.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_mpasyncio.py"
     ],
     [
       "multimer/_polling.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_polling.py"
-    ],
-    [
-      "multimer/_posix.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_posix.py"
     ],
     [
       "multimer/_schedule.py",
@@ -43,6 +43,10 @@
     [
       "multimer/_timerbase.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_timerbase.py"
+    ],
+    [
+      "multimer/_win32.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_win32.py"
     ]
   ],
   "deps": [],

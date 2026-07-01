@@ -29,7 +29,7 @@ What changes is which **display backend** `board_config` selects — automatical
 | `PSDisplay` | [PyScript](pyscript.md) browser canvas | auto |
 | `JNDisplay` | [Jupyter Notebook](jupyter.md) | auto |
 
-Input is just as portable: a mouse on the desktop, a finger on a touchscreen, and a tap in the browser all arrive as the same [events](../concepts/events.md). Timers come from [`multimer`](../concepts/multimer.md), which picks a backend (`machine.Timer`, POSIX, threads, polling, SDL, or `asyncio`) to suit the host.
+Input is just as portable: a mouse on the desktop, a finger on a touchscreen, and a tap in the browser all arrive as the same [events](../concepts/events.md). Timers come from [`multimer`](../concepts/multimer.md), which picks a backend (`machine.Timer`, librt, threads, polling, SDL, or `asyncio`) to suit the host.
 
 See [Displays](../concepts/displays.md) for backend details and [Architecture](../concepts/architecture.md) for how the pieces fit together.
 

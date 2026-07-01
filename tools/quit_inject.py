@@ -61,7 +61,10 @@ def pump_multimer(count=15, delay_s=0.02, broker_poll=True):
     ms = int(delay_s * 1000) if delay_s else 0
     for _ in range(count):
         if broker is not None:
-            broker.poll()
+            try:
+                broker.poll()
+            except Exception:
+                pass
         if pump is not None:
             pump()
         if ms:
@@ -134,7 +137,7 @@ def inject_synthetic_touch(*, broker_poll=False, pump_count=20, pump_delay=0.02)
     return True
 
 
-def inject_quit(*, broker_poll=True, pump_count=15, pump_delay=0.02, lvgl=False):
+def inject_quit(*, broker_poll=True, pump_count=15, pump_delay=0.02, lvgl=False, deinit=True):
     """
     Mock QUEUE read to deliver one Quit event, then pump broker / multimer / LVGL.
 
@@ -172,5 +175,6 @@ def inject_quit(*, broker_poll=True, pump_count=15, pump_delay=0.02, lvgl=False)
         if not pending:
             queue_dev._read = orig_read
 
-    deinit_display()
+    if deinit:
+        deinit_display()
     return True

@@ -10,6 +10,16 @@ import _env  # noqa: F401
 
 from multimer import AsyncTimer, run
 
+try:
+    from multimer._mpasyncio import Event as MpEvent
+    from multimer._mpasyncio import run as mp_run
+
+    _MPASYNCIO_AVAILABLE = True
+except ImportError:
+    MpEvent = None
+    mp_run = None
+    _MPASYNCIO_AVAILABLE = False
+
 
 @unittest.skipIf(AsyncTimer is None, "async support not available")
 class TestAsyncTimer(unittest.TestCase):
@@ -82,6 +92,91 @@ class TestAsyncTimer(unittest.TestCase):
 
         run(main)
         self.assertEqual(result, ["done"])
+
+
+@unittest.skipIf(not _MPASYNCIO_AVAILABLE, "_mpasyncio requires MicroPython _asyncio")
+class TestMpAsyncioEvent(unittest.TestCase):
+    def test_starts_cleared(self):
+        ev = MpEvent()
+        self.assertFalse(ev.is_set())
+
+    def test_wait_until_set(self):
+        seen = []
+
+        async def main():
+            from multimer._mpasyncio import create_task, sleep_ms
+
+            ev = MpEvent()
+
+            async def waiter():
+                await ev.wait()
+                seen.append("done")
+
+            create_task(waiter())
+            await sleep_ms(20)
+            ev.set()
+            await sleep_ms(20)
+
+        mp_run(main())
+        self.assertEqual(seen, ["done"])
+
+    def test_clear_requires_new_set(self):
+        ev = MpEvent()
+        ev.set()
+        ev.clear()
+        self.assertFalse(ev.is_set())
+
+    def test_background_task_wakes_event(self):
+        """lv_utils-style wait/clear loop driven by another _mpasyncio task."""
+        ticks = []
+
+        async def main():
+            from multimer._mpasyncio import create_task, sleep_ms
+
+            ev = MpEvent()
+
+            async def refresh_loop():
+                while len(ticks) < 3:
+                    await ev.wait()
+                    ev.clear()
+                    ticks.append(1)
+
+            async def ticker():
+                while len(ticks) < 3:
+                    await sleep_ms(25)
+                    ev.set()
+
+            create_task(refresh_loop())
+            create_task(ticker())
+            await sleep_ms(150)
+
+        mp_run(main())
+        self.assertGreaterEqual(len(ticks), 3)
+
+
+@unittest.skipIf(AsyncTimer is None, "async support not available")
+class TestAsyncTimerEvent(unittest.TestCase):
+    def test_async_timer_wakes_stdlib_event(self):
+        """AsyncTimer + asyncio.Event on CPython (stdlib asyncio path)."""
+        ticks = []
+
+        async def main():
+            ev = asyncio.Event()
+
+            async def refresh_loop():
+                while len(ticks) < 3:
+                    await ev.wait()
+                    ev.clear()
+                    ticks.append(1)
+
+            _refresh_task = asyncio.create_task(refresh_loop())  # noqa: RUF006
+            t = AsyncTimer(-1)
+            t.init(mode=AsyncTimer.PERIODIC, period=20, callback=lambda _tmr: ev.set())
+            await asyncio.sleep(0.12)
+            t.deinit()
+
+        asyncio.run(main())
+        self.assertGreaterEqual(len(ticks), 3)
 
 
 if __name__ == "__main__":

@@ -53,13 +53,15 @@ if sys.platform == "rp2":
     # rp2 only supports SW timer -1
     default_timer_id = -1
 
-# Try importing asyncio, if available
+# Try importing asyncio via multimer (stdlib, uasyncio, or _mpasyncio).
 
 try:
-    import asyncio
+    from multimer._async import asyncio as _aio_mod
 
-    asyncio_available = True
+    asyncio = _aio_mod
+    asyncio_available = asyncio is not None
 except ImportError:
+    asyncio = None
     asyncio_available = False
 
 ##############################################################################
@@ -177,7 +179,8 @@ class event_loop:
 
     def task_handler(self, _):
         try:
-            if lv._nesting.value == 0:
+            nesting = lv._nesting.value
+            if nesting == 0:
                 lv.task_handler()
                 if self.refresh_cb:
                     self.refresh_cb()
