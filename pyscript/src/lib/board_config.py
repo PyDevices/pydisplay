@@ -69,6 +69,20 @@ else:
     # Running on the desktop
     import sys
 
+    _DESKTOP_PLATFORMS = frozenset(
+        ("linux", "darwin", "win32", "unix", "webassembly", "emscripten")
+    )
+    _impl = sys.implementation.name
+    if _impl in ("micropython", "circuitpython") and sys.platform not in _DESKTOP_PLATFORMS:
+        print(
+            "board_config: default board_config.py from lib/ is for desktop "
+            "displaysys only.\n"
+            "On a microcontroller, copy a board_config.py for your hardware "
+            "into the current working directory (the parent of lib/).\n"
+            "Download board configs from:\n"
+            "  https://github.com/PyDevices/pydisplay/tree/main/board_configs"
+        )
+
     import eventsys
 
     try:
