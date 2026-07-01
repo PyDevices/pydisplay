@@ -63,9 +63,17 @@ try:
     _NEEDS_PUMP = False
 except ImportError:
     Timer = None
-    if sys.implementation.name == "micropython":
+    if sys.platform == "win32":
         try:
-            from ._posix import Timer
+            from ._win32 import Timer
+
+            _BACKEND = Timer.BACKEND
+            _NEEDS_PUMP = Timer.NEEDS_PUMP
+        except ImportError:
+            pass
+    if Timer is None and sys.implementation.name == "micropython":
+        try:
+            from ._librt import Timer
 
             _BACKEND = Timer.BACKEND
             _NEEDS_PUMP = Timer.NEEDS_PUMP
@@ -80,9 +88,9 @@ except ImportError:
 
                 _BACKEND = Timer.BACKEND
                 _NEEDS_PUMP = Timer.NEEDS_PUMP
-    elif sys.implementation.name == "cpython":
+    elif sys.implementation.name == "cpython" and Timer is None:
         try:
-            from ._posix import Timer
+            from ._librt import Timer
 
             _BACKEND = Timer.BACKEND
             _NEEDS_PUMP = Timer.NEEDS_PUMP
@@ -97,11 +105,23 @@ except ImportError:
 
                 _BACKEND = Timer.BACKEND
                 _NEEDS_PUMP = Timer.NEEDS_PUMP
-    elif sys.implementation.name == "circuitpython":
-        from ._threading import Timer
+    elif sys.implementation.name == "circuitpython" and Timer is None:
+        try:
+            from ._polling import Timer
 
-        _BACKEND = Timer.BACKEND
-        _NEEDS_PUMP = Timer.NEEDS_PUMP
+            _BACKEND = Timer.BACKEND
+            _NEEDS_PUMP = Timer.NEEDS_PUMP
+        except ImportError:
+            try:
+                from ._sdl2 import Timer
+
+                _BACKEND = Timer.BACKEND
+                _NEEDS_PUMP = Timer.NEEDS_PUMP
+            except ImportError:
+                from ._threading import Timer
+
+                _BACKEND = Timer.BACKEND
+                _NEEDS_PUMP = Timer.NEEDS_PUMP
 
 if Timer is None:
     raise UnsupportedPlatformError("multimer: no Timer backend available on this platform")
@@ -144,6 +164,13 @@ def pump(max_items=None):
 
     Returns the number of callbacks dispatched.
     """
+    try:
+        from ._win32 import is_active, process_apcs
+
+        if is_active():
+            process_apcs()
+    except ImportError:
+        pass
     n = _drain_schedule(max_items)
     n_native = 0
     remaining = None if max_items is None else max_items - n

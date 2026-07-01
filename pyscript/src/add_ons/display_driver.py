@@ -37,8 +37,6 @@ def main():
         # Present the frame from the aio refresh loop instead.
         refresh_cb = None
         use_async = TIMER_ASYNC
-        if sys.implementation.name == "circuitpython":
-            use_async = False
         if use_async:
             if getattr(display_drv, "_timer", None) is not None:
                 display_drv._timer.deinit()

@@ -11,62 +11,6 @@
     <link rel="stylesheet" href="./vendor/core.css">
     <script src="./mini-coi-fd.js"></script>
     <script type="module" src="./vendor/core.js"></script>
-    <!-- #region agent log -->
-    <script>
-        (function () {
-            var LOG = 'http://127.0.0.1:7576/ingest/bf910d00-cb5f-458f-b35d-2b7513951481';
-            function dbg(hypothesisId, location, message, data) {
-                fetch(LOG, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'c62277' },
-                    body: JSON.stringify({
-                        sessionId: 'c62277',
-                        runId: 'post-fix',
-                        hypothesisId: hypothesisId,
-                        location: location,
-                        message: message,
-                        data: data || {},
-                        timestamp: Date.now()
-                    })
-                }).catch(function () {});
-            }
-            var tomlUrl = new URL('./pyscript.toml', location.href).href;
-            dbg('A', 'load.html:boot', 'loader boot', { href: location.href, tomlUrl: tomlUrl });
-            fetch(tomlUrl).then(function (r) { return r.text(); }).then(function (text) {
-                dbg('A', 'load.html:toml-sample', 'pyscript.toml prefix', {
-                    firstLine: (text.split('\n').slice(0, 3).join(' | ')),
-                    usesDotSrc: text.indexOf('"./src/') >= 0,
-                    usesDotDotSrc: text.indexOf('"../../src/') >= 0
-                });
-            }).catch(function (e) {
-                dbg('A', 'load.html:toml-fetch', 'pyscript.toml fetch failed', { error: String(e) });
-            });
-            var probe = new URL('./src/lib/path.py', tomlUrl).href;
-            fetch(probe, { method: 'HEAD' }).then(function (r) {
-                dbg('B', 'load.html:path-probe', './src/lib/path.py HEAD', { url: probe, status: r.status });
-            }).catch(function (e) {
-                dbg('B', 'load.html:path-probe', './src/lib/path.py failed', { url: probe, error: String(e) });
-            });
-            var btnWatch = setInterval(function () {
-                var btn = document.getElementById('run-btn');
-                if (btn && !btn.disabled) {
-                    dbg('C', 'load.html:ready', 'Run enabled', {
-                        status: document.getElementById('status') ? document.getElementById('status').textContent : ''
-                    });
-                    clearInterval(btnWatch);
-                }
-            }, 500);
-            setTimeout(function () {
-                var btn = document.getElementById('run-btn');
-                if (btn && btn.disabled) {
-                    dbg('C', 'load.html:timeout', 'Run still disabled after 30s', {
-                        status: document.getElementById('status') ? document.getElementById('status').textContent : ''
-                    });
-                }
-            }, 30000);
-        })();
-    </script>
-    <!-- #endregion -->
 </head>
 <body>
     <header class="site-header">

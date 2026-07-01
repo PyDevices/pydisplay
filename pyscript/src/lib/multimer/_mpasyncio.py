@@ -45,6 +45,32 @@ class SingletonGenerator:
 _sleep_ms_sgen = SingletonGenerator()
 
 
+class Event:
+    """Minimal asyncio.Event for lv_utils async refresh coordination."""
+
+    def __init__(self):
+        self.state = False
+        self.waiting = TaskQueue()
+
+    def is_set(self):
+        return self.state
+
+    def set(self):
+        while self.waiting.peek():
+            _task_queue.push(self.waiting.pop())
+        self.state = True
+
+    def clear(self):
+        self.state = False
+
+    def wait(self):
+        if not self.state:
+            self.waiting.push(cur_task)
+            cur_task.data = self.waiting
+            yield
+        return True
+
+
 def sleep_ms(t, sgen=_sleep_ms_sgen):
     assert sgen.state is None
     sgen.state = ticks_add(ticks(), max(0, t))
