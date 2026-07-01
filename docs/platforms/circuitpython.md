@@ -35,7 +35,20 @@ RGB666 (parallel), USB Video, and RGB Matrix devices use `displaysys.fbdisplay.F
 
 ## Unix desktop (SDL2)
 
-CircuitPython on Unix can use **`SDLDisplay`** with the native **`usdl2`** module — see [MicroPython — usdl2](micropython.md#usdl2-native-sdl2) for build instructions (same `usdl2` repo and patch script).
+CircuitPython on Unix can use **`SDLDisplay`** with the native **`usdl2`** module.
+
+Build from the [cmods](https://github.com/PyDevices/cmods) workspace (sibling trees: `circuitpython/`, `usdl2/`, `lv_circuitpython_mod/`):
+
+```bash
+cd ~/github/cmods/usdl2
+./apply_cp_unix_usdl_patches.sh --apply   # required before every CP unix compile
+cd ~/github/cmods/lv_circuitpython_mod
+./build_cp.sh --port unix --variant coverage
+```
+
+`build_cp.sh` runs `apply_cp_unix_usdl_patches.sh --apply` automatically for the **unix** port. If you invoke `make` in `circuitpython/ports/unix` directly, run the patch script yourself first.
+
+Install `libsdl2-dev`, then symlink or copy the built binary (e.g. `ports/unix/build-coverage/micropython`) to `~/bin/circuitpython`.
 
 ## framebuf shim
 

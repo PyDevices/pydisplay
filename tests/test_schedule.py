@@ -66,6 +66,20 @@ class TestSchedule(unittest.TestCase):
         pump()
         self.assertEqual(calls, [0, 1, 2, 3])
 
+    def test_coalesces_duplicate_pending(self):
+        calls = []
+
+        def worker():
+            for _ in range(20):
+                schedule(calls.append, "same")
+
+        t = threading.Thread(target=worker)
+        t.start()
+        t.join()
+
+        pump()
+        self.assertEqual(calls, ["same"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,6 @@
 # Comprehensive LVGL timer report
 
-Generated: 2026-07-01 09:51 UTC  
+Generated: 2026-07-01 11:27 UTC  
 Command: `export PATH="$HOME/bin:$PATH" && python tools/run_comprehensive_timer_reports.py --phase lvgl`
 
 Runs ``examples/lv_test_timer_harness.py`` (no_pump / pump / async) on every desktop runtime.
@@ -10,25 +10,21 @@ Runs ``examples/lv_test_timer_harness.py`` (no_pump / pump / async) on every des
 
 | Runtime | no_pump | pump | async |
 |---------|:---------:|:---------:|:---------:|
-| micropython | _librt, ok | _librt, ok | _async, ok |
-| circuitpython | _polling, no timers (expected) | _polling, ok | _async, ok |
+| micropython | ?, hang | ?, hang | _async, ok |
+| circuitpython | _threading, ok | _threading, ok | _async, ok |
 | cpython-venv | _librt, ok | _librt, ok | _async, ok |
-| micropython.exe | _polling, ok | _polling, ok | _async, ok |
+| micropython.exe | exit_5 | exit_5 | exit_5 |
 | python.exe | _win32, ok | _win32, ok | _async, ok |
 
 ## Per-cell details
 
 ### `micropython` / `no_pump`
 
-- **Summary:** _librt, ok
-- **Exit code:** 0
-- **KIT_RESULT:** `{"click_status":"ok","backend":"_librt","mode":"no_pump","seconds":6,"broker_polls":0,"status":"ok","sdl_lv_taps":1,"taps":1,"sdl_stolen_taps":0,"fifo_taps":0,"taps_total":1,"lv_event_ok":true}`
+- **Status:** subprocess timeout (expected for no_pump on pump backends)
 
 ### `micropython` / `pump`
 
-- **Summary:** _librt, ok
-- **Exit code:** 0
-- **KIT_RESULT:** `{"click_status":"ok","backend":"_librt","mode":"pump","seconds":4,"broker_polls":0,"status":"ok","sdl_lv_taps":0,"taps":2,"sdl_stolen_taps":0,"fifo_taps":0,"taps_total":1,"lv_event_ok":true}`
+- **Status:** subprocess timeout (expected for no_pump on pump backends)
 
 ### `micropython` / `async`
 
@@ -38,15 +34,15 @@ Runs ``examples/lv_test_timer_harness.py`` (no_pump / pump / async) on every des
 
 ### `circuitpython` / `no_pump`
 
-- **Summary:** _polling, no timers (expected)
+- **Summary:** _threading, ok
 - **Exit code:** -11
-- **KIT_RESULT:** `{"click_status":"no timers","backend":"_polling","mode":"no_pump","seconds":0,"broker_polls":0,"status":"fail","sdl_lv_taps":0,"taps":0,"sdl_stolen_taps":0,"fifo_taps":0,"taps_total":0,"lv_event_ok":false}`
+- **KIT_RESULT:** `{"click_status":"ok","backend":"_threading","mode":"no_pump","seconds":3,"broker_polls":0,"status":"ok","sdl_lv_taps":1,"taps":1,"sdl_stolen_taps":0,"fifo_taps":0,"taps_total":1,"lv_event_ok":true}`
 
 ### `circuitpython` / `pump`
 
-- **Summary:** _polling, ok
+- **Summary:** _threading, ok
 - **Exit code:** -11
-- **KIT_RESULT:** `{"click_status":"ok","backend":"_polling","mode":"pump","seconds":4,"broker_polls":0,"status":"ok","sdl_lv_taps":0,"taps":1,"sdl_stolen_taps":0,"fifo_taps":0,"taps_total":1,"lv_event_ok":true}`
+- **KIT_RESULT:** `{"click_status":"ok","backend":"_threading","mode":"pump","seconds":4,"broker_polls":0,"status":"ok","sdl_lv_taps":0,"taps":1,"sdl_stolen_taps":0,"fifo_taps":0,"taps_total":1,"lv_event_ok":true}`
 
 ### `circuitpython` / `async`
 
@@ -64,7 +60,7 @@ Runs ``examples/lv_test_timer_harness.py`` (no_pump / pump / async) on every des
 
 - **Summary:** _librt, ok
 - **Exit code:** 0
-- **KIT_RESULT:** `{"mode":"pump","status":"ok","click_status":"ok","backend":"_librt","seconds":6,"taps":1,"broker_polls":0,"sdl_stolen_taps":0,"sdl_lv_taps":0,"fifo_taps":0,"lv_event_ok":true,"taps_total":1}`
+- **KIT_RESULT:** `{"mode":"pump","status":"ok","click_status":"ok","backend":"_librt","seconds":4,"taps":2,"broker_polls":0,"sdl_stolen_taps":0,"sdl_lv_taps":0,"fifo_taps":0,"lv_event_ok":true,"taps_total":1}`
 
 ### `cpython-venv` / `async`
 
@@ -84,21 +80,18 @@ RuntimeWarning: Enable tracemalloc to get the object allocation traceback
 
 ### `micropython.exe` / `no_pump`
 
-- **Summary:** _polling, ok
-- **Exit code:** 0
-- **KIT_RESULT:** `{"click_status":"ok","taps_total":1,"mode":"no_pump","taps":2,"sdl_stolen_taps":0,"status":"ok","seconds":2,"sdl_lv_taps":0,"fifo_taps":0,"backend":"_polling","broker_polls":0,"lv_event_ok":true}`
+- **Summary:** exit_5
+- **Exit code:** 5
 
 ### `micropython.exe` / `pump`
 
-- **Summary:** _polling, ok
-- **Exit code:** 0
-- **KIT_RESULT:** `{"click_status":"ok","taps_total":2,"mode":"pump","taps":2,"sdl_stolen_taps":1,"status":"ok","seconds":6,"sdl_lv_taps":1,"fifo_taps":1,"backend":"_polling","broker_polls":0,"lv_event_ok":true}`
+- **Summary:** exit_5
+- **Exit code:** 5
 
 ### `micropython.exe` / `async`
 
-- **Summary:** _async, ok
-- **Exit code:** 0
-- **KIT_RESULT:** `{"click_status":"ok","lv_event_ok":true,"fifo_taps":0,"sdl_stolen_taps":0,"sdl_lv_taps":1,"status":"ok","taps":1,"seconds":3,"mode":"async","backend":"_async","taps_total":1,"broker_polls":0}`
+- **Summary:** exit_5
+- **Exit code:** 5
 
 ### `python.exe` / `no_pump`
 
@@ -110,7 +103,7 @@ RuntimeWarning: Enable tracemalloc to get the object allocation traceback
 
 - **Summary:** _win32, ok
 - **Exit code:** 0
-- **KIT_RESULT:** `{"mode":"pump","status":"ok","click_status":"ok","backend":"_win32","seconds":4,"taps":2,"broker_polls":0,"sdl_stolen_taps":0,"sdl_lv_taps":0,"fifo_taps":0,"lv_event_ok":true,"taps_total":1}`
+- **KIT_RESULT:** `{"mode":"pump","status":"ok","click_status":"ok","backend":"_win32","seconds":4,"taps":1,"broker_polls":0,"sdl_stolen_taps":0,"sdl_lv_taps":0,"fifo_taps":0,"lv_event_ok":true,"taps_total":1}`
 
 ### `python.exe` / `async`
 

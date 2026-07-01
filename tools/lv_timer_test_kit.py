@@ -245,6 +245,13 @@ def _no_pump_passes(row: dict, needs_pump_map: dict[str, bool | None]) -> bool:
     return _no_pump_expected(needs_pump, result, bool(row.get("timed_out")))
 
 
+def _polling_backend(result: dict | None) -> bool:
+    if not result:
+        return False
+    backend = str(result.get("backend", ""))
+    return backend in ("_polling", "polling")
+
+
 def compute_exit_code(
     rows: list[dict],
     *,
@@ -259,39 +266,25 @@ def compute_exit_code(
         mode = row.get("mode", "")
         result = row.get("result")
 
+        # pump + async: KIT_RESULT status ok is authoritative (teardown may SIGSEGV)
+        if mode in ("pump", "async"):
+            passed = (
+                result
+                and result.get("status") == "ok"
+                and not _polling_backend(result)
+                and (not strict_clicks or result.get("click_status") == "ok")
+            )
+            if not passed:
+                failed.append(row)
+            continue
+
         if mode == "no_pump":
             if _no_pump_passes(row, needs_pump_map):
                 continue
             failed.append(row)
             continue
 
-        # pump + async: require harness status ok
-        if result and result.get("status") == "ok":
-            if strict_clicks and result.get("click_status") != "ok":
-                failed.append(row)
-            continue
-
-        if (
-            row.get("timed_out")
-            or row["summary"].startswith("exit_")
-            or row["summary"] == "no_result"
-        ):
-            failed.append(row)
-            continue
-        if not result:
-            failed.append(row)
-            continue
-        if result.get("status") == "error":
-            failed.append(row)
-            continue
-        if result.get("seconds", 0) < 2:
-            failed.append(row)
-            continue
-        if strict_clicks and result.get("click_status") != "ok":
-            failed.append(row)
-            continue
-        if row["summary"].endswith(", no timers") or row["summary"].endswith(", error"):
-            failed.append(row)
+        failed.append(row)
     return 1 if failed else 0
 
 
@@ -354,7 +347,10 @@ def run_case(
     )
     if result and result.get("status") == "ok":
         backend = result.get("backend", "?")
-        summary = f"{backend}, ok"
+        if mode in ("pump", "async") and _polling_backend(result):
+            summary = f"{backend}, polling (rejected)"
+        else:
+            summary = f"{backend}, ok"
     elif mode == "no_pump" and _no_pump_expected(needs_pump, result, timed_out):
         backend = (result or {}).get(
             "backend", _backend_from_row({"result": result, "stdout_tail": stdout})

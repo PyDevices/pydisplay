@@ -127,6 +127,19 @@ Backend selection at import (first match wins):
 | Polling | `_polling` | True | Cooperative tick list |
 | Asyncio | `_async.AsyncTimer` | False | Software timer on the event loop |
 
+Per-implementation fallback when `machine.Timer` is unavailable:
+
+| Implementation | Order tried |
+|----------------|-------------|
+| CPython win32 | `_win32` → `_threading` → `_sdl2` → `_polling` |
+| CPython Linux | `_librt` → `_threading` → `_sdl2` → `_polling` |
+| MicroPython unix | `_librt` → `_threading` → `_sdl2` → `_polling` |
+| MicroPython win32 | `_sdl2` → `_polling` (`_threading` unavailable) |
+| MicroPython unix (no librt) | `_threading` → `_sdl2` → `_polling` |
+| CircuitPython desktop | `_threading` → `_sdl2` → `_polling` |
+
+`_polling` is the last resort on every path above.
+
 `tools/test_timers.py` probes each row (plus `multimer.Timer` default) on the host. Run `python tools/run_test_timers.py` for a per-runtime matrix.
 
 ### librt backend (`_librt`)
