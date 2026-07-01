@@ -2,7 +2,20 @@
 #   python3 -m venv .venv
 #   .venv/bin/pip install -r requirements-dev.txt
 #   .venv/bin/playwright install chromium
+#
+# Top-level packages only — reconcile with: .venv/bin/pip list --not-required
 
+# Browser / embed testing
 playwright>=1.40
+
+# Unit & integration tests
 pytest>=8.0
 pytest-timeout>=2.2
+
+# Jupyter (Cursor agents / interactive dev; pulls ipykernel, ipython, etc.)
+jupyterlab>=4.6
+ipyevents>=2.0
+nbstripout>=0.9
+
+# Display / image inspection
+pillow>=12.0
