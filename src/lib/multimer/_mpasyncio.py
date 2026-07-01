@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MIT
 #
 # Minimal asyncio event loop for MicroPython builds that ship ``_asyncio`` but
-# not the frozen ``asyncio`` / ``uasyncio`` packages (e.g. micropython.exe dev).
+# not the frozen ``asyncio`` / ``uasyncio`` packages (e.g. micropython.exe standard).
 # Adapted from MicroPython extmod/asyncio/core.py.
 
 from _asyncio import Task, TaskQueue

@@ -246,6 +246,29 @@ def retcheck(retvalue):
         raise RuntimeError(usdl2.SDL_GetError())
 
 
+def _hard_process_exit(code: int = 0) -> None:
+    """Terminate immediately without SDL teardown (kit subprocesses)."""
+    try:
+        import usdl2
+
+        usdl2.process_exit(code)
+    except Exception:
+        pass
+    try:
+        import ffi
+
+        ffi.open("libc.so.6").func("v", "_exit", "i")(code)
+    except Exception:
+        pass
+    try:
+        import os
+
+        os._exit(code)
+    except Exception:
+        pass
+    raise SystemExit(code)
+
+
 class SDLDisplay(DisplayDriver):
     """
     A class to emulate an LCD using SDL2.
@@ -610,20 +633,7 @@ class SDLDisplay(DisplayDriver):
             _ensure_tty_sane()
         except Exception:
             pass
-        try:
-            import ffi
-
-            ffi.open("libc.so.6").func("v", "_exit", "i")(code)
-            return
-        except Exception:
-            pass
-        try:
-            import os
-
-            os._exit(code)
-        except Exception:
-            pass
-        raise SystemExit(code)
+        _hard_process_exit(code)
 
     def force_quit(self, code: int = 0) -> None:
         """Release SDL resources then hard-exit the process.
@@ -640,11 +650,5 @@ class SDLDisplay(DisplayDriver):
                 _ensure_tty_sane()
             except Exception:
                 pass
-            try:
-                import os
-
-                os._exit(code)
-            except Exception:
-                pass
-            raise SystemExit(code)
+            _hard_process_exit(code)
         self.quit(code, force=True)

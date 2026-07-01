@@ -344,15 +344,17 @@ def _hard_exit_after_quit(code=0):
     try:
         from board_config import display_drv
 
-        display_drv.quit(code, force=True)
+        display_drv.force_quit(code)
     except SystemExit:
         raise
     except Exception:
         pass
     try:
-        import os
+        from displaysys.sdldisplay import _hard_process_exit
 
-        os._exit(code)
+        _hard_process_exit(code)
+    except SystemExit:
+        raise
     except Exception:
         pass
     raise SystemExit(code)
@@ -385,6 +387,14 @@ def _finish_after_result(pump, *, mode="?", ok=True):
     if _kit_fast_exit_runtime():
         _minimal_timer_teardown()
         sys.stdout.flush()
+        try:
+            from board_config import display_drv
+
+            display_drv.force_quit(0 if ok else 1)
+        except SystemExit:
+            raise
+        except Exception:
+            pass
         raise SystemExit(0 if ok else 1)
     _inject_quit_and_exit(pump, mode=mode)
 
@@ -468,7 +478,7 @@ def _run_no_pump():
             if delay_s:
                 time.sleep(delay_s)
 
-    btn = build_ui()
+    btn = build_ui("no_pump")
     cx, cy = _button_center(btn)
     broker_polls = 0
 
@@ -506,6 +516,10 @@ def _run_pump():
     from lv_test_timer_common import build_ui, get_state
     from multimer import pump, sleep_ms
 
+    _BROKER_POLL_S = 0.025
+    next_broker_poll = time.time() + _BROKER_POLL_S
+    _fast_spin = sys.implementation.name == "circuitpython"
+
     def pumped_lvgl(n=5, delay_s=0):
         import lvgl as lv
 
@@ -517,17 +531,25 @@ def _run_pump():
             if delay_s:
                 time.sleep(delay_s)
 
-    btn = build_ui()
+    btn = build_ui("pump")
     cx, cy = _button_center(btn)
     broker_polls = 0
 
     deadline = time.time() + _DURATION_S
     input_tests = None
+    loop_i = 0
 
     while time.time() < deadline:
-        pump()
-        broker.poll()
         sleep_ms(1)
+        loop_i += 1
+        if _fast_spin:
+            if time.time() >= next_broker_poll:
+                broker.poll()
+                broker_polls += 1
+                next_broker_poll = time.time() + _BROKER_POLL_S
+        elif (loop_i & 3) == 0:
+            broker.poll()
+            broker_polls += 1
 
         if input_tests is None and get_state()["seconds"] >= 2:
             input_tests = _run_input_tests(btn, cx, cy, pump=pumped_lvgl)
@@ -565,7 +587,7 @@ def _run_async():
         import display_driver  # noqa: F401
         from lv_test_timer_common import build_ui, get_state
 
-        btn = build_ui()
+        btn = build_ui("async")
         cx, cy = _button_center(btn)
         broker_polls = 0
 
@@ -593,6 +615,14 @@ def _run_async():
         if _kit_fast_exit_runtime():
             _minimal_timer_teardown()
             sys.stdout.flush()
+            try:
+                from board_config import display_drv
+
+                display_drv.force_quit(0 if result.get("status") == "ok" else 1)
+            except SystemExit:
+                raise
+            except Exception:
+                pass
             raise SystemExit(0 if result.get("status") == "ok" else 1)
         await _inject_quit_and_exit_async(mode="async")
 

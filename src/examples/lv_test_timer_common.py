@@ -13,6 +13,17 @@ import lvgl as lv
 _seconds = 0
 _taps = 0
 _arc_angle = 0
+_test_mode = None
+
+
+def set_test_mode(mode):
+    """Set harness mode label shown on the test screen (no_pump, pump, async)."""
+    global _test_mode
+    _test_mode = mode
+
+
+def _test_mode_label():
+    return _test_mode if _test_mode else "?"
 
 
 def get_state():
@@ -126,6 +137,7 @@ def get_platform_info():
         "display": _display_type(),
         "timer": _timer_type(),
         "lvgl": _lvgl_label(),
+        "mode": _test_mode_label(),
     }
 
 
@@ -136,6 +148,7 @@ def timer_backend_name():
 
 def _add_info_labels(scr, info, y_start=26, line_h=16):
     lines = (
+        f"Mode: {info['mode']}",
         f"Runtime: {info['runtime']}",
         f"OS: {info['os']}",
         f"Display: {info['display']}",
@@ -150,12 +163,17 @@ def _add_info_labels(scr, info, y_start=26, line_h=16):
         y += line_h
 
 
-def build_ui():
+def build_ui(mode=None):
     """Build the timer test screen: title, seconds counter, arc, tap button.
+
+    Args:
+        mode: Optional harness mode (``no_pump``, ``pump``, ``async``) for the info labels.
 
     Returns:
         lv.button: The tap button (for harness coordinate / event injection).
     """
+    if mode is not None:
+        set_test_mode(mode)
     scr = lv.screen_active()
     info = get_platform_info()
 

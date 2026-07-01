@@ -20,12 +20,24 @@ board_config.TIMER_ASYNC = False
 import display_driver  # noqa: F401
 from lv_test_timer_common import build_ui
 
-build_ui()
+build_ui("pump")
+
+import time
+import sys
 
 from board_config import broker
-from multimer import pump, sleep_ms
+from multimer import sleep_ms
 
+_BROKER_POLL_S = 0.025
+next_broker_poll = time.time() + _BROKER_POLL_S
+_fast_spin = sys.implementation.name == "circuitpython"
+loop_i = 0
 while True:
-    pump()
-    broker.poll()
     sleep_ms(1)
+    loop_i += 1
+    if _fast_spin:
+        if time.time() >= next_broker_poll:
+            broker.poll()
+            next_broker_poll = time.time() + _BROKER_POLL_S
+    elif (loop_i & 3) == 0:
+        broker.poll()

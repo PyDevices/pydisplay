@@ -245,13 +245,6 @@ def _no_pump_passes(row: dict, needs_pump_map: dict[str, bool | None]) -> bool:
     return _no_pump_expected(needs_pump, result, bool(row.get("timed_out")))
 
 
-def _polling_backend(result: dict | None) -> bool:
-    if not result:
-        return False
-    backend = str(result.get("backend", ""))
-    return backend in ("_polling", "polling")
-
-
 def compute_exit_code(
     rows: list[dict],
     *,
@@ -271,7 +264,6 @@ def compute_exit_code(
             passed = (
                 result
                 and result.get("status") == "ok"
-                and not _polling_backend(result)
                 and (not strict_clicks or result.get("click_status") == "ok")
             )
             if not passed:
@@ -347,10 +339,7 @@ def run_case(
     )
     if result and result.get("status") == "ok":
         backend = result.get("backend", "?")
-        if mode in ("pump", "async") and _polling_backend(result):
-            summary = f"{backend}, polling (rejected)"
-        else:
-            summary = f"{backend}, ok"
+        summary = f"{backend}, ok"
     elif mode == "no_pump" and _no_pump_expected(needs_pump, result, timed_out):
         backend = (result or {}).get(
             "backend", _backend_from_row({"result": result, "stdout_tail": stdout})

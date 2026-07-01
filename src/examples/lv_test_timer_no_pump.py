@@ -23,4 +23,4 @@ board_config.TIMER_ASYNC = False
 import display_driver  # noqa: F401
 from lv_test_timer_common import build_ui
 
-build_ui()
+build_ui("no_pump")

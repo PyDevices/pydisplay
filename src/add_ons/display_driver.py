@@ -196,12 +196,13 @@ def run():
     a periodic timer at ``import display_driver`` time — this returns immediately
     so the REPL stays usable while the UI runs.
 
-    On Windows (MicroPython and CPython), blocks in ``pump()`` +
-    ``broker.poll()`` because the SDL message pump needs the main thread.
+    On Windows (MicroPython and CPython), blocks in ``sleep_ms(1)`` with
+    ``broker.poll()`` every few iterations because SDL polling is costly on
+    ``micropython.exe`` while cooperative timers still need frequent ticks.
 
     On macOS, blocks in ``lv_utils.event_loop.run()`` (manual tick loop).
     """
-    from multimer import needs_pump, pump, sleep_ms
+    from multimer import sleep_ms
 
     inst = lv_utils.event_loop.current_instance()
     if inst is not None:
@@ -211,14 +212,24 @@ def run():
         if sys.platform != "win32":
             return
 
+    import time
+
+    inst = lv_utils.event_loop.current_instance()
+    if inst is not None:
+        if sys.platform == "darwin":
+            inst.run()
+            return
+        if sys.platform != "win32":
+            return
+
+    loop_i = 0
     while True:
-        if needs_pump():
-            pump()
-        if elist := broker.poll():
+        sleep_ms(1)
+        loop_i += 1
+        if (loop_i & 3) == 0 and (elist := broker.poll()):
             for e in elist:
                 if e.type == events.QUIT:
                     return
-        sleep_ms(1)
 
 
 main()

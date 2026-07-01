@@ -134,7 +134,7 @@ Per-implementation fallback when `machine.Timer` is unavailable:
 | CPython win32 | `_win32` → `_threading` → `_sdl2` → `_polling` |
 | CPython Linux | `_librt` → `_threading` → `_sdl2` → `_polling` |
 | MicroPython unix | `_librt` → `_threading` → `_sdl2` → `_polling` |
-| MicroPython win32 | `_sdl2` → `_polling` (`_threading` unavailable) |
+| MicroPython win32 | `_polling` (`_threading` / `_sdl2` unavailable or unsafe under WSL) |
 | MicroPython unix (no librt) | `_threading` → `_sdl2` → `_polling` |
 | CircuitPython desktop | `_threading` → `_sdl2` → `_polling` |
 
