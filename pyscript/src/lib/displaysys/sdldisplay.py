@@ -246,6 +246,29 @@ def retcheck(retvalue):
         raise RuntimeError(usdl2.SDL_GetError())
 
 
+def _hard_process_exit(code: int = 0) -> None:
+    """Terminate immediately without SDL teardown (kit subprocesses)."""
+    try:
+        import usdl2
+
+        usdl2.process_exit(code)
+    except Exception:
+        pass
+    try:
+        import ffi
+
+        ffi.open("libc.so.6").func("v", "_exit", "i")(code)
+    except Exception:
+        pass
+    try:
+        import os
+
+        os._exit(code)
+    except Exception:
+        pass
+    raise SystemExit(code)
+
+
 class SDLDisplay(DisplayDriver):
     """
     A class to emulate an LCD using SDL2.
@@ -337,7 +360,17 @@ class SDLDisplay(DisplayDriver):
             raise RuntimeError(f"{usdl2.SDL_GetError()}")
         retcheck(usdl2.SDL_SetTextureBlendMode(self._buffer, usdl2.SDL_BLENDMODE_NONE))
 
-        super().__init__(auto_refresh=True)
+        auto_refresh = True
+        if implementation.name == "micropython":
+            try:
+                from multimer import needs_pump
+
+                if needs_pump():
+                    auto_refresh = False
+            except ImportError:
+                pass
+
+        super().__init__(auto_refresh=auto_refresh)
 
     ############### Required API Methods ################
 
@@ -600,21 +633,22 @@ class SDLDisplay(DisplayDriver):
             _ensure_tty_sane()
         except Exception:
             pass
-        try:
-            import ffi
-
-            ffi.open("libc.so.6").func("v", "_exit", "i")(code)
-            return
-        except Exception:
-            pass
-        try:
-            import os
-
-            os._exit(code)
-        except Exception:
-            pass
-        raise SystemExit(code)
+        _hard_process_exit(code)
 
     def force_quit(self, code: int = 0) -> None:
-        """Release SDL resources then hard-exit the process."""
+        """Release SDL resources then hard-exit the process.
+
+        On MicroPython and CircuitPython, ``SDL_Quit`` during subprocess shutdown
+        can SIGSEGV; skip SDL teardown and ``_exit`` immediately after restoring
+        the TTY (kit harnesses and other short-lived desktop runs).
+        """
+        import sys
+
+        if sys.implementation.name in ("micropython", "circuitpython"):
+            try:
+                _restore_tty()
+                _ensure_tty_sane()
+            except Exception:
+                pass
+            _hard_process_exit(code)
         self.quit(code, force=True)

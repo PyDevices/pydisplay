@@ -63,7 +63,12 @@ try:
     _NEEDS_PUMP = False
 except ImportError:
     Timer = None
-    if sys.platform == "win32":
+    if sys.implementation.name == "micropython" and sys.platform == "win32":
+        from ._polling import Timer
+
+        _BACKEND = Timer.BACKEND
+        _NEEDS_PUMP = Timer.NEEDS_PUMP
+    elif sys.platform == "win32":
         try:
             from ._win32 import Timer
 
@@ -107,7 +112,7 @@ except ImportError:
                 _NEEDS_PUMP = Timer.NEEDS_PUMP
     elif sys.implementation.name == "circuitpython" and Timer is None:
         try:
-            from ._polling import Timer
+            from ._threading import Timer
 
             _BACKEND = Timer.BACKEND
             _NEEDS_PUMP = Timer.NEEDS_PUMP
@@ -118,7 +123,7 @@ except ImportError:
                 _BACKEND = Timer.BACKEND
                 _NEEDS_PUMP = Timer.NEEDS_PUMP
             except ImportError:
-                from ._threading import Timer
+                from ._polling import Timer
 
                 _BACKEND = Timer.BACKEND
                 _NEEDS_PUMP = Timer.NEEDS_PUMP

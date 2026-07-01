@@ -28,7 +28,7 @@ async def main():
     from eventsys import poll_quit_discarding_others
     from lv_test_timer_common import build_ui
 
-    build_ui()
+    build_ui("async")
     while True:
         if poll_quit_discarding_others(broker):
             break
