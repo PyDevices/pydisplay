@@ -750,6 +750,8 @@ async def main_async():
     await run_forever_async(lambda: _play_poll(play), delay_ms=1)
 
 
-from board_config import TIMER_ASYNC
+import board_config
 
-dual_main(main_sync, main_async, async_mode=TIMER_ASYNC)
+board_config.TIMER_ASYNC = True
+
+dual_main(main_sync, main_async, async_mode=board_config.TIMER_ASYNC)

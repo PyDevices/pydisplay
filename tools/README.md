@@ -13,6 +13,10 @@ Developer workflow only — local servers, test harnesses, and IDE typings. For 
 From repo root:
 
 ```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-dev.txt   # playwright, pytest (optional)
+.venv/bin/playwright install chromium           # headless PyScript matrix
+
 python tools/serve.py
 # http://127.0.0.1:8000/web/pyscript/index.html
 # http://127.0.0.1:8000/web/pyscript/load.html?modules=calculator

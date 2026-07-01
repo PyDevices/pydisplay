@@ -72,7 +72,7 @@ kind = "pyscript"
 status = "active"
 command_template = ["./tools/pyscript.sh", "--module", "{example}", "--no-open"]
 cwd = "."
-setup_notes = "Requires tools/serve.py on port 8000. Autotest uses embed.html?autotest=1. Optional: pip install playwright for headless kit runs."
+setup_notes = "Requires tools/serve.py on port 8000. Autotest uses embed.html?autotest=1. Headless: .venv/bin/pip install -r requirements-dev.txt && .venv/bin/playwright install chromium"
 
 [runtimes.jupyter]
 platform = "jupyter"
