@@ -193,13 +193,7 @@ def build_ui(mode=None):
     arc.set_bg_angles(0, 360)
     arc.set_angles(0, 0)
     arc.remove_style(None, lv.PART.KNOB)
-    try:
-        arc.remove_flag(lv.obj.FLAG.CLICKABLE)
-    except AttributeError:
-        try:
-            arc.clear_flag(lv.obj.FLAG.CLICKABLE)
-        except AttributeError:
-            pass
+    arc.remove_flag(lv.obj.FLAG.CLICKABLE)
 
     btn = lv.button(scr)
     btn.set_size(120, 50)
