@@ -9,6 +9,9 @@
     "python.analysis.diagnosticSeverityOverrides": {
         "reportMissingModuleSource": "none"
     },
+    // Overlay stubs on installed binary packages (e.g. lvgl.cpython-*.so in .venv).
+    // Pylance expects tools/typings/lvgl/__init__.pyi (symlink to ../lvgl.pyi).
+    "python.analysis.stubPath": "./tools/typings",
     // pip install -U micropython-esp32-esp32_generic_s3-stubs==1.23.* --target ./.site_utils/typings --no-user
     "python.analysis.typeshedPaths": [
         "tools/typings"

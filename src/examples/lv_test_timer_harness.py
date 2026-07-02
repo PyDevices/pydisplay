@@ -60,13 +60,14 @@ def _kit_fast_exit_runtime():
 
 
 def _button_center(btn):
+    import lvgl as lv
+
     from board_config import height, width
 
     try:
-        coords = btn.get_coords()
-        if coords:
-            x1, y1, x2, y2 = coords
-            return (x1 + x2) // 2, (y1 + y2) // 2
+        area = lv.area_t()
+        btn.get_coords(area)
+        return (area.x1 + area.x2) // 2, (area.y1 + area.y2) // 2
     except Exception:
         pass
     return width // 2, height - 55
