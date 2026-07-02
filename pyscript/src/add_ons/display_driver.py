@@ -42,6 +42,9 @@ def main():
                 display_drv._timer.deinit()
                 display_drv._timer = None
             refresh_cb = display_drv.show
+        elif getattr(display_drv, "_timer", None) is None:
+            # SDLDisplay disables auto_refresh when needs_pump(); present each LVGL frame.
+            refresh_cb = display_drv.show
         lv_utils.event_loop(asynchronous=use_async, refresh_cb=refresh_cb)
 
     if lv.group_get_default() is None:
@@ -172,6 +175,9 @@ class DisplayDriver:
         create_devices(devs, self.lv_display)
 
     def _flush_cb(self, disp_drv, area, color_p):
+        if hasattr(display_drv, "_sdl_active") and not display_drv._sdl_active():
+            self.lv_display.flush_ready()
+            return
         width = area.x2 - area.x1 + 1
         height = area.y2 - area.y1 + 1
 
@@ -212,24 +218,14 @@ def run():
         if sys.platform != "win32":
             return
 
-    import time
-
-    inst = lv_utils.event_loop.current_instance()
-    if inst is not None:
-        if sys.platform == "darwin":
-            inst.run()
-            return
-        if sys.platform != "win32":
-            return
-
     loop_i = 0
     while True:
         sleep_ms(1)
         loop_i += 1
-        if (loop_i & 3) == 0 and (elist := broker.poll()):
-            for e in elist:
-                if e.type == events.QUIT:
-                    return
+        if (loop_i & 3) == 0:
+            broker.poll()
+        if getattr(display_drv, "_deinitialized", False):
+            return
 
 
 main()
