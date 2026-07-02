@@ -129,6 +129,7 @@ class event_loop:
 
     def shutdown_for_quit(self, *, pump_rounds=30, pump_delay_ms=1):
         """Stop LVGL scheduling, drain in-flight work, then release the event loop."""
+        self.disable()
         if self.asynchronous:
             if self._aio_timer is not None:
                 self._aio_timer.deinit()
@@ -178,6 +179,10 @@ class event_loop:
         return event_loop._current_instance
 
     def task_handler(self, _):
+        if event_loop._current_instance is not self:
+            if getattr(self, "scheduled", 0) > 0:
+                self.scheduled -= 1
+            return
         try:
             nesting = lv._nesting.value
             if nesting == 0:
@@ -198,6 +203,8 @@ class event_loop:
                 self.tick()
 
     def timer_cb(self, t):
+        if event_loop._current_instance is not self:
+            return
         # Can be called in Interrupt context
         # Use task_handler_ref since passing self.task_handler would cause allocation.
         lv.tick_inc(self.delay)

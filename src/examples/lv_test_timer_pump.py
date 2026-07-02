@@ -22,10 +22,10 @@ from lv_test_timer_common import build_ui
 
 build_ui("pump")
 
-import time
 import sys
+import time
 
-from board_config import broker
+from board_config import broker, display_drv
 from multimer import sleep_ms
 
 _BROKER_POLL_S = 0.025
@@ -41,3 +41,7 @@ while True:
             next_broker_poll = time.time() + _BROKER_POLL_S
     elif (loop_i & 3) == 0:
         broker.poll()
+    # QUIT may be handled via LVGL VirtualDevices during task_handler, not this
+    # poll pass — ``register_quit_cleanup`` deinits the display when the window closes.
+    if getattr(display_drv, "_deinitialized", False):
+        break

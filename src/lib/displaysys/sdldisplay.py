@@ -86,7 +86,12 @@ def _ensure_tty_sane() -> None:
     except Exception:
         try:
             import os
+            import sys
 
+            # ``stty`` is Unix-only; ``os.system`` on win32 spawns CMD.EXE and
+            # errors when micropython.exe is launched from a WSL UNC cwd.
+            if sys.platform == "win32":
+                return
             os.system("stty sane 2>/dev/null")
         except Exception:
             pass
@@ -406,6 +411,8 @@ class SDLDisplay(DisplayDriver):
         Returns:
             (tuple): A tuple containing the x, y, w, h values.
         """
+        if not self._sdl_active():
+            return (x, y, w, h)
         pitch = int(w * self.color_depth // 8)
         if len(buffer) != pitch * h:
             raise ValueError("Buffer size does not match dimensions")
