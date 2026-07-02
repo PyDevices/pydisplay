@@ -1,0 +1,12 @@
+{
+  "include": ["src"],
+  "extraPaths": [
+    "src",
+    "src/add_ons",
+    "src/examples",
+    "src/lib"
+  ],
+  "stubPath": "tools/typings",
+  "typeCheckingMode": "standard",
+  "reportMissingModuleSource": "none"
+}
