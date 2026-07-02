@@ -15,6 +15,8 @@ Private working notes for this repo. Not part of the published docs.
 
 - [ ] Develop apps and freeze them into standalone executables — start with `spotapi_remote` in the spotapi repo
 
+- [ ] Check `display_driver.py`, `lv_utils.py`, and `multimer` for possible refactor / optimizations
+
 ### Frozen self-installer notes
 
 Private design scratchpad (not for RTD).
