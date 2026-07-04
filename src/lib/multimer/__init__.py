@@ -100,16 +100,29 @@ except ImportError:
             _BACKEND = Timer.BACKEND
             _NEEDS_PUMP = Timer.NEEDS_PUMP
         except ImportError:
-            try:
-                from ._threading import Timer
+            if sys.platform == "android":
+                # SDL UI thread: prefer SDL_AddTimer (_sdl2) over threading.Timer.
+                try:
+                    from ._sdl2 import Timer
 
-                _BACKEND = Timer.BACKEND
-                _NEEDS_PUMP = Timer.NEEDS_PUMP
-            except ImportError:
-                from ._sdl2 import Timer
+                    _BACKEND = Timer.BACKEND
+                    _NEEDS_PUMP = Timer.NEEDS_PUMP
+                except ImportError:
+                    from ._threading import Timer
 
-                _BACKEND = Timer.BACKEND
-                _NEEDS_PUMP = Timer.NEEDS_PUMP
+                    _BACKEND = Timer.BACKEND
+                    _NEEDS_PUMP = Timer.NEEDS_PUMP
+            else:
+                try:
+                    from ._threading import Timer
+
+                    _BACKEND = Timer.BACKEND
+                    _NEEDS_PUMP = Timer.NEEDS_PUMP
+                except ImportError:
+                    from ._sdl2 import Timer
+
+                    _BACKEND = Timer.BACKEND
+                    _NEEDS_PUMP = Timer.NEEDS_PUMP
     elif sys.implementation.name == "circuitpython" and Timer is None:
         try:
             from ._threading import Timer
