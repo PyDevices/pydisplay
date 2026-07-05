@@ -50,6 +50,30 @@ cd ~/github/cmods/lv_circuitpython_mod
 
 Install `libsdl2-dev`, then symlink or copy the built binary (e.g. `ports/unix/build-coverage/micropython`) to `~/bin/circuitpython`.
 
+### Frozen asyncio (required for multimer.AsyncTimer)
+
+CircuitPython unix pydisplay builds must **freeze** Adafruit's `asyncio` and
+`adafruit_ticks` libraries into the firmware — do not rely on
+`circup install asyncio` at runtime.
+
+From the [cmods](https://github.com/PyDevices/cmods) workspace:
+
+```bash
+mkdir -p cp-user-config
+cp cp-user-config/user_post_mpconfigport.mk.example cp-user-config/user_post_mpconfigport.mk
+git clone https://github.com/adafruit/Adafruit_CircuitPython_asyncio.git
+git clone https://github.com/adafruit/Adafruit_CircuitPython_Ticks.git
+./build_cp.sh --port unix --variant coverage
+```
+
+`build_cp.sh` passes `-I cp-user-config/` so `user_post_mpconfigport.mk` sets
+`FROZEN_MPY_DIRS` and enables `MICROPY_PY_ASYNCIO` / `select` / `traceback`.
+See [multimer building docs](https://github.com/PyDevices/multimer/blob/main/docs/building.md)
+and [cmods README](https://github.com/PyDevices/cmods/blob/main/README.md).
+
+`multimer` supplies Adafruit-compatible `ticks_*` helpers for application code;
+frozen asyncio still uses `adafruit_ticks` internally unless the build is customized.
+
 ## framebuf shim
 
 CircuitPython lacks MicroPython-compatible `framebuf`. Install `add_ons/framebuf.py` or copy it to your `lib/` folder.
