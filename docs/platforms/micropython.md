@@ -52,4 +52,17 @@ Without **`usdl2`**, `SDLDisplay` falls back to pure-Python ffi/ctypes bindings;
 
 ## Frozen firmware
 
-The repo-root `manifest.py` lists packages for frozen MicroPython builds. See [tools/README.md](https://github.com/PyDevices/pydisplay/blob/main/tools/README.md) for maintainer details.
+The repo-root `manifest.py` lists packages for frozen MicroPython builds and
+**freezes `asyncio` on unix and windows ports** (required for `multimer.AsyncTimer`).
+
+With [cmods](https://github.com/PyDevices/cmods) `build_mp.sh`, set
+`FROZEN_MANIFEST` to this file (or copy `packaging/cmods-my-manifest.py.example`
+from the multimer repo into `cmods/my-manifest.py`). Build Windows with
+`--variant dev` so `MICROPY_PY_ASYNCIO` and `select` are enabled::
+
+```bash
+./build_mp.sh --port windows --variant dev
+./build_mp.sh --port unix
+```
+
+See [multimer building docs](https://github.com/PyDevices/multimer/blob/main/docs/building.md) and [tools/README.md](https://github.com/PyDevices/pydisplay/blob/main/tools/README.md).
