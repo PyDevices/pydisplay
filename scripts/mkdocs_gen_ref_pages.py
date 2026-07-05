@@ -40,6 +40,8 @@ def _should_skip(path: Path, parts: tuple[str, ...]) -> bool:
 
 
 for src, ref_prefix, nav_prefix, path_entries in SOURCE_TREES:
+    if not src.is_dir():
+        continue
     for entry in path_entries:
         sys.path.append(str(src / entry) if entry else str(src))
 

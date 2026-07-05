@@ -17,7 +17,7 @@ if sys.platform != "win32":
 
 import ctypes
 
-from ._timerbase import _TimerBase
+from .._core import _TimerCore
 
 kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
 
@@ -95,7 +95,7 @@ def _apc_entry(param):
     timer = _registry.get(int(param))
     if timer is None or not timer._running:
         return
-    timer._handler(0)
+    timer._deliver(0)
 
 
 def _spawn(fn):
@@ -104,25 +104,22 @@ def _spawn(fn):
     threading.Thread(target=fn, daemon=True).start()
 
 
-class Timer(_TimerBase):
+class Timer(_TimerCore):
     """Windows waitable-timer + APC delivery on the main thread."""
 
-    BACKEND = "win32"
-    NEEDS_PUMP = False
-
-    def __init__(self, id=-1, **kwargs):
+    def __init__(self, id=-1, /, **kwargs):
         self._running = False
         self._token = 0
         self._handle = None
         super().__init__(id, **kwargs)
 
-    def _start(self):
+    def _arm(self):
         _ensure_main_thread()
         self._token = _alloc_token(self)
         self._running = True
         _spawn(self._worker)
 
-    def _stop(self):
+    def _disarm(self):
         self._running = False
         handle = self._handle
         if handle:
@@ -139,8 +136,8 @@ class Timer(_TimerBase):
             return
         self._handle = handle
         due = _LARGE_INTEGER()
-        due.QuadPart = -self._interval * 10000
-        period_ms = self._interval if self._mode == Timer.PERIODIC else 0
+        due.QuadPart = -self._period_ms * 10000
+        period_ms = self._period_ms if self._mode == Timer.PERIODIC else 0
         try:
             if not kernel32.SetWaitableTimer(
                 handle,

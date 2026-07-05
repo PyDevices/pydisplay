@@ -15,7 +15,7 @@ import sys
 if sys.platform != "linux":
     raise ImportError("librt timer backend requires Linux")
 
-from ._timerbase import _TimerBase
+from .._core import _TimerCore
 
 _USE_CTYPES = sys.implementation.name == "cpython"
 _CLOCK_MONOTONIC = 1
@@ -233,25 +233,22 @@ def _remove_signal(signum):
     _sigaction_(signum, sa, sa_old)
 
 
-class Timer(_TimerBase):
+class Timer(_TimerCore):
     """Linux librt Timer (timer_create)."""
 
-    BACKEND = "librt"
-    NEEDS_PUMP = False
-
-    def _start(self):
+    def _arm(self):
         self.id = self.id if self.id != -1 else 0xF
         signum = _SIGRTMIN + self.id
 
         def _py_handler(_signum, _frame=None):
-            self._handler(_signum)
+            self._deliver()
 
         self._py_handler = _py_handler
         self._signal_ref = _install_signal(signum, _py_handler)
         self._timer = _timer_create(self.id)
-        _timer_settime(self._timer, self._interval, self._mode == Timer.PERIODIC)
+        _timer_settime(self._timer, self._period_ms, self._mode == Timer.PERIODIC)
 
-    def _stop(self):
+    def _disarm(self):
         signum = _SIGRTMIN + (self.id if self.id != -1 else 0xF)
         if self._timer is not None:
             _timer_disarm(self._timer)

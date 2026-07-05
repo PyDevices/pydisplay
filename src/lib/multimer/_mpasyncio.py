@@ -4,14 +4,19 @@
 # SPDX-License-Identifier: MIT
 #
 # Minimal asyncio event loop for MicroPython builds that ship ``_asyncio`` but
-# not the frozen ``asyncio`` / ``uasyncio`` packages (e.g. micropython.exe standard).
+# not frozen ``asyncio`` / ``uasyncio`` (e.g. micropython.exe standard).
 # Adapted from MicroPython extmod/asyncio/core.py.
 
 from _asyncio import Task, TaskQueue
-import select
 import sys
-from time import ticks_add, ticks_diff
-from time import ticks_ms as ticks
+
+from ._ticks import ticks_add, ticks_diff
+from ._ticks import ticks_ms as ticks
+
+try:
+    import select
+except ImportError:
+    select = None
 
 
 class CancelledError(BaseException):
@@ -46,8 +51,6 @@ _sleep_ms_sgen = SingletonGenerator()
 
 
 class Event:
-    """Minimal asyncio.Event for lv_utils async refresh coordination."""
-
     def __init__(self):
         self.state = False
         self.waiting = TaskQueue()
@@ -83,6 +86,8 @@ def sleep(t):
 
 class IOQueue:
     def __init__(self):
+        if select is None:
+            raise ImportError("_mpasyncio IOQueue requires select")
         self.poller = select.poll()
         self.map = {}
 
@@ -150,6 +155,10 @@ def create_task(coro):
     t = Task(coro, globals())
     _task_queue.push(t)
     return t
+
+
+def ensure_future(aw):
+    return _promote_to_task(aw)
 
 
 def run_until_complete(main_task=None):
