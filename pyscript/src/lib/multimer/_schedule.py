@@ -6,7 +6,6 @@
 import sys
 
 if sys.implementation.name in ("cpython", "circuitpython"):
-    SCHEDULE_QUEUE = True
     _MAX_PENDING = 128 if sys.implementation.name == "circuitpython" else 32
 
     try:
@@ -85,7 +84,7 @@ if sys.implementation.name in ("cpython", "circuitpython"):
         except _QueueFull as err:
             raise RuntimeError("schedule queue full") from err
 
-    def _drain_schedule(max_items=None):
+    def _drain(max_items=None):
         n = 0
         while max_items is None or n < max_items:
             try:
@@ -99,7 +98,5 @@ if sys.implementation.name in ("cpython", "circuitpython"):
 else:
     from micropython import schedule
 
-    SCHEDULE_QUEUE = False
-
-    def _drain_schedule(max_items=None):
+    def _drain(max_items=None):
         return 0
