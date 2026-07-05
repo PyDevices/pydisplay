@@ -232,6 +232,7 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `font_list.py` | Font picker | CPython · MCU | core |
 | `fonts.py` | Page through fonts | CPython · MCU | core |
 | `boxlines.py` | Lines and boxes | CPython · MCU | core |
+| `bouncing_balls.py` | Colored balls animation | CPython · MCU · PyScript | core |
 
 ## Bitmaps and palettes
 

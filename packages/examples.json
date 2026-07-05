@@ -29,6 +29,10 @@
       "github:PyDevices/pydisplay/src/examples/bmp565_sprite_transparent.py"
     ],
     [
+      "bouncing_balls.py",
+      "github:PyDevices/pydisplay/src/examples/bouncing_balls.py"
+    ],
+    [
       "boxlines.py",
       "github:PyDevices/pydisplay/src/examples/boxlines.py"
     ],
