@@ -1,13 +1,14 @@
 # Tests
 
-Self-contained tests for the standalone [`multimer`](../src/lib/multimer),
+Self-contained tests for the standalone [`multimer`](https://github.com/PyDevices/multimer)
+package (sibling checkout at `../multimer`), plus in-tree
 [`eventsys`](../src/lib/eventsys), [`graphics`](../src/lib/graphics), and
 [`displaysys`](../src/lib/displaysys) packages.
 
 They use only the Python standard library (`unittest`) — no third-party test
 runner or build step is required. The shared bootstrap in
-[`_env.py`](_env.py) puts `src/lib` on `sys.path`, so nothing needs to be
-installed first.
+[`_env.py`](_env.py) puts `src/lib` and the sibling `multimer` repo on
+`sys.path`, so nothing needs to be installed first.
 
 On CPython the graphics package falls back to its pure-Python
 `graphics._framebuf` implementation (the native `framebuf` module only exists

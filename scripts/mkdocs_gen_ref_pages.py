@@ -15,7 +15,14 @@ SOURCE_TREES = (
         root / "src/lib",
         Path("reference"),
         (),
-        ("", "displaysys", "eventsys", "graphics", "multimer"),
+        ("", "displaysys", "eventsys", "graphics"),
+    ),
+    (
+        # Sibling PyDevices/multimer checkout (parent of the package dir)
+        root.parent / "multimer",
+        Path("reference"),
+        (),
+        ("",),
     ),
     (
         root / "src/add_ons",
@@ -40,12 +47,17 @@ def _should_skip(path: Path, parts: tuple[str, ...]) -> bool:
 
 
 for src, ref_prefix, nav_prefix, path_entries in SOURCE_TREES:
+    if not src.is_dir():
+        continue
     for entry in path_entries:
         sys.path.append(str(src / entry) if entry else str(src))
 
     for path in sorted(src.rglob("*.py")):
         rel_parts = path.relative_to(src).parts
         if any(p in SKIP_DIR_NAMES for p in rel_parts):
+            continue
+        # Sibling multimer checkout has tests/ and docs/ next to the package.
+        if src == root.parent / "multimer" and (not rel_parts or rel_parts[0] != "multimer"):
             continue
         if src == root / "src" / "add_ons" and any(p in ADD_ONS_SKIP_DIR_NAMES for p in rel_parts):
             continue
@@ -69,7 +81,11 @@ for src, ref_prefix, nav_prefix, path_entries in SOURCE_TREES:
             ident = ".".join(parts)
             fd.write(f"::: {ident}")
 
-        mkdocs_gen_files.set_edit_path(full_doc_path, path.relative_to(root))
+        try:
+            mkdocs_gen_files.set_edit_path(full_doc_path, path.relative_to(root))
+        except ValueError:
+            # External sibling packages (e.g. multimer) live outside this repo.
+            pass
 
 with mkdocs_gen_files.open("reference/SUMMARY.md", "w") as nav_file:
     nav_file.writelines(nav.build_literate_nav())

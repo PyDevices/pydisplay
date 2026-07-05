@@ -118,23 +118,23 @@
     ],
     [
       "lib/multimer/__init__.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/__init__.py"
+      "github:PyDevices/multimer/multimer/__init__.py"
     ],
     [
       "lib/multimer/_capabilities.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_capabilities.py"
+      "github:PyDevices/multimer/multimer/_capabilities.py"
     ],
     [
       "lib/multimer/_schedule.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_schedule.py"
+      "github:PyDevices/multimer/multimer/_schedule.py"
     ],
     [
       "lib/multimer/_ticks.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_ticks.py"
+      "github:PyDevices/multimer/multimer/_ticks.py"
     ],
     [
       "lib/multimer/_timerbase.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/_timerbase.py"
+      "github:PyDevices/multimer/multimer/_timerbase.py"
     ],
     [
       "add_ons/touch_keypad.py",

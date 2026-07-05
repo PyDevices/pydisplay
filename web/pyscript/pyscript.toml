@@ -111,6 +111,7 @@
 "./src/lib/graphics/_framebuf_plus.py" = "/lib/graphics/"
 "./src/lib/graphics/_shapes.py" = "/lib/graphics/"
 
+"./src/jupyter_notebook.ipynb" = "/"
 "./src/lib/multimer/__init__.py" = "/lib/multimer/"
 "./src/lib/multimer/_async.py" = "/lib/multimer/"
 "./src/lib/multimer/_capabilities.py" = "/lib/multimer/"
@@ -124,4 +125,3 @@
 "./src/lib/multimer/_timerbase.py" = "/lib/multimer/"
 "./src/lib/multimer/_win32.py" = "/lib/multimer/"
 
-"./src/jupyter_notebook.ipynb" = "/"

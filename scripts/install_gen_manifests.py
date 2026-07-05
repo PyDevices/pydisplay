@@ -3,6 +3,7 @@
 import json
 import os
 from pathlib import Path
+import shutil
 import sys
 
 _scripts = Path(__file__).resolve().parent
@@ -21,13 +22,26 @@ toml_full_path = output_dir + "web/pyscript/pyscript.toml"
 master_package_name = "pydisplay-bundle"
 
 # list of package directories, dependencies and extra files in that package
+# multimer lives in sibling PyDevices/multimer (see EXTERNAL_PACKAGES below).
 packages = [
     ["add_ons", [], []],
     ["examples", [], []],
     ["lib/displaysys", [], ["board_config.py", "path.py"]],
     ["lib/eventsys", [], []],
     ["lib/graphics", [], []],
-    ["lib/multimer", [], []],
+]
+
+# Sibling packages: scanned from disk for PyScript vendor copy; mip URLs
+# point at the external GitHub repo.
+EXTERNAL_PACKAGES = [
+    {
+        "name": "multimer",
+        "source_dir": os.path.abspath(os.path.join(repo_dir, "..", "multimer", "multimer")),
+        "github_url": "github:PyDevices/multimer/multimer/",
+        "bundle_dest_prefix": "lib/multimer/",
+        "pyscript_vendor_dir": os.path.join(repo_dir, "web", "pyscript", "src", "lib", "multimer"),
+        "pyscript_toml_prefix": "src/lib/multimer/",
+    },
 ]
 
 # Packages omitted from pydisplay-bundle.json (still get their own packages/*.json).
@@ -177,6 +191,50 @@ for rel_path in extra_files_added_to_master:
     if toml_dest_dir == "//":
         toml_dest_dir = "/"
     master_toml.append(pyscript_toml_file_entry(rel_path, toml_dest_dir))
+
+# Sibling/external packages (e.g. PyDevices/multimer).
+for external in EXTERNAL_PACKAGES:
+    package_name = external["name"]
+    source_dir = external["source_dir"]
+    if not os.path.isdir(source_dir):
+        raise SystemExit(
+            f"install_gen_manifests: missing external package source for "
+            f"{package_name}: {source_dir}\n"
+            f"Clone PyDevices/{package_name} as a sibling of pydisplay."
+        )
+
+    vendor_dir = external["pyscript_vendor_dir"]
+    if os.path.isdir(vendor_dir) or os.path.islink(vendor_dir):
+        if os.path.islink(vendor_dir):
+            os.unlink(vendor_dir)
+        else:
+            shutil.rmtree(vendor_dir)
+    os.makedirs(os.path.dirname(vendor_dir), exist_ok=True)
+    shutil.copytree(
+        source_dir,
+        vendor_dir,
+        ignore=shutil.ignore_patterns(*SKIP_DIR_NAMES, "*.pyc", "*.pyo"),
+    )
+
+    package_dicts[package_name] = {"urls": [], "deps": [], "version": package_ver}
+    github_url = external["github_url"]
+    bundle_prefix = external["bundle_dest_prefix"]
+    toml_prefix = external["pyscript_toml_prefix"]
+
+    for root, dirs, files in os.walk(source_dir):
+        dirs[:] = sorted(d for d in dirs if d not in SKIP_DIR_NAMES)
+        for f in sorted(files):
+            if not should_include_file(f):
+                continue
+            full_file_path = os.path.join(root, f)
+            rel = os.path.relpath(full_file_path, source_dir).replace("\\", "/")
+            package_dicts[package_name]["urls"].append([f"{package_name}/{rel}", github_url + rel])
+            master_package["urls"].append([bundle_prefix + rel, github_url + rel])
+            toml_dest_dir = "/" + bundle_prefix.rstrip("/") + "/" + "/".join(rel.split("/")[:-1])
+            toml_dest_dir = toml_dest_dir.replace("//", "/").rstrip("/") + "/"
+            master_toml.append(pyscript_toml_file_entry(toml_prefix + rel, toml_dest_dir))
+
+    master_toml.append("")
 
 # Add the master package to the package dictionaries
 package_dicts[master_package_name] = master_package
