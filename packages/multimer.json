@@ -2,63 +2,63 @@
   "urls": [
     [
       "multimer/__init__.py",
-      "github:PyDevices/multimer/multimer/__init__.py"
+      "github:PyDevices/pydisplay/src/lib/multimer/__init__.py"
     ],
     [
       "multimer/_async_timer.py",
-      "github:PyDevices/multimer/multimer/_async_timer.py"
+      "github:PyDevices/pydisplay/src/lib/multimer/_async_timer.py"
     ],
     [
       "multimer/_asyncio_loader.py",
-      "github:PyDevices/multimer/multimer/_asyncio_loader.py"
+      "github:PyDevices/pydisplay/src/lib/multimer/_asyncio_loader.py"
     ],
     [
       "multimer/_core.py",
-      "github:PyDevices/multimer/multimer/_core.py"
+      "github:PyDevices/pydisplay/src/lib/multimer/_core.py"
     ],
     [
       "multimer/_mpasyncio.py",
-      "github:PyDevices/multimer/multimer/_mpasyncio.py"
+      "github:PyDevices/pydisplay/src/lib/multimer/_mpasyncio.py"
     ],
     [
       "multimer/_schedule.py",
-      "github:PyDevices/multimer/multimer/_schedule.py"
+      "github:PyDevices/pydisplay/src/lib/multimer/_schedule.py"
     ],
     [
       "multimer/_select.py",
-      "github:PyDevices/multimer/multimer/_select.py"
+      "github:PyDevices/pydisplay/src/lib/multimer/_select.py"
     ],
     [
       "multimer/_ticks.py",
-      "github:PyDevices/multimer/multimer/_ticks.py"
+      "github:PyDevices/pydisplay/src/lib/multimer/_ticks.py"
     ],
     [
       "multimer/_timer.py",
-      "github:PyDevices/multimer/multimer/_timer.py"
+      "github:PyDevices/pydisplay/src/lib/multimer/_timer.py"
     ],
     [
       "multimer/py.typed",
-      "github:PyDevices/multimer/multimer/py.typed"
+      "github:PyDevices/pydisplay/src/lib/multimer/py.typed"
     ],
     [
       "multimer/_backends/__init__.py",
-      "github:PyDevices/multimer/multimer/_backends/__init__.py"
+      "github:PyDevices/pydisplay/src/lib/multimer/_backends/__init__.py"
     ],
     [
       "multimer/_backends/librt.py",
-      "github:PyDevices/multimer/multimer/_backends/librt.py"
+      "github:PyDevices/pydisplay/src/lib/multimer/_backends/librt.py"
     ],
     [
       "multimer/_backends/polling.py",
-      "github:PyDevices/multimer/multimer/_backends/polling.py"
+      "github:PyDevices/pydisplay/src/lib/multimer/_backends/polling.py"
     ],
     [
       "multimer/_backends/threading.py",
-      "github:PyDevices/multimer/multimer/_backends/threading.py"
+      "github:PyDevices/pydisplay/src/lib/multimer/_backends/threading.py"
     ],
     [
       "multimer/_backends/win32.py",
-      "github:PyDevices/multimer/multimer/_backends/win32.py"
+      "github:PyDevices/pydisplay/src/lib/multimer/_backends/win32.py"
     ]
   ],
   "deps": [],

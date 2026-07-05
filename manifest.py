@@ -55,5 +55,4 @@ if _port.endswith("/unix") or _port.endswith("/windows"):
 package("displaysys", base_path="./src/lib", opt=3)
 package("eventsys", base_path="./src/lib", opt=3)
 package("graphics", base_path="./src/lib", opt=3)
-# Standalone PyDevices/multimer (sibling checkout next to pydisplay).
-package("multimer", base_path="../multimer", opt=3)
+package("multimer", base_path="./src/lib", opt=3)
