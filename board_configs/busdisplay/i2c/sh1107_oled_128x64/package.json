@@ -4,7 +4,8 @@
     ["sh1107.py", "github:PyDevices/pydisplay/drivers/display/sh1107.py"]
   ],
   "deps": [
-    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"]
+    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"],
+    ["github:PyDevices/pydisplay/packages/i2cbus.json", "main"]
   ],
   "version": "0.1"
 }

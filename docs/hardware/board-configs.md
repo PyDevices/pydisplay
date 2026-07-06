@@ -97,7 +97,8 @@ An exact match for all four is rare; bus + display controller is usually enough 
 | Directory | Hardware |
 |-----------|----------|
 | `busdisplay/i2c/cp_ssd1306_oled_featherwing` | FeatherWing OLED 128×32 |
-| `busdisplay/i2c/ssd1306_oled_featherwing` | MP skeleton (i2cbus) |
+| `busdisplay/i2c/ssd1306_oled_featherwing` | FeatherWing OLED 128×32 (MP + `i2cbus`) |
+| `busdisplay/i2c/sh1107_oled_128x64` | SH1107 OLED 128×64 (MP + `i2cbus`) |
 
 ## Built-in Adafruit boards (SPI)
 
@@ -105,6 +106,7 @@ An exact match for all four is rare; bus + display controller is usually enough 
 |-----------|----------|
 | `busdisplay/spi/cp_pyportal` | PyPortal + TT21100 touch |
 | `busdisplay/spi/cp_clue` | CLUE ST7789 |
+| `busdisplay/spi/cp_clue_builtin` | CLUE via `board.DISPLAY` (no manual SPI wiring) |
 | `busdisplay/spi/cp_funhouse` | FunHouse ST7789 + touch |
 | `busdisplay/spi/cp_pygamer` | PyGamer ST7789 |
 | `busdisplay/spi/cp_pitft_ili9341_featherwing` | PiTFT FeatherWing + STMPE610 |

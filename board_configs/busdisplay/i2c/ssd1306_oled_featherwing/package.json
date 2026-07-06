@@ -4,7 +4,8 @@
     ["ssd1306.py", "github:PyDevices/pydisplay/drivers/display/ssd1306.py"]
   ],
   "deps": [
-    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"]
+    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"],
+    ["github:PyDevices/pydisplay/packages/i2cbus.json", "main"]
   ],
   "version": "0.1"
 }

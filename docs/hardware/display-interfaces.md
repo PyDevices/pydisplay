@@ -8,11 +8,11 @@ Maps hardware interface types to pydisplay `displaysys` backends and pydevices/c
 |-----------|---------------|----------------------|-------------------|-----------------|------------------|
 | SPI + MIPI DCS | SPI TFT | `fourwire.FourWire` + chip driver | **BusDisplay** | `SPIBus` | Done |
 | 8080 8-bit parallel | I80 parallel | `paralleldisplaybus.ParallelBus` | **BusDisplay** | `I80Bus` | Bit-bang done; PIO WIP |
-| I2C DCS | I2C OLED | `i2cdisplaybus.I2CDisplayBus` | **BusDisplay** | `I2CBus` (planned) | Not started |
+| I2C DCS | I2C OLED | `i2cdisplaybus.I2CDisplayBus` | **BusDisplay** | `I2CBus` | **Done** (`drivers/bus/i2cbus.py`) |
 | RGB parallel timed | RGB565 / **RGB666** | `dotclockframebuffer` | **FBDisplay** | `rgbframebuffer` | External / cmod |
 | HUB75 LED matrix | HUB75 | `rgbmatrix.RGBMatrix` | **FBDisplay** | `rgbmatrix` | Not started |
 | WS2812 / DotStar grid | Addressable LED matrix | `adafruit_pixel_framebuf` | **PixelDisplay** | neopixel + mapper | Not started |
-| SPI E-ink | E-paper | `epaperdisplay.EPaperDisplay` chip drivers | **EPaperDisplay** (stub) | SPI + chip driver | Stub only |
+| SPI E-ink | E-paper | `epaperdisplay.EPaperDisplay` chip drivers | **EPaperDisplay** | SPI + chip driver | CP displayio push; MP bus.send path |
 | USB UVC gadget | USB Video | `usb_video` | **FBDisplay** | N/A | CP only |
 | MIPI DSI | MIPI DSI | SoC firmware | TBD | DSI host | Not started |
 
@@ -26,6 +26,7 @@ Maps hardware interface types to pydisplay `displaysys` backends and pydevices/c
 | FBDisplay | `board_configs/fbdisplay/` | `cp_qualia_tl040hds20`, `cp_matrixportal_s3_64x64` |
 | PixelDisplay | `board_configs/pixeldisplay/` | `cp_neopixel_8x8_zigzag` |
 | EPaperDisplay | `board_configs/epaperdisplay/` | `cp_magtag` |
+| BoardDisplay | `board_configs/busdisplay/spi/cp_*_builtin` | `cp_clue_builtin` |
 
 ## Touch
 

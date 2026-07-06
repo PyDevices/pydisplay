@@ -1,11 +1,19 @@
-"""Adafruit FeatherWing OLED 128x32 SSD1306 — MicroPython (requires I2C display bus)"""
+"""Adafruit FeatherWing OLED 128x32 SSD1306 — MicroPython"""
 
-# MicroPython parity pending i2cbus user_c_module — see docs/hardware/display-interfaces.md
-
+from machine import I2C, Pin
+from i2cbus import I2CBus
 from ssd1306 import SSD1306
 
 import eventsys
 
-raise NotImplementedError(
-    "I2C OLED on MicroPython requires i2cbus — use cp_ssd1306_oled_featherwing on CircuitPython"
+display_bus = I2CBus(I2C(0, sda=Pin(4), scl=Pin(5), freq=400_000), address=0x3C)
+
+display_drv = SSD1306(
+    display_bus,
+    width=128,
+    height=32,
+    rotation=0,
 )
+
+broker = eventsys.Broker()
+broker.register_quit_cleanup(display_drv)

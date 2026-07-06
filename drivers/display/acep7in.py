@@ -22,7 +22,15 @@ Implementation Notes
 """
 
 
-from fourwire import FourWire
+try:
+    from epaperdisplay import EPaperDisplay
+except ImportError:
+    pass
+
+try:
+    from fourwire import FourWire
+except ImportError:
+    pass
 
 __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_ACeP7In.git"

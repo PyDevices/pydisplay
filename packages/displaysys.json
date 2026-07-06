@@ -43,6 +43,10 @@
     [
       "displaysys/epaperdisplay.py",
       "github:PyDevices/pydisplay/src/lib/displaysys/epaperdisplay.py"
+    ],
+    [
+      "displaysys/boarddisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/boarddisplay.py"
     ]
   ],
   "deps": [],

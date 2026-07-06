@@ -6,7 +6,7 @@ MicroPython hardware gaps surfaced by pydisplay board configs. See also [display
 
 | Module | Repo target | Unblocks |
 |--------|-------------|----------|
-| `i2cbus` | pydevices/cmods | `cp_ssd1306_oled_featherwing`, `cp_sh1107_oled_128x64`, all I2C OLED MP pairs |
+| `i2cbus` | pydevices/cmods | **Done in pydisplay** (`drivers/bus/i2cbus.py`) — OLED MP configs |
 | `rgbframebuffer` | pydevices/cmods | `qualia_tl040hds20`, RGB parallel (RGB666) panels |
 
 ## P1 — LED matrix and fast parallel
@@ -20,7 +20,7 @@ MicroPython hardware gaps surfaced by pydisplay board configs. See also [display
 
 | Work item | Location | Unblocks |
 |-----------|----------|----------|
-| `EPaperDisplay` buffer → panel push | `src/lib/displaysys/epaperdisplay.py` | All `epaperdisplay/*` MP configs |
+| `EPaperDisplay` buffer → panel push | `src/lib/displaysys/epaperdisplay.py` | CP displayio path done; MP `bus.send` path needs chip testing |
 | NeoPixel grid mapper | pydevices/cmods | `pixeldisplay/*` MP pairs |
 
 ## P3 — advanced interfaces
@@ -33,7 +33,8 @@ MicroPython hardware gaps surfaced by pydisplay board configs. See also [display
 
 ## pydisplay-side work (no cmod required)
 
-- [ ] `EPaperDisplay.show()` — transfer RAM buffer to chip driver GRAM
-- [ ] `board.DISPLAY` adapter for built-in CP boards
+- [x] `i2cbus` for MicroPython OLED (`drivers/bus/i2cbus.py`)
+- [x] `EPaperDisplay.show()` — displayio push on CP; `bus.send` fallback on MP
+- [x] `board.DISPLAY` adapter (`displaysys.boarddisplay.BoardDisplay`)
 - [ ] Hardware validation pass on physical boards
 - [ ] circup / micropython-lib publish for new drivers
