@@ -1,9 +1,9 @@
-"""LILYGO T-QT Pro GC9107 128x128 — CircuitPython"""
+"""Adafruit PyGamer ST7789 — CircuitPython"""
 
 import board
 from displayio import release_displays
 from fourwire import FourWire
-from gc9a01 import GC9A01
+from st7789 import ST7789
 
 import eventsys
 
@@ -11,27 +11,23 @@ release_displays()
 
 display_bus = FourWire(
     board.SPI(),
-    command=board.GP6,
-    chip_select=board.GP5,
-    reset=board.GP1,
-    baudrate=60_000_000,
+    command=board.TFT_DC,
+    chip_select=board.TFT_CS,
+    reset=board.TFT_RESET,
+    baudrate=24_000_000,
 )
 
-display_drv = GC9A01(
+display_drv = ST7789(
     display_bus,
-    width=128,
+    width=160,
     height=128,
     colstart=0,
     rowstart=0,
-    rotation=180,
+    rotation=0,
     mirrored=False,
     color_depth=16,
-    bgr=True,
+    bgr=False,
     reverse_bytes_in_word=True,
-    invert=True,
-    brightness=1.0,
-    backlight_pin=board.GP10,
-    backlight_on_high=True,
 )
 
 broker = eventsys.Broker()

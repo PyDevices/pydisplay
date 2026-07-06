@@ -1,9 +1,10 @@
-"""CircuitPython variant — see paired MicroPython config in sibling directory."""
+"""QTPy ESP32S3 with EyeSPI and ILI9341 2.8" display — CircuitPython"""
 
+from adafruit_focaltouch import Adafruit_FocalTouch
 import board
 from displayio import release_displays
 from fourwire import FourWire
-from st7789 import ST7789
+from ili9341 import ILI9341
 
 import eventsys
 
@@ -27,8 +28,8 @@ display_drv = ILI9341(
     color_depth=16,
     bgr=True,
     reverse_bytes_in_word=True,
+    invert=False,
 )
-from adafruit_focaltouch import Adafruit_FocalTouch
 
 i2c = board.I2C()
 touch_drv = Adafruit_FocalTouch(i2c)
@@ -44,6 +45,7 @@ def touch_read_func():
 touch_rotation_table = (6, 3, 0, 5)
 
 broker = eventsys.Broker()
+
 touch_dev = broker.create(
     type=eventsys.TOUCH,
     read=touch_read_func,

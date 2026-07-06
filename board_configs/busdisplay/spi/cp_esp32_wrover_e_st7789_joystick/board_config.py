@@ -1,9 +1,9 @@
-"""CircuitPython variant — see paired MicroPython config in sibling directory."""
+"""ESP32 WROVER-E ST7789 with GPIO joystick — CircuitPython"""
 
 import board
 from displayio import release_displays
 from fourwire import FourWire
-from gpiojoystick import GPIOJoystick
+from st7789 import ST7789
 
 import eventsys
 
@@ -11,21 +11,25 @@ release_displays()
 
 display_bus = FourWire(
     board.SPI(),
-    command=board.D10,
-    chip_select=board.D9,
+    command=board.D13,
+    chip_select=board.D15,
     baudrate=40_000_000,
 )
 
-display_drv = GPIOJoystick(
+display_drv = ST7789(
     display_bus,
     width=240,
-    height=320,
+    height=240,
+    colstart=0,
+    rowstart=0,
     rotation=0,
+    mirrored=True,
     color_depth=16,
-    bgr=False,
+    bgr=True,
     reverse_bytes_in_word=True,
+    invert=False,
 )
 
+# Joystick wiring is board-specific; register KEYPAD/JOYSTICK when ported.
 broker = eventsys.Broker()
-
 broker.register_quit_cleanup(display_drv)

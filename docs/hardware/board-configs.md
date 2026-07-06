@@ -99,6 +99,13 @@ An exact match for all four is rare; bus + display controller is usually enough 
 |-----------|----------|
 | `busdisplay/spi/cp_pyportal` | PyPortal + TT21100 touch |
 | `busdisplay/spi/cp_clue` | CLUE ST7789 |
+| `busdisplay/spi/cp_funhouse` | FunHouse ST7789 + touch |
+| `busdisplay/spi/cp_pygamer` | PyGamer ST7789 |
+| `busdisplay/spi/cp_pitft_ili9341_featherwing` | PiTFT FeatherWing + STMPE610 |
+| `busdisplay/spi/cp_ssd1331_096_oled` | SSD1331 color OLED |
+| `busdisplay/i80/cp_t-display-s3` | LilyGO T-Display S3 I80 |
+| `busdisplay/i80/cp_t-hmi` | LilyGO T-HMI I80 + touch |
+| `busdisplay/i80/cp_wt32sc01-plus` | WT32-SC01 Plus I80 |
 | `busdisplay/spi/cp_*` | CircuitPython variants of MP configs |
 
 ## Desktop / browser configs

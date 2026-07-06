@@ -1,9 +1,10 @@
-"""CircuitPython variant — see paired MicroPython config in sibling directory."""
+"""M5Stack CoreS3 with ILI9341 320x240 — CircuitPython"""
 
+from adafruit_focaltouch import Adafruit_FocalTouch
 import board
 from displayio import release_displays
 from fourwire import FourWire
-from st7789 import ST7789
+from ili9341 import ILI9341
 
 import eventsys
 
@@ -11,21 +12,24 @@ release_displays()
 
 display_bus = FourWire(
     board.SPI(),
-    command=board.D10,
-    chip_select=board.D9,
-    baudrate=40_000_000,
+    command=board.TFT_DC,
+    chip_select=board.TFT_CS,
+    baudrate=60_000_000,
 )
 
-display_drv = ST7789(
+display_drv = ILI9341(
     display_bus,
     width=240,
     height=320,
-    rotation=0,
+    colstart=0,
+    rowstart=0,
+    rotation=180,
+    mirrored=False,
     color_depth=16,
-    bgr=False,
+    bgr=True,
     reverse_bytes_in_word=True,
+    invert=True,
 )
-from adafruit_focaltouch import Adafruit_FocalTouch
 
 i2c = board.I2C()
 touch_drv = Adafruit_FocalTouch(i2c)
@@ -38,9 +42,10 @@ def touch_read_func():
     return None
 
 
-touch_rotation_table = (0, 0, 0, 0)
+touch_rotation_table = None
 
 broker = eventsys.Broker()
+
 touch_dev = broker.create(
     type=eventsys.TOUCH,
     read=touch_read_func,

@@ -1,10 +1,10 @@
-"""LilyGO T-Display-S3 Pro 222x480 ST7796 — CircuitPython"""
+"""Adafruit FunHouse ST7789 + TT21100 touch — CircuitPython"""
 
-from adafruit_focaltouch import Adafruit_FocalTouch
+from adafruit_tt21100 import TT21100
 import board
 from displayio import release_displays
 from fourwire import FourWire
-from st7796 import ST7796
+from st7789 import ST7789
 
 import eventsys
 
@@ -12,32 +12,27 @@ release_displays()
 
 display_bus = FourWire(
     board.SPI(),
-    command=board.GP9,
-    chip_select=board.GP39,
-    reset=board.GP47,
-    baudrate=60_000_000,
+    command=board.TFT_DC,
+    chip_select=board.TFT_CS,
+    reset=board.TFT_RESET,
+    baudrate=24_000_000,
 )
 
-display_drv = ST7796(
+display_drv = ST7789(
     display_bus,
-    width=222,
-    height=480,
-    colstart=49,
-    rowstart=0,
+    width=240,
+    height=240,
+    colstart=0,
+    rowstart=80,
     rotation=0,
     mirrored=False,
     color_depth=16,
-    bgr=True,
+    bgr=False,
     reverse_bytes_in_word=True,
-    invert=True,
-    brightness=1.0,
-    backlight_pin=board.GP48,
-    backlight_on_high=True,
-    reset_high=False,
 )
 
 i2c = board.I2C()
-touch_drv = Adafruit_FocalTouch(i2c)
+touch_drv = TT21100(i2c)
 
 
 def touch_read_func():
@@ -47,7 +42,7 @@ def touch_read_func():
     return None
 
 
-touch_rotation_table = (0, 5, 6, 3)
+touch_rotation_table = (0, 0, 0, 0)
 
 broker = eventsys.Broker()
 

@@ -97,6 +97,11 @@ def clone_repo_url(url: str, dest: Path) -> None:
 def find_module_py(repo_dir: Path, stem: str) -> Path:
     for path in repo_dir.glob("adafruit_*.py"):
         return path
+    pkg = repo_dir / f"adafruit_{stem}"
+    if pkg.is_dir():
+        candidate = pkg / f"{stem}.py"
+        if candidate.exists():
+            return candidate
     matches = list(repo_dir.glob(f"*{stem}*.py"))
     if not matches:
         raise FileNotFoundError(f"No module in {repo_dir} for {stem}")
