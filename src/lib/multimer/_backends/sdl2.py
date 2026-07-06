@@ -65,7 +65,11 @@ class Timer(_TimerCore):
             return 0
         if not self._pending:
             self._pending = True
-            schedule(self._scheduled_deliver, None)
+            try:
+                schedule(self._scheduled_deliver, None)
+            except RuntimeError:
+                self._pending = False
+                return interval
         if self._mode == self.ONE_SHOT:
             return 0
         return interval

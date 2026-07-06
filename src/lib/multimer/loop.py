@@ -17,10 +17,15 @@ def run_forever(poll, delay_ms=20):
 async def run_forever_async(poll, delay_ms=20):
     """Async version of ``run_forever``."""
     from . import asyncio
+    from ._schedule import _run_pending
+    from ._select import _drain as _backend_drain
 
     while True:
         if poll():
             break
+        _run_pending()
+        if _backend_drain is not None:
+            _backend_drain()
         await asyncio.sleep(delay_ms / 1000)  # type: ignore[misc]
 
 
