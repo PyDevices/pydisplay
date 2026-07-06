@@ -103,8 +103,13 @@ def build(manifest_path, output_path):
             sys.exit(1)
 
         # "foo/bar/baz.py" --> "foo"
+        # "foo/nested/bar/baz.py" --> "foo" (not "foo/nested")
         # "baz.py" --> ""
-        result_package = os.path.split(result.target_path)[0]
+        normalized = result.target_path.replace("\\", "/")
+        if "/" in normalized:
+            result_package = normalized.split("/", 1)[0]
+        else:
+            result_package = ""
 
         if not result_package:
             # This is a standalone .py file.
