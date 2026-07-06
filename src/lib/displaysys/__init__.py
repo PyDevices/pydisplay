@@ -218,13 +218,16 @@ class DisplayDriver:
                 _DEFAULT_AUTO_REFRESH_PERIOD if isinstance(auto_refresh, bool) else auto_refresh
             )
             try:
-                from multimer import periodic
+                from multimer import AsyncTimer, Timer
 
-                self._timer = periodic(
-                    self.show,
-                    period=period,
-                    async_=async_,
-                )
+                TimerClass = AsyncTimer if async_ else Timer
+                if TimerClass is not None:
+                    self._timer = TimerClass(-1)
+                    self._timer.init(
+                        mode=TimerClass.PERIODIC,
+                        period=period,
+                        callback=self._auto_refresh,
+                    )
             except ImportError:
                 raise ImportError("multimer is required for auto_refresh") from None
         self._deinitialized = False
@@ -234,6 +237,9 @@ class DisplayDriver:
 
     def __del__(self):
         self.deinit()
+
+    def _auto_refresh(self, timer=None):
+        self.show(timer)
 
     ############### Universal API Methods, not usually overridden ################
 

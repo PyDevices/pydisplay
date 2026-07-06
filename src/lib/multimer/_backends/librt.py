@@ -21,6 +21,20 @@ _USE_CTYPES = sys.implementation.name == "cpython"
 _CLOCK_MONOTONIC = 1
 _SIGEV_THREAD_ID = 4
 _SYS_gettid = 186
+_DEFAULT_TIMER_IDS = list(range(0xF, -1, -1))
+_ALLOCATED_DEFAULT_IDS = set()
+
+
+def _alloc_default_id():
+    for timer_id in _DEFAULT_TIMER_IDS:
+        if timer_id not in _ALLOCATED_DEFAULT_IDS:
+            _ALLOCATED_DEFAULT_IDS.add(timer_id)
+            return timer_id
+    raise RuntimeError("no librt timer ids available")
+
+
+def _free_default_id(timer_id):
+    _ALLOCATED_DEFAULT_IDS.discard(timer_id)
 
 
 def _period_parts(period_ms):
@@ -237,7 +251,8 @@ class Timer(_TimerCore):
     """Linux librt Timer (timer_create)."""
 
     def _arm(self):
-        self.id = self.id if self.id != -1 else 0xF
+        self._allocated_default_id = self.id == -1
+        self.id = _alloc_default_id() if self._allocated_default_id else self.id
         signum = _SIGRTMIN + self.id
 
         def _py_handler(_signum, _frame=None):
@@ -255,5 +270,9 @@ class Timer(_TimerCore):
             _timer_delete(self._timer)
             self._timer = None
         _remove_signal(signum)
+        if getattr(self, "_allocated_default_id", False):
+            _free_default_id(self.id)
+            self.id = -1
+            self._allocated_default_id = False
         self._py_handler = None
         self._signal_ref = None

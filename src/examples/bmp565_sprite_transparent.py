@@ -11,7 +11,7 @@ except ImportError:
 from board_config import broker
 from color_setup import ssd as canvas
 from graphics import BMP565
-from multimer import pump, sleep_ms
+from multimer import sleep_ms
 
 image = BMP565("examples/assets/warrior.bmp", streamed=True)
 print(f"\n{image.width=}, {image.height=}, {image.bpp=}")
@@ -86,7 +86,7 @@ while True:
             location = point(location.x + step, location.y)
         dirty += draw_sprite(*location, pos, dir)
         canvas.show(dirty)
-        pump()
+        sleep_ms(0)
         if poll_quit_discarding_others(broker):
             break
         sleep_ms(100)

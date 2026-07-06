@@ -27,11 +27,12 @@ gc.collect()
 mem = mem_free()
 print(f"Free memory at start: {mem:,}")
 
-from board_config import display_drv, broker
+from board_config import TIMER_ASYNC, display_drv, broker
 import apollo_dsky as dsky
 import time
 
-from multimer import ONE_SHOT, PERIODIC, Timer, dual_main, periodic, run_forever
+from multimer import Timer
+from multimer.loop import dual_main, run_forever
 
 _last_time = (0, 0, 0, 0, 0, 0)
 _key_busy = False
@@ -86,7 +87,7 @@ def _start_scroll():
     _scroll_i = start
     _scroll_end = display_drv.height + 1
     _scrolling = True
-    _scroll_timer.init(mode=PERIODIC, period=1, callback=_scroll_tick)
+    _scroll_timer.init(mode=Timer.PERIODIC, period=1, callback=_scroll_tick)
 
 
 def _key_release(_=None):
@@ -111,7 +112,7 @@ def _handle_key(key):
     else:
         _start_scroll()
 
-    _key_timer.init(mode=ONE_SHOT, period=200, callback=_key_release)
+    _key_timer.init(mode=Timer.ONE_SHOT, period=200, callback=_key_release)
 
 
 def _poll_apollo():
@@ -128,8 +129,12 @@ def _poll_apollo():
 
 def main_sync():
     _init_apollo()
-    periodic(_write_time_tick, period=500)
-    run_forever(_poll_apollo)
+    timer = Timer(-1)
+    timer.init(mode=Timer.PERIODIC, period=500, callback=_write_time_tick)
+    try:
+        run_forever(_poll_apollo)
+    finally:
+        timer.deinit()
 
 
 async def main_async():
@@ -137,8 +142,6 @@ async def main_async():
         import asyncio
     except ImportError:
         import uasyncio as asyncio
-
-    from multimer import run
 
     async def write_time():
         last_time = (0, 0, 0, 0, 0, 0)
@@ -198,7 +201,5 @@ async def main_async():
 
     await run()
 
-
-from board_config import TIMER_ASYNC
 
 dual_main(main_sync, main_async, async_mode=TIMER_ASYNC)

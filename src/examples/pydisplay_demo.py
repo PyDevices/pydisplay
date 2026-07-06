@@ -6,9 +6,11 @@ Uses only src/lib modules (board_config, graphics, multimer, eventsys).
 """
 
 from board_config import broker, display_drv
+
 from displaysys import color565
-from graphics import Area, Font, FrameBuffer, RGB565
-from multimer import periodic, run_forever
+from graphics import RGB565, Area, Font, FrameBuffer
+from multimer import Timer
+from multimer.loop import run_forever
 
 TOP, BOT = 36, 20
 ROW, ACCENT = 20, 4
@@ -127,6 +129,8 @@ def on_tick(_=None):
         return
     state["scroll"] = (state["scroll"] + 1) % scroll_height()
     display_drv.vscroll = state["scroll"]
+    if display_drv._timer is None:
+        display_drv.show()
 
 
 def handle_events():
@@ -136,7 +140,7 @@ def handle_events():
                 return True
             if e.type != broker.events.MOUSEBUTTONDOWN:
                 continue
-            if rotate_btn.contains(e.pos):
+            if rotate_btn is not None and rotate_btn.contains(e.pos):
                 pause_scroll()
                 state["rotation"] = (state["rotation"] + 90) % 360
                 state["scroll"] = 0
@@ -144,7 +148,7 @@ def handle_events():
                 setup_scroll()
                 redraw()
                 resume_scroll()
-            elif color_btn.contains(e.pos):
+            elif color_btn is not None and color_btn.contains(e.pos):
                 pause_scroll()
                 state["color_i"] = (state["color_i"] + 1) % len(ACCENTS)
                 redraw()
@@ -156,9 +160,12 @@ def main():
     setup_scroll()
     redraw()
 
-    periodic(on_tick, period=40)
-
-    run_forever(handle_events)
+    timer = Timer(-1)
+    timer.init(mode=Timer.PERIODIC, period=40, callback=on_tick)
+    try:
+        run_forever(handle_events)
+    finally:
+        timer.deinit()
 
 
 main()

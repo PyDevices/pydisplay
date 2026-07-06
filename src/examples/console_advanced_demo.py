@@ -66,7 +66,7 @@ display_drv.show()
 
 if _test_mode:
     from board_config import broker
-    from multimer import run_forever
+    from multimer.loop import run_forever
 
     console.write("console_advanced_demo: smoke test\n", pal.GREEN)
     display_drv.show()

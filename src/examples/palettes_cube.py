@@ -1,7 +1,7 @@
 # multimer types: all
 from board_config import broker, display_drv
 from eventsys import poll_quit_discarding_others
-from multimer import pump, sleep_ms
+from multimer import sleep_ms
 from palettes import get_palette
 from graphics import FrameBuffer, RGB565
 
@@ -36,7 +36,7 @@ def main():
         fb.text16(name, 2, 2, text_color)
         display_drv.blit_rect(ba, 0, y % display_drv.height, display_drv.width, line_height)
         display_drv.show()
-        pump()
+        sleep_ms(0)
         if poll_quit_discarding_others(broker):
             return True
         sleep_ms(100)

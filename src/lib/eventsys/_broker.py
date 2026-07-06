@@ -145,20 +145,6 @@ class Broker(Device):
         self._on_quit = value
 
     def _poll(self):
-        try:
-            from multimer import needs_pump, pump
-
-            try:
-                from multimer._win32 import is_active, process_apcs
-
-                if is_active():
-                    process_apcs()
-            except ImportError:
-                pass
-            if needs_pump():
-                pump()
-        except ImportError:
-            pass
         eventlist = []
         for device in self.devices:
             dev_events = device.poll()

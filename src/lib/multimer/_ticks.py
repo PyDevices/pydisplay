@@ -25,8 +25,21 @@ try:
     def ticks_ms():
         return _supervisor_ticks_ms()
 
+    def monotonic():
+        return _supervisor_ticks_ms() / 1000
+
 except (ImportError, NameError):
     import time
+
+    if _time_monotonic := getattr(time, "monotonic", None):
+
+        def monotonic():
+            return _time_monotonic()
+
+    elif _time_monotonic_ns := getattr(time, "monotonic_ns", None):
+
+        def monotonic():
+            return _time_monotonic_ns() / 1_000_000_000
 
     if _time_ticks_ms := getattr(time, "ticks_ms", None):
         if getattr(time, "ticks_add", None) and getattr(time, "ticks_diff", None):
@@ -48,11 +61,26 @@ except (ImportError, NameError):
             def ticks_ms():
                 return (_monotonic_ns() // 1_000_000) & _TICKS_MAX
 
+            if "monotonic" not in globals():
+
+                def monotonic():
+                    return _monotonic_ns() / 1_000_000_000
+
         except (ImportError, NameError, NotImplementedError):
             from time import monotonic as _monotonic
 
             def ticks_ms():
                 return int(_monotonic() * 1000) & _TICKS_MAX
+
+            if "monotonic" not in globals():
+
+                def monotonic():
+                    return _monotonic()
+
+    if "monotonic" not in globals():
+
+        def monotonic():
+            return _time_ticks_ms() / 1000
 
 
 if _needs_software_ticks_math:
@@ -75,8 +103,7 @@ def ticks_less(ticks1, ticks2):
     return ticks_diff(ticks1, ticks2) < 0
 
 
-def sleep_ms(ms):
-    """Block for ``ms`` milliseconds."""
+def _raw_sleep_ms(ms):
     try:
         from time import sleep_ms as _time_sleep_ms
 
@@ -85,6 +112,24 @@ def sleep_ms(ms):
         import time
 
         time.sleep(ms / 1000)
+
+
+def sleep_ms(ms):
+    """Block for ``ms`` milliseconds."""
+    from ._schedule import _run_pending
+    from ._select import _drain as _backend_drain
+    from ._select import _sleep_ms as _backend_sleep_ms
+
+    _run_pending()
+    if _backend_drain is not None:
+        _backend_drain()
+    if _backend_sleep_ms is not None:
+        _backend_sleep_ms(ms)
+    else:
+        _raw_sleep_ms(ms)
+    _run_pending()
+    if _backend_drain is not None:
+        _backend_drain()
 
 
 _sleep_ms = sleep_ms

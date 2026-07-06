@@ -33,7 +33,7 @@ except ImportError:
     from multimer import ticks_ms
 
 from board_config import broker
-from multimer import Timer, needs_pump, pump, sleep_ms
+from multimer import Timer, sleep_ms
 
 import tft_config
 import tft_bitmap
@@ -65,8 +65,6 @@ def main():
         tft.draw.fill_rect(last_col, old_row, alien.WIDTH, alien.HEIGHT, 0)
         tft_bitmap.bitmap(tft, alien, col, row)
         tft.show()
-        if needs_pump():
-            pump()
         if elist := broker.poll():
             if any(e.type == broker.events.QUIT for e in elist):
                 break

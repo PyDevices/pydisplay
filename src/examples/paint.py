@@ -3,8 +3,8 @@
 A simple paint application demonstrating the use of displaysys.
 """
 
-from board_config import display_drv, broker
-from multimer import dual_main, run_forever
+from board_config import TIMER_ASYNC, display_drv, broker
+from multimer.loop import dual_main, run_forever
 
 
 def _setup_paint():
@@ -104,7 +104,5 @@ async def main_async():
             return
         await asyncio.sleep(0.02)
 
-
-from board_config import TIMER_ASYNC
 
 dual_main(main_sync, main_async, async_mode=TIMER_ASYNC)

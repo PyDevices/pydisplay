@@ -5,10 +5,10 @@ lv_test_timer_no_pump.py
 LVGL timer test — no pump() loop.
 
 Works on MCU, MicroPython unix, and CPython Linux where the default
-multimer.Timer delivers callbacks without a pump() drain loop.
+multimer.Timer delivers callbacks without a sleep/drain loop.
 
-On platforms where ``needs_pump()`` is True (e.g. CPython macOS threading
-backend), this script will hang — use lv_test_timer_pump.py or
+On platforms where a threaded timer backend needs the main thread to call
+``sleep_ms()``, this script will hang — use lv_test_timer_pump.py or
 lv_test_timer_async.py instead.  On Windows with ``multimer._win32``, the
 main loop must use ``multimer.sleep_ms()`` (not ``time.sleep``) so APC timer
 delivery can run.

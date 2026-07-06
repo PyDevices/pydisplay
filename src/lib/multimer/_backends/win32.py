@@ -62,6 +62,14 @@ def sleep_ex(ms):
     kernel32.SleepEx(int(ms), True)
 
 
+def _backend_drain():
+    process_apcs()
+
+
+def _backend_sleep_ms(ms):
+    sleep_ex(ms)
+
+
 def _ensure_main_thread():
     global _main_thread_handle, _active, _registry_lock
     if _registry_lock is None:
@@ -94,7 +102,7 @@ def _apc_entry(param):
     timer = _registry.get(int(param))
     if timer is None or not timer._running:
         return
-    timer._deliver(0)
+    timer._deliver()
 
 
 def _spawn(fn):

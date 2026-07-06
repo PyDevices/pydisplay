@@ -35,7 +35,7 @@ from random import getrandbits
 import tft_bitmap
 import tft_config
 from board_config import broker
-from multimer import Timer, needs_pump, pump, sleep_ms
+from multimer import Timer, sleep_ms
 
 palette = tft_config.palette
 sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
@@ -220,8 +220,6 @@ def main():
             sprite.draw()
 
         tft.show()
-        if needs_pump():
-            pump()
         if elist := broker.poll():
             if any(e.type == broker.events.QUIT for e in elist):
                 break

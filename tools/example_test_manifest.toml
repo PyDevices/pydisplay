@@ -18,6 +18,7 @@ script = "examples/pydisplay_demo.py"
 kind = "loop"
 quit = "poll"
 deps = ["core"]
+skip_runtimes = ["jupyter"]
 
 [examples.pydisplay_demo_async]
 import = "pydisplay_demo_async"

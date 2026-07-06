@@ -69,6 +69,7 @@ if _TOOLS not in sys.path:
     sys.path.insert(0, _TOOLS)
 
 RESULT_PREFIX = "EXAMPLE_RESULT="
+_MULTIMER_TEST_TIMERS = []
 
 
 def _trace(msg):
@@ -204,12 +205,13 @@ def _touch_delay_s(duration_s):
 
 def _inject_quit_now(quit_inject, kind, injected, *, pump_count=20):
     lvgl = kind == "lvgl"
-    if quit_inject.inject_quit(
+    ok = quit_inject.inject_quit(
         broker_poll=False,
         pump_count=pump_count,
         pump_delay=0.02,
         lvgl=lvgl,
-    ):
+    )
+    if ok:
         injected[0] = True
 
 
@@ -222,6 +224,12 @@ def _start_multimer_quit_schedule(duration_s, quit_mode, kind, injected):
         from multimer import Timer
     except ImportError:
         return False
+    if Timer is None:
+        return False
+    try:
+        quit_inject.queue_device()
+    except Exception:
+        pass
 
     def on_quit(_timer):
         # Leave Quit on the QUEUE mock; the example's broker.poll() delivers it.
@@ -238,6 +246,7 @@ def _start_multimer_quit_schedule(duration_s, quit_mode, kind, injected):
             period=int(touch_delay * 1000),
             callback=on_touch,
         )
+        _MULTIMER_TEST_TIMERS.append(touch_timer)
 
     quit_timer = Timer(-1)
     quit_timer.init(
@@ -245,6 +254,7 @@ def _start_multimer_quit_schedule(duration_s, quit_mode, kind, injected):
         period=int(duration_s * 1000),
         callback=on_quit,
     )
+    _MULTIMER_TEST_TIMERS.append(quit_timer)
     return True
 
 
@@ -268,7 +278,8 @@ def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode
 
             threading.Thread(target=delayed_inject, daemon=True).start()
         except ImportError:
-            if not _start_daemon(delayed_inject) and not _start_multimer_quit_schedule(
+            daemon_started = _start_daemon(delayed_inject)
+            if not daemon_started and not _start_multimer_quit_schedule(
                 duration_s, quit_mode, kind, injected
             ):
                 delayed_inject()

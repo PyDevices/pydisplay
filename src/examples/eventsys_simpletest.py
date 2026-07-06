@@ -1,6 +1,7 @@
 # multimer types: async
-from board_config import broker
-from multimer import dual_main, periodic, run_forever
+from board_config import TIMER_ASYNC, broker
+from multimer import Timer
+from multimer.loop import dual_main, run_forever
 
 
 def _heartbeat(_=None):
@@ -19,8 +20,12 @@ def _poll_events():
 
 def main_sync():
     print("eventsys_simpletest: started — click the canvas to see pointer events")
-    periodic(_heartbeat, period=2000)
-    run_forever(_poll_events, delay_ms=20)
+    timer = Timer(-1)
+    timer.init(mode=Timer.PERIODIC, period=2000, callback=_heartbeat)
+    try:
+        run_forever(_poll_events, delay_ms=20)
+    finally:
+        timer.deinit()
 
 
 async def main_async():
@@ -45,7 +50,5 @@ async def main_async():
                     return
         await asyncio.sleep(0.02)
 
-
-from board_config import TIMER_ASYNC
 
 dual_main(main_sync, main_async, async_mode=TIMER_ASYNC)

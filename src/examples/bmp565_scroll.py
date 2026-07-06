@@ -3,7 +3,7 @@
 from board_config import broker, display_drv
 from eventsys import poll_quit_discarding_others
 from graphics import BMP565
-from multimer import pump, sleep_ms
+from multimer import sleep_ms
 
 display_drv.rotation = 0
 
@@ -31,7 +31,7 @@ while True:
     display_drv.vscsad(i % display_drv.height)
     draw_bg(0, i % display_drv.height, 0, i % image.height)
     display_drv.show()
-    pump()
+    sleep_ms(0)
     if poll_quit_discarding_others(broker):
         break
     sleep_ms(1)
