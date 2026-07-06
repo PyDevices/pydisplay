@@ -13,6 +13,8 @@ pydisplay works with CircuitPython using Adafruit bus drivers and `framebufferio
 | `board_configs/fbdisplay/cp_usb_video/` | USB Video (webcam-style output) |
 | `board_configs/fbdisplay/cp_qualia_tl040hds20/` | Qualia RGB display |
 | `board_configs/busdisplay/spi/cp_esp32_pico_eyespi_ili9341/` | SPI ILI9341 |
+| `board_configs/pixeldisplay/cp_neopixel_8x8_zigzag/` | NeoPixel 8×8 grid |
+| `board_configs/epaperdisplay/cp_magtag/` | MagTag E-Ink |
 
 There is no top-level `board_configs/circuitpython/` directory; per-board configs live alongside MicroPython ones under `board_configs/`.
 
@@ -31,7 +33,9 @@ except ImportError:
 
 ## Framebuffer displays
 
-RGB666 (parallel), USB Video, and RGB Matrix devices use `displaysys.fbdisplay.FBDisplay` with CircuitPython's `framebufferio.FramebufferDisplay`. No special patching is needed once CircuitPython sees the hardware.
+RGB666 (parallel), USB Video, and HUB75 LED matrices use `displaysys.fbdisplay.FBDisplay` with CircuitPython's `framebufferio.FramebufferDisplay`. No special patching is needed once CircuitPython sees the hardware.
+
+Addressable LED grids (NeoPixel, DotStar) use `displaysys.pixeldisplay.PixelDisplay` with `adafruit_pixel_framebuf`.
 
 ## Unix desktop (SDL2)
 

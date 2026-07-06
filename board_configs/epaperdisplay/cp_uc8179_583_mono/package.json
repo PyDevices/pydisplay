@@ -1,0 +1,23 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/epaperdisplay/cp_uc8179_583_mono/board_config.py"
+    ],
+    [
+      "uc8179.py",
+      "github:PyDevices/pydisplay/drivers/display/uc8179.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/epaperdisplay.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

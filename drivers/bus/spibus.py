@@ -8,6 +8,7 @@ import struct
 from machine import SPI, Pin
 import micropython
 from micropython import const
+from time import sleep_ms
 
 DC_CMD = const(0)
 DC_DATA = const(1)
@@ -50,6 +51,7 @@ class SPIBus:
         miso: int = -1,
         dc: int = -1,
         cs: int = -1,
+        reset: int = -1,
     ) -> None:
         print("SPIBus loading...")
         if dc == -1:
@@ -86,9 +88,19 @@ class SPIBus:
         # DC and CS pins must be set AFTER the SPI bus is initialized on some boards
         self._dc: Pin = Pin(dc, Pin.OUT, value=DC_DATA)
         self._cs = Pin(cs, Pin.OUT, value=CS_INACTIVE) if cs != -1 else lambda val: None
+        self._reset = Pin(reset, Pin.OUT, value=1) if reset != -1 else None
 
         self._buf1: bytearray = bytearray(1)
         print("SPIBus loaded")
+
+    def reset(self) -> None:
+        """Hardware reset pulse when ``reset`` pin was provided."""
+        if self._reset is None:
+            raise RuntimeError("No reset pin defined")
+        self._reset.value(0)
+        sleep_ms(10)
+        self._reset.value(1)
+        sleep_ms(10)
 
     @micropython.native
     def send(

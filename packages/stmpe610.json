@@ -1,0 +1,6 @@
+{
+  "urls": [
+    ["stmpe610.py", "github:PyDevices/pydisplay/drivers/touch/stmpe610.py"]
+  ],
+  "version": "0.1"
+}

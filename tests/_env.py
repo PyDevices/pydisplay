@@ -38,3 +38,12 @@ GRAPHICS_DIR = os.path.join(_SRC_LIB, "graphics")
 #: Absolute path to the ``displaysys`` package directory, handy for tests that
 #: want to copy it somewhere isolated.
 DISPLAYSYS_DIR = os.path.join(_SRC_LIB, "displaysys")
+
+_DRIVERS_DISPLAY = os.path.join(_REPO_ROOT, "drivers", "display")
+_DRIVERS_BUS = os.path.join(_REPO_ROOT, "drivers", "bus")
+_DRIVERS_TOUCH = os.path.join(_REPO_ROOT, "drivers", "touch")
+_DRIVERS_INPUT = os.path.join(_REPO_ROOT, "drivers", "input")
+
+for _path in (_DRIVERS_DISPLAY, _DRIVERS_BUS, _DRIVERS_TOUCH, _DRIVERS_INPUT):
+    if _path not in sys.path:
+        sys.path.insert(0, _path)

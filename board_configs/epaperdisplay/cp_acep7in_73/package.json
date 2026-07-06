@@ -1,0 +1,11 @@
+{
+  "urls": [
+    ["board_config.py", "github:PyDevices/pydisplay/board_configs/epaperdisplay/cp_acep7in_73/board_config.py"],
+    ["acep7in.py", "github:PyDevices/pydisplay/drivers/display/acep7in.py"]
+  ],
+  "deps": [
+    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"],
+    ["github:PyDevices/pydisplay/packages/epaperdisplay.json", "main"]
+  ],
+  "version": "0.1"
+}

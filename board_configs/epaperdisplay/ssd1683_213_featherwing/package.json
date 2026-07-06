@@ -1,0 +1,31 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/epaperdisplay/ssd1683_213_featherwing/board_config.py"
+    ],
+    [
+      "ssd1683.py",
+      "github:PyDevices/pydisplay/drivers/display/ssd1683.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/epaperdisplay.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/epaper_chip.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/spibus.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

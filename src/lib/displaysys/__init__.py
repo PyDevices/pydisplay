@@ -54,6 +54,14 @@ def capabilities():
         "modules": {
             "busdisplay": {"eventsys": False, "auto_refresh": False},
             "fbdisplay": {"eventsys": False, "auto_refresh": False},
+            "pixeldisplay": {"eventsys": False, "auto_refresh": False},
+            "epaperdisplay": {"eventsys": False, "auto_refresh": False, "buffer_push": "displayio_or_bus"},
+            "boarddisplay": {
+                "eventsys": False,
+                "auto_refresh": False,
+                "platform": "circuitpython",
+                "target": "board.DISPLAY",
+            },
             "sdldisplay": {
                 "eventsys": True,
                 "auto_refresh": True,

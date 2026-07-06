@@ -1,0 +1,9 @@
+{
+  "urls": [
+    ["keypad_shift.py", "github:PyDevices/pydisplay/drivers/input/keypad_shift.py"]
+  ],
+  "deps": [
+    ["github:PyDevices/pydisplay/packages/eventsys.json", "main"]
+  ],
+  "version": "0.1"
+}

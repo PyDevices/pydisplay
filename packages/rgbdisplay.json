@@ -1,0 +1,12 @@
+{
+  "urls": [
+    [
+      "displaysys/rgbdisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/rgbdisplay.py"
+    ]
+  ],
+  "deps": [
+    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"]
+  ],
+  "version": "0.1"
+}

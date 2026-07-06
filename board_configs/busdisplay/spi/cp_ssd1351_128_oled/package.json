@@ -1,0 +1,10 @@
+{
+  "urls": [
+    ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/spi/cp_ssd1351_128_oled/board_config.py"],
+    ["ssd1351.py", "github:PyDevices/pydisplay/drivers/display/ssd1351.py"]
+  ],
+  "deps": [
+    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"]
+  ],
+  "version": "0.1"
+}

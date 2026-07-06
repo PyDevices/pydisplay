@@ -1,0 +1,7 @@
+{
+  "urls": [
+    ["i2cbus.py", "github:PyDevices/pydisplay/drivers/bus/i2cbus.py"]
+  ],
+  "deps": [],
+  "version": "0.1"
+}
