@@ -2,4 +2,6 @@
 
 import eventsys
 
-raise NotImplementedError("HUB75 rgbmatrix on MicroPython requires displayif rgbmatrix cmod")
+raise NotImplementedError(
+    "MatrixPortal M4 requires SAMD51; displayif rgbmatrix supports ESP32-S3 and mimxrt (Teensy) only"
+)
