@@ -1,0 +1,27 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/busdisplay/spi/cp_t-qt-pro/board_config.py"
+    ],
+    [
+      "gc9a01.py",
+      "github:PyDevices/pydisplay/drivers/display/gc9a01.py"
+    ],
+    [
+      "adafruit_focaltouch.py",
+      "github:PyDevices/pydisplay/drivers/touch/circuitpython/adafruit_focaltouch.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/spibus.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

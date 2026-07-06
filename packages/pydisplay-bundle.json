@@ -37,6 +37,14 @@
       "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay.py"
     ],
     [
+      "lib/displaysys/pixeldisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/pixeldisplay.py"
+    ],
+    [
+      "lib/displaysys/epaperdisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/epaperdisplay.py"
+    ],
+    [
       "lib/eventsys/__init__.py",
       "github:PyDevices/pydisplay/src/lib/eventsys/__init__.py"
     ],

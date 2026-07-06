@@ -69,6 +69,37 @@ An exact match for all four is rare; bus + display controller is usually enough 
 | `fbdisplay/qualia_tl040hds20` | MicroPython Qualia RGB |
 | `fbdisplay/cp_qualia_tl040hds20` | CircuitPython Qualia |
 | `fbdisplay/cp_usb_video` | CircuitPython USB Video |
+| `fbdisplay/cp_matrixportal_s3_64x64` | MatrixPortal S3 HUB75 64×64 |
+| `fbdisplay/matrixportal_s3_64x64` | MP skeleton (rgbmatrix cmod) |
+
+## Pixel / addressable LED configs
+
+| Directory | Hardware |
+|-----------|----------|
+| `pixeldisplay/cp_neopixel_8x8_zigzag` | NeoPixel 8×8 grid |
+| `pixeldisplay/neopixel_8x8_zigzag` | MP skeleton |
+
+## E-paper configs
+
+| Directory | Hardware |
+|-----------|----------|
+| `epaperdisplay/cp_magtag` | Adafruit MagTag SSD1680 |
+| `epaperdisplay/magtag` | MP skeleton |
+
+## I2C OLED configs
+
+| Directory | Hardware |
+|-----------|----------|
+| `busdisplay/i2c/cp_ssd1306_oled_featherwing` | FeatherWing OLED 128×32 |
+| `busdisplay/i2c/ssd1306_oled_featherwing` | MP skeleton (i2cbus) |
+
+## Built-in Adafruit boards (SPI)
+
+| Directory | Hardware |
+|-----------|----------|
+| `busdisplay/spi/cp_pyportal` | PyPortal + TT21100 touch |
+| `busdisplay/spi/cp_clue` | CLUE ST7789 |
+| `busdisplay/spi/cp_*` | CircuitPython variants of MP configs |
 
 ## Desktop / browser configs
 

@@ -23,6 +23,17 @@ mip.install("github:PyDevices/pydisplay/drivers/touch/ft6x36.py", target="./driv
 
 Micropython-lib index packages: `ft6x36`, `xpt2046`, `cst226`, etc.
 
-## CircuitPython
+## CircuitPython shims
 
-CircuitPython touch helpers live under `drivers/touch/circuitpython/` (e.g. Adafruit FocalTouch wrapper).
+Adafruit touch libraries vendored under `drivers/touch/circuitpython/`:
+
+| File | Chip |
+|------|------|
+| `adafruit_focaltouch.py` | FocalTech FT6x36 family |
+| `adafruit_ft5336.py` | FT5336 |
+| `adafruit_tsc2007.py` | TSC2007 resistive |
+| `adafruit_tt21100.py` | TT21100 (PyPortal) |
+| `adafruit_stmpe610.py` | STMPE610 (PiTFT) |
+| `adafruit_touchscreen.py` | 4-wire analog resistive |
+
+See [driver inventory](driver-inventory.md) for the full list.

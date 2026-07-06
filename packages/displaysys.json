@@ -35,6 +35,14 @@
     [
       "displaysys/sdldisplay.py",
       "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay.py"
+    ],
+    [
+      "displaysys/pixeldisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/pixeldisplay.py"
+    ],
+    [
+      "displaysys/epaperdisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/epaperdisplay.py"
     ]
   ],
   "deps": [],
