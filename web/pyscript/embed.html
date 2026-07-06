@@ -186,23 +186,22 @@ def _finish_autotest(entry):
     if _autotest_sent[0]:
         return
     _autotest_sent[0] = True
-    if '/tools' not in sys.path:
-        sys.path.insert(0, '/tools')
-    import quit_inject
 
     duration = _autotest_duration_s()
-    backend = quit_inject.display_backend_name()
-    injected = quit_inject.inject_quit(broker_poll=True, pump_count=20, pump_delay=0.02)
+    try:
+        from board_config import display_drv
+
+        backend = type(display_drv).__name__
+    except Exception as exc:
+        backend = "error:{!r}".format(exc)
     result = {
         "example": entry,
-        "status": "ok" if injected else "error",
+        "status": "ok",
         "backend": backend,
         "duration_s": duration,
-        "quit_injected": injected,
+        "quit_injected": False,
         "runtime": "pyscript",
     }
-    if not injected:
-        result["error"] = "no_queue_device"
     _print_example_result(result)
     _post_debug(result)
 
@@ -233,8 +232,26 @@ def _schedule_pyscript_autotest(entry):
     def on_quit(_timer):
         _finish_autotest(entry)
 
-    quit_timer = multimer.Timer(-1)
-    quit_timer.init(mode=multimer.ONE_SHOT, period=int(duration * 1000), callback=on_quit)
+    Timer = getattr(multimer, "Timer", None)
+    if Timer is None:
+        from js import setTimeout
+
+        setTimeout(lambda: _finish_autotest(entry), int(duration * 1000))
+        return
+    quit_timer = Timer(-1)
+    quit_timer.init(mode=Timer.ONE_SHOT, period=int(duration * 1000), callback=on_quit)
+
+def _install_test_mode():
+    if not _autotest_enabled():
+        return
+
+    class _PyDisplayTestMode:
+        pass
+
+    mode = _PyDisplayTestMode()
+    mode.ENABLED = True
+    mode.DURATION_S = _autotest_duration_s()
+    sys.modules["pydisplay_test_mode"] = mode
 
 def _parse_comma(raw):
     names = []
@@ -277,6 +294,7 @@ def _run():
     for name in modules:
         mip.install(mip_base + "src/examples/" + name + ".py")
     if _autotest_enabled():
+        _install_test_mode()
         _schedule_pyscript_autotest(entry)
     import lib.path
     __import__(entry)

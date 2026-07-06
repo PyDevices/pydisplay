@@ -222,6 +222,8 @@ def _start_multimer_quit_schedule(duration_s, quit_mode, kind, injected):
         from multimer import Timer
     except ImportError:
         return False
+    if Timer is None:
+        return False
 
     def on_quit(_timer):
         # Leave Quit on the QUEUE mock; the example's broker.poll() delivers it.

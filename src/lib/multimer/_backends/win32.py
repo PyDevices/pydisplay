@@ -94,7 +94,7 @@ def _apc_entry(param):
     timer = _registry.get(int(param))
     if timer is None or not timer._running:
         return
-    timer._deliver(0)
+    timer._deliver()
 
 
 def _spawn(fn):

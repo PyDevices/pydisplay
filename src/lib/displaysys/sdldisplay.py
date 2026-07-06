@@ -365,17 +365,7 @@ class SDLDisplay(DisplayDriver):
             raise RuntimeError(f"{usdl2.SDL_GetError()}")
         retcheck(usdl2.SDL_SetTextureBlendMode(self._buffer, usdl2.SDL_BLENDMODE_NONE))
 
-        auto_refresh = True
-        if implementation.name == "micropython":
-            try:
-                from multimer import needs_pump
-
-                if needs_pump():
-                    auto_refresh = False
-            except ImportError:
-                pass
-
-        super().__init__(auto_refresh=auto_refresh)
+        super().__init__(auto_refresh=implementation.name == "cpython")
 
     ############### Required API Methods ################
 

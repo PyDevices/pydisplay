@@ -78,6 +78,15 @@ def ticks_less(ticks1, ticks2):
 def sleep_ms(ms):
     """Block for ``ms`` milliseconds."""
     try:
+        from ._backends.win32 import is_active, sleep_ex
+
+        if is_active():
+            sleep_ex(ms)
+            return
+    except ImportError:
+        pass
+
+    try:
         from time import sleep_ms as _time_sleep_ms
 
         _time_sleep_ms(ms)

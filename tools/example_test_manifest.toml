@@ -17,14 +17,14 @@ import = "pydisplay_demo"
 script = "examples/pydisplay_demo.py"
 kind = "loop"
 quit = "poll"
-deps = ["core"]
+deps = ["core", "add_ons"]
 
 [examples.pydisplay_demo_async]
 import = "pydisplay_demo_async"
 script = "examples/pydisplay_demo_async.py"
 kind = "async"
 quit = "poll"
-deps = ["core"]
+deps = ["core", "add_ons"]
 
 [examples.calculator]
 import = "calculator"
