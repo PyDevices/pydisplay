@@ -10,7 +10,7 @@ except ImportError:
 from board_config import broker, display_drv
 from eventsys import poll_quit_discarding_others
 from graphics import BMP565
-from multimer import pump, sleep_ms
+from multimer import sleep_ms
 
 image = BMP565("examples/assets/warrior.bmp", streamed=True)
 print(f"\n{image.width=}, {image.height=}, {image.bpp=}")
@@ -89,7 +89,7 @@ while True:
             location = point(location.x + step, location.y)
         draw_sprite(*location, pos, dir)
         display_drv.show()
-        pump()
+        sleep_ms(0)
         if poll_quit_discarding_others(broker):
             break
         sleep_ms(100)

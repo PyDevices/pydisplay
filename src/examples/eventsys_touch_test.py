@@ -7,14 +7,14 @@ Then it prints the touch_rotation_table that should be set in board_config.py.
 
 On asyncio-native hosts (PyScript, Jupyter Notebook) the test runs an async main
 loop that yields to the event loop so input/widget events can be dispatched.  On
-MCU/desktop it runs the classic blocking loop with pump() + sleep_ms().
+MCU/desktop it runs the classic blocking loop with sleep_ms().
 """
 
 import board_config
 from board_config import display_drv, broker
 import eventsys
 from graphics import round_rect, text16
-from multimer import pump, sleep_ms
+from multimer import sleep_ms
 
 TIMER_ASYNC = getattr(board_config, "TIMER_ASYNC", False)
 
@@ -143,7 +143,7 @@ def loop():
                 touched_point = None
                 while not touched_point:
                     touched_point = _poll_touch()
-                    pump()
+                    sleep_ms(0)
                     sleep_ms(1)
                 _record_zone(touched_point, touched_zones, half_width, half_height)
                 _clear_target(x, y, half_width, half_height)
@@ -207,7 +207,7 @@ def run_sync():
         while not completed:
             display_drv.show()
             completed = loop()
-            pump()
+            sleep_ms(0)
             sleep_ms(1)
     except KeyboardInterrupt:
         print("\nStopped.")

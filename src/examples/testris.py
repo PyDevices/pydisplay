@@ -31,7 +31,7 @@ try:
 except ImportError:
     from multimer import ticks_diff, ticks_ms
 
-from multimer import dual_main, pump, run_forever, run_forever_async
+from multimer.loop import dual_main, run_forever, run_forever_async
 
 if display_drv.width > display_drv.height:
     display_drv.rotation += 90
@@ -82,14 +82,9 @@ def _quit_if_needed(_where):
 
 
 class _Loop:
-    """Cooperative poll helper; sync mode pumps multimer between frames."""
-
-    def __init__(self, *, pump_on_poll):
-        self._pump_on_poll = pump_on_poll
+    """Cooperative poll helper."""
 
     def poll(self, where):
-        if self._pump_on_poll:
-            pump()
         return _quit_if_needed(where)
 
 
@@ -736,17 +731,17 @@ def _play_poll(play):
         return True
 
 
-def _start_play(*, pump_on_poll):
-    return _get_game()(_Loop(pump_on_poll=pump_on_poll))
+def _start_play():
+    return _get_game()(_Loop())
 
 
 def main_sync():
-    play = _start_play(pump_on_poll=True)
+    play = _start_play()
     run_forever(lambda: _play_poll(play), delay_ms=1)
 
 
 async def main_async():
-    play = _start_play(pump_on_poll=False)
+    play = _start_play()
     await run_forever_async(lambda: _play_poll(play), delay_ms=1)
 
 

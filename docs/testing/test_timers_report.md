@@ -10,9 +10,9 @@ Probes public multimer APIs only (`Timer`, `AsyncTimer`, plus hardware `machine.
 | Timer backend | micropython | micropython.exe | circuitpython | cpython-venv | python.exe |
 |---------------|:-----------:|:-----------:|:-----------:|:-----------:|:-----------:|
 | `machine.Timer` | SKIP | SKIP | SKIP | SKIP | SKIP |
-| `AsyncTimer` | **PASS** | **FAIL** | **PASS** | **PASS** | **PASS** |
-| `AsyncTimer (yield loop)` | **PASS** | **FAIL** | **PASS** | **PASS** | **PASS** |
-| `multimer.Timer (default)` | **FAIL** | **FAIL** | **FAIL** | **PASS** | **FAIL** |
+| `AsyncTimer` | **PASS** | **PASS** | **PASS** | **PASS** | **PASS** |
+| `AsyncTimer (yield loop)` | **PASS** | **PASS** | **PASS** | **PASS** | **PASS** |
+| `multimer.Timer (default)` | **PASS** | **PASS** | **PASS** | **PASS** | **PASS** |
 
 **Legend:** **PASS** = ≥2 callbacks in 300 ms · **FAIL** = ran but failed · **SKIP** = not on this port
 

@@ -45,7 +45,7 @@ def _bootstrap_src_path():
 
 _bootstrap_src_path()
 
-from multimer import sleep_ms  # noqa: E402
+from multimer import sleep_ms, ticks_add, ticks_less, ticks_ms  # noqa: E402
 
 TEST_PERIOD_MS = 50
 TEST_DURATION_MS = 300
@@ -83,8 +83,8 @@ def _print_error(label, err):
 
 
 def _wait_ms(ms):
-    deadline = time.monotonic() + (ms / 1000.0)
-    while time.monotonic() < deadline:
+    deadline = ticks_add(ticks_ms(), ms)
+    while ticks_less(ticks_ms(), deadline):
         sleep_ms(10)
 
 
@@ -119,7 +119,7 @@ def _run_timer_test(TimerClass):
 
 
 async def _run_async_timer_test(TimerClass):
-    import asyncio
+    from multimer import asyncio
 
     counter = [0]
 
@@ -135,7 +135,7 @@ async def _run_async_timer_test(TimerClass):
 
 def _run_async_loop_test(TimerClass):
     """Exercise AsyncTimer while the main thread also does sync work."""
-    import asyncio
+    from multimer import asyncio
 
     counter = [0]
 
@@ -157,7 +157,7 @@ def _run_async_loop_test(TimerClass):
 
 
 def _run_async_timer_test_sync(TimerClass):
-    import asyncio
+    from multimer import asyncio
 
     return asyncio.run(_run_async_timer_test(TimerClass))
 

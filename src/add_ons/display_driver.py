@@ -32,9 +32,8 @@ def main():
     if not lv.is_initialized():
         lv.init()
     if not lv_utils.event_loop.is_running():
-        # Async apps use multimer.AsyncTimer for LVGL ticks; SDL auto_refresh uses sync
-        # multimer.Timer (_threading on CircuitPython) which requires pump().
-        # Present the frame from the aio refresh loop instead.
+        # Async apps use multimer.AsyncTimer for LVGL ticks; present the frame
+        # from the aio refresh loop instead.
         refresh_cb = None
         use_async = TIMER_ASYNC
         if use_async:
@@ -43,7 +42,7 @@ def main():
                 display_drv._timer = None
             refresh_cb = display_drv.show
         elif getattr(display_drv, "_timer", None) is None:
-            # SDLDisplay disables auto_refresh when needs_pump(); present each LVGL frame.
+            # Present each LVGL frame when the display has no auto-refresh timer.
             refresh_cb = display_drv.show
         lv_utils.event_loop(asynchronous=use_async, refresh_cb=refresh_cb)
 

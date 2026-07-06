@@ -29,7 +29,7 @@ import sys
 
 import tft_config
 from board_config import broker
-from multimer import Timer, needs_pump, pump
+from multimer import Timer
 
 palette = tft_config.palette
 sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
@@ -78,8 +78,6 @@ def main():
     row += noto_mono.HEIGHT
 
     tft.show()
-    if needs_pump():
-        pump()
     broker.poll()
 
 

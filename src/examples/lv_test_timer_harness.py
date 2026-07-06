@@ -515,7 +515,7 @@ def _run_pump():
 
     import display_driver  # noqa: F401
     from lv_test_timer_common import build_ui, get_state
-    from multimer import pump, sleep_ms
+    from multimer import sleep_ms
 
     _BROKER_POLL_S = 0.025
     next_broker_poll = time.time() + _BROKER_POLL_S
@@ -525,7 +525,7 @@ def _run_pump():
         import lvgl as lv
 
         for _ in range(n):
-            pump()
+            sleep_ms(0)
             broker.poll()
             if lv._nesting.value == 0:
                 lv.task_handler()

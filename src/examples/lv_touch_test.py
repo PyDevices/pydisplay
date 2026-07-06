@@ -7,7 +7,7 @@ to find a rotation that matches the display rotation.
 
 import display_driver
 import lvgl as lv
-from multimer import needs_pump, pump, sleep_ms, ticks_diff, ticks_ms
+from multimer import sleep_ms, ticks_diff, ticks_ms
 import sys
 
 
@@ -25,8 +25,7 @@ alignments = (
 
 
 def _pump_if_needed():
-    if needs_pump():
-        pump()
+    sleep_ms(0)
 
 
 def _build_ui():
@@ -63,7 +62,7 @@ def _build_ui():
 _build_ui()
 
 display_driver.run()
-if needs_pump() and sys.platform != "win32":
+if sys.platform != "win32":
     from board_config import broker
     from eventsys import poll_quit_discarding_others
 
@@ -77,7 +76,7 @@ if needs_pump() and sys.platform != "win32":
     _test_start = ticks_ms() if _test_duration_ms is not None else None
 
     while True:
-        pump()
+        sleep_ms(0)
         if poll_quit_discarding_others(broker):
             break
         if _test_start is not None and ticks_diff(ticks_ms(), _test_start) >= _test_duration_ms:

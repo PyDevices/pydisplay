@@ -5,10 +5,6 @@
       "github:PyDevices/pydisplay/src/add_ons/README.md"
     ],
     [
-      "app_loop.py",
-      "github:PyDevices/pydisplay/src/add_ons/app_loop.py"
-    ],
-    [
       "byteswap.py",
       "github:PyDevices/pydisplay/src/add_ons/byteswap.py"
     ],

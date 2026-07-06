@@ -8,7 +8,7 @@ import png
 from board_config import broker
 from color_setup import ssd
 from displaybuf import alloc_buffer
-from multimer import capabilities, pump, sleep_ms
+from multimer import sleep_ms
 
 png_image = namedtuple("png_image", ["width", "height", "pixels", "metadata"])
 
@@ -162,8 +162,7 @@ while True:
         sleep_ms(1000)
         ssd.fill_rect(pos_x, pos_y, p.width, p.height, bg_color)
         ssd.fill_rect(0, 0, ssd.width, 32, bg_color)
-        if capabilities()["schedule_queue"]:
-            pump()
+        sleep_ms(0)
     if poll_quit_discarding_others(broker):
         break
     if _max_pngs is not None and shown >= _max_pngs:

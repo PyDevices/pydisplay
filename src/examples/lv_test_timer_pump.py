@@ -2,13 +2,12 @@
 """
 lv_test_timer_pump.py
 
-LVGL timer test — default multimer.Timer with an unconditional pump() drain loop.
+LVGL timer test — default multimer.Timer with an unconditional sleep/drain loop.
 
 On CPython Linux and MicroPython unix (``_librt`` timers), callbacks
 run on the main thread without a blocking loop — same as ``lv_test_timer_no_pump.py``.
 
-On CPython Win/mac and other queued platforms, blocks in a ``pump()`` +
-``broker.poll()`` loop.
+On queued platforms, blocks in a ``sleep_ms()`` + ``broker.poll()`` loop.
 """
 
 # Override board_config.TIMER_ASYNC for this timer test only. Real apps normally

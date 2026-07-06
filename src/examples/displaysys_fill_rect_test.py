@@ -5,7 +5,7 @@ from random import getrandbits
 
 from board_config import broker, display_drv
 from eventsys import poll_quit_discarding_others
-from multimer import pump, sleep_ms
+from multimer import sleep_ms
 import gc
 import time
 
@@ -49,7 +49,7 @@ def main():
             )
             if display_drv._timer is None:
                 display_drv.show()
-            pump()
+            sleep_ms(0)
             count += 1
             if count % 1000 == 0:
                 rate = count / (time.time() - start_time)

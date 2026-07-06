@@ -9,7 +9,16 @@ import unittest
 import _env  # noqa: F401
 
 import multimer
-from multimer import AsyncTimer, Timer, sleep_ms, ticks_add, ticks_diff, ticks_less, ticks_ms
+from multimer import (
+    AsyncTimer,
+    Timer,
+    monotonic,
+    sleep_ms,
+    ticks_add,
+    ticks_diff,
+    ticks_less,
+    ticks_ms,
+)
 
 _TICKS_PERIOD = 1 << 29
 _TICKS_MAX = _TICKS_PERIOD - 1
@@ -40,6 +49,7 @@ class TestApiSurface(unittest.TestCase):
             {
                 "Timer",
                 "AsyncTimer",
+                "monotonic",
                 "schedule",
                 "sleep_ms",
                 "ticks_ms",
@@ -57,6 +67,12 @@ class TestTicks(unittest.TestCase):
         self.assertIsInstance(t, int)
         self.assertGreaterEqual(t, 0)
         self.assertLessEqual(t, _TICKS_MAX)
+
+    def test_monotonic_advances(self):
+        start = monotonic()
+        self.assertIsInstance(start, (int, float))
+        sleep_ms(20)
+        self.assertGreaterEqual(monotonic(), start)
 
     def test_ticks_add_wrap(self):
         self.assertEqual(ticks_add(_TICKS_MAX, 1), 0)

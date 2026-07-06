@@ -36,7 +36,7 @@ def load_asyncio():
 
     # Fallback for incomplete builds (e.g. micropython.exe without frozen asyncio).
     # Production desktop firmware should freeze extmod/asyncio — see docs/building.md.
-    from . import _mpasyncio as aio
+    aio = __import__("multimer._mpasyncio", None, None, ("_mpasyncio",))
 
     _asyncio_mod = aio
     return aio

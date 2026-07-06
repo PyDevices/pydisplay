@@ -1,6 +1,5 @@
 [files]
 "./src/add_ons/README.md" = "/add_ons/"
-"./src/add_ons/app_loop.py" = "/add_ons/"
 "./src/add_ons/byteswap.py" = "/add_ons/"
 "./src/add_ons/color_setup.py" = "/add_ons/"
 "./src/add_ons/console.py" = "/add_ons/"
@@ -117,6 +116,7 @@
 "./src/lib/multimer/_asyncio_loader.py" = "/lib/multimer/"
 "./src/lib/multimer/_core.py" = "/lib/multimer/"
 "./src/lib/multimer/_mpasyncio.py" = "/lib/multimer/"
+"./src/lib/multimer/loop.py" = "/lib/multimer/"
 "./src/lib/multimer/_schedule.py" = "/lib/multimer/"
 "./src/lib/multimer/_select.py" = "/lib/multimer/"
 "./src/lib/multimer/_ticks.py" = "/lib/multimer/"
@@ -125,6 +125,7 @@
 "./src/lib/multimer/_backends/__init__.py" = "/lib/multimer/_backends/"
 "./src/lib/multimer/_backends/librt.py" = "/lib/multimer/_backends/"
 "./src/lib/multimer/_backends/polling.py" = "/lib/multimer/_backends/"
+"./src/lib/multimer/_backends/sdl2.py" = "/lib/multimer/_backends/"
 "./src/lib/multimer/_backends/threading.py" = "/lib/multimer/_backends/"
 "./src/lib/multimer/_backends/win32.py" = "/lib/multimer/_backends/"
 

@@ -139,17 +139,14 @@ class event_loop:
             self.timer = None
 
         try:
-            from multimer import pump, sleep_ms
+            from multimer import sleep_ms
         except ImportError:
-
-            def pump():
-                return None
 
             def sleep_ms(_ms):
                 return None
 
         for _ in range(pump_rounds):
-            pump()
+            sleep_ms(0)
             if lv._nesting.value == 0 and (self.asynchronous or self.scheduled <= 0):
                 break
             sleep_ms(pump_delay_ms)
