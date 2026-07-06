@@ -1,0 +1,12 @@
+{
+  "urls": [
+    [
+      "displaysys/dpidisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/dpidisplay.py"
+    ]
+  ],
+  "deps": [
+    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"]
+  ],
+  "version": "0.1"
+}

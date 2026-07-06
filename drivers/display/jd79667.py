@@ -135,8 +135,6 @@ class JD79667(EPaperDisplay):
             start_sequence[res_pos + 4] = (height >> 8) & 0xFF
             start_sequence[res_pos + 5] = height & 0xFF
 
-        print(start_sequence.hex(" "))
-
         super().__init__(
             bus,
             start_sequence,

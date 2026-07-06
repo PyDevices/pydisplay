@@ -93,8 +93,14 @@ An exact match for all four is rare; bus + display controller is usually enough 
 | `epaperdisplay/ssd1675_213_featherwing` | SSD1675 2.13" FeatherWing (MP) |
 | `epaperdisplay/cp_uc8151d_29_breakout` | UC8151D 2.9" flexible breakout |
 | `epaperdisplay/uc8151d_29_breakout` | UC8151D 2.9" breakout (MP) |
+
+Additional vendored chip drivers (each has `cp_*` sibling): `ssd1681_154_tricolor`, `ssd1683_213_featherwing`, `ssd1677_583_mono`, `ssd1608_154_mono`, `il0373_213_tricolor`, `il0398_42_mono`, `il91874_27_tricolor`, `uc8179_583_mono`, `uc8253_37_mono`, `ek79686_27_tricolor`, `jd79661_213_4gray`, `jd79667_391_4gray`, `spd1656_154_acep`.
+
+Tri-color / 4-gray configs use `color_depth=2` (0=white, 1=black, 2=accent). ACeP configs use `color_depth=4`.
+
+| Directory | Hardware |
+|-----------|----------|
 | `fbdisplay/cp_matrixportal_m4_64x32` | MatrixPortal M4 HUB75 64×32 |
-| `busdisplay/spi/cp_pybadge` | PyBadge LC + buttons |
 | `busdisplay/spi/cp_hallowing_m4` | HalloWing M4 |
 | `busdisplay/spi/cp_pyportal_titano` | PyPortal Titano + touch |
 | `busdisplay/i2c/cp_sh1107_oled_128x64` | SH1107 OLED |

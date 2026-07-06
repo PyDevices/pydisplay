@@ -1,0 +1,31 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/epaperdisplay/ek79686_27_tricolor/board_config.py"
+    ],
+    [
+      "ek79686.py",
+      "github:PyDevices/pydisplay/drivers/display/ek79686.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/epaperdisplay.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/epaper_chip.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/spibus.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

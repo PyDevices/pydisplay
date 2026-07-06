@@ -1,0 +1,23 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/epaperdisplay/cp_il0398_42_mono/board_config.py"
+    ],
+    [
+      "il0398.py",
+      "github:PyDevices/pydisplay/drivers/display/il0398.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/epaperdisplay.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}
