@@ -73,11 +73,20 @@ python3 scripts/vendor_circuitpython_drivers.py --all
 | `community/st7565.py` | Community DisplayIO | vendored |
 | `pixel_framebuffer.py` | pydisplay helper | in repo |
 
+## Input
+
+| File | Source | Status |
+|------|--------|--------|
+| `keypad_gpio.py` | pydisplay | in repo |
+| `keypad_shift.py` | pydisplay (74HC165) | in repo |
+
 ## Touch
 
 | File | Source | Status |
 |------|--------|--------|
 | `ft6x36.py` | pydisplay MP | in repo |
+| `tt21100.py` | pydisplay MP | in repo |
+| `stmpe610.py` | pydisplay MP (SPI) | in repo |
 | `xpt2046.py` | pydisplay MP | in repo |
 | `gt911.py` | pydisplay MP | in repo |
 | `cst8xx.py` | pydisplay MP | in repo |

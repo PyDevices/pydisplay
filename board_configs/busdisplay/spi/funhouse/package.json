@@ -1,7 +1,8 @@
 {
   "urls": [
     ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/spi/funhouse/board_config.py"],
-    ["st7789.py", "github:PyDevices/pydisplay/drivers/display/st7789.py"]
+    ["st7789.py", "github:PyDevices/pydisplay/drivers/display/st7789.py"],
+    ["tt21100.py", "github:PyDevices/pydisplay/drivers/touch/tt21100.py"]
   ],
   "deps": [
     ["github:PyDevices/pydisplay/packages/displaysys.json", "main"],

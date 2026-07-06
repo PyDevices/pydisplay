@@ -109,7 +109,17 @@ An exact match for all four is rare; bus + display controller is usually enough 
 | Directory | Hardware |
 |-----------|----------|
 | `busdisplay/spi/cp_pyportal` | PyPortal + TT21100 touch |
-| `busdisplay/spi/cp_clue` | CLUE ST7789 |
+| `busdisplay/spi/pyportal` | PyPortal + TT21100 (MP SAMD51) |
+| `busdisplay/spi/cp_pyportal_titano` | PyPortal Titano + touch |
+| `busdisplay/spi/pyportal_titano` | PyPortal Titano (MP SAMD51) |
+| `busdisplay/spi/cp_funhouse` | FunHouse ST7789 + touch |
+| `busdisplay/spi/funhouse` | FunHouse ST7789 + TT21100 (MP ESP32-S2) |
+| `busdisplay/spi/cp_pybadge` | PyBadge LC + buttons |
+| `busdisplay/spi/pybadge` | PyBadge LC + shift-register KEYPAD (MP) |
+| `busdisplay/spi/cp_hallowing_m4` | HalloWing M4 |
+| `busdisplay/spi/hallowing_m4` | HalloWing M4 ST7735 (MP) |
+| `busdisplay/spi/cp_pitft_ili9341_featherwing` | PiTFT FeatherWing + STMPE610 |
+| `busdisplay/spi/pitft_ili9341_featherwing` | PiTFT FeatherWing (MP Feather + STMPE610) |
 | `busdisplay/spi/clue` | CLUE ST7789 (MP nRF52840) |
 | `busdisplay/spi/cp_clue_builtin` | CLUE via `board.DISPLAY` (no manual SPI wiring) |
 | `busdisplay/spi/cp_funhouse` | FunHouse ST7789 + touch |
