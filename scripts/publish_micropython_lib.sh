@@ -158,6 +158,43 @@ pypi_publish_name() {
     esac
 }
 
+# Representative board_config.py for micropython-lib displaysys-* example trees.
+# Board configs live in nested directories; only a few desktop backends have a
+# flat board_configs/<name>/board_config.py path.
+displaysys_example_board_config_path() {
+    local package="$1"
+    local board_configs="$SOURCE_REPO/board_configs"
+    case "$package" in
+        displaysys-busdisplay) echo "$board_configs/busdisplay/i80/wt32sc01-plus/board_config.py" ;;
+        displaysys-fbdisplay) echo "$board_configs/fbdisplay/qualia_tl040hds20/board_config.py" ;;
+        displaysys-rgbdisplay) echo "$board_configs/fbdisplay/t-rgb_480/board_config.py" ;;
+        displaysys-epaperdisplay) echo "$board_configs/epaperdisplay/cp_magtag/board_config.py" ;;
+        displaysys-pixeldisplay) echo "$board_configs/pixeldisplay/cp_neopixel_8x8_zigzag/board_config.py" ;;
+        displaysys-jndisplay) echo "$board_configs/jndisplay/board_config.py" ;;
+        displaysys-pgdisplay) echo "$board_configs/pgdisplay/board_config.py" ;;
+        displaysys-psdisplay) echo "$board_configs/psdisplay/board_config.py" ;;
+        displaysys-sdldisplay) echo "$board_configs/sdldisplay/board_config.py" ;;
+        displaysys-boarddisplay) return 1 ;;
+        *) return 1 ;;
+    esac
+}
+
+copy_displaysys_example_board_config() {
+    local package="$1"
+    local dest_dir="$2"
+    local src=""
+
+    if ! src="$(displaysys_example_board_config_path "$package")"; then
+        echo "Skipping example board_config for $package"
+        return 0
+    fi
+    if [[ ! -f "$src" ]]; then
+        echo "Warning: example board_config not found for $package: $src" >&2
+        return 0
+    fi
+    cp "$src" "$dest_dir/"
+}
+
 copy_source_tree() {
     local src="$1"
     local dest="$2"
@@ -308,15 +345,7 @@ EOF
         # hatch build
         # twine upload --repository testpypi dist/*
         # popd
-        if [[ $package == displaysys-busdisplay ]]; then
-            cp $SOURCE_DIR/../board_configs/busdisplay/i80/wt32sc01-plus/board_config.py $DEST_DIR/displaysys/$package/examples/
-        else
-            if [[ $package == displaysys-fbdisplay ]]; then
-                cp $SOURCE_DIR/../board_configs/fbdisplay/qualia_tl040hds20/board_config.py $DEST_DIR/displaysys/$package/examples/
-            else
-                cp $SOURCE_DIR/../board_configs/$package_dir/board_config.py $DEST_DIR/displaysys/$package/examples/
-            fi
-        fi
+        copy_displaysys_example_board_config "$package" "$DEST_DIR/displaysys/$package/examples/"
     fi
 done
 
