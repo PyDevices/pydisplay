@@ -6,7 +6,7 @@
   ],
   "deps": [
     ["github:PyDevices/pydisplay/packages/displaysys.json", "main"],
-    ["github:PyDevices/pydisplay/packages/dpidisplay.json", "main"]
+    ["github:PyDevices/pydisplay/packages/rgbdisplay.json", "main"]
   ],
   "version": "0.1"
 }

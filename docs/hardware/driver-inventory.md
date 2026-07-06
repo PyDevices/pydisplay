@@ -24,7 +24,7 @@ python3 scripts/vendor_circuitpython_drivers.py --all
 | `st7789.py` | Adafruit | in repo |
 | `st7789vw.py` | variant | in repo |
 | `st7796.py` | Adafruit | in repo |
-| `st7701.py` | LilyGO T-RGB | in repo (`run_init` + `DPIDisplay` board config) |
+| `st7701.py` | LilyGO T-RGB | in repo (`run_init` + `RGBDisplay` board config; pixel bus via displayif) |
 | `ra8875.py` | Adafruit | skipped (framebuf API, not displayio) |
 
 ## OLED (BusDisplay)

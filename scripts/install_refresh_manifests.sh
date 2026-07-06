@@ -33,7 +33,7 @@ MANUAL_PACKAGES=(
     packages/boarddisplay.json
     packages/pixeldisplay.json
     packages/epaperdisplay.json
-    packages/dpidisplay.json
+    packages/rgbdisplay.json
     packages/tt21100.json
     packages/stmpe610.json
     packages/keypad_shift.json
@@ -65,7 +65,7 @@ Not generated here (edit manually when drivers/bus/ or drivers/touch/ changes):
   packages/boarddisplay.json
   packages/pixeldisplay.json
   packages/epaperdisplay.json
-  packages/dpidisplay.json
+  packages/rgbdisplay.json
   packages/tt21100.json
   packages/stmpe610.json
   packages/keypad_shift.json

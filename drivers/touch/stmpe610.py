@@ -45,13 +45,13 @@ def _map_range(x, in_min, in_max, out_min, out_max):
 class STMPE610:
     """STMPE610 on a dedicated SPI chip-select."""
 
-    def __init__(self, spi, cs, *, width=240, height=320, rotation=0):
+    def __init__(self, spi, cs, *, width=240, height=320, rotation=0, calibration=None):
         self._spi = spi
         self._cs = Pin(cs, Pin.OUT, value=1)
         self._width = width
         self._height = height
         self._rotation = rotation
-        self._calib = ((0, 4095), (0, 4095))
+        self._calib = calibration if calibration is not None else ((0, 4095), (0, 4095))
         version = self._get_version()
         if version != _STMPE_VERSION:
             self._spi.init(polarity=0, phase=1)

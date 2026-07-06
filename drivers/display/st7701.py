@@ -119,8 +119,8 @@ class ST7701(BusDisplay):
     ST7701 display driver for LilyGO T-RGB and similar RGB666 panels.
 
     Panel registers are initialized via ``lcd_pins`` (3-wire SPI bit-bang).
-    Pixel data is sent through ``display_bus`` (typically an ESP32-S3 ``lcd.DPI``
-    panel wrapped by ``displaysys.dpidisplay.DPIDisplay``).
+    Pixel data is sent through ``display_bus`` (RGB parallel panel from
+    ``pydevices/displayif``, wrapped by ``displaysys.rgbdisplay.RGBDisplay``).
     """
 
     def __init__(self, lcd_pins, display_bus, *, init_sequence=None, **kwargs):

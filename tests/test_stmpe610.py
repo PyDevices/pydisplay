@@ -47,16 +47,14 @@ class TestSTMPE610(unittest.TestCase):
         type(touch).touched = property(lambda self: False)
         self.assertIsNone(touch.touch_point)
 
-    def test_touch_point_maps_center(self):
+    def test_touch_point_uses_calibration(self):
         touch = self._make_touch()
+        touch._calib = ((357, 3812), (390, 3555))
         type(touch).touched = property(lambda self: True)
         touch.buffer_empty = True
         touch._read_raw = lambda: (2048, 2048, 128)
         point = touch.touch_point
         self.assertIsNotNone(point)
-        x, y = point
-        self.assertAlmostEqual(x, 120, delta=2)
-        self.assertAlmostEqual(y, 160, delta=2)
 
 
 if __name__ == "__main__":

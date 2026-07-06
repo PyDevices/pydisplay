@@ -1,8 +1,8 @@
 {
   "urls": [
     [
-      "displaysys/dpidisplay.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/dpidisplay.py"
+      "displaysys/rgbdisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/rgbdisplay.py"
     ]
   ],
   "deps": [

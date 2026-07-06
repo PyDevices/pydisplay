@@ -3,24 +3,28 @@
 # SPDX-License-Identifier: MIT
 
 """
-displaysys.dpidisplay — ESP32 RGB/DPI panel wrapper.
+displaysys.rgbdisplay — RGB parallel panel framebuffer adapter.
 
-Wraps LilyGO ``lcd.DPI`` (or compatible) framebuffers for pydisplay drawing.
+Wraps a panel object from ``pydevices/displayif`` (or compatible) that can
+present an RGB565 RAM buffer to the display.  The panel protocol is duck-typed:
+
+- ``present(x, y, width, height, buffer)`` — preferred (displayif)
+- ``bitmap(x, y, width, height, buffer)`` — legacy alias during bring-up
 """
 
 from displaysys import DisplayDriver, alloc_buffer
 
 
-class DPIDisplay(DisplayDriver):
+class RGBDisplay(DisplayDriver):
     """
-    DisplayDriver for ESP32-S3 RGB DPI panels after chip init.
+    ``DisplayDriver`` for SoC RGB parallel panels (RGB565).
 
     Args:
-        panel: Object with ``bitmap(x, y, w, h, data)`` and optional ``backlight_on/off``.
+        panel: Object implementing ``present()`` or ``bitmap()``.
         width (int): Panel width in pixels.
         height (int): Panel height in pixels.
         color_depth (int): Bits per pixel (16 for RGB565).
-        buffer: Optional pre-allocated RGB565 buffer.
+        buffer: Optional pre-allocated draw buffer.
     """
 
     def __init__(self, panel, width, height, color_depth=16, buffer=None):
@@ -38,9 +42,9 @@ class DPIDisplay(DisplayDriver):
         super().__init__(auto_refresh=False)
 
     def init(self) -> None:
-        backlight = getattr(self._panel, "backlight_on", None)
-        if backlight is not None:
-            backlight()
+        backlight_on = getattr(self._panel, "backlight_on", None)
+        if backlight_on is not None:
+            backlight_on()
 
     def fill_rect(self, x, y, w, h, c):
         bpp = self.color_depth // 8
@@ -64,13 +68,23 @@ class DPIDisplay(DisplayDriver):
     def pixel(self, x, y, c):
         return self.fill_rect(x, y, 1, 1, c)
 
+    def _present_buffer(self):
+        present = getattr(self._panel, "present", None)
+        if present is None:
+            present = getattr(self._panel, "bitmap", None)
+        if present is None:
+            raise NotImplementedError(
+                "RGB panel must implement present(x, y, w, h, buffer) or bitmap(...)"
+            )
+        present(0, 0, self.width, self.height, self._buffer)
+
     def show(self, _timer=None) -> None:
-        self._panel.bitmap(0, 0, self.width, self.height, self._buffer)
+        self._present_buffer()
 
     def deinit(self) -> None:
-        backlight = getattr(self._panel, "backlight_off", None)
-        if backlight is not None:
-            backlight()
+        backlight_off = getattr(self._panel, "backlight_off", None)
+        if backlight_off is not None:
+            backlight_off()
         deinit = getattr(self._panel, "deinit", None)
         if deinit is not None:
             deinit()

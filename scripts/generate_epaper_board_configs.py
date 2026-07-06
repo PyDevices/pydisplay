@@ -23,6 +23,7 @@ MP_BUS = """display_bus = SPIBus(
 )
 """
 
+# Adafruit FeatherWing SPI: D9=DC, D10=CS, D6=RST, D7=BUSY (intentional, not a placeholder).
 CP_BUS = """display_bus = FourWire(
     board.SPI(),
     command=board.D9,

@@ -62,6 +62,37 @@ SPI_OVERRIDES: dict[str, dict] = {
 }
 
 
+def parse_mp_spi_bus(text: str) -> str | None:
+    """Build CircuitPython FourWire setup from MicroPython SPIBus pin numbers."""
+    dc = re.search(r"\bdc=(\d+)", text)
+    cs = re.search(r"\bcs=(\d+)", text)
+    if not dc or not cs:
+        return None
+    reset = re.search(r"\breset=(\d+)", text)
+    baud = re.search(r"baudrate=([\d_]+)", text)
+    baudrate = baud.group(1) if baud else "40_000_000"
+    lines = [
+        "display_bus = FourWire(",
+        "    board.SPI(),",
+        f"    command=board.D{dc.group(1)},",
+        f"    chip_select=board.D{cs.group(1)},",
+    ]
+    if reset:
+        lines.append(f"    reset=board.D{reset.group(1)},")
+    lines.append(f"    baudrate={baudrate},")
+    lines.append(")")
+    return "\n".join(lines)
+
+
+def parse_mp_display_drv(text: str, display_class: str) -> str | None:
+    """Extract display_drv = Class(...) block from MP config when present."""
+    m = re.search(
+        rf"(display_drv = {re.escape(display_class)}\([\s\S]*?\n\))",
+        text,
+    )
+    return m.group(1) if m else None
+
+
 def parse_mp_config(path: Path) -> dict:
     text = path.read_text(encoding="utf-8")
     info: dict = {}
@@ -152,6 +183,7 @@ def generate_cp_package(mp_dir: Path) -> None:
 
     override = SPI_OVERRIDES.get(slug, {})
     parsed = parse_mp_config(mp_config)
+    mp_text = mp_config.read_text(encoding="utf-8")
 
     # Skip I80 for now unless override exists — manual configs preferred
     if parsed.get("bus_type") == "i80" and slug not in SPI_OVERRIDES:
@@ -168,18 +200,19 @@ def generate_cp_package(mp_dir: Path) -> None:
     display_module = override.get("display_module") or parsed.get("display_module", "st7789")
     display_class = override.get("display_class") or parsed.get("display_class", "ST7789")
 
-    bus_setup = override.get(
-        "bus",
-        """display_bus = FourWire(
+    bus_setup = override.get("bus") or parse_mp_spi_bus(mp_text)
+    if bus_setup is None:
+        bus_setup = """display_bus = FourWire(
     board.SPI(),
     command=board.D10,
     chip_select=board.D9,
     baudrate=40_000_000,
-)""",
+)"""
+    display_setup = override.get("display") or parse_mp_display_drv(
+        mp_text, display_class
     )
-    display_setup = override.get(
-        "display",
-        f"""display_drv = {display_class}(
+    if display_setup is None:
+        display_setup = f"""display_drv = {display_class}(
     display_bus,
     width=240,
     height=320,
@@ -187,8 +220,7 @@ def generate_cp_package(mp_dir: Path) -> None:
     color_depth=16,
     bgr=False,
     reverse_bytes_in_word=True,
-)""",
-    )
+)"""
 
     touch = override.get("touch", parsed.get("touch"))
     touch_setup = ""

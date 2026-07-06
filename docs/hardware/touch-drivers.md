@@ -52,3 +52,16 @@ Adafruit touch libraries vendored under `drivers/touch/circuitpython/`:
 | `adafruit_touchscreen.py` | 4-wire analog resistive |
 
 See [driver inventory](driver-inventory.md) for the full list.
+
+## Calibration (STMPE610 / PiTFT)
+
+PiTFT FeatherWing configs pass Adafruit's factory calibration for the 2.4" wing
+(rotation 90°):
+
+```python
+_PITFT_CALIBRATION = ((357, 3812), (390, 3555))
+```
+
+MicroPython (`pitft_ili9341_featherwing`) passes this to `STMPE610(..., calibration=...)`.
+CircuitPython (`cp_pitft_ili9341_featherwing`) passes the same tuple to
+`Adafruit_STMPE610_SPI`.

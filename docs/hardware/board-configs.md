@@ -67,6 +67,7 @@ An exact match for all four is rare; bus + display controller is usually enough 
 | Directory | Hardware |
 |-----------|----------|
 | `fbdisplay/qualia_tl040hds20` | MicroPython Qualia RGB |
+| `fbdisplay/t-rgb_480` | LilyGO T-RGB 480×480 ST7701 (ESP32-S3; RGB via pydevices/displayif) |
 | `fbdisplay/cp_qualia_tl040hds20` | CircuitPython Qualia |
 | `fbdisplay/cp_usb_video` | CircuitPython USB Video |
 | `fbdisplay/cp_matrixportal_s3_64x64` | MatrixPortal S3 HUB75 64×64 |

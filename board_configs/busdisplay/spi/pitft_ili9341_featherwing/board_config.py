@@ -32,7 +32,16 @@ display_drv = ILI9341(
 )
 
 touch_spi = SPI(0, baudrate=1_000_000, sck=Pin(18), mosi=Pin(19), miso=Pin(20))
-touch_drv = STMPE610(touch_spi, cs=8, width=240, height=320, rotation=90)
+# PiTFT 2.4" FeatherWing (#3315) STMPE610 calibration (rotation 90°)
+_PITFT_CALIBRATION = ((357, 3812), (390, 3555))
+touch_drv = STMPE610(
+    touch_spi,
+    cs=8,
+    width=240,
+    height=320,
+    rotation=90,
+    calibration=_PITFT_CALIBRATION,
+)
 
 
 def touch_read_func():
