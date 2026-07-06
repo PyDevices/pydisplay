@@ -7,7 +7,7 @@ multimer — cross-platform machine.Timer for CPython, MicroPython, and CircuitP
 
 from ._async_timer import AsyncTimer
 from ._schedule import schedule
-from ._ticks import ticks_add, ticks_diff, ticks_less, ticks_ms
+from ._ticks import sleep_ms, ticks_add, ticks_diff, ticks_less, ticks_ms
 from ._timer import Timer
 
 __all__ = [
@@ -15,6 +15,7 @@ __all__ = [
     "Timer",
     "asyncio",
     "schedule",
+    "sleep_ms",
     "ticks_add",
     "ticks_diff",
     "ticks_less",

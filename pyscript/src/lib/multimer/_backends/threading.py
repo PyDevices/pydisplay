@@ -34,7 +34,7 @@ else:
 
 
 class Timer(_TimerCore):
-    def __init__(self, id=-1, /, **kwargs):
+    def __init__(self, id=-1, **kwargs):
         self._running = False
         super().__init__(id, **kwargs)
 
