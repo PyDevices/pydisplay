@@ -30,6 +30,7 @@ class PixelDisplay(DisplayDriver):
         self._height = height if height is not None else pixel_buffer.height
         self._rotation = 0
         self.color_depth = color_depth
+        self._requires_byteswap = False
         super().__init__(auto_refresh=False)
 
     def init(self) -> None:
