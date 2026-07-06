@@ -1,3 +1,13 @@
+
+try:
+    import digitalio
+except ImportError:
+    pass
+try:
+    from epaperdisplay import EPaperDisplay
+except ImportError:
+    from epaperdisplay_chip import EPaperDisplay
+
 # SPDX-FileCopyrightText: 2019 Scott Shawcroft for Adafruit Industries
 #
 # SPDX-License-Identifier: MIT
@@ -28,8 +38,6 @@ Implementation Notes
   https://github.com/adafruit/circuitpython/releases
 
 """
-
-import epaperdisplay
 
 try:
     from typing import Optional
@@ -116,7 +124,7 @@ _STOP_SEQUENCE = (
 
 
 # pylint: disable=too-few-public-methods
-class IL0373(epaperdisplay.EPaperDisplay):
+class IL0373(EPaperDisplay):
     r"""IL0373 driver
 
     :param bus: The data bus the display is on

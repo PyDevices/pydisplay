@@ -4,7 +4,10 @@
     ["ssd1680.py", "github:PyDevices/pydisplay/drivers/display/ssd1680.py"]
   ],
   "deps": [
-    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"]
+    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"],
+    ["github:PyDevices/pydisplay/packages/epaperdisplay.json", "main"],
+    ["github:PyDevices/pydisplay/packages/epaper_chip.json", "main"],
+    ["github:PyDevices/pydisplay/packages/spibus.json", "main"]
   ],
   "version": "0.1"
 }

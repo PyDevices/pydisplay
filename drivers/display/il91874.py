@@ -1,3 +1,13 @@
+
+try:
+    import digitalio
+except ImportError:
+    pass
+try:
+    from epaperdisplay import EPaperDisplay
+except ImportError:
+    from epaperdisplay_chip import EPaperDisplay
+
 # SPDX-FileCopyrightText: 2019 Scott Shawcroft for Adafruit Industries
 #
 # SPDX-License-Identifier: MIT

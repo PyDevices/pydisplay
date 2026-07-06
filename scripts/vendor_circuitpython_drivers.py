@@ -123,9 +123,35 @@ def patch_busdisplay(content: str) -> str:
     return content
 
 
+EPAPER_IMPORT = """try:
+    import digitalio
+except ImportError:
+    pass
+try:
+    from epaperdisplay import EPaperDisplay
+except ImportError:
+    from epaperdisplay_chip import EPaperDisplay
+"""
+
+
 def patch_epaper(content: str) -> str:
-    content = re.sub(r"^from epaperdisplay import EPaperDisplay\s*$", "", content, flags=re.M)
-    # Keep CircuitPython epaperdisplay when available; pydisplay stub for MP later.
+    content = re.sub(r"^import digitalio\s*$", "", content, flags=re.M)
+    content = re.sub(r"^import epaperdisplay\s*$", "", content, flags=re.M)
+    content = re.sub(r"^import displayio\s*$", "", content, flags=re.M)
+    content = re.sub(
+        r"^try:\s*\n\s*from epaperdisplay import EPaperDisplay.*?\nexcept ImportError:.*?\n(?:\s*from .*?\n)?",
+        "",
+        content,
+        flags=re.M | re.S,
+    )
+    content = content.replace("epaperdisplay.EPaperDisplay", "EPaperDisplay")
+    if "from epaperdisplay_chip import EPaperDisplay" not in content:
+        match = re.search(r'^""".*?"""\s*\n', content, flags=re.S | re.M)
+        if match:
+            pos = match.end()
+            content = content[:pos] + "\n" + EPAPER_IMPORT + "\n" + content[pos:]
+        else:
+            content = EPAPER_IMPORT + "\n" + content
     return content
 
 

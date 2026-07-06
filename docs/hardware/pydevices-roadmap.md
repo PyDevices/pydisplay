@@ -20,7 +20,7 @@ MicroPython hardware gaps surfaced by pydisplay board configs. See also [display
 
 | Work item | Location | Unblocks |
 |-----------|----------|----------|
-| `EPaperDisplay` buffer → panel push | `src/lib/displaysys/epaperdisplay.py` | CP displayio path done; MP `bus.send` path needs chip testing |
+| `EPaperDisplay` buffer → panel push | `src/lib/displaysys/epaperdisplay.py` | **Done** — CP displayio + MP `bus.send`; chip base via `epaperdisplay_chip.py` |
 | NeoPixel grid mapper | pydevices/cmods | `pixeldisplay/*` MP pairs |
 
 ## P3 — advanced interfaces
@@ -36,5 +36,6 @@ MicroPython hardware gaps surfaced by pydisplay board configs. See also [display
 - [x] `i2cbus` for MicroPython OLED (`drivers/bus/i2cbus.py`)
 - [x] `EPaperDisplay.show()` — displayio push on CP; `bus.send` fallback on MP
 - [x] `board.DISPLAY` adapter (`displaysys.boarddisplay.BoardDisplay`)
+- [x] `epaperdisplay_chip` + `digitalio` shims for MP e-paper chip drivers
 - [ ] Hardware validation pass on physical boards
 - [ ] circup / micropython-lib publish for new drivers

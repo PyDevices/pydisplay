@@ -1,3 +1,13 @@
+
+try:
+    import digitalio
+except ImportError:
+    pass
+try:
+    from epaperdisplay import EPaperDisplay
+except ImportError:
+    from epaperdisplay_chip import EPaperDisplay
+
 # SPDX-FileCopyrightText: 2017 Scott Shawcroft, written for Adafruit Industries
 # SPDX-FileCopyrightText: Copyright (c) 2023 Scott Shawcroft for Adafruit Industries
 #
@@ -23,8 +33,6 @@ Implementation Notes
 
 import struct
 
-import epaperdisplay
-
 __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_SPD1656.git"
 
@@ -47,7 +55,7 @@ _STOP_SEQUENCE = b"\x02\x01\x00\x07\x01\xa5"  # Power off then deep sleep
 # Datasheet is here: https://www.waveshare.com/w/upload/b/bf/SPD1656_1.1.pdf
 
 
-class SPD1656(epaperdisplay.EPaperDisplay):
+class SPD1656(EPaperDisplay):
     r"""SPD1656 display driver
 
     :param bus: The data bus the display is on

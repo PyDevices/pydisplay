@@ -41,10 +41,12 @@ python3 scripts/vendor_circuitpython_drivers.py --all
 | `ssd1331.py` | Adafruit | vendored |
 | `ssd1351.py` | Adafruit | vendored |
 
-## E-paper (EPaperDisplay on CP)
+## E-paper (EPaperDisplay on CP; epaperdisplay_chip on MP)
 
 | File | Source | Status |
 |------|--------|--------|
+| `epaperdisplay_chip.py` | pydisplay MP shim | in repo |
+| `digitalio.py` | pydisplay MP shim (`drivers/bus/`) | in repo |
 | `ssd1680.py` | Adafruit | vendored |
 | `ssd1681.py` | Adafruit | vendored |
 | `ssd1683.py` | Adafruit | vendored |

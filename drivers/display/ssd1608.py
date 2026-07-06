@@ -1,3 +1,13 @@
+
+try:
+    import digitalio
+except ImportError:
+    pass
+try:
+    from epaperdisplay import EPaperDisplay
+except ImportError:
+    from epaperdisplay_chip import EPaperDisplay
+
 # SPDX-FileCopyrightText: 2019 Scott Shawcroft for Adafruit Industries
 #
 # SPDX-License-Identifier: MIT
@@ -25,8 +35,6 @@ Implementation Notes
 
 """
 
-import epaperdisplay
-
 try:
     import typing
 
@@ -52,7 +60,7 @@ _START_SEQUENCE = (
 _STOP_SEQUENCE = b"\x10\x01\x01"  # Enter deep sleep
 
 
-class SSD1608(epaperdisplay.EPaperDisplay):
+class SSD1608(EPaperDisplay):
     """SSD1608 driver"""
 
     def __init__(self, bus: fourwire.FourWire, **kwargs) -> None:
