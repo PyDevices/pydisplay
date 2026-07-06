@@ -5,5 +5,5 @@
 import eventsys
 
 raise NotImplementedError(
-    "HUB75 rgbmatrix on MicroPython requires pydevices rgbmatrix cmod"
+    "HUB75 rgbmatrix on MicroPython requires displayif rgbmatrix cmod"
 )

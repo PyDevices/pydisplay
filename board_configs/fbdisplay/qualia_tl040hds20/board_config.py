@@ -4,10 +4,16 @@
 from ft6x36 import FT6x36
 from machine import I2C, Pin
 from pca9554 import PCA9554
-from rgbframebuffer import RGBFrameBuffer
 
 from displaysys.fbdisplay import FBDisplay
 import eventsys
+
+try:
+    from rgbframebuffer import RGBFrameBuffer
+except ImportError as exc:
+    raise NotImplementedError(
+        "RGB-666 dotclock scanout requires displayif rgbframebuffer cmod (esp32 port)"
+    ) from exc
 
 
 def send_init_sequence(init_sequence, mosi, sck, cs):

@@ -5,8 +5,7 @@
     ["xl9535.py", "github:PyDevices/pydisplay/drivers/io_expander/xl9535.py"]
   ],
   "deps": [
-    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"],
-    ["github:PyDevices/pydisplay/packages/rgbdisplay.json", "main"]
+    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"]
   ],
-  "version": "0.1"
+  "version": "0.2"
 }

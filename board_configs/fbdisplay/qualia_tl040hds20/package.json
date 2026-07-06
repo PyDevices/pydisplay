@@ -4,5 +4,8 @@
       ["pca9554.py", "github:PyDevices/pydisplay/drivers/io_expander/pca9554.py"],
       ["ft6x36.py", "github:PyDevices/pydisplay/drivers/touch/ft6x36.py"]
     ],
-    "version": "0.1"
+    "deps": [
+      ["github:PyDevices/pydisplay/packages/displaysys.json", "main"]
+    ],
+    "version": "0.2"
   }
