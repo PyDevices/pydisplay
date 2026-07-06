@@ -104,6 +104,7 @@ nav:
     - MicroPython: platforms/micropython.md
     - CircuitPython: platforms/circuitpython.md
     - CPython desktop: platforms/cpython-desktop.md
+    - Android: platforms/android.md
     - Jupyter: platforms/jupyter.md
     - Run interactively: platforms/jupyter-run.md
     - Jupyter notebook: platforms/jupyter-notebook.ipynb
