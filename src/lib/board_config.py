@@ -18,61 +18,18 @@ scale = 1.0
 touch_dev = None
 
 
-def _attach_timer_to_broker(broker, *, async_=False, tick_ms=10):
-    from multimer import AsyncTimer, Timer, ticks_add, ticks_diff, ticks_ms
-
-    TimerClass = AsyncTimer if async_ else Timer
-
-    callbacks = []
-    timer = TimerClass(-1)
-
-    class _BrokerTimerSubscription:
-        def __init__(self, entry):
-            self._entry = entry
-
-        def deinit(self):
-            entry = self._entry
-            if entry is None:
-                return
-            self._entry = None
-            try:
-                callbacks.remove(entry)
-            except ValueError:
-                pass
-
-    def _on_tick(timer_obj):
-        now = ticks_ms()
-        for entry in tuple(callbacks):
-            if ticks_diff(entry[2], now) > 0:
-                continue
-            entry[2] = ticks_add(now, entry[1])
-            entry[0](timer_obj)
-
-    def on_tick(callback, *, period):
-        entry = [callback, int(period), ticks_add(ticks_ms(), int(period))]
-        callbacks.append(entry)
-        return _BrokerTimerSubscription(entry)
-
-    def stop_timer():
-        callbacks[:] = []
-        timer.deinit()
-
-    timer.init(mode=TimerClass.PERIODIC, period=tick_ms, callback=_on_tick)
-    broker._timer = timer
-    broker.on_tick = on_tick
-    broker.stop_timer = stop_timer
-    return timer
+_DISPLAY_REFRESH_MS = 33
 
 
-def _share_broker_timer_with_display(broker, display_drv, *, async_=False, period=33):
-    if not hasattr(broker, "on_tick"):
-        _attach_timer_to_broker(broker, async_=async_)
+def _wire_display_refresh(broker, display_drv, *, async_=False, period=_DISPLAY_REFRESH_MS):
+    """Drive display refresh from the broker's shared timer.
 
-    display_timer = getattr(display_drv, "_timer", None)
-    if display_timer is not None:
-        display_timer.deinit()
-
-    display_drv._timer = broker.on_tick(display_drv._auto_refresh, period=period)
+    The broker owns the timer (see ``eventsys.Broker.on_tick``); the display only
+    provides ``show()``. Quit tears the shared timer down after the display is
+    released.
+    """
+    broker.on_tick(display_drv.show, period=period, async_=async_)
+    broker.register_quit_cleanup(display_drv, after=broker.stop_timer)
 
 
 _ps = _jn = False
@@ -103,8 +60,7 @@ if _ps:
         read=devices_drv.read,
         data=display_drv,
     )
-    _share_broker_timer_with_display(broker, display_drv, async_=True)
-    broker.register_quit_cleanup(display_drv, after=broker.stop_timer)
+    _wire_display_refresh(broker, display_drv, async_=True)
 elif _jn:
     # Running in Jupyter Notebook
     from displaysys.jndisplay import JNDevices, JNDisplay
@@ -123,8 +79,7 @@ elif _jn:
         read=devices_drv.read,
         data=display_drv,
     )
-    _share_broker_timer_with_display(broker, display_drv, async_=TIMER_ASYNC)
-    broker.register_quit_cleanup(display_drv, after=broker.stop_timer)
+    _wire_display_refresh(broker, display_drv, async_=TIMER_ASYNC)
 else:
     # Running on the desktop
     import sys
@@ -170,8 +125,7 @@ else:
         data=display_drv,
         # data2=events.filter,
     )
-    _share_broker_timer_with_display(broker, display_drv, async_=TIMER_ASYNC)
-    broker.register_quit_cleanup(display_drv, after=broker.stop_timer)
+    _wire_display_refresh(broker, display_drv, async_=TIMER_ASYNC)
 
 if _ps:
     TIMER_ASYNC = True

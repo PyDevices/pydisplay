@@ -30,6 +30,7 @@ events_dev = broker.create(
     # data2=events.filter,
 )
 
-broker.register_quit_cleanup(display_drv)
+broker.on_tick(display_drv.show, period=33)
+broker.register_quit_cleanup(display_drv, after=broker.stop_timer)
 
 display_drv.fill(0)

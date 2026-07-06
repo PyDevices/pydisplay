@@ -275,8 +275,6 @@ class JNDisplay(DisplayDriver):
     Args:
         width (int): The width of the display.
         height (int): The height of the display.
-        async_ (bool): Use ``multimer.AsyncTimer`` for ``auto_refresh``. Defaults
-            to ``True`` (Jupyter async demos run under asyncio).
 
     Attributes:
         color_depth (int): The color depth of the display
@@ -286,7 +284,7 @@ class JNDisplay(DisplayDriver):
 
     _next_display_id = 0
 
-    def __init__(self, width, height, *, async_=True):
+    def __init__(self, width, height):
         self._display_id = f"JNDisplay_{JNDisplay._next_display_id}"
         JNDisplay._next_display_id += 1
         self._width = width
@@ -302,7 +300,7 @@ class JNDisplay(DisplayDriver):
         self.quit_chord = default_quit_chord()
         self._visible = None
 
-        super().__init__(auto_refresh=True, async_=async_)
+        super().__init__()
 
     ############### Required API Methods ################
 

@@ -47,7 +47,7 @@ def main():
                 block_size,
                 getrandbits(16),
             )
-            if display_drv._timer is None:
+            if getattr(broker, "_timer", None) is None:
                 display_drv.show()
             sleep_ms(0)
             count += 1

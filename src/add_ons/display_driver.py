@@ -32,18 +32,12 @@ def main():
     if not lv.is_initialized():
         lv.init()
     if not lv_utils.event_loop.is_running():
-        # Async apps use multimer.AsyncTimer for LVGL ticks; present the frame
-        # from the aio refresh loop instead.
-        refresh_cb = None
+        # The broker owns the shared refresh timer (wired in board_config). Only
+        # present LVGL frames from lv_utils when nothing else is already
+        # refreshing the display, to avoid double refresh.
         use_async = TIMER_ASYNC
-        if use_async:
-            if getattr(display_drv, "_timer", None) is not None:
-                display_drv._timer.deinit()
-                display_drv._timer = None
-            refresh_cb = display_drv.show
-        elif getattr(display_drv, "_timer", None) is None:
-            # Present each LVGL frame when the display has no auto-refresh timer.
-            refresh_cb = display_drv.show
+        broker_refreshing = getattr(broker, "_timer", None) is not None
+        refresh_cb = None if broker_refreshing else display_drv.show
         lv_utils.event_loop(asynchronous=use_async, refresh_cb=refresh_cb)
 
     if lv.group_get_default() is None:

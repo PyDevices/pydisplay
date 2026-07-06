@@ -130,8 +130,7 @@ def on_tick(_=None):
         return
     state["scroll"] = (state["scroll"] + 1) % scroll_height()
     display_drv.vscroll = state["scroll"]
-    if display_drv._timer is None:
-        display_drv.show()
+    # The broker's shared timer refreshes the display; just advance the scroll.
 
 
 def handle_events():

@@ -26,12 +26,12 @@ class FakeTouch:
 class ScrollDisplay(DisplayDriver):
     """Smallest driver that makes the base scroll helpers observable."""
 
-    def __init__(self, width=10, height=10, auto_refresh=False):
+    def __init__(self, width=10, height=10):
         self._width = width
         self._height = height
         self._rotation = 0
         self._requires_byteswap = False
-        super().__init__(auto_refresh=auto_refresh)
+        super().__init__()
 
     def init(self):
         # base __init__ resets _vssa to False; give it a real start value
@@ -140,10 +140,6 @@ class TestPowerBrightnessDefaults(unittest.TestCase):
 
 
 class TestLifecycle(unittest.TestCase):
-    def test_no_timer_without_auto_refresh(self):
-        d, _ = make_fbdisplay(8, 4)
-        self.assertIsNone(d._timer)
-
     def test_deinit_is_idempotent(self):
         d, _ = make_fbdisplay(8, 4)
         d.deinit()

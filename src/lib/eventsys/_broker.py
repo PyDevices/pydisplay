@@ -18,8 +18,38 @@ def poll_quit_discarding_others(broker):
     return False
 
 
+class _BrokerTimerSubscription:
+    """Handle for a callback subscribed to the broker's shared timer.
+
+    Call :meth:`deinit` to stop receiving ticks without affecting other
+    subscribers or the underlying timer.
+    """
+
+    def __init__(self, broker, entry):
+        self._broker = broker
+        self._entry = entry
+
+    def deinit(self):
+        entry = self._entry
+        if entry is None:
+            return
+        self._entry = None
+        try:
+            self._broker._tick_callbacks.remove(entry)
+        except ValueError:
+            pass
+
+
 class Broker(Device):
-    """Polls registered devices and dispatches events to subscribers."""
+    """Polls registered devices and dispatches events to subscribers.
+
+    The broker also owns the single shared periodic timer for a board. Instead
+    of each display or GUI subsystem creating its own ``multimer`` timer, they
+    subscribe a callback through :meth:`on_tick`; the broker runs one timer and
+    fans ticks out to every subscriber. ``multimer`` is imported lazily so
+    ``eventsys`` stays importable in isolation and on targets without a timer
+    backend.
+    """
 
     type = types.BROKER
     responses = events.filter
@@ -30,6 +60,11 @@ class Broker(Device):
         self.devices = []
         self._device_callbacks = {}
         self._on_quit = None
+        self._timer = None
+        self._tick_callbacks = []
+        self._ticks_ms = None
+        self._ticks_add = None
+        self._ticks_diff = None
 
     def on(self, event_type, callback):
         """Subscribe ``callback`` to one or more event types."""
@@ -103,6 +138,62 @@ class Broker(Device):
         if dev in self.devices:
             self.devices.remove(dev)
             dev.broker = None
+
+    ############### Shared timer dispatch ################
+
+    def start_timer(self, *, async_=False, tick_ms=10):
+        """Create the shared periodic timer that drives :meth:`on_tick` subscribers.
+
+        ``multimer`` is imported lazily here (not at module import) so
+        ``eventsys`` remains standalone. ``async_`` selects
+        ``multimer.AsyncTimer`` (asyncio hosts such as PyScript/Jupyter) over the
+        default ``multimer.Timer``. Returns the underlying timer; a no-op if the
+        timer is already running.
+        """
+        if self._timer is not None:
+            return self._timer
+        from multimer import AsyncTimer, Timer, ticks_add, ticks_diff, ticks_ms
+
+        self._ticks_ms = ticks_ms
+        self._ticks_add = ticks_add
+        self._ticks_diff = ticks_diff
+        timer_class = AsyncTimer if async_ else Timer
+        timer = timer_class(-1)
+        timer.init(mode=timer_class.PERIODIC, period=tick_ms, callback=self._dispatch_tick)
+        self._timer = timer
+        return timer
+
+    def _dispatch_tick(self, timer_obj):
+        now = self._ticks_ms()
+        for entry in tuple(self._tick_callbacks):
+            if self._ticks_diff(entry[2], now) > 0:
+                continue
+            entry[2] = self._ticks_add(now, entry[1])
+            entry[0](timer_obj)
+
+    def on_tick(self, callback, *, period, async_=False):
+        """Subscribe ``callback`` to the shared timer, firing about every ``period`` ms.
+
+        Starts the shared timer on first use. Returns a subscription object with
+        a ``deinit()`` method that unsubscribes the callback. This is the hook
+        display refresh uses instead of the display owning its own timer, and the
+        same hook other subsystems (e.g. ``lv_utils``) can use later.
+        """
+        if not callable(callback):
+            raise ValueError("callback is not callable.")
+        if self._timer is None:
+            self.start_timer(async_=async_)
+        entry = [callback, int(period), self._ticks_add(self._ticks_ms(), int(period))]
+        self._tick_callbacks.append(entry)
+        return _BrokerTimerSubscription(self, entry)
+
+    def stop_timer(self):
+        """Stop the shared timer and drop all :meth:`on_tick` subscriptions."""
+        self._tick_callbacks = []
+        timer = self._timer
+        self._timer = None
+        if timer is not None:
+            timer.deinit()
 
     def register_quit_cleanup(self, resource, *, before=None, after=None):
         """Wire ``resource.quit()`` to run on ``events.QUIT`` (no process exit)."""

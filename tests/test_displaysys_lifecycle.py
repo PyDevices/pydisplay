@@ -22,7 +22,7 @@ class CountingDriver(DisplayDriver):
         self._rotation = 0
         self._requires_byteswap = False
         self.deinit_count = 0
-        super().__init__(auto_refresh=False)
+        super().__init__()
 
     def init(self):
         pass
