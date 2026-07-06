@@ -1,37 +1,46 @@
-"""Waveshare ESP32-P4-WIFI6-Touch-LCD-4B — 720×720 MIPI DSI + GT911 touch
+"""Waveshare ESP32-P4-WIFI6-Touch-LCD-4B — MicroPython
 
-Product: https://www.waveshare.com/esp32-p4-wifi6-touch-lcd-4b.htm
-Wiki:    https://www.waveshare.com/wiki/ESP32-P4-WIFI6-Touch-LCD-4B
+720×720 ST7703 on MIPI DSI + GT911 touch.  Targets the displayif ``mipidsi``
+cmod on ESP32-P4.  The ``Bus`` / ``Display`` call surface mirrors CircuitPython
+``mipidsi``; ``Display`` must satisfy the ``FBDisplay`` buffer contract
+(``.width``, ``.height``, ``memoryview()``, ``.refresh()``).
 
-4-inch 720×720 IPS panel (ST7703) on MIPI DSI.  GT911 capacitive touch on I2C.
-Pin assignments match the Waveshare ``esp32_p4_wifi6_touch_lcd_4b`` BSP.
+displayif implementation notes (Waveshare BSP):
+- Enable DSI PHY LDO channel 3 at 2500 mV before ``esp_lcd_new_dsi_bus``
+- Lane bit rate 1000 Mbps/lane, 2 lanes
+- ``refresh()`` should flush CPU cache then ``esp_lcd_panel_draw_bitmap`` (CP mipidsi)
 
-Requires CircuitPython with ``mipidsi`` (ESP32-P4) and the community ``gt911``
-library (``circup install gt911``).
+CircuitPython sibling: ``cp_esp32-p4-wifi6-touch-lcd-4b``.
+
+BSP reference: waveshareteam/Waveshare-ESP32-components ``esp32_p4_wifi6_touch_lcd_4b``
 """
 
-import board
-import busio
-import digitalio
-import displayio
-import framebufferio
-import gt911
-import mipidsi
+from gt911 import GT911
+from machine import I2C, Pin
 import time
 
 from displaysys.fbdisplay import FBDisplay
 import eventsys
 
-# This first part is particular to CircuitPython framebuffer-based displays
+try:
+    from mipidsi import Bus, Display
+except ImportError as exc:
+    raise NotImplementedError(
+        "MIPI DSI requires displayif mipidsi cmod (esp32p4 port)"
+    ) from exc
 
-# Waveshare BSP: SCL=GPIO8, SDA=GPIO7, LCD_RST=GPIO27, BL=GPIO26, TOUCH_RST=GPIO23
-I2C_SCL = board.IO8
-I2C_SDA = board.IO7
-LCD_RESET = board.IO27
-LCD_BACKLIGHT = board.IO26
-TOUCH_RESET = board.IO23
+# Waveshare BSP pinout
+LCD_RESET = 27
+LCD_BACKLIGHT = 26
+I2C_SCL = 8
+I2C_SDA = 7
+TOUCH_RESET = 23
+# GT911 INT is not routed to the MCU (BSP: GPIO_NC); GPIO22 is unused dummy for reset.
+TOUCH_IRQ_DUMMY = 22
 
-# ST7703 vendor init (waveshare/esp_lcd_st7703, 720×720 panel)
+# ST7703 vendor init (waveshare/esp_lcd_st7703, 720×720 panel).
+# Init record format matches CircuitPython busdisplay / mipidsi:
+#   bytes([cmd, param_count | 0x80, ...params..., delay_ms])
 ST7703_INIT_SEQUENCE = (
     b"\xb9\x03\xf1\x12\x83"
     b"\xb1\x05\x00\x00\x00\xda\x80"
@@ -59,18 +68,17 @@ ST7703_INIT_SEQUENCE = (
     b")\x81\x002"
 )
 
-displayio.release_displays()
+# MIPI DSI bus (BSP_LCD_MIPI_DSI_LANE_BITRATE_MBPS = 1000)
+bus = Bus(frequency=1_000_000_000, num_lanes=2)
 
-bus = mipidsi.Bus(frequency=1_000_000_000, num_lanes=2)
+lcd_reset = Pin(LCD_RESET, Pin.OUT, value=1)
+lcd_reset.value(0)
+time.sleep_ms(100)
+lcd_reset.value(1)
+time.sleep_ms(200)
 
-reset_pin = digitalio.DigitalInOut(LCD_RESET)
-reset_pin.direction = digitalio.Direction.OUTPUT
-reset_pin.value = False
-time.sleep(0.1)
-reset_pin.value = True
-time.sleep(0.2)
-
-fb = mipidsi.Display(
+# DPI timings from ST7703_720_720_PANEL_60HZ_DPI_CONFIG
+fb = Display(
     bus,
     init_sequence=ST7703_INIT_SEQUENCE,
     width=720,
@@ -83,30 +91,31 @@ fb = mipidsi.Display(
     vsync_pulse_width=4,
     vsync_front_porch=20,
     vsync_back_porch=20,
+    reset_pin=LCD_RESET,
     backlight_pin=LCD_BACKLIGHT,
     backlight_on_high=False,
 )
 
-display = framebufferio.FramebufferDisplay(fb, auto_refresh=True)
-display.root_group = None
-
-i2c = busio.I2C(I2C_SCL, I2C_SDA)
-touch_rst = digitalio.DigitalInOut(TOUCH_RESET)
-touch_rst.direction = digitalio.Direction.OUTPUT
-touch_drv = gt911.GT911(i2c, i2c_address=0x5D, rst_pin=touch_rst)
-
-
-# Typical board_config.py setup from here on out
-
-display_drv = FBDisplay(fb)
+i2c = I2C(1, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA), freq=400_000)
+touch_drv = GT911(
+    i2c,
+    reset_pin=TOUCH_RESET,
+    irq_pin=TOUCH_IRQ_DUMMY,
+    address=0x5D,
+    width=720,
+    height=720,
+    touch_points=5,
+)
 
 
 def touch_read_func():
-    touches = touch_drv.touches
-    if touches:
-        return touches[0][0], touches[0][1]
+    n, points = touch_drv.read_points()
+    if n:
+        return points[0][0], points[0][1]
     return None
 
+
+display_drv = FBDisplay(fb)
 
 touch_rotation_table = (0, 0, 0, 0)
 
