@@ -89,6 +89,10 @@ An exact match for all four is rare; bus + display controller is usually enough 
 | `epaperdisplay/ssd1680_213_featherwing` | 2.13" E-Ink FeatherWing (MP) |
 | `epaperdisplay/cp_acep7in_73` | ACeP 7.3" 7-color E-Ink |
 | `epaperdisplay/acep7in_73` | ACeP 7.3" (MP) |
+| `epaperdisplay/cp_ssd1675_213_featherwing` | SSD1675 2.13" monochrome FeatherWing |
+| `epaperdisplay/ssd1675_213_featherwing` | SSD1675 2.13" FeatherWing (MP) |
+| `epaperdisplay/cp_uc8151d_29_breakout` | UC8151D 2.9" flexible breakout |
+| `epaperdisplay/uc8151d_29_breakout` | UC8151D 2.9" breakout (MP) |
 | `fbdisplay/cp_matrixportal_m4_64x32` | MatrixPortal M4 HUB75 64×32 |
 | `busdisplay/spi/cp_pybadge` | PyBadge LC + buttons |
 | `busdisplay/spi/cp_hallowing_m4` | HalloWing M4 |
@@ -121,7 +125,7 @@ An exact match for all four is rare; bus + display controller is usually enough 
 | `busdisplay/spi/cp_pitft_ili9341_featherwing` | PiTFT FeatherWing + STMPE610 |
 | `busdisplay/spi/pitft_ili9341_featherwing` | PiTFT FeatherWing (MP Feather + STMPE610) |
 | `busdisplay/spi/clue` | CLUE ST7789 (MP nRF52840) |
-| `busdisplay/spi/cp_clue_builtin` | CLUE via `board.DISPLAY` (no manual SPI wiring) |
+| `busdisplay/spi/cp_clue` | CLUE ST7789 (CircuitPython) |
 | `busdisplay/spi/cp_funhouse` | FunHouse ST7789 + touch |
 | `busdisplay/spi/cp_pygamer` | PyGamer ST7789 |
 | `busdisplay/spi/pygamer` | PyGamer ST7789 (MP SAMD51) |

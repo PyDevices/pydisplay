@@ -35,7 +35,8 @@ MicroPython hardware gaps surfaced by pydisplay board configs. See also [display
 
 - [x] `i2cbus` for MicroPython OLED (`drivers/bus/i2cbus.py`)
 - [x] `EPaperDisplay.show()` — displayio push on CP; `bus.send` fallback on MP
-- [x] `board.DISPLAY` adapter (`displaysys.boarddisplay.BoardDisplay`)
+- [x] `board.DISPLAY` adapter (`displaysys.boarddisplay.BoardDisplay`) — optional CP helper; board configs use explicit wiring for teaching
 - [x] `epaperdisplay_chip` + `digitalio` shims for MP e-paper chip drivers
+- [x] MIP package manifests for `tt21100`, `stmpe610`, `keypad_shift`, `i2cbus`, `epaper_chip`
 - [ ] Hardware validation pass on physical boards
-- [ ] circup / micropython-lib publish for new drivers
+- [ ] circup / micropython-lib publish for new drivers (on next release tag)

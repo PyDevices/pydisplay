@@ -29,7 +29,7 @@ class TT21100:
         length = self._data_len[0] | (self._data_len[1] << 8)
         if length in (0, 2):
             return []
-        if length % 10 == 7:
+        if length == 7:
             self._i2c.readfrom(self._address, 7, self._bytes)
             return []
         if length % 10 != 7:
