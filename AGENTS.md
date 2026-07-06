@@ -53,6 +53,25 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 
 - The single shared periodic timer is owned by `eventsys.Broker`
   (`Broker.on_tick` / `stop_timer`), not by display drivers. `board_config`
-  wires periodic display refresh via `broker.on_tick(display_drv.show, ...)`.
-  `displaysys` drivers only `show()`/`deinit()`. `multimer` stays
+  wires periodic display refresh via `broker.on_tick(display_drv.show, ...)` and
+  keeps the subscription handle on `broker.display_refresh` so a GUI layer can
+  take it over. `displaysys` drivers only `show()`/`deinit()`. `multimer` stays
   display-agnostic (no pydisplay/LVGL concepts).
+
+### LVGL
+
+- Install the CPython LVGL binding from TestPyPI (import name `lvgl`):
+  `.venv/bin/pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ lvgl-cpython`
+  (see https://github.com/PyDevices/lv_cpython_mod). The update script installs it.
+- `add_ons/lv_utils.py` subscribes its LVGL tick to the broker's shared timer
+  (`broker.on_tick`) and imports `asyncio` from `multimer`; `add_ons/display_driver.py`
+  takes over `broker.display_refresh` so LVGL presents frames from `task_handler`.
+- Test LVGL timers with `tools/lv_timer_test_kit.py` (modes: `sync`, `async` —
+  there is no pump/no_pump). Headless: `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/lv_timer_test_kit.py --only cpython-venv`.
+- Non-obvious: the sync `multimer.Timer` backend on CPython/Linux delivers via a
+  main-thread signal handler. LVGL is not re-entrant, so the app loop must not
+  touch LVGL/pygame concurrently (just `sleep_ms(0)`); the LVGL timer examples
+  are therefore excluded from the generic example matrix (`matrix = false`) — its
+  daemon-thread quit injection is incompatible — and are covered by the kit
+  instead. In this VNC/SDL environment, external desktop mouse clicks do not reach
+  the pygame window; use the kit's event-queue injection to exercise input.
