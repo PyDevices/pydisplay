@@ -5,29 +5,10 @@
 
 import contextlib
 import io
-import time
 
 import _env  # noqa: F401
 
 import graphics
-import multimer
-
-
-def pump(duration_s, step_s=0.005):
-    """Drive timers for ``duration_s`` seconds.
-
-    Works across every synchronous backend:
-
-    - threading / SDL / polling backends deliver callbacks through the schedule
-      queue, which ``multimer.pump()`` drains here on the main thread;
-    - the librt ``_librt`` backend delivers callbacks on the main
-      thread during ``time.sleep`` (``pump`` is then a harmless no-op).
-    """
-    end = time.monotonic() + duration_s
-    while time.monotonic() < end:
-        multimer.pump()
-        time.sleep(step_s)
-    multimer.pump()
 
 
 def scripted(*values):

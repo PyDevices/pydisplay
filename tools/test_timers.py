@@ -2,30 +2,28 @@
 #
 # SPDX-License-Identifier: MIT
 """
-Probe every multimer Timer backend available on this Python port.
+Probe public multimer Timer APIs available on this Python port.
 
-Backends exercised (when importable on the host):
+Public surfaces exercised (when importable on the host):
 
-- ``machine.Timer`` — MCU hardware
-- ``multimer._librt.Timer`` — Linux librt timers (unified ``_ffi`` + ``_ctypes`` replacement)
-- ``multimer._win32.Timer`` — Windows waitable timer + QueueUserAPC (main thread, no pump)
-- ``multimer._threading.Timer`` — background thread + schedule queue
-- ``multimer._sdl2.Timer`` — SDL2 ``SDL_AddTimer`` (via ``usdl2``)
-- ``multimer._polling.Timer`` — cooperative tick list
-- ``multimer.AsyncTimer`` — asyncio / uasyncio
-- ``multimer.Timer`` — platform default (first match at import)
+- ``machine.Timer`` — MCU hardware (not multimer; listed for comparison)
+- ``multimer.Timer`` — platform default backend
+- ``multimer.AsyncTimer`` — asyncio / uasyncio (sleep and yield-loop styles)
 
-Run the full desktop matrix (always includes ``micropython.exe`` and
-``python.exe`` from ``~/bin`` when present)::
+Development-only optional probes of private backends are behind
+``MULTIMER_PROBE_BACKENDS=1`` (not for production).
+
+Run the full desktop matrix::
 
     python tools/run_test_timers.py
 
-Each implementation is imported and exercised inside its own try block so one
-failure does not stop the rest.  Implementations that cannot be imported are
-reported as SKIP.
+Each probe is isolated so one failure does not stop the rest. Imports that
+fail are reported as SKIP.
 """
 
+import os
 import sys
+import time
 
 
 def _bootstrap_src_path():
@@ -38,8 +36,6 @@ def _bootstrap_src_path():
     else:
         lib = "../src/lib"
     try:
-        import os
-
         os.stat(lib)
     except Exception:
         return
@@ -49,15 +45,22 @@ def _bootstrap_src_path():
 
 _bootstrap_src_path()
 
-from multimer import pump  # noqa: E402
-from multimer._ticks import sleep_ms as wait_ms  # noqa: E402
+from multimer import sleep_ms  # noqa: E402
 
 TEST_PERIOD_MS = 50
 TEST_DURATION_MS = 300
 MIN_CALLBACKS = 2
 
-# Canonical sync backend modules (``_librt`` replaces the former ``_ffi`` and ``_ctypes`` modules).
-SYNC_TIMER_BACKENDS = ("_librt", "_win32", "_threading", "_sdl2", "_polling")
+
+def _probe_backends_enabled():
+    """Development-only private backend probes (not available on all ports)."""
+    environ = getattr(os, "environ", None)
+    if environ is None:
+        return False
+    try:
+        return environ.get("MULTIMER_PROBE_BACKENDS", "") == "1"
+    except Exception:
+        return False
 
 
 def _timer_id():
@@ -79,15 +82,15 @@ def _print_error(label, err):
     print(f"  {label}: {type(err).__name__}: {err}")
 
 
-def _import_timer(module_name):
-    """Import a Timer class from a multimer backend module."""
-    mod = __import__(f"multimer.{module_name}", None, None, ("Timer",))
-    return mod.Timer
+def _wait_ms(ms):
+    deadline = time.monotonic() + (ms / 1000.0)
+    while time.monotonic() < deadline:
+        sleep_ms(10)
 
 
 def _run_timer_test(TimerClass):
     """
-    Start a periodic timer, wait, stop, and verify callbacks fired.
+    Start a periodic timer, wait, stop, verify fire.
 
     Returns:
         tuple[str, str | int]: (status, detail) where status is PASS, FAIL, or SKIP.
@@ -104,15 +107,7 @@ def _run_timer_test(TimerClass):
 
     timer = TimerClass(_timer_id())
     timer.init(mode=TimerClass.PERIODIC, period=TEST_PERIOD_MS, callback=callback)
-
-    requires_pump = getattr(TimerClass, "NEEDS_PUMP", False)
-    elapsed = 0
-    while elapsed < TEST_DURATION_MS:
-        if requires_pump:
-            pump()
-        wait_ms(10)
-        elapsed += 10
-
+    _wait_ms(TEST_DURATION_MS)
     timer.deinit()
 
     count = counter[0]
@@ -124,7 +119,7 @@ def _run_timer_test(TimerClass):
 
 
 async def _run_async_timer_test(TimerClass):
-    from multimer._async import sleep_ms as _sleep_ms
+    import asyncio
 
     counter = [0]
 
@@ -133,14 +128,14 @@ async def _run_async_timer_test(TimerClass):
 
     timer = TimerClass(_timer_id())
     timer.init(mode=TimerClass.PERIODIC, period=TEST_PERIOD_MS, callback=callback)
-    await _sleep_ms(TEST_DURATION_MS)
+    await asyncio.sleep(TEST_DURATION_MS / 1000)
     timer.deinit()
     return counter[0]
 
 
 def _run_async_loop_test(TimerClass):
-    """Exercise AsyncTimer + async yield in a sync-work loop."""
-    from multimer import run, sleep_ms
+    """Exercise AsyncTimer while the main thread also does sync work."""
+    import asyncio
 
     counter = [0]
 
@@ -152,23 +147,19 @@ def _run_async_loop_test(TimerClass):
         timer.init(mode=TimerClass.PERIODIC, period=TEST_PERIOD_MS, callback=callback)
         elapsed = 0
         while elapsed < TEST_DURATION_MS:
-            wait_ms(10)
-            await sleep_ms(0)
+            time.sleep(0.01)  # noqa: ASYNC251 — intentional sync work on the event-loop thread
+            await asyncio.sleep(0)
             elapsed += 10
         timer.deinit()
         return counter[0]
 
-    return run(main)
+    return asyncio.run(main())
 
 
 def _run_async_timer_test_sync(TimerClass):
-    from multimer._async import _require_asyncio
+    import asyncio
 
-    asyncio = _require_asyncio()
-    if hasattr(asyncio, "run"):
-        return asyncio.run(_run_async_timer_test(TimerClass))
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(_run_async_timer_test(TimerClass))
+    return asyncio.run(_run_async_timer_test(TimerClass))
 
 
 def _probe(name, import_fn, *, async_test=False, async_loop_test=False):
@@ -185,8 +176,6 @@ def _probe(name, import_fn, *, async_test=False, async_loop_test=False):
         _print_error("reason", err)
         print()
         return
-
-    print(f"  NEEDS_PUMP: {getattr(TimerClass, 'NEEDS_PUMP', False)}")
 
     try:
         if async_loop_test:
@@ -223,26 +212,6 @@ def _import_machine_timer():
     return Timer
 
 
-def _import_librt_timer():
-    return _import_timer("_librt")
-
-
-def _import_win32_timer():
-    return _import_timer("_win32")
-
-
-def _import_sdl2_timer():
-    return _import_timer("_sdl2")
-
-
-def _import_threading_timer():
-    return _import_timer("_threading")
-
-
-def _import_polling_timer():
-    return _import_timer("_polling")
-
-
 def _import_async_timer():
     from multimer import AsyncTimer
 
@@ -255,27 +224,40 @@ def _import_multimer_timer():
     return Timer
 
 
+def _import_backend_timer(backend_name):
+    mod = __import__(
+        f"multimer._backends.{backend_name}",
+        None,
+        None,
+        ("Timer",),
+    )
+    return mod.Timer
+
+
 def main():
     _print_platform()
-    print("sync backends:", ", ".join(SYNC_TIMER_BACKENDS))
-    print()
 
-    # Probe order matters on MicroPython unix: _sdl2 before _librt; _librt last
-    # among sync backends (librt timer signals break later probes).
-    probes = (
+    probes = [
         ("machine.Timer", _import_machine_timer, False, False),
-        ("_threading.Timer", _import_threading_timer, False, False),
-        ("_sdl2.Timer", _import_sdl2_timer, False, False),
-        ("_polling.Timer", _import_polling_timer, False, False),
         ("AsyncTimer", _import_async_timer, True, False),
         ("AsyncTimer (yield loop)", _import_async_timer, False, True),
-        ("_win32.Timer", _import_win32_timer, False, False),
-        ("_librt.Timer", _import_librt_timer, False, False),
         ("multimer.Timer (default)", _import_multimer_timer, False, False),
-    )
+    ]
 
-    for probe in probes:
-        name, import_fn, async_test, async_loop_test = probe
+    if _probe_backends_enabled():
+        print("development backend probes enabled (MULTIMER_PROBE_BACKENDS=1)")
+        print()
+        for name in ("librt", "win32", "threading", "polling"):
+            probes.append(
+                (
+                    f"_backends.{name}.Timer",
+                    lambda n=name: _import_backend_timer(n),
+                    False,
+                    False,
+                )
+            )
+
+    for name, import_fn, async_test, async_loop_test in probes:
         _probe(name, import_fn, async_test=async_test, async_loop_test=async_loop_test)
 
 

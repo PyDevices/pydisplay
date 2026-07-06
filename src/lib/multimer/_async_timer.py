@@ -29,7 +29,7 @@ def _loop_running(aio):
 
 
 class AsyncTimer(_TimerCore):
-    def __init__(self, id=-1, /, **kwargs):
+    def __init__(self, id=-1, **kwargs):
         self._running = False
         self._task = None
         super().__init__(id, **kwargs)

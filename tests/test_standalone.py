@@ -28,32 +28,34 @@ _MULTIMER_CHILD = textwrap.dedent(
     """
     import sys
 
+    import time
+
     import multimer
     from multimer import (
+        AsyncTimer,
         Timer,
-        periodic,
-        pump,
         schedule,
         sleep_ms,
         ticks_add,
         ticks_diff,
         ticks_less,
         ticks_ms,
-        AsyncTimer,
     )
 
     forbidden = [m for m in {siblings!r} if m in sys.modules]
     assert not forbidden, "multimer pulled in pydisplay modules: %r" % forbidden
 
     assert ticks_ms() >= 0
+    seen = []
+    schedule(lambda x: seen.append(x), 1)
+    assert seen == [1], seen
+
     hits = []
-    t = periodic(lambda tmr: hits.append(1), period=10)
-    import time
-    end = time.time() + 0.2
-    while time.time() < end:
-        pump()
-        time.sleep(0.005)
-    pump()
+    t = Timer(-1)
+    t.init(period=50, callback=lambda tim: hits.append(tim))
+    deadline = time.monotonic() + 0.35
+    while time.monotonic() < deadline:
+        sleep_ms(10)
     t.deinit()
     assert hits, "standalone timer never fired"
     assert AsyncTimer is not None, "AsyncTimer should be available on CPython"

@@ -25,11 +25,9 @@ if HAS_JNDisplay:
 @unittest.skipUnless(HAS_JNDisplay, "IPython and Pillow required for jndisplay tests")
 class TestJNDisplayScroll(unittest.TestCase):
     def _make_display(self, w=10, h=12):
-        fake_timer = mock.Mock()
-        fake_timer.deinit = mock.Mock()
-        with mock.patch("multimer.periodic", return_value=fake_timer), mock.patch.object(
-            JNDisplay, "init", lambda self: None
-        ):
+        with mock.patch(
+            "displaysys.DisplayDriver.__init__", lambda self, *a, **k: None
+        ), mock.patch.object(JNDisplay, "init", lambda self: None):
             d = JNDisplay(w, h)
         d._timer = None
         d._jn_devices = None

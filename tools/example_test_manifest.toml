@@ -3,7 +3,7 @@
 #
 # kind: oneshot | loop | async | lvgl | pdwidgets | harness | legacy
 # quit: native_exit | poll | inject | pending | interactive
-# kind: oneshot | loop | async | lvgl | pdwidgets | legacy | interactive
+# bootstrap: full (default) | headless — headless skips lib.path / display init
 
 [defaults]
 duration_s = 5
@@ -168,6 +168,7 @@ import = "test_timers"
 script = "../tools/test_timers.py"
 kind = "oneshot"
 quit = "native_exit"
+bootstrap = "headless"
 deps = ["core"]
 oneshot_timeout_s = 30
 

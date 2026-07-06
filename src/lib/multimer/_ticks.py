@@ -75,8 +75,8 @@ def ticks_less(ticks1, ticks2):
     return ticks_diff(ticks1, ticks2) < 0
 
 
-def _sleep_ms(ms):
-    """Block for ``ms`` milliseconds (internal helper)."""
+def sleep_ms(ms):
+    """Block for ``ms`` milliseconds."""
     try:
         from time import sleep_ms as _time_sleep_ms
 
@@ -85,3 +85,6 @@ def _sleep_ms(ms):
         import time
 
         time.sleep(ms / 1000)
+
+
+_sleep_ms = sleep_ms

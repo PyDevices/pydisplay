@@ -86,12 +86,7 @@ def _print_result(payload):
 
 
 def _sleep(seconds):
-    try:
-        from multimer import sleep_ms
-
-        sleep_ms(int(seconds * 1000))
-    except ImportError:
-        time.sleep(seconds)
+    time.sleep(seconds)
 
 
 def _system_exit_code(exc):
@@ -161,6 +156,20 @@ def _backend_name():
         return "?"
 
 
+def _setup_bootstrap(src, mode):
+    """Put pydisplay packages on sys.path; headless skips display-oriented lib.path."""
+    if mode == "headless":
+        lib = _join(src, "lib")
+        if lib not in sys.path:
+            sys.path.insert(0, lib)
+        return
+
+    try:
+        import lib.path  # noqa: F401
+    except Exception as exc:
+        raise RuntimeError("lib.path: {}".format(exc)) from exc
+
+
 def _run_oneshot(script_path, timeout_s):
     try:
         _exec_script(script_path)
@@ -210,12 +219,12 @@ def _start_multimer_quit_schedule(duration_s, quit_mode, kind, injected):
         import quit_inject
 
         import multimer
+        from multimer import Timer
     except ImportError:
         return False
 
     def on_quit(_timer):
         # Leave Quit on the QUEUE mock; the example's broker.poll() delivers it.
-        # Avoid pump_multimer here — nested pump() can overflow micropython.schedule.
         _inject_quit_now(quit_inject, kind, injected, pump_count=0)
 
     def on_touch(_timer):
@@ -223,16 +232,16 @@ def _start_multimer_quit_schedule(duration_s, quit_mode, kind, injected):
 
     touch_delay = _touch_delay_s(duration_s)
     if quit_mode == "inject" and touch_delay > 0:
-        touch_timer = multimer.Timer(-1)
+        touch_timer = Timer(-1)
         touch_timer.init(
-            mode=multimer.ONE_SHOT,
+            mode=Timer.ONE_SHOT,
             period=int(touch_delay * 1000),
             callback=on_touch,
         )
 
-    quit_timer = multimer.Timer(-1)
+    quit_timer = Timer(-1)
     quit_timer.init(
-        mode=multimer.ONE_SHOT,
+        mode=Timer.ONE_SHOT,
         period=int(duration_s * 1000),
         callback=on_quit,
     )
@@ -381,6 +390,7 @@ def _parse_args(argv):
         "script": None,
         "kind": None,
         "quit": "poll",
+        "bootstrap": "full",
         "duration": 5.0,
         "timeout": 30.0,
     }
@@ -396,6 +406,9 @@ def _parse_args(argv):
         elif arg == "--quit" and i + 1 < len(argv):
             out["quit"] = argv[i + 1]
             i += 2
+        elif arg == "--bootstrap" and i + 1 < len(argv):
+            out["bootstrap"] = argv[i + 1]
+            i += 2
         elif arg == "--duration" and i + 1 < len(argv):
             out["duration"] = float(argv[i + 1])
             i += 2
@@ -409,8 +422,12 @@ def _parse_args(argv):
     return out
 
 
-def _subprocess_hard_exit(code):
+def _subprocess_hard_exit(code, *, headless=False):
     """SDL on desktop CPython/MicroPython can block normal interpreter shutdown."""
+    if headless:
+        if hasattr(os, "_exit"):
+            os._exit(code)
+        return False
     try:
         name = sys.implementation.name
     except AttributeError:
@@ -470,19 +487,20 @@ def main(argv=None):
     except Exception:
         pass
 
+    headless = args["bootstrap"] == "headless"
     try:
-        import lib.path  # noqa: F401
+        _setup_bootstrap(src, args["bootstrap"])
     except Exception as exc:
         payload = {
             "example": args["example"],
             "status": "error",
-            "error": "lib.path: {}".format(exc),
-            "backend": "?",
+            "error": str(exc),
+            "backend": "headless" if headless else "?",
         }
         _print_result(payload)
         return 1
 
-    backend = _backend_name()
+    backend = "headless" if headless else "?"
     quit_injected = False
     error = None
 
@@ -496,6 +514,9 @@ def main(argv=None):
         )
     else:
         error = "unknown kind {}".format(args["kind"])
+
+    if not headless:
+        backend = _backend_name()
 
     status = "ok" if error is None else "error"
     payload = {
@@ -511,7 +532,7 @@ def main(argv=None):
 
     _print_result(payload)
     code = 0 if status == "ok" else 1
-    if _subprocess_hard_exit(code):
+    if _subprocess_hard_exit(code, headless=headless):
         return code
     return code
 

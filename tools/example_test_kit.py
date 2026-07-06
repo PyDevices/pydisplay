@@ -231,6 +231,8 @@ def summarize(result: dict | None, returncode: int, timed_out: bool) -> str:
         return "skip"
     if status == "ok":
         backend = result.get("backend", "?")
+        if backend == "headless":
+            return "ok"
         return f"{backend}, ok"
     if status == "error":
         err = result.get("error", "error")
@@ -308,6 +310,7 @@ def run_subprocess_case(
     script = example_meta.get("script", f"examples/{example_id}.py")
     kind = example_meta.get("kind", "loop")
     quit_mode = example_meta.get("quit", "poll")
+    bootstrap = example_meta.get("bootstrap", "full")
     cmd = [
         exe,
         wrapper_rel,
@@ -318,6 +321,8 @@ def run_subprocess_case(
         kind,
         "--quit",
         quit_mode,
+        "--bootstrap",
+        bootstrap,
         "--duration",
         str(duration),
         "--timeout",

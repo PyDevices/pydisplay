@@ -32,14 +32,9 @@ from example_test_kit import (  # noqa: E402
 EXAMPLE_ID = "test_timers"
 REPORT_PATH = REPO / "docs" / "testing" / "test_timers_report.md"
 
-# Probe labels in report column order (_librt is the unified _ffi/_ctypes backend).
+# Public probe labels in report column order.
 PROBE_COLUMNS = (
     "machine.Timer",
-    "_librt.Timer",
-    "_win32.Timer",
-    "_threading.Timer",
-    "_sdl2.Timer",
-    "_polling.Timer",
     "AsyncTimer",
     "AsyncTimer (yield loop)",
     "multimer.Timer (default)",
@@ -92,7 +87,7 @@ def _write_report(rows: list[dict]) -> None:
         f"Generated: {datetime.now(tz=UTC).date().isoformat()}  ",
         'Command: `export PATH="$HOME/bin:$PATH" && python tools/run_test_timers.py`',
         "",
-        "`_librt.Timer` is the unified Linux librt backend (replaces former `_ffi` and `_ctypes`).",
+        "Probes public multimer APIs only (`Timer`, `AsyncTimer`, plus hardware `machine.Timer` when present).",
         "",
         "## Summary matrix",
         "",

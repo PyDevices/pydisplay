@@ -1,14 +1,13 @@
 # Tests
 
-Self-contained tests for the standalone [`multimer`](https://github.com/PyDevices/multimer)
-package (sibling checkout at `../multimer`), plus in-tree
+Self-contained tests for in-tree [`multimer`](../src/lib/multimer),
 [`eventsys`](../src/lib/eventsys), [`graphics`](../src/lib/graphics), and
 [`displaysys`](../src/lib/displaysys) packages.
 
 They use only the Python standard library (`unittest`) — no third-party test
 runner or build step is required. The shared bootstrap in
-[`_env.py`](_env.py) puts `src/lib` and the sibling `multimer` repo on
-`sys.path`, so nothing needs to be installed first.
+[`_env.py`](_env.py) puts `src/lib` on `sys.path`, so nothing needs to be
+installed first.
 
 On CPython the graphics package falls back to its pure-Python
 `graphics._framebuf` implementation (the native `framebuf` module only exists
@@ -25,20 +24,16 @@ python -m unittest discover -s tests -v
 Or run a single module:
 
 ```bash
-python -m unittest tests.test_ticks -v
+python -m unittest discover -s tests -p 'test_multimer.py' -v
 # or
-python tests/test_ticks.py
+python tests/test_multimer.py
 ```
 
 ## What is covered
 
 | Module | Area |
 |--------|------|
-| `test_ticks.py` | `ticks_ms` / `ticks_add` / `ticks_diff` / `ticks_less` / `sleep_ms` |
-| `test_schedule.py` | `schedule` / `pump` and `capabilities()` |
-| `test_timer.py` | the default `multimer.Timer` (whichever backend is selected) |
-| `test_periodic.py` | the `periodic` convenience helper |
-| `test_aio.py` | `AsyncTimer` and async helpers |
+| `test_multimer.py` | public multimer API (`Timer`, `AsyncTimer`, `schedule`, `sleep_ms`, and `ticks_*`) |
 | `test_events.py` | the `events` types/classes and `eventsys.register_event` |
 | `test_devices.py` | `Broker` and the `Queue`/`Touch`/`Encoder`/`Keypad` devices plus `register_device` |
 | `test_joystick.py` | `JoystickDevice` with a mock driver |
@@ -57,13 +52,11 @@ python tests/test_ticks.py
 | `test_byteswap.py` | the `byteswap` helper (native or pure-Python fallback) |
 | `test_display_driver.py` | the `DisplayDriver` base class: rotation, byte-swap controls, touch device, lifecycle and vertical scroll math |
 | `test_fbdisplay.py` | the pure-Python `FBDisplay` driver (`fill_rect` / `blit_rect` / `pixel` / `fill` / `blit_transparent` / `show`) |
-| `test_auto_refresh.py` | the optional `auto_refresh` timer wiring into `multimer` |
+| `test_auto_refresh.py` | placeholder while `auto_refresh` migrates to `Timer` / `AsyncTimer` |
 | `test_standalone.py` | proves each package imports and runs with **none** of the rest of pydisplay on the path |
 
-The timer tests run on whichever synchronous backend the host selects
-(`_librt`/`_threading`/`_sdl2`/`_polling`); `_sdl2` prefers the
-native `usdl2` module when present. `_support.pump()` drives them uniformly. Tests that need a real `machine.Timer` are skipped when no
-backend is available.
+The multimer tests exercise the public package contract. Private backend
+modules are not part of the default test surface.
 
 The device tests drive each device through its `poll()` method using small
 scripted `read` callbacks from [`_support.py`](_support.py), so they run

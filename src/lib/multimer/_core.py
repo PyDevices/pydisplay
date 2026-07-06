@@ -11,7 +11,8 @@ except ImportError:
         return x
 
 
-from ._schedule import _drain, schedule
+from ._schedule import schedule
+from ._ticks import _sleep_ms
 
 
 class _TimerCore:
@@ -20,7 +21,7 @@ class _TimerCore:
     ONE_SHOT = const(0)
     PERIODIC = const(1)
 
-    def __init__(self, id=-1, /, **kwargs):
+    def __init__(self, id=-1, **kwargs):
         self.id = id
         self._mode = None
         self._period_ms = 0
@@ -62,7 +63,7 @@ class _TimerCore:
 
     def _wait_idle(self):
         while self._busy:
-            _drain()
+            _sleep_ms(1)
 
     def _invoke_callback(self, arg):
         if self._callback is None:

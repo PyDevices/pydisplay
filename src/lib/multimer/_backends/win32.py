@@ -5,9 +5,8 @@
 Windows kernel32 timer backend (waitable timer + QueueUserAPC).
 
 Timer callbacks are queued to the thread that created the timer (the main
-thread) and run during alertable waits (``SleepEx``).  ``NEEDS_PUMP`` is
-False — use ``multimer.sleep_ms()`` or ``broker.poll()`` (which calls
-``process_apcs()``) so APCs can run; tight CPU-only loops still stall.
+thread) and run during alertable waits (``SleepEx``). Host display poll or
+asyncio can provide alertable waits.
 """
 
 import sys
@@ -107,7 +106,7 @@ def _spawn(fn):
 class Timer(_TimerCore):
     """Windows waitable-timer + APC delivery on the main thread."""
 
-    def __init__(self, id=-1, /, **kwargs):
+    def __init__(self, id=-1, **kwargs):
         self._running = False
         self._token = 0
         self._handle = None

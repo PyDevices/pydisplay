@@ -61,10 +61,19 @@ def update():
             sys.path.append(entry)
             added.append(entry)
 
-    if prepended:
+    if prepended and not _quiet():
         print(f"path.py:  Prepended {prepended} to sys.path.")
-    if added:
+    if added and not _quiet():
         print(f"path.py:  Added {added} to sys.path.")
+
+
+def _quiet():
+    try:
+        import pydisplay_test_mode
+
+        return pydisplay_test_mode.ENABLED
+    except ImportError:
+        return False
 
 
 def add(directory, first=False):

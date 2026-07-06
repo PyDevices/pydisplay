@@ -7,7 +7,7 @@ Linux librt Timer (``timer_create`` / ``timer_settime``).
 
 Uses ctypes on CPython and ffi/uctypes on MicroPython unix.  Timer signals are
 delivered to the thread that created the timer (the main thread), so callbacks
-run without ``pump()``.
+run without application-side servicing.
 """
 
 import sys

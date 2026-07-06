@@ -37,17 +37,12 @@ def deinit_display():
         pass
 
 
-def pump_multimer(count=15, delay_s=0.02, broker_poll=True):
+def service_host_events(count=15, delay_s=0.02, broker_poll=True):
+    """Service host display / broker events only."""
     try:
-        from multimer import pump, sleep_ms
+        import time
     except ImportError:
-        pump = None
-        try:
-            import time
-
-            sleep_ms = lambda ms: time.sleep(ms / 1000.0)  # noqa: E731
-        except ImportError:
-            return
+        return
 
     broker = None
     if broker_poll:
@@ -58,17 +53,14 @@ def pump_multimer(count=15, delay_s=0.02, broker_poll=True):
         except Exception:
             broker = None
 
-    ms = int(delay_s * 1000) if delay_s else 0
     for _ in range(count):
         if broker is not None:
             try:
                 broker.poll()
             except Exception:
                 pass
-        if pump is not None:
-            pump()
-        if ms:
-            sleep_ms(ms)
+        if delay_s:
+            time.sleep(delay_s)
 
 
 def pump_lvgl(count=5, delay_s=0):
@@ -77,11 +69,11 @@ def pump_lvgl(count=5, delay_s=0):
 
         import lvgl as lv
     except ImportError:
-        pump_multimer(count, delay_s or 0.02)
+        service_host_events(count, delay_s or 0.02)
         return
 
     if not lv.is_initialized():
-        pump_multimer(count, delay_s or 0.02)
+        service_host_events(count, delay_s or 0.02)
         return
 
     for _ in range(count):
@@ -131,7 +123,7 @@ def inject_synthetic_touch(*, broker_poll=False, pump_count=20, pump_delay=0.02)
 
     queue_dev._read = mock_read
     try:
-        pump_multimer(pump_count, pump_delay, broker_poll=broker_poll)
+        service_host_events(pump_count, pump_delay, broker_poll=broker_poll)
     finally:
         queue_dev._read = orig_read
     return True
@@ -163,7 +155,7 @@ def inject_quit(*, broker_poll=True, pump_count=15, pump_delay=0.02, lvgl=False,
         if lvgl:
             pump_lvgl(pump_count, pump_delay)
         else:
-            pump_multimer(pump_count, pump_delay, broker_poll=broker_poll)
+            service_host_events(pump_count, pump_delay, broker_poll=broker_poll)
         if broker_poll:
             try:
                 from board_config import broker
