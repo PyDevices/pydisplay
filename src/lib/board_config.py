@@ -28,7 +28,9 @@ def _wire_display_refresh(broker, display_drv, *, async_=False, period=_DISPLAY_
     provides ``show()``. Quit tears the shared timer down after the display is
     released.
     """
-    broker.on_tick(display_drv.show, period=period, async_=async_)
+    # Keep the refresh subscription handle on the broker so a GUI layer (e.g.
+    # LVGL via display_driver) can take over presenting frames itself.
+    broker.display_refresh = broker.on_tick(display_drv.show, period=period, async_=async_)
     broker.register_quit_cleanup(display_drv, after=broker.stop_timer)
 
 

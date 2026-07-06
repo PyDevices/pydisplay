@@ -20,7 +20,7 @@ events_dev = broker.create(
     data=display_drv,
 )
 
-broker.on_tick(display_drv.show, period=33, async_=True)
+broker.display_refresh = broker.on_tick(display_drv.show, period=33, async_=True)
 broker.register_quit_cleanup(display_drv, after=broker.stop_timer)
 
 display_drv.fill(0)

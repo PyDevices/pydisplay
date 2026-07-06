@@ -112,22 +112,19 @@ matrix = false
 
 # --- LVGL timer mode scripts (matrix) ---
 
-[examples.lv_test_timer_no_pump]
-import = "lv_test_timer_no_pump"
-script = "examples/lv_test_timer_no_pump.py"
-kind = "oneshot"
-quit = "native_exit"
-deps = ["lvgl"]
-oneshot_timeout_s = 20
-
-[examples.lv_test_timer_pump]
-import = "lv_test_timer_pump"
-script = "examples/lv_test_timer_pump.py"
+# LVGL timer tests are driven by tools/lv_timer_test_kit.py (its harness owns the
+# loop and quit). The generic matrix injects quit by pumping lv.task_handler on a
+# daemon thread, which is incompatible with the shared broker timer driving LVGL,
+# so these are excluded from the matrix (matrix = false).
+[examples.lv_test_timer_sync]
+import = "lv_test_timer_sync"
+script = "examples/lv_test_timer_sync.py"
 kind = "lvgl"
 quit = "inject"
 deps = ["lvgl"]
 duration_s = 5
 timeout_s = 45
+matrix = false
 
 [examples.lv_test_timer_async]
 import = "lv_test_timer_async"
@@ -137,6 +134,7 @@ quit = "inject"
 deps = ["lvgl"]
 duration_s = 5
 timeout_s = 45
+matrix = false
 
 # --- displaysys harness scripts (matrix) ---
 
