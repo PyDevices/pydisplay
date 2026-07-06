@@ -91,6 +91,7 @@ nav:
     - Board configs: hardware/board-configs.md
     - Display interfaces: hardware/display-interfaces.md
     - Driver inventory: hardware/driver-inventory.md
+    - pydevices roadmap: hardware/pydevices-roadmap.md
     - Display drivers: hardware/display-drivers.md
     - Touch drivers: hardware/touch-drivers.md
   - Learn:

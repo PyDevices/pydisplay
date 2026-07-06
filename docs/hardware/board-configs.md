@@ -83,8 +83,14 @@ An exact match for all four is rare; bus + display controller is usually enough 
 
 | Directory | Hardware |
 |-----------|----------|
-| `epaperdisplay/cp_magtag` | Adafruit MagTag SSD1680 |
-| `epaperdisplay/magtag` | MP skeleton |
+| `epaperdisplay/cp_magtag` | Adafruit MagTag SSD1680 + KEYPAD |
+| `epaperdisplay/cp_ssd1680_213_featherwing` | 2.13" E-Ink FeatherWing |
+| `fbdisplay/cp_matrixportal_m4_64x32` | MatrixPortal M4 HUB75 64×32 |
+| `busdisplay/spi/cp_pybadge` | PyBadge LC + buttons |
+| `busdisplay/spi/cp_hallowing_m4` | HalloWing M4 |
+| `busdisplay/spi/cp_pyportal_titano` | PyPortal Titano + touch |
+| `busdisplay/i2c/cp_sh1107_oled_128x64` | SH1107 OLED |
+| `busdisplay/spi/cp_ssd1351_128_oled` | SSD1351 color OLED |
 
 ## I2C OLED configs
 

@@ -1,34 +1,35 @@
-"""Adafruit MagTag 2.9\" grayscale E-Ink (SSD1680) — CircuitPython"""
+"""Adafruit PyBadge LC ST7789 320x240 — CircuitPython"""
 
 import board
 from displayio import release_displays
 from fourwire import FourWire
 from keypad_gpio import GPIOButtons, MAGTAG_BUTTON_KEYS
-from ssd1680 import SSD1680
+from st7789 import ST7789
 
-from displaysys.epaperdisplay import EPaperDisplay
 import eventsys
 
 release_displays()
 
 display_bus = FourWire(
     board.SPI(),
-    command=board.EPD_DC,
-    chip_select=board.EPD_CS,
-    reset=board.EPD_RESET,
-    baudrate=4_000_000,
+    command=board.TFT_DC,
+    chip_select=board.TFT_CS,
+    reset=board.TFT_RESET,
+    baudrate=24_000_000,
 )
 
-_epaper = SSD1680(
+display_drv = ST7789(
     display_bus,
-    width=296,
-    height=128,
-    busy_pin=board.EPD_BUSY,
+    width=320,
+    height=240,
+    colstart=0,
+    rowstart=0,
     rotation=0,
-    ram_offset=1,
+    mirrored=False,
+    color_depth=16,
+    bgr=False,
+    reverse_bytes_in_word=True,
 )
-
-display_drv = EPaperDisplay(_epaper, width=296, height=128, color_depth=1)
 
 buttons = GPIOButtons(
     {

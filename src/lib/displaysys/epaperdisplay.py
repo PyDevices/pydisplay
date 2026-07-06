@@ -10,7 +10,7 @@ directly until this backend is complete.  The wrapper below provides a
 ``DisplayDriver`` starting point for MicroPython parity work.
 """
 
-from displaysys import DisplayDriver
+from displaysys import DisplayDriver, alloc_buffer
 
 
 class EPaperDisplay(DisplayDriver):
@@ -28,14 +28,17 @@ class EPaperDisplay(DisplayDriver):
         buffer: Optional writable RAM buffer for framebuf operations.
     """
 
-    def __init__(self, epaper, width=None, height=None, buffer=None):
+    def __init__(self, epaper, width=None, height=None, buffer=None, color_depth=None):
         self._epaper = epaper
-        self._raw_buffer = buffer
-        self._buffer = memoryview(buffer) if buffer is not None else None
         self._width = width if width is not None else epaper.width
         self._height = height if height is not None else epaper.height
+        self.color_depth = color_depth if color_depth is not None else getattr(epaper, "color_depth", 1)
+        if buffer is None and self.color_depth <= 8:
+            buffer = alloc_buffer(self._width * self._height * max(1, self.color_depth) // 8)
+        self._raw_buffer = buffer
+        self._buffer = memoryview(buffer) if buffer is not None else None
         self._rotation = 0
-        self.color_depth = getattr(epaper, "color_depth", 1)
+        self._requires_byteswap = False
         super().__init__(auto_refresh=False)
 
     def init(self) -> None:

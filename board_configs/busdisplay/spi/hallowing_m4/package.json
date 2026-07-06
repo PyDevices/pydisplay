@@ -1,0 +1,11 @@
+{
+  "urls": [
+    ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/spi/hallowing_m4/board_config.py"],
+    ["st7735.py", "github:PyDevices/pydisplay/drivers/display/st7735.py"]
+  ],
+  "deps": [
+    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"],
+    ["github:PyDevices/pydisplay/packages/spibus.json", "main"]
+  ],
+  "version": "0.1"
+}
