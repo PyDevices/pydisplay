@@ -3,6 +3,7 @@ set -euo pipefail
 cd /workspace/src
 OUT=/opt/cursor/artifacts/tower-climb-vertical-platformer.mp4
 TRACE=/opt/cursor/artifacts/tower-climb-trace.jsonl
+DURATION="${TOWER_CLIMB_RECORD_SECONDS:-18}"
 mkdir -p /opt/cursor/artifacts
 rm -f "$TRACE"
 
@@ -11,11 +12,16 @@ find_win() {
     | sed -E 's/^[[:space:]]*(0x[0-9a-f]+).*/\1/'
 }
 
+win_geom() {
+  DISPLAY=:1 xwininfo -id "$1" 2>/dev/null \
+    | awk '/Absolute upper-left X:|Absolute upper-left Y:|Width:|Height:/ {print $NF}'
+}
+
 SESSION="tower-vid"
 tmux -f /exec-daemon/tmux.portal.conf kill-session -t "$SESSION" 2>/dev/null || true
 tmux -f /exec-daemon/tmux.portal.conf new-session -d -s "$SESSION" -c "/workspace/src" -- "${SHELL:-zsh}" -l
 tmux -f /exec-daemon/tmux.portal.conf send-keys -t "$SESSION:0.0" \
-  "TOWER_CLIMB_TRACE=$TRACE DISPLAY=:1 PYTHONPATH=lib ../.venv/bin/python examples/tower_climb.py" C-m
+  "TOWER_CLIMB_RECORD=1 TOWER_CLIMB_TRACE=$TRACE DISPLAY=:1 PYTHONPATH=lib ../.venv/bin/python examples/tower_climb.py" C-m
 
 WIN=""
 for _ in $(seq 1 50); do
@@ -30,40 +36,38 @@ if [ -z "$WIN" ]; then
   exit 1
 fi
 
-LINE=$(DISPLAY=:1 xwininfo -root -tree 2>/dev/null | rg "tower_climb\.py" | head -1)
-# e.g. ... 640x960+1+28  +641+148
-read -r W H X Y <<<"$(echo "$LINE" | sed -E 's/.* ([0-9]+)x([0-9]+)\+[0-9]+\+[0-9]+  \+([0-9]+)\+([0-9]+).*/\1 \2 \3 \4/')"
+read -r X Y W H <<<"$(win_geom "$WIN" | tr '\n' ' ')"
 echo "WIN=$WIN ${W}x${H} at ${X},${Y}"
+
+# Let the game present a few frames before capture starts.
+sleep 1.0
 
 ffmpeg -y -f x11grab -draw_mouse 0 -framerate 24 \
   -video_size "${W}x${H}" -i ":1+${X},${Y}" \
-  -t 12 -c:v libx264 -pix_fmt yuv420p "$OUT" &
+  -t "$DURATION" -c:v libx264 -pix_fmt yuv420p "$OUT" &
 FFPID=$!
-sleep 2.0
-
-WIN_DEC=$((WIN))
-# Focus pygame window so keys reach the game
-DISPLAY=:1 xdotool windowactivate --sync "$WIN_DEC" 2>/dev/null || true
-sleep 0.3
-# Dismiss splash screen
-DISPLAY=:1 xdotool key --window "$WIN_DEC" Return 2>/dev/null || true
-sleep 0.8
-
-# Climb: run right, jump onto branches, repeat
-for _ in $(seq 1 18); do
-  DISPLAY=:1 xdotool key --window "$WIN_DEC" --delay 40 Right 2>/dev/null || true
-  sleep 0.08
-  DISPLAY=:1 xdotool key --window "$WIN_DEC" --delay 40 space 2>/dev/null || true
-  sleep 0.45
-  DISPLAY=:1 xdotool key --window "$WIN_DEC" --delay 40 Left 2>/dev/null || true
-  sleep 0.08
-  DISPLAY=:1 xdotool key --window "$WIN_DEC" --delay 40 space 2>/dev/null || true
-  sleep 0.45
-done
 
 wait "$FFPID"
 ls -lh "$OUT"
+
 if [ -f "$TRACE" ]; then
   echo "TRACE=$TRACE ($(wc -l < "$TRACE") lines)"
+  /workspace/.venv/bin/python - <<'PY' "$TRACE"
+import json, sys
+path = sys.argv[1]
+ys = []
+won = False
+for line in open(path, encoding="utf-8"):
+    d = json.loads(line)
+    if d["kind"] == "frame":
+        ys.append(d["player"]["y"])
+    if d["kind"] == "win":
+        won = True
+if ys:
+    print(f"trace ymin={min(ys):.1f} ymax={max(ys):.1f} frames={len(ys)} won={won}")
+else:
+    print("trace has no frame records")
+PY
 fi
+
 tmux -f /exec-daemon/tmux.portal.conf kill-session -t "$SESSION" 2>/dev/null || true

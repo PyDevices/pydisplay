@@ -159,6 +159,9 @@ PLATFORMS, GEMS, HAZARDS, GOAL_Y = _build_level()
 
 _trace = open_trace()
 _bot = os.environ.get("TOWER_CLIMB_BOT", "").strip().lower() in ("1", "true", "yes")
+_record = os.environ.get("TOWER_CLIMB_RECORD", "").strip().lower() in ("1", "true", "yes")
+if _record:
+    _bot = True
 
 # --- Background draw ---------------------------------------------------------------------------
 
@@ -648,7 +651,7 @@ def _run_game(show_splash=True):
     if _trace is not None:
         _trace.log_init(L, SPR_W, SPR_H, PLATFORMS, GEMS, HAZARDS, GOAL_Y)
         show_splash = False
-    if _bot:
+    if _bot or _record:
         show_splash = False
     try:
         if show_splash and not _skip_ui():
@@ -884,6 +887,9 @@ def _run_game(show_splash=True):
                 _draw_bg(camera)
                 _draw_text_panel(lines)
 
+            if _bot and _record:
+                show_splash = False
+                continue
             if _bot:
                 break
             if not _wait_for_input(draw_end):
