@@ -197,6 +197,10 @@
       "github:PyDevices/pydisplay/src/examples/png_test.py"
     ],
     [
+      "platformer.py",
+      "github:PyDevices/pydisplay/src/examples/platformer.py"
+    ],
+    [
       "pydisplay_demo.py",
       "github:PyDevices/pydisplay/src/examples/pydisplay_demo.py"
     ],

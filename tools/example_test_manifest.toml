@@ -237,6 +237,14 @@ kind = "loop"
 quit = "poll"
 deps = ["core"]
 
+[examples.platformer]
+import = "platformer"
+script = "examples/platformer.py"
+kind = "loop"
+quit = "poll"
+timeout_s = 15
+deps = ["core"]
+
 [examples.console_advanced_demo]
 import = "console_advanced_demo"
 script = "examples/console_advanced_demo.py"
