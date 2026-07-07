@@ -16,7 +16,7 @@ TAB5_LCD_RESET_BIT = 7
 
 
 def tab5_init_lcd_reset(i2c: I2C, address: int = TAB5_PI4IOE1_ADDR) -> None:
-    """Program Tab5 PI4IOE expander and pulse LCD reset (ILI9881C / early Tab5 panels)."""
+    """Program Tab5 PI4IOE expander and pulse LCD reset (ILI9881C and ST7123 panels)."""
     i2c.writeto_mem(address, _REG_CHIP_RESET, b"\xff")
     i2c.writeto_mem(address, _REG_IO_DIR, bytes([0b01111111]))
     i2c.writeto_mem(address, _REG_OUT_H_IM, b"\x00")
