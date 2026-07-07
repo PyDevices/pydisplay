@@ -238,8 +238,8 @@ quit = "poll"
 deps = ["core"]
 
 [examples.tower_climb]
-import = "tower_climb"
-script = "examples/tower_climb.py"
+import = "tower_climb.tower_climb"
+script = "examples/tower_climb/tower_climb.py"
 kind = "loop"
 quit = "poll"
 timeout_s = 15

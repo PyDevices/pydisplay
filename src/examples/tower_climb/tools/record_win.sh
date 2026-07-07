@@ -1,34 +1,42 @@
 #!/bin/bash
 # Record one bot playthrough through the SUMMIT win screen (in-game frame capture).
 set -euo pipefail
-cd /workspace/src
-OUT=/opt/cursor/artifacts/tower-climb-bot-win.mp4
-TRACE=/opt/cursor/artifacts/tower-climb-bot-win-trace.jsonl
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+SRC_DIR="$(cd "$PKG_DIR/../.." && pwd)"
+REPO_ROOT="$(cd "$SRC_DIR/.." && pwd)"
+GAME_SCRIPT="$PKG_DIR/tower_climb.py"
+PYTHON="${REPO_ROOT}/.venv/bin/python"
+
+OUT="${TOWER_CLIMB_VIDEO:-/opt/cursor/artifacts/tower-climb-bot-win.mp4}"
+TRACE="${TOWER_CLIMB_TRACE:-$PKG_DIR/trace/record-win.jsonl}"
 VIDEO_FPS="${PYDISPLAY_VIDEO_FPS:-12}"
 MAX_WAIT="${TOWER_CLIMB_RECORD_MAX_WAIT:-180}"
-mkdir -p /opt/cursor/artifacts
+mkdir -p "$(dirname "$OUT")" "$(dirname "$TRACE")"
 rm -f "$OUT" "$TRACE"
 
 SESSION="tower-vid-win"
 tmux -f /exec-daemon/tmux.portal.conf kill-session -t "$SESSION" 2>/dev/null || true
-tmux -f /exec-daemon/tmux.portal.conf new-session -d -s "$SESSION" -c "/workspace/src" -- "${SHELL:-zsh}" -l
+tmux -f /exec-daemon/tmux.portal.conf new-session -d -s "$SESSION" -c "$SRC_DIR" -- "${SHELL:-zsh}" -l
 tmux -f /exec-daemon/tmux.portal.conf send-keys -t "$SESSION:0.0" \
-  "TOWER_CLIMB_BOT=1 TOWER_CLIMB_HOLD_WIN=1 PYDISPLAY_VIDEO=$OUT PYDISPLAY_VIDEO_FPS=$VIDEO_FPS TOWER_CLIMB_TRACE=$TRACE DISPLAY=:1 PYTHONPATH=lib ../.venv/bin/python examples/tower_climb.py" C-m
+  "TOWER_CLIMB_BOT=1 TOWER_CLIMB_HOLD_WIN=1 PYDISPLAY_VIDEO=$OUT PYDISPLAY_VIDEO_FPS=$VIDEO_FPS TOWER_CLIMB_TRACE=$TRACE DISPLAY=:1 PYTHONPATH=lib $PYTHON $GAME_SCRIPT" C-m
 
+GAME_PATTERN="examples/tower_climb/tower_climb.py"
 DEADLINE=$((SECONDS + MAX_WAIT))
 while [ "$SECONDS" -lt "$DEADLINE" ]; do
   if [ -f "$OUT" ] && [ -f "$TRACE" ] && rg -q '"kind":"win"' "$TRACE" 2>/dev/null; then
-    if ! pgrep -f "examples/tower_climb.py" >/dev/null 2>&1; then
+    if ! pgrep -f "$GAME_PATTERN" >/dev/null 2>&1; then
       break
     fi
   fi
   sleep 0.5
 done
 
-if pgrep -f "examples/tower_climb.py" >/dev/null 2>&1; then
+if pgrep -f "$GAME_PATTERN" >/dev/null 2>&1; then
   echo "timeout waiting for tower_climb.py to finish" >&2
   tmux -f /exec-daemon/tmux.portal.conf capture-pane -t "$SESSION:0.0" -p | tail -20 >&2
-  pkill -f "examples/tower_climb.py" 2>/dev/null || true
+  pkill -f "$GAME_PATTERN" 2>/dev/null || true
   exit 1
 fi
 
@@ -44,7 +52,7 @@ ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:no
 
 if [ -f "$TRACE" ]; then
   echo "TRACE=$TRACE ($(wc -l < "$TRACE") lines)"
-  /workspace/.venv/bin/python - <<'PY' "$TRACE"
+  "$PYTHON" - <<'PY' "$TRACE"
 import json, sys
 path = sys.argv[1]
 ys = []

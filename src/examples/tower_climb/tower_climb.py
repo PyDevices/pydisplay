@@ -1,5 +1,5 @@
 # multimer types: all
-# pyscript binaries: assets/climber.bmp, assets/tower_tiles.bmp, assets/tower_bg.bmp
+# pyscript binaries: tower_climb/assets/climber.bmp, tower_climb/assets/tower_tiles.bmp, tower_climb/assets/tower_bg.bmp
 """
 tower_climb.py — 1980s-style vertical scrolling platformer.
 
@@ -12,7 +12,12 @@ Built from the four core pydisplay libraries only.
 """
 
 import os
+import sys
 from collections import namedtuple
+
+_PKG_DIR = os.path.dirname(os.path.abspath(__file__))
+if _PKG_DIR not in sys.path:
+    sys.path.insert(0, _PKG_DIR)
 
 from board_config import broker, display_drv
 from displaysys import color565
@@ -20,6 +25,7 @@ from eventsys import poll_quit_discarding_others
 from eventsys.keys import Keys
 from graphics import BMP565, FrameBuffer, RGB565, rect, text8
 from multimer import sleep_ms
+from _paths import asset_path
 from tower_climb_trace import open_trace
 
 try:
@@ -103,9 +109,9 @@ CROWN_GOLD = _c(255, 210, 50)
 
 # --- Assets ------------------------------------------------------------------------------------
 
-CLIMBER = BMP565("examples/assets/climber.bmp", streamed=True)
-TILES = BMP565("examples/assets/tower_tiles.bmp", streamed=True)
-BG = BMP565("examples/assets/tower_bg.bmp", streamed=True)
+CLIMBER = BMP565(asset_path("climber.bmp"), streamed=True)
+TILES = BMP565(asset_path("tower_tiles.bmp"), streamed=True)
+BG = BMP565(asset_path("tower_bg.bmp"), streamed=True)
 
 SPR_W = CLIMBER.width // 4
 SPR_H = CLIMBER.height // 3

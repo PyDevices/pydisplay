@@ -2,7 +2,10 @@
 """Generate RGB565 BMP assets for tower_climb.py (run once on CPython).
 
 Temporary generator — remove after assets are approved.
-  .venv/bin/python src/examples/assets/gen_tower_assets.py
+
+From repo root::
+
+  .venv/bin/python src/examples/tower_climb/assets/gen_tower_assets.py
 """
 
 from __future__ import annotations
@@ -11,7 +14,7 @@ import math
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT / "src" / "lib"))
 
 from graphics._bmp565 import write_bmp565_file  # noqa: E402

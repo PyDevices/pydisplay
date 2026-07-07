@@ -7,9 +7,13 @@ import subprocess
 import sys
 import time
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
+PKG_DIR = os.path.dirname(TOOLS_DIR)
+SRC_DIR = os.path.dirname(os.path.dirname(PKG_DIR))
+REPO_ROOT = os.path.dirname(SRC_DIR)
+GAME_SCRIPT = os.path.join(PKG_DIR, "tower_climb.py")
 TRACE = os.environ.get(
-    "TOWER_CLIMB_TRACE", os.path.join(ROOT, ".cursor", "tower-climb-playtest.jsonl")
+    "TOWER_CLIMB_TRACE", os.path.join(PKG_DIR, "trace", "playtest.jsonl")
 )
 HARD_TIMEOUT_S = int(os.environ.get("TOWER_CLIMB_PLAYTEST_TIMEOUT", "120"))
 STALL_SECONDS = float(os.environ.get("TOWER_CLIMB_PLAYTEST_STALL_S", "15"))
@@ -122,12 +126,13 @@ def main():
     env = os.environ.copy()
     env["SDL_VIDEODRIVER"] = "dummy"
     env["SDL_AUDIODRIVER"] = "dummy"
-    env["PYTHONPATH"] = os.path.join(ROOT, "src", "lib")
+    env["PYTHONPATH"] = os.path.join(SRC_DIR, "lib")
     env["TOWER_CLIMB_BOT"] = "1"
     env["TOWER_CLIMB_TRACE"] = TRACE
+    python = os.path.join(REPO_ROOT, ".venv", "bin", "python")
     proc = subprocess.Popen(
-        [os.path.join(ROOT, ".venv", "bin", "python"), "examples/tower_climb.py"],
-        cwd=os.path.join(ROOT, "src"),
+        [python, GAME_SCRIPT],
+        cwd=SRC_DIR,
         env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,

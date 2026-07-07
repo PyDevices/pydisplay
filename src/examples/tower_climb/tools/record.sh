@@ -1,14 +1,22 @@
 #!/bin/bash
+# Legacy x11grab recording (desktop capture). Prefer tools/record_win.sh for frame capture.
 set -euo pipefail
-cd /workspace/src
-OUT=/opt/cursor/artifacts/tower-climb-vertical-platformer.mp4
-TRACE=/opt/cursor/artifacts/tower-climb-trace.jsonl
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+SRC_DIR="$(cd "$PKG_DIR/../.." && pwd)"
+REPO_ROOT="$(cd "$SRC_DIR/.." && pwd)"
+GAME_SCRIPT="$PKG_DIR/tower_climb.py"
+PYTHON="${REPO_ROOT}/.venv/bin/python"
+
+OUT="${TOWER_CLIMB_VIDEO:-/opt/cursor/artifacts/tower-climb-vertical-platformer.mp4}"
+TRACE="${TOWER_CLIMB_TRACE:-$PKG_DIR/trace/record.jsonl}"
 DURATION="${TOWER_CLIMB_RECORD_SECONDS:-18}"
-mkdir -p /opt/cursor/artifacts
+mkdir -p "$(dirname "$OUT")" "$(dirname "$TRACE")"
 rm -f "$TRACE"
 
 find_win() {
-  DISPLAY=:1 xwininfo -root -tree 2>/dev/null | rg "tower_climb\.py" | head -1 \
+  DISPLAY=:1 xwininfo -root -tree 2>/dev/null | rg "tower_climb/tower_climb\.py" | head -1 \
     | sed -E 's/^[[:space:]]*(0x[0-9a-f]+).*/\1/'
 }
 
@@ -19,9 +27,9 @@ win_geom() {
 
 SESSION="tower-vid"
 tmux -f /exec-daemon/tmux.portal.conf kill-session -t "$SESSION" 2>/dev/null || true
-tmux -f /exec-daemon/tmux.portal.conf new-session -d -s "$SESSION" -c "/workspace/src" -- "${SHELL:-zsh}" -l
+tmux -f /exec-daemon/tmux.portal.conf new-session -d -s "$SESSION" -c "$SRC_DIR" -- "${SHELL:-zsh}" -l
 tmux -f /exec-daemon/tmux.portal.conf send-keys -t "$SESSION:0.0" \
-  "TOWER_CLIMB_RECORD=1 TOWER_CLIMB_TRACE=$TRACE DISPLAY=:1 PYTHONPATH=lib ../.venv/bin/python examples/tower_climb.py" C-m
+  "TOWER_CLIMB_RECORD=1 TOWER_CLIMB_TRACE=$TRACE DISPLAY=:1 PYTHONPATH=lib $PYTHON $GAME_SCRIPT" C-m
 
 WIN=""
 for _ in $(seq 1 50); do
@@ -39,7 +47,6 @@ fi
 read -r X Y W H <<<"$(win_geom "$WIN" | tr '\n' ' ')"
 echo "WIN=$WIN ${W}x${H} at ${X},${Y}"
 
-# Let the game present a few frames before capture starts.
 sleep 1.0
 
 ffmpeg -y -f x11grab -draw_mouse 0 -framerate 24 \
@@ -52,7 +59,7 @@ ls -lh "$OUT"
 
 if [ -f "$TRACE" ]; then
   echo "TRACE=$TRACE ($(wc -l < "$TRACE") lines)"
-  /workspace/.venv/bin/python - <<'PY' "$TRACE"
+  "$PYTHON" - <<'PY' "$TRACE"
 import json, sys
 path = sys.argv[1]
 ys = []
