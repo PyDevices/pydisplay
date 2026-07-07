@@ -40,19 +40,23 @@ FFPID=$!
 sleep 2.0
 
 WIN_DEC=$((WIN))
+# Focus pygame window so keys reach the game
+DISPLAY=:1 xdotool windowactivate --sync "$WIN_DEC" 2>/dev/null || true
+sleep 0.3
 # Dismiss splash screen
 DISPLAY=:1 xdotool key --window "$WIN_DEC" Return 2>/dev/null || true
 sleep 0.8
 
-for _ in $(seq 1 12); do
-  DISPLAY=:1 xdotool key --window "$WIN_DEC" Right 2>/dev/null || true
-  sleep 0.15
-  DISPLAY=:1 xdotool key --window "$WIN_DEC" space 2>/dev/null || true
-  sleep 0.35
-  DISPLAY=:1 xdotool key --window "$WIN_DEC" Left 2>/dev/null || true
-  sleep 0.15
-  DISPLAY=:1 xdotool key --window "$WIN_DEC" space 2>/dev/null || true
-  sleep 0.35
+# Climb: run right, jump onto branches, repeat
+for _ in $(seq 1 18); do
+  DISPLAY=:1 xdotool key --window "$WIN_DEC" --delay 40 Right 2>/dev/null || true
+  sleep 0.08
+  DISPLAY=:1 xdotool key --window "$WIN_DEC" --delay 40 space 2>/dev/null || true
+  sleep 0.45
+  DISPLAY=:1 xdotool key --window "$WIN_DEC" --delay 40 Left 2>/dev/null || true
+  sleep 0.08
+  DISPLAY=:1 xdotool key --window "$WIN_DEC" --delay 40 space 2>/dev/null || true
+  sleep 0.45
 done
 
 wait "$FFPID"
