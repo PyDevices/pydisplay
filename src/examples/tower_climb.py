@@ -20,7 +20,6 @@ from eventsys import poll_quit_discarding_others
 from eventsys.keys import Keys
 from graphics import BMP565, FrameBuffer, RGB565, rect, text8
 from multimer import sleep_ms
-from tower_climb_capture import active as video_active, close as close_video, grab as grab_video, open_capture
 from tower_climb_trace import open_trace
 
 try:
@@ -166,9 +165,20 @@ if _record:
     _bot = True
 
 
+def _open_video_recorder():
+    path = os.environ.get("TOWER_CLIMB_VIDEO", "").strip()
+    if not path:
+        path = os.environ.get("PYDISPLAY_VIDEO", "").strip()
+    if not path:
+        return
+    fps = int(
+        os.environ.get("TOWER_CLIMB_VIDEO_FPS") or os.environ.get("PYDISPLAY_VIDEO_FPS", "12")
+    )
+    display_drv.open_frame_recorder(path, fps=fps)
+
+
 def _present():
     display_drv.show()
-    grab_video()
 
 # --- Background draw ---------------------------------------------------------------------------
 
@@ -656,7 +666,7 @@ def _restore_display_refresh():
 
 def _run_game(show_splash=True):
     _take_over_display_refresh()
-    open_capture()
+    _open_video_recorder()
     if _trace is not None:
         _trace.log_init(L, SPR_W, SPR_H, PLATFORMS, GEMS, HAZARDS, GOAL_Y)
         show_splash = False
@@ -900,7 +910,10 @@ def _run_game(show_splash=True):
             if _bot:
                 if _hold_win and won:
                     hold_frames = int(
-                        os.environ.get("TOWER_CLIMB_HOLD_FRAMES", "48" if video_active() else "150")
+                        os.environ.get(
+                            "TOWER_CLIMB_HOLD_FRAMES",
+                            "48" if display_drv.frame_recording else "150",
+                        )
                     )
                     for _ in range(hold_frames):
                         draw_end()
@@ -919,7 +932,7 @@ def _run_game(show_splash=True):
         _restore_display_refresh()
         if _trace is not None:
             _trace.close()
-        close_video()
+        display_drv.close_frame_recorder()
 
 
 def main():

@@ -4,7 +4,7 @@ set -euo pipefail
 cd /workspace/src
 OUT=/opt/cursor/artifacts/tower-climb-bot-win.mp4
 TRACE=/opt/cursor/artifacts/tower-climb-bot-win-trace.jsonl
-VIDEO_FPS="${TOWER_CLIMB_VIDEO_FPS:-12}"
+VIDEO_FPS="${PYDISPLAY_VIDEO_FPS:-12}"
 MAX_WAIT="${TOWER_CLIMB_RECORD_MAX_WAIT:-180}"
 mkdir -p /opt/cursor/artifacts
 rm -f "$OUT" "$TRACE"
@@ -13,7 +13,7 @@ SESSION="tower-vid-win"
 tmux -f /exec-daemon/tmux.portal.conf kill-session -t "$SESSION" 2>/dev/null || true
 tmux -f /exec-daemon/tmux.portal.conf new-session -d -s "$SESSION" -c "/workspace/src" -- "${SHELL:-zsh}" -l
 tmux -f /exec-daemon/tmux.portal.conf send-keys -t "$SESSION:0.0" \
-  "TOWER_CLIMB_BOT=1 TOWER_CLIMB_HOLD_WIN=1 TOWER_CLIMB_VIDEO=$OUT TOWER_CLIMB_VIDEO_FPS=$VIDEO_FPS TOWER_CLIMB_TRACE=$TRACE DISPLAY=:1 PYTHONPATH=lib ../.venv/bin/python examples/tower_climb.py" C-m
+  "TOWER_CLIMB_BOT=1 TOWER_CLIMB_HOLD_WIN=1 PYDISPLAY_VIDEO=$OUT PYDISPLAY_VIDEO_FPS=$VIDEO_FPS TOWER_CLIMB_TRACE=$TRACE DISPLAY=:1 PYTHONPATH=lib ../.venv/bin/python examples/tower_climb.py" C-m
 
 DEADLINE=$((SECONDS + MAX_WAIT))
 while [ "$SECONDS" -lt "$DEADLINE" ]; do
