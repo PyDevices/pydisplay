@@ -20,6 +20,7 @@ from eventsys import poll_quit_discarding_others
 from eventsys.keys import Keys
 from graphics import BMP565, FrameBuffer, RGB565, rect, text8
 from multimer import sleep_ms
+from tower_climb_capture import active as video_active, close as close_video, grab as grab_video, open_capture
 from tower_climb_trace import open_trace
 
 try:
@@ -160,8 +161,14 @@ PLATFORMS, GEMS, HAZARDS, GOAL_Y = _build_level()
 _trace = open_trace()
 _bot = os.environ.get("TOWER_CLIMB_BOT", "").strip().lower() in ("1", "true", "yes")
 _record = os.environ.get("TOWER_CLIMB_RECORD", "").strip().lower() in ("1", "true", "yes")
+_hold_win = os.environ.get("TOWER_CLIMB_HOLD_WIN", "").strip().lower() in ("1", "true", "yes")
 if _record:
     _bot = True
+
+
+def _present():
+    display_drv.show()
+    grab_video()
 
 # --- Background draw ---------------------------------------------------------------------------
 
@@ -569,14 +576,14 @@ def _wait_for_input(draw_fn=None):
     if _skip_ui():
         if draw_fn is not None:
             draw_fn()
-            display_drv.show()
+            _present()
         return True
     while True:
         if poll_quit_discarding_others(broker):
             return False
         if draw_fn is not None:
             draw_fn()
-            display_drv.show()
+            _present()
         for ev in broker.poll():
             if _is_start_input(ev):
                 _keys["left"] = _keys["right"] = _keys["up"] = _keys["down"] = False
@@ -648,6 +655,7 @@ def _restore_display_refresh():
 
 def _run_game(show_splash=True):
     _take_over_display_refresh()
+    open_capture()
     if _trace is not None:
         _trace.log_init(L, SPR_W, SPR_H, PLATFORMS, GEMS, HAZARDS, GOAL_Y)
         show_splash = False
@@ -869,7 +877,7 @@ def _run_game(show_splash=True):
                 _draw_sprite(player.pose, frame // 5, int(player.x), int(player.y - cam))
                 _draw_hud(player, altitude)
 
-                display_drv.show()
+                _present()
                 sleep_ms(0)
                 sleep_ms(16)
 
@@ -891,6 +899,14 @@ def _run_game(show_splash=True):
                 show_splash = False
                 continue
             if _bot:
+                if _hold_win and won:
+                    hold_frames = int(
+                        os.environ.get("TOWER_CLIMB_HOLD_FRAMES", "48" if video_active() else "150")
+                    )
+                    for _ in range(hold_frames):
+                        draw_end()
+                        _present()
+                        sleep_ms(16)
                 break
             if not _wait_for_input(draw_end):
                 break
@@ -904,6 +920,7 @@ def _run_game(show_splash=True):
         _restore_display_refresh()
         if _trace is not None:
             _trace.close()
+        close_video()
 
 
 def main():
