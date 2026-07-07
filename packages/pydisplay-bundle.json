@@ -13,8 +13,16 @@
       "github:PyDevices/pydisplay/src/lib/displaysys/__init__.py"
     ],
     [
+      "lib/displaysys/boarddisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/boarddisplay.py"
+    ],
+    [
       "lib/displaysys/busdisplay.py",
       "github:PyDevices/pydisplay/src/lib/displaysys/busdisplay.py"
+    ],
+    [
+      "lib/displaysys/epaperdisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/epaperdisplay.py"
     ],
     [
       "lib/displaysys/fbdisplay.py",
@@ -29,24 +37,16 @@
       "github:PyDevices/pydisplay/src/lib/displaysys/pgdisplay.py"
     ],
     [
+      "lib/displaysys/pixeldisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/pixeldisplay.py"
+    ],
+    [
       "lib/displaysys/psdisplay.py",
       "github:PyDevices/pydisplay/src/lib/displaysys/psdisplay.py"
     ],
     [
       "lib/displaysys/sdldisplay.py",
       "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay.py"
-    ],
-    [
-      "lib/displaysys/pixeldisplay.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/pixeldisplay.py"
-    ],
-    [
-      "lib/displaysys/epaperdisplay.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/epaperdisplay.py"
-    ],
-    [
-      "lib/displaysys/boarddisplay.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/boarddisplay.py"
     ],
     [
       "lib/eventsys/__init__.py",
@@ -189,6 +189,10 @@
       "github:PyDevices/pydisplay/src/lib/multimer/_timer.py"
     ],
     [
+      "lib/multimer/loop.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/loop.py"
+    ],
+    [
       "lib/multimer/py.typed",
       "github:PyDevices/pydisplay/src/lib/multimer/py.typed"
     ],
@@ -203,6 +207,10 @@
     [
       "lib/multimer/_backends/polling.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_backends/polling.py"
+    ],
+    [
+      "lib/multimer/_backends/sdl2.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_backends/sdl2.py"
     ],
     [
       "lib/multimer/_backends/threading.py",

@@ -13,8 +13,16 @@
       "github:PyDevices/pydisplay/src/lib/displaysys/__init__.py"
     ],
     [
+      "displaysys/boarddisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/boarddisplay.py"
+    ],
+    [
       "displaysys/busdisplay.py",
       "github:PyDevices/pydisplay/src/lib/displaysys/busdisplay.py"
+    ],
+    [
+      "displaysys/epaperdisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/epaperdisplay.py"
     ],
     [
       "displaysys/fbdisplay.py",
@@ -29,24 +37,16 @@
       "github:PyDevices/pydisplay/src/lib/displaysys/pgdisplay.py"
     ],
     [
+      "displaysys/pixeldisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/pixeldisplay.py"
+    ],
+    [
       "displaysys/psdisplay.py",
       "github:PyDevices/pydisplay/src/lib/displaysys/psdisplay.py"
     ],
     [
       "displaysys/sdldisplay.py",
       "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay.py"
-    ],
-    [
-      "displaysys/pixeldisplay.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/pixeldisplay.py"
-    ],
-    [
-      "displaysys/epaperdisplay.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/epaperdisplay.py"
-    ],
-    [
-      "displaysys/boarddisplay.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/boarddisplay.py"
     ]
   ],
   "deps": [],

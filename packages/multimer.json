@@ -37,6 +37,10 @@
       "github:PyDevices/pydisplay/src/lib/multimer/_timer.py"
     ],
     [
+      "multimer/loop.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/loop.py"
+    ],
+    [
       "multimer/py.typed",
       "github:PyDevices/pydisplay/src/lib/multimer/py.typed"
     ],
@@ -51,6 +55,10 @@
     [
       "multimer/_backends/polling.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_backends/polling.py"
+    ],
+    [
+      "multimer/_backends/sdl2.py",
+      "github:PyDevices/pydisplay/src/lib/multimer/_backends/sdl2.py"
     ],
     [
       "multimer/_backends/threading.py",
