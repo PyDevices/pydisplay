@@ -1,0 +1,6 @@
+{
+  "urls": [
+    ["board_config.py", "github:PyDevices/pydisplay/board_configs/fbdisplay/rgb_matrix_featherwing_teensy41_64x32/board_config.py"]
+  ],
+  "version": "0.1"
+}
