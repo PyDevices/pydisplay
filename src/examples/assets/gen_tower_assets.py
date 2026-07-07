@@ -85,10 +85,12 @@ def save(name, data, w, h):
 
 def gen_climber():
     # 4 frames x 3 poses (climb, jump, idle) @ 32x40
+    # Top-left pixel (magenta) is the transparency key for blit_transparent.
     fw, fh = 32, 40
     cols, rows = 4, 3
     w, h = fw * cols, fh * rows
-    data = buf(w, h, rgb565(0, 0, 0))
+    TRANSPARENT = rgb565(255, 0, 255)
+    data = buf(w, h, TRANSPARENT)
 
     SKIN = rgb565(255, 210, 160)
     COAT = rgb565(40, 120, 220)

@@ -17,7 +17,7 @@ from board_config import broker, display_drv
 from displaysys import color565
 from eventsys import poll_quit_discarding_others
 from eventsys.keys import Keys
-from graphics import BMP565, FrameBuffer, RGB565, text8
+from graphics import BMP565, FrameBuffer, RGB565, rect, text8
 from multimer import sleep_ms
 
 try:
@@ -91,6 +91,7 @@ BG = BMP565("examples/assets/tower_bg.bmp", streamed=True)
 
 SPR_W = CLIMBER.width // 4
 SPR_H = CLIMBER.height // 3
+SPR_KEY = CLIMBER[0]
 TILE = 16
 
 T_BARK, T_BRANCH_L, T_BRANCH_R, T_ICE, T_LEAF, T_GEM, T_SPIKE, T_CLOUD = range(8)
@@ -117,7 +118,7 @@ def _blit_tile(idx, dx, dy, repeat=1):
 def _draw_sprite(pose, frame, dx, dy):
     col = frame % 4
     buf = CLIMBER[col * SPR_W : (col + 1) * SPR_W, pose * SPR_H : (pose + 1) * SPR_H]
-    display_drv.blit_rect(buf, dx, dy, SPR_W, SPR_H)
+    display_drv.blit_transparent(buf, dx, dy, SPR_W, SPR_H, SPR_KEY)
 
 
 def _build_level():
@@ -197,8 +198,8 @@ class Player:
         self.y = float(L.y(REF_H - 48) - SPR_H)
         self.vx = 0.0
         self.vy = 0.0
-        self.on_ground = False
-        self.coyote = 0
+        self.on_ground = True
+        self.coyote = 8
         self.jump_buf = 0
         self.lives = 3
         self.score = 0
@@ -305,11 +306,32 @@ def _spark(x, y, n=6):
         )
 
 
-# --- HUD ---------------------------------------------------------------------------------------
+# --- HUD & overlays ----------------------------------------------------------------------------
 
 _hud_h = L.u(16)
 _hud_buf = bytearray(L.w * _hud_h * 2)
 _hud_fb = FrameBuffer(_hud_buf, L.w, _hud_h, RGB565)
+
+_overlay_h = L.y(220)
+_overlay_buf = bytearray(L.w * _overlay_h * 2)
+_overlay_fb = FrameBuffer(_overlay_buf, L.w, _overlay_h, RGB565)
+
+SPLASH_LINES = (
+    "TOWER CLIMB",
+    "",
+    "Climb the magical tree",
+    "to the summit!",
+    "",
+    "Move: arrows / A D",
+    "Jump: Space / W / tap top",
+    "Smash ice: Down / S",
+    "",
+    "Collect gems, break ice,",
+    "dodge falling debris.",
+    "",
+    "Press any key or tap",
+    "to start",
+)
 
 
 def _draw_hud(p, altitude):
@@ -321,6 +343,90 @@ def _draw_hud(p, altitude):
     display_drv.blit_rect(_hud_buf, 0, 0, L.w, _hud_h)
 
 
+def _skip_ui():
+    try:
+        import pydisplay_test_mode
+
+        return pydisplay_test_mode.ENABLED
+    except ImportError:
+        return False
+
+
+def _draw_text_panel(lines, y0=None):
+    if y0 is None:
+        y0 = max(0, (L.h - _overlay_h) // 2)
+    panel_c = _c(12, 16, 40)
+    border_c = _c(255, 180, 40)
+    title_c = _c(255, 220, 80)
+    x0 = L.u(8)
+    pw = L.w - L.u(16)
+    display_drv.fill_rect(x0, y0, pw, _overlay_h, panel_c)
+    rect(display_drv, x0, y0, pw, _overlay_h, border_c)
+    _overlay_fb.fill(panel_c)
+    ty = 10
+    for i, line in enumerate(lines):
+        if line:
+            color = title_c if i == 0 else HUD_INK
+            text8(_overlay_fb, line, 10, ty, color)
+        ty += 12
+    display_drv.blit_rect(_overlay_buf, 0, y0, L.w, _overlay_h)
+
+
+def _is_start_input(ev):
+    if ev.type == broker.events.KEYDOWN:
+        return True
+    if ev.type == broker.events.MOUSEBUTTONDOWN:
+        return True
+    return False
+
+
+def _wait_for_input(draw_fn=None):
+    """Block until the user taps or presses a key (splash / life lost)."""
+    if _skip_ui():
+        if draw_fn is not None:
+            draw_fn()
+            display_drv.show()
+        return True
+    while True:
+        if poll_quit_discarding_others(broker):
+            return False
+        if draw_fn is not None:
+            draw_fn()
+            display_drv.show()
+        for ev in broker.poll():
+            if _is_start_input(ev):
+                _keys["left"] = _keys["right"] = _keys["up"] = _keys["down"] = False
+                _keys["smash"] = False
+                return True
+        sleep_ms(0)
+        sleep_ms(16)
+
+
+def _show_splash():
+    def draw():
+        _draw_bg(0)
+        _draw_text_panel(SPLASH_LINES)
+
+    return _wait_for_input(draw)
+
+
+def _life_lost_pause(player):
+    lines = (
+        "LIFE LOST!",
+        "",
+        f"Lives left: {player.lives}",
+        "",
+        "Press any key or tap",
+        "to continue",
+    )
+
+    def draw():
+        _draw_bg(0)
+        _draw_text_panel(lines)
+
+    return _wait_for_input(draw)
+
+
 # --- Main --------------------------------------------------------------------------------------
 
 
@@ -329,191 +435,233 @@ def _respawn(p):
     p.x = float(L.ox + L.field_w // 2 - SPR_W // 2)
     p.y = float(L.y(REF_H - 48) - SPR_H)
     p.vx = p.vy = 0
+    p.on_ground = True
 
 
-def main():
-    player = Player()
-    plats = list(PLATFORMS)
-    gems = list(GEMS)
-    hazards = [list(h) for h in HAZARDS]
-    camera = 0.0
-    frame = 0
-    won = False
+def _lose_life(player, camera_ref):
+    _respawn(player)
+    camera_ref[0] = 0.0
+    if player.lives <= 0:
+        return False
+    return _life_lost_pause(player)
 
-    while player.lives > 0 and not won:
+
+def _run_game(show_splash=True):
+    if show_splash and not _skip_ui():
+        if not _show_splash():
+            return
         if poll_quit_discarding_others(broker):
-            break
-        for ev in broker.poll():
-            _handle_event(ev)
+            return
 
-        frame += 1
+    while True:
+        player = Player()
+        plats = list(PLATFORMS)
+        gems = list(GEMS)
+        hazards = [list(h) for h in HAZARDS]
+        camera = 0.0
+        frame = 0
+        won = False
+        _particles.clear()
 
-        # Camera follows upward climbs (software scroll).
-        target_cam = player.y - ANCHOR_Y
-        if target_cam < camera:
-            camera = target_cam
-        if camera < 0:
-            camera = 0
+        while player.lives > 0 and not won:
+            if poll_quit_discarding_others(broker):
+                CLIMBER.deinit()
+                TILES.deinit()
+                BG.deinit()
+                return
 
-        # Input
-        if _keys["left"]:
-            player.vx -= MOVE_A
-            player.pose = 0
-        if _keys["right"]:
-            player.vx += MOVE_A
-            player.pose = 0
-        if not _keys["left"] and not _keys["right"] and player.on_ground:
-            player.pose = 2
-        if _keys["up"]:
-            player.jump_buf = 8
-        else:
-            player.jump_buf = max(0, player.jump_buf - 1)
+            for ev in broker.poll():
+                _handle_event(ev)
 
-        if player.on_ground:
-            player.coyote = 8
-        else:
-            player.coyote = max(0, player.coyote - 1)
-            player.pose = 1
+            frame += 1
 
-        if player.jump_buf and player.coyote:
-            player.vy = JUMP_V * (L.s if L.s < 1.2 else 1.0)
-            player.on_ground = False
-            player.coyote = 0
-            player.jump_buf = 0
-            _spark(int(player.x + SPR_W // 2), int(player.y + SPR_H), 4)
-
-        # Smash ice (Ice Climber mallet)
-        if _keys["smash"] and player.on_ground:
-            box = _hitbox(player)
-            for i, plat in enumerate(plats):
-                if plat.kind == T_ICE and _overlap(
-                    box, Rect(plat.x, plat.y - 4, plat.w, plat.h + 8, T_ICE)
-                ):
-                    plats[i] = Rect(plat.x, plat.y, plat.w, plat.h, T_BRANCH_L)
-                    player.score += 15
-                    _spark(plat.x + plat.w // 2, plat.y, 10)
-                    break
-
-        player.vx = max(-MAX_RUN, min(MAX_RUN, player.vx))
-        if player.on_ground:
-            player.vx *= FRICTION
-        else:
-            player.vx *= 0.99
-        player.vy = min(MAX_FALL, player.vy + GRAVITY)
-
-        ox = player.x
-        player.x += player.vx
-        for plat in plats:
-            _resolve_x(player, plat, player.x - ox)
-
-        oy = player.y
-        player.y += player.vy
-        hurt = _land(player, oy, plats)
-        if hurt:
-            _respawn(player)
-            camera = 0
-            continue
-
-        # Fall below start
-        if player.y > L.y(REF_H) + L.u(40):
-            _respawn(player)
-            camera = 0
-            continue
-
-        # Gems
-        box = _hitbox(player)
-        got = []
-        for i, g in enumerate(gems):
-            gr = Rect(g.x, g.y, 12, 12, T_GEM)
-            if _overlap(box, gr):
-                got.append(i)
-                player.score += 25
-                _spark(g.x, g.y, 6)
-        for i in reversed(got):
-            gems.pop(i)
-
-        # Hazards (Crazy Climber drops)
-        if frame % 90 == 0 and player.y < L.y(REF_H - 100):
-            hx = L.ox + randint(20, max(21, L.field_w - 20))
-            hazards.append([hx, camera - 20, 10, 0.0, L.y(2.5)])
-        for hz in hazards:
-            hz[1] += hz[4]
-            hz[3] += 0.05
-            hr = Rect(int(hz[0]), int(hz[1]), hz[2], hz[2], T_SPIKE)
-            if _overlap(box, hr):
-                _respawn(player)
+            # Camera follows upward climbs (software scroll).
+            target_cam = player.y - ANCHOR_Y
+            if target_cam < camera:
+                camera = target_cam
+            if camera < 0:
                 camera = 0
+
+            # Input
+            if _keys["left"]:
+                player.vx -= MOVE_A
+                player.pose = 0
+            if _keys["right"]:
+                player.vx += MOVE_A
+                player.pose = 0
+            if not _keys["left"] and not _keys["right"] and player.on_ground:
+                player.pose = 2
+            if _keys["up"]:
+                player.jump_buf = 8
+            else:
+                player.jump_buf = max(0, player.jump_buf - 1)
+
+            if player.on_ground:
+                player.coyote = 8
+            else:
+                player.coyote = max(0, player.coyote - 1)
+                player.pose = 1
+
+            if player.jump_buf and player.coyote:
+                player.vy = JUMP_V * (L.s if L.s < 1.2 else 1.0)
+                player.on_ground = False
+                player.coyote = 0
+                player.jump_buf = 0
+                _spark(int(player.x + SPR_W // 2), int(player.y + SPR_H), 4)
+
+            # Smash ice (Ice Climber mallet)
+            if _keys["smash"] and player.on_ground:
+                box = _hitbox(player)
+                for i, plat in enumerate(plats):
+                    if plat.kind == T_ICE and _overlap(
+                        box, Rect(plat.x, plat.y - 4, plat.w, plat.h + 8, T_ICE)
+                    ):
+                        plats[i] = Rect(plat.x, plat.y, plat.w, plat.h, T_BRANCH_L)
+                        player.score += 15
+                        _spark(plat.x + plat.w // 2, plat.y, 10)
+                        break
+
+            player.vx = max(-MAX_RUN, min(MAX_RUN, player.vx))
+            if player.on_ground:
+                player.vx *= FRICTION
+            else:
+                player.vx *= 0.99
+            player.vy = min(MAX_FALL, player.vy + GRAVITY)
+
+            ox = player.x
+            player.x += player.vx
+            for plat in plats:
+                _resolve_x(player, plat, player.x - ox)
+
+            oy = player.y
+            player.y += player.vy
+            hurt = _land(player, oy, plats)
+            cam_box = [camera]
+            if hurt:
+                if not _lose_life(player, cam_box):
+                    break
+                camera = cam_box[0]
+                continue
+
+            # Fall below start
+            if player.y > L.y(REF_H) + L.u(40):
+                if not _lose_life(player, cam_box):
+                    break
+                camera = cam_box[0]
+                continue
+
+            # Gems
+            box = _hitbox(player)
+            got = []
+            for i, g in enumerate(gems):
+                gr = Rect(g.x, g.y, 12, 12, T_GEM)
+                if _overlap(box, gr):
+                    got.append(i)
+                    player.score += 25
+                    _spark(g.x, g.y, 6)
+            for i in reversed(got):
+                gems.pop(i)
+
+            # Hazards (Crazy Climber drops)
+            if frame % 90 == 0 and player.y < L.y(REF_H - 100):
+                hx = L.ox + randint(20, max(21, L.field_w - 20))
+                hazards.append([hx, camera - 20, 10, 0.0, L.y(2.5)])
+            life_lost = False
+            for hz in hazards:
+                hz[1] += hz[4]
+                hz[3] += 0.05
+                hr = Rect(int(hz[0]), int(hz[1]), hz[2], hz[2], T_SPIKE)
+                if _overlap(box, hr):
+                    if not _lose_life(player, cam_box):
+                        life_lost = True
+                        break
+                    camera = cam_box[0]
+                    life_lost = True
+                    break
+            if life_lost and player.lives <= 0:
                 break
-        else:
+            if life_lost:
+                continue
             hazards[:] = [h for h in hazards if h[1] < camera + L.h + L.u(40)]
 
-        if player.y <= GOAL_Y:
-            won = True
-            player.score += 500
+            if player.y <= GOAL_Y:
+                won = True
+                player.score += 500
 
-        altitude = int(L.y(REF_H - 80) - player.y)
-        _draw_bg(camera)
-        cam = int(camera)
+            altitude = int(L.y(REF_H - 80) - player.y)
+            _draw_bg(camera)
+            cam = int(camera)
 
-        # Platforms
-        for plat in plats:
-            sy = int(plat.y - cam)
-            if sy < -TILE or sy > L.h:
-                continue
-            if plat.kind == T_BARK:
-                reps = max(1, plat.w // TILE)
-                _blit_tile(T_BARK, plat.x, sy, reps)
-            elif plat.kind in (T_BRANCH_L, T_BRANCH_R, T_ICE, T_LEAF):
-                reps = max(1, plat.w // TILE)
-                _blit_tile(plat.kind, plat.x, sy, reps)
+            # Platforms
+            for plat in plats:
+                sy = int(plat.y - cam)
+                if sy < -TILE or sy > L.h:
+                    continue
+                if plat.kind == T_BARK:
+                    reps = max(1, plat.w // TILE)
+                    _blit_tile(T_BARK, plat.x, sy, reps)
+                elif plat.kind in (T_BRANCH_L, T_BRANCH_R, T_ICE, T_LEAF):
+                    reps = max(1, plat.w // TILE)
+                    _blit_tile(plat.kind, plat.x, sy, reps)
 
-        # Gems
-        for g in gems:
-            sy = int(g.y - cam)
-            if 0 <= sy < L.h:
-                _blit_tile(T_GEM, g.x, sy)
-
-        # Hazards
-        for hz in hazards:
-            sy = int(hz[1] - cam)
-            if 0 <= sy < L.h:
-                _blit_tile(T_SPIKE, int(hz[0]), sy)
-
-        # Particles
-        live = []
-        for px, py, pvx, life in _particles:
-            life -= 1
-            if life > 0:
-                px += pvx
-                py += 1
-                sy = int(py - cam)
+            # Gems
+            for g in gems:
+                sy = int(g.y - cam)
                 if 0 <= sy < L.h:
-                    display_drv.pixel(int(px), sy, PARTICLE)
-                live.append([px, py, pvx, life])
-        _particles[:] = live
+                    _blit_tile(T_GEM, g.x, sy)
 
-        _draw_sprite(player.pose, frame // 5, int(player.x), int(player.y - cam))
-        _draw_hud(player, altitude)
+            # Hazards
+            for hz in hazards:
+                sy = int(hz[1] - cam)
+                if 0 <= sy < L.h:
+                    _blit_tile(T_SPIKE, int(hz[0]), sy)
 
-        display_drv.show()
-        sleep_ms(0)
-        sleep_ms(16)
+            # Particles
+            live = []
+            for px, py, pvx, life in _particles:
+                life -= 1
+                if life > 0:
+                    px += pvx
+                    py += 1
+                    sy = int(py - cam)
+                    if 0 <= sy < L.h:
+                        display_drv.pixel(int(px), sy, PARTICLE)
+                    live.append([px, py, pvx, life])
+            _particles[:] = live
 
-    # Banner
-    banner_h = L.u(36)
-    banner = bytearray(L.w * banner_h * 2)
-    bfb = FrameBuffer(banner, L.w, banner_h, RGB565)
-    bfb.fill(HUD_BG)
-    msg = "SUMMIT!" if won else "GAME OVER"
-    text8(bfb, f"{msg}  SCORE {player.score:04d}", L.u(20), L.u(12), HUD_INK)
-    display_drv.fill_rect(0, L.h // 2 - banner_h // 2, L.w, banner_h, HUD_BG)
-    display_drv.blit_rect(banner, 0, L.h // 2 - banner_h // 2, L.w, banner_h)
-    display_drv.show()
-    sleep_ms(2000)
+            _draw_sprite(player.pose, frame // 5, int(player.x), int(player.y - cam))
+            _draw_hud(player, altitude)
+
+            display_drv.show()
+            sleep_ms(0)
+            sleep_ms(16)
+
+        # End of round — game over or win
+        msg = "SUMMIT!" if won else "GAME OVER"
+        lines = (
+            msg,
+            "SCORE %04d" % player.score,
+            "",
+            "Press any key or tap",
+            "to play again",
+        )
+
+        def draw_end():
+            _draw_bg(camera)
+            _draw_text_panel(lines)
+
+        if not _wait_for_input(draw_end):
+            break
+        # Replay: skip splash on next round
+        show_splash = False
 
     CLIMBER.deinit()
     TILES.deinit()
     BG.deinit()
+
+
+def main():
+    _run_game(show_splash=True)
 
 
 main()
