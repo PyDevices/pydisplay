@@ -4,11 +4,11 @@ Portability is PyDisplay's defining feature. Write your display, input, and timi
 
 ## Where PyDisplay runs
 
-| Runtime | Microcontrollers | Unix / Linux | Windows | Browser | Jupyter Notebook |
-|---------|:----------------:|:------------:|:-------:|:-------:|:----------------:|
-| **[MicroPython](micropython.md)** | ✅ | ✅ | ✅ | ✅ [PyScript](pyscript.md) · [Wokwi](../guides/wokwi.md) | — |
-| **[CircuitPython](circuitpython.md)** | ✅ | ✅ | — | — | — |
-| **[CPython](cpython-desktop.md)** | — | ✅ | ✅ | — | ✅ [Jupyter](jupyter.md) |
+| Runtime | Microcontrollers | Unix / Linux | Windows | Android | Browser | Jupyter Notebook |
+|---------|:----------------:|:------------:|:-------:|:-------:|:-------:|:----------------:|
+| **[MicroPython](micropython.md)** | ✅ | ✅ | ✅ | — | ✅ [PyScript](pyscript.md) · [Wokwi](../guides/wokwi.md) | — |
+| **[CircuitPython](circuitpython.md)** | ✅ | ✅ | — | — | — | — |
+| **[CPython](cpython-desktop.md)** | — | ✅ | ✅ | ✅ [Android](android.md) | — | ✅ [Jupyter](jupyter.md) |
 
 ## How portability works
 
@@ -38,6 +38,7 @@ See [Displays](../concepts/displays.md) for backend details and [Architecture](.
 - [MicroPython](micropython.md) — MCUs, Unix, Windows, bus drivers, frozen firmware.
 - [CircuitPython](circuitpython.md) — MCUs and Unix; `framebufferio` and the `framebuf` shim.
 - [CPython desktop](cpython-desktop.md) — SDL2 / PyGame setup for Linux, macOS, and Windows.
+- [Android](android.md) — CPython APK builds with python-for-android and buildozer.
 - [Jupyter Notebook](jupyter.md) — interactive display widget and async execution model.
 - [Run the notebook interactively](jupyter-run.md) — JupyterLab / VS Code setup (the RTD notebook page is static).
 - [PyScript](pyscript.md) — running in the browser.
