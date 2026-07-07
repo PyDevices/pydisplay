@@ -66,7 +66,7 @@ TFT_eSPI bundles dozens of controller init tables. pydisplay **vendors CircuitPy
 
 | Board | MP | CP |
 |-------|----|----|
-| M5 Tab5 (DSI) | `m5stack_tab5` | `cp_m5stack_tab5` |
+| M5 Tab5 (DSI) | `m5stack_tab5` (auto ILI9881C / ST7123) | `cp_m5stack_tab5` |
 | Pico 2 DVI Sock (HSTX) | `pico2_dvi_sock_640x480` | `cp_pico2_dvi_sock_640x480` |
 | Metro RP2350 HSTX | `adafruit_metro_rp2350_hstx_640x480` | `cp_adafruit_metro_rp2350_hstx_640x480` |
 | Pimoroni Pico DV (RP2040 PIO) | `pimoroni_pico_dv_base_640x480` | `cp_pimoroni_pico_dv_base_640x480` |
@@ -78,4 +78,4 @@ TFT_eSPI bundles dozens of controller init tables. pydisplay **vendors CircuitPy
 - **ESP8266** — out of pydisplay scope
 - **AVR** — out of scope
 - **PSRAM-less ESP32** large framebuffers — hardware limit; use smaller buffers or SPI TFT
-- **ST7123 Tab5** on MicroPython — pending vendor init in displayif; CP latest builds support via firmware
+- **ST7123 Tab5** on MicroPython — `m5stack_tab5` auto-detects GT911@0x14 vs ST7123@0x55; hardware validation pending
