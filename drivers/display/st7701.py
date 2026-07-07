@@ -120,7 +120,7 @@ class ST7701(BusDisplay):
 
     Panel registers are initialized via ``lcd_pins`` (3-wire SPI bit-bang).
     Pixel data is sent through ``display_bus`` (RGB parallel panel from
-    ``pydevices/displayif``, wrapped by ``displaysys.rgbdisplay.RGBDisplay``).
+    ``pydevices/displayif`` ``rgbframebuffer`` + ``displaysys.fbdisplay.FBDisplay``).
     """
 
     def __init__(self, lcd_pins, display_bus, *, init_sequence=None, **kwargs):

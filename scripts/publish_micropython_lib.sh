@@ -167,7 +167,6 @@ displaysys_example_board_config_path() {
     case "$package" in
         displaysys-busdisplay) echo "$board_configs/busdisplay/i80/wt32sc01-plus/board_config.py" ;;
         displaysys-fbdisplay) echo "$board_configs/fbdisplay/qualia_tl040hds20/board_config.py" ;;
-        displaysys-rgbdisplay) echo "$board_configs/fbdisplay/t-rgb_480/board_config.py" ;;
         displaysys-epaperdisplay) echo "$board_configs/epaperdisplay/cp_magtag/board_config.py" ;;
         displaysys-pixeldisplay) echo "$board_configs/pixeldisplay/cp_neopixel_8x8_zigzag/board_config.py" ;;
         displaysys-jndisplay) echo "$board_configs/jndisplay/board_config.py" ;;
