@@ -23,7 +23,7 @@ from multimer import sleep_ms
 from tower_climb_trace import open_trace
 
 try:
-    from random import getrandbits, randint
+    from random import getrandbits, randint, seed
 except ImportError:
 
     def getrandbits(n):
@@ -31,6 +31,9 @@ except ImportError:
 
     def randint(a, b):
         return a
+
+    def seed(_):
+        pass
 
 
 try:
@@ -115,6 +118,36 @@ _TRANSPARENT_TILES = frozenset({T_LEAF, T_GEM, T_SPIKE, T_CLOUD})
 
 BASE_Y_REF = REF_H - 80
 CLIMB_REF = 560  # reference pixels; twice the original ~280 px climb
+CROWN_Y = L.y(BASE_Y_REF - CLIMB_REF)
+GOAL_Y = CROWN_Y - L.y(16)
+
+
+def _rng(lo, hi):
+    """Inclusive random int (MicroPython-safe)."""
+    if lo >= hi:
+        return lo
+    try:
+        return randint(lo, hi)
+    except TypeError:
+        span = hi - lo + 1
+        return lo + (getrandbits(16) % span)
+
+
+def _seed_rng():
+    raw = os.environ.get("TOWER_CLIMB_SEED", "").strip()
+    if raw:
+        try:
+            seed(int(raw, 0))
+        except ValueError:
+            pass
+        return
+    try:
+        seed(ticks_ms())
+    except NameError:
+        pass
+
+
+_seed_rng()
 
 # --- Level helpers -----------------------------------------------------------------------------
 
@@ -147,14 +180,14 @@ def _draw_sprite(pose, frame, dx, dy):
 
 def _build_tree_crown(plats, decos, trunk, crown_y):
     """Wide leafy crown and cloud puffs at the tree top."""
-    cw = L.x(104)
+    cw = L.x(_rng(96, 112))
     cx = L.ox + trunk - cw // 2
     plats.append(Rect(cx, crown_y, cw, TILE, T_CROWN))
     plats.append(Rect(cx - L.x(18), crown_y - L.y(18), L.x(40), TILE, T_LEAF))
     plats.append(Rect(cx + cw - L.x(22), crown_y - L.y(18), L.x(40), TILE, T_LEAF))
     mid = cx + cw // 2
     # Sparse cloud puffs — spread wide so the canopy is not a solid block.
-    for dx, dy in (
+    cloud_spots = (
         (-L.x(88), -L.y(34)),
         (-L.x(34), -L.y(62)),
         (L.x(78), -L.y(48)),
@@ -164,47 +197,68 @@ def _build_tree_crown(plats, decos, trunk, crown_y):
         (L.x(62), -L.y(84)),
         (-L.x(18), -L.y(46)),
         (L.x(24), -L.y(70)),
-    ):
-        decos.append((mid + dx, crown_y + dy, T_CLOUD))
+    )
+    for dx, dy in cloud_spots:
+        if _rng(0, 99) < 88:
+            jx = dx + L.x(_rng(-16, 16))
+            jy = dy + L.y(_rng(-12, 12))
+            decos.append((mid + jx, crown_y + jy, T_CLOUD))
     for dx, dy in ((-L.x(62), -L.y(16)), (L.x(58), -L.y(20))):
-        decos.append((mid + dx, crown_y + dy, T_LEAF))
+        decos.append((mid + dx + L.x(_rng(-8, 8)), crown_y + dy, T_LEAF))
 
 
 def _build_level():
-    """Procedural tree: branches, ice, gems, hazards, and a leafy crown."""
+    """Randomized tree: branches, ice, gems, hazards, and a leafy crown."""
     plats = []
     gems = []
     hazards = []
     decos = []
     trunk = L.field_w // 2
-    top_ref = BASE_Y_REF - CLIMB_REF
-    top = L.y(top_ref)
     y = L.y(BASE_Y_REF)
-    step = L.y(40)
     n = 0
-    while y > top:
-        side = -1 if n % 2 else 1
-        bw = L.x(56 + (n % 3) * 12)
-        bx = trunk + side * L.x(26 + (n % 4) * 6) - bw // 2
+    side = -1 if _rng(0, 1) else 1
+    prev_cx = trunk
+    hazard_cap = _rng(1, max(2, _HAZARD_BRANCH_MAX_N - 1))
+    ice_chance = _rng(10, 18)
+    gem_chance = _rng(34, 46)
+    while y > CROWN_Y:
+        bw = L.x(_rng(52, 84))
+        reach = L.x(_rng(24, 44))
+        bx = trunk + side * reach - bw // 2
         bx = max(L.ox + L.u(4), min(bx, L.ox + L.field_w - bw - L.u(4)))
+        cx = bx + bw // 2
+        if n > 0 and abs(cx - prev_cx) > L.x(68):
+            nudge = L.x(16) if cx > prev_cx else -L.x(16)
+            bx = max(L.ox + L.u(4), min(bx - nudge, L.ox + L.field_w - bw - L.u(4)))
+            cx = bx + bw // 2
+        prev_cx = cx
         kind = T_BRANCH_L if side < 0 else T_BRANCH_R
-        if n % 5 == 2:
+        if n > 3 and _rng(0, 99) < ice_chance:
             kind = T_ICE
         plats.append(Rect(bx, y, bw, TILE, kind))
-        if n % 3 == 1:
-            gems.append(Point(bx + bw // 2 - 6, y - 18))
-        if n % _HAZARD_BRANCH_INTERVAL == 0 and 4 < n < _HAZARD_BRANCH_MAX_N:
-            hazards.append([bx + bw // 2, y - L.y(200), 10, 0.0, _HAZARD_SPEED])
-        y -= step + (n % 4) * L.u(6)
+        if n > 0 and _rng(0, 99) < gem_chance:
+            gx = bx + _rng(max(8, bw // 5), max(9, bw - bw // 5)) - 6
+            gems.append(Point(gx, y - _rng(14, 24)))
+        if (
+            n > 6
+            and len(hazards) < hazard_cap
+            and _rng(0, 99) < max(6, 90 - _HAZARD_BRANCH_INTERVAL * 4)
+        ):
+            hazards.append(
+                [
+                    bx + _rng(0, max(0, bw - 10)),
+                    y - _rng(L.y(160), L.y(240)),
+                    10,
+                    0.0,
+                    _HAZARD_SPEED,
+                ]
+            )
+        y -= L.y(_rng(36, 44)) + L.u(_rng(2, 8))
         n += 1
+        side = -side
     plats.append(Rect(L.ox + L.field_w // 2 - L.x(40), L.y(REF_H - 48), L.x(80), TILE, T_BARK))
-    crown_y = top
-    _build_tree_crown(plats, decos, trunk, crown_y)
-    goal_y = crown_y - L.y(16)
-    return plats, gems, hazards, goal_y, crown_y, decos
-
-
-PLATFORMS, GEMS, HAZARDS, GOAL_Y, CROWN_Y, SUMMIT_DECOS = _build_level()
+    _build_tree_crown(plats, decos, trunk, CROWN_Y)
+    return plats, gems, hazards, decos
 
 _trace = open_trace()
 _bot = os.environ.get("TOWER_CLIMB_BOT", "").strip().lower() in ("1", "true", "yes")
@@ -306,8 +360,8 @@ def _draw_sun(sx, sy):
                 display_drv.pixel(cx + dx, cy + dy, core)
 
 
-def _draw_summit_decos(cam):
-    for dx, dy, kind in SUMMIT_DECOS:
+def _draw_summit_decos(cam, decos):
+    for dx, dy, kind in decos:
         sy = int(dy - cam)
         if -TILE <= sy < L.h + TILE:
             _blit_tile(kind, dx, sy, 1)
@@ -786,7 +840,6 @@ def _run_game(show_splash=True):
     _take_over_display_refresh()
     _open_video_recorder()
     if _trace is not None:
-        _trace.log_init(L, SPR_W, SPR_H, PLATFORMS, GEMS, HAZARDS, GOAL_Y)
         show_splash = False
     if _bot or _record:
         show_splash = False
@@ -798,11 +851,13 @@ def _run_game(show_splash=True):
                 return
 
         while True:
+            plats, gems, hazards, summit_decos = _build_level()
+            if _trace is not None:
+                _trace.log_init(L, SPR_W, SPR_H, plats, gems, hazards, GOAL_Y)
             player = Player()
-            plats = list(PLATFORMS)
             _snap_to_ground(player, plats, reason="round_start")
-            gems = list(GEMS)
-            hazards = [list(h) for h in HAZARDS]
+            gems = list(gems)
+            hazards = [list(h) for h in hazards]
             camera = 0.0
             frame = 0
             won = False
@@ -983,7 +1038,7 @@ def _run_game(show_splash=True):
                         reps = max(1, plat.w // TILE)
                         _blit_tile(plat.kind, plat.x, sy, reps)
 
-                _draw_summit_decos(cam)
+                _draw_summit_decos(cam, summit_decos)
 
                 # Gems
                 for g in gems:
@@ -1046,7 +1101,7 @@ def _run_game(show_splash=True):
                     sy = int(plat.y - int(camera))
                     if -TILE <= sy < L.h:
                         _draw_crown(plat, sy)
-                _draw_summit_decos(int(camera))
+                _draw_summit_decos(int(camera), summit_decos)
                 if won:
                     _draw_sprite(player.pose, frame // 5, int(player.x), int(player.y - int(camera)))
                 _draw_text_panel(lines, at_top=won)
