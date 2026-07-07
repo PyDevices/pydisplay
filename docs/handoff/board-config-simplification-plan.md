@@ -141,31 +141,37 @@ replacement for the device API.
 
 ---
 
-## Worked example: `busdisplay/spi/diy_esp32_ili9341_xpt2046`
+## Worked example: `busdisplay/i80/wt32sc01-plus`
 
-This MCU config (DIY ESP32 + ILI9341 SPI display + XPT2046 resistive touch)
-existed on Jan 1, 2026 and still exists today, so it shows all three layouts.
-The hardware-description half (bus, display, touch chip, calibration) is
-identical in all three versions and is elided below.
+This MCU config (Sunton WT32-SC01 Plus: ESP32-S3, ST7796 320×480 over an I80
+parallel bus, FT6x36 capacitive touch on I2C) existed on Jan 1, 2026 and
+still exists today, so it shows all three layouts. The hardware-description
+half (CPU frequency, shared reset-pin workaround, bus, display, touch chip)
+is identical in all three versions and is abbreviated below.
 
 ### As of Jan 1, 2026 (`ef14624e`)
 
 ```python
-from spibus import SPIBus
-from ili9341 import ILI9341
-from machine import Pin, SPI
-from xpt2046 import Touch
+from i80bus import I80Bus
+from st7796 import ST7796
+from machine import I2C, Pin, freq
+from ft6x36 import FT6x36
 from eventsys import devices
 
-display_bus = SPIBus(id=1, baudrate=40_000_000, sck=14, mosi=13, miso=12, dc=5, cs=15)
-display_drv = ILI9341(display_bus, width=240, height=320, rotation=270, ...)
+freq(240_000_000)
+# Display and touch ICs share reset on pin 4; hold it high here instead of
+# letting the display driver toggle it (would knock out the touchscreen).
+reset = Pin(4, Pin.OUT, value=1)
 
-spi = SPI(2, baudrate=1000000, sck=Pin(18), mosi=Pin(23), miso=Pin(19))
-touch_drv = Touch(spi=spi, cs=Pin(25), int_pin=Pin(21))
-touch_drv.calibrate(...)
+display_bus = I80Bus(dc=0, cs=6, wr=47, data=[9, 46, 3, 8, 18, 17, 16, 15])
 
-touch_read_func = (touch_drv.get_touch,)
-touch_rotation_table = (0b000, 0b000, 0b000, 0b100)
+display_drv = ST7796(display_bus, width=320, height=480, rotation=0,
+                     bgr=True, invert=True, backlight_pin=45, ...)
+
+i2c = I2C(0, sda=Pin(6), scl=Pin(5), freq=100000)
+touch_drv = FT6x36(i2c)
+touch_read_func = touch_drv.get_positions
+touch_rotation_table = None
 
 broker = devices.Broker()
 
@@ -184,22 +190,25 @@ refresh timer would have lived *inside* `DisplayDriver` via `auto_refresh`.
 ### Current (`main` today)
 
 ```python
-from ili9341 import ILI9341
-from machine import SPI, Pin
-from spibus import SPIBus
-from xpt2046 import Touch
+from ft6x36 import FT6x36
+from i80bus import I80Bus
+from machine import I2C, Pin, freq
+from st7796 import ST7796
 
 import eventsys
 
-display_bus = SPIBus(...)
-display_drv = ILI9341(display_bus, ...)
+freq(240_000_000)
+reset = Pin(4, Pin.OUT, value=1)  # shared display/touch reset, see note
 
-spi = SPI(2, ...)
-touch_drv = Touch(spi=spi, cs=Pin(25), int_pin=Pin(21))
-touch_drv.calibrate(...)
+display_bus = I80Bus(dc=0, cs=6, wr=47, data=[9, 46, 3, 8, 18, 17, 16, 15])
 
-touch_read_func = (touch_drv.get_touch,)
-touch_rotation_table = (0b000, 0b000, 0b000, 0b100)
+display_drv = ST7796(display_bus, width=320, height=480, rotation=0,
+                     bgr=True, invert=True, backlight_pin=45, ...)
+
+i2c = I2C(0, sda=Pin(6), scl=Pin(5), freq=100000)
+touch_drv = FT6x36(i2c)
+touch_read_func = touch_drv.get_positions
+touch_rotation_table = None
 
 broker = eventsys.Broker()
 
@@ -215,50 +224,58 @@ broker.register_quit_cleanup(display_drv)
 
 Notes: flat `eventsys` API and quit cleanup, but the input wiring is still
 the old shape — the display and rotation table travel through the opaque
-`data=`/`data2=` slots. It also carries a latent bug inherited from the
-original: `touch_read_func = (touch_drv.get_touch,)` is a **1-tuple, not a
-callable** — `TouchDevice._poll()` does `self._read()` and would raise
-`TypeError` on the first poll. Opaque positional-style parameters make this
-kind of mistake easy to write and hard to spot in review.
+`data=`/`data2=` slots, and `data2=None` relies on the reader knowing that
+`TouchDevice` substitutes its default rotation table for `None`. Nothing here
+says the broker owns the refresh timer; the config simply never mentions
+refresh, which is correct for a bus display but indistinguishable from an
+accidental omission.
 
 ### Proposed
 
 ```python
-from ili9341 import ILI9341
-from machine import SPI, Pin
-from spibus import SPIBus
-from xpt2046 import Touch
+from ft6x36 import FT6x36
+from i80bus import I80Bus
+from machine import I2C, Pin, freq
+from st7796 import ST7796
 
 import eventsys
 
+freq(240_000_000)
+reset = Pin(4, Pin.OUT, value=1)  # shared display/touch reset, see note
+
 # 1. bus
-display_bus = SPIBus(id=1, baudrate=40_000_000, sck=14, mosi=13, miso=12, dc=5, cs=15)
+display_bus = I80Bus(dc=0, cs=6, wr=47, data=[9, 46, 3, 8, 18, 17, 16, 15])
 
 # 2. display
-display_drv = ILI9341(display_bus, width=240, height=320, rotation=270, ...)
+display_drv = ST7796(display_bus, width=320, height=480, rotation=0,
+                     bgr=True, invert=True, backlight_pin=45, ...)
 
 # 3. input device
-spi = SPI(2, baudrate=1000000, sck=Pin(18), mosi=Pin(23), miso=Pin(19))
-touch_drv = Touch(spi=spi, cs=Pin(25), int_pin=Pin(21))
-touch_drv.calibrate(...)
+i2c = I2C(0, sda=Pin(6), scl=Pin(5), freq=100000)
+touch_drv = FT6x36(i2c)
 
-# 4. wrapper not needed: Touch.get_touch already returns (x, y) or None
+# 4. wrapper not needed: FT6x36.get_positions already returns a point list
+#    the TouchDevice understands (first point wins), or an empty list.
 
-# 5. touch rotation table
-touch_rotation_table = (0b000, 0b000, 0b000, 0b100)
+# 5. touch rotation table: omitted — this panel uses the default table
 
 # 6. broker owns the input device, refresh policy, and quit/timer cleanup
 broker = eventsys.Broker(
     display_drv=display_drv,
-    touch_read=touch_drv.get_touch,
-    touch_rotation_table=touch_rotation_table,
+    touch_read=touch_drv.get_positions,
 )
 ```
 
-The boilerplate `broker.create(... data= ... data2= ...)` block and
-`register_quit_cleanup` call disappear; the named parameters make the tuple
-bug impossible to write (`touch_read` must be callable — the constructor can
-validate it, which `data=`/`read=` never did).
+The boilerplate `broker.create(... data= ... data2= ...)` block and the
+`register_quit_cleanup` call disappear, and "use the default rotation table"
+becomes an omitted named parameter instead of an unexplained `data2=None`.
+The constructor validates `touch_read` is callable, which the `read=` slot
+never did — one currently shipping config,
+`busdisplay/spi/diy_esp32_ili9341_xpt2046`, passes
+`touch_read_func = (touch_drv.get_touch,)` (a 1-tuple, not a callable) and
+would raise `TypeError` on the first poll; verified against the live
+`eventsys` code. Named, validated parameters make that class of mistake fail
+loudly at import time instead.
 
 For comparison, the desktop config (`board_configs/sdldisplay`) under the
 proposal:
