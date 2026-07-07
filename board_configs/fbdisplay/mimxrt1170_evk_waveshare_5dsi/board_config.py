@@ -11,8 +11,16 @@ On Raspberry Pi this panel uses ``dtoverlay=vc4-kms-dsi-7inch`` (TC358762 DSI-to
 bridge).  displayif ``mipidsi`` programs the bridge automatically when
 ``init_sequence`` is empty.
 
+Touch (50H-800480-IPS-**CT** capacitive SKU only): Goodix GT911 on I2C via J84 FFC
+pins 11–12 (``board.SDA`` / ``board.SCL``, LPI2C5).  Reset and interrupt are routed
+on ``board.D9`` / ``board.D6`` per NXP MIPI-panel touch wiring.  The non-touch IPS
+variant has no controller on that I2C bus.
+
 CircuitPython sibling: ``cp_mimxrt1170_evk_waveshare_5dsi``.
 """
+
+from gt911 import GT911
+from machine import I2C
 
 from displaysys.fbdisplay import FBDisplay
 import eventsys
@@ -48,5 +56,34 @@ fb = Display(
 
 display_drv = FBDisplay(fb)
 
+# 50H-800480-IPS-CT: Goodix GT911 on J84 FFC I2C (pins 11–12) + EVK touch GPIOs
+i2c = I2C(0, freq=400_000)
+touch_drv = GT911(
+    i2c,
+    reset_pin="GPIO_AD_01",
+    irq_pin="GPIO_AD_00",
+    width=800,
+    height=480,
+    touch_points=5,
+)
+
+
+def touch_read_func():
+    n, points = touch_drv.read_points()
+    if n:
+        return points[0][0], points[0][1]
+    return None
+
+
+touch_rotation_table = (0, 0, 0, 0)
+
 broker = eventsys.Broker()
+
+touch_dev = broker.create(
+    type=eventsys.TOUCH,
+    read=touch_read_func,
+    data=display_drv,
+    data2=touch_rotation_table,
+)
+
 broker.register_quit_cleanup(display_drv)
