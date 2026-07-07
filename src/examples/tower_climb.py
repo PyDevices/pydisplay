@@ -11,6 +11,7 @@ Layout scales from the 320×480 reference to taller panels (480×800, 720×720, 
 Built from the four core pydisplay libraries only.
 """
 
+import os
 from collections import namedtuple
 
 from board_config import broker, display_drv
@@ -130,7 +131,7 @@ def _build_level():
     trunk = L.field_w // 2
     y = L.y(REF_H - 80)
     top = L.y(120)
-    step = L.y(52)
+    step = L.y(46)
     n = 0
     while y > top:
         side = -1 if n % 2 else 1
@@ -145,8 +146,8 @@ def _build_level():
         plats.append(Rect(bx, y, bw, TILE, kind))
         if n % 3 == 1:
             gems.append(Point(bx + bw // 2 - 6, y - 18))
-        if n % 6 == 0 and n > 0:
-            hazards.append([bx + bw // 2, y - L.y(200), 10, 0.0, L.y(2.2)])
+        if n % 10 == 0 and n > 5:
+            hazards.append([bx + bw // 2, y - L.y(200), 10, 0.0, L.y(1.4)])
         y -= step + (n % 4) * L.u(6)
         n += 1
     plats.append(Rect(L.ox + L.field_w // 2 - L.x(40), L.y(REF_H - 48), L.x(80), TILE, T_BARK))
@@ -157,6 +158,7 @@ def _build_level():
 PLATFORMS, GEMS, HAZARDS, GOAL_Y = _build_level()
 
 _trace = open_trace()
+_bot = os.environ.get("TOWER_CLIMB_BOT", "").strip().lower() in ("1", "true", "yes")
 
 # --- Background draw ---------------------------------------------------------------------------
 
@@ -185,7 +187,7 @@ def _draw_bg(camera_y):
 # --- Physics -----------------------------------------------------------------------------------
 
 GRAVITY = 0.55
-JUMP_V = -9.0
+JUMP_V = -10.0
 MAX_FALL = 11.0
 MOVE_A = 0.7
 MAX_RUN = 4.5
@@ -218,7 +220,19 @@ def _overlap(a, b):
     return a.x < b.x + b.w and a.x + a.w > b.x and a.y < b.y + b.h and a.y + a.h > b.y
 
 
+def _platform_supports_feet(p, plat, margin=6):
+    """True when the player is standing on ``plat`` (not jumping past it)."""
+    feet = p.y + SPR_H - 4
+    if not p.on_ground and p.vy < 0:
+        return False
+    if p.vy < 0 and feet > plat.y + margin:
+        return False
+    return plat.y - margin <= feet <= plat.y + margin
+
+
 def _resolve_x(p, plat, dx):
+    if not _platform_supports_feet(p, plat):
+        return None
     box = _hitbox(p)
     if not _overlap(box, plat):
         return None
@@ -247,32 +261,63 @@ def _nearby_platforms(hitbox, player_y, plats, radius=96):
 
 
 def _land(p, prev_y, plats):
-    p.on_ground = False
-    if p.vy < 0:
-        return None
     feet = int(p.y + SPR_H - 4)
     prev_feet = int(prev_y + SPR_H - 4)
     box = _hitbox(p)
     best = None
     best_plat = None
-    for plat in plats:
-        if plat.kind == T_GEM:
-            continue
-        if box.x + box.w <= plat.x or box.x >= plat.x + plat.w:
-            continue
-        top = plat.y
-        if prev_feet <= top <= feet and (best is None or top > best):
-            best = top
-            best_plat = plat
-    if best is not None:
-        p.y = best - SPR_H
-        p.vy = 0
-        p.on_ground = True
-        if _trace is not None:
-            result = "hurt" if best_plat.kind == T_SPIKE else "land"
-            _trace.log_land(p, prev_y, best_plat, result, feet)
-        if best_plat.kind == T_SPIKE:
-            return "hurt"
+
+    if p.vy < 0:
+        # Jumping up onto a platform from below.
+        for plat in plats:
+            if plat.kind == T_GEM:
+                continue
+            if box.x + box.w <= plat.x or box.x >= plat.x + plat.w:
+                continue
+            top = plat.y
+            if prev_feet >= top >= feet and (best is None or top < best):
+                best = top
+                best_plat = plat
+        if best is not None:
+            new_y = best - SPR_H
+            if not (p.on_ground and p.vy == 0 and abs(p.y - new_y) < 1):
+                p.y = new_y
+                p.vy = 0
+                p.on_ground = True
+                if _trace is not None:
+                    _trace.log_land(p, prev_y, best_plat, "land_up", feet)
+                if best_plat.kind == T_SPIKE:
+                    return "hurt"
+        else:
+            p.on_ground = False
+        return None
+
+    if p.vy > 0 or not p.on_ground:
+        tol = max(4, int(p.vy) + 2)
+        for plat in plats:
+            if plat.kind == T_GEM:
+                continue
+            if box.x + box.w <= plat.x or box.x >= plat.x + plat.w:
+                continue
+            top = plat.y
+            crossed = prev_feet <= top <= feet
+            snap = prev_feet <= top + tol and feet >= top - 2
+            if (crossed or snap) and (best is None or top > best):
+                best = top
+                best_plat = plat
+        if best is not None:
+            new_y = best - SPR_H
+            if not (p.on_ground and p.vy == 0 and abs(p.y - new_y) < 1):
+                p.y = new_y
+                p.vy = 0
+                p.on_ground = True
+                if _trace is not None:
+                    result = "hurt" if best_plat.kind == T_SPIKE else "land"
+                    _trace.log_land(p, prev_y, best_plat, result, feet)
+                if best_plat.kind == T_SPIKE:
+                    return "hurt"
+        elif p.vy > 0:
+            p.on_ground = False
     return None
 
 
@@ -297,6 +342,86 @@ def _snap_to_ground(p, plats, reason="spawn"):
     p.jump_buf = 0
     if _trace is not None:
         _trace.log_snap(reason, p, plat)
+
+
+_bot_stuck = 0
+_bot_last_x = None
+
+
+def _bot_tick(player, plats, hazards):
+    """Simple climb AI for playtesting (``TOWER_CLIMB_BOT=1``)."""
+    global _bot_stuck, _bot_last_x
+    _keys["left"] = _keys["right"] = _keys["up"] = _keys["down"] = False
+    _keys["smash"] = False
+    px = player.x + SPR_W // 2
+
+    for hz in hazards:
+        hx, hy = hz[0], hz[1]
+        if abs(hx - px) < L.u(40) and abs(hy - (player.y + SPR_H // 2)) < L.u(56):
+            _keys["left" if px > hx else "right"] = True
+            if player.on_ground or player.coyote > 0:
+                _keys["up"] = True
+            return
+
+    if _bot_last_x is not None and abs(player.x - _bot_last_x) < 0.5:
+        _bot_stuck += 1
+    else:
+        _bot_stuck = 0
+    _bot_last_x = player.x
+
+    if player.on_ground:
+        box = _hitbox(player)
+        for plat in plats:
+            if plat.kind == T_ICE and _overlap(
+                box, Rect(plat.x, plat.y - 4, plat.w, plat.h + 8, T_ICE)
+            ):
+                _keys["smash"] = True
+                return
+        support = [
+            plat for plat in plats if plat.kind != T_GEM and _platform_supports_feet(player, plat)
+        ]
+        if support:
+            plat = max(support, key=lambda p: p.y)
+            edge = L.u(10)
+            if px < plat.x + edge or px > plat.x + plat.w - edge:
+                _keys["up"] = True
+
+    feet = player.y + SPR_H - 4
+    above = [
+        plat
+        for plat in plats
+        if plat.kind not in (T_GEM, T_SPIKE)
+        and plat.y < feet - L.u(8)
+        and plat.y > GOAL_Y - L.u(30)
+    ]
+    if player.on_ground:
+        support = [
+            plat for plat in plats if plat.kind != T_GEM and _platform_supports_feet(player, plat)
+        ]
+        if support:
+            floor_y = max(plat.y for plat in support)
+            above = [plat for plat in above if plat.y < floor_y - L.u(4)]
+    if not above:
+        if player.y > GOAL_Y and (player.on_ground or player.coyote > 0):
+            _keys["up"] = True
+        return
+
+    if feet < L.y(260):
+        target = min(above, key=lambda plat: plat.y)
+    else:
+        target = max(above, key=lambda plat: plat.y)
+    tcx = target.x + target.w // 2
+    aligned = abs(px - tcx) <= L.u(12)
+
+    if aligned and (player.on_ground or player.coyote > 0):
+        _keys["up"] = True
+    elif _bot_stuck > 10 and (player.on_ground or player.coyote > 0):
+        _keys["up"] = True
+        _keys["right" if px < tcx else "left"] = True
+    elif abs(px - tcx) > L.u(8):
+        _keys["right" if px < tcx else "left"] = True
+    if player.on_ground and not _keys["up"] and feet < target.y + L.u(4):
+        _keys["up"] = True
 
 
 # --- Input -------------------------------------------------------------------------------------
@@ -467,6 +592,8 @@ def _show_splash():
 
 
 def _life_lost_pause(player):
+    if _bot:
+        return True
     lines = (
         "LIFE LOST!",
         "",
@@ -521,6 +648,8 @@ def _run_game(show_splash=True):
     if _trace is not None:
         _trace.log_init(L, SPR_W, SPR_H, PLATFORMS, GEMS, HAZARDS, GOAL_Y)
         show_splash = False
+    if _bot:
+        show_splash = False
     try:
         if show_splash and not _skip_ui():
             if not _show_splash():
@@ -545,6 +674,9 @@ def _run_game(show_splash=True):
 
                 for ev in broker.poll():
                     _handle_event(ev)
+
+                if _bot:
+                    _bot_tick(player, plats, hazards)
 
                 frame += 1
 
@@ -639,10 +771,10 @@ def _run_game(show_splash=True):
                 for i in reversed(got):
                     gems.pop(i)
 
-                # Hazards (Crazy Climber drops)
-                if frame % 90 == 0 and player.y < L.y(REF_H - 100):
+                # Hazards (Crazy Climber drops) — only after leaving the trunk base.
+                if frame % 240 == 0 and player.y < L.y(REF_H - 220):
                     hx = L.ox + randint(20, max(21, L.field_w - 20))
-                    hazards.append([hx, camera - 20, 10, 0.0, L.y(2.5)])
+                    hazards.append([hx, camera - 20, 10, 0.0, L.y(1.6)])
                 life_lost = False
                 for hz in hazards:
                     hz[1] += hz[4]
@@ -661,9 +793,18 @@ def _run_game(show_splash=True):
                     continue
                 hazards[:] = [h for h in hazards if h[1] < camera + L.h + L.u(40)]
 
-                if player.y <= GOAL_Y:
-                    won = True
-                    player.score += 500
+                if not won:
+                    if player.y <= GOAL_Y:
+                        won = True
+                        player.score += 500
+                    else:
+                        for plat in plats:
+                            if plat.kind == T_LEAF and _platform_supports_feet(player, plat):
+                                won = True
+                                player.score += 500
+                                break
+                    if won and _trace is not None:
+                        _trace.event("win", score=player.score, y=round(player.y, 2))
 
                 if _trace is not None:
                     _trace.frame += 1
@@ -743,6 +884,8 @@ def _run_game(show_splash=True):
                 _draw_bg(camera)
                 _draw_text_panel(lines)
 
+            if _bot:
+                break
             if not _wait_for_input(draw_end):
                 break
             # Replay: skip splash on next round
