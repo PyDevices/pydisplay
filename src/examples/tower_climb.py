@@ -203,6 +203,7 @@ MOVE_A = 0.7
 MAX_RUN = 4.5
 FRICTION = 0.82
 ANCHOR_Y = L.y(300)
+CAM_MIN = L.y(120) - ANCHOR_Y  # stop scrolling above the tower crown
 
 
 class Player:
@@ -694,9 +695,7 @@ def _run_game(show_splash=True):
                 # Camera follows upward climbs (software scroll).
                 target_cam = player.y - ANCHOR_Y
                 if target_cam < camera:
-                    camera = target_cam
-                if camera < 0:
-                    camera = 0
+                    camera = max(target_cam, CAM_MIN)
 
                 # Input
                 if _keys["left"]:
