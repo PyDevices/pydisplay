@@ -107,9 +107,11 @@ BG = BMP565("examples/assets/tower_bg.bmp", streamed=True)
 SPR_W = CLIMBER.width // 4
 SPR_H = CLIMBER.height // 3
 SPR_KEY = CLIMBER[0]
+TILE_KEY = SPR_KEY
 TILE = 16
 
 T_BARK, T_BRANCH_L, T_BRANCH_R, T_ICE, T_LEAF, T_GEM, T_SPIKE, T_CLOUD, T_CROWN = range(9)
+_TRANSPARENT_TILES = frozenset({T_LEAF, T_GEM, T_SPIKE, T_CLOUD})
 
 BASE_Y_REF = REF_H - 80
 CLIMB_REF = 560  # reference pixels; twice the original ~280 px climb
@@ -130,7 +132,11 @@ def _blit_tile(idx, dx, dy, repeat=1):
     sx, sy = _tile_rect(idx)
     buf = TILES[sx : sx + TILE, sy : sy + TILE]
     for i in range(repeat):
-        display_drv.blit_rect(buf, dx + i * TILE, dy, TILE, TILE)
+        x = dx + i * TILE
+        if idx in _TRANSPARENT_TILES:
+            display_drv.blit_transparent(buf, x, dy, TILE, TILE, TILE_KEY)
+        else:
+            display_drv.blit_rect(buf, x, dy, TILE, TILE)
 
 
 def _draw_sprite(pose, frame, dx, dy):
@@ -147,16 +153,20 @@ def _build_tree_crown(plats, decos, trunk, crown_y):
     plats.append(Rect(cx - L.x(18), crown_y - L.y(18), L.x(40), TILE, T_LEAF))
     plats.append(Rect(cx + cw - L.x(22), crown_y - L.y(18), L.x(40), TILE, T_LEAF))
     mid = cx + cw // 2
+    # Sparse cloud puffs — spread wide so the canopy is not a solid block.
     for dx, dy in (
-        (-L.x(40), -L.y(28)),
-        (-L.x(12), -L.y(38)),
-        (L.x(16), -L.y(34)),
-        (L.x(42), -L.y(26)),
-        (-L.x(28), -L.y(50)),
-        (L.x(24), -L.y(48)),
+        (-L.x(88), -L.y(34)),
+        (-L.x(34), -L.y(62)),
+        (L.x(78), -L.y(48)),
+        (-L.x(110), -L.y(18)),
+        (L.x(104), -L.y(24)),
+        (-L.x(58), -L.y(78)),
+        (L.x(62), -L.y(84)),
+        (-L.x(18), -L.y(46)),
+        (L.x(24), -L.y(70)),
     ):
         decos.append((mid + dx, crown_y + dy, T_CLOUD))
-    for dx, dy in ((-L.x(52), -L.y(14)), (L.x(48), -L.y(16))):
+    for dx, dy in ((-L.x(62), -L.y(16)), (L.x(58), -L.y(20))):
         decos.append((mid + dx, crown_y + dy, T_LEAF))
 
 
@@ -263,15 +273,37 @@ def _draw_trunk(cam):
 
 
 def _draw_crown(plat, sy):
-    """Summit landing: golden rim, leaf tiles, and cloud puffs."""
+    """Summit landing: golden rim, leaf tiles, and a single cloud puff."""
     reps = max(1, plat.w // TILE)
     display_drv.fill_rect(plat.x, sy + TILE - L.u(4), plat.w, L.u(4), CROWN_GOLD)
     for i in range(reps):
         _blit_tile(T_LEAF, plat.x + i * TILE, sy, 1)
     mid = plat.x + plat.w // 2
-    _blit_tile(T_CLOUD, mid - TILE, sy - TILE - L.u(2), 1)
-    _blit_tile(T_CLOUD, mid - TILE // 2, sy - TILE - L.u(10), 1)
-    _blit_tile(T_CLOUD, mid + TILE // 2, sy - TILE - L.u(6), 1)
+    _blit_tile(T_CLOUD, mid - TILE // 2, sy - TILE - L.u(8), 1)
+
+
+def _draw_sun(sx, sy):
+    """Morning sun with rays (screen coordinates)."""
+    if sy < L.u(8) or sy > L.h - L.u(24):
+        return
+    ray = _c(255, 196, 48)
+    core = _c(255, 236, 120)
+    halo = _c(255, 248, 180)
+    r = L.u(9)
+    cx, cy = sx, sy
+    display_drv.fill_rect(cx - L.u(2), cy - L.u(16), L.u(4), L.u(32), ray)
+    display_drv.fill_rect(cx - L.u(16), cy - L.u(2), L.u(32), L.u(4), ray)
+    display_drv.fill_rect(cx - L.u(11), cy - L.u(11), L.u(4), L.u(14), ray)
+    display_drv.fill_rect(cx + L.u(8), cy - L.u(11), L.u(4), L.u(14), ray)
+    display_drv.fill_rect(cx - L.u(11), cy + L.u(4), L.u(4), L.u(14), ray)
+    display_drv.fill_rect(cx + L.u(8), cy + L.u(4), L.u(4), L.u(14), ray)
+    for dy in range(-r - L.u(4), r + L.u(5)):
+        for dx in range(-r - L.u(4), r + L.u(5)):
+            d2 = dx * dx + dy * dy
+            if d2 <= (r + L.u(4)) * (r + L.u(4)):
+                display_drv.pixel(cx + dx, cy + dy, halo)
+            if d2 <= r * r:
+                display_drv.pixel(cx + dx, cy + dy, core)
 
 
 def _draw_summit_decos(cam):
@@ -279,11 +311,7 @@ def _draw_summit_decos(cam):
         sy = int(dy - cam)
         if -TILE <= sy < L.h + TILE:
             _blit_tile(kind, dx, sy, 1)
-    sx = L.ox + L.field_w - L.u(28)
-    sy = int(CROWN_Y - cam) - L.y(56)
-    if 0 <= sy < L.h - L.u(20):
-        display_drv.fill_rect(sx, sy, L.u(18), L.u(18), CROWN_GOLD)
-        display_drv.fill_rect(sx + L.u(4), sy - L.u(4), L.u(10), L.u(6), CROWN_GOLD)
+    _draw_sun(L.ox + L.field_w - L.u(40), int(CROWN_Y - cam) - L.y(72))
 
 
 # --- Physics -----------------------------------------------------------------------------------
@@ -1019,6 +1047,8 @@ def _run_game(show_splash=True):
                     if -TILE <= sy < L.h:
                         _draw_crown(plat, sy)
                 _draw_summit_decos(int(camera))
+                if won:
+                    _draw_sprite(player.pose, frame // 5, int(player.x), int(player.y - int(camera)))
                 _draw_text_panel(lines, at_top=won)
 
             if _bot and _record:

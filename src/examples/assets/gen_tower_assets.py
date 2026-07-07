@@ -24,6 +24,9 @@ def rgb565(r, g, b):
     return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)
 
 
+TRANSPARENT = rgb565(255, 0, 255)
+
+
 def rgb_to565(rgb):
     return rgb565(rgb[0], rgb[1], rgb[2])
 
@@ -322,7 +325,16 @@ def _ice_tile(data, w, ox, oy, tw):
     put_rgb(data, w, ox + 4, oy + 3, (255, 255, 255))
 
 
+def _clear_tile(data, w, ox, oy, tw, fill=0):
+    fill_rect(data, w, ox, oy, tw, tw, fill)
+
+
+def _clear_tile_transparent(data, w, ox, oy, tw):
+    _clear_tile(data, w, ox, oy, tw, TRANSPARENT)
+
+
 def _leaf_tile(data, w, ox, oy, tw):
+    _clear_tile_transparent(data, w, ox, oy, tw)
     branch = (78, 48, 24)
     for i in range(tw):
         line_rgb(data, w, ox + i, oy + 11, ox + i, oy + 13, branch)
@@ -340,6 +352,7 @@ def _leaf_tile(data, w, ox, oy, tw):
 
 
 def _gem_tile(data, w, ox, oy, tw):
+    _clear_tile_transparent(data, w, ox, oy, tw)
     core = (228, 28, 148)
     hi = (255, 188, 236)
     shaft = (255, 244, 180)
@@ -360,6 +373,7 @@ def _gem_tile(data, w, ox, oy, tw):
 
 
 def _spike_tile(data, w, ox, oy, tw):
+    _clear_tile_transparent(data, w, ox, oy, tw)
     metal = (168, 172, 184)
     rust = (156, 84, 36)
     shadow = (68, 70, 78)
@@ -372,6 +386,7 @@ def _spike_tile(data, w, ox, oy, tw):
 
 
 def _cloud_tile(data, w, ox, oy, tw):
+    _clear_tile_transparent(data, w, ox, oy, tw)
     base = (228, 236, 248)
     hi = (255, 255, 255)
     sh = (184, 200, 224)
