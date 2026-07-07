@@ -45,7 +45,9 @@ else:
             "CLR": 0x18,
             "gpios": {
                 "rp2040": (
-                    # The SIO registers start at a base address of 0xd0000000 (defined as SIO_BASE in SDK).
+                    0xD0000000,
+                ),
+                "rp2350": (
                     0xD0000000,
                 ),
             },

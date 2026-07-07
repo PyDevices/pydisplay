@@ -48,6 +48,8 @@ python3 scripts/vendor_circuitpython_drivers.py --all
 
 ## pydevices priority
 
+See also [TFT_eSPI parity](tft-espi-parity.md) for Arduino bus/driver mapping.
+
 1. `i2cbus` — OLED FeatherWings, QT Py OLED
 2. `rgbframebuffer` — Qualia / RGB parallel (RGB666)
 3. `rgbmatrix` — MatrixPortal HUB75

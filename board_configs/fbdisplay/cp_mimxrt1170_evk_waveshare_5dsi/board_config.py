@@ -14,25 +14,18 @@ import busio
 import digitalio
 import displayio
 import gt911
+import mipidsi
 
 from displaysys.fbdisplay import FBDisplay
 import eventsys
 
 displayio.release_displays()
 
-try:
-    from mipidsi import Bus, Display
-except ImportError as exc:
-    raise NotImplementedError(
-        "MIPI DSI requires displayif mipidsi cmod (mimxrt1176 port)"
-    ) from exc
-
-# Empty init: displayif runs TC358762 bridge setup (RPi / Waveshare 50H-800480-IPS).
+# CircuitPython native mipidsi (not displayif).
 PANEL_INIT_SEQUENCE = b""
+bus = mipidsi.Bus(frequency=1_000_000_000, num_lanes=2)
 
-bus = Bus(frequency=1_000_000_000, num_lanes=2)
-
-fb = Display(
+fb = mipidsi.Display(
     bus,
     init_sequence=PANEL_INIT_SEQUENCE,
     width=800,
