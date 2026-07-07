@@ -237,6 +237,14 @@ kind = "loop"
 quit = "poll"
 deps = ["core"]
 
+[examples.tower_climb]
+import = "tower_climb.tower_climb"
+script = "examples/tower_climb/tower_climb.py"
+kind = "loop"
+quit = "poll"
+timeout_s = 15
+deps = ["core"]
+
 [examples.console_advanced_demo]
 import = "console_advanced_demo"
 script = "examples/console_advanced_demo.py"

@@ -10,10 +10,12 @@ https://github.com/PyDevices/pydisplay/tree/main/board_configs
 # True: multimer.AsyncTimer — PyScript and asyncio-native apps
 TIMER_ASYNC = False
 
-width = 640
+# Default portrait panel (320×480). Games scale layout for taller/wider panels
+# (e.g. 480×800, 720×720) via display_drv.width / height.
+width = 320
 height = 480
 rotation = 0
-scale = 1.0
+scale = 2
 
 touch_dev = None
 
