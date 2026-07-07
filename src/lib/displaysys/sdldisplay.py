@@ -377,7 +377,7 @@ class SDLDisplay(DisplayDriver):
         retcheck(usdl2.SDL_SetTextureBlendMode(self._buffer, usdl2.SDL_BLENDMODE_NONE))
 
         _displays.append(self)
-        super().__init__(auto_refresh=implementation.name == "cpython")
+        super().__init__()
 
     ############### Required API Methods ################
 

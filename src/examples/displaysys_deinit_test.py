@@ -16,15 +16,13 @@ import lib.path  # noqa: F401
 from board_config import display_drv
 
 cls = display_drv.__class__.__name__
-had_timer = display_drv._timer is not None
 
 display_drv.fill(0xF800)
 display_drv.show()
 
 display_drv.deinit()
 assert display_drv._deinitialized, "_deinitialized not set after deinit()"
-assert display_drv._timer is None, "_timer not cleared after deinit()"
 
 display_drv.deinit()  # idempotent — must not raise or re-run cleanup
 
-print(f"DEINIT_OK class={cls} had_timer={had_timer}")
+print(f"DEINIT_OK class={cls}")

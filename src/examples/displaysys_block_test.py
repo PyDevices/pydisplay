@@ -71,7 +71,7 @@ def main():
                 block_size,
                 block_size,
             )
-            if display_drv._timer is None:
+            if getattr(broker, "_timer", None) is None:
                 display_drv.show()
             count += 1
             if count % 2000 == 0:

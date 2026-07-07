@@ -32,7 +32,7 @@ class FBDisplay(DisplayDriver):
         self._rotation = 0
         self.color_depth = 16
 
-        super().__init__(auto_refresh=False)
+        super().__init__()
 
     ############### Required API Methods ################
 

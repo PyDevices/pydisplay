@@ -169,7 +169,7 @@ class PGDisplay(DisplayDriver):
         self._buffer = pg.Surface(size=(self._width, self._height), depth=self.color_depth)
         self._buffer.fill((0, 0, 0))
 
-        super().__init__(auto_refresh=True)
+        super().__init__()
 
     ############### Required API Methods ################
 

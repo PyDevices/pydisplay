@@ -199,14 +199,12 @@ class DisplayDriver:
     use a concrete driver from ``board_config.display`` rather than instantiating this
     class directly.
 
-    Args:
-        auto_refresh: If ``True`` or an integer period in ms, starts a ``multimer`` timer
-            that calls ``show()`` automatically.
-        async_: When ``auto_refresh`` is enabled, use ``multimer.AsyncTimer`` if
-            ``True``, otherwise sync ``multimer.Timer``. Defaults to ``False``.
+    The driver only knows how to ``show()`` and ``deinit()``; it never owns a
+    refresh timer. Periodic auto-refresh is driven by the broker's shared timer,
+    wired up in ``board_config`` via ``broker.on_tick(display_drv.show, ...)``.
     """
 
-    def __init__(self, auto_refresh=False, *, async_=False):
+    def __init__(self):
         if not hasattr(self, "_quiet"):
             self._quiet = False
         if not self._quiet:
@@ -218,26 +216,8 @@ class DisplayDriver:
         self._vssa = False  # False means no vertical scroll
         self._auto_byteswap = self.requires_byteswap
         self._touch_device = None
-        self._timer = None
         self.init()
         gc.collect()
-        if auto_refresh:
-            period = (
-                _DEFAULT_AUTO_REFRESH_PERIOD if isinstance(auto_refresh, bool) else auto_refresh
-            )
-            try:
-                from multimer import AsyncTimer, Timer
-
-                TimerClass = AsyncTimer if async_ else Timer
-                if TimerClass is not None:
-                    self._timer = TimerClass(-1)
-                    self._timer.init(
-                        mode=TimerClass.PERIODIC,
-                        period=period,
-                        callback=self._auto_refresh,
-                    )
-            except ImportError:
-                raise ImportError("multimer is required for auto_refresh") from None
         self._deinitialized = False
         if not self._quiet:
             print(f"{self.__class__.__name__}: initialized.")
@@ -245,9 +225,6 @@ class DisplayDriver:
 
     def __del__(self):
         self.deinit()
-
-    def _auto_refresh(self, timer=None):
-        self.show(timer)
 
     ############### Universal API Methods, not usually overridden ################
 
@@ -663,15 +640,15 @@ class DisplayDriver:
 
     def deinit(self) -> None:
         """
-        Stop the auto-refresh timer (so it can't fire after resources are
-        released) and then run subclass cleanup. Idempotent.
+        Run subclass cleanup. Idempotent.
+
+        The broker owns the shared refresh timer, so there is no display-owned
+        timer to stop here; ``board_config`` stops the timer on quit via
+        ``broker.stop_timer``.
         """
         if getattr(self, "_deinitialized", False):
             return
         self._deinitialized = True
-        if getattr(self, "_timer", None) is not None:
-            self._timer.deinit()
-            self._timer = None
         self._deinit()
 
     def _deinit(self) -> None:

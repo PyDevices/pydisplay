@@ -2,10 +2,11 @@
 """
 lv_test_timer_async.py
 
-LVGL timer test — multimer.AsyncTimer via board_config.TIMER_ASYNC and asyncio.
+LVGL timer test — async mode.
 
-Import display_driver inside the async main coroutine so the asyncio
-event loop is already running when lv_utils starts aio timers.
+Runs an asyncio loop (asyncio from multimer); the board's shared broker timer
+drives LVGL via lv_utils. Import display_driver inside the async main so the
+event loop is already running when lv_utils subscribes its tick to the broker.
 """
 
 # Override board_config.TIMER_ASYNC for this timer test only. Real apps normally
@@ -14,11 +15,7 @@ import board_config
 
 board_config.TIMER_ASYNC = True
 
-from multimer._async import _require_asyncio
-
-asyncio = _require_asyncio()
-
-from multimer import run
+from multimer import asyncio
 
 
 async def main():
@@ -35,4 +32,4 @@ async def main():
         await asyncio.sleep(0)
 
 
-run(main)
+asyncio.run(main())

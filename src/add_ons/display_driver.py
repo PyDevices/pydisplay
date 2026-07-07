@@ -32,34 +32,45 @@ def main():
     if not lv.is_initialized():
         lv.init()
     if not lv_utils.event_loop.is_running():
-        # Async apps use multimer.AsyncTimer for LVGL ticks; present the frame
-        # from the aio refresh loop instead.
-        refresh_cb = None
+        # The broker owns the shared timer; lv_utils subscribes its LVGL tick to
+        # it (see add_ons/lv_utils.py). LVGL presents each frame from inside
+        # task_handler via refresh_cb, so take over the board's plain display
+        # refresh to avoid the broker timer also calling show() concurrently
+        # (which, with the signal-based sync backend, races with LVGL rendering).
         use_async = TIMER_ASYNC
-        if use_async:
-            if getattr(display_drv, "_timer", None) is not None:
-                display_drv._timer.deinit()
-                display_drv._timer = None
-            refresh_cb = display_drv.show
-        elif getattr(display_drv, "_timer", None) is None:
-            # Present each LVGL frame when the display has no auto-refresh timer.
-            refresh_cb = display_drv.show
-        lv_utils.event_loop(asynchronous=use_async, refresh_cb=refresh_cb)
+        sub = getattr(broker, "display_refresh", None)
+        if sub is not None:
+            sub.deinit()
+            broker.display_refresh = None
+        loop_inst = lv_utils.event_loop(asynchronous=use_async, refresh_cb=display_drv.show)
+    else:
+        loop_inst = lv_utils.event_loop.current_instance()
 
-    if lv.group_get_default() is None:
-        lv.group_create().set_default()
+    # The timer may already be dispatching LVGL task_handler; pause it while we
+    # build the LVGL display and buffers so timer-driven rendering never runs
+    # concurrently with this construction (LVGL is not re-entrant).
+    if loop_inst is not None:
+        loop_inst.disable()
+    try:
+        if lv.group_get_default() is None:
+            lv.group_create().set_default()
 
-    _driver_ref = DisplayDriver(
-        display_drv,
-        broker.devices,
-    )
+        _driver_ref = DisplayDriver(
+            display_drv,
+            broker.devices,
+        )
+    finally:
+        if loop_inst is not None:
+            loop_inst.enable()
 
     def _lvgl_shutdown_before_quit():
         inst = lv_utils.event_loop.current_instance()
         if inst is not None:
-            inst.shutdown_for_quit()
+            inst.deinit()
 
-    broker.register_quit_cleanup(display_drv, before=_lvgl_shutdown_before_quit)
+    broker.register_quit_cleanup(
+        display_drv, before=_lvgl_shutdown_before_quit, after=broker.stop_timer
+    )
 
 
 class _TouchState:
