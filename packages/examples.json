@@ -197,8 +197,8 @@
       "github:PyDevices/pydisplay/src/examples/png_test.py"
     ],
     [
-      "platformer.py",
-      "github:PyDevices/pydisplay/src/examples/platformer.py"
+      "tower_climb.py",
+      "github:PyDevices/pydisplay/src/examples/tower_climb.py"
     ],
     [
       "pydisplay_demo.py",
