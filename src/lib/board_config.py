@@ -15,7 +15,7 @@ TIMER_ASYNC = False
 width = 320
 height = 480
 rotation = 0
-scale = 1.5
+scale = 2
 
 touch_dev = None
 
