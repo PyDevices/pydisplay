@@ -458,6 +458,43 @@ shared tick.
   than monkey-patching a module global — an improvement, but it must be done
   in the same pass.
 
+### Quit signaling: replace `poll_quit_discarding_others` with a sticky flag
+
+`poll_quit_discarding_others(broker)` was written for one narrow case:
+output-only demos (e.g. `displaysys_block_test`) that never read input but
+must still close when the SDL/pygame window's X is clicked — the deliberately
+awkward name was the warning label. It has since spread to ~26 example files,
+including places it was never meant for, and its semantics have drifted:
+
+- Its "discarding" is now only half-true. `Device.poll()` dispatches every
+  event to `broker.on(...)`/`on_device(...)` **subscribers** before the
+  helper drops the returned list — `testris` gets its joystick input through
+  the helper purely via that loophole.
+- `tower_climb._wait_for_input` calls it *and* `broker.poll()` in the same
+  loop iteration — two drains per pass, so input consumed by the quit-check
+  call never reaches the input check (masked only because a tap emits
+  multiple events).
+- Its real job shrank. QUIT cleanup (release display, stop timer) already
+  runs automatically inside any poll via `broker._handle_quit()`; the helper
+  contributes only the loop-exit boolean.
+
+Replacement: `broker._handle_quit()` sets `self._quit_requested = True`;
+expose read-only **`broker.quit_requested`** (sticky — after QUIT, cleanup
+has run and the app should unwind; there is no meaningful un-quit).
+
+- Output-only demos: `while not broker.quit_requested: draw(); broker.poll()`
+  — the drain is visible at the call site instead of hidden in a helper.
+- Input-reading apps: one drain per iteration, `for ev in broker.poll(): ...`
+  plus `if broker.quit_requested: break` — fixes the double-poll pattern by
+  construction.
+- Checking a flag consumes nothing, so it is safe anywhere, any number of
+  times — the entire misuse class disappears. It also composes with the
+  future `autopoll()` push mode (a pushed QUIT sets the flag).
+
+`poll_quit_discarding_others` is then deleted (all callers are in-repo and
+updated in the same sweep as the `TIMER_ASYNC` removal;
+`tests/test_eventsys_quit.py` is rewritten against the flag).
+
 ### New idiom enabled by broker-owned timer: push-mode polling
 
 Since the broker owns a periodic timer, it *could* subscribe its own
@@ -503,10 +540,11 @@ safe (the asyncio event loop), then evaluate the sync/ISR paths.
 Context: since all board configs are regenerated in one pass, this is the
 cheapest moment ever to fix names. The working interpretation (**confirm**):
 the problem names are the eventsys vocabulary that appears almost only in
-`board_config.py` files — `QUEUE`, `create(type=...)`, `data=`/`data2=`,
-`touch_read_func`, `TIMER_ASYNC`, `register_quit_cleanup`, `events_dev` —
-i.e. wiring jargon that config authors must reproduce without it appearing
-anywhere else they'd learn it from.
+`board_config.py` files and example boilerplate — `QUEUE`,
+`create(type=...)`, `data=`/`data2=`, `touch_read_func`, `TIMER_ASYNC`,
+`register_quit_cleanup`, `events_dev`, `poll_quit_discarding_others` — i.e.
+wiring jargon that authors must reproduce without it appearing anywhere else
+they'd learn it from.
 
 | Current name | Where it appears | Proposal | Notes |
 |---|---|---|---|
@@ -517,7 +555,7 @@ anywhere else they'd learn it from.
 | `TIMER_ASYNC` | board_config export | deleted → `broker.timer_async` | see above |
 | `register_quit_cleanup` | all configs | deleted → implicit + `broker.before_quit` | see above |
 | `events_dev`, `touch_dev` (exports) | configs | dropped as module exports; available as `broker.touch_dev` / `broker.pump_dev` when needed | shrinks board_config's implicit API |
-| `poll_quit_discarding_others(broker)` | examples | `broker.quit_requested()` (method) | reads as a question, lives where it belongs |
+| `poll_quit_discarding_others(broker)` | ~26 examples | deleted → sticky `broker.quit_requested` property | see "Quit signaling" below |
 | `Broker` | everywhere | **DECISION** — keep, or rename (best candidate: `Hub`) | see below |
 | `display_drv` (export) | every example | **DECISION** — keep (recommended), or rename to `display` | renaming touches every example, not just configs |
 
@@ -723,13 +761,16 @@ these ride along cheaply and should be decided now:
    also `on_quit`; Broker stops subclassing Device; rotation tables into
    touch drivers.
 2. `eventsys`: constructor parameters + validation, `DEFAULT_REFRESH_MS`,
-   implicit quit + `before_quit`, `timer_async` property, claim API,
+   implicit quit + `before_quit`, `quit_requested` flag (delete
+   `poll_quit_discarding_others`), `timer_async` property, claim API,
    renames. Unit tests per the list above; fix the 14 stale test errors.
 3. `displaysys`: `needs_refresh` booleans (+ tests asserting the table).
 4. Convert `src/lib/board_config.py` and the four hosted configs
    (`sdldisplay`, `pgdisplay`, `jndisplay`, `psdisplay`); update examples
-   off `TIMER_ASYNC` and `tower_climb` onto the claim API; run the example
-   matrix headlessly and the LVGL timer kit to confirm takeover still works.
+   off `TIMER_ASYNC` and onto `broker.quit_requested`, and `tower_climb`
+   onto the claim API (also fixing its double-poll in `_wait_for_input`);
+   run the example matrix headlessly and the LVGL timer kit to confirm
+   takeover still works.
 5. Update generator scripts; regenerate MCU configs; spot-check one config
    per family (busdisplay spi/i80/i2c, fbdisplay, epaperdisplay,
    pixeldisplay) and the Wokwi configs.
