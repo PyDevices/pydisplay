@@ -639,24 +639,29 @@ def _skip_ui():
         return False
 
 
-def _draw_text_panel(lines, y0=None):
+def _draw_text_panel(lines, y0=None, at_top=False):
+    line_h = L.u(12)
+    pad = L.u(10)
+    panel_h = pad * 2 + line_h * len(lines)
+    if panel_h > _overlay_h:
+        panel_h = _overlay_h
     if y0 is None:
-        y0 = max(0, (L.h - _overlay_h) // 2)
+        y0 = (_hud_h + L.u(4)) if at_top else max(0, (L.h - panel_h) // 2)
     panel_c = _c(12, 16, 40)
     border_c = _c(255, 180, 40)
     title_c = _c(255, 220, 80)
     x0 = L.u(8)
     pw = L.w - L.u(16)
-    display_drv.fill_rect(x0, y0, pw, _overlay_h, panel_c)
-    rect(display_drv, x0, y0, pw, _overlay_h, border_c)
+    display_drv.fill_rect(x0, y0, pw, panel_h, panel_c)
+    rect(display_drv, x0, y0, pw, panel_h, border_c)
     _overlay_fb.fill(panel_c)
-    ty = 10
+    ty = pad
     for i, line in enumerate(lines):
         if line:
             color = title_c if i == 0 else HUD_INK
-            text8(_overlay_fb, line, 10, ty, color)
-        ty += 12
-    display_drv.blit_rect(_overlay_buf, 0, y0, L.w, _overlay_h)
+            text8(_overlay_fb, line, L.u(10), ty, color)
+        ty += line_h
+    display_drv.blit_rect(_overlay_buf, 0, y0, L.w, panel_h)
 
 
 def _is_start_input(ev):
@@ -1014,7 +1019,7 @@ def _run_game(show_splash=True):
                     if -TILE <= sy < L.h:
                         _draw_crown(plat, sy)
                 _draw_summit_decos(int(camera))
-                _draw_text_panel(lines)
+                _draw_text_panel(lines, at_top=won)
 
             if _bot and _record:
                 show_splash = False
