@@ -10,10 +10,11 @@ https://github.com/PyDevices/pydisplay/tree/main/board_configs
 # True: multimer.AsyncTimer — PyScript and asyncio-native apps
 TIMER_ASYNC = False
 
-width = 640
-height = 480
+# ILI9341 2.8" panel (portrait native resolution; apps may set rotation=90 for landscape)
+width = 240
+height = 320
 rotation = 0
-scale = 1.0
+scale = 2.0
 
 touch_dev = None
 
