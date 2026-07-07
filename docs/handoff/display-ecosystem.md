@@ -18,7 +18,8 @@ Handoff for picking up pydisplay display-ecosystem work in **desktop Cursor** af
 | `epaperdisplay.py` | E-paper: 1/2/4 bpp buffers, CP displayio push, MP `bus.send`, tri-color dual-RAM |
 | `pixeldisplay.py` | Addressable LED grids via pixel framebuffer helper |
 | `boarddisplay.py` | Optional CP `board.DISPLAY` adapter — **not** used in board configs (explicit wiring preferred) |
-| `rgbdisplay.py` | RGB565 parallel panels via `displayif` `present()` protocol (was `dpidisplay`) |
+
+Parallel RGB scanout uses **`fbdisplay.FBDisplay`** + displayif **`rgbframebuffer`** (not a separate `RGBDisplay` backend).
 
 ### Drivers (`drivers/`)
 
@@ -36,12 +37,12 @@ Handoff for picking up pydisplay display-ecosystem work in **desktop Cursor** af
 - Paired CP+MP configs for SPI/I80/I2C bus displays
 - Built-in Adafruit boards: PyPortal, Titano, FunHouse, PyBadge, HalloWing M4, PiTFT FeatherWing, etc.
 - **All vendored e-paper chips** have CP+MP pairs (via `scripts/generate_epaper_board_configs.py`)
-- `fbdisplay/t-rgb_480` — ST7701 + XL9535; MP pixel output blocked on displayif
+- `fbdisplay/t-rgb_480` — ST7701 + XL9535; MP uses `rgbframebuffer` + `FBDisplay`
 - **Removed:** `cp_clue_builtin` (explicit wiring teaches MP users)
 
 ### Packages (`packages/`)
 
-New MIP manifests: `i2cbus`, `epaper_chip`, `boarddisplay`, `pixeldisplay`, `epaperdisplay`, `rgbdisplay`, `tt21100`, `stmpe610`, `keypad_shift`
+New MIP manifests: `i2cbus`, `epaper_chip`, `boarddisplay`, `pixeldisplay`, `epaperdisplay`, `rgbframebuffer`, `tt21100`, `stmpe610`, `keypad_shift`
 
 ### Tooling
 
@@ -63,7 +64,7 @@ New MIP manifests: `i2cbus`, `epaper_chip`, `boarddisplay`, `pixeldisplay`, `epa
 
 ### Tests
 
-~302 tests at PR merge; new coverage for epaper, boarddisplay, rgbdisplay, st7701, tt21100, stmpe610, keypad_shift, i2cbus. Re-run `pytest tests/` after long gaps — main may have unrelated failures.
+~302 tests at PR merge; coverage for epaper, boarddisplay, fbdisplay/rgbframebuffer configs, st7701, tt21100, stmpe610, keypad_shift, i2cbus.
 
 ### Publish pipeline fixes (PRs #48, #49)
 
@@ -77,7 +78,7 @@ New MIP manifests: `i2cbus`, `epaper_chip`, `boarddisplay`, `pixeldisplay`, `epa
 | Topic | Decision |
 |-------|----------|
 | **BoardDisplay builtins** | No `cp_*_builtin` proliferation; keep `BoardDisplay` as optional CP-only helper |
-| **RGB naming** | `RGBDisplay` not `DPIDisplay`; no fictitious `lcd.DPI` import |
+| **RGB naming** | Parallel RGB uses `rgbframebuffer.RGBFrameBuffer` + `FBDisplay` — no `RGBDisplay` / `present()` path |
 | **displayif location** | Native RGB/HUB75/Qualia drivers live in **`PyDevices/displayif`** repo (see its `HANDOFF.md`) |
 | **board_config contract** | `display_drv`, `broker`, optional `touch_read_func` + `touch_rotation_table`, KEYPAD via `broker.create(type=eventsys.KEYPAD, ...)` |
 | **E-paper tri-color** | `color_depth=2` (0=white, 1=black, 2=accent) + `highlight_color=True` on chip driver |
@@ -91,7 +92,7 @@ These MP configs intentionally `raise NotImplementedError`:
 
 | Config | Blocker | CP reference |
 |--------|---------|--------------|
-| `fbdisplay/t-rgb_480` | `displayif.rgb565.RGB565Panel` | N/A (MP-only wiring) |
+| `fbdisplay/t-rgb_480` | `rgbframebuffer` (works if displayif cmod installed) | N/A (MP-focused) |
 | `fbdisplay/qualia_tl040hds20` | `rgbframebuffer` (works if cmod installed) | `cp_qualia_tl040hds20` |
 | `fbdisplay/matrixportal_s3_64x64` | `rgbmatrix` | `cp_matrixportal_s3_64x64` |
 | `fbdisplay/matrixportal_m4_64x32` | `rgbmatrix` | `cp_matrixportal_m4_64x32` |
@@ -107,8 +108,8 @@ These MP configs intentionally `raise NotImplementedError`:
 
 ### P0 — displayif (separate repo)
 
-1. `RGB565Panel` for ESP32-S3 — unblocks `t-rgb_480`
-2. `RGBFrameBuffer` RGB666 — unblocks Qualia MP config
+1. `rgbframebuffer` on target SoC — unblocks `t-rgb_480`, Qualia, RK043
+2. `rgbmatrix`, `mipidsi`, `picodvi` per board — see displayif `HANDOFF.md`
 
 See `docs/hardware/pydevices-roadmap.md` and displayif `HANDOFF.md`.
 
@@ -137,9 +138,9 @@ Generate displayif cmod sources from pydisplay `board_configs/` + `drivers/` (us
 ## Key files to read first
 
 ```
-src/lib/displaysys/rgbdisplay.py      # panel protocol
+src/lib/displaysys/fbdisplay.py       # framebuffer scanout adapter
 src/lib/displaysys/epaperdisplay.py   # tri-color / packed bpp
-board_configs/fbdisplay/t-rgb_480/    # displayif integration point
+board_configs/fbdisplay/t-rgb_480/    # displayif rgbframebuffer integration
 drivers/display/st7701.py             # T-RGB init sequence
 drivers/io_expander/xl9535.py
 scripts/publish_micropython_lib.sh    # release sync

@@ -37,7 +37,7 @@ MicroPython hardware gaps surfaced by pydisplay board configs. See also [display
 - [x] `EPaperDisplay.show()` — displayio push on CP; `bus.send` fallback on MP
 - [x] `board.DISPLAY` adapter (`displaysys.boarddisplay.BoardDisplay`) — optional CP helper; board configs use explicit wiring for teaching
 - [x] `epaperdisplay_chip` + `digitalio` shims for MP e-paper chip drivers
-- [x] MIP package manifests for `tt21100`, `stmpe610`, `keypad_shift`, `i2cbus`, `epaper_chip`, `rgbdisplay`
+- [x] MIP package manifests for `tt21100`, `stmpe610`, `keypad_shift`, `i2cbus`, `epaper_chip`, `rgbframebuffer`
 - [x] E-paper board configs for all vendored chip drivers
 - [x] `EPaperDisplay` packed 2/4bpp buffers and tri-color plane push
 - [x] ST7701 bit-bang init + LilyGO T-RGB `fbdisplay/t-rgb_480` config
