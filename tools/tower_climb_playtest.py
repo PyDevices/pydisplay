@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run tower_climb with the built-in bot until summit or timeout."""
+"""Run tower_climb with the built-in bot; watch the trace stream in real time."""
 
 import json
 import os
@@ -11,13 +11,14 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TRACE = os.environ.get(
     "TOWER_CLIMB_TRACE", os.path.join(ROOT, ".cursor", "tower-climb-playtest.jsonl")
 )
-TIMEOUT_S = int(os.environ.get("TOWER_CLIMB_PLAYTEST_TIMEOUT", "180"))
+HARD_TIMEOUT_S = int(os.environ.get("TOWER_CLIMB_PLAYTEST_TIMEOUT", "120"))
+STALL_SECONDS = float(os.environ.get("TOWER_CLIMB_PLAYTEST_STALL_S", "15"))
+STALL_IMPROVE_Y = float(os.environ.get("TOWER_CLIMB_PLAYTEST_STALL_DY", "4"))
 
 
 def analyze(path):
     won = False
-    max_alt = 0
-    min_y = 9999
+    min_y = 9999.0
     life_lost = 0
     frames = 0
     last = None
@@ -32,8 +33,6 @@ def analyze(path):
                 frames += 1
                 y = d["player"]["y"]
                 min_y = min(min_y, y)
-                alt = 400 - y  # rough; init has goal_y
-                max_alt = max(max_alt, int(400 - y))
                 last = d
     return {
         "won": won,
@@ -44,6 +43,76 @@ def analyze(path):
         "last_lives": last["player"]["lives"] if last else None,
         "last_score": last["player"]["score"] if last else None,
     }
+
+
+def watch_trace(path, proc):
+    """Tail the JSONL trace; report progress and detect stalls early."""
+    offset = 0
+    best_y = 9999.0
+    last_improve = time.time()
+    frames = 0
+    goal_y = None
+    started = time.time()
+    last_report = 0.0
+    last_line = None
+
+    while proc.poll() is None:
+        now = time.time()
+        if now - started > HARD_TIMEOUT_S:
+            return "timeout", {"best_y": best_y, "frames": frames, "last": last_line}
+
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                f.seek(offset)
+                chunk = f.read()
+                offset = f.tell()
+            for raw in chunk.splitlines():
+                if not raw.strip():
+                    continue
+                d = json.loads(raw)
+                last_line = d
+                kind = d.get("kind")
+                if kind == "init":
+                    goal_y = d.get("goal_y")
+                    print(f"init goal_y={goal_y} platforms={len(d.get('platforms', []))}")
+                elif kind == "win":
+                    print(
+                        f"win frame={frames} score={d.get('score')} y={d.get('y')}"
+                    )
+                    return "win", d
+                elif kind == "life_lost":
+                    print(
+                        f"life_lost reason={d.get('reason')} "
+                        f"lives={d.get('player', {}).get('lives')}"
+                    )
+                elif kind == "frame":
+                    frames += 1
+                    y = float(d["player"]["y"])
+                    if y < best_y - STALL_IMPROVE_Y:
+                        best_y = y
+                        last_improve = now
+                    if now - last_report >= 1.0:
+                        last_report = now
+                        pct = ""
+                        if goal_y is not None:
+                            span = max(1.0, 400.0 - float(goal_y))
+                            pct = f" climb={max(0, min(99, int((400.0 - y) * 100 / span))):2d}%"
+                        print(
+                            f"frame={d.get('frame', frames):4d} "
+                            f"y={y:6.1f} best_y={best_y:6.1f}{pct} "
+                            f"lives={d['player']['lives']} score={d['player']['score']:4d}"
+                        )
+
+        if frames > 0 and now - last_improve > STALL_SECONDS:
+            return "stall", {
+                "best_y": best_y,
+                "frames": frames,
+                "last": last_line,
+            }
+
+        time.sleep(0.12)
+
+    return "exit", {"best_y": best_y, "frames": frames, "last": last_line}
 
 
 def main():
@@ -64,30 +133,38 @@ def main():
         stderr=subprocess.STDOUT,
         text=True,
     )
-    deadline = time.time() + TIMEOUT_S
-    while proc.poll() is None and time.time() < deadline:
-        if os.path.exists(TRACE):
-            with open(TRACE, encoding="utf-8") as f:
-                if any('"kind":"win"' in line for line in f):
-                    proc.terminate()
-                    break
-        time.sleep(0.25)
+    status, detail = watch_trace(TRACE, proc)
     if proc.poll() is None:
         proc.terminate()
-        proc.wait(timeout=5)
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            proc.kill()
     out = proc.stdout.read() if proc.stdout else ""
     if not os.path.exists(TRACE):
         print("FAIL: no trace written", file=sys.stderr)
         if out:
             print(out[-2000:], file=sys.stderr)
         return 1
+
     result = analyze(TRACE)
     print(json.dumps(result, indent=2))
     print(f"trace: {TRACE}")
-    if not result["won"]:
-        print("FAIL: bot did not reach summit", file=sys.stderr)
+
+    if status == "stall":
+        print(
+            f"FAIL: stalled for {STALL_SECONDS:.0f}s without climbing "
+            f"{STALL_IMPROVE_Y:.0f}px (best_y={detail.get('best_y')})",
+            file=sys.stderr,
+        )
         return 1
-    print("OK: summit reached")
+    if status == "timeout":
+        print(f"FAIL: hard timeout after {HARD_TIMEOUT_S}s", file=sys.stderr)
+        return 1
+    if not result["won"]:
+        print("FAIL: bot did not reach tree top", file=sys.stderr)
+        return 1
+    print("OK: tree top reached")
     return 0
 
 

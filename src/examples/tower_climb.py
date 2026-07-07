@@ -3,7 +3,7 @@
 """
 tower_climb.py — 1980s-style vertical scrolling platformer.
 
-Climb a magical tree toward the clouds, inspired by Ice Climber, Nebulus,
+Climb a magical tree toward the canopy, inspired by Ice Climber, Nebulus,
 Magical Tree, and Crazy Climber.  Uses software vertical scrolling (no
 hardware ``vscsad`` / rotation tricks) so it runs on PGDisplay and SDLDisplay.
 
@@ -43,6 +43,9 @@ except ImportError:
 
 REF_W, REF_H = 320, 480
 
+# Developer difficulty tuning (1 = gentle, 10 = punishing). Not user-facing.
+DIFFICULTY = 4
+
 
 class Layout:
     __slots__ = ("w", "h", "sw", "sh", "s", "field_w", "ox")
@@ -68,6 +71,12 @@ class Layout:
 
 L = Layout(display_drv.width, display_drv.height)
 
+# Hazard pacing derived from DIFFICULTY (see DIFFICULTY above).
+_HAZARD_SPEED = L.y(0.6 + DIFFICULTY * 0.10)
+_HAZARD_SPAWN_PERIOD = max(180, 720 - DIFFICULTY * 50)
+_HAZARD_BRANCH_INTERVAL = max(8, 24 - DIFFICULTY * 2)
+_HAZARD_BRANCH_MAX_N = min(12, 4 + DIFFICULTY)
+
 if display_drv.requires_byteswap:
     needs_swap = display_drv.disable_auto_byteswap(True)
 else:
@@ -84,6 +93,10 @@ def _c(r, g, b):
 HUD_BG = _c(16, 20, 48)
 HUD_INK = _c(255, 248, 200)
 PARTICLE = _c(255, 200, 60)
+SKY_HIGH = _c(110, 175, 255)
+SKY_SUMMIT = _c(150, 210, 255)
+TRUNK_WOOD = _c(72, 44, 24)
+CROWN_GOLD = _c(255, 210, 50)
 
 # --- Assets ------------------------------------------------------------------------------------
 
@@ -96,7 +109,10 @@ SPR_H = CLIMBER.height // 3
 SPR_KEY = CLIMBER[0]
 TILE = 16
 
-T_BARK, T_BRANCH_L, T_BRANCH_R, T_ICE, T_LEAF, T_GEM, T_SPIKE, T_CLOUD = range(8)
+T_BARK, T_BRANCH_L, T_BRANCH_R, T_ICE, T_LEAF, T_GEM, T_SPIKE, T_CLOUD, T_CROWN = range(9)
+
+BASE_Y_REF = REF_H - 80
+CLIMB_REF = 560  # reference pixels; twice the original ~280 px climb
 
 # --- Level helpers -----------------------------------------------------------------------------
 
@@ -123,39 +139,62 @@ def _draw_sprite(pose, frame, dx, dy):
     display_drv.blit_transparent(buf, dx, dy, SPR_W, SPR_H, SPR_KEY)
 
 
+def _build_tree_crown(plats, decos, trunk, crown_y):
+    """Wide leafy crown and cloud puffs at the tree top."""
+    cw = L.x(104)
+    cx = L.ox + trunk - cw // 2
+    plats.append(Rect(cx, crown_y, cw, TILE, T_CROWN))
+    plats.append(Rect(cx - L.x(18), crown_y - L.y(18), L.x(40), TILE, T_LEAF))
+    plats.append(Rect(cx + cw - L.x(22), crown_y - L.y(18), L.x(40), TILE, T_LEAF))
+    mid = cx + cw // 2
+    for dx, dy in (
+        (-L.x(40), -L.y(28)),
+        (-L.x(12), -L.y(38)),
+        (L.x(16), -L.y(34)),
+        (L.x(42), -L.y(26)),
+        (-L.x(28), -L.y(50)),
+        (L.x(24), -L.y(48)),
+    ):
+        decos.append((mid + dx, crown_y + dy, T_CLOUD))
+    for dx, dy in ((-L.x(52), -L.y(14)), (L.x(48), -L.y(16))):
+        decos.append((mid + dx, crown_y + dy, T_LEAF))
+
+
 def _build_level():
-    """Procedural tower: branches, ice, gems, hazards."""
+    """Procedural tree: branches, ice, gems, hazards, and a leafy crown."""
     plats = []
     gems = []
     hazards = []
+    decos = []
     trunk = L.field_w // 2
-    y = L.y(REF_H - 80)
-    top = L.y(120)
-    step = L.y(46)
+    top_ref = BASE_Y_REF - CLIMB_REF
+    top = L.y(top_ref)
+    y = L.y(BASE_Y_REF)
+    step = L.y(40)
     n = 0
     while y > top:
         side = -1 if n % 2 else 1
         bw = L.x(56 + (n % 3) * 12)
-        bx = trunk + side * L.x(36 + (n % 4) * 8) - bw // 2
+        bx = trunk + side * L.x(26 + (n % 4) * 6) - bw // 2
         bx = max(L.ox + L.u(4), min(bx, L.ox + L.field_w - bw - L.u(4)))
         kind = T_BRANCH_L if side < 0 else T_BRANCH_R
         if n % 5 == 2:
             kind = T_ICE
-        elif n % 7 == 4:
-            kind = T_LEAF
         plats.append(Rect(bx, y, bw, TILE, kind))
         if n % 3 == 1:
             gems.append(Point(bx + bw // 2 - 6, y - 18))
-        if n % 10 == 0 and n > 5:
-            hazards.append([bx + bw // 2, y - L.y(200), 10, 0.0, L.y(1.4)])
+        if n % _HAZARD_BRANCH_INTERVAL == 0 and 4 < n < _HAZARD_BRANCH_MAX_N:
+            hazards.append([bx + bw // 2, y - L.y(200), 10, 0.0, _HAZARD_SPEED])
         y -= step + (n % 4) * L.u(6)
         n += 1
     plats.append(Rect(L.ox + L.field_w // 2 - L.x(40), L.y(REF_H - 48), L.x(80), TILE, T_BARK))
-    goal_y = top - L.y(20)
-    return plats, gems, hazards, goal_y
+    crown_y = top
+    _build_tree_crown(plats, decos, trunk, crown_y)
+    goal_y = crown_y - L.y(16)
+    return plats, gems, hazards, goal_y, crown_y, decos
 
 
-PLATFORMS, GEMS, HAZARDS, GOAL_Y = _build_level()
+PLATFORMS, GEMS, HAZARDS, GOAL_Y, CROWN_Y, SUMMIT_DECOS = _build_level()
 
 _trace = open_trace()
 _bot = os.environ.get("TOWER_CLIMB_BOT", "").strip().lower() in ("1", "true", "yes")
@@ -198,22 +237,65 @@ def _draw_bg(camera_y):
             display_drv.blit_rect(chunk, L.ox + col, 0, 1, slice_h)
         if slice_h < L.h:
             display_drv.fill_rect(L.ox, slice_h, L.field_w, L.h - slice_h, _c(8, 12, 40))
+    if camera_y < L.y(-80):
+        tint_h = min(L.h, L.u(72) + int((-camera_y - L.y(80)) // 2))
+        display_drv.fill_rect(L.ox, 0, L.field_w, tint_h, SKY_HIGH)
+    if camera_y < CROWN_Y - L.y(120):
+        tint_h = min(L.h // 2, L.u(96))
+        display_drv.fill_rect(L.ox, 0, L.field_w, tint_h, SKY_SUMMIT)
     if L.ox > 0:
         display_drv.fill_rect(0, 0, L.ox, L.h, _c(4, 8, 28))
     if L.ox + L.field_w < L.w:
         display_drv.fill_rect(L.ox + L.field_w, 0, L.w - L.ox - L.field_w, L.h, _c(4, 8, 28))
 
 
+def _draw_trunk(cam):
+    """Bark column through the playfield so the climb reads as a tree."""
+    tx = L.ox + L.field_w // 2 - L.u(8)
+    tw = L.u(16)
+    y0 = max(0, int(CROWN_Y - cam) - L.u(8))
+    y1 = min(L.h, int(L.y(REF_H - 36) - cam))
+    if y1 <= y0:
+        return
+    display_drv.fill_rect(tx, y0, tw, y1 - y0, TRUNK_WOOD)
+    for ty in range(y0, y1, TILE * 2):
+        _blit_tile(T_BARK, tx, ty, 1)
+
+
+def _draw_crown(plat, sy):
+    """Summit landing: golden rim, leaf tiles, and cloud puffs."""
+    reps = max(1, plat.w // TILE)
+    display_drv.fill_rect(plat.x, sy + TILE - L.u(4), plat.w, L.u(4), CROWN_GOLD)
+    for i in range(reps):
+        _blit_tile(T_LEAF, plat.x + i * TILE, sy, 1)
+    mid = plat.x + plat.w // 2
+    _blit_tile(T_CLOUD, mid - TILE, sy - TILE - L.u(2), 1)
+    _blit_tile(T_CLOUD, mid - TILE // 2, sy - TILE - L.u(10), 1)
+    _blit_tile(T_CLOUD, mid + TILE // 2, sy - TILE - L.u(6), 1)
+
+
+def _draw_summit_decos(cam):
+    for dx, dy, kind in SUMMIT_DECOS:
+        sy = int(dy - cam)
+        if -TILE <= sy < L.h + TILE:
+            _blit_tile(kind, dx, sy, 1)
+    sx = L.ox + L.field_w - L.u(28)
+    sy = int(CROWN_Y - cam) - L.y(56)
+    if 0 <= sy < L.h - L.u(20):
+        display_drv.fill_rect(sx, sy, L.u(18), L.u(18), CROWN_GOLD)
+        display_drv.fill_rect(sx + L.u(4), sy - L.u(4), L.u(10), L.u(6), CROWN_GOLD)
+
+
 # --- Physics -----------------------------------------------------------------------------------
 
 GRAVITY = 0.55
-JUMP_V = -10.0
+JUMP_V = -10.5
 MAX_FALL = 11.0
 MOVE_A = 0.7
 MAX_RUN = 4.5
 FRICTION = 0.82
 ANCHOR_Y = L.y(300)
-CAM_MIN = L.y(120) - ANCHOR_Y  # stop scrolling above the tower crown
+CAM_MIN = CROWN_Y - ANCHOR_Y - L.y(56)  # stop above the leafy crown
 
 
 class Player:
@@ -378,7 +460,7 @@ def _bot_tick(player, plats, hazards):
 
     for hz in hazards:
         hx, hy = hz[0], hz[1]
-        if abs(hx - px) < L.u(40) and abs(hy - (player.y + SPR_H // 2)) < L.u(56):
+        if abs(hx - px) < L.u(28) and abs(hy - (player.y + SPR_H // 2)) < L.u(36):
             _keys["left" if px > hx else "right"] = True
             if player.on_ground or player.coyote > 0:
                 _keys["up"] = True
@@ -427,21 +509,24 @@ def _bot_tick(player, plats, hazards):
             _keys["up"] = True
         return
 
-    if feet < L.y(260):
-        target = min(above, key=lambda plat: plat.y)
-    else:
-        target = max(above, key=lambda plat: plat.y)
+    crowns = [plat for plat in above if plat.kind == T_CROWN]
+    target = max(above, key=lambda plat: plat.y)
+    if crowns and feet < CROWN_Y + L.y(72):
+        target = crowns[0]
     tcx = target.x + target.w // 2
     aligned = abs(px - tcx) <= L.u(12)
+    dx = abs(px - tcx)
 
     if aligned and (player.on_ground or player.coyote > 0):
         _keys["up"] = True
     elif _bot_stuck > 10 and (player.on_ground or player.coyote > 0):
         _keys["up"] = True
         _keys["right" if px < tcx else "left"] = True
-    elif abs(px - tcx) > L.u(8):
+    elif dx > L.u(8):
         _keys["right" if px < tcx else "left"] = True
-    if player.on_ground and not _keys["up"] and feet < target.y + L.u(4):
+        if dx < L.u(56) and (player.on_ground or player.coyote > 0):
+            _keys["up"] = True
+    if (player.on_ground or player.coyote > 0) and feet > target.y + L.u(6):
         _keys["up"] = True
 
 
@@ -519,10 +604,10 @@ _overlay_buf = bytearray(L.w * _overlay_h * 2)
 _overlay_fb = FrameBuffer(_overlay_buf, L.w, _overlay_h, RGB565)
 
 SPLASH_LINES = (
-    "TOWER CLIMB",
+    "TREE CLIMB",
     "",
     "Climb the magical tree",
-    "to the summit!",
+    "to the leafy crown!",
     "",
     "Move: arrows / A D",
     "Jump: Space / W / tap top",
@@ -538,7 +623,7 @@ SPLASH_LINES = (
 
 def _draw_hud(p, altitude):
     display_drv.fill_rect(0, 0, L.w, _hud_h, HUD_BG)
-    pct = min(99, altitude * 100 // max(1, L.y(REF_H - 80) - GOAL_Y))
+    pct = min(99, altitude * 100 // max(1, L.y(BASE_Y_REF) - GOAL_Y))
     msg = f"SCORE {p.score:04d}  M {pct:2d}%  LIVES {p.lives}"
     _hud_fb.fill(HUD_BG)
     text8(_hud_fb, msg, L.u(4), L.u(3), HUD_INK)
@@ -791,10 +876,14 @@ def _run_game(show_splash=True):
                 for i in reversed(got):
                     gems.pop(i)
 
-                # Hazards (Crazy Climber drops) — only after leaving the trunk base.
-                if frame % 240 == 0 and player.y < L.y(REF_H - 220):
+                # Hazards (falling debris) — mostly in the lower trunk.
+                if (
+                    frame % _HAZARD_SPAWN_PERIOD == 0
+                    and player.y > GOAL_Y + L.y(80)
+                    and player.y < L.y(REF_H - 240)
+                ):
                     hx = L.ox + randint(20, max(21, L.field_w - 20))
-                    hazards.append([hx, camera - 20, 10, 0.0, L.y(1.6)])
+                    hazards.append([hx, camera - 20, 10, 0.0, _HAZARD_SPEED])
                 life_lost = False
                 for hz in hazards:
                     hz[1] += hz[4]
@@ -819,7 +908,7 @@ def _run_game(show_splash=True):
                         player.score += 500
                     else:
                         for plat in plats:
-                            if plat.kind == T_LEAF and _platform_supports_feet(player, plat):
+                            if plat.kind == T_CROWN and _platform_supports_feet(player, plat):
                                 won = True
                                 player.score += 500
                                 break
@@ -842,9 +931,10 @@ def _run_game(show_splash=True):
                         x_blocked,
                     )
 
-                altitude = int(L.y(REF_H - 80) - player.y)
+                altitude = int(L.y(BASE_Y_REF) - player.y)
                 _draw_bg(camera)
                 cam = int(camera)
+                _draw_trunk(cam)
 
                 # Platforms
                 for plat in plats:
@@ -854,9 +944,13 @@ def _run_game(show_splash=True):
                     if plat.kind == T_BARK:
                         reps = max(1, plat.w // TILE)
                         _blit_tile(T_BARK, plat.x, sy, reps)
+                    elif plat.kind == T_CROWN:
+                        _draw_crown(plat, sy)
                     elif plat.kind in (T_BRANCH_L, T_BRANCH_R, T_ICE, T_LEAF):
                         reps = max(1, plat.w // TILE)
                         _blit_tile(plat.kind, plat.x, sy, reps)
+
+                _draw_summit_decos(cam)
 
                 # Gems
                 for g in gems:
@@ -891,17 +985,35 @@ def _run_game(show_splash=True):
                 sleep_ms(16)
 
             # End of round — game over or win
-            msg = "SUMMIT!" if won else "GAME OVER"
-            lines = (
-                msg,
-                "SCORE %04d" % player.score,
-                "",
-                "Press any key or tap",
-                "to play again",
-            )
+            if won:
+                msg = "TREE TOP!"
+                lines = (
+                    msg,
+                    "You reached the canopy!",
+                    "SCORE %04d" % player.score,
+                    "",
+                    "Press any key or tap",
+                    "to play again",
+                )
+            else:
+                lines = (
+                    "GAME OVER",
+                    "SCORE %04d" % player.score,
+                    "",
+                    "Press any key or tap",
+                    "to play again",
+                )
 
             def draw_end():
                 _draw_bg(camera)
+                _draw_trunk(int(camera))
+                for plat in plats:
+                    if plat.kind != T_CROWN:
+                        continue
+                    sy = int(plat.y - int(camera))
+                    if -TILE <= sy < L.h:
+                        _draw_crown(plat, sy)
+                _draw_summit_decos(int(camera))
                 _draw_text_panel(lines)
 
             if _bot and _record:

@@ -17,6 +17,7 @@ _KIND_NAMES = (
     "gem",
     "spike",
     "cloud",
+    "crown",
 )
 
 
