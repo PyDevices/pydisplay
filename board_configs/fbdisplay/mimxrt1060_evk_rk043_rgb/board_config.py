@@ -8,10 +8,15 @@ Targets displayif ``rgbframebuffer`` (NXP eLCDIF) on mimxrt.  Pin names match
 CircuitPython ``board.LCD_*`` on imxrt1060_evk; MicroPython uses ``GPIO_B*`` cpu
 pin names from the NXP EVK LCDIF mux (MCUXpresso BOARD_InitLCDPins).
 
+Touch (RK043 6-pin FPC on J49): Goodix GT911 on LPI2C1 (``board.SCL`` /
+``board.SDA``), reset on shield FPC pin 2 (``LCD_RST``), interrupt on pin 3
+(``LCD_TOUCH_INT``).
+
 CircuitPython sibling: ``cp_mimxrt1060_evk_rk043_rgb``.
 """
 
-from machine import Pin
+from gt911 import GT911
+from machine import I2C, Pin
 import time
 
 from displaysys.fbdisplay import FBDisplay
@@ -81,5 +86,34 @@ fb = RGBFrameBuffer(**tft_pins, **tft_timings)
 
 display_drv = FBDisplay(fb)
 
+# RK043FN66HS-CTG capacitive touch (GT911 on shield I2C FPC)
+i2c = I2C(0, freq=400_000)
+touch_drv = GT911(
+    i2c,
+    reset_pin="GPIO_AD_B0_02",
+    irq_pin="GPIO_AD_B0_11",
+    width=480,
+    height=272,
+    touch_points=5,
+)
+
+
+def touch_read_func():
+    n, points = touch_drv.read_points()
+    if n:
+        return points[0][0], points[0][1]
+    return None
+
+
+touch_rotation_table = (0, 0, 0, 0)
+
 broker = eventsys.Broker()
+
+touch_dev = broker.create(
+    type=eventsys.TOUCH,
+    read=touch_read_func,
+    data=display_drv,
+    data2=touch_rotation_table,
+)
+
 broker.register_quit_cleanup(display_drv)

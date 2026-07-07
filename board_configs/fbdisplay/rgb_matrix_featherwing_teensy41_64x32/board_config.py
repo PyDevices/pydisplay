@@ -1,4 +1,7 @@
-"""Adafruit RGB Matrix FeatherWing 64x32 — MicroPython (Teensy 4.1)"""
+"""Adafruit RGB Matrix FeatherWing 64x32 — MicroPython (Teensy 4.1)
+
+CircuitPython sibling: ``cp_rgb_matrix_featherwing_teensy41_64x32``.
+"""
 
 from machine import Pin
 import rgbmatrix
