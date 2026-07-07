@@ -19,6 +19,7 @@ from eventsys import poll_quit_discarding_others
 from eventsys.keys import Keys
 from graphics import BMP565, FrameBuffer, RGB565, rect, text8
 from multimer import sleep_ms
+from tower_climb_trace import open_trace
 
 try:
     from random import getrandbits, randint
@@ -155,6 +156,8 @@ def _build_level():
 
 PLATFORMS, GEMS, HAZARDS, GOAL_Y = _build_level()
 
+_trace = open_trace()
+
 # --- Background draw ---------------------------------------------------------------------------
 
 
@@ -218,11 +221,29 @@ def _overlap(a, b):
 def _resolve_x(p, plat, dx):
     box = _hitbox(p)
     if not _overlap(box, plat):
-        return
+        return None
+    old_x = p.x
     if dx > 0:
         p.x = plat.x - (SPR_W - 6)
     elif dx < 0:
         p.x = plat.x + plat.w - 6
+    else:
+        return None
+    if _trace is not None:
+        _trace.log_resolve_x(p, plat, dx, old_x)
+    return plat
+
+
+def _nearby_platforms(hitbox, player_y, plats, radius=96):
+    nearby = []
+    for plat in plats:
+        if plat.kind == T_GEM:
+            continue
+        if hitbox.x + hitbox.w <= plat.x or hitbox.x >= plat.x + plat.w:
+            continue
+        if abs(plat.y - (player_y + SPR_H)) <= radius:
+            nearby.append(plat)
+    return nearby
 
 
 def _land(p, prev_y, plats):
@@ -247,6 +268,9 @@ def _land(p, prev_y, plats):
         p.y = best - SPR_H
         p.vy = 0
         p.on_ground = True
+        if _trace is not None:
+            result = "hurt" if best_plat.kind == T_SPIKE else "land"
+            _trace.log_land(p, prev_y, best_plat, result, feet)
         if best_plat.kind == T_SPIKE:
             return "hurt"
     return None
@@ -262,7 +286,7 @@ def _ground_platform(plats):
     return best
 
 
-def _snap_to_ground(p, plats):
+def _snap_to_ground(p, plats, reason="spawn"):
     plat = _ground_platform(plats)
     if plat is None:
         return
@@ -271,6 +295,8 @@ def _snap_to_ground(p, plats):
     p.on_ground = True
     p.coyote = 8
     p.jump_buf = 0
+    if _trace is not None:
+        _trace.log_snap(reason, p, plat)
 
 
 # --- Input -------------------------------------------------------------------------------------
@@ -293,6 +319,8 @@ def _handle_event(ev):
             _keys["smash"] = True
         elif k in (Keys.K_x, Keys.K_z):
             _keys["smash"] = True
+        if _trace is not None:
+            _trace.log_input("keydown", key=int(k))
     elif t == broker.events.KEYUP:
         k = ev.key
         if k in (Keys.K_LEFT, Keys.K_a):
@@ -304,6 +332,8 @@ def _handle_event(ev):
         elif k in (Keys.K_DOWN, Keys.K_s):
             _keys["down"] = False
             _keys["smash"] = False
+        if _trace is not None:
+            _trace.log_input("keyup", key=int(k))
     elif t == broker.events.MOUSEBUTTONDOWN:
         tx, ty = ev.pos
         if ty < L.h // 3:
@@ -314,8 +344,12 @@ def _handle_event(ev):
             _keys["left"] = True
         else:
             _keys["right"] = True
+        if _trace is not None:
+            _trace.log_input("mousedown", pos=[tx, ty], keys=dict(_keys))
     elif t == broker.events.MOUSEBUTTONUP:
         _keys["left"] = _keys["right"] = _keys["up"] = _keys["smash"] = False
+        if _trace is not None:
+            _trace.log_input("mouseup", keys=dict(_keys))
 
 
 _particles = []
@@ -455,10 +489,12 @@ def _life_lost_pause(player):
 def _respawn(p, plats):
     p.lives -= 1
     p.x = float(L.ox + L.field_w // 2 - SPR_W // 2)
-    _snap_to_ground(p, plats)
+    _snap_to_ground(p, plats, reason="respawn")
 
 
-def _lose_life(player, camera_ref, plats):
+def _lose_life(player, camera_ref, plats, reason="unknown"):
+    if _trace is not None:
+        _trace.log_life(reason, player, camera_ref[0])
     _respawn(player, plats)
     camera_ref[0] = 0.0
     if player.lives <= 0:
@@ -482,6 +518,9 @@ def _restore_display_refresh():
 
 def _run_game(show_splash=True):
     _take_over_display_refresh()
+    if _trace is not None:
+        _trace.log_init(L, SPR_W, SPR_H, PLATFORMS, GEMS, HAZARDS, GOAL_Y)
+        show_splash = False
     try:
         if show_splash and not _skip_ui():
             if not _show_splash():
@@ -492,7 +531,7 @@ def _run_game(show_splash=True):
         while True:
             player = Player()
             plats = list(PLATFORMS)
-            _snap_to_ground(player, plats)
+            _snap_to_ground(player, plats, reason="round_start")
             gems = list(GEMS)
             hazards = [list(h) for h in HAZARDS]
             camera = 0.0
@@ -565,22 +604,25 @@ def _run_game(show_splash=True):
 
                 ox = player.x
                 player.x += player.vx
+                x_blocked = []
                 for plat in plats:
-                    _resolve_x(player, plat, player.x - ox)
+                    blocked = _resolve_x(player, plat, player.x - ox)
+                    if blocked is not None:
+                        x_blocked.append(blocked)
 
                 oy = player.y
                 player.y += player.vy
                 hurt = _land(player, oy, plats)
                 cam_box = [camera]
                 if hurt:
-                    if not _lose_life(player, cam_box, plats):
+                    if not _lose_life(player, cam_box, plats, reason="spike"):
                         break
                     camera = cam_box[0]
                     continue
 
                 # Fall below start
                 if player.y > L.y(REF_H) + L.u(40):
-                    if not _lose_life(player, cam_box, plats):
+                    if not _lose_life(player, cam_box, plats, reason="fall"):
                         break
                     camera = cam_box[0]
                     continue
@@ -607,7 +649,7 @@ def _run_game(show_splash=True):
                     hz[3] += 0.05
                     hr = Rect(int(hz[0]), int(hz[1]), hz[2], hz[2], T_SPIKE)
                     if _overlap(box, hr):
-                        if not _lose_life(player, cam_box, plats):
+                        if not _lose_life(player, cam_box, plats, reason="hazard"):
                             life_lost = True
                             break
                         camera = cam_box[0]
@@ -622,6 +664,22 @@ def _run_game(show_splash=True):
                 if player.y <= GOAL_Y:
                     won = True
                     player.score += 500
+
+                if _trace is not None:
+                    _trace.frame += 1
+                    box = _hitbox(player)
+                    feet = int(player.y + SPR_H - 4)
+                    nearby = _nearby_platforms(box, player.y, plats)
+                    _trace.log_frame(
+                        player,
+                        camera,
+                        _keys,
+                        box,
+                        feet,
+                        (int(player.x), int(player.y), SPR_W, SPR_H),
+                        nearby,
+                        x_blocked,
+                    )
 
                 altitude = int(L.y(REF_H - 80) - player.y)
                 _draw_bg(camera)
@@ -695,6 +753,8 @@ def _run_game(show_splash=True):
         TILES.deinit()
         BG.deinit()
         _restore_display_refresh()
+        if _trace is not None:
+            _trace.close()
 
 
 def main():

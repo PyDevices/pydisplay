@@ -2,7 +2,9 @@
 set -euo pipefail
 cd /workspace/src
 OUT=/opt/cursor/artifacts/tower-climb-vertical-platformer.mp4
+TRACE=/opt/cursor/artifacts/tower-climb-trace.jsonl
 mkdir -p /opt/cursor/artifacts
+rm -f "$TRACE"
 
 find_win() {
   DISPLAY=:1 xwininfo -root -tree 2>/dev/null | rg "tower_climb\.py" | head -1 \
@@ -13,7 +15,7 @@ SESSION="tower-vid"
 tmux -f /exec-daemon/tmux.portal.conf kill-session -t "$SESSION" 2>/dev/null || true
 tmux -f /exec-daemon/tmux.portal.conf new-session -d -s "$SESSION" -c "/workspace/src" -- "${SHELL:-zsh}" -l
 tmux -f /exec-daemon/tmux.portal.conf send-keys -t "$SESSION:0.0" \
-  'DISPLAY=:1 PYTHONPATH=lib ../.venv/bin/python examples/tower_climb.py' C-m
+  "TOWER_CLIMB_TRACE=$TRACE DISPLAY=:1 PYTHONPATH=lib ../.venv/bin/python examples/tower_climb.py" C-m
 
 WIN=""
 for _ in $(seq 1 50); do
@@ -61,4 +63,7 @@ done
 
 wait "$FFPID"
 ls -lh "$OUT"
+if [ -f "$TRACE" ]; then
+  echo "TRACE=$TRACE ($(wc -l < "$TRACE") lines)"
+fi
 tmux -f /exec-daemon/tmux.portal.conf kill-session -t "$SESSION" 2>/dev/null || true
