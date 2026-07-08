@@ -25,5 +25,8 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Install ruff
+        run: pip install ruff
+
       - name: Run stdlib unittest suite
         run: python -m unittest discover -s tests -v

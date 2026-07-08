@@ -5,11 +5,12 @@
 
 from pathlib import Path
 import subprocess
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 GEN = ROOT / "scripts" / "generate_board_configs.py"
-PYTHON = ROOT / ".venv" / "bin" / "python"
+PYTHON = sys.executable
 
 
 class TestGenerateBoardConfigs(unittest.TestCase):

@@ -43,6 +43,9 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Install ruff
+        run: pip install ruff
+
       - name: Audit install manifests
         run: ./scripts/install_refresh_manifests.sh --audit
 

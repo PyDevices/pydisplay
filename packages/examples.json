@@ -189,6 +189,30 @@
       "github:PyDevices/pydisplay/src/examples/pbm_simpletest.py"
     ],
     [
+      "pixel_sim_fire.py",
+      "github:PyDevices/pydisplay/src/examples/pixel_sim_fire.py"
+    ],
+    [
+      "pixel_sim_matrix.py",
+      "github:PyDevices/pydisplay/src/examples/pixel_sim_matrix.py"
+    ],
+    [
+      "pixel_sim_plasma.py",
+      "github:PyDevices/pydisplay/src/examples/pixel_sim_plasma.py"
+    ],
+    [
+      "pixel_sim_reel.py",
+      "github:PyDevices/pydisplay/src/examples/pixel_sim_reel.py"
+    ],
+    [
+      "pixel_sim_scroll.py",
+      "github:PyDevices/pydisplay/src/examples/pixel_sim_scroll.py"
+    ],
+    [
+      "pixel_sim_starfield.py",
+      "github:PyDevices/pydisplay/src/examples/pixel_sim_starfield.py"
+    ],
+    [
       "png_test.py",
       "github:PyDevices/pydisplay/src/examples/png_test.py"
     ],
@@ -365,6 +389,14 @@
       "github:PyDevices/pydisplay/src/examples/noto_fonts/noto_fonts.py"
     ],
     [
+      "pixel_sim/__init__.py",
+      "github:PyDevices/pydisplay/src/examples/pixel_sim/__init__.py"
+    ],
+    [
+      "pixel_sim/board_config.py",
+      "github:PyDevices/pydisplay/src/examples/pixel_sim/board_config.py"
+    ],
+    [
       "proverbs/__init__.py",
       "github:PyDevices/pydisplay/src/examples/proverbs/__init__.py"
     ],
@@ -459,14 +491,6 @@
     [
       "tower_climb/trace/.gitkeep",
       "github:PyDevices/pydisplay/src/examples/tower_climb/trace/.gitkeep"
-    ],
-    [
-      "tower_climb/trace/playtest.jsonl",
-      "github:PyDevices/pydisplay/src/examples/tower_climb/trace/playtest.jsonl"
-    ],
-    [
-      "tower_climb/trace/record-win.jsonl",
-      "github:PyDevices/pydisplay/src/examples/tower_climb/trace/record-win.jsonl"
     ]
   ],
   "deps": [],
