@@ -40,9 +40,12 @@ try:
     else:
         raise ImportError
 except ImportError:
-    from psutil import virtual_memory
+    try:
+        from psutil import virtual_memory
 
-    console.label(Console.RIGHT, lambda: f"mf={virtual_memory().free:,}", pal.BLUE)
+        console.label(Console.RIGHT, lambda: f"mf={virtual_memory().free:,}", pal.BLUE)
+    except ImportError:
+        pass
 
 try:
     import pydisplay_test_mode

@@ -192,11 +192,17 @@ def _use_main_thread_for_bounded():
     return name in ("cpython", "micropython", "circuitpython")
 
 
-def _circuitpython_lvgl_cooperative(kind):
+def _cooperative_lvgl_quit(kind):
+    """Skip daemon quit-inject for LVGL; example must self-exit via test mode."""
+    if kind != "lvgl":
+        return False
     try:
-        return sys.implementation.name == "circuitpython" and kind == "lvgl"
+        name = sys.implementation.name
     except AttributeError:
         return False
+    # CircuitPython: daemon inject + LVGL is unsafe. CPython: daemon inject deadlocks
+    # with librt sync timers (see lv_test_timer_sync matrix notes).
+    return name in ("circuitpython", "cpython")
 
 
 def _touch_delay_s(duration_s):
@@ -262,7 +268,7 @@ def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode
     import quit_inject
 
     injected = [False]
-    cooperative = _circuitpython_lvgl_cooperative(kind)
+    cooperative = _cooperative_lvgl_quit(kind)
 
     def delayed_inject():
         touch_delay = _touch_delay_s(duration_s)
@@ -287,6 +293,7 @@ def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode
         try:
             import pydisplay_test_mode
 
+            pydisplay_test_mode.ENABLED = True
             pydisplay_test_mode.DURATION_S = duration_s
         except ImportError:
             pass
@@ -464,6 +471,9 @@ def _subprocess_hard_exit(code, *, headless=False):
 
 def main(argv=None):
     argv = argv if argv is not None else sys.argv
+    tools = _dir_of(os.path.abspath(__file__))
+    if tools not in sys.path:
+        sys.path.insert(0, tools)
     try:
         args = _parse_args(argv)
     except ValueError as exc:

@@ -8,6 +8,14 @@ It creates a periodic timer in a class instance and a one-shot timer that stops 
 from multimer import Timer, sleep_ms
 from sys import platform
 
+try:
+    import sys as _sys
+
+    # librt callbacks on MicroPython unix run with the heap locked; defer delivery.
+    _timer_hard = _sys.implementation.name != "micropython"
+except AttributeError:
+    _timer_hard = True
+
 _done = False
 
 
@@ -17,7 +25,12 @@ class TimerTest:
 
     def start(self, period):
         self._counter = 0
-        self._tim.init(mode=Timer.PERIODIC, period=period, callback=self.do_something)
+        self._tim.init(
+            mode=Timer.PERIODIC,
+            period=period,
+            callback=self.do_something,
+            hard=_timer_hard,
+        )
         print("TimerTest:  timer started...")
 
     def do_something(self, t):
@@ -36,7 +49,7 @@ tt.start(1)
 
 # Create a timer that stops the first timer after 5 seconds
 tim2 = Timer(-1 if platform == "rp2" else 2)
-tim2.init(mode=Timer.ONE_SHOT, period=5000, callback=tt.stop)
+tim2.init(mode=Timer.ONE_SHOT, period=5000, callback=tt.stop, hard=_timer_hard)
 
 while not _done:
     sleep_ms(0)
