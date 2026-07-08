@@ -19,7 +19,7 @@ BUFFERED = False
 if BUFFERED:
     from displaybuf import DisplayBuffer
 
-    from multimer import Timer, capabilities
+    from multimer import Timer
 
 
 font_dir = sep.join(tft_text.__file__.split(sep)[:-1]) + sep + "fonts"
@@ -53,14 +53,13 @@ def config(rotation=None, buffer_size=0, options=0):
         display_drv.rotation = rotation
     if BUFFERED:
         display = DisplayBuffer(display_drv)
-        if capabilities()["schedule_queue"]:
-            _orig_show = display.show
+        _orig_show = display.show
 
-            def show(area=None):
-                _orig_show(area)
-                display_drv.show()
+        def show(area=None):
+            _orig_show(area)
+            display_drv.show()
 
-            display.show = show
+        display.show = show
         display.draw = display
         tim = Timer()
         tim.init(mode=Timer.PERIODIC, period=33, callback=lambda t: display.show())

@@ -4,12 +4,11 @@ Testris game implemented in MicroPython by Brad Barnett.
 """
 
 # For the display & optional touch drivers
-from board_config import display_drv, broker
+from board_config import display_drv, runtime
 from displaysys import alloc_buffer
 from touch_keypad import Keypad
 from joystick_keypad import JoystickKeypad
 from eventsys.keys import Keys
-from eventsys import poll_quit_discarding_others
 try:
     from random import choice  # For random piece selection
 except ImportError:
@@ -31,7 +30,7 @@ try:
 except ImportError:
     from multimer import ticks_diff, ticks_ms
 
-from multimer import dual_main, pump, run_forever, run_forever_async
+from multimer.loop import dual_main, run_forever, run_forever_async
 
 if display_drv.width > display_drv.height:
     display_drv.rotation += 90
@@ -49,7 +48,7 @@ LEFT = Keys.K_LEFT  # LEFT
 DOWN = Keys.K_DOWN  # DOWN
 RIGHT = Keys.K_RIGHT  # RIGHT
 keypad = Keypad(
-    broker,
+    runtime,
     0,
     0,
     display_drv.width,
@@ -58,7 +57,7 @@ keypad = Keypad(
 )
 
 joystick_keypad = JoystickKeypad(
-    broker,
+    runtime,
     joymap={
         1: {
             'hats': {
@@ -75,21 +74,16 @@ joystick_keypad = JoystickKeypad(
 
 
 def _quit_if_needed(_where):
-    if not poll_quit_discarding_others(broker):
+    if not runtime.quit_requested if runtime else False:
         return False
     display_drv.quit()
     return True
 
 
 class _Loop:
-    """Cooperative poll helper; sync mode pumps multimer between frames."""
-
-    def __init__(self, *, pump_on_poll):
-        self._pump_on_poll = pump_on_poll
+    """Cooperative poll helper."""
 
     def poll(self, where):
-        if self._pump_on_poll:
-            pump()
         return _quit_if_needed(where)
 
 
@@ -736,22 +730,18 @@ def _play_poll(play):
         return True
 
 
-def _start_play(*, pump_on_poll):
-    return _get_game()(_Loop(pump_on_poll=pump_on_poll))
+def _start_play():
+    return _get_game()(_Loop())
 
 
 def main_sync():
-    play = _start_play(pump_on_poll=True)
+    play = _start_play()
     run_forever(lambda: _play_poll(play), delay_ms=1)
 
 
 async def main_async():
-    play = _start_play(pump_on_poll=False)
+    play = _start_play()
     await run_forever_async(lambda: _play_poll(play), delay_ms=1)
 
 
-import board_config
-
-board_config.TIMER_ASYNC = True
-
-dual_main(main_sync, main_async, async_mode=board_config.TIMER_ASYNC)
+dual_main(main_sync, main_async, async_mode=runtime.timer_async if runtime else True)

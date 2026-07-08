@@ -6,10 +6,12 @@ Same UI and behaviour; uses multimer.AsyncTimer and an async main loop.
 Uses only src/lib modules (board_config, graphics, multimer, eventsys).
 """
 
-from board_config import broker, display_drv
+from board_config import display_drv, runtime
+
 from displaysys import color565
-from graphics import Area, Font, FrameBuffer, RGB565
-from multimer import dual_main, periodic, run_forever, run_forever_async
+from graphics import RGB565, Area, Font, FrameBuffer
+from multimer import AsyncTimer, Timer
+from multimer.loop import dual_main, run_forever, run_forever_async
 
 TOP, BOT = 36, 20
 ROW, ACCENT = 20, 4
@@ -128,16 +130,17 @@ def on_tick(_=None):
         return
     state["scroll"] = (state["scroll"] + 1) % scroll_height()
     display_drv.vscroll = state["scroll"]
+    # The runtime's shared timer refreshes the display; just advance the scroll.
 
 
 def handle_events():
-    if elist := broker.poll():
+    if elist := runtime.poll():
         for e in elist:
-            if e.type == broker.events.QUIT:
+            if e.type == runtime.events.QUIT:
                 return True
-            if e.type != broker.events.MOUSEBUTTONDOWN:
+            if e.type != runtime.events.MOUSEBUTTONDOWN:
                 continue
-            if rotate_btn.contains(e.pos):
+            if rotate_btn is not None and rotate_btn.contains(e.pos):
                 pause_scroll()
                 state["rotation"] = (state["rotation"] + 90) % 360
                 state["scroll"] = 0
@@ -145,7 +148,7 @@ def handle_events():
                 setup_scroll()
                 redraw()
                 resume_scroll()
-            elif color_btn.contains(e.pos):
+            elif color_btn is not None and color_btn.contains(e.pos):
                 pause_scroll()
                 state["color_i"] = (state["color_i"] + 1) % len(ACCENTS)
                 redraw()
@@ -156,17 +159,23 @@ def handle_events():
 def main_sync():
     setup_scroll()
     redraw()
-    periodic(on_tick, period=40)
-    run_forever(handle_events, delay_ms=20)
+    timer = Timer(-1)
+    timer.init(mode=Timer.PERIODIC, period=40, callback=on_tick)
+    try:
+        run_forever(handle_events, delay_ms=20)
+    finally:
+        timer.deinit()
 
 
 async def main_async():
     setup_scroll()
     redraw()
-    periodic(on_tick, period=40, async_=True)
-    await run_forever_async(handle_events, delay_ms=20)
+    timer = AsyncTimer(-1)
+    timer.init(mode=AsyncTimer.PERIODIC, period=40, callback=on_tick)
+    try:
+        await run_forever_async(handle_events, delay_ms=20)
+    finally:
+        timer.deinit()
 
 
-from board_config import TIMER_ASYNC
-
-dual_main(main_sync, main_async, async_mode=TIMER_ASYNC)
+dual_main(main_sync, main_async, async_mode=runtime.timer_async)

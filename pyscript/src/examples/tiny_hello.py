@@ -1,5 +1,4 @@
-from board_config import broker
-from eventsys import poll_quit_discarding_others
+from board_config import runtime
 # multimer types: all
 """
 tiny_hello.py
@@ -25,7 +24,7 @@ Writes "Hello!" in a tiny font in random colors at random locations on the Displ
 
 from random import getrandbits
 
-from multimer import sleep_ms, needs_pump, pump
+from multimer import sleep_ms
 import tft_text
 import tft_config
 
@@ -43,9 +42,7 @@ tft = tft_config.config(tft_config.WIDE)
 
 
 def _quit_requested():
-    if needs_pump():
-        pump()
-    return poll_quit_discarding_others(broker)
+    return runtime.quit_requested if runtime else False
 
 
 def randint(a, b):

@@ -8,7 +8,7 @@ displaysys.pgdisplay
 
 import pygame as pg
 
-from displaysys import DisplayDriver, color_rgb, default_quit_chord
+from displaysys import DisplayDriver, FFmpegFrameRecorder, color_rgb, default_quit_chord
 from eventsys import events
 
 
@@ -113,6 +113,8 @@ def _init_joysticks() -> None:
 
 
 class PGDisplay(DisplayDriver):
+    needs_refresh = True
+
     """
     A class to emulate an LCD using pygame.
     Provides scrolling and rotation functions similar to an LCD.  The .texture
@@ -169,7 +171,7 @@ class PGDisplay(DisplayDriver):
         self._buffer = pg.Surface(size=(self._width, self._height), depth=self.color_depth)
         self._buffer.fill((0, 0, 0))
 
-        super().__init__(auto_refresh=True)
+        super().__init__()
 
     ############### Required API Methods ################
 
@@ -299,6 +301,19 @@ class PGDisplay(DisplayDriver):
         except pg.error:
             return False
 
+    def _buffer_rgb(self) -> bytes:
+        """Export the logical framebuffer as packed RGB24 bytes."""
+        if hasattr(pg.image, "tostring"):
+            return pg.image.tostring(self._buffer, "RGB")
+        return pg.image.tobytes(self._buffer, "RGB")
+
+    def open_frame_recorder(self, path, *, fps=12, width=None, height=None):
+        self.close_frame_recorder()
+        w = self.width if width is None else width
+        h = self.height if height is None else height
+        self._frame_recorder = FFmpegFrameRecorder(path, w, h, fps)
+        return self._frame_recorder
+
     def render(self, renderRect=None) -> None:
         """
         Render the display.  Automatically called after blitting or filling the display.
@@ -350,6 +365,8 @@ class PGDisplay(DisplayDriver):
         """
         if not self._video_active():
             return
+        if self._frame_recorder is not None:
+            self._record_frame(self._buffer_rgb())
         try:
             pg.display.flip()
         except pg.error:

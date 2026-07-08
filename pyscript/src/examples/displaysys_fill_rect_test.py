@@ -3,9 +3,8 @@
 
 from random import getrandbits
 
-from board_config import broker, display_drv
-from eventsys import poll_quit_discarding_others
-from multimer import pump, sleep_ms
+from board_config import display_drv, runtime
+from multimer import sleep_ms
 import gc
 import time
 
@@ -47,14 +46,14 @@ def main():
                 block_size,
                 getrandbits(16),
             )
-            if display_drv._timer is None:
+            if getattr(runtime, "_timer", None) is None:
                 display_drv.show()
-            pump()
+            sleep_ms(0)
             count += 1
             if count % 1000 == 0:
                 rate = count / (time.time() - start_time)
                 print(f"blocks/sec: {rate:5.2f}")
-            if poll_quit_discarding_others(broker):
+            if runtime.quit_requested if runtime else False:
                 break
             sleep_ms(1)
     except KeyboardInterrupt:

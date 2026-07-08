@@ -98,6 +98,7 @@ def _ensure_tty_sane() -> None:
 
 
 _event = usdl2.SDL_Event()
+_displays = []
 
 # Open joystick handles, keyed by SDL instance id, kept referenced so SDL keeps
 # delivering their events.
@@ -153,6 +154,7 @@ def poll_event():
         Optional[events]: One eventsys event, or ``None``.
     """
     global _event
+    _flush_pending_displays()
     if usdl2.SDL_PollEvent(_event):
         if uses_native_event:
             if _event.type in events.filter:
@@ -171,6 +173,7 @@ def get_events():
         list | None: A list of eventsys events, or ``None`` if the queue was empty.
     """
     global _event
+    _flush_pending_displays()
     eventlist = []
     while usdl2.SDL_PollEvent(_event):
         if uses_native_event:
@@ -180,6 +183,12 @@ def get_events():
             if int.from_bytes(_event[:4], "little") in events.filter:
                 eventlist.append(_convert(usdl2.SDL_Event(_event)))
     return eventlist if len(eventlist) > 0 else None
+
+
+def _flush_pending_displays():
+    for display in tuple(_displays):
+        if display._render_dirty or display._show_pending:
+            display._flush_pending_show()
 
 
 def _convert(e):
@@ -275,6 +284,8 @@ def _hard_process_exit(code: int = 0) -> None:
 
 
 class SDLDisplay(DisplayDriver):
+    needs_refresh = True
+
     """
     A class to emulate an LCD using SDL2.
     Provides scrolling and rotation functions similar to an LCD.  The .texture
@@ -316,6 +327,8 @@ class SDLDisplay(DisplayDriver):
         self.touch_scale = 1.0
         self.quit_chord = default_quit_chord()
         self._buffer = None
+        self._render_dirty = False
+        self._show_pending = False
         self._requires_byteswap = False
 
         # CircuitPython + usdl2 accelerated GL cannot attach swapped-dimension render
@@ -365,17 +378,8 @@ class SDLDisplay(DisplayDriver):
             raise RuntimeError(f"{usdl2.SDL_GetError()}")
         retcheck(usdl2.SDL_SetTextureBlendMode(self._buffer, usdl2.SDL_BLENDMODE_NONE))
 
-        auto_refresh = True
-        if implementation.name == "micropython":
-            try:
-                from multimer import needs_pump
-
-                if needs_pump():
-                    auto_refresh = False
-            except ImportError:
-                pass
-
-        super().__init__(auto_refresh=auto_refresh)
+        _displays.append(self)
+        super().__init__()
 
     ############### Required API Methods ################
 
@@ -496,7 +500,7 @@ class SDLDisplay(DisplayDriver):
             bfa (int): The bottom fixed area.
         """
         super().vscrdef(tfa, vsa, bfa)
-        self.render()
+        self._render_dirty = True
 
     def vscsad(self, vssa=None) -> int:
         """
@@ -510,7 +514,7 @@ class SDLDisplay(DisplayDriver):
         """
         if vssa is not None:
             super().vscsad(vssa)
-            self.render()
+            self._render_dirty = True
         return self._vssa
 
     def _rotation_helper(self, value):
@@ -602,6 +606,7 @@ class SDLDisplay(DisplayDriver):
         if self._bfa > 0:
             bfaRect = usdl2.SDL_Rect(0, self._tfa + self._vsa, self.width, self._bfa)
             retcheck(usdl2.SDL_RenderCopy(self._renderer, self._buffer, bfaRect, bfaRect))
+        self._render_dirty = False
 
     def show(self, _timer=None) -> None:
         """
@@ -609,10 +614,26 @@ class SDLDisplay(DisplayDriver):
         """
         if not self._sdl_active():
             return
+        try:
+            self._flush_pending_show()
+        except MemoryError:
+            self._show_pending = True
+            return
+
+    def _flush_pending_show(self):
+        if not self._sdl_active():
+            return
+        if self._render_dirty:
+            self.render()
         usdl2.SDL_RenderPresent(self._renderer)
+        self._show_pending = False
 
     def _deinit(self) -> None:
         """Release SDL resources."""
+        try:
+            _displays.remove(self)
+        except ValueError:
+            pass
         _close_joysticks()
         if self._buffer is not None:
             usdl2.SDL_DestroyTexture(self._buffer)

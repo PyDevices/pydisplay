@@ -1,5 +1,4 @@
-from board_config import broker
-from eventsys import poll_quit_discarding_others
+from board_config import runtime
 # multimer types: all
 """
 hello.py
@@ -56,6 +55,8 @@ def main():
     tft = tft_config.config(tft_config.WIDE)
 
     while True:
+        if runtime is not None:
+            runtime.poll()
         for rotation in range(4):
             tft.rotation = rotation
             tft.draw.fill(0)
@@ -84,7 +85,7 @@ def main():
                     ),
                 )
                 tft.show()
-                if poll_quit_discarding_others(broker):
+                if runtime.quit_requested if runtime else False:
                     return
                 sleep_ms(1)
 

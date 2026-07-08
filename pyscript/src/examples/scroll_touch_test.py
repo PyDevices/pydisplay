@@ -1,9 +1,9 @@
 # multimer types: all
-from board_config import display_drv, broker
+from board_config import display_drv, runtime
 from graphics import Draw
 from palettes import get_palette
 from random import getrandbits
-from multimer import needs_pump, pump
+
 
 
 canvas = display_drv
@@ -48,15 +48,13 @@ def main():
     canvas.show()
 
     while True:
-        if needs_pump():
-            pump()
-        if elist := broker.poll():
+        if elist := runtime.poll():
             quit_requested = False
             for e in elist:
-                if e.type == broker.events.QUIT:
+                if e.type == runtime.events.QUIT:
                     quit_requested = True
                     break
-                if e.type == broker.events.MOUSEBUTTONDOWN:
+                if e.type == runtime.events.MOUSEBUTTONDOWN:
                     x, y = canvas.translate_point(e.pos)
                     if y < canvas.tfa:
                         canvas.vscroll -= line_height

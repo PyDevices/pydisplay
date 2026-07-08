@@ -1,5 +1,4 @@
-from board_config import broker
-from eventsys import poll_quit_discarding_others
+from board_config import runtime
 # multimer types: all
 """
 boxlines.py
@@ -46,6 +45,8 @@ def main():
     tft = tft_config.config(tft_config.WIDE)
 
     while True:
+        if runtime is not None:
+            runtime.poll()
         color = palette.color565(getrandbits(8), getrandbits(8), getrandbits(8))
 
         tft.draw.line(
@@ -68,7 +69,7 @@ def main():
             palette.color565(getrandbits(8), getrandbits(8), getrandbits(8)),
         )
         tft.show()
-        if poll_quit_discarding_others(broker):
+        if runtime.quit_requested if runtime else False:
             break
 
 

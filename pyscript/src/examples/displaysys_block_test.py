@@ -2,17 +2,28 @@
 """displaysys_block_test.py"""
 
 from random import getrandbits
+
 try:
     from random import choice
 except ImportError:
-    def choice(seq):
-        return seq[0]
+    def choice(sequence):
+        return sequence[0]
 
-from board_config import broker, display_drv
-from eventsys import poll_quit_discarding_others
-from multimer import pump, sleep_ms
+
+from board_config import display_drv, runtime
+from multimer import sleep_ms
 import gc
 import time
+
+
+try:
+    import pydisplay_test_mode  # type: ignore[import-not-found]
+
+    TEST_DURATION_S = (
+        pydisplay_test_mode.DURATION_S if pydisplay_test_mode.ENABLED else None
+    )
+except ImportError:
+    TEST_DURATION_S = None
 
 
 def randint(a, b):
@@ -59,14 +70,15 @@ def main():
                 block_size,
                 block_size,
             )
-            if display_drv._timer is None:
+            if getattr(runtime, "_timer", None) is None:
                 display_drv.show()
-            pump()
             count += 1
             if count % 2000 == 0:
                 rate = count / (time.time() - start_time)
                 print(f"blocks/sec: {rate:5.2f}")
-            if poll_quit_discarding_others(broker):
+            if runtime.quit_requested if runtime else False:
+                break
+            if TEST_DURATION_S is not None and time.time() - start_time >= TEST_DURATION_S:
                 break
             sleep_ms(1)
     except KeyboardInterrupt:

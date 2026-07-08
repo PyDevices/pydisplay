@@ -73,15 +73,17 @@ def init_timer(period=10):
         period (int): The period in milliseconds to call the tick function.
     """
     if Display.timer is None:
-        from multimer import periodic
+        from multimer import Timer
 
-        Display.timer = periodic(tick, period=period)
+        if Timer is not None:
+            Display.timer = Timer(-1)
+            Display.timer.init(mode=Timer.PERIODIC, period=period, callback=tick)
 
 
 def _poll_widgets():
     """Poll all widget displays; return True when ``events.QUIT`` is seen."""
     for display in list(Display.displays):
-        if elist := display.broker.poll():
+        if elist := display.runtime.poll():
             for e in elist:
                 if e.type == events.QUIT:
                     return True
@@ -94,23 +96,16 @@ def pump():
     """
     Process one frame during setup bursts (before ``run_forever``).
 
-    On queued backends, drains the multimer callback queue. In poll mode
-    (no ``init_timer``), also calls ``tick()``.
+    When no timer is active, also calls ``tick()``.
     """
-    from multimer import capabilities, needs_pump
-    from multimer import pump as multimer_pump
-
-    caps = capabilities()
-    if caps["schedule_queue"] or needs_pump():
-        multimer_pump()
     if Display.timer is None:
         tick()
 
 
 def run_forever():
-    """Run ``multimer.run_forever`` with widget tick + broker poll until quit."""
+    """Run ``multimer.run_forever`` with widget tick + runtime poll until quit."""
     init_timer(10)
-    from multimer import run_forever as multimer_run_forever
+    from multimer.loop import run_forever as multimer_run_forever
 
     multimer_run_forever(_poll_widgets)
 
@@ -531,20 +526,20 @@ class Display(Widget):
     displays = []
     timer = None
 
-    def __init__(self, display_drv, broker, tfa=0, bfa=0, format=RGB565):
+    def __init__(self, display_drv, runtime, tfa=0, bfa=0, format=RGB565):
         """
         Initialize a Display object to manage the display and child widgets.
 
         Args:
             display_drv (DisplayDriver): The display driver object that manages the display hardware.
-            broker (Broker): The event broker object that manages the event system.
+            runtime (Runtime): The event runtime object that manages the event system.
             tfa (int): The top fixed area of the display.
             bfa (int): The bottom fixed area of the display.
             format (int): The color format of the display (default is RGB565).
 
         Usage:
-            from board_config import display_drv, broker
-            display = Display(display_drv, broker)
+            from board_config import display_drv, runtime
+            display = Display(display_drv, runtime)
         """
         self.display_drv = display_drv
         super().__init__(
@@ -552,7 +547,7 @@ class Display(Widget):
         )
         display_drv.set_vscroll(tfa, bfa)
         display_drv.vscroll = 0
-        self.broker = broker
+        self.runtime = runtime
         self._buffer = memoryview(
             bytearray(display_drv.width * display_drv.height * display_drv.color_depth // 8)
         )
@@ -659,12 +654,7 @@ class Display(Widget):
             self.display_drv.fill_rect(x, y + h - 2, w, 2, c)
             self.display_drv.fill_rect(x, y, 2, h, c)
             self.display_drv.fill_rect(x + w - 2, y, 2, h, c)
-        from multimer import capabilities, needs_pump
-
-        caps = capabilities()
-        needs_show = caps["schedule_queue"] or needs_pump()
-        if needs_show:
-            self.display_drv.show()
+        self.display_drv.show()
 
     def remove_task(self, task):
         self._tasks.remove(task)
@@ -684,7 +674,7 @@ class Display(Widget):
         """
         Run one frame of the widget event loop.
 
-        Flushes dirty areas to the display, otherwise polls ``broker`` for events,
+        Flushes dirty areas to the display, otherwise polls ``runtime`` for events,
         runs scheduled tasks, and re-renders invalidated widgets. Call from a timer
         (see ``init_timer``) or your main loop.
         """

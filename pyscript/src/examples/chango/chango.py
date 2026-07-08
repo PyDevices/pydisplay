@@ -30,8 +30,8 @@ sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
 import chango_16 as font_16
 import chango_32 as font_32
 import chango_64 as font_64
-from board_config import broker
-from multimer import Timer, needs_pump, pump
+from board_config import runtime
+from multimer import Timer
 import tft_config
 import tft_write
 
@@ -56,9 +56,7 @@ def main():
     row += font_64.HEIGHT
 
     tft.show()
-    if needs_pump():
-        pump()
-    broker.poll()
+    runtime.poll()
 
 
 main()

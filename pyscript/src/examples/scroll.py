@@ -1,5 +1,4 @@
-from board_config import broker
-from eventsys import poll_quit_discarding_others
+from board_config import runtime
 # multimer types: all
 """
 scroll.py
@@ -48,6 +47,8 @@ def main():
     col = tft.width // 2 - 5 * font.WIDTH // 2
 
     while True:
+        if runtime is not None:
+            runtime.poll()
         tft.draw.fill_rect(0, scroll, tft.width, 1, palette.BLUE)
 
         if scroll % font.HEIGHT == 0:
@@ -70,7 +71,7 @@ def main():
         if scroll == tft.height:
             scroll = 0
 
-        if poll_quit_discarding_others(broker):
+        if runtime.quit_requested if runtime else False:
             break
         sleep_ms(10)
 

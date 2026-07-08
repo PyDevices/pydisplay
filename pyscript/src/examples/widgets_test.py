@@ -15,7 +15,7 @@ pd.init_timer(10)  # Remove this line to use polled mode in a while loop
 
 REVERSE = False  # for troubleshooting progressbar, sliders, scrollbars
 
-display = pd.Display(board_config.display_drv, board_config.broker)
+display = pd.Display(board_config.display_drv, board_config.runtime)
 screen = pd.Screen(display, visible=False)
 
 status = pd.TextBox(screen, w=screen.width, align=pd.ALIGN.BOTTOM, scale=1)

@@ -99,7 +99,7 @@ def _timer_class():
     try:
         import board_config
 
-        if getattr(board_config, "TIMER_ASYNC", False):
+        if getattr(board_config, "runtime.timer_async", False):
             from multimer import AsyncTimer as Timer
 
             return Timer
@@ -114,16 +114,14 @@ def _timer_class():
 
 
 def _timer_type():
+    # The board's shared runtime timer drives LVGL now (lv_utils subscribes to it),
+    # so report the runtime timer's class when it exists.
     try:
-        import lv_utils
+        from board_config import runtime
 
-        inst = lv_utils.event_loop.current_instance()
-        if inst is not None:
-            if inst.asynchronous and getattr(inst, "_aio_timer", None) is not None:
-                return _format_timer_type(type(inst._aio_timer))
-            timer = getattr(inst, "timer", None)
-            if timer is not None and timer is not False:
-                return _format_timer_type(type(timer))
+        timer = getattr(runtime, "_timer", None)
+        if timer is not None:
+            return _format_timer_type(type(timer))
     except ImportError:
         pass
     return _format_timer_type(_timer_class())
@@ -174,50 +172,67 @@ def build_ui(mode=None):
     """
     if mode is not None:
         set_test_mode(mode)
-    scr = lv.screen_active()
-    info = get_platform_info()
 
-    title = lv.label(scr)
-    title.set_text("LVGL Timer Test")
-    title.align(lv.ALIGN.TOP_MID, 0, 8)
+    # Pause the shared runtime-timer-driven LVGL task_handler while we construct
+    # the UI: LVGL is not re-entrant, so timer-driven rendering must not run
+    # concurrently with widget creation on the main thread.
+    inst = None
+    try:
+        import lv_utils
 
-    _add_info_labels(scr, info)
+        inst = lv_utils.event_loop.current_instance()
+    except ImportError:
+        inst = None
+    if inst is not None:
+        inst.disable()
+    try:
+        scr = lv.screen_active()
+        info = get_platform_info()
 
-    seconds_lbl = lv.label(scr)
-    seconds_lbl.set_text("Seconds: 0")
-    seconds_lbl.align(lv.ALIGN.CENTER, 0, -48)
+        title = lv.label(scr)
+        title.set_text("LVGL Timer Test")
+        title.align(lv.ALIGN.TOP_MID, 0, 8)
 
-    arc = lv.arc(scr)
-    arc.set_size(80, 80)
-    arc.align(lv.ALIGN.CENTER, 0, 25)
-    arc.set_bg_angles(0, 360)
-    arc.set_angles(0, 0)
-    arc.remove_style(None, lv.PART.KNOB)
-    arc.remove_flag(lv.obj.FLAG.CLICKABLE)
+        _add_info_labels(scr, info)
 
-    btn = lv.button(scr)
-    btn.set_size(120, 50)
-    btn.align(lv.ALIGN.BOTTOM_MID, 0, -30)
-    btn_lbl = lv.label(btn)
-    btn_lbl.set_text("Tap me (0)")
-    btn_lbl.center()
+        seconds_lbl = lv.label(scr)
+        seconds_lbl.set_text("Seconds: 0")
+        seconds_lbl.align(lv.ALIGN.CENTER, 0, -48)
 
-    def on_seconds_timer(_t):
-        global _seconds
-        _seconds += 1
-        seconds_lbl.set_text(f"Seconds: {_seconds}")
+        arc = lv.arc(scr)
+        arc.set_size(80, 80)
+        arc.align(lv.ALIGN.CENTER, 0, 25)
+        arc.set_bg_angles(0, 360)
+        arc.set_angles(0, 0)
+        arc.remove_style(None, lv.PART.KNOB)
+        arc.remove_flag(lv.obj.FLAG.CLICKABLE)
 
-    def on_arc_timer(_t):
-        global _arc_angle
-        _arc_angle = (_arc_angle + 10) % 360
-        arc.set_angles(0, _arc_angle)
+        btn = lv.button(scr)
+        btn.set_size(120, 50)
+        btn.align(lv.ALIGN.BOTTOM_MID, 0, -30)
+        btn_lbl = lv.label(btn)
+        btn_lbl.set_text("Tap me (0)")
+        btn_lbl.center()
 
-    def on_click(_e):
-        global _taps
-        _taps += 1
-        btn_lbl.set_text(f"Tap me ({_taps})")
+        def on_seconds_timer(_t):
+            global _seconds
+            _seconds += 1
+            seconds_lbl.set_text(f"Seconds: {_seconds}")
 
-    lv.timer_create(on_seconds_timer, 1000, None)
-    lv.timer_create(on_arc_timer, 50, None)
-    btn.add_event_cb(on_click, lv.EVENT.CLICKED, None)
-    return btn
+        def on_arc_timer(_t):
+            global _arc_angle
+            _arc_angle = (_arc_angle + 10) % 360
+            arc.set_angles(0, _arc_angle)
+
+        def on_click(_e):
+            global _taps
+            _taps += 1
+            btn_lbl.set_text(f"Tap me ({_taps})")
+
+        lv.timer_create(on_seconds_timer, 1000, None)
+        lv.timer_create(on_arc_timer, 50, None)
+        btn.add_event_cb(on_click, lv.EVENT.CLICKED, None)
+        return btn
+    finally:
+        if inst is not None:
+            inst.enable()

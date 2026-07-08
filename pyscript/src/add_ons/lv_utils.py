@@ -32,37 +32,19 @@
 
 import sys
 
+# pydisplay changes from upstream lv_utils.py (kept intentionally small):
+#   * The periodic tick is provided by the board's shared runtime timer
+#     (``eventsys.Runtime.on_tick``) instead of a ``machine.Timer``.
+#   * ``asyncio`` comes from ``multimer`` (public API).
+#   * The sync path runs ``lv.task_handler()`` straight from the tick callback
+#     (guarded against re-entrancy) rather than via ``micropython.schedule``;
+#     the runtime timer already delivers the callback on the main thread.
+from board_config import runtime
 import lvgl as lv
 
-try:
-    from multimer import Timer, schedule
-except ImportError:
-    if sys.platform != "darwin":
-        raise RuntimeError("Missing multimer implementation!") from None
-    Timer = False
-    schedule = None
+from multimer import asyncio
 
-# Try to determine default timer id
-
-default_timer_id = 0
-if sys.platform == "pyboard":
-    # stm32 only supports SW timer -1
-    default_timer_id = -1
-
-if sys.platform == "rp2":
-    # rp2 only supports SW timer -1
-    default_timer_id = -1
-
-# Try importing asyncio via multimer (stdlib, uasyncio, or _mpasyncio).
-
-try:
-    from multimer._async import asyncio as _aio_mod
-
-    asyncio = _aio_mod
-    asyncio_available = asyncio is not None
-except ImportError:
-    asyncio = None
-    asyncio_available = False
+asyncio_available = asyncio is not None
 
 ##############################################################################
 
@@ -73,7 +55,6 @@ class event_loop:
     def __init__(
         self,
         freq=25,
-        timer_id=default_timer_id,
         max_scheduled=2,
         refresh_cb=None,
         asynchronous=False,
@@ -90,85 +71,35 @@ class event_loop:
         self.delay = 1000 // freq
         self.refresh_cb = refresh_cb
         self.exception_sink = exception_sink if exception_sink else self.default_exception_sink
-        self._aio_timer = None
+        self._pause = 0
+        self._in_task = False
 
         self.asynchronous = asynchronous
         if self.asynchronous:
             if not asyncio_available:
                 raise RuntimeError("Cannot run asynchronous event loop. asyncio is not available!")
-            self._init_async_timers()
-        else:
-            if Timer:
-                self.timer = Timer(timer_id)
-                self.timer.init(mode=Timer.PERIODIC, period=self.delay, callback=self.timer_cb)
-            self.task_handler_ref = self.task_handler  # Allocation occurs here
-            self.max_scheduled = max_scheduled
-            self.scheduled = 0
+            self.refresh_event = asyncio.Event()
+            self.refresh_task = asyncio.create_task(self.async_refresh())
 
-    def _init_async_timers(self):
-        from multimer import AsyncTimer
-
-        self.refresh_event = asyncio.Event()
-        self.refresh_task = asyncio.create_task(self.async_refresh())
-        self._aio_timer = AsyncTimer(-1)
-        self._aio_timer.init(mode=AsyncTimer.PERIODIC, period=self.delay, callback=self._aio_tick)
-
-    def init_async(self):
-        self._init_async_timers()
+        if runtime is None:
+            raise RuntimeError("LVGL requires board_config.runtime")
+        self._timer_sub = runtime.on_tick(self.timer_cb, period=self.delay, async_=asynchronous)
 
     def deinit(self):
-        if self.asynchronous:
-            self.refresh_task.cancel()
-            if self._aio_timer is not None:
-                self._aio_timer.deinit()
-                self._aio_timer = None
-        else:
-            if Timer:
-                self.timer.deinit()
-        event_loop._current_instance = None
-
-    def shutdown_for_quit(self, *, pump_rounds=30, pump_delay_ms=1):
-        """Stop LVGL scheduling, drain in-flight work, then release the event loop."""
-        self.disable()
-        if self.asynchronous:
-            if self._aio_timer is not None:
-                self._aio_timer.deinit()
-                self._aio_timer = None
-        elif Timer and getattr(self, "timer", None):
-            self.timer.deinit()
-            self.timer = None
-
-        try:
-            from multimer import pump, sleep_ms
-        except ImportError:
-
-            def pump():
-                return None
-
-            def sleep_ms(_ms):
-                return None
-
-        for _ in range(pump_rounds):
-            pump()
-            if lv._nesting.value == 0 and (self.asynchronous or self.scheduled <= 0):
-                break
-            sleep_ms(pump_delay_ms)
-
-        if lv._nesting.value == 0:
-            try:
-                lv.task_handler()
-            except Exception:
-                pass
-
+        if getattr(self, "_timer_sub", None) is not None:
+            self._timer_sub.deinit()
+            self._timer_sub = None
         if self.asynchronous:
             self.refresh_task.cancel()
         event_loop._current_instance = None
 
     def disable(self):
-        self.scheduled += self.max_scheduled
+        # Pause LVGL task handling (e.g. while building the UI). Re-entrant.
+        self._pause += 1
 
     def enable(self):
-        self.scheduled -= self.max_scheduled
+        if self._pause > 0:
+            self._pause -= 1
 
     @staticmethod
     def is_running():
@@ -178,21 +109,20 @@ class event_loop:
     def current_instance():
         return event_loop._current_instance
 
-    def task_handler(self, _):
-        if event_loop._current_instance is not self:
-            if getattr(self, "scheduled", 0) > 0:
-                self.scheduled -= 1
+    def task_handler(self, _=None):
+        if self._in_task or self._pause > 0:
             return
+        self._in_task = True
         try:
-            nesting = lv._nesting.value
-            if nesting == 0:
+            if lv._nesting.value == 0:
                 lv.task_handler()
                 if self.refresh_cb:
                     self.refresh_cb()
-            self.scheduled -= 1
         except Exception as e:
             if self.exception_sink:
                 self.exception_sink(e)
+        finally:
+            self._in_task = False
 
     def tick(self):
         self.timer_cb(None)
@@ -203,21 +133,14 @@ class event_loop:
                 self.tick()
 
     def timer_cb(self, t):
-        if event_loop._current_instance is not self:
+        # Called from the runtime's shared timer (on the main thread).
+        lv.tick_inc(self.delay)
+        if self._pause > 0:
             return
-        # Can be called in Interrupt context
-        # Use task_handler_ref since passing self.task_handler would cause allocation.
-        lv.tick_inc(self.delay)
-        if self.scheduled < self.max_scheduled:
-            try:
-                schedule(self.task_handler_ref, 0)
-                self.scheduled += 1
-            except Exception:
-                pass
-
-    def _aio_tick(self, _timer):
-        lv.tick_inc(self.delay)
-        self.refresh_event.set()
+        if self.asynchronous:
+            self.refresh_event.set()
+        else:
+            self.task_handler()
 
     async def async_refresh(self):
         while True:

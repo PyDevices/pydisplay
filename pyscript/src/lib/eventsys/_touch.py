@@ -27,10 +27,15 @@ class TouchDevice(Device):
     type = types.TOUCH
     responses = (events.MOUSEMOTION, events.MOUSEBUTTONDOWN, events.MOUSEBUTTONUP)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self, *args, read=None, data=None, data2=None, display=None, rotation_table=None, **kwargs
+    ):
+        read = read if read is not None else (args[0] if args else None)
+        data = display if display is not None else data
+        data2 = rotation_table if rotation_table is not None else data2
+        super().__init__(read=read, data=data, data2=data2, **kwargs)
         if self._data is None:
-            raise ValueError("TouchDevice requires a display device as 'data'")
+            raise ValueError("TouchDevice requires display=")
         if self._data2 is None:
             self._data2 = _DEFAULT_TOUCH_ROTATION_TABLE
         self.rotation = self._data.rotation

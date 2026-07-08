@@ -1,7 +1,6 @@
 # multimer types: all
-from board_config import broker, display_drv
-from eventsys import poll_quit_discarding_others
-from multimer import pump, sleep_ms
+from board_config import display_drv, runtime
+from multimer import sleep_ms
 from palettes import get_palette
 
 if display_drv.requires_byteswap:
@@ -23,7 +22,7 @@ def main():
 
 while True:
     main()
-    pump()
-    if poll_quit_discarding_others(broker):
+    sleep_ms(0)
+    if runtime.quit_requested if runtime else False:
         break
     sleep_ms(1)
