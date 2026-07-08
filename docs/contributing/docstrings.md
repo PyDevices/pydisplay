@@ -24,7 +24,7 @@ See also: https://pydisplay.readthedocs.io/en/latest/concepts/displays/
 
 - What the class is for and when to use it vs alternatives.
 - `Args` for constructor parameters when non-obvious.
-- Short usage example only when setup is not obvious (e.g. `Broker`, `BusDisplay`).
+- Short usage example only when setup is not obvious (e.g. `Runtime`, `BusDisplay`).
 
 ## Method / function docstrings
 

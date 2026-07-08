@@ -3,6 +3,8 @@
 from spibus import SPIBus
 from st7735r_1 import ST7735R
 
+import eventsys
+
 display_bus = SPIBus(
     id=1,
     baudrate=60_000_000,
@@ -31,6 +33,21 @@ display_drv = ST7735R(
     reset_high=False,
     power_pin=None,
     power_on_high=True,
+    cp={
+        "width": 160,
+        "height": 128,
+        "colstart": 1,
+        "rowstart": 2,
+        "rotation": 0,
+        "mirrored": False,
+        "color_depth": 16,
+        "bgr": True,
+        "reverse_bytes_in_word": True,
+        "invert": False,
+        "brightness": 1.0,
+        "backlight_pin": "board.GP13",
+        "backlight_on_high": True,
+        "reset_high": False,
+    },
 )
-
-broker = None
+runtime = None

@@ -51,21 +51,22 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 
 ### Architecture note: timers and refresh
 
-- The single shared periodic timer is owned by `eventsys.Broker`
-  (`Broker.on_tick` / `stop_timer`), not by display drivers. `board_config`
-  wires periodic display refresh via `broker.on_tick(display_drv.show, ...)` and
-  keeps the subscription handle on `broker.display_refresh` so a GUI layer can
-  take it over. `displaysys` drivers only `show()`/`deinit()`. `multimer` stays
-  display-agnostic (no pydisplay/LVGL concepts).
+- The single shared periodic timer is owned by `eventsys.Runtime`
+  (`Runtime.on_tick` / `stop_timer`), not by display drivers. `board_config`
+  constructs `eventsys.Runtime(display=display_drv, ...)` which wires periodic
+  refresh when `display_drv.needs_refresh` is true. `displaysys` drivers only
+  `show()`/`deinit()` and declare `needs_refresh`; `multimer` stays
+  display-agnostic. GUI layers claim presentation via
+  `runtime.claim_display_refresh()` (LVGL via `add_ons/display_driver.py`).
 
 ### LVGL
 
 - Install the CPython LVGL binding from TestPyPI (import name `lvgl`):
   `.venv/bin/pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ lvgl-cpython`
   (see https://github.com/PyDevices/lv_cpython_mod). The update script installs it.
-- `add_ons/lv_utils.py` subscribes its LVGL tick to the broker's shared timer
-  (`broker.on_tick`) and imports `asyncio` from `multimer`; `add_ons/display_driver.py`
-  takes over `broker.display_refresh` so LVGL presents frames from `task_handler`.
+- `add_ons/lv_utils.py` subscribes its LVGL tick to the runtime's shared timer
+  (`runtime.on_tick`) and imports `asyncio` from `multimer`; `add_ons/display_driver.py`
+  claims runtime display refresh so LVGL presents frames from `task_handler`.
 - Test LVGL timers with `tools/lv_timer_test_kit.py` (modes: `sync`, `async` —
   there is no pump/no_pump). Headless: `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/lv_timer_test_kit.py --only cpython-venv`.
 - Non-obvious: the sync `multimer.Timer` backend on CPython/Linux delivers via a

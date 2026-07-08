@@ -1,0 +1,140 @@
+# Bootstrapped from board_configs — edit here; run generate_board_configs.py
+kind = "busdisplay_verbatim"
+slug = 'esp32_wrover_e_st7789_joystick'
+out = "busdisplay/spi"
+circuitpython = true
+title = 'ESP32 WROVER E with ST7789 display, and joystick instead of touchscreen'
+
+[verbatim.mp]
+board_config = '''
+"""ESP32 WROVER E with ST7789 display, and joystick instead of touchscreen"""
+
+from gpiojoystick import GPIOJoystick
+from machine import ADC, Pin
+from spibus import SPIBus
+from st7789 import ST7789
+
+import eventsys
+
+display_bus = SPIBus(
+    id=1,
+    sck=14,
+    mosi=12,
+    dc=13,
+    cs=15,
+)
+
+display_drv = ST7789(
+    display_bus,
+    width=240,
+    height=240,
+    colstart=0,
+    rowstart=0,
+    rotation=0,
+    mirrored=True,
+    color_depth=16,
+    bgr=True,
+    reverse_bytes_in_word=True,
+    invert=False,
+    brightness=1.0,
+    backlight_pin=None,
+    backlight_on_high=True,
+)
+
+joystick_driver = GPIOJoystick(
+    instance_id=1,
+    axes=[ADC(Pin(39), atten=ADC.ATTN_11DB), ADC(Pin(36), atten=ADC.ATTN_11DB)],
+    buttons=[
+        Pin(4, Pin.IN, Pin.PULL_UP),
+        Pin(25, Pin.IN, Pin.PULL_UP),
+        Pin(26, Pin.IN, Pin.PULL_UP),
+    ],
+)
+
+runtime = eventsys.Runtime(display=display_drv)
+runtime.add_joystick(joystick_driver=joystick_driver, emulate_digital=[(0, 1)])
+'''
+package_json = """
+{
+    "urls": [
+      ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/spi/esp32_wrover_e_st7789_joystick/board_config.py"],
+      ["st7789.py", "github:PyDevices/pydisplay/drivers/display/st7789.py"],
+      ["gpiojoystick.py", "github:PyDevices/pydisplay/drivers/joystick/gpiojoystick.py"]
+    ],
+    "deps": [
+      ["github:PyDevices/pydisplay/packages/spibus.json", "main"]
+    ],
+    "version": "0.1"
+  }
+"""
+
+[verbatim.cp]
+board_config = '''
+"""ESP32 WROVER-E ST7789 with GPIO joystick — CircuitPython"""
+
+import board
+from displayio import release_displays
+from fourwire import FourWire
+from st7789 import ST7789
+
+import eventsys
+
+release_displays()
+
+display_bus = FourWire(
+    board.SPI(),
+    command=board.D13,
+    chip_select=board.D15,
+    baudrate=40_000_000,
+)
+
+display_drv = ST7789(
+    display_bus,
+    width=240,
+    height=240,
+    colstart=0,
+    rowstart=0,
+    rotation=0,
+    mirrored=True,
+    color_depth=16,
+    bgr=True,
+    reverse_bytes_in_word=True,
+    invert=False,
+)
+
+# Joystick wiring is board-specific; register KEYPAD/JOYSTICK when ported.
+runtime = None
+'''
+package_json = """
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/busdisplay/spi/cp_esp32_wrover_e_st7789_joystick/board_config.py"
+    ],
+    [
+      "st7789.py",
+      "github:PyDevices/pydisplay/drivers/display/st7789.py"
+    ],
+    [
+      "gpiojoystick.py",
+      "github:PyDevices/pydisplay/drivers/joystick/gpiojoystick.py"
+    ],
+    [
+      "adafruit_focaltouch.py",
+      "github:PyDevices/pydisplay/drivers/touch/circuitpython/adafruit_focaltouch.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/spibus.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}
+"""

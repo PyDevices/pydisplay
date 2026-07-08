@@ -98,6 +98,7 @@ nav:
     - Architecture: concepts/architecture.md
     - Displays: concepts/displays.md
     - Events: concepts/events.md
+    - Runtime: concepts/runtime.md
     - multimer: concepts/multimer.md
     - Drawing and fonts: concepts/drawing-and-fonts.md
     - Graphics files: concepts/graphics-files.md

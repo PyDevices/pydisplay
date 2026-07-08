@@ -1,6 +1,7 @@
 """Adafruit RGB Matrix FeatherWing 64x32 — MicroPython (Feather ESP32-S3)"""
 
 import rgbmatrix
+
 from displaysys.fbdisplay import FBDisplay
 import eventsys
 
@@ -17,5 +18,4 @@ matrix = rgbmatrix.RGBMatrix(
 
 display_drv = FBDisplay(matrix, width=64, height=32)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

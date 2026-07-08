@@ -1,6 +1,6 @@
-"""SSD1680 2.13\" E-Ink FeatherWing — MicroPython (Feather RP2040 / M4 pinout)"""
+"""SSD1680 2.13" E-Ink FeatherWing — MicroPython (Feather SPI pinout)"""
 
-from machine import Pin, SPI
+from machine import SPI, Pin
 from spibus import SPIBus
 from ssd1680 import SSD1680
 
@@ -17,7 +17,6 @@ display_bus = SPIBus(
     cs=10,
     reset=6,
 )
-
 _epaper = SSD1680(
     display_bus,
     width=250,
@@ -28,5 +27,4 @@ _epaper = SSD1680(
 
 display_drv = EPaperDisplay(_epaper, width=250, height=122, color_depth=1)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

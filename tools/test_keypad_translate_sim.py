@@ -39,13 +39,13 @@ def translate_scrolled(point):
     return x, y + 80
 
 
-broker = MockBroker()
-keypad = Keypad(broker, 2, 233, 7 * 45, 3 * 45, cols=7, rows=3, translate=translate_scrolled)
+runtime = MockBroker()
+keypad = Keypad(runtime, 2, 233, 7 * 45, 3 * 45, cols=7, rows=3, translate=translate_scrolled)
 # Window click on visible key row; logical y must be ~250 after translate
 window_pos = (50, 200)
 
-broker.inject(evt(events.MOUSEBUTTONDOWN, window_pos))
-broker.inject(evt(events.MOUSEBUTTONUP, window_pos))
+runtime.inject(evt(events.MOUSEBUTTONDOWN, window_pos))
+runtime.inject(evt(events.MOUSEBUTTONUP, window_pos))
 clicks = keypad.read()
 
 print(f"window_pos={window_pos!r} logical_y={translate_scrolled(window_pos)[1]}")

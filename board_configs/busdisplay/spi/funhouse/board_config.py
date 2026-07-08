@@ -30,8 +30,7 @@ display_drv = ST7789(
     bgr=False,
     reverse_bytes_in_word=True,
 )
-
-i2c = I2C(0, scl=Pin(33), sda=Pin(34), freq=400_000)
+i2c = I2C(0, sda=Pin(34), scl=Pin(33), freq=400_000)
 touch_drv = TT21100(i2c)
 
 
@@ -44,13 +43,8 @@ def touch_read_func():
 
 touch_rotation_table = (0, 0, 0, 0)
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

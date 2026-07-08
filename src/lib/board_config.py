@@ -6,35 +6,16 @@ board_config.py file that is specific to your hardware from:
 https://github.com/PyDevices/pydisplay/tree/main/board_configs
 """
 
-# False: default multimer.Timer (MCU, desktop Linux, etc.)
-# True: multimer.AsyncTimer — PyScript and asyncio-native apps
-TIMER_ASYNC = False
+import os
 
-# Default portrait panel (320×480). Games scale layout for taller/wider panels
-# (e.g. 480×800, 720×720) via display_drv.width / height.
+# Default portrait panel (320x480). Games scale layout for taller/wider panels
+# (e.g. 480x800, 720x720) via display_drv.width / height.
 width = 320
 height = 480
 rotation = 0
 scale = 2
 
-touch_dev = None
-
-
-_DISPLAY_REFRESH_MS = 33
-
-
-def _wire_display_refresh(broker, display_drv, *, async_=False, period=_DISPLAY_REFRESH_MS):
-    """Drive display refresh from the broker's shared timer.
-
-    The broker owns the timer (see ``eventsys.Broker.on_tick``); the display only
-    provides ``show()``. Quit tears the shared timer down after the display is
-    released.
-    """
-    # Keep the refresh subscription handle on the broker so a GUI layer (e.g.
-    # LVGL via display_driver) can take over presenting frames itself.
-    broker.display_refresh = broker.on_tick(display_drv.show, period=period, async_=async_)
-    broker.register_quit_cleanup(display_drv, after=broker.stop_timer)
-
+_TIMER_ASYNC = os.environ.get("PYDISPLAY_TIMER_ASYNC", "").lower() in ("1", "true", "yes")
 
 _ps = _jn = False
 try:
@@ -49,43 +30,28 @@ except ImportError:
         pass
 
 if _ps:
-    # Running in PyScript
     from displaysys.psdisplay import PSDevices, PSDisplay
     import eventsys
 
     display_drv = PSDisplay("display_canvas", width, height)
-
-    broker = eventsys.Broker()
-
     devices_drv = PSDevices("display_canvas", display_drv)
-
-    events_dev = broker.create(
-        type=eventsys.QUEUE,
-        read=devices_drv.read,
-        data=display_drv,
+    runtime = eventsys.Runtime(
+        display=display_drv,
+        host_read=devices_drv.read,
+        timer_async=True,
     )
-    _wire_display_refresh(broker, display_drv, async_=True)
 elif _jn:
-    # Running in Jupyter Notebook
     from displaysys.jndisplay import JNDevices, JNDisplay
     import eventsys
 
-    TIMER_ASYNC = True
-
-    broker = eventsys.Broker()
-
     display_drv = JNDisplay(width, height)
-
     devices_drv = JNDevices(display_drv)
-
-    events_dev = broker.create(
-        type=eventsys.QUEUE,
-        read=devices_drv.read,
-        data=display_drv,
+    runtime = eventsys.Runtime(
+        display=display_drv,
+        host_read=devices_drv.read,
+        timer_async=True,
     )
-    _wire_display_refresh(broker, display_drv, async_=TIMER_ASYNC)
 else:
-    # Running on the desktop
     import sys
 
     _DESKTOP_PLATFORMS = frozenset(
@@ -105,11 +71,9 @@ else:
     import eventsys
 
     try:
-        # This should load for CPython
         from displaysys.pgdisplay import PGDisplay as DTDisplay
         from displaysys.pgdisplay import get_events
     except ImportError:
-        # This should load for MicroPython on the desktop
         from displaysys.sdldisplay import SDLDisplay as DTDisplay
         from displaysys.sdldisplay import get_events
 
@@ -120,18 +84,6 @@ else:
         title=f"{sys.implementation.name} on {sys.platform}",
         scale=scale,
     )
-
-    broker = eventsys.Broker()
-
-    events_dev = broker.create(
-        type=eventsys.QUEUE,
-        read=get_events,
-        data=display_drv,
-        # data2=events.filter,
-    )
-    _wire_display_refresh(broker, display_drv, async_=TIMER_ASYNC)
-
-if _ps:
-    TIMER_ASYNC = True
+    runtime = eventsys.Runtime(display=display_drv, host_read=get_events, timer_async=_TIMER_ASYNC)
 
 display_drv.fill(0)

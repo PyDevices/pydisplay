@@ -36,7 +36,7 @@ Parallel RGB scanout uses **`fbdisplay.FBDisplay`** + displayif **`rgbframebuffe
 
 - Paired CP+MP configs for SPI/I80/I2C bus displays
 - Built-in Adafruit boards: PyPortal, Titano, FunHouse, PyBadge, HalloWing M4, PiTFT FeatherWing, etc.
-- **All vendored e-paper chips** have CP+MP pairs (via `scripts/generate_epaper_board_configs.py`)
+- **All vendored e-paper chips** have CP+MP pairs (via `board_configs/manifests/epaperdisplay.toml` + `scripts/generate_board_configs.py`)
 - `fbdisplay/t-rgb_480` — ST7701 + XL9535; MP uses `rgbframebuffer` + `FBDisplay`
 - **Removed:** `cp_clue_builtin` (explicit wiring teaches MP users)
 
@@ -49,8 +49,9 @@ New MIP manifests: `i2cbus`, `epaper_chip`, `boarddisplay`, `pixeldisplay`, `epa
 | Script | Purpose |
 |--------|---------|
 | `scripts/vendor_circuitpython_drivers.py` | Refresh Adafruit drivers from GitHub |
-| `scripts/generate_cp_board_configs.py` | CP siblings from MP configs (pin parsing) |
-| `scripts/generate_epaper_board_configs.py` | E-paper CP+MP pairs for all vendored chips |
+| `scripts/generate_board_configs.py` | Manifest-driven `board_config.py` + `package.json` (SPI bus + e-paper) |
+| `scripts/generate_cp_board_configs.py` | CP siblings from MP configs (legacy) |
+| `scripts/generate_epaper_board_configs.py` | Thin wrapper → `generate_board_configs.py --kind epaper` |
 | `scripts/publish_micropython_lib.sh` | Sync to micropython-lib + TestPyPI |
 | `scripts/publish_make_pyproject.py` | Hatch wheels from manifests |
 

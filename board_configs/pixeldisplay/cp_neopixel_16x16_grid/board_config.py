@@ -18,5 +18,4 @@ pixel_buf = create_pixel_framebuffer(
 
 display_drv = PixelDisplay(pixel_buf, width=16, height=16, color_depth=24)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

@@ -117,4 +117,25 @@ python scripts/pyscript_gen_packages.py --check    # CI freshness
 
 Manual packages (not generated): `packages/i80bus.json`, `packages/spibus.json`, `packages/i2cbus.json`, `packages/epaper_chip.json`, `packages/boarddisplay.json`, `packages/pixeldisplay.json`, `packages/epaperdisplay.json`, `packages/rgbframebuffer.json`, `packages/tt21100.json`, `packages/stmpe610.json`, `packages/keypad_shift.json`.
 
+### Board config generation
+
+Describe hardware once under `board_configs/manifests/`, then:
+
+```bash
+.venv/bin/python scripts/generate_board_configs.py
+.venv/bin/python scripts/generate_board_configs.py --check
+.venv/bin/python scripts/audit_board_config_pairs.py   # fbdisplay CP/MP pairs
+```
+
+Bootstrap verbatim busdisplay manifests from existing configs:
+
+```bash
+.venv/bin/python scripts/bootstrap_busdisplay_manifests.py
+```
+
+See `board_configs/manifests/README.md`. Legacy `generate_cp_board_configs.py` remains
+for one-off CP regeneration; prefer manifests + `generate_board_configs.py`.
+E-paper uses `generate_epaper_board_configs.py`, which delegates to
+`generate_board_configs.py`.
+
 Personal-only example symlinks under `src/examples/` (`frogger`, `spotapi`, `spotify_remote`, …) are listed in [`personal_examples.py`](personal_examples.py) and excluded from `install_gen_manifests`, `pyscript_gen_packages`, and CI.

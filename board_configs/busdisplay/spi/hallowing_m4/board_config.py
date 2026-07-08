@@ -28,6 +28,4 @@ display_drv = ST7735(
     bgr=True,
     reverse_bytes_in_word=True,
 )
-
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

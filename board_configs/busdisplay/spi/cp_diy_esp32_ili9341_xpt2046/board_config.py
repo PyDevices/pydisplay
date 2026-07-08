@@ -1,11 +1,10 @@
 """DIY ESP32 ILI9341 + XPT2046 resistive touch — CircuitPython"""
 
+from adafruit_touchscreen import Touchscreen
 import board
 from displayio import release_displays
 from fourwire import FourWire
 from ili9341 import ILI9341
-
-from adafruit_touchscreen import Touchscreen
 
 import eventsys
 
@@ -44,20 +43,18 @@ touchscreen = Touchscreen(
     x_resistance=400,
 )
 
+
 def touch_read_func():
     point = touchscreen.touch_point
     if point:
         return point[0], point[1]
     return None
+
+
 touch_rotation_table = (0, 0, 0, 0)
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

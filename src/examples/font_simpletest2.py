@@ -11,8 +11,7 @@ Rendering path (per-pixel → live display):
   three font_simpletest variants. display_drv.show() follows each draw.
 """
 
-from board_config import broker, display_drv
-from eventsys import poll_quit_discarding_others
+from board_config import display_drv, runtime
 from graphics import Font
 from random import getrandbits
 from palettes import get_palette
@@ -80,7 +79,7 @@ def main():
                     scale,
                 )
                 display_drv.show()
-                if poll_quit_discarding_others(broker):
+                if runtime.quit_requested if runtime else False:
                     return
 
 

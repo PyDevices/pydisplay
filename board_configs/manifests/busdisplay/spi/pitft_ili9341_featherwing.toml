@@ -1,0 +1,162 @@
+# Bootstrapped from board_configs — edit here; run generate_board_configs.py
+kind = "busdisplay_verbatim"
+slug = 'pitft_ili9341_featherwing'
+out = "busdisplay/spi"
+circuitpython = true
+
+[verbatim.mp]
+board_config = '''
+"""Adafruit PiTFT 2.4\" FeatherWing ILI9341 + STMPE610 — MicroPython (Feather)"""
+
+from machine import Pin, SPI
+from ili9341 import ILI9341
+from spibus import SPIBus
+from stmpe610 import STMPE610
+
+import eventsys
+
+display_bus = SPIBus(
+    id=0,
+    baudrate=24_000_000,
+    sck=18,
+    mosi=19,
+    miso=20,
+    dc=10,
+    cs=9,
+    reset=6,
+)
+
+display_drv = ILI9341(
+    display_bus,
+    width=240,
+    height=320,
+    colstart=0,
+    rowstart=0,
+    rotation=90,
+    mirrored=False,
+    color_depth=16,
+    bgr=True,
+    reverse_bytes_in_word=True,
+)
+
+touch_spi = SPI(0, baudrate=1_000_000, sck=Pin(18), mosi=Pin(19), miso=Pin(20))
+# PiTFT 2.4" FeatherWing (#3315) STMPE610 calibration (rotation 90°)
+_PITFT_CALIBRATION = ((357, 3812), (390, 3555))
+touch_drv = STMPE610(
+    touch_spi,
+    cs=8,
+    width=240,
+    height=320,
+    rotation=90,
+    calibration=_PITFT_CALIBRATION,
+)
+
+
+def touch_read_func():
+    if touch_drv.touched:
+        point = touch_drv.touch_point
+        if point is not None:
+            return point
+    return None
+
+
+touch_rotation_table = (0, 0, 0, 0)
+
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
+)
+'''
+package_json = """
+{
+  "urls": [
+    ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/spi/pitft_ili9341_featherwing/board_config.py"],
+    ["ili9341.py", "github:PyDevices/pydisplay/drivers/display/ili9341.py"],
+    ["stmpe610.py", "github:PyDevices/pydisplay/drivers/touch/stmpe610.py"]
+  ],
+  "deps": [
+    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"],
+    ["github:PyDevices/pydisplay/packages/spibus.json", "main"]
+  ],
+  "version": "0.1"
+}
+"""
+
+[verbatim.cp]
+board_config = '''
+"""Adafruit PiTFT 2.4\" FeatherWing ILI9341 + STMPE610 — CircuitPython"""
+
+from adafruit_stmpe610 import Adafruit_STMPE610_SPI
+import board
+from displayio import release_displays
+from fourwire import FourWire
+from ili9341 import ILI9341
+
+import eventsys
+
+release_displays()
+
+# PiTFT 2.4" FeatherWing (#3315) STMPE610 calibration (rotation 90°)
+_PITFT_CALIBRATION = ((357, 3812), (390, 3555))
+
+display_bus = FourWire(
+    board.SPI(),
+    command=board.D10,
+    chip_select=board.D9,
+    reset=board.D6,
+    baudrate=24_000_000,
+)
+
+display_drv = ILI9341(
+    display_bus,
+    width=240,
+    height=320,
+    colstart=0,
+    rowstart=0,
+    rotation=90,
+    mirrored=False,
+    color_depth=16,
+    bgr=True,
+    reverse_bytes_in_word=True,
+)
+
+touch_drv = Adafruit_STMPE610_SPI(
+    board.SPI(),
+    board.D8,
+    baudrate=1_000_000,
+    calibration=_PITFT_CALIBRATION,
+    size=(display_drv.width, display_drv.height),
+    disp_rotation=display_drv.rotation,
+)
+
+
+def touch_read_func():
+    if touch_drv.touched:
+        point = touch_drv.touch_point
+        if point is not None:
+            return point[0], point[1]
+    return None
+
+
+touch_rotation_table = (0, 0, 0, 0)
+
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
+)
+'''
+package_json = """
+{
+  "urls": [
+    ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/spi/cp_pitft_ili9341_featherwing/board_config.py"],
+    ["ili9341.py", "github:PyDevices/pydisplay/drivers/display/ili9341.py"],
+    ["adafruit_stmpe610.py", "github:PyDevices/pydisplay/drivers/touch/circuitpython/adafruit_stmpe610.py"]
+  ],
+  "deps": [
+    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"]
+  ],
+  "version": "0.1"
+}
+"""

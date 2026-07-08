@@ -15,7 +15,8 @@ buttons = GPIOButtons({
     "b": (board.BUTTON_B, Keys.K_b),
 })
 
-broker.create(type=eventsys.KEYPAD, read=buttons.read)
+runtime = eventsys.Runtime(display=display_drv)
+runtime.add_keypad(read=buttons.read)
 ```
 
 Used by MagTag, PyBadge, and similar boards with front-panel buttons.

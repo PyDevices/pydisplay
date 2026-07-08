@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Tests for ``eventsys`` Broker and built-in device types."""
+"""Tests for ``eventsys`` Runtime and built-in device types."""
 
 import unittest
 
@@ -10,11 +10,11 @@ from _support import FakeDisplay, scripted
 
 import eventsys
 from eventsys import (
-    Broker,
     Device,
     EncoderDevice,
+    HostEventsDevice,
     KeypadDevice,
-    QueueDevice,
+    Runtime,
     TouchDevice,
     events,
     types,
@@ -24,7 +24,7 @@ from eventsys._device import _mapping as device_mapping
 
 class TestDeviceBase(unittest.TestCase):
     def test_subscribe_requires_callable(self):
-        dev = QueueDevice(read=scripted(None))
+        dev = HostEventsDevice(host_read=scripted(None))
         with self.assertRaises(ValueError):
             dev.subscribe("not callable", [events.KEYDOWN])
 
@@ -49,7 +49,7 @@ class TestDeviceBase(unittest.TestCase):
         self.assertEqual(len(seen), 1)
 
     def test_user_data_roundtrip(self):
-        dev = QueueDevice(read=scripted(None))
+        dev = HostEventsDevice(host_read=scripted(None))
         dev.user_data = {"hello": 1}
         self.assertEqual(dev.user_data, {"hello": 1})
 
@@ -89,24 +89,24 @@ class TestEncoderDevice(unittest.TestCase):
         self.assertEqual(btn[0].button, 2)
 
 
-class TestQueueDevice(unittest.TestCase):
+class TestHostEventsDevice(unittest.TestCase):
     def test_forwards_filtered_events(self):
         ev = events.Key(events.KEYDOWN, "A", 65, 0, 0, None)
-        dev = QueueDevice(read=scripted([ev]))
+        dev = HostEventsDevice(host_read=scripted([ev]))
         out = dev.poll()
         self.assertEqual(len(out), 1)
         self.assertEqual(out[0].type, events.KEYDOWN)
 
     def test_empty_read_returns_empty_list(self):
-        dev = QueueDevice(read=scripted(None))
+        dev = HostEventsDevice(host_read=scripted(None))
         self.assertEqual(dev.poll(), [])
 
-    def test_touch_scale_on_display_data(self):
+    def test_touch_scale_on_display(self):
         class ScaledDisplay:
             touch_scale = 2
 
         ev = events.Button(events.MOUSEBUTTONDOWN, (100, 200), 1, False, None)
-        dev = QueueDevice(read=scripted([ev]), data=ScaledDisplay())
+        dev = HostEventsDevice(host_read=scripted([ev]), display=ScaledDisplay())
         out = dev.poll()
         self.assertEqual(out[0].pos, (50, 100))
 
@@ -115,7 +115,7 @@ class TestTouchDevice(unittest.TestCase):
     def test_press_move_release_sequence(self):
         disp = FakeDisplay()
         touch = scripted((10, 20), (15, 28), None)
-        dev = TouchDevice(read=touch, data=disp)
+        dev = TouchDevice(read=touch, display=disp)
         self.assertIs(disp.touch_device, dev)
 
         down = dev.poll()
@@ -132,74 +132,67 @@ class TestTouchDevice(unittest.TestCase):
 
     def test_rotation_transforms_coordinates(self):
         disp = FakeDisplay(width=320, height=240, rotation=90)
-        dev = TouchDevice(read=scripted((5, 7)), data=disp)
+        dev = TouchDevice(read=scripted((5, 7)), display=disp)
         down = dev.poll()
         self.assertEqual(down[0].pos, (7, 234))
 
-    def test_requires_data(self):
+    def test_requires_display(self):
         with self.assertRaises(ValueError):
             TouchDevice(read=scripted(None))
 
 
-class TestBroker(unittest.TestCase):
+class TestRuntime(unittest.TestCase):
     def test_on_rejects_non_callable(self):
-        broker = Broker()
+        runtime = Runtime()
         with self.assertRaises(ValueError):
-            broker.on(events.KEYDOWN, "nope")
+            runtime.on(events.KEYDOWN, "nope")
 
     def test_poll_aggregates_registered_devices(self):
-        broker = Broker()
+        runtime = Runtime()
         kp = KeypadDevice(read=scripted({65}, set()))
-        broker.register(kp)
-        self.assertIs(kp.broker, broker)
+        runtime.register(kp)
+        self.assertIs(kp.runtime, runtime)
 
-        out = broker.poll()
+        out = runtime.poll()
         self.assertEqual(len(out), 1)
         self.assertEqual(out[0].type, events.KEYDOWN)
 
     def test_poll_empty_is_list(self):
-        broker = Broker()
-        self.assertEqual(broker.poll(), [])
+        runtime = Runtime()
+        self.assertEqual(runtime.poll(), [])
 
     def test_device_type_subscription(self):
-        broker = Broker()
+        runtime = Runtime()
         kp = KeypadDevice(read=scripted({66}, set()))
-        broker.register(kp)
+        runtime.register(kp)
         seen = []
-        broker.on_device(types.KEYPAD, seen.append)
-        broker.poll()
+        runtime.on_device(types.KEYPAD, seen.append)
+        runtime.poll()
         self.assertEqual(len(seen), 1)
         self.assertEqual(seen[0].key, 66)
 
-    def test_create_registers_device(self):
-        broker = Broker()
-        dev = broker.create(types.QUEUE, read=scripted(None))
-        self.assertIn(dev, broker.devices)
-        self.assertIsInstance(dev, QueueDevice)
-
-    def test_create_invalid_type_raises(self):
-        broker = Broker()
-        with self.assertRaises(ValueError):
-            broker.create(0x999)
-
     def test_unregister(self):
-        broker = Broker()
-        dev = broker.create(types.QUEUE, read=scripted(None))
-        broker.unregister(dev)
-        self.assertNotIn(dev, broker.devices)
-        self.assertIsNone(dev.broker)
+        runtime = Runtime()
+        dev = HostEventsDevice(host_read=scripted(None))
+        runtime.register(dev)
+        runtime.unregister(dev)
+        self.assertNotIn(dev, runtime.devices)
+        self.assertIsNone(dev.runtime)
 
-    def test_on_quit_must_be_callable(self):
-        broker = Broker()
+    def test_before_quit_must_be_callable(self):
+        runtime = Runtime()
         with self.assertRaises(ValueError):
-            broker.on_quit = 5
+            runtime.before_quit = 5
 
-    def test_on_quit_handler_runs(self):
-        broker = Broker()
-        called = []
-        broker.on_quit = lambda: called.append(True)
-        broker.quit()
-        self.assertTrue(called)
+    def test_touch_read_must_be_callable(self):
+        with self.assertRaises(TypeError):
+            Runtime(display=FakeDisplay(), touch_read=(lambda: None,))
+
+    def test_add_keypad(self):
+        runtime = Runtime()
+        dev = runtime.add_keypad(read=scripted(set()))
+        self.assertIs(runtime.keypad_dev, dev)
+        self.assertIn(dev, runtime.devices)
 
 
 class TestRegisterDevice(unittest.TestCase):

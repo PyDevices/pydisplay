@@ -17,7 +17,7 @@ class TestCapabilities(unittest.TestCase):
         self.assertIn("devices", caps)
         self.assertIn("joystick", caps)
         self.assertTrue(caps["joystick"])
-        self.assertIn("joystick", caps["devices"])
+        self.assertIn("runtime", caps["devices"])
 
 
 if __name__ == "__main__":

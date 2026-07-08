@@ -17,6 +17,4 @@ display_drv = SH1107(
     height=64,
     rotation=0,
 )
-
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

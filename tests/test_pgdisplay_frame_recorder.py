@@ -3,14 +3,32 @@
 # SPDX-License-Identifier: MIT
 """PGDisplay frame recording via displaysys."""
 
+import io
 import os
 import tempfile
 import unittest
+from unittest import mock
 
 import _env  # noqa: F401
 from _support import quiet
 
 from displaysys import FFmpegFrameRecorder
+
+
+def _fake_popen(cmd, stdin=None, stdout=None, stderr=None, **kwargs):
+    """Stub ffmpeg: write a non-empty placeholder MP4 on ``wait()``."""
+    out_path = cmd[-1]
+    proc = mock.Mock()
+    proc.stdin = io.BytesIO()
+    proc.stderr = io.BytesIO(b"")
+
+    def _wait():
+        with open(out_path, "wb") as fh:
+            fh.write(b"\x00" * 128)
+        return 0
+
+    proc.wait = _wait
+    return proc
 
 
 class TestFrameRecorderBase(unittest.TestCase):
@@ -27,6 +45,11 @@ class TestPGDisplayFrameRecorder(unittest.TestCase):
     def setUp(self):
         os.environ["SDL_VIDEODRIVER"] = "dummy"
         os.environ["SDL_AUDIODRIVER"] = "dummy"
+        self._popen = mock.patch("subprocess.Popen", side_effect=_fake_popen)
+        self._popen.start()
+
+    def tearDown(self):
+        self._popen.stop()
 
     def test_records_logical_buffer_on_show(self):
         from displaysys.pgdisplay import PGDisplay
@@ -69,6 +92,13 @@ class TestPGDisplayFrameRecorder(unittest.TestCase):
 
 
 class TestFFmpegFrameRecorder(unittest.TestCase):
+    def setUp(self):
+        self._popen = mock.patch("subprocess.Popen", side_effect=_fake_popen)
+        self._popen.start()
+
+    def tearDown(self):
+        self._popen.stop()
+
     def test_write_rejects_bad_frame_size(self):
         with tempfile.TemporaryDirectory() as tmp:
             out = os.path.join(tmp, "bad.mp4")

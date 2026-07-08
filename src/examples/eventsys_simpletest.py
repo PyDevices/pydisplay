@@ -1,5 +1,5 @@
 # multimer types: async
-from board_config import TIMER_ASYNC, broker
+from board_config import runtime
 from multimer import Timer
 from multimer.loop import dual_main, run_forever
 
@@ -9,10 +9,10 @@ def _heartbeat(_=None):
 
 
 def _poll_events():
-    if elist := broker.poll():
+    if elist := runtime.poll():
         for e in elist:
             print(e)
-            if e.type == broker.events.QUIT:
+            if e.type == runtime.events.QUIT:
                 print("eventsys_simpletest: quit")
                 return True
     return False
@@ -42,13 +42,13 @@ async def main_async():
     print("eventsys_simpletest: started — click the canvas to see pointer events")
     asyncio.create_task(_heartbeat())
     while True:
-        if elist := broker.poll():
+        if elist := runtime.poll():
             for e in elist:
                 print(e)
-                if e.type == broker.events.QUIT:
+                if e.type == runtime.events.QUIT:
                     print("eventsys_simpletest: quit")
                     return
         await asyncio.sleep(0.02)
 
 
-dual_main(main_sync, main_async, async_mode=TIMER_ASYNC)
+dual_main(main_sync, main_async, async_mode=runtime.timer_async)

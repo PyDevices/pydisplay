@@ -4,7 +4,7 @@ Apollo Guidance Computer DSKY Emulator
 Image source:  https://commons.wikimedia.org/wiki/File:Apollo_DSKY_interface.svg
 """
 
-from board_config import display_drv, broker
+from board_config import display_drv, runtime
 from touch_keypad import Keypad
 from graphics import Area, BMP565
 
@@ -92,7 +92,7 @@ data3_pos = (187, 184)
 # The keypad area starts at (2, 233) and is 7 keys wide and 3 keys tall
 # The keys are 45x45 pixels
 keypad = Keypad(
-    broker, 2, 233, 7 * 45, 3 * 45, cols=7, rows=3, translate=display_drv.translate_point
+    runtime, 2, 233, 7 * 45, 3 * 45, cols=7, rows=3, translate=display_drv.translate_point
 )
 
 ########### Define the states of the screen elements

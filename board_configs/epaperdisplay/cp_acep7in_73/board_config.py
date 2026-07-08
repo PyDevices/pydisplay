@@ -1,9 +1,9 @@
-"""Adafruit 7.3\" ACeP 7-color E-Ink — CircuitPython"""
+"""Adafruit 7.3" ACeP 7-color E-Ink — CircuitPython"""
 
+from acep7in import ACeP7In
 import board
 from displayio import release_displays
 from fourwire import FourWire
-from acep7in import ACeP7In
 
 from displaysys.epaperdisplay import EPaperDisplay
 import eventsys
@@ -17,7 +17,6 @@ display_bus = FourWire(
     reset=board.D6,
     baudrate=24_000_000,
 )
-
 _epaper = ACeP7In(
     display_bus,
     width=800,
@@ -27,5 +26,4 @@ _epaper = ACeP7In(
 
 display_drv = EPaperDisplay(_epaper, width=800, height=480, color_depth=4)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

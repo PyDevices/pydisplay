@@ -12,8 +12,7 @@ Rendering path (string → dirty blit):
   limited to the changed region.
 """
 
-from board_config import broker, display_drv
-from eventsys import poll_quit_discarding_others
+from board_config import display_drv, runtime
 from graphics import Font
 from random import getrandbits
 from displaybuf import DisplayBuffer
@@ -85,7 +84,7 @@ def main():
                     pal[randint(0, len(pal) - 1)],
                     scale,
                 )
-                if poll_quit_discarding_others(broker):
+                if runtime.quit_requested if runtime else False:
                     return
 
 

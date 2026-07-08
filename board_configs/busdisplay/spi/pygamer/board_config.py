@@ -28,6 +28,4 @@ display_drv = ST7789(
     bgr=False,
     reverse_bytes_in_word=True,
 )
-
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

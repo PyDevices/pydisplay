@@ -36,20 +36,26 @@ display_drv = GC9A01(
     reset_high=True,
     power_pin=None,
     power_on_high=True,
+    cp={
+        "width": 240,
+        "height": 240,
+        "colstart": 0,
+        "rowstart": 0,
+        "rotation": 0,
+        "mirrored": False,
+        "color_depth": 16,
+        "bgr": True,
+        "reverse_bytes_in_word": True,
+        "invert": True,
+    },
 )
-
-i2c = I2C(0, sda=Pin(7), scl=Pin(6), freq=400000)
+i2c = I2C(0, sda=Pin(7), scl=Pin(6), freq=400_000)
 touch_drv = CHSC6X(i2c, irq_pin=16)
 touch_read_func = touch_drv.touch_read
 touch_rotation_table = (0, 5, 6, 3)
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

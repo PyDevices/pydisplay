@@ -33,16 +33,16 @@ def evt(etype, pos):
     return e
 
 
-broker = MockBroker()
-keypad = Keypad(broker, 2, 233, 7 * 45, 3 * 45, cols=7, rows=3)
+runtime = MockBroker()
+keypad = Keypad(runtime, 2, 233, 7 * 45, 3 * 45, cols=7, rows=3)
 pos = (50, 250)
 
-broker.inject(evt(events.MOUSEBUTTONDOWN, pos))
-broker.inject(evt(events.MOUSEBUTTONUP, pos))
+runtime.inject(evt(events.MOUSEBUTTONDOWN, pos))
+runtime.inject(evt(events.MOUSEBUTTONUP, pos))
 after_quick_click_held = keypad.read_held()
 after_quick_click_edge = keypad.read()
 
-broker.inject(evt(events.MOUSEBUTTONDOWN, pos))
+runtime.inject(evt(events.MOUSEBUTTONDOWN, pos))
 after_down_only = keypad.read_held()
 
 print(f"quick_click_held_read={after_quick_click_held!r}")

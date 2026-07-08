@@ -1,10 +1,19 @@
 {
   "urls": [
-    ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/i2c/cp_ssd1306_oled_featherwing/board_config.py"],
-    ["ssd1306.py", "github:PyDevices/pydisplay/drivers/display/ssd1306.py"]
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/busdisplay/i2c/cp_ssd1306_oled_featherwing/board_config.py"
+    ],
+    [
+      "ssd1306.py",
+      "github:PyDevices/pydisplay/drivers/display/ssd1306.py"
+    ]
   ],
   "deps": [
-    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"]
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ]
   ],
   "version": "0.1"
 }

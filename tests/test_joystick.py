@@ -7,7 +7,7 @@ import unittest
 
 import _env  # noqa: F401
 
-from eventsys import Broker, JoystickDevice, events, types
+from eventsys import JoystickDevice, Runtime, events, types
 
 
 class _MockJoystick:
@@ -75,15 +75,15 @@ class TestJoystickDevice(unittest.TestCase):
         self.assertIn(events.JOYAXISMOTION, types_out)
         self.assertIn(events.JOYHATMOTION, types_out)
 
-    def test_broker_on_device_dispatch(self):
+    def test_runtime_on_device_dispatch(self):
         driver = _MockJoystick()
-        broker = Broker()
+        runtime = Runtime()
         dev = JoystickDevice(joystick_driver=driver)
-        broker.register(dev)
+        runtime.register(dev)
         seen = []
-        broker.on_device(types.JOYSTICK, seen.append)
+        runtime.on_device(types.JOYSTICK, seen.append)
         driver._buttons[0] = True
-        broker.poll()
+        runtime.poll()
         self.assertEqual(len(seen), 1)
         self.assertEqual(seen[0].type, events.JOYBUTTONDOWN)
 

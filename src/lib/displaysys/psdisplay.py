@@ -264,6 +264,8 @@ class PSDevices:
 
 
 class PSDisplay(DisplayDriver):
+    needs_refresh = True
+
     """
     A class to emulate a display on PyScript.
 

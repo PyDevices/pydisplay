@@ -1,5 +1,4 @@
-from board_config import broker
-from eventsys import poll_quit_discarding_others
+from board_config import runtime
 # multimer types: all
 """
 rotations.py
@@ -81,6 +80,8 @@ def main():
 
     color_idx = 0
     while True:
+        if runtime is not None:
+            runtime.poll()
         for rotation in range(4):
             tft.rotation = rotation
             height = tft.height
@@ -103,7 +104,7 @@ def main():
             )
             tft.show()
             color_idx = (color_idx + 1) % len(colors)
-            if poll_quit_discarding_others(broker):
+            if runtime.quit_requested if runtime else False:
                 return
             sleep_ms(2000)
 

@@ -69,25 +69,25 @@ _EVENTSYS_CHILD = textwrap.dedent(
     import sys
 
     import eventsys
-    from eventsys import Broker, KeypadDevice, events, types
+    from eventsys import KeypadDevice, Runtime, events, types
     from eventsys.keys import Keys
 
     forbidden = [m for m in {siblings!r} if m in sys.modules]
     assert not forbidden, "eventsys pulled in pydisplay modules: %r" % forbidden
     assert "micropython" not in sys.modules, "eventsys requires the micropython shim"
 
-    # Exercise a real flow: a keypad device feeding a broker.
-    broker = Broker()
+    # Exercise a real flow: a keypad device feeding a runtime.
+    runtime = Runtime()
     presses = [set([65]), set()]
     kp = KeypadDevice(read=lambda: presses.pop(0) if presses else set())
-    broker.register(kp)
+    runtime.register(kp)
 
     seen = []
-    broker.on_device(types.KEYPAD, seen.append)
+    runtime.on_device(types.KEYPAD, seen.append)
 
-    down = broker.poll()
+    down = runtime.poll()
     assert down and down[0].type == events.KEYDOWN, down
-    up = broker.poll()
+    up = runtime.poll()
     assert up and up[0].type == events.KEYUP, up
     assert len(seen) == 2, seen
 

@@ -1,4 +1,4 @@
-"""Adafruit 2.9\" UC8151D flexible E-Ink breakout — CircuitPython"""
+"""Adafruit UC8151D 2.9" flexible E-Ink breakout — CircuitPython"""
 
 import board
 from displayio import release_displays
@@ -17,7 +17,6 @@ display_bus = FourWire(
     reset=board.D6,
     baudrate=4_000_000,
 )
-
 _epaper = UC8151D(
     display_bus,
     width=128,
@@ -28,5 +27,4 @@ _epaper = UC8151D(
 
 display_drv = EPaperDisplay(_epaper, width=128, height=296, color_depth=1)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

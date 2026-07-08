@@ -1,5 +1,4 @@
-from board_config import broker
-from eventsys import poll_quit_discarding_others
+from board_config import runtime
 # multimer types: all
 """
 tiny_hello.py
@@ -43,7 +42,7 @@ tft = tft_config.config(tft_config.WIDE)
 
 
 def _quit_requested():
-    return poll_quit_discarding_others(broker)
+    return runtime.quit_requested if runtime else False
 
 
 def randint(a, b):

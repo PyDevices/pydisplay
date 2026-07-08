@@ -1,9 +1,9 @@
-"""M5Stack Tab5 — MicroPython (ESP32-P4 + MIPI DSI)
+"""M5Stack Tab5 - MicroPython (ESP32-P4 + MIPI DSI)
 
-5″ 1280×720 IPS MIPI DSI with auto-detected panel/touch:
+5″ 1280x720 IPS MIPI DSI with auto-detected panel/touch:
 
-- **ILI9881C + GT911 @ 0x14** — early Tab5 units (pre ~Oct 2025)
-- **ST7123 TDDI @ 0x55** — integrated display/touch (current production)
+- **ILI9881C + GT911 @ 0x14** - early Tab5 units (pre ~Oct 2025)
+- **ST7123 TDDI @ 0x55** - integrated display/touch (current production)
 
 Product: https://docs.m5stack.com/en/core/Tab5
 CP board: https://circuitpython.org/board/m5stack_tab5/
@@ -14,23 +14,22 @@ Requires displayif ``mipidsi`` on ESP32-P4 firmware
 CircuitPython sibling: ``cp_m5stack_tab5``.
 """
 
-from gt911 import GT911
-from machine import I2C, Pin
 import time
 
-from displaysys.fbdisplay import FBDisplay
+from gt911 import GT911
+from machine import I2C, Pin
 from pi4ioe5v import tab5_init_lcd_reset
 from st7123 import ST7123
 from tab5_ili9881c_init import TAB5_ILI9881C_INIT
 from tab5_st7123_init import TAB5_ST7123_INIT
+
+from displaysys.fbdisplay import FBDisplay
 import eventsys
 
 try:
     from mipidsi import Bus, Display
 except ImportError as exc:
-    raise NotImplementedError(
-        "MIPI DSI requires displayif mipidsi cmod (esp32p4 port)"
-    ) from exc
+    raise NotImplementedError("MIPI DSI requires displayif mipidsi cmod (esp32p4 port)") from exc
 
 I2C_SCL = 32
 I2C_SDA = 31
@@ -89,9 +88,7 @@ elif ST7123_ADDR in addrs:
         height=1280,
     )
 else:
-    raise RuntimeError(
-        "Tab5 panel not detected on I2C (expected GT911@0x14 or ST7123@0x55)"
-    )
+    raise RuntimeError("Tab5 panel not detected on I2C (expected GT911@0x14 or ST7123@0x55)")
 
 bus = Bus(frequency=profile["bus_mhz"], num_lanes=2)
 
@@ -124,13 +121,8 @@ display_drv = FBDisplay(fb)
 
 touch_rotation_table = (0, 0, 0, 0)
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

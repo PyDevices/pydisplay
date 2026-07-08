@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 BOARD_ROOT = ROOT / "board_configs" / "busdisplay"
@@ -19,7 +19,9 @@ import board
 from displayio import release_displays
 '''
 
-SPI_CP_TEMPLATE = CP_HEADER + '''from fourwire import FourWire
+SPI_CP_TEMPLATE = (
+    CP_HEADER
+    + """from fourwire import FourWire
 from {display_module} import {display_class}
 {touch_imports}
 import eventsys
@@ -30,10 +32,9 @@ release_displays()
 
 {display_drv_setup}
 {touch_setup}
-broker = eventsys.Broker()
-{touch_broker}
-broker.register_quit_cleanup(display_drv)
-'''
+{runtime_setup}
+"""
+)
 
 # Per-config overrides: (display_module, display_class, bus_setup, display_kwargs, touch)
 SPI_OVERRIDES: dict[str, dict] = {
@@ -108,13 +109,13 @@ def parse_mp_config(path: Path) -> dict:
         info["touch"] = "ft6x36"
     elif "XPT2046" in text or "xpt2046" in text:
         info["touch"] = "xpt2046"
-    elif "broker = None" in text:
+    elif "runtime = None" in text or "broker = None" in text:
         info["touch"] = None
     return info
 
 
 def focaltouch_block(rotation: str = "(0, 0, 0, 0)") -> str:
-    return f'''
+    return f"""
 from adafruit_focaltouch import Adafruit_FocalTouch
 
 i2c = board.I2C()
@@ -130,17 +131,16 @@ def touch_read_func():
 
 touch_rotation_table = {rotation}
 
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-'''
+"""
 
 
 def ft6x36_cp_block(rotation: str = "(0, 0, 0, 0)") -> str:
-    return f'''
+    return f"""
 from adafruit_focaltouch import Adafruit_FocalTouch
 
 i2c = board.I2C()
@@ -156,13 +156,12 @@ def touch_read_func():
 
 touch_rotation_table = {rotation}
 
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-'''
+"""
 
 
 def generate_cp_package(mp_dir: Path) -> None:
@@ -208,9 +207,7 @@ def generate_cp_package(mp_dir: Path) -> None:
     chip_select=board.D9,
     baudrate=40_000_000,
 )"""
-    display_setup = override.get("display") or parse_mp_display_drv(
-        mp_text, display_class
-    )
+    display_setup = override.get("display") or parse_mp_display_drv(mp_text, display_class)
     if display_setup is None:
         display_setup = f"""display_drv = {display_class}(
     display_bus,
@@ -224,7 +221,7 @@ def generate_cp_package(mp_dir: Path) -> None:
 
     touch = override.get("touch", parsed.get("touch"))
     touch_setup = ""
-    touch_broker = ""
+    touch_runtime = ""
     if touch in ("ft6x36", "focaltouch"):
         rot = override.get("touch_rotation", "(0, 0, 0, 0)")
         touch_setup = (
@@ -234,18 +231,19 @@ def generate_cp_package(mp_dir: Path) -> None:
             "def touch_read_func():\n"
             "    touches = touch_drv.touches\n"
             "    if len(touches):\n"
-            "        return touches[0][\"x\"], touches[0][\"y\"]\n"
+            '        return touches[0]["x"], touches[0]["y"]\n'
             "    return None\n\n\n"
             f"touch_rotation_table = {rot}\n"
         )
-        touch_broker = (
-            "touch_dev = broker.create(\n"
-            "    type=eventsys.TOUCH,\n"
-            "    read=touch_read_func,\n"
-            "    data=display_drv,\n"
-            "    data2=touch_rotation_table,\n"
+        touch_runtime = (
+            "runtime = eventsys.Runtime(\n"
+            "    display=display_drv,\n"
+            "    touch_read=touch_read_func,\n"
+            "    touch_rotation_table=touch_rotation_table,\n"
             ")\n"
         )
+    else:
+        touch_runtime = "runtime = None\n"
 
     content = SPI_CP_TEMPLATE.format(
         display_module=display_module,
@@ -254,7 +252,7 @@ def generate_cp_package(mp_dir: Path) -> None:
         display_bus_setup=bus_setup,
         display_drv_setup=display_setup,
         touch_setup=touch_setup,
-        touch_broker=touch_broker,
+        runtime_setup=touch_runtime,
     )
 
     cp_dir.mkdir(parents=True, exist_ok=True)
@@ -263,7 +261,10 @@ def generate_cp_package(mp_dir: Path) -> None:
     pkg = json.loads(mp_pkg.read_text(encoding="utf-8"))
     urls = pkg.get("urls", [])
     new_urls = [
-        ["board_config.py", f"github:PyDevices/pydisplay/board_configs/busdisplay/{mp_dir.parent.name}/cp_{slug}/board_config.py"]
+        [
+            "board_config.py",
+            f"github:PyDevices/pydisplay/board_configs/busdisplay/{mp_dir.parent.name}/cp_{slug}/board_config.py",
+        ]
     ]
     for url in urls:
         if url[0] != "board_config.py":

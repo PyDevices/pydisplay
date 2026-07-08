@@ -46,12 +46,5 @@ def encoder_button_func():
     return not encoder_button.value()
 
 
-broker = eventsys.Broker()
-
-encoder_dev = broker.create(
-    type=eventsys.ENCODER,
-    read=encoder_read_func,
-    read2=encoder_button_func,
-)
-
-broker.register_quit_cleanup(display_drv)
+runtime = eventsys.Runtime(display=display_drv)
+runtime.add_encoder(read=encoder_read_func, button_read=encoder_button_func)

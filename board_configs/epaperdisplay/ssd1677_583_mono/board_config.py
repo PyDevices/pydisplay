@@ -1,8 +1,8 @@
 """SSD1677 5.83" monochrome bare display — MicroPython (Feather SPI pinout)"""
 
-from machine import Pin, SPI
-from ssd1677 import SSD1677
+from machine import SPI, Pin
 from spibus import SPIBus
+from ssd1677 import SSD1677
 
 from displaysys.epaperdisplay import EPaperDisplay
 import eventsys
@@ -17,7 +17,6 @@ display_bus = SPIBus(
     cs=10,
     reset=6,
 )
-
 _epaper = SSD1677(
     display_bus,
     width=648,
@@ -28,5 +27,4 @@ _epaper = SSD1677(
 
 display_drv = EPaperDisplay(_epaper, width=648, height=480, color_depth=1)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

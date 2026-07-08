@@ -20,8 +20,7 @@ class types:
     """Built-in device type identifiers."""
 
     UNDEFINED = const(-1)
-    BROKER = const(0x00)
-    QUEUE = const(0x01)
+    HOST = const(0x01)
     TOUCH = const(0x02)
     ENCODER = const(0x03)
     KEYPAD = const(0x04)
@@ -40,7 +39,7 @@ class Device:
         self._data = data
         self._read2 = read2 if read2 else lambda: None
         self._data2 = data2
-        self._broker = None
+        self._runtime = None
         self._state = None
         self._user_data = None
 
@@ -53,8 +52,8 @@ class Device:
             raw = [raw]
         eventlist = [e for e in raw if e.type in events.filter]
         for event in eventlist:
-            if event.type == events.QUIT and self._broker is not None:
-                self._broker._handle_quit()
+            if event.type == events.QUIT and self._runtime is not None:
+                self._runtime._handle_quit()
             if callback_list := self._event_callbacks.get(event.type):
                 for callback in callback_list:
                     callback(event, *args)
@@ -78,12 +77,12 @@ class Device:
                 callback_set.discard(callback)
 
     @property
-    def broker(self):
-        return self._broker
+    def runtime(self):
+        return self._runtime
 
-    @broker.setter
-    def broker(self, broker):
-        self._broker = broker
+    @runtime.setter
+    def runtime(self, runtime):
+        self._runtime = runtime
 
     @property
     def user_data(self):

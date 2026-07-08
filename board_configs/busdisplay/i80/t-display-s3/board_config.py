@@ -6,6 +6,8 @@ from i80bus import I80Bus
 from machine import Pin
 from st7789 import ST7789
 
+import eventsys
+
 display_power_pin = Pin(15, Pin.OUT, value=1)
 display_rd_pin = Pin(9, Pin.OUT, value=1)
 display_reset_pin = Pin(5, Pin.OUT, value=1)
@@ -41,5 +43,4 @@ display_drv = ST7789(
     power_pin=None,
     power_on_high=True,
 )
-
-broker = None
+runtime = None

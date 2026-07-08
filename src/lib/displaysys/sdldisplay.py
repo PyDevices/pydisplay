@@ -284,6 +284,8 @@ def _hard_process_exit(code: int = 0) -> None:
 
 
 class SDLDisplay(DisplayDriver):
+    needs_refresh = True
+
     """
     A class to emulate an LCD using SDL2.
     Provides scrolling and rotation functions similar to an LCD.  The .texture

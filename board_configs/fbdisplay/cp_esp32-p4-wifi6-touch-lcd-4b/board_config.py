@@ -1,14 +1,16 @@
-"""Waveshare ESP32-P4-WIFI6-Touch-LCD-4B — 720×720 MIPI DSI + GT911 touch
+"""Waveshare ESP32-P4-WIFI6-Touch-LCD-4B - 720x720 MIPI DSI + GT911 touch
 
 Product: https://www.waveshare.com/esp32-p4-wifi6-touch-lcd-4b.htm
 Wiki:    https://www.waveshare.com/wiki/ESP32-P4-WIFI6-Touch-LCD-4B
 
-4-inch 720×720 IPS panel (ST7703) on MIPI DSI.  GT911 capacitive touch on I2C.
+4-inch 720x720 IPS panel (ST7703) on MIPI DSI.  GT911 capacitive touch on I2C.
 Pin assignments match the Waveshare ``esp32_p4_wifi6_touch_lcd_4b`` BSP.
 
 Requires CircuitPython with ``mipidsi`` (ESP32-P4) and the community ``gt911``
 library (``circup install gt911``).
 """
+
+import time
 
 import board
 import busio
@@ -17,7 +19,6 @@ import displayio
 import framebufferio
 import gt911
 import mipidsi
-import time
 
 from displaysys.fbdisplay import FBDisplay
 import eventsys
@@ -31,7 +32,7 @@ LCD_RESET = board.IO27
 LCD_BACKLIGHT = board.IO26
 TOUCH_RESET = board.IO23
 
-# ST7703 vendor init (waveshare/esp_lcd_st7703, 720×720 panel)
+# ST7703 vendor init (waveshare/esp_lcd_st7703, 720x720 panel)
 ST7703_INIT_SEQUENCE = (
     b"\xb9\x03\xf1\x12\x83"
     b"\xb1\x05\x00\x00\x00\xda\x80"
@@ -40,7 +41,7 @@ ST7703_INIT_SEQUENCE = (
     b"\xb4\x01\x80"
     b"\xb5\x02\n\n"
     b"\xb6\x02\x97\x97"
-    b"\xb8\x04&\"\xf0\x13"
+    b'\xb8\x04&"\xf0\x13'
     b"\xba\x1b1\x81\x0f\xf9\x0e\x06 \x00\x00\x00\x00\x00\x00\x00D%\x00\x90\n\x00\x00\x01O\x01\x00\x007"
     b"\xbc\x01G"
     b"\xbf\x03\x02\x11\x00"
@@ -50,7 +51,7 @@ ST7703_INIT_SEQUENCE = (
     b"\xc7\x06\xb8\x00\n\x10\x01\t"
     b"\xc8\x04\x10@\x1e\x02"
     b"\xcc\x01\x0b"
-    b"\xe0\"\x00\x0b\x10,=?B:\x07\r\x0f\x13\x15\x13\x14\x0f\x16\x00\x0b\x10,=?B:\x07\r\x0f\x13\x15\x13\x14\x0f\x16"
+    b'\xe0"\x00\x0b\x10,=?B:\x07\r\x0f\x13\x15\x13\x14\x0f\x16\x00\x0b\x10,=?B:\x07\r\x0f\x13\x15\x13\x14\x0f\x16'
     b"\xe3\x0e\x07\x07\x0b\x0b\x0b\x0b\x00\x00\x00\x00\xff\x00\xc0\x10"
     b"\xe9?\xc8\x10\n\x00\x00\x80\x81\x121#O\x86\xa0\x00G\x08\x00\x00\x0c\x00\x00\x00\x00\x00\x0c\x00\x00\x00\x98\x02\x8b\xafF\x02\x88\x88\x88\x88\x88\x98\x13\x8b\xafW\x13\x88\x88\x88\x88\x88\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
     b"\xea=\x97\x0c\t\t\tx\x00\x00\x00\x00\x00\x00\x9f1\x8b\xa81u\x88\x88\x88\x88\x88\x9f \x8b\xa8 d\x88\x88\x88\x88\x88#\x00\x00\x02q\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00@\x80\x81\x00\x00\x00\x00"
@@ -110,13 +111,8 @@ def touch_read_func():
 
 touch_rotation_table = (0, 0, 0, 0)
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

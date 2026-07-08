@@ -1,21 +1,33 @@
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Queue device and LVGL virtual device fan-out."""
+"""Host event device and LVGL virtual device fan-out."""
 
 from ._device import Device, register_device_class, types
 from ._events import events
 from .keys import chord_matches
 
 
-class QueueDevice(Device):
-    """Returns multiple event types from a native poll callback."""
+class HostEventsDevice(Device):
+    """Returns multiple event types from a native host event pump callback."""
 
-    type = types.QUEUE
+    type = types.HOST
     responses = events.filter
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        read=None,
+        data=None,
+        data2=None,
+        *,
+        host_read=None,
+        display=None,
+        event_filter=None,
+    ):
+        read = host_read if host_read is not None else read
+        data = display if display is not None else data
+        data2 = event_filter if event_filter is not None else data2
+        super().__init__(read=read, data=data, data2=data2)
         if self._data2 is None:
             self._data2 = events.filter
         if hasattr(self._data, "touch_scale"):
@@ -72,7 +84,7 @@ class QueueDevice(Device):
 
 
 class VirtualDevices:
-    """Fan-out queue events into virtual touch/encoder/keypad devices for LVGL."""
+    """Fan-out host events into virtual touch/encoder/keypad devices for LVGL."""
 
     class VirtualDevice:
         def __init__(self, virtual_devices, device_type):
@@ -86,7 +98,7 @@ class VirtualDevices:
             self._callback = callback
 
         def poll(self, *args):
-            self._virtual_devices.poll_queue_device()
+            self._virtual_devices.poll_host_device()
             event = self._fifo.pop(0) if self._fifo else None
             if self._callback is not None:
                 self._callback(event, *args)
@@ -94,15 +106,15 @@ class VirtualDevices:
         def add_event(self, event):
             self._fifo.append(event)
 
-    def __init__(self, queue_device):
-        self._queue_device = queue_device
+    def __init__(self, host_device):
+        self._host_device = host_device
         self._vd_touch = self.VirtualDevice(self, types.TOUCH)
         self._vd_encoder = self.VirtualDevice(self, types.ENCODER)
         self._vd_keypad = self.VirtualDevice(self, types.KEYPAD)
         self.devices = [self._vd_touch, self._vd_encoder, self._vd_keypad]
 
-    def poll_queue_device(self):
-        for e in self._queue_device.poll():
+    def poll_host_device(self):
+        for e in self._host_device.poll():
             if (
                 e.type == events.MOUSEBUTTONDOWN
                 or e.type == events.MOUSEBUTTONUP
@@ -115,4 +127,4 @@ class VirtualDevices:
                 self._vd_keypad.add_event(e)
 
 
-register_device_class(types.QUEUE, QueueDevice)
+register_device_class(types.HOST, HostEventsDevice)

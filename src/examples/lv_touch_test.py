@@ -63,8 +63,7 @@ _build_ui()
 
 display_driver.run()
 if sys.platform != "win32":
-    from board_config import broker
-    from eventsys import poll_quit_discarding_others
+    from board_config import runtime
 
     try:
         import pydisplay_test_mode as _ptm
@@ -77,7 +76,7 @@ if sys.platform != "win32":
 
     while True:
         sleep_ms(0)
-        if poll_quit_discarding_others(broker):
+        if runtime.quit_requested if runtime else False:
             break
         if _test_start is not None and ticks_diff(ticks_ms(), _test_start) >= _test_duration_ms:
             break

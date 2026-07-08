@@ -15,10 +15,6 @@
   ],
   "deps": [
     [
-      "github:PyDevices/pydisplay/packages/spibus.json",
-      "main"
-    ],
-    [
       "github:PyDevices/pydisplay/packages/displaysys.json",
       "main"
     ]

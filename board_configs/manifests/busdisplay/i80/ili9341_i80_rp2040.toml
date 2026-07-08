@@ -1,0 +1,71 @@
+kind = "busdisplay_i80"
+slug = "ili9341_i80_rp2040"
+title = "DIY Raspberry Pi Pico with ILI9341 2.8\" display"
+title_cp = "Pico + ILI9341 I80 shield — CircuitPython"
+out = "busdisplay/i80"
+circuitpython = true
+mp_preamble = "reset = Pin(12, Pin.OUT, value=1)\n"
+
+[display]
+module = "ili9341"
+class = "ILI9341"
+width = 240
+height = 320
+colstart = 0
+rowstart = 0
+rotation = 0
+mirrored = false
+color_depth = 16
+bgr = true
+reverse_bytes_in_word = true
+invert = false
+brightness = 1.0
+backlight_pin = "None"
+backlight_on_high = true
+reset_pin = "None"
+reset_high = true
+power_pin = "None"
+power_on_high = true
+
+[display.cp]
+width = 240
+height = 320
+colstart = 0
+rowstart = 0
+rotation = 0
+mirrored = false
+color_depth = 16
+bgr = true
+reverse_bytes_in_word = true
+invert = false
+
+[bus.mp.i80]
+dc = 14
+cs = 15
+wr = 13
+data = [0, 1, 2, 3, 4, 5, 6, 7]
+
+[bus.cp.parallel]
+pins = [
+    "board.GP0", "board.GP1", "board.GP2", "board.GP3",
+    "board.GP4", "board.GP5", "board.GP6", "board.GP7",
+    "board.GP14", "board.GP15", "board.GP13",
+]
+
+[touch]
+module = "ft6x36"
+class = "FT6x36"
+read = "get_positions"
+rotation_null = true
+
+[touch.mp.i2c]
+id = 0
+sda = 16
+scl = 17
+freq = 100_000
+
+[package]
+display_driver = "ili9341"
+touch_driver = "ft6x36"
+deps_mp = ["i80bus"]
+include_displaysys = false

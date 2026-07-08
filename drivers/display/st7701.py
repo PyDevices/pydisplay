@@ -3,12 +3,18 @@ GPL-3.0 License
 see https://github.com/Xinyuan-LilyGO/lilygo-micropython/tree/master/target/esp32s3/boards/LILYGO_T-RGB/modules
 """
 
-from time import sleep_ms
+try:
+    from time import sleep_ms
+except ImportError:
+    from multimer import sleep_ms
 
 try:
     from displaysys.busdisplay import BusDisplay
 except ImportError:
-    from busdisplay import BusDisplay
+    try:
+        from busdisplay import BusDisplay
+    except ImportError:
+        BusDisplay = None
 
 _INIT_SEQUENCE = [
     (0xFF, b"\x77\x01\x00\x00\x10", 0),
@@ -114,16 +120,18 @@ def _tx_data(lcd_pins, data):
         lcd_pins.cs(1)
 
 
-class ST7701(BusDisplay):
-    """
-    ST7701 display driver for LilyGO T-RGB and similar RGB666 panels.
+if BusDisplay is not None:
 
-    Panel registers are initialized via ``lcd_pins`` (3-wire SPI bit-bang).
-    Pixel data is sent through ``display_bus`` (RGB parallel panel from
-    ``pydevices/displayif`` ``rgbframebuffer`` + ``displaysys.fbdisplay.FBDisplay``).
-    """
+    class ST7701(BusDisplay):
+        """
+        ST7701 display driver for LilyGO T-RGB and similar RGB666 panels.
 
-    def __init__(self, lcd_pins, display_bus, *, init_sequence=None, **kwargs):
-        self.lcd_pins = lcd_pins
-        run_init(lcd_pins, init_sequence or _INIT_SEQUENCE)
-        super().__init__(display_bus, init_sequence=None, **kwargs)
+        Panel registers are initialized via ``lcd_pins`` (3-wire SPI bit-bang).
+        Pixel data is sent through ``display_bus`` (RGB parallel panel from
+        ``pydevices/displayif`` ``rgbframebuffer`` + ``displaysys.fbdisplay.FBDisplay``).
+        """
+
+        def __init__(self, lcd_pins, display_bus, *, init_sequence=None, **kwargs):
+            self.lcd_pins = lcd_pins
+            run_init(lcd_pins, init_sequence or _INIT_SEQUENCE)
+            super().__init__(display_bus, init_sequence=None, **kwargs)

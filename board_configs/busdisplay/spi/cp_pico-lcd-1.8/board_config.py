@@ -13,8 +13,8 @@ display_bus = FourWire(
     board.SPI(),
     command=board.GP8,
     chip_select=board.GP9,
-    reset=board.GP12,
     baudrate=60_000_000,
+    reset=board.GP12,
 )
 
 display_drv = ST7735R(
@@ -34,6 +34,4 @@ display_drv = ST7735R(
     backlight_on_high=True,
     reset_high=False,
 )
-
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

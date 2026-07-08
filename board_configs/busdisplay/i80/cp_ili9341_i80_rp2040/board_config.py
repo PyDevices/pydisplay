@@ -3,8 +3,8 @@
 from adafruit_focaltouch import Adafruit_FocalTouch
 import board
 from displayio import release_displays
-from paralleldisplaybus import ParallelBus
 from ili9341 import ILI9341
+from paralleldisplaybus import ParallelBus
 
 import eventsys
 
@@ -37,7 +37,6 @@ display_drv = ILI9341(
     reverse_bytes_in_word=True,
     invert=False,
 )
-
 i2c = board.I2C()
 touch_drv = Adafruit_FocalTouch(i2c)
 
@@ -51,13 +50,8 @@ def touch_read_func():
 
 touch_rotation_table = None
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

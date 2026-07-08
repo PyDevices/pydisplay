@@ -42,10 +42,5 @@ joystick_driver = GPIOJoystick(
     ],
 )
 
-broker = eventsys.Broker()
-
-joystick_dev = broker.create(
-    type=eventsys.JOYSTICK, joystick_driver=joystick_driver, emulate_digital=[(0, 1)]
-)
-
-broker.register_quit_cleanup(display_drv)
+runtime = eventsys.Runtime(display=display_drv)
+runtime.add_joystick(joystick_driver=joystick_driver, emulate_digital=[(0, 1)])

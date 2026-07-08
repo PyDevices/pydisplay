@@ -74,11 +74,11 @@ with multimer.Timer(-1) as t:
     ...
 
 # Blocking main loop (``poll()`` may return ``True`` to exit cleanly)
-multimer.run_forever(poll=broker.poll, delay_ms=1)
-multimer.run_forever(poll=lambda: eventsys.poll_quit_discarding_others(broker))
+multimer.run_forever(poll=runtime.poll, delay_ms=1)
+multimer.run_forever(poll=lambda: runtime.quit_requested)
 
 # Async main loop
-await multimer.run_forever_async(poll=broker.poll, delay_ms=10)
+await multimer.run_forever_async(poll=runtime.poll, delay_ms=10)
 
 # Sync or async entry (MicroPython-safe startup via schedule)
 multimer.dual_main(sync_main, async_main, async_mode=False)
@@ -121,7 +121,7 @@ Backend selection at import (first match wins):
 |---------|--------|--------------|-------|
 | MCU hardware | `machine.Timer` | False | On-device only |
 | Linux librt | `_librt` | False | `timer_create` via librt; ctypes on CPython, ffi/uctypes on MicroPython unix. Replaces former **`_ffi`** and **`_ctypes`** modules. |
-| Windows APC | `_win32` | False | Waitable timer + `QueueUserAPC`; callbacks run on the main thread during alertable `SleepEx` (see **`sleep_ms`** / **`broker.poll`**). |
+| Windows APC | `_win32` | False | Waitable timer + `QueueUserAPC`; callbacks run on the main thread during alertable `SleepEx` (see **`sleep_ms`** / **`runtime.poll`**). |
 | Thread | `_threading` | True | Background thread + `schedule` queue |
 | SDL2 | `_sdl2` | True | `SDL_AddTimer` via **`usdl2`** |
 | Polling | `_polling` | True | Cooperative tick list |
@@ -157,9 +157,9 @@ This single module replaced the older split **`multimer._ffi`** (MicroPython) an
 
 ### win32 backend (`_win32`)
 
-Windows **`CreateWaitableTimer`** + **`QueueUserAPC`**. Callbacks run on the main thread during alertable waits — **`multimer.sleep_ms()`** uses **`SleepEx`**, and **`eventsys` `broker.poll()`** calls **`process_apcs()`** so typical display loops do not need an explicit **`pump()`**.
+Windows **`CreateWaitableTimer`** + **`QueueUserAPC`**. Callbacks run on the main thread during alertable waits — **`multimer.sleep_ms()`** uses **`SleepEx`**, and **`eventsys` `runtime.poll()`** calls **`process_apcs()`** so typical display loops do not need an explicit **`pump()`**.
 
-Tight CPU-only loops (`while True: pass`) still stall timers (unlike Linux librt signals). Use **`sleep_ms(0)`** or **`broker.poll()`** in the loop if needed.
+Tight CPU-only loops (`while True: pass`) still stall timers (unlike Linux librt signals). Use **`sleep_ms(0)`** or **`runtime.poll()`** in the loop if needed.
 
 ### SDL2 bindings (`usdl2`)
 

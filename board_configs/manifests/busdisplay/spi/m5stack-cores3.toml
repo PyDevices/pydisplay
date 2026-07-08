@@ -1,0 +1,57 @@
+kind = "busdisplay_spi"
+slug = "m5stack-cores3"
+title = "M5Stack CoreS3 with ILI9342 320x240 display"
+title_cp = "M5Stack CoreS3 with ILI9341 320x240 — CircuitPython"
+out = "busdisplay/spi"
+circuitpython = true
+
+[display]
+module = "ili9341"
+class = "ILI9341"
+width = 240
+height = 320
+colstart = 0
+rowstart = 0
+rotation = 180
+mirrored = false
+color_depth = 16
+bgr = true
+reverse_bytes_in_word = true
+invert = true
+brightness = 1.0
+backlight_pin = "None"
+backlight_on_high = true
+reset_pin = "None"
+reset_high = true
+power_pin = "None"
+power_on_high = true
+
+[bus.mp.spi]
+id = 1
+baudrate = 60_000_000
+sck = 36
+mosi = 37
+dc = 35
+cs = 3
+
+[bus.cp.fourwire]
+command = "board.TFT_DC"
+chip_select = "board.TFT_CS"
+baudrate = 60_000_000
+
+[touch]
+module = "ft6x36"
+class = "FT6x36"
+read = "get_positions"
+rotation_null = true
+
+[touch.mp.i2c]
+id = 0
+sda = 12
+scl = 11
+freq = 100_000
+
+[package]
+display_driver = "ili9341"
+touch_driver = "ft6x36"
+deps_mp = ["spibus"]

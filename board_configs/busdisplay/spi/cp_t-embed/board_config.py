@@ -33,5 +33,4 @@ display_drv = ST7789(
     backlight_on_high=True,
 )
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

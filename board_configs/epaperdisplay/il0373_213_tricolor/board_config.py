@@ -1,7 +1,7 @@
 """IL0373 2.13" tri-color FeatherWing — MicroPython (Feather SPI pinout)"""
 
-from machine import Pin, SPI
 from il0373 import IL0373
+from machine import SPI, Pin
 from spibus import SPIBus
 
 from displaysys.epaperdisplay import EPaperDisplay
@@ -17,7 +17,6 @@ display_bus = SPIBus(
     cs=10,
     reset=6,
 )
-
 _epaper = IL0373(
     display_bus,
     width=250,
@@ -29,5 +28,4 @@ _epaper = IL0373(
 
 display_drv = EPaperDisplay(_epaper, width=250, height=122, color_depth=2)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

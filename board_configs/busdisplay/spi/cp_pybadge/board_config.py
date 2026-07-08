@@ -3,7 +3,7 @@
 import board
 from displayio import release_displays
 from fourwire import FourWire
-from keypad_gpio import GPIOButtons, MAGTAG_BUTTON_KEYS
+from keypad_gpio import MAGTAG_BUTTON_KEYS, GPIOButtons
 from st7789 import ST7789
 
 import eventsys
@@ -40,11 +40,5 @@ buttons = GPIOButtons(
     }
 )
 
-broker = eventsys.Broker()
-
-keypad_dev = broker.create(
-    type=eventsys.KEYPAD,
-    read=buttons.read,
-)
-
-broker.register_quit_cleanup(display_drv)
+runtime = eventsys.Runtime(display=display_drv)
+runtime.add_keypad(read=buttons.read)

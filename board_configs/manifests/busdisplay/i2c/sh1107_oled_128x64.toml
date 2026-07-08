@@ -1,0 +1,27 @@
+kind = "busdisplay_i2c"
+slug = "sh1107_oled_128x64"
+title = "SH1107 128x64 OLED — MicroPython"
+title_cp = "SH1107 128x64 OLED — CircuitPython"
+out = "busdisplay/i2c"
+circuitpython = true
+
+[display]
+module = "sh1107"
+class = "SH1107"
+width = 128
+height = 64
+rotation = 0
+
+[bus.mp.i2c]
+id = 0
+sda = 4
+scl = 5
+freq = 400_000
+address = "0x3C"
+
+[bus.cp]
+address = "0x3C"
+
+[package]
+display_driver = "sh1107"
+deps_mp = ["i2cbus"]

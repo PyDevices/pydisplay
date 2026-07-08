@@ -1,7 +1,7 @@
 """Adafruit FeatherWing OLED 128x32 SSD1306 — MicroPython"""
 
-from machine import I2C, Pin
 from i2cbus import I2CBus
+from machine import I2C, Pin
 from ssd1306 import SSD1306
 
 import eventsys
@@ -14,6 +14,4 @@ display_drv = SSD1306(
     height=32,
     rotation=0,
 )
-
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

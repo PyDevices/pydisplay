@@ -9,19 +9,11 @@
       "github:PyDevices/pydisplay/drivers/display/gc9a01.py"
     ],
     [
-      "cst8xx.py",
-      "github:PyDevices/pydisplay/drivers/touch/cst8xx.py"
-    ],
-    [
       "adafruit_focaltouch.py",
       "github:PyDevices/pydisplay/drivers/touch/circuitpython/adafruit_focaltouch.py"
     ]
   ],
   "deps": [
-    [
-      "github:PyDevices/pydisplay/packages/spibus.json",
-      "main"
-    ],
     [
       "github:PyDevices/pydisplay/packages/displaysys.json",
       "main"

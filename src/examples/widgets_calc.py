@@ -17,7 +17,7 @@ button_labels = [
 
 pd.init_timer(10)  # Remove this line to use polled mode in a while loop
 
-display = pd.Display(board_config.display_drv, board_config.broker)
+display = pd.Display(board_config.display_drv, board_config.runtime)
 theme = display.color_theme
 screen = pd.Screen(display, visible=False)
 top_box = pd.Widget(screen, h=60, bg=theme.secondary)

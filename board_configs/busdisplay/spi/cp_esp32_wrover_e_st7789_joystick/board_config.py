@@ -31,5 +31,4 @@ display_drv = ST7789(
 )
 
 # Joystick wiring is board-specific; register KEYPAD/JOYSTICK when ported.
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

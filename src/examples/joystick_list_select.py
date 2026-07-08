@@ -3,7 +3,7 @@ import board_config
 import eventsys
 import pdwidgets as pd
 
-display = pd.Display(board_config.display_drv, board_config.broker,40)
+display = pd.Display(board_config.display_drv, board_config.runtime,40)
 screen = pd.Screen(display, visible=False)
 
 top, bottom, main = screen.top, screen.bottom, screen.main
@@ -36,6 +36,6 @@ def joystick_callback(event):
             if event.value[1] != 0:
                 select_item(event.value[1] > 0)
 
-board_config.broker.on_device(eventsys.JOYSTICK, joystick_callback)
+board_config.runtime.on_device(eventsys.JOYSTICK, joystick_callback)
 
 pd.run_forever()

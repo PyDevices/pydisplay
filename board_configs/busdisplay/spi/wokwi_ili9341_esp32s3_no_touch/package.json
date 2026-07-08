@@ -1,10 +1,23 @@
 {
-    "urls": [
-      ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/spi/wokwi_ili9341_esp32s3_no_touch/board_config.py"],
-      ["ili9341.py", "github:PyDevices/pydisplay/drivers/display/ili9341.py"]
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/busdisplay/spi/wokwi_ili9341_esp32s3_no_touch/board_config.py"
     ],
-    "deps": [
-      ["github:PyDevices/pydisplay/packages/spibus.json", "main"]
+    [
+      "ili9341.py",
+      "github:PyDevices/pydisplay/drivers/display/ili9341.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
     ],
-    "version": "0.1"
-  }
+    [
+      "github:PyDevices/pydisplay/packages/spibus.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

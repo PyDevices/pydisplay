@@ -27,7 +27,7 @@ gc.collect()
 mem = mem_free()
 print(f"Free memory at start: {mem:,}")
 
-from board_config import TIMER_ASYNC, display_drv, broker
+from board_config import display_drv, runtime
 import apollo_dsky as dsky
 import time
 
@@ -116,8 +116,8 @@ def _handle_key(key):
 
 
 def _poll_apollo():
-    if elist := broker.poll():
-        if any(e.type == broker.events.QUIT for e in elist):
+    if elist := runtime.poll():
+        if any(e.type == runtime.events.QUIT for e in elist):
             return True
     if _key_busy or _scrolling:
         return False
@@ -168,8 +168,8 @@ async def main_async():
 
     async def main_loop():
         while True:
-            if elist := broker.poll():
-                if any(e.type == broker.events.QUIT for e in elist):
+            if elist := runtime.poll():
+                if any(e.type == runtime.events.QUIT for e in elist):
                     break
             if keys := dsky.keypad.read():
                 for key in keys:
@@ -202,4 +202,4 @@ async def main_async():
     await run()
 
 
-dual_main(main_sync, main_async, async_mode=TIMER_ASYNC)
+dual_main(main_sync, main_async, async_mode=runtime.timer_async)

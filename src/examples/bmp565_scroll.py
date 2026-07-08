@@ -1,7 +1,6 @@
 # multimer types: all
 # pyscript binaries: assets/longstreet.bmp
-from board_config import broker, display_drv
-from eventsys import poll_quit_discarding_others
+from board_config import display_drv, runtime
 from graphics import BMP565
 from multimer import sleep_ms
 
@@ -32,7 +31,7 @@ while True:
     draw_bg(0, i % display_drv.height, 0, i % image.height)
     display_drv.show()
     sleep_ms(0)
-    if poll_quit_discarding_others(broker):
+    if runtime.quit_requested if runtime else False:
         break
     sleep_ms(1)
     i += 1

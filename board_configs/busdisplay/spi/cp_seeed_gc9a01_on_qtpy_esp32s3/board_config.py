@@ -30,7 +30,6 @@ display_drv = GC9A01(
     reverse_bytes_in_word=True,
     invert=True,
 )
-
 i2c = board.I2C()
 touch_drv = Adafruit_FocalTouch(i2c)
 
@@ -44,13 +43,8 @@ def touch_read_func():
 
 touch_rotation_table = (0, 5, 6, 3)
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

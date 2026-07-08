@@ -22,12 +22,12 @@ Follow upstream [lv_micropython](https://github.com/lvgl/lv_micropython) for you
 
 Your `board_config.py` should expose:
 
-- `display` — pydisplay driver with `blit_rect`, dimensions, rotation
-- Touch broker — `eventsys` broker that enqueues touch/mouse events
+- `display_drv` — pydisplay driver with `blit_rect`, dimensions, rotation
+- `runtime` — [eventsys Runtime](../concepts/runtime.md) with host/touch input and auto-refresh
 
 Connect LVGL's display flush callback to copy LVGL's draw buffer through `display.blit_rect` (or the pattern documented in lv_micropython for your port).
 
-With [`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py), LVGL input is wired automatically: each indev `read_cb` polls the broker's queue device via virtual touch/encoder/keypad devices. **Do not call `broker.poll()` in your LVGL main loop** — `lv.task_handler()` (driven by `lv_utils` + multimer) already drains input. Calling both competes for the same event queue and breaks clicks. Window-close (`QUIT`) is handled on the same path inside `QueueDevice.poll()`.
+With [`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py), LVGL input is wired automatically: each indev `read_cb` polls the runtime's host device via virtual touch/encoder/keypad devices. **Do not call `runtime.poll()` in your LVGL main loop** — `lv.task_handler()` (driven by `lv_utils` + multimer) already drains input. Calling both competes for the same event queue and breaks clicks. Window-close (`QUIT`) is handled on the same path inside `HostEventsDevice`.
 
 ### 4. Run the touch test example
 
@@ -48,24 +48,24 @@ For production ESP32 projects, consider [kdschlosser's lvgl_micropython](https:/
 
 `src/add_ons/lv_utils.py` — LVGL event loop helper (requires `multimer`).
 
-Set **`TIMER_ASYNC`** in `board_config.py` to choose the timer backend:
+Use **`runtime.timer_async`** (set in `board_config.py` when constructing `Runtime`) to choose the timer backend:
 
-| `TIMER_ASYNC` | Use when |
+| `runtime.timer_async` | Use when |
 |---------------|----------|
 | `False` (default) | MCU, MicroPython unix, CPython Linux — default `multimer.Timer` |
 | `True` | PyScript and other asyncio-native apps — `multimer.AsyncTimer` |
 
-[`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py) passes this to `lv_utils.event_loop(async_=TIMER_ASYNC)`.
+[`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py) passes this to `lv_utils.event_loop(async_=runtime.timer_async)`.
 
-When **`TIMER_ASYNC = True`**, `display_driver` disables SDL's sync `auto_refresh` timer and calls `display.show()` from the aio LVGL refresh loop instead. CircuitPython's default `multimer.Timer` uses a background thread and requires `pump()` — which an asyncio app does not call — so the window would never be presented otherwise.
+When **`runtime.timer_async` is true**, `display_driver` claims runtime-driven refresh and calls `display.show()` from the aio LVGL refresh loop instead. CircuitPython's default `multimer.Timer` uses a background thread and requires `pump()` — which an asyncio app does not call — so the window would never be presented otherwise.
 
-On CPython Win/mac (`TIMER_ASYNC = False`), call **`multimer.pump()`** from your main loop when using threaded timer backends — see [multimer](../concepts/multimer.md). Full apps call **`display_driver.run()`** after UI setup: it returns immediately on MicroPython unix and CPython Linux (REPL stays live) and blocks only on Windows SDL or macOS.
+On CPython Win/mac (sync timers), call **`multimer.pump()`** from your main loop when using threaded timer backends — see [multimer](../concepts/multimer.md). Full apps call **`display_driver.run()`** after UI setup: it returns immediately on MicroPython unix and CPython Linux (REPL stays live) and blocks only on Windows SDL or macOS.
 
-Override before import:
+Force async mode before import (LVGL timer tests):
 
 ```python
-import board_config
-board_config.TIMER_ASYNC = True
+import os
+os.environ["PYDISPLAY_TIMER_ASYNC"] = "1"
 import display_driver
 ```
 
@@ -77,7 +77,7 @@ Three scripts share the same UI via `lv_test_timer_common.build_ui()` and differ
 |--------|-------------|
 | [`lv_test_timer_no_pump.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_no_pump.py) | MCU, MP-unix, CPython Linux — no main loop; **hangs** on pump-required platforms |
 | [`lv_test_timer_pump.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_pump.py) | CPython Win/mac — `pump()` drain loop only |
-| [`lv_test_timer_async.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_async.py) | PyScript / asyncio — `TIMER_ASYNC = True`, deferred `import display_driver`, `await asyncio.sleep(0)` loop |
+| [`lv_test_timer_async.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_async.py) | PyScript / asyncio — `PYDISPLAY_TIMER_ASYNC=1`, deferred `import display_driver`, `await asyncio.sleep(0)` loop |
 
 The shared UI ([`lv_test_timer_common.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_common.py)) shows autodetected **runtime**, **OS**, **display** driver class, **timer** backend, and **LVGL** version.
 

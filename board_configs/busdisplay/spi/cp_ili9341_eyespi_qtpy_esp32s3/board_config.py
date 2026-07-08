@@ -19,8 +19,6 @@ display_bus = FourWire(
 
 display_drv = ILI9341(
     display_bus,
-    width=240,
-    height=320,
     colstart=0,
     rowstart=0,
     rotation=0,
@@ -29,8 +27,9 @@ display_drv = ILI9341(
     bgr=True,
     reverse_bytes_in_word=True,
     invert=False,
+    width=240,
+    height=320,
 )
-
 i2c = board.I2C()
 touch_drv = Adafruit_FocalTouch(i2c)
 
@@ -44,13 +43,8 @@ def touch_read_func():
 
 touch_rotation_table = (6, 3, 0, 5)
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

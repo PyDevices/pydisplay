@@ -17,7 +17,6 @@ display_bus = FourWire(
     reset=board.D6,
     baudrate=4_000_000,
 )
-
 _epaper = IL0373(
     display_bus,
     width=250,
@@ -29,5 +28,4 @@ _epaper = IL0373(
 
 display_drv = EPaperDisplay(_epaper, width=250, height=122, color_depth=2)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

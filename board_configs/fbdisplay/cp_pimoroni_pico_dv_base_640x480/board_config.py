@@ -25,5 +25,4 @@ fb = picodvi.Framebuffer(
 
 display_drv = FBDisplay(fb)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

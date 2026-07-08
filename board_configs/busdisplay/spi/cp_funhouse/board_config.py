@@ -14,8 +14,8 @@ display_bus = FourWire(
     board.SPI(),
     command=board.TFT_DC,
     chip_select=board.TFT_CS,
-    reset=board.TFT_RESET,
     baudrate=24_000_000,
+    reset=board.TFT_RESET,
 )
 
 display_drv = ST7789(
@@ -30,7 +30,6 @@ display_drv = ST7789(
     bgr=False,
     reverse_bytes_in_word=True,
 )
-
 i2c = board.I2C()
 touch_drv = TT21100(i2c)
 
@@ -44,13 +43,8 @@ def touch_read_func():
 
 touch_rotation_table = (0, 0, 0, 0)
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

@@ -21,8 +21,8 @@ from eventsys import events
 
 
 class JoystickKeypad:
-    def __init__(self, broker, joymap):
-        self._broker = broker
+    def __init__(self, runtime, joymap):
+        self._runtime = runtime
         self._joymap = joymap
         self._state = {}
         for j in joymap.values():
@@ -31,7 +31,7 @@ class JoystickKeypad:
                     self._state[key] = False
             for b in j["buttons"].values():
                 self._state[b] = False
-        self._broker.on(
+        self._runtime.on(
             [events.JOYHATMOTION, events.JOYBUTTONDOWN, events.JOYBUTTONUP],
             self.callback,
         )

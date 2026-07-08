@@ -1,11 +1,11 @@
-"""Raspberry Pi Pico 2 + Adafruit DVI Sock (HSTX) — MicroPython
+"""Raspberry Pi Pico 2 + Adafruit DVI Sock (HSTX) - MicroPython
 
 Plug-in stack:
 - Raspberry Pi Pico 2 / Pico 2 W: https://circuitpython.org/board/raspberry_pi_pico2/
-- Adafruit DVI Sock for Pico (HSTX differential pairs on GP12–GP19, CK on GP14/15)
+- Adafruit DVI Sock for Pico (HSTX differential pairs on GP12-GP19, CK on GP14/15)
 
 Pimoroni Pico DV Demo Base uses a different pin map and is **not** HSTX-compatible on
-Pico 2 — use this config with the Adafruit DVI Sock instead.
+Pico 2 - use this config with the Adafruit DVI Sock instead.
 
 Targets displayif ``picodvi`` (RP2350 HSTX backend).
 
@@ -20,9 +20,7 @@ import eventsys
 try:
     from picodvi import Framebuffer
 except ImportError as exc:
-    raise NotImplementedError(
-        "DVI output requires displayif picodvi cmod (rp2350 HSTX)"
-    ) from exc
+    raise NotImplementedError("DVI output requires displayif picodvi cmod (rp2350 HSTX)") from exc
 
 fb = Framebuffer(
     width=640,
@@ -40,5 +38,4 @@ fb = Framebuffer(
 
 display_drv = FBDisplay(fb)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

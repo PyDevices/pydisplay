@@ -1,11 +1,27 @@
 {
-    "urls": [
-      ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/spi/rp2040-touch-lcd-1.28/board_config.py"],
-      ["gc9a01.py", "github:PyDevices/pydisplay/drivers/display/gc9a01.py"],
-      ["cst8xx.py", "github:PyDevices/pydisplay/drivers/touch/cst8xx.py"]
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/busdisplay/spi/rp2040-touch-lcd-1.28/board_config.py"
     ],
-    "deps": [
-      ["github:PyDevices/pydisplay/packages/spibus.json", "main"]
+    [
+      "gc9a01.py",
+      "github:PyDevices/pydisplay/drivers/display/gc9a01.py"
     ],
-    "version": "0.1"
-  }
+    [
+      "cst8xx.py",
+      "github:PyDevices/pydisplay/drivers/touch/cst8xx.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/spibus.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

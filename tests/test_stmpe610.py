@@ -51,7 +51,7 @@ class TestSTMPE610(unittest.TestCase):
         touch = self._make_touch()
         touch._calib = ((357, 3812), (390, 3555))
         type(touch).touched = property(lambda self: True)
-        touch.buffer_empty = True
+        type(touch).buffer_empty = property(lambda self: True)
         touch._read_raw = lambda: (2048, 2048, 128)
         point = touch.touch_point
         self.assertIsNotNone(point)

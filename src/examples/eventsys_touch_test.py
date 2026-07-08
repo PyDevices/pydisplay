@@ -10,13 +10,10 @@ loop that yields to the event loop so input/widget events can be dispatched.  On
 MCU/desktop it runs the classic blocking loop with sleep_ms().
 """
 
-import board_config
-from board_config import display_drv, broker
+from board_config import display_drv, runtime
 import eventsys
 from graphics import round_rect, text16
 from multimer import sleep_ms
-
-TIMER_ASYNC = getattr(board_config, "TIMER_ASYNC", False)
 
 demo = False
 
@@ -81,11 +78,11 @@ def _clear_target(x, y, half_width, half_height):
 
 
 def _poll_touch():
-    if elist := broker.poll():
+    if elist := runtime.poll():
         for event in elist:
-            if event.type == broker.events.QUIT:
+            if event.type == runtime.events.QUIT:
                 raise SystemExit(0)
-            if event.type == broker.events.MOUSEBUTTONDOWN and event.button == 1:
+            if event.type == runtime.events.MOUSEBUTTONDOWN and event.button == 1:
                 return event.pos
     return None
 
@@ -216,7 +213,7 @@ def run_sync():
 if not demo:
     set_rotation_table((0, 0, 0, 0))
 
-if TIMER_ASYNC:
+if runtime.timer_async:
     # On a host with a running loop (Jupyter, PyScript) this schedules the test
     # as a background task and returns; otherwise it runs to completion.
     from multimer import run

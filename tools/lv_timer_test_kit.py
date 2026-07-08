@@ -6,7 +6,7 @@ Subprocesses run ``examples/lv_test_timer_harness.py`` from ``src/`` (~4 s of
 checks, then an injected ``events.Quit``). Each child prints ``KIT_RESULT=`` on
 stdout; exit code 0 is expected on success.
 
-The board's shared broker timer drives LVGL (``multimer.Timer`` never needs
+The board's shared runtime timer drives LVGL (``multimer.Timer`` never needs
 "pumping"), so there is no pump/no_pump distinction: the only modes are ``sync``
 and ``async``.
 

@@ -19,9 +19,8 @@ _PKG_DIR = os.path.dirname(os.path.abspath(__file__))
 if _PKG_DIR not in sys.path:
     sys.path.insert(0, _PKG_DIR)
 
-from board_config import broker, display_drv
+from board_config import display_drv, runtime
 from displaysys import color565
-from eventsys import poll_quit_discarding_others
 from eventsys.keys import Keys
 from graphics import BMP565, FrameBuffer, RGB565, rect, text8
 from multimer import sleep_ms
@@ -625,7 +624,7 @@ _keys = {"left": False, "right": False, "up": False, "down": False, "smash": Fal
 
 def _handle_event(ev):
     t = ev.type
-    if t == broker.events.KEYDOWN:
+    if t == runtime.events.KEYDOWN:
         k = ev.key
         if k in (Keys.K_LEFT, Keys.K_a):
             _keys["left"] = True
@@ -640,7 +639,7 @@ def _handle_event(ev):
             _keys["smash"] = True
         if _trace is not None:
             _trace.log_input("keydown", key=int(k))
-    elif t == broker.events.KEYUP:
+    elif t == runtime.events.KEYUP:
         k = ev.key
         if k in (Keys.K_LEFT, Keys.K_a):
             _keys["left"] = False
@@ -653,7 +652,7 @@ def _handle_event(ev):
             _keys["smash"] = False
         if _trace is not None:
             _trace.log_input("keyup", key=int(k))
-    elif t == broker.events.MOUSEBUTTONDOWN:
+    elif t == runtime.events.MOUSEBUTTONDOWN:
         tx, ty = ev.pos
         if ty < L.h // 3:
             _keys["up"] = True
@@ -665,7 +664,7 @@ def _handle_event(ev):
             _keys["right"] = True
         if _trace is not None:
             _trace.log_input("mousedown", pos=[tx, ty], keys=dict(_keys))
-    elif t == broker.events.MOUSEBUTTONUP:
+    elif t == runtime.events.MOUSEBUTTONUP:
         _keys["left"] = _keys["right"] = _keys["up"] = _keys["smash"] = False
         if _trace is not None:
             _trace.log_input("mouseup", keys=dict(_keys))
@@ -753,9 +752,9 @@ def _draw_text_panel(lines, y0=None, at_top=False):
 
 
 def _is_start_input(ev):
-    if ev.type == broker.events.KEYDOWN:
+    if ev.type == runtime.events.KEYDOWN:
         return True
-    if ev.type == broker.events.MOUSEBUTTONDOWN:
+    if ev.type == runtime.events.MOUSEBUTTONDOWN:
         return True
     return False
 
@@ -768,12 +767,12 @@ def _wait_for_input(draw_fn=None):
             _present()
         return True
     while True:
-        if poll_quit_discarding_others(broker):
+        if runtime.quit_requested if runtime else False:
             return False
         if draw_fn is not None:
             draw_fn()
             _present()
-        for ev in broker.poll():
+        for ev in runtime.poll():
             if _is_start_input(ev):
                 _keys["left"] = _keys["right"] = _keys["up"] = _keys["down"] = False
                 _keys["smash"] = False
@@ -828,18 +827,20 @@ def _lose_life(player, camera_ref, plats, reason="unknown"):
     return _life_lost_pause(player)
 
 
+_refresh_claim = None
+
+
 def _take_over_display_refresh():
-    sub = getattr(broker, "display_refresh", None)
-    if sub is not None:
-        sub.deinit()
-        broker.display_refresh = None
+    global _refresh_claim
+    if runtime is not None and _refresh_claim is None:
+        _refresh_claim = runtime.claim_display_refresh()
 
 
 def _restore_display_refresh():
-    if getattr(broker, "display_refresh", None) is None:
-        from board_config import _wire_display_refresh
-
-        _wire_display_refresh(broker, display_drv)
+    global _refresh_claim
+    if _refresh_claim is not None:
+        _refresh_claim.release()
+        _refresh_claim = None
 
 
 def _run_game(show_splash=True):
@@ -853,7 +854,7 @@ def _run_game(show_splash=True):
         if show_splash and not _skip_ui():
             if not _show_splash():
                 return
-            if poll_quit_discarding_others(broker):
+            if runtime.quit_requested if runtime else False:
                 return
 
         while True:
@@ -870,10 +871,10 @@ def _run_game(show_splash=True):
             _particles.clear()
 
             while player.lives > 0 and not won:
-                if poll_quit_discarding_others(broker):
+                if runtime.quit_requested if runtime else False:
                     return
 
-                for ev in broker.poll():
+                for ev in runtime.poll():
                     _handle_event(ev)
 
                 if _bot:

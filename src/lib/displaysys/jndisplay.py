@@ -265,6 +265,8 @@ class JNDevices:
 
 
 class JNDisplay(DisplayDriver):
+    needs_refresh = True
+
     """
     A class to emulate a display on Jupyter Notebook.
 

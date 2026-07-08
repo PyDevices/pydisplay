@@ -9,7 +9,7 @@ _DIALECT = sys.implementation.name
 
 _CAPS = {
     "dialect": _DIALECT,
-    "devices": ["broker", "queue", "touch", "encoder", "keypad", "joystick"],
+    "devices": ["runtime", "host", "touch", "encoder", "keypad", "joystick"],
     "joystick": True,
 }
 

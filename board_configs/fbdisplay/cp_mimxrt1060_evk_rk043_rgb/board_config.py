@@ -4,12 +4,13 @@ Touch: Goodix GT911 on shield I2C (``board.SCL`` / ``board.SDA``), reset on
 ``board.LCD_RST``, interrupt on ``board.LCD_TOUCH_INT``.
 """
 
+import time
+
 import board
 import busio
-import displayio
 import digitalio
+import displayio
 import gt911
-import time
 
 from displaysys.fbdisplay import FBDisplay
 import eventsys
@@ -88,13 +89,8 @@ def touch_read_func():
 
 touch_rotation_table = (0, 0, 0, 0)
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

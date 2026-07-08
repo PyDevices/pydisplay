@@ -37,7 +37,7 @@ Select the **`.venv`** kernel (**Kernel → Change Kernel**), then run cells top
 
 No LVGL build is required for the pydisplay walkthrough in the notebook.
 
-`src/lib/board_config.py` detects Jupyter (`get_ipython()`) and selects **`JNDisplay`** with `TIMER_ASYNC = True`. The notebook must run with working directory under **`src/`** so `import lib.path` finds `lib/`, `examples/`, and `add_ons/` — opening `src/jupyter_notebook.ipynb` from the repo in JupyterLab does that automatically.
+`src/lib/board_config.py` detects Jupyter (`get_ipython()`) and selects **`JNDisplay`** with `timer_async=True`. The notebook must run with working directory under **`src/`** so `import lib.path` finds `lib/`, `examples/`, and `add_ons/` — opening `src/jupyter_notebook.ipynb` from the repo in JupyterLab does that automatically.
 
 ## Touch input
 

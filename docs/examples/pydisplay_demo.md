@@ -64,7 +64,7 @@ Constants in the script: `TOP = 36`, `BOT = 20`, `ROW = 20` (height of each tip 
 | Import | Role |
 |--------|------|
 | `board_config.display_drv` | Platform display driver (SDL, BusDisplay, …) |
-| `board_config.broker` | Input event broker (touch / mouse) |
+| `board_config.runtime` | Input event runtime (touch / mouse) |
 | `displaysys.color565` | RGB → RGB565 color values |
 | `graphics.Area` | Rectangle hit-testing for buttons |
 | `graphics.Font`, `FrameBuffer`, `RGB565` | Text rendered in RAM, blitted once |
@@ -129,7 +129,7 @@ def main():
 
     while True:
         pump()
-        if elist := broker.poll():
+        if elist := runtime.poll():
             ...
         sleep_ms(1)
 
@@ -140,7 +140,7 @@ main()
 - **`periodic(on_tick, period=40)`** — allocates the next timer id after `display_drv` (SDLDisplay `auto_refresh` already took id 1 via `periodic(show, …)`). No need to pick a timer number yourself.
 - **`on_tick(_=None)`** — every 40 ms, increments `state["scroll"]` and sets `display_drv.vscroll`. The optional timer argument matches the `machine.Timer` / `periodic` callback contract.
 - **`pump()`** — drains multimer callbacks on backends that queue timer work to the main thread ([multimer](../concepts/multimer.md)).
-- **`broker.poll()`** — returns touch/mouse events; the demo handles `MOUSEBUTTONDOWN` only.
+- **`runtime.poll()`** — returns touch/mouse events; the demo handles `MOUSEBUTTONDOWN` only.
 
 **Rotate** pauses scroll, updates `display_drv.rotation`, resets scroll to 0, calls `setup_scroll()` and `redraw()`, then resumes scroll.
 
@@ -257,7 +257,7 @@ import lib.path
 import pydisplay_demo_async
 ```
 
-The script sets `board_config.TIMER_ASYNC = True`, starts the scroll timer inside `async def main()` (required for `aio.Timer.init`), and yields with `await pump()` each frame. UI, colours, scroll pause during redraw, and buffered text are unchanged.
+The script runs on PyScript/Jupyter where `runtime.timer_async` is true, starts the scroll timer inside `async def main()` (required for `aio.Timer.init`), and yields with `await pump()` each frame. UI, colours, scroll pause during redraw, and buffered text are unchanged.
 
 To migrate from sync to async, compare the two `main()` functions side by side:
 
@@ -273,6 +273,6 @@ To migrate from sync to async, compare the two `main()` functions side by side:
 ## Related docs
 
 - [Board configs](../hardware/board-configs.md) — choose and customize `board_config.py`
-- [Events](../concepts/events.md) — `broker.poll()` and device types
+- [Events](../concepts/events.md) — `runtime.poll()` and device types
 - [Displays](../concepts/displays.md) — driver overview and rotation notes
 - [Examples catalog](index.md) — full list of scripts

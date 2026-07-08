@@ -1,6 +1,7 @@
 """MatrixPortal S3 64x64 HUB75 — MicroPython"""
 
 import rgbmatrix
+
 from displaysys.fbdisplay import FBDisplay
 import eventsys
 
@@ -18,5 +19,4 @@ matrix = rgbmatrix.RGBMatrix(
 
 display_drv = FBDisplay(matrix, width=64, height=64)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

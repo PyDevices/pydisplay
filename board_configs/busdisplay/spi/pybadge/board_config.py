@@ -37,11 +37,5 @@ buttons = ShiftRegisterButtons(
     mapping=PYBADGE_BUTTON_MAP,
 )
 
-broker = eventsys.Broker()
-
-keypad_dev = broker.create(
-    type=eventsys.KEYPAD,
-    read=buttons.read,
-)
-
-broker.register_quit_cleanup(display_drv)
+runtime = eventsys.Runtime(display=display_drv)
+runtime.add_keypad(read=buttons.read)

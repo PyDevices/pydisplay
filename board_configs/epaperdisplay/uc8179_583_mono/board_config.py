@@ -1,8 +1,8 @@
 """UC8179 5.83" monochrome bare display — MicroPython (Feather SPI pinout)"""
 
-from machine import Pin, SPI
-from uc8179 import UC8179
+from machine import SPI, Pin
 from spibus import SPIBus
+from uc8179 import UC8179
 
 from displaysys.epaperdisplay import EPaperDisplay
 import eventsys
@@ -17,7 +17,6 @@ display_bus = SPIBus(
     cs=10,
     reset=6,
 )
-
 _epaper = UC8179(
     display_bus,
     width=648,
@@ -28,5 +27,4 @@ _epaper = UC8179(
 
 display_drv = EPaperDisplay(_epaper, width=648, height=480, color_depth=1)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

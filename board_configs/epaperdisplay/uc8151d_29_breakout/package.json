@@ -1,13 +1,31 @@
 {
   "urls": [
-    ["board_config.py", "github:PyDevices/pydisplay/board_configs/epaperdisplay/uc8151d_29_breakout/board_config.py"],
-    ["uc8151d.py", "github:PyDevices/pydisplay/drivers/display/uc8151d.py"]
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/epaperdisplay/uc8151d_29_breakout/board_config.py"
+    ],
+    [
+      "uc8151d.py",
+      "github:PyDevices/pydisplay/drivers/display/uc8151d.py"
+    ]
   ],
   "deps": [
-    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"],
-    ["github:PyDevices/pydisplay/packages/epaperdisplay.json", "main"],
-    ["github:PyDevices/pydisplay/packages/epaper_chip.json", "main"],
-    ["github:PyDevices/pydisplay/packages/spibus.json", "main"]
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/epaperdisplay.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/epaper_chip.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/spibus.json",
+      "main"
+    ]
   ],
   "version": "0.1"
 }

@@ -5,7 +5,7 @@
 A class to make keypad keys appear as pins on a microcontroller.
 
 Usage:
-    from board_config import display_drv, broker
+    from board_config import display_drv, runtime
     from keypins import KeyPins, Keys
 
 
@@ -17,10 +17,10 @@ Usage:
         fire=Keys.K_SPACE,
     )
 
-    broker.on([broker.events.KEYDOWN, broker.events.KEYUP], buttons)
+    runtime.on([runtime.events.KEYDOWN, runtime.events.KEYUP], buttons)
 
     while True:
-        _ = broker.poll()
+        _ = runtime.poll()
         for button in buttons:
             if button.value() == True:
                 print(f"{button.name} ({button.keyname}) pressed")

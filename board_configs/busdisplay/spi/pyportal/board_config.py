@@ -1,7 +1,7 @@
 """Adafruit PyPortal ILI9341 + TT21100 — MicroPython (SAMD51)"""
 
-from machine import I2C, Pin
 from ili9341 import ILI9341
+from machine import I2C, Pin
 from spibus import SPIBus
 from tt21100 import TT21100
 
@@ -28,8 +28,7 @@ display_drv = ILI9341(
     bgr=True,
     reverse_bytes_in_word=True,
 )
-
-i2c = I2C(1, scl=Pin(35), sda=Pin(34), freq=400_000)
+i2c = I2C(1, sda=Pin(34), scl=Pin(35), freq=400_000)
 touch_drv = TT21100(i2c)
 
 
@@ -42,13 +41,8 @@ def touch_read_func():
 
 touch_rotation_table = (0, 0, 0, 0)
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

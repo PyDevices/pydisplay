@@ -2,8 +2,8 @@
 
 import board
 from displayio import release_displays
-from fourwire import FourWire
 from ek79686 import EK79686
+from fourwire import FourWire
 
 from displaysys.epaperdisplay import EPaperDisplay
 import eventsys
@@ -17,7 +17,6 @@ display_bus = FourWire(
     reset=board.D6,
     baudrate=4_000_000,
 )
-
 _epaper = EK79686(
     display_bus,
     width=176,
@@ -29,5 +28,4 @@ _epaper = EK79686(
 
 display_drv = EPaperDisplay(_epaper, width=176, height=264, color_depth=2)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None
