@@ -1,7 +1,4 @@
-"""Adafruit Metro RP2350 + HSTX DVI breakout — CircuitPython
-
-https://learn.adafruit.com/adafruit-metro-rp2350/hstx-display
-"""
+"""Adafruit Metro RP2350 + HSTX DVI breakout — CircuitPython"""
 
 import board
 import displayio

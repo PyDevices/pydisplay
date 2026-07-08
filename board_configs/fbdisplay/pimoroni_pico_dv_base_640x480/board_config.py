@@ -1,14 +1,4 @@
-"""Pimoroni Pico DV Demo Base + Raspberry Pi Pico (RP2040) - MicroPython
-
-Plug-in stack (no breadboard wiring):
-- Raspberry Pi Pico in socket headers: https://circuitpython.org/board/raspberry_pi_pico/
-- Pimoroni Pico DV Demo Base HDMI: https://circuitpython.org/board/pimoroni_pico_dv_base/
-
-DVI pinout matches CircuitPython ``board.CKP`` / ``D0P`` aliases on pimoroni_pico_dv_base
-(GP6-GP13).  Targets displayif ``picodvi`` (PIO bit-bang on RP2040).
-
-CircuitPython sibling: ``cp_pimoroni_pico_dv_base_640x480``.
-"""
+"""Pimoroni Pico DV Demo Base + Raspberry Pi Pico (RP2040) - MicroPython"""
 
 from machine import Pin
 
@@ -18,9 +8,7 @@ import eventsys
 try:
     from picodvi import Framebuffer
 except ImportError as exc:
-    raise NotImplementedError(
-        "DVI output requires displayif picodvi cmod (rp2 PIO or RP2350 HSTX)"
-    ) from exc
+    raise NotImplementedError("DVI output requires displayif picodvi cmod (rp2 PIO)") from exc
 
 fb = Framebuffer(
     width=640,

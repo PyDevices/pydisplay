@@ -34,6 +34,12 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 
 ### Running examples headlessly (GUI smoke tests)
 
+- **Read [`docs/testing/example-runtimes.md`](docs/testing/example-runtimes.md)
+  first** — it is the source of truth for the cross-runtime example test system
+  (runtimes, prerequisites, the example contract, the matrix commands, and
+  debugging). The canonical runtime list is
+  [`tools/example_runtimes.toml`](tools/example_runtimes.toml) and per-example
+  metadata is [`tools/example_test_manifest.toml`](tools/example_test_manifest.toml).
 - The cross-runtime example harness is `tools/example_test_kit.py`. To run the
   CPython matrix headlessly, set dummy SDL drivers so pygame needs no display:
   `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv`

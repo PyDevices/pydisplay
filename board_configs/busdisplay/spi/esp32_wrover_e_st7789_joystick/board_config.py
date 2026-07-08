@@ -30,11 +30,25 @@ display_drv = ST7789(
     brightness=1.0,
     backlight_pin=None,
     backlight_on_high=True,
+    cp={
+        "width": 240,
+        "height": 240,
+        "colstart": 0,
+        "rowstart": 0,
+        "rotation": 0,
+        "mirrored": True,
+        "color_depth": 16,
+        "bgr": True,
+        "reverse_bytes_in_word": True,
+        "invert": False,
+    },
 )
-
 joystick_driver = GPIOJoystick(
     instance_id=1,
-    axes=[ADC(Pin(39), atten=ADC.ATTN_11DB), ADC(Pin(36), atten=ADC.ATTN_11DB)],
+    axes=[
+        ADC(Pin(39), atten=ADC.ATTN_11DB),
+        ADC(Pin(36), atten=ADC.ATTN_11DB),
+    ],
     buttons=[
         Pin(4, Pin.IN, Pin.PULL_UP),
         Pin(25, Pin.IN, Pin.PULL_UP),
@@ -42,5 +56,6 @@ joystick_driver = GPIOJoystick(
     ],
 )
 
+
 runtime = eventsys.Runtime(display=display_drv)
-runtime.add_joystick(joystick_driver=joystick_driver, emulate_digital=[(0, 1)])
+runtime.add_joystick(joystick_driver=joystick_driver, emulate_digital=[[0, 1]])

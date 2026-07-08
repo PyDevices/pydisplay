@@ -1,0 +1,35 @@
+kind = "fbdisplay_picodvi"
+slug = "pimoroni_pico_dv_base_640x480"
+title = "Pimoroni Pico DV Demo Base + Raspberry Pi Pico (RP2040) - MicroPython"
+title_cp = "Pimoroni Pico DV Demo Base + Raspberry Pi Pico (RP2040) — CircuitPython"
+out = "fbdisplay"
+circuitpython = true
+port = "rp2040"
+
+[fb]
+width = 640
+height = 480
+color_depth = 8
+
+[pins.mp]
+clk_dp = 7
+clk_dn = 6
+red_dp = 9
+red_dn = 8
+green_dp = 11
+green_dn = 10
+blue_dp = 13
+blue_dn = 12
+
+[pins.cp]
+clk_dp = "board.CKP"
+clk_dn = "board.CKN"
+red_dp = "board.D0P"
+red_dn = "board.D0N"
+green_dp = "board.D1P"
+green_dn = "board.D1N"
+blue_dp = "board.D2P"
+blue_dn = "board.D2N"
+
+[package]
+include_picodvi = true

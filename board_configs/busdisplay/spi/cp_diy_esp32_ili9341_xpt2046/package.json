@@ -9,19 +9,11 @@
       "github:PyDevices/pydisplay/drivers/display/ili9341.py"
     ],
     [
-      "ft6x36.py",
-      "github:PyDevices/pydisplay/drivers/touch/xpt2046.py"
-    ],
-    [
-      "adafruit_focaltouch.py",
-      "github:PyDevices/pydisplay/drivers/touch/circuitpython/adafruit_focaltouch.py"
+      "adafruit_touchscreen.py",
+      "github:PyDevices/pydisplay/drivers/touch/circuitpython/adafruit_touchscreen.py"
     ]
   ],
   "deps": [
-    [
-      "github:PyDevices/pydisplay/packages/spibus.json",
-      "main"
-    ],
     [
       "github:PyDevices/pydisplay/packages/displaysys.json",
       "main"

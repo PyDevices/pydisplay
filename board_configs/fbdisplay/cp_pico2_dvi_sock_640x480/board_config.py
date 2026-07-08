@@ -1,7 +1,4 @@
-"""Raspberry Pi Pico 2 + Adafruit DVI Sock (HSTX) — CircuitPython
-
-Pin map from Adafruit DVI Sock guide (HSTX on RP2350).
-"""
+"""Raspberry Pi Pico 2 + Adafruit DVI Sock (HSTX) — CircuitPython"""
 
 import board
 import displayio

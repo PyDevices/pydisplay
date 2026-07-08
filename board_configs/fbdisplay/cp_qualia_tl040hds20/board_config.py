@@ -1,22 +1,19 @@
 """Qualia S3 RGB-666 with TL040HDS20 4.0" 720x720 Square Display"""
-# Similar configs may be available for RGBMatrix, is31fl3741 and picodvi
 
-import adafruit_focaltouch
+from adafruit_focaltouch import Adafruit_FocalTouch
 import board
 import busio
-from displayio import release_displays
+import displayio
 import dotclockframebuffer
-from framebufferio import FramebufferDisplay
+import framebufferio
 
 from displaysys.fbdisplay import FBDisplay
 import eventsys
 
-# This first part is particular to CircuitPython-based framebuffer-based displays
-
 tft_pins = dict(board.TFT_PINS)
 
 tft_timings = {
-    "frequency": 16000000,
+    "frequency": 16_000_000,
     "width": 720,
     "height": 720,
     "hsync_pulse_width": 2,
@@ -37,20 +34,18 @@ init_sequence_tl040hds20 = bytes()
 board.I2C().deinit()
 i2c = busio.I2C(board.SCL, board.SDA)
 tft_io_expander = dict(board.TFT_IO_EXPANDER)
-# tft_io_expander['i2c_address'] = 0x38 # uncomment for rev B
 dotclockframebuffer.ioexpander_send_init_sequence(i2c, init_sequence_tl040hds20, **tft_io_expander)
+displayio.release_displays()
 
-release_displays()
 fb = dotclockframebuffer.DotClockFramebuffer(**tft_pins, **tft_timings)
-display = FramebufferDisplay(fb, auto_refresh=True)
+
+display = framebufferio.FramebufferDisplay(fb, auto_refresh=True)
 display.root_group = None
-
-
-# Typical board_config.py setup from here on out
 
 display_drv = FBDisplay(fb)
 
-touch_drv = adafruit_focaltouch.Adafruit_FocalTouch(i2c, address=0x48)
+i2c = board.I2C()
+touch_drv = Adafruit_FocalTouch(i2c)
 
 
 def touch_read_func():

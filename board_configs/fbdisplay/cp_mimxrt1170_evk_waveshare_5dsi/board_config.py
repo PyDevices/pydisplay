@@ -1,13 +1,4 @@
-"""NXP MIMXRT1170-EVK + Waveshare 50H-800480-IPS DSI (800x480) on J84 - CircuitPython
-
-Board: https://circuitpython.org/board/nxp_mimxrt1170_evk/
-Panel: https://www.waveshare.com/wiki/50H-800480-IPS#Interface_Definition
-Waveshare 50H-800480-IPS on J84 (15-pin RPi-style FFC) + 5 V on J85.
-
-Touch (50H-800480-IPS-CT only): Goodix GT911 on I2C via J84 FFC pins 11-12
-(``board.SCL`` / ``board.SDA``).  Reset / interrupt on ``board.D9`` / ``board.D6``.
-Non-touch IPS panels omit the controller; display-only use still works.
-"""
+"""NXP MIMXRT1170-EVK + Waveshare 50H-800480-IPS DSI (800x480) on J84 - CircuitPython"""
 
 import board
 import busio
@@ -21,8 +12,8 @@ import eventsys
 
 displayio.release_displays()
 
-# CircuitPython native mipidsi (not displayif).
 PANEL_INIT_SEQUENCE = b""
+
 bus = mipidsi.Bus(frequency=1_000_000_000, num_lanes=2)
 
 fb = mipidsi.Display(
@@ -39,7 +30,6 @@ fb = mipidsi.Display(
     vsync_front_porch=7,
     vsync_back_porch=21,
 )
-
 display_drv = FBDisplay(fb)
 
 i2c = busio.I2C(board.SCL, board.SDA)

@@ -1,0 +1,20 @@
+kind = "pixeldisplay"
+slug = "neopixel_8x4"
+title = "NeoPixel 8x4 grid"
+strip = "neopixel"
+out = "pixeldisplay"
+circuitpython = true
+
+[grid]
+width = 8
+height = 4
+alternating = false
+
+[cp.neopixel]
+pin = "board.D6"
+brightness = 0.1
+
+[mp.neopixel]
+pin = 6
+bpp = 3
+timing = 1

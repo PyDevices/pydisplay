@@ -1,0 +1,77 @@
+kind = "busdisplay_spi"
+slug = "pitft_ili9341_featherwing"
+title = "Adafruit PiTFT 2.4\" FeatherWing ILI9341 + STMPE610 — MicroPython (Feather)"
+title_cp = "Adafruit PiTFT 2.4\" FeatherWing ILI9341 + STMPE610 — CircuitPython"
+out = "busdisplay/spi"
+circuitpython = true
+
+[display]
+module = "ili9341"
+class = "ILI9341"
+width = 240
+height = 320
+colstart = 0
+rowstart = 0
+rotation = 90
+mirrored = false
+color_depth = 16
+bgr = true
+reverse_bytes_in_word = true
+
+[display.cp]
+width = 240
+height = 320
+colstart = 0
+rowstart = 0
+rotation = 90
+mirrored = false
+color_depth = 16
+bgr = true
+reverse_bytes_in_word = true
+
+[bus.mp.spi]
+id = 0
+baudrate = 24_000_000
+sck = 18
+mosi = 19
+miso = 20
+dc = 10
+cs = 9
+reset = 6
+
+[bus.cp.fourwire]
+command = "board.D10"
+chip_select = "board.D9"
+reset = "board.D6"
+baudrate = 24_000_000
+
+[touch]
+type = "stmpe610"
+module = "stmpe610"
+class = "STMPE610"
+read_wrapper = "stmpe610"
+calibration_name = "_PITFT_CALIBRATION"
+calibration = [[357, 3812], [390, 3555]]
+rotation_table = [0, 0, 0, 0]
+
+[touch.mp.spi]
+id = 0
+baudrate = 1_000_000
+sck = 18
+mosi = 19
+miso = 20
+
+[touch.chip]
+cs = 8
+width = 240
+height = 320
+rotation = 90
+
+[touch.cp]
+chip_select = "board.D8"
+baudrate = 1_000_000
+
+[package]
+display_driver = "ili9341"
+touch_driver = "stmpe610"
+deps_mp = ["spibus"]

@@ -1,10 +1,23 @@
 {
   "urls": [
-    ["board_config.py", "github:PyDevices/pydisplay/board_configs/fbdisplay/esp32-p4-wifi6-touch-lcd-4b/board_config.py"],
-    ["gt911.py", "github:PyDevices/pydisplay/drivers/touch/gt911.py"]
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/fbdisplay/esp32-p4-wifi6-touch-lcd-4b/board_config.py"
+    ],
+    [
+      "gt911.py",
+      "github:PyDevices/pydisplay/drivers/touch/gt911.py"
+    ]
   ],
   "deps": [
-    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"]
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/mipidsi.json",
+      "main"
+    ]
   ],
   "version": "0.1"
 }

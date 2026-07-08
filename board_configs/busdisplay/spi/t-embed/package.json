@@ -1,12 +1,27 @@
 {
-    "urls": [
-      ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/spi/t-embed/board_config.py"],
-      ["st7789.py", "github:PyDevices/pydisplay/drivers/display/st7789.py"],
-      ["rotary.py", "github:miketeachman/micropython-rotary/rotary.py"],
-      ["rotary_irq_esp.py", "github:miketeachman/micropython-rotary/rotary_irq_esp.py"]
-      ],
-      "deps": [
-        ["github:PyDevices/pydisplay/packages/spibus.json", "main"]
-      ],
-      "version": "0.1"
-  }
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/busdisplay/spi/t-embed/board_config.py"
+    ],
+    [
+      "st7789.py",
+      "github:PyDevices/pydisplay/drivers/display/st7789.py"
+    ],
+    [
+      "rotary.py",
+      "github:miketeachman/micropython-rotary/rotary.py"
+    ],
+    [
+      "rotary_irq_esp.py",
+      "github:miketeachman/micropython-rotary/rotary_irq_esp.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/spibus.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

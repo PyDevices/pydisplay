@@ -1,0 +1,104 @@
+kind = "fbdisplay_mipidsi"
+slug = "esp32-p4-wifi6-touch-lcd-4b"
+title = "Waveshare ESP32-P4-WIFI6-Touch-LCD-4B - MicroPython"
+title_cp = "Waveshare ESP32-P4-WIFI6-Touch-LCD-4B - 720x720 MIPI DSI + GT911 touch"
+out = "fbdisplay"
+circuitpython = true
+port = "esp32p4"
+mp_lcd_reset_pulse = true
+cp_lcd_reset_pulse = true
+cp_framebuffer_display = true
+
+[bus]
+frequency = 1_000_000_000
+num_lanes = 2
+ldo_chan = 3
+ldo_voltage_mv = 2500
+
+[display]
+init_sequence_name = "ST7703_INIT_SEQUENCE"
+init_sequence_hex = [
+  "b903f11283",
+  "b105000000da80",
+  "b2033c1230",
+  "b30a1010282803ff00000000",
+  "b40180",
+  "b5020a0a",
+  "b6029797",
+  "b8042622f013",
+  "ba1b31810ff90e062000000000000000442500900a0000014f01000037",
+  "bc0147",
+  "bf03021100",
+  "c009737350500000127000",
+  "c10c2500323277e4ffffcccc7777",
+  "c6068200bfff00ff",
+  "c706b8000a100109",
+  "c80410401e02",
+  "cc010b",
+  "e022000b102c3d3f423a070d0f131513140f16000b102c3d3f423a070d0f131513140f16",
+  "e30e07070b0b0b0b00000000ff00c010",
+  "e93fc8100a000080811231234f86a000470800000c00000000000c00000098028baf4602888888888898138baf5713888888888800000000000000000000000000",
+  "ea3d970c090909780000000000009f318ba8317588888888889f208ba820648888888888230000027100000000000000000000000000000040808100000000",
+  "ef03ffff01",
+  "118100fa",
+  "29810032"
+]
+width = 720
+height = 720
+color_depth = 16
+pixel_clock_frequency = 38_000_000
+hsync_pulse_width = 20
+hsync_front_porch = 50
+hsync_back_porch = 50
+vsync_pulse_width = 4
+vsync_front_porch = 20
+vsync_back_porch = 20
+reset_pin = "LCD_RESET"
+backlight_pin = "LCD_BACKLIGHT"
+backlight_on_high = false
+
+[pins.mp]
+LCD_RESET = 27
+LCD_BACKLIGHT = 26
+I2C_SCL = 8
+I2C_SDA = 7
+TOUCH_RESET = 23
+TOUCH_IRQ_DUMMY = 22
+
+[pins.cp]
+I2C_SCL = "board.IO8"
+I2C_SDA = "board.IO7"
+LCD_RESET = "board.IO27"
+LCD_BACKLIGHT = "board.IO26"
+TOUCH_RESET = "board.IO23"
+
+[touch]
+module = "gt911"
+class = "GT911"
+rotation_table = [0, 0, 0, 0]
+
+[touch.mp.i2c]
+id = 1
+scl = "I2C_SCL"
+sda = "I2C_SDA"
+freq = 400_000
+
+[touch.chip]
+reset_pin = "TOUCH_RESET"
+irq_pin = "TOUCH_IRQ_DUMMY"
+address = "0x5D"
+width = 720
+height = 720
+touch_points = 5
+
+[touch.cp]
+driver = "gt911"
+i2c_scl = "I2C_SCL"
+i2c_sda = "I2C_SDA"
+reset_pin = "TOUCH_RESET"
+address = "0x5D"
+
+[package]
+touch_driver = "gt911"
+include_mipidsi = true
+notes_cp = "Requires CircuitPython mipidsi (ESP32-P4) and gt911 (circup install gt911)."

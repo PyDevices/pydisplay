@@ -29,6 +29,4 @@ display_drv = ST7789(
     reverse_bytes_in_word=True,
     invert=False,
 )
-
-# Joystick wiring is board-specific; register KEYPAD/JOYSTICK when ported.
-runtime = None
+runtime = eventsys.Runtime(display=display_drv)

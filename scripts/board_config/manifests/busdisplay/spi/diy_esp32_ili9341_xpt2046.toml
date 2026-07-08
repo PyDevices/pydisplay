@@ -1,0 +1,90 @@
+kind = "busdisplay_spi"
+slug = "diy_esp32_ili9341_xpt2046"
+title = "DIY ESP32 psram with and ILI9341 2.8\" display and XPT2046 touch controller"
+title_cp = "DIY ESP32 ILI9341 + XPT2046 resistive touch — CircuitPython"
+out = "busdisplay/spi"
+circuitpython = true
+
+[display]
+module = "ili9341"
+class = "ILI9341"
+width = 240
+height = 320
+colstart = 0
+rowstart = 0
+rotation = 270
+mirrored = false
+color_depth = 16
+bgr = true
+reverse_bytes_in_word = true
+invert = false
+brightness = 1.0
+backlight_pin = "None"
+backlight_on_high = true
+reset_pin = 4
+reset_high = false
+power_pin = 22
+power_on_high = true
+
+[display.cp]
+width = 240
+height = 320
+colstart = 0
+rowstart = 0
+rotation = 270
+mirrored = false
+color_depth = 16
+bgr = true
+reverse_bytes_in_word = true
+invert = false
+power_pin = "board.D22"
+power_on_high = true
+
+[bus.mp.spi]
+id = 1
+baudrate = 40_000_000
+sck = 14
+mosi = 13
+miso = 12
+dc = 5
+cs = 15
+
+[bus.cp.fourwire]
+command = "board.D5"
+chip_select = "board.D15"
+reset = "board.D4"
+baudrate = 40_000_000
+
+[touch]
+type = "xpt2046"
+module = "xpt2046"
+class = "Touch"
+read = "get_touch"
+rotation_table = [0, 0, 0, 4]
+
+[touch.mp.spi]
+id = 2
+baudrate = 1_000_000
+sck = 18
+mosi = 23
+miso = 19
+cs = 25
+int_pin = 21
+
+[touch.calibrate]
+xmin = 107
+xmax = 2000
+ymin = 200
+ymax = 1940
+width = "display_drv.height"
+height = "display_drv.width"
+orientation = 3
+
+[touch.cp]
+pins = ["board.D25", "board.D26", "board.D27", "board.D32"]
+x_resistance = 400
+
+[package]
+display_driver = "ili9341"
+touch_driver = "xpt2046"
+deps_mp = ["spibus"]

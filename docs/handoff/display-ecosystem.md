@@ -16,7 +16,7 @@ Handoff for picking up pydisplay display-ecosystem work in **desktop Cursor** af
 | `busdisplay.py` | SPI / I80 / I2C chip drivers via bus layer |
 | `fbdisplay.py` | External framebuffer (`refresh()` + memoryview) |
 | `epaperdisplay.py` | E-paper: 1/2/4 bpp buffers, CP displayio push, MP `bus.send`, tri-color dual-RAM |
-| `pixeldisplay.py` | Addressable LED grids via pixel framebuffer helper |
+| `displaysys/pixeldisplay.py` | `PixelFramebuffer` + `PixelDisplay` for addressable LED grids |
 | `boarddisplay.py` | Optional CP `board.DISPLAY` adapter — **not** used in board configs (explicit wiring preferred) |
 
 Parallel RGB scanout uses **`fbdisplay.FBDisplay`** + displayif **`rgbframebuffer`** (not a separate `RGBDisplay` backend).
@@ -36,7 +36,7 @@ Parallel RGB scanout uses **`fbdisplay.FBDisplay`** + displayif **`rgbframebuffe
 
 - Paired CP+MP configs for SPI/I80/I2C bus displays
 - Built-in Adafruit boards: PyPortal, Titano, FunHouse, PyBadge, HalloWing M4, PiTFT FeatherWing, etc.
-- **All vendored e-paper chips** have CP+MP pairs (via `board_configs/manifests/epaperdisplay.toml` + `scripts/generate_board_configs.py`)
+- **All vendored e-paper chips** have CP+MP pairs (via `scripts/board_config/manifests/epaperdisplay.toml` + `scripts/generate_board_configs.py`)
 - `fbdisplay/t-rgb_480` — ST7701 + XL9535; MP uses `rgbframebuffer` + `FBDisplay`
 - **Removed:** `cp_clue_builtin` (explicit wiring teaches MP users)
 
@@ -49,8 +49,7 @@ New MIP manifests: `i2cbus`, `epaper_chip`, `boarddisplay`, `pixeldisplay`, `epa
 | Script | Purpose |
 |--------|---------|
 | `scripts/vendor_circuitpython_drivers.py` | Refresh Adafruit drivers from GitHub |
-| `scripts/generate_board_configs.py` | Manifest-driven `board_config.py` + `package.json` (SPI bus + e-paper) |
-| `scripts/generate_cp_board_configs.py` | CP siblings from MP configs (legacy) |
+| `scripts/generate_board_configs.py` | Manifest-driven `board_config.py` + `package.json` (SPI bus + e-paper + pixel grids) |
 | `scripts/generate_epaper_board_configs.py` | Thin wrapper → `generate_board_configs.py --kind epaper` |
 | `scripts/publish_micropython_lib.sh` | Sync to micropython-lib + TestPyPI |
 | `scripts/publish_make_pyproject.py` | Hatch wheels from manifests |
@@ -98,8 +97,8 @@ These MP configs intentionally `raise NotImplementedError`:
 | `fbdisplay/matrixportal_s3_64x64` | `rgbmatrix` | `cp_matrixportal_s3_64x64` |
 | `fbdisplay/matrixportal_m4_64x32` | `rgbmatrix` | `cp_matrixportal_m4_64x32` |
 | `fbdisplay/rgb_matrix_featherwing_64x32` | `rgbmatrix` | `cp_rgb_matrix_featherwing_64x32` |
-| `pixeldisplay/neopixel_8x8_zigzag` | NeoPixel grid mapper cmod | `cp_neopixel_8x8_zigzag` |
-| `pixeldisplay/neopixel_16x16_grid` | NeoPixel grid mapper cmod | `cp_neopixel_16x16_grid` |
+| `pixeldisplay/neopixel_8x4` | `displaysys.pixeldisplay.PixelFramebuffer` | `cp_neopixel_8x4` |
+| `pixeldisplay/dotstar_12x6` | `displaysys.pixeldisplay.PixelFramebuffer` | `cp_dotstar_12x6` |
 
 **displayif handoff:** https://github.com/PyDevices/displayif/blob/main/HANDOFF.md (bootstrap this repo if missing)
 

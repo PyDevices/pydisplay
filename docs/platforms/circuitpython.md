@@ -12,8 +12,9 @@ pydisplay works with CircuitPython using Adafruit bus drivers and `framebufferio
 |--------|----------|
 | `board_configs/fbdisplay/cp_usb_video/` | USB Video (webcam-style output) |
 | `board_configs/fbdisplay/cp_qualia_tl040hds20/` | Qualia RGB display |
-| `board_configs/busdisplay/spi/cp_esp32_pico_eyespi_ili9341/` | SPI ILI9341 |
-| `board_configs/pixeldisplay/cp_neopixel_8x8_zigzag/` | NeoPixel 8×8 grid |
+| `board_configs/busdisplay/spi/cp_ili9341_eyespi_qtpy_esp32s3/` | EyeSPI ILI9341 on QT Py ESP32-S3 |
+| `board_configs/pixeldisplay/cp_neopixel_8x4/` | NeoPixel 8×4 grid |
+| `board_configs/pixeldisplay/cp_dotstar_12x6/` | DotStar 12×6 grid |
 | `board_configs/epaperdisplay/cp_magtag/` | MagTag E-Ink |
 
 There is no top-level `board_configs/circuitpython/` directory; per-board configs live alongside MicroPython ones under `board_configs/`.

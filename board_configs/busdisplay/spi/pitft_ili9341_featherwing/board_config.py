@@ -1,4 +1,4 @@
-"""Adafruit PiTFT 2.4\" FeatherWing ILI9341 + STMPE610 — MicroPython (Feather)"""
+"""Adafruit PiTFT 2.4" FeatherWing ILI9341 + STMPE610 — MicroPython (Feather)"""
 
 from ili9341 import ILI9341
 from machine import SPI, Pin
@@ -29,11 +29,26 @@ display_drv = ILI9341(
     color_depth=16,
     bgr=True,
     reverse_bytes_in_word=True,
+    cp={
+        "width": 240,
+        "height": 320,
+        "colstart": 0,
+        "rowstart": 0,
+        "rotation": 90,
+        "mirrored": False,
+        "color_depth": 16,
+        "bgr": True,
+        "reverse_bytes_in_word": True,
+    },
 )
-
-touch_spi = SPI(0, baudrate=1_000_000, sck=Pin(18), mosi=Pin(19), miso=Pin(20))
-# PiTFT 2.4" FeatherWing (#3315) STMPE610 calibration (rotation 90°)
-_PITFT_CALIBRATION = ((357, 3812), (390, 3555))
+touch_spi = SPI(
+    0,
+    baudrate=1000000,
+    sck=Pin(18),
+    mosi=Pin(19),
+    miso=Pin(20),
+)
+_PITFT_CALIBRATION = ((357, 3_812), (390, 3_555))
 touch_drv = STMPE610(
     touch_spi,
     cs=8,

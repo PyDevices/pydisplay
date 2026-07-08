@@ -32,5 +32,4 @@ display_drv = ST7789(
     backlight_pin=board.D15,
     backlight_on_high=True,
 )
-
-runtime = None
+runtime = eventsys.Runtime(display=display_drv)

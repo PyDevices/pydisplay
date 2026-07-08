@@ -1,9 +1,19 @@
 {
   "urls": [
-    ["board_config.py", "github:PyDevices/pydisplay/board_configs/fbdisplay/cp_mimxrt1060_evk_rk043_rgb/board_config.py"]
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/fbdisplay/cp_mimxrt1060_evk_rk043_rgb/board_config.py"
+    ],
+    [
+      "gt911.py",
+      "github:PyDevices/pydisplay/drivers/touch/gt911.py"
+    ]
   ],
   "deps": [
-    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"]
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ]
   ],
   "version": "0.1"
 }

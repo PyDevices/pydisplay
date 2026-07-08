@@ -36,8 +36,21 @@ display_drv = ILI9341(
     reset_high=False,
     power_pin=22,
     power_on_high=True,
+    cp={
+        "width": 240,
+        "height": 320,
+        "colstart": 0,
+        "rowstart": 0,
+        "rotation": 270,
+        "mirrored": False,
+        "color_depth": 16,
+        "bgr": True,
+        "reverse_bytes_in_word": True,
+        "invert": False,
+        "power_pin": "board.D22",
+        "power_on_high": True,
+    },
 )
-
 spi = SPI(2, baudrate=1000000, sck=Pin(18), mosi=Pin(23), miso=Pin(19))
 touch_drv = Touch(
     spi=spi,
@@ -45,7 +58,6 @@ touch_drv = Touch(
     int_pin=Pin(21),
 )
 
-# Display rotation 270 degrees, invert Y axis 0b100
 touch_drv.calibrate(
     xmin=107,
     xmax=2000,
@@ -57,7 +69,7 @@ touch_drv.calibrate(
 )
 
 touch_read_func = touch_drv.get_touch
-touch_rotation_table = (0b000, 0b000, 0b000, 0b100)
+touch_rotation_table = (0, 0, 0, 4)
 
 runtime = eventsys.Runtime(
     display=display_drv,

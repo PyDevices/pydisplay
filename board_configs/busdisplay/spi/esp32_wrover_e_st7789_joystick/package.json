@@ -1,11 +1,23 @@
 {
-    "urls": [
-      ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/spi/esp32_wrover_e_st7789_joystick/board_config.py"],
-      ["st7789.py", "github:PyDevices/pydisplay/drivers/display/st7789.py"],
-      ["gpiojoystick.py", "github:PyDevices/pydisplay/drivers/joystick/gpiojoystick.py"]
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/busdisplay/spi/esp32_wrover_e_st7789_joystick/board_config.py"
     ],
-    "deps": [
-      ["github:PyDevices/pydisplay/packages/spibus.json", "main"]
+    [
+      "st7789.py",
+      "github:PyDevices/pydisplay/drivers/display/st7789.py"
     ],
-    "version": "0.1"
-  }
+    [
+      "gpiojoystick.py",
+      "github:PyDevices/pydisplay/drivers/joystick/gpiojoystick.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/spibus.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

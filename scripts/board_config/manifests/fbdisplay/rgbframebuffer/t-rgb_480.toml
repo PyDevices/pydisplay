@@ -1,0 +1,67 @@
+kind = "fbdisplay_rgbframebuffer"
+slug = "t-rgb_480"
+title = "480x480 ST7701 parallel RGB - MicroPython (ESP32-S3)"
+out = "fbdisplay"
+circuitpython = false
+port = "esp32"
+mp_pin_wrap = false
+
+mp_imports = ["from st7701 import LCDPins, run_init", "from xl9535 import XL9535"]
+mp_preamble = """
+_PWR_EN = 2
+_LCD_CS = 3
+_LCD_SDA = 4
+_LCD_CLK = 5
+_LCD_RST = 6
+
+i2c = I2C(0, scl=Pin(48), sda=Pin(8))
+xl = XL9535(i2c)
+_pin_mask = (1 << _PWR_EN) | (1 << _LCD_CS) | (1 << _LCD_SDA) | (1 << _LCD_CLK) | (1 << _LCD_RST)
+xl.pinMode8(0, _pin_mask, xl.OUT)
+xl.digitalWrite(_PWR_EN, 1)
+
+lcd_pins = LCDPins(
+    pwr_en=xl.Pin(_PWR_EN, xl.OUT, value=1),
+    cs=xl.Pin(_LCD_CS, xl.OUT, value=1),
+    sda=xl.Pin(_LCD_SDA, xl.OUT, value=1),
+    clk=xl.Pin(_LCD_CLK, xl.OUT, value=1),
+    rst=xl.Pin(_LCD_RST, xl.OUT, value=1),
+)
+run_init(lcd_pins)
+
+backlight = Pin(46, Pin.OUT, value=1)
+"""
+
+[tft_pins.mp]
+de = 45
+vsync = 41
+hsync = 47
+dclk = 42
+data = [7, 6, 5, 3, 2, 14, 13, 12, 11, 10, 9, 21, 18, 17, 16, 15]
+
+[tft_timings]
+frequency = 12_000_000
+width = 480
+height = 480
+hsync_pulse_width = 2
+hsync_front_porch = 20
+hsync_back_porch = 0
+vsync_pulse_width = 8
+vsync_front_porch = 30
+vsync_back_porch = 1
+hsync_idle_low = false
+vsync_idle_low = false
+de_idle_high = false
+pclk_active_high = true
+pclk_idle_high = false
+
+[package]
+include_rgbframebuffer = true
+
+[[package.urls_mp]]
+name = "st7701.py"
+url = "github:PyDevices/pydisplay/drivers/display/st7701.py"
+
+[[package.urls_mp]]
+name = "xl9535.py"
+url = "github:PyDevices/pydisplay/drivers/io_expander/xl9535.py"

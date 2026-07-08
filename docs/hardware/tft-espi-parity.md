@@ -44,7 +44,7 @@ This document states what is **implemented**, what uses **Python fallbacks**, an
 | Capability | Status |
 |------------|--------|
 | SPI / I2C | **Done** — `spibus`, `i2cbus` |
-| 8-bit I80 | **Done (1062)** — FlexIO `i80bus`; example `teensy41_flexio_ili9341` |
+| 8-bit I80 | **Done (1062)** — FlexIO `i80bus` |
 | RGB parallel | **Done (1062)** — eLCDIF `rgbframebuffer`; RK043 EVK config |
 | MIPI DSI | **Done (1176)** — `mipidsi` + TC358762 bridge; Waveshare 5″ DSI EVK config |
 | HUB75 | **Done (1062)** — `rgbmatrix` Protomatter |
@@ -66,11 +66,11 @@ TFT_eSPI bundles dozens of controller init tables. pydisplay **vendors CircuitPy
 
 | Board | MP | CP |
 |-------|----|----|
-| M5 Tab5 (DSI) | `m5stack_tab5` (auto ILI9881C / ST7123) | `cp_m5stack_tab5` |
+| M5 Tab5 ILI9881C (early) | `m5stack_tab5_ili9881c` | `cp_m5stack_tab5_ili9881c` |
+| M5 Tab5 ST7123 (current) | `m5stack_tab5_st7123` | — |
 | Pico 2 DVI Sock (HSTX) | `pico2_dvi_sock_640x480` | `cp_pico2_dvi_sock_640x480` |
 | Metro RP2350 HSTX | `adafruit_metro_rp2350_hstx_640x480` | `cp_adafruit_metro_rp2350_hstx_640x480` |
 | Pimoroni Pico DV (RP2040 PIO) | `pimoroni_pico_dv_base_640x480` | `cp_pimoroni_pico_dv_base_640x480` |
-| Teensy 4.1 FlexIO ILI9341 | `teensy41_flexio_ili9341` | — (use CP `paralleldisplaybus` on supported boards) |
 | LilyGO T-RGB | `t-rgb_480` | — (MP-focused) |
 
 ## When not to port TFT_eSPI features
@@ -78,4 +78,4 @@ TFT_eSPI bundles dozens of controller init tables. pydisplay **vendors CircuitPy
 - **ESP8266** — out of pydisplay scope
 - **AVR** — out of scope
 - **PSRAM-less ESP32** large framebuffers — hardware limit; use smaller buffers or SPI TFT
-- **ST7123 Tab5** on MicroPython — `m5stack_tab5` auto-detects GT911@0x14 vs ST7123@0x55; hardware validation pending
+- **ST7123 Tab5** on MicroPython — use `m5stack_tab5_st7123`; hardware validation pending

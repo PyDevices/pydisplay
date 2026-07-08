@@ -14,7 +14,9 @@ import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 BOARD_ROOT = ROOT / "board_configs"
-MANIFEST_ROOT = ROOT / "board_configs" / "manifests"
+SOURCE_ROOT = ROOT / "scripts" / "board_config"
+MANIFEST_ROOT = SOURCE_ROOT / "manifests"
+HAND_MAINTAINED_ROOT = SOURCE_ROOT / "hand_maintained"
 
 
 def _manifest_owned_slugs() -> set[str]:
@@ -29,7 +31,16 @@ def _manifest_owned_slugs() -> set[str]:
     return slugs
 
 
+def _hand_maintained_slugs() -> set[str]:
+    slugs: set[str] = set()
+    for path in HAND_MAINTAINED_ROOT.rglob("board_config.py"):
+        slugs.add(path.parent.name)
+    return slugs
+
+
 MANIFEST_OWNED = _manifest_owned_slugs()
+HAND_MAINTAINED = _hand_maintained_slugs()
+SKIP_PAIR_AUDIT = MANIFEST_OWNED | HAND_MAINTAINED
 
 
 def _pairs(root: Path) -> list[tuple[Path, Path]]:
@@ -38,7 +49,7 @@ def _pairs(root: Path) -> list[tuple[Path, Path]]:
         mp_dir = mp_config.parent
         if mp_dir.name.startswith("cp_"):
             continue
-        if mp_dir.name in MANIFEST_OWNED:
+        if mp_dir.name in SKIP_PAIR_AUDIT:
             continue
         cp_dir = mp_dir.parent / f"cp_{mp_dir.name}"
         cp_config = cp_dir / "board_config.py"

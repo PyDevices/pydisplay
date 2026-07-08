@@ -1,0 +1,24 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/fbdisplay/cp_m5stack_tab5_ili9881c/board_config.py"
+    ],
+    [
+      "gt911.py",
+      "github:PyDevices/pydisplay/drivers/touch/gt911.py"
+    ],
+    [
+      "tab5_ili9881c_init.py",
+      "github:PyDevices/pydisplay/drivers/display/tab5_ili9881c_init.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ]
+  ],
+  "version": "0.1",
+  "notes": "Requires CircuitPython mipidsi + gt911 on Tab5 (circup install gt911)."
+}

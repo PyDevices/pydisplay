@@ -41,5 +41,4 @@ display_drv = ST7789(
     reset_pin=board.GP3,
     reset_high=True,
 )
-
-runtime = None
+runtime = eventsys.Runtime(display=display_drv)
