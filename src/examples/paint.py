@@ -3,7 +3,7 @@
 A simple paint application demonstrating the use of displaysys.
 """
 
-from board_config import TIMER_ASYNC, display_drv, broker
+from board_config import display_drv, runtime
 from multimer.loop import dual_main, run_forever
 
 
@@ -43,9 +43,9 @@ def _setup_paint():
 
     def poll():
         nonlocal selected
-        if elist := broker.poll():
+        if elist := runtime.poll():
             for e in elist:
-                if e.type == broker.events.MOUSEBUTTONDOWN:
+                if e.type == runtime.events.MOUSEBUTTONDOWN:
                     x, y = e.pos
                     last_selected = selected
                     if on_x_axis and y < block_size or not on_x_axis and x < block_size:
@@ -75,11 +75,11 @@ def _setup_paint():
                                 )
                     elif e.button == 1:
                         paint(x, y, colors[selected])
-                elif e.type == broker.events.MOUSEMOTION and e.buttons[0] == 1:
+                elif e.type == runtime.events.MOUSEMOTION and e.buttons[0] == 1:
                     x, y = e.pos
                     if (on_x_axis and y > block_size) or (not on_x_axis and x > block_size):
                         paint(x, y, colors[selected])
-                elif e.type == broker.events.QUIT:
+                elif e.type == runtime.events.QUIT:
                     return True
         display_drv.show()
         return False
@@ -105,4 +105,4 @@ async def main_async():
         await asyncio.sleep(0.02)
 
 
-dual_main(main_sync, main_async, async_mode=TIMER_ASYNC)
+dual_main(main_sync, main_async, async_mode=runtime.timer_async)

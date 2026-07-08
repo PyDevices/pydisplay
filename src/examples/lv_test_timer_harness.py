@@ -4,7 +4,7 @@ lv_test_timer_harness.py
 
 Automated LVGL timer + input test for ``sync`` and ``async`` modes.
 
-The board's shared broker timer drives LVGL (lv_utils subscribes its tick to it),
+The board's shared runtime timer drives LVGL (lv_utils subscribes its tick to it),
 so there is no pump/no_pump distinction anymore: one ``sleep_ms(0)`` per loop
 iteration is enough. This harness builds the shared UI, verifies LVGL timers
 advance and that a simulated click reaches the LVGL button, then injects
@@ -82,7 +82,7 @@ def _inject_click(cx, cy):
     """Feed a press+release through the QUEUE device so LVGL's indev reads them.
 
     LVGL's pointer indev reads the virtual touch device from ``task_handler``
-    (driven by the shared broker timer), which pulls the mocked events out of the
+    (driven by the shared runtime timer), which pulls the mocked events out of the
     queue device — exactly like a real SDL mouse click. We only sleep here and
     let the timer's task_handler drain them (no main-thread LVGL calls, so no
     race with the timer-driven rendering).
@@ -171,10 +171,10 @@ def _emit_result(mode, state, taps):
 def _quit_and_exit(code=0):
     """Stop the shared timer, release the display, and hard-exit for the kit."""
     try:
-        from board_config import broker
+        from board_config import runtime
 
         # Stop the timer first so no signal-driven rendering runs during teardown.
-        broker.stop_timer()
+        runtime.stop_timer()
     except Exception:
         pass
     try:
@@ -189,9 +189,10 @@ def _quit_and_exit(code=0):
 
 
 def _run_sync():
-    import board_config
+    import os
 
-    board_config.TIMER_ASYNC = False
+    os.environ["PYDISPLAY_TIMER_ASYNC"] = "0"
+    import board_config  # noqa: F401
 
     import display_driver  # noqa: F401
     from lv_test_timer_common import build_ui, get_state
@@ -199,7 +200,7 @@ def _run_sync():
 
     btn = build_ui("sync")
 
-    # The broker's timer drives LVGL (tick + task_handler + present) on its own;
+    # The runtime's timer drives LVGL (tick + task_handler + present) on its own;
     # the app loop just needs to sleep. Avoid touching LVGL/pygame on the main
     # thread here so we don't race the timer-driven rendering. Read the button
     # coords only once timers have advanced (LVGL has laid the UI out by then).
@@ -218,14 +219,15 @@ def _run_sync():
 
 
 def _run_async():
-    import board_config
+    import os
 
-    board_config.TIMER_ASYNC = True
+    os.environ["PYDISPLAY_TIMER_ASYNC"] = "1"
+    import board_config  # noqa: F401
 
     from multimer import asyncio
 
     async def main():
-        from board_config import broker
+        from board_config import runtime
 
         import display_driver  # noqa: F401
         from lv_test_timer_common import build_ui, get_state
@@ -235,7 +237,7 @@ def _run_async():
         deadline = time.time() + _DURATION_S
         clicked_taps = None
         while time.time() < deadline:
-            broker.poll()
+            runtime.poll()
             await asyncio.sleep(0)
             if clicked_taps is None and get_state()["seconds"] >= 2:
                 cx, cy = _button_center(btn)

@@ -1,10 +1,27 @@
 {
-    "urls": [
-      ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/i80/t-display-s3/board_config.py"],
-      ["st7789.py", "github:PyDevices/pydisplay/drivers/display/st7789.py"]
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/busdisplay/i80/t-display-s3/board_config.py"
     ],
-    "deps": [
-      ["github:PyDevices/pydisplay/packages/i80bus.json", "main"]
+    [
+      "st7789.py",
+      "github:PyDevices/pydisplay/drivers/display/st7789.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
     ],
-    "version": "0.1"
-  }
+    [
+      "github:PyDevices/pydisplay/packages/i80bus.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/i80bus.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

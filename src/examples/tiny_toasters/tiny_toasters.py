@@ -34,7 +34,7 @@ import sys
 from random import getrandbits
 import tft_bitmap
 import tft_config
-from board_config import broker
+from board_config import runtime
 from multimer import Timer, sleep_ms
 
 palette = tft_config.palette
@@ -220,8 +220,8 @@ def main():
             sprite.draw()
 
         tft.show()
-        if elist := broker.poll():
-            if any(e.type == broker.events.QUIT for e in elist):
+        if elist := runtime.poll():
+            if any(e.type == runtime.events.QUIT for e in elist):
                 break
         gc.collect()
         sleep_ms(50)

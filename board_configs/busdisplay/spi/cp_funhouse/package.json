@@ -1,11 +1,23 @@
 {
   "urls": [
-    ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/spi/cp_funhouse/board_config.py"],
-    ["st7789.py", "github:PyDevices/pydisplay/drivers/display/st7789.py"],
-    ["adafruit_tt21100.py", "github:PyDevices/pydisplay/drivers/touch/circuitpython/adafruit_tt21100.py"]
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/busdisplay/spi/cp_funhouse/board_config.py"
+    ],
+    [
+      "st7789.py",
+      "github:PyDevices/pydisplay/drivers/display/st7789.py"
+    ],
+    [
+      "adafruit_tt21100.py",
+      "github:PyDevices/pydisplay/drivers/touch/circuitpython/adafruit_tt21100.py"
+    ]
   ],
   "deps": [
-    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"]
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ]
   ],
   "version": "0.1"
 }

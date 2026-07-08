@@ -7,12 +7,12 @@ Must stay importable on MicroPython, CircuitPython, and CPython.
 
 
 def queue_device():
-    from board_config import broker
+    from board_config import runtime
 
     import eventsys
 
-    for dev in broker.devices:
-        if dev.type == eventsys.QUEUE:
+    for dev in runtime.devices:
+        if dev.type == eventsys.HOST:
             return dev
     return None
 
@@ -38,25 +38,25 @@ def deinit_display():
 
 
 def service_host_events(count=15, delay_s=0.02, broker_poll=True):
-    """Service host display / broker events only."""
+    """Service host display / runtime events only."""
     try:
         import time
     except ImportError:
         return
 
-    broker = None
+    runtime = None
     if broker_poll:
         try:
-            from board_config import broker as _broker
+            from board_config import runtime as _broker
 
-            broker = _broker
+            runtime = _broker
         except Exception:
-            broker = None
+            runtime = None
 
     for _ in range(count):
-        if broker is not None:
+        if runtime is not None:
             try:
-                broker.poll()
+                runtime.poll()
             except Exception:
                 pass
         if delay_s:
@@ -131,7 +131,7 @@ def inject_synthetic_touch(*, broker_poll=False, pump_count=20, pump_delay=0.02)
 
 def inject_quit(*, broker_poll=True, pump_count=15, pump_delay=0.02, lvgl=False, deinit=True):
     """
-    Mock QUEUE read to deliver one Quit event, then pump broker / multimer / LVGL.
+    Mock QUEUE read to deliver one Quit event, then pump runtime / multimer / LVGL.
 
     Returns True if injection was attempted (QUEUE device existed).
     The caller should verify the process exits; if still running, quit was not handled.
@@ -158,9 +158,9 @@ def inject_quit(*, broker_poll=True, pump_count=15, pump_delay=0.02, lvgl=False,
             service_host_events(pump_count, pump_delay, broker_poll=broker_poll)
         if broker_poll:
             try:
-                from board_config import broker
+                from board_config import runtime
 
-                broker.poll()
+                runtime.poll()
             except Exception:
                 pass
     finally:

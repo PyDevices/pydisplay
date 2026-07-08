@@ -1,0 +1,27 @@
+kind = "busdisplay_i2c"
+slug = "ssd1306_oled_featherwing"
+title = "Adafruit FeatherWing OLED 128x32 SSD1306 — MicroPython"
+title_cp = "Adafruit FeatherWing OLED 128x32 SSD1306 — CircuitPython"
+out = "busdisplay/i2c"
+circuitpython = true
+
+[display]
+module = "ssd1306"
+class = "SSD1306"
+width = 128
+height = 32
+rotation = 0
+
+[bus.mp.i2c]
+id = 0
+sda = 4
+scl = 5
+freq = 400_000
+address = "0x3C"
+
+[bus.cp]
+address = "0x3C"
+
+[package]
+display_driver = "ssd1306"
+deps_mp = ["i2cbus"]

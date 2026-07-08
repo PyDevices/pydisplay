@@ -1,6 +1,6 @@
-"""Waveshare ESP32-P4-WIFI6-Touch-LCD-4B — MicroPython
+"""Waveshare ESP32-P4-WIFI6-Touch-LCD-4B - MicroPython
 
-720×720 ST7703 on MIPI DSI + GT911 touch.  Targets the displayif ``mipidsi``
+720x720 ST7703 on MIPI DSI + GT911 touch.  Targets the displayif ``mipidsi``
 cmod on ESP32-P4.  The ``Bus`` / ``Display`` call surface mirrors CircuitPython
 ``mipidsi``; ``Display`` must satisfy the ``FBDisplay`` buffer contract
 (``.width``, ``.height``, ``memoryview()``, ``.refresh()``).
@@ -15,9 +15,10 @@ CircuitPython sibling: ``cp_esp32-p4-wifi6-touch-lcd-4b``.
 BSP reference: waveshareteam/Waveshare-ESP32-components ``esp32_p4_wifi6_touch_lcd_4b``
 """
 
+import time
+
 from gt911 import GT911
 from machine import I2C, Pin
-import time
 
 from displaysys.fbdisplay import FBDisplay
 import eventsys
@@ -25,9 +26,7 @@ import eventsys
 try:
     from mipidsi import Bus, Display
 except ImportError as exc:
-    raise NotImplementedError(
-        "MIPI DSI requires displayif mipidsi cmod (esp32p4 port)"
-    ) from exc
+    raise NotImplementedError("MIPI DSI requires displayif mipidsi cmod (esp32p4 port)") from exc
 
 # Waveshare BSP pinout
 LCD_RESET = 27
@@ -38,7 +37,7 @@ TOUCH_RESET = 23
 # GT911 INT is not routed to the MCU (BSP: GPIO_NC); GPIO22 is unused dummy for reset.
 TOUCH_IRQ_DUMMY = 22
 
-# ST7703 vendor init (waveshare/esp_lcd_st7703, 720×720 panel).
+# ST7703 vendor init (waveshare/esp_lcd_st7703, 720x720 panel).
 # Init record format matches CircuitPython busdisplay / mipidsi:
 #   bytes([cmd, param_count | 0x80, ...params..., delay_ms])
 ST7703_INIT_SEQUENCE = (
@@ -49,7 +48,7 @@ ST7703_INIT_SEQUENCE = (
     b"\xb4\x01\x80"
     b"\xb5\x02\n\n"
     b"\xb6\x02\x97\x97"
-    b"\xb8\x04&\"\xf0\x13"
+    b'\xb8\x04&"\xf0\x13'
     b"\xba\x1b1\x81\x0f\xf9\x0e\x06 \x00\x00\x00\x00\x00\x00\x00D%\x00\x90\n\x00\x00\x01O\x01\x00\x007"
     b"\xbc\x01G"
     b"\xbf\x03\x02\x11\x00"
@@ -59,7 +58,7 @@ ST7703_INIT_SEQUENCE = (
     b"\xc7\x06\xb8\x00\n\x10\x01\t"
     b"\xc8\x04\x10@\x1e\x02"
     b"\xcc\x01\x0b"
-    b"\xe0\"\x00\x0b\x10,=?B:\x07\r\x0f\x13\x15\x13\x14\x0f\x16\x00\x0b\x10,=?B:\x07\r\x0f\x13\x15\x13\x14\x0f\x16"
+    b'\xe0"\x00\x0b\x10,=?B:\x07\r\x0f\x13\x15\x13\x14\x0f\x16\x00\x0b\x10,=?B:\x07\r\x0f\x13\x15\x13\x14\x0f\x16'
     b"\xe3\x0e\x07\x07\x0b\x0b\x0b\x0b\x00\x00\x00\x00\xff\x00\xc0\x10"
     b"\xe9?\xc8\x10\n\x00\x00\x80\x81\x121#O\x86\xa0\x00G\x08\x00\x00\x0c\x00\x00\x00\x00\x00\x0c\x00\x00\x00\x98\x02\x8b\xafF\x02\x88\x88\x88\x88\x88\x98\x13\x8b\xafW\x13\x88\x88\x88\x88\x88\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
     b"\xea=\x97\x0c\t\t\tx\x00\x00\x00\x00\x00\x00\x9f1\x8b\xa81u\x88\x88\x88\x88\x88\x9f \x8b\xa8 d\x88\x88\x88\x88\x88#\x00\x00\x02q\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00@\x80\x81\x00\x00\x00\x00"
@@ -119,13 +118,8 @@ display_drv = FBDisplay(fb)
 
 touch_rotation_table = (0, 0, 0, 0)
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

@@ -3,7 +3,7 @@
 Simple calculator example to demonstrate the use of graphics.FrameBuffer
 """
 
-from board_config import TIMER_ASYNC, broker, display_drv
+from board_config import display_drv, runtime
 from palettes import get_palette
 from touch_keypad import Keypad
 
@@ -52,7 +52,7 @@ class _Calculator:
         self.line_height = (self.row_height - self.pad_x2) // 2
         self.pal = get_palette(name="material_design")
         self.keypad = Keypad(
-            broker,
+            runtime,
             0,
             0,
             display_drv.width,
@@ -143,7 +143,12 @@ class _Calculator:
         )
 
     def poll_quit(self):
-        return (elist := broker.poll()) and any(e.type == broker.events.QUIT for e in elist)
+        import eventsys
+
+        if runtime is None:
+            return False
+        elist = runtime.poll()
+        return elist and any(e.type == eventsys.QUIT for e in elist)
 
     def read_presses(self):
         presses = []
@@ -254,4 +259,4 @@ async def main_async():
         await asyncio.sleep(0.02)
 
 
-dual_main(main_sync, main_async, async_mode=TIMER_ASYNC)
+dual_main(main_sync, main_async, async_mode=runtime.timer_async)

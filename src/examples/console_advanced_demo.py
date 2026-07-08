@@ -65,16 +65,16 @@ console.label(Console.LEFT, platform, pal.RED)
 display_drv.show()
 
 if _test_mode:
-    from board_config import broker
+    from board_config import runtime
     from multimer.loop import run_forever
 
     console.write("console_advanced_demo: smoke test\n", pal.GREEN)
     display_drv.show()
 
     def _poll():
-        if elist := broker.poll():
+        if elist := runtime.poll():
             for e in elist:
-                if e.type == broker.events.QUIT:
+                if e.type == runtime.events.QUIT:
                     return True
         return False
 

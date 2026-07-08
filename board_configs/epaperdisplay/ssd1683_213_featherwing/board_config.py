@@ -1,8 +1,8 @@
 """SSD1683 2.13" E-Ink FeatherWing — MicroPython (Feather SPI pinout)"""
 
-from machine import Pin, SPI
-from ssd1683 import SSD1683
+from machine import SPI, Pin
 from spibus import SPIBus
+from ssd1683 import SSD1683
 
 from displaysys.epaperdisplay import EPaperDisplay
 import eventsys
@@ -17,7 +17,6 @@ display_bus = SPIBus(
     cs=10,
     reset=6,
 )
-
 _epaper = SSD1683(
     display_bus,
     width=250,
@@ -28,5 +27,4 @@ _epaper = SSD1683(
 
 display_drv = EPaperDisplay(_epaper, width=250, height=122, color_depth=1)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

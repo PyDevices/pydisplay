@@ -38,7 +38,9 @@ class EPaperDisplay(DisplayDriver):
         self._epaper = epaper
         self._width = width if width is not None else epaper.width
         self._height = height if height is not None else epaper.height
-        self.color_depth = color_depth if color_depth is not None else getattr(epaper, "color_depth", 1)
+        self.color_depth = (
+            color_depth if color_depth is not None else getattr(epaper, "color_depth", 1)
+        )
         if buffer is None and self.color_depth <= 8:
             buffer = alloc_buffer(self._buffer_byte_size())
         self._raw_buffer = buffer
@@ -46,7 +48,7 @@ class EPaperDisplay(DisplayDriver):
         self._rotation = 0
         self._requires_byteswap = False
         self._displayio_group = None
-        super().__init__(auto_refresh=False)
+        super().__init__()
 
     def _buffer_byte_size(self):
         return (self._width * self._height * self.color_depth + 7) // 8
@@ -67,12 +69,16 @@ class EPaperDisplay(DisplayDriver):
         if self.color_depth == 2:
             shift = 6 - (idx % 4) * 2
             byte_i = idx // 4
-            self._buffer[byte_i] = (self._buffer[byte_i] & ~(0x03 << shift)) | ((value & 0x03) << shift)
+            self._buffer[byte_i] = (self._buffer[byte_i] & ~(0x03 << shift)) | (
+                (value & 0x03) << shift
+            )
             return
         if self.color_depth == 4:
             shift = 4 if idx & 1 else 0
             byte_i = idx // 2
-            self._buffer[byte_i] = (self._buffer[byte_i] & ~(0x0F << shift)) | ((value & 0x0F) << shift)
+            self._buffer[byte_i] = (self._buffer[byte_i] & ~(0x0F << shift)) | (
+                (value & 0x0F) << shift
+            )
             return
         bpp = self.color_depth // 8
         begin = idx * bpp

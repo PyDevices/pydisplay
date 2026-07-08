@@ -276,10 +276,11 @@ class DisplayDriver:
     use a concrete driver from ``board_config.display`` rather than instantiating this
     class directly.
 
-    The driver only knows how to ``show()`` and ``deinit()``; it never owns a
-    refresh timer. Periodic auto-refresh is driven by the broker's shared timer,
-    wired up in ``board_config`` via ``broker.on_tick(display_drv.show, ...)``.
+    Periodic presentation when needed is driven by ``eventsys.Runtime`` (see
+    ``needs_refresh``); the driver only implements ``show()`` and ``deinit()``.
     """
+
+    needs_refresh = False
 
     def __init__(self):
         if not hasattr(self, "_quiet"):
@@ -760,7 +761,7 @@ class DisplayDriver:
 
         The broker owns the shared refresh timer, so there is no display-owned
         timer to stop here; ``board_config`` stops the timer on quit via
-        ``broker.stop_timer``.
+        ``runtime.stop_timer``.
         """
         if getattr(self, "_deinitialized", False):
             return
@@ -773,7 +774,7 @@ class DisplayDriver:
         return
 
     def quit(self, code: int = 0, force: bool = False) -> None:
-        """Release display resources (REPL-safe unless ``force=True``). Called by ``broker.on_quit`` on QUIT."""
+        """Release display resources (REPL-safe unless ``force=True``). Called on QUIT."""
         self.deinit()
         if force:
             raise SystemExit(code)

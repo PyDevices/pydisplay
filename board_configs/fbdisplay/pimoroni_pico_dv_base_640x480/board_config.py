@@ -1,11 +1,11 @@
-"""Pimoroni Pico DV Demo Base + Raspberry Pi Pico (RP2040) — MicroPython
+"""Pimoroni Pico DV Demo Base + Raspberry Pi Pico (RP2040) - MicroPython
 
 Plug-in stack (no breadboard wiring):
 - Raspberry Pi Pico in socket headers: https://circuitpython.org/board/raspberry_pi_pico/
 - Pimoroni Pico DV Demo Base HDMI: https://circuitpython.org/board/pimoroni_pico_dv_base/
 
 DVI pinout matches CircuitPython ``board.CKP`` / ``D0P`` aliases on pimoroni_pico_dv_base
-(GP6–GP13).  Targets displayif ``picodvi`` (PIO bit-bang on RP2040).
+(GP6-GP13).  Targets displayif ``picodvi`` (PIO bit-bang on RP2040).
 
 CircuitPython sibling: ``cp_pimoroni_pico_dv_base_640x480``.
 """
@@ -38,5 +38,4 @@ fb = Framebuffer(
 
 display_drv = FBDisplay(fb)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

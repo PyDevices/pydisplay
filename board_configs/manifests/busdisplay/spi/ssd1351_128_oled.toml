@@ -1,0 +1,33 @@
+kind = "busdisplay_spi"
+slug = "ssd1351_128_oled"
+title = "SSD1351 1.5\" color OLED — MicroPython (Feather breakout pinout)"
+title_cp = "Adafruit 1.5\" SSD1351 color OLED — CircuitPython"
+out = "busdisplay/spi"
+circuitpython = true
+
+[display]
+module = "ssd1351"
+class = "SSD1351"
+width = 128
+height = 128
+rotation = 0
+
+[bus.mp.spi]
+id = 0
+baudrate = 24_000_000
+sck = 18
+mosi = 19
+miso = -1
+dc = 6
+cs = 5
+reset = 9
+
+[bus.cp.fourwire]
+command = "board.D6"
+chip_select = "board.D5"
+reset = "board.D9"
+baudrate = 24_000_000
+
+[package]
+display_driver = "ssd1351"
+deps_mp = ["spibus"]

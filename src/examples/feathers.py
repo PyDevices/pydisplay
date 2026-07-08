@@ -1,5 +1,4 @@
-from board_config import broker
-from eventsys import poll_quit_discarding_others
+from board_config import runtime
 # multimer types: all
 """
 feathers.py
@@ -86,6 +85,8 @@ def main():
     y_offsets = [i * (height // 8) - 1 for i in range(2, 9)]
 
     while True:
+        if runtime is not None:
+            runtime.poll()
         if counter > interval:
             last_x = current_x
             current_x = randint(0, half)
@@ -103,7 +104,7 @@ def main():
             tft.draw.pixel(half - tween, (scroll + y_offset) % height, palette[wheel + (i << 2)])
 
         tft.show()
-        if poll_quit_discarding_others(broker):
+        if runtime.quit_requested if runtime else False:
             break
         scroll = (scroll + 1) % height
         wheel = (wheel + 1) % 256

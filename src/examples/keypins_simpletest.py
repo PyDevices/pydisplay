@@ -1,5 +1,5 @@
 # multimer types: all
-from board_config import broker
+from board_config import runtime
 from keypins import KeyPins, Keys
 
 
@@ -28,13 +28,13 @@ print(f"{buttons.fire.key=}")
 print(f"{buttons.fire.keyname=}\n")
 
 # Subscribe the to the display driver so _KeyPin states are updated
-# on KEYDOWN and KEYUP events when broker.poll() is called.
-broker.on([broker.events.KEYDOWN, broker.events.KEYUP], buttons)
+# on KEYDOWN and KEYUP events when runtime.poll() is called.
+runtime.on([runtime.events.KEYDOWN, runtime.events.KEYUP], buttons)
 
 print(f"Press any of these keys:  {[button.keyname for button in buttons]}")
 while True:
-    if elist := broker.poll():
-        if any(e.type == broker.events.QUIT for e in elist):
+    if elist := runtime.poll():
+        if any(e.type == runtime.events.QUIT for e in elist):
             break
     for button in buttons:
         if button.value():

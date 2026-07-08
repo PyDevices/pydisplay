@@ -34,6 +34,4 @@ display_drv = ST7735(
     reset_pin=board.D1,
     reset_high=True,
 )
-
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

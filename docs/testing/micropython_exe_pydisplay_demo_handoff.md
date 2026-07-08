@@ -91,7 +91,7 @@ Recommended next debugging pass:
    - `tools/example_test_wrapper._start_multimer_quit_schedule()`
    - `quit_inject.inject_quit()`
    - `pydisplay_demo_async.handle_events()`
-3. Verify whether the fallback quit timer fires and whether the injected quit event is observed by `broker.poll()`.
+3. Verify whether the fallback quit timer fires and whether the injected quit event is observed by `runtime.poll()`.
 4. For sync `exit_5`, instrument only the post-quit / process-exit path after confirming the demo loop reaches or misses the quit event.
 
 ## Useful notes

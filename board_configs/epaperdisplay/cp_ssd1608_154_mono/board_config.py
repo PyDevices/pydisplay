@@ -17,7 +17,6 @@ display_bus = FourWire(
     reset=board.D6,
     baudrate=4_000_000,
 )
-
 _epaper = SSD1608(
     display_bus,
     width=200,
@@ -28,5 +27,4 @@ _epaper = SSD1608(
 
 display_drv = EPaperDisplay(_epaper, width=200, height=200, color_depth=1)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

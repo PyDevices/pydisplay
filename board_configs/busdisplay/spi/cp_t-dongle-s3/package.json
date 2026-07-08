@@ -7,17 +7,9 @@
     [
       "st7735.py",
       "github:PyDevices/pydisplay/drivers/display/st7735.py"
-    ],
-    [
-      "adafruit_focaltouch.py",
-      "github:PyDevices/pydisplay/drivers/touch/circuitpython/adafruit_focaltouch.py"
     ]
   ],
   "deps": [
-    [
-      "github:PyDevices/pydisplay/packages/spibus.json",
-      "main"
-    ],
     [
       "github:PyDevices/pydisplay/packages/displaysys.json",
       "main"

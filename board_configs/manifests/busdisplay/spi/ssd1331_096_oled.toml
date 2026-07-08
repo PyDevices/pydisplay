@@ -1,0 +1,33 @@
+kind = "busdisplay_spi"
+slug = "ssd1331_096_oled"
+title = "SSD1331 0.96\" OLED — MicroPython (Feather breakout pinout)"
+title_cp = "Adafruit 0.96\" SSD1331 color OLED — CircuitPython"
+out = "busdisplay/spi"
+circuitpython = true
+
+[display]
+module = "ssd1331"
+class = "SSD1331"
+width = 96
+height = 64
+rotation = 0
+
+[bus.mp.spi]
+id = 0
+baudrate = 16_000_000
+sck = 18
+mosi = 19
+miso = -1
+dc = 6
+cs = 5
+reset = 9
+
+[bus.cp.fourwire]
+command = "board.D6"
+chip_select = "board.D5"
+reset = "board.D9"
+baudrate = 16_000_000
+
+[package]
+display_driver = "ssd1331"
+deps_mp = ["spibus"]

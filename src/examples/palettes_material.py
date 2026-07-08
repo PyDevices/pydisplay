@@ -1,6 +1,5 @@
 # multimer types: all
-from board_config import broker, display_drv
-from eventsys import poll_quit_discarding_others
+from board_config import display_drv, runtime
 from multimer import sleep_ms
 from palettes import get_palette
 
@@ -24,6 +23,6 @@ def main():
 while True:
     main()
     sleep_ms(0)
-    if poll_quit_discarding_others(broker):
+    if runtime.quit_requested if runtime else False:
         break
     sleep_ms(1)

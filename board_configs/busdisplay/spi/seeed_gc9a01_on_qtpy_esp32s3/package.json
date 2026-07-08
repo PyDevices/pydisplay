@@ -1,11 +1,27 @@
 {
-    "urls": [
-      ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/spi/seeed_gc9a01_on_qtpy_esp32s3/board_config.py"],
-      ["gc9a01.py", "github:PyDevices/pydisplay/drivers/display/gc9a01.py"],
-      ["chsc6x.py", "github:PyDevices/pydisplay/drivers/touch/chsc6x.py"]
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/busdisplay/spi/seeed_gc9a01_on_qtpy_esp32s3/board_config.py"
     ],
-    "deps": [
-      ["github:PyDevices/pydisplay/packages/spibus.json", "main"]
+    [
+      "gc9a01.py",
+      "github:PyDevices/pydisplay/drivers/display/gc9a01.py"
     ],
-    "version": "0.1"
-  }
+    [
+      "chsc6x.py",
+      "github:PyDevices/pydisplay/drivers/touch/chsc6x.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/spibus.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

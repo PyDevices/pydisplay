@@ -13,8 +13,8 @@ display_bus = FourWire(
     board.SPI(),
     command=board.GP6,
     chip_select=board.GP5,
-    reset=board.GP1,
     baudrate=60_000_000,
+    reset=board.GP1,
 )
 
 display_drv = GC9A01(
@@ -33,6 +33,4 @@ display_drv = GC9A01(
     backlight_pin=board.GP10,
     backlight_on_high=True,
 )
-
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

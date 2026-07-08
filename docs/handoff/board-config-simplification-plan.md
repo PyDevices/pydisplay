@@ -1,5 +1,8 @@
 # Plan: simplified board_config with broker-constructor wiring
 
+> **Superseded.** This document is historical discussion notes from July 2026.
+> The implementation spec is **[Runtime and board_config](../concepts/runtime.md)**.
+
 Status: **proposal / discussion doc** — no code changes yet.
 Items marked **DECISION** need sign-off before implementation.
 

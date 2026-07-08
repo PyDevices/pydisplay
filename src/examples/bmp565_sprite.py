@@ -7,8 +7,7 @@ except ImportError:
     def choice(seq):
         return seq[0]
 
-from board_config import broker, display_drv
-from eventsys import poll_quit_discarding_others
+from board_config import display_drv, runtime
 from graphics import BMP565
 from multimer import sleep_ms
 
@@ -57,7 +56,7 @@ draw_sprite(*location, *sprite)
 step = 3
 dir = choice(directions)
 while True:
-    if poll_quit_discarding_others(broker):
+    if runtime.quit_requested if runtime else False:
         break
     if choice((True, False, False, False, False)):
         dir = choice(directions)
@@ -90,7 +89,7 @@ while True:
         draw_sprite(*location, pos, dir)
         display_drv.show()
         sleep_ms(0)
-        if poll_quit_discarding_others(broker):
+        if runtime.quit_requested if runtime else False:
             break
         sleep_ms(100)
     else:

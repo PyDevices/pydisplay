@@ -2,7 +2,7 @@
 # pyscript binaries: assets/longstreet.bmp, assets/runner.bmp
 from collections import namedtuple
 
-from board_config import display_drv, broker
+from board_config import display_drv, runtime
 from graphics import BMP565
 from multimer import sleep_ms
 
@@ -66,11 +66,11 @@ def main():
             sleep_ms(0)
             sleep_ms(1)
             continue
-        elist = broker.poll()
+        elist = runtime.poll()
         for event in elist:
-            if event.type == broker.events.QUIT:
+            if event.type == runtime.events.QUIT:
                 return
-            if event and event.type == broker.events.MOUSEMOTION and event.buttons[0] == 1:
+            if event and event.type == runtime.events.MOUSEMOTION and event.buttons[0] == 1:
                 touched_point = event.pos
                 if touched_point[1] < display_drv.height // 2:
                     sprites = jump_shoot_sprites

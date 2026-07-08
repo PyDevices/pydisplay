@@ -1,4 +1,4 @@
-"""Adafruit RGB Matrix FeatherWing 64×32 — CircuitPython (Teensy 4.1)
+"""Adafruit RGB Matrix FeatherWing 64x32 - CircuitPython (Teensy 4.1)
 
 MicroPython sibling: ``rgb_matrix_featherwing_teensy41_64x32``.
 """
@@ -32,5 +32,4 @@ matrix = rgbmatrix.RGBMatrix(
 
 display_drv = FBDisplay(matrix, width=64, height=32)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

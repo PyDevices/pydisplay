@@ -33,13 +33,13 @@
 import sys
 
 # pydisplay changes from upstream lv_utils.py (kept intentionally small):
-#   * The periodic tick is provided by the board's shared broker timer
-#     (``eventsys.Broker.on_tick``) instead of a ``machine.Timer``.
+#   * The periodic tick is provided by the board's shared runtime timer
+#     (``eventsys.Runtime.on_tick``) instead of a ``machine.Timer``.
 #   * ``asyncio`` comes from ``multimer`` (public API).
 #   * The sync path runs ``lv.task_handler()`` straight from the tick callback
 #     (guarded against re-entrancy) rather than via ``micropython.schedule``;
-#     the broker timer already delivers the callback on the main thread.
-from board_config import broker
+#     the runtime timer already delivers the callback on the main thread.
+from board_config import runtime
 import lvgl as lv
 
 from multimer import asyncio
@@ -81,10 +81,9 @@ class event_loop:
             self.refresh_event = asyncio.Event()
             self.refresh_task = asyncio.create_task(self.async_refresh())
 
-        # Subscribe our LVGL tick to the board's shared broker timer instead of
-        # owning a timer here.  The broker decides whether it is a sync or async
-        # timer (see board_config); we only need the periodic callback.
-        self._timer_sub = broker.on_tick(self.timer_cb, period=self.delay, async_=asynchronous)
+        if runtime is None:
+            raise RuntimeError("LVGL requires board_config.runtime")
+        self._timer_sub = runtime.on_tick(self.timer_cb, period=self.delay, async_=asynchronous)
 
     def deinit(self):
         if getattr(self, "_timer_sub", None) is not None:
@@ -134,7 +133,7 @@ class event_loop:
                 self.tick()
 
     def timer_cb(self, t):
-        # Called from the broker's shared timer (on the main thread).
+        # Called from the runtime's shared timer (on the main thread).
         lv.tick_inc(self.delay)
         if self._pause > 0:
             return

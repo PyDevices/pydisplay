@@ -1,4 +1,4 @@
-"""Adafruit 2.13\" SSD1680 E-Ink FeatherWing — CircuitPython"""
+"""Adafruit SSD1680 2.13" E-Ink FeatherWing — CircuitPython"""
 
 import board
 from displayio import release_displays
@@ -17,7 +17,6 @@ display_bus = FourWire(
     reset=board.D6,
     baudrate=4_000_000,
 )
-
 _epaper = SSD1680(
     display_bus,
     width=250,
@@ -29,5 +28,4 @@ _epaper = SSD1680(
 
 display_drv = EPaperDisplay(_epaper, width=250, height=122, color_depth=1)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

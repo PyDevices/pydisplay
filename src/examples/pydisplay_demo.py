@@ -5,7 +5,7 @@ pydisplay_demo.py — minimal board_config demo: clicks, rotation, scrolling.
 Uses only src/lib modules (board_config, graphics, multimer, eventsys).
 """
 
-from board_config import broker, display_drv
+from board_config import display_drv, runtime
 
 from displaysys import color565
 from graphics import RGB565, Area, Font, FrameBuffer
@@ -129,15 +129,15 @@ def on_tick(_=None):
         return
     state["scroll"] = (state["scroll"] + 1) % scroll_height()
     display_drv.vscroll = state["scroll"]
-    # The broker's shared timer refreshes the display; just advance the scroll.
+    # The runtime's shared timer refreshes the display; just advance the scroll.
 
 
 def handle_events():
-    if elist := broker.poll():
+    if elist := runtime.poll():
         for e in elist:
-            if e.type == broker.events.QUIT:
+            if e.type == runtime.events.QUIT:
                 return True
-            if e.type != broker.events.MOUSEBUTTONDOWN:
+            if e.type != runtime.events.MOUSEBUTTONDOWN:
                 continue
             if rotate_btn is not None and rotate_btn.contains(e.pos):
                 pause_scroll()

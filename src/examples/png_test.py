@@ -1,11 +1,10 @@
 # multimer types: all
 # pyscript skip: gallery
-from eventsys import poll_quit_discarding_others
 import os
 from collections import namedtuple
 
 import png
-from board_config import broker
+from board_config import runtime
 from color_setup import ssd
 from displaybuf import alloc_buffer
 from multimer import sleep_ms
@@ -155,7 +154,7 @@ while True:
         ssd.text16("    " + lines[2], 0, 16, 0xFFFF)
         ssd.show()
         shown += 1
-        if poll_quit_discarding_others(broker):
+        if runtime.quit_requested if runtime else False:
             break
         if _max_pngs is not None and shown >= _max_pngs:
             break
@@ -163,7 +162,7 @@ while True:
         ssd.fill_rect(pos_x, pos_y, p.width, p.height, bg_color)
         ssd.fill_rect(0, 0, ssd.width, 32, bg_color)
         sleep_ms(0)
-    if poll_quit_discarding_others(broker):
+    if runtime.quit_requested if runtime else False:
         break
     if _max_pngs is not None and shown >= _max_pngs:
         break

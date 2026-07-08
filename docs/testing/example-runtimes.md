@@ -71,7 +71,7 @@ Per-example metadata (kind, quit handling, timeouts, skip lists) is in [`tools/e
 Every matrix example should be one of:
 
 1. **Oneshot** — draws and exits with code 0 (`timer_simpletest`, `graphics_simpletest`).
-2. **Loop + quit** — main loop handles `events.QUIT` or uses `poll_quit_discarding_others(broker)`.
+2. **Loop + quit** — main loop handles `events.QUIT` or checks `runtime.quit_requested` after `runtime.poll()`.
 3. **Library-driven** — `run_forever()`, `display_driver.run()`, or `pd.run_forever()` exits cleanly when Quit is injected.
 
 Harness scripts (`lv_test_timer_*`, `displaysys_*_test`) are tagged `kind = harness` and are never included in the matrix.

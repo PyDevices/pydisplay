@@ -29,8 +29,14 @@ display_drv = ILI9341(
     bgr=True,
     reverse_bytes_in_word=True,
     invert=True,
+    brightness=1.0,
+    backlight_pin=None,
+    backlight_on_high=True,
+    reset_pin=None,
+    reset_high=True,
+    power_pin=None,
+    power_on_high=True,
 )
-
 i2c = board.I2C()
 touch_drv = Adafruit_FocalTouch(i2c)
 
@@ -44,13 +50,8 @@ def touch_read_func():
 
 touch_rotation_table = None
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

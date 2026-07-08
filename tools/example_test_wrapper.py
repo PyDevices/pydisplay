@@ -232,7 +232,7 @@ def _start_multimer_quit_schedule(duration_s, quit_mode, kind, injected):
         pass
 
     def on_quit(_timer):
-        # Leave Quit on the QUEUE mock; the example's broker.poll() delivers it.
+        # Leave Quit on the QUEUE mock; the example's runtime.poll() delivers it.
         _inject_quit_now(quit_inject, kind, injected, pump_count=0)
 
     def on_touch(_timer):

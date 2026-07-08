@@ -1,7 +1,7 @@
 """JD79661 2.13" 4-gray E-Ink — MicroPython (Feather SPI pinout)"""
 
-from machine import Pin, SPI
 from jd79661 import JD79661
+from machine import SPI, Pin
 from spibus import SPIBus
 
 from displaysys.epaperdisplay import EPaperDisplay
@@ -17,7 +17,6 @@ display_bus = SPIBus(
     cs=10,
     reset=6,
 )
-
 _epaper = JD79661(
     display_bus,
     width=128,
@@ -28,5 +27,4 @@ _epaper = JD79661(
 
 display_drv = EPaperDisplay(_epaper, width=128, height=250, color_depth=2)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

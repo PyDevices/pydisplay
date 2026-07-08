@@ -17,7 +17,7 @@ climbers. Early work focused on:
 - Scalable layout from a 320×480 reference (`Layout` in `tower_climb.py`)
 - Landing/collision physics stable enough for repeated jumps up procedurally
   placed branches
-- A single shared periodic timer via `eventsys.Broker` for display refresh
+- The shared periodic timer via ``eventsys.Runtime`` for display refresh
   (see repo `AGENTS.md` for the timer/display split)
 
 Gameplay bugs (flicker, respawn deaths, camera clamp at the crown, bot pathing)

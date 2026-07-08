@@ -1,13 +1,13 @@
 # Board configs
 
-Every pydisplay app needs a `board_config.py` that wires up the display, touch/input devices, and optional brokers.
+Every pydisplay app needs a `board_config.py` that wires up the display, input devices, and optional [Runtime](../concepts/runtime.md).
 
 ## What board_config.py provides
 
 Typically:
 
 - A `display_drv` object (BusDisplay, SDLDisplay, PGDisplay, FBDisplay, etc.)
-- Touch/read functions or `eventsys` brokers for input
+- A `runtime` object (`eventsys.Runtime(...)`) when the display needs periodic present or input dispatch; `None` on MCU display-only boards
 - Optional setup (WiFi, sensors, backlight pins)
 
 Configs live under [`board_configs/`](https://github.com/PyDevices/pydisplay/tree/main/board_configs). Each directory with a `package.json` can be installed via MIP:

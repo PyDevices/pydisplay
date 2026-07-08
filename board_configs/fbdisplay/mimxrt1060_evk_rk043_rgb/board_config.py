@@ -1,4 +1,4 @@
-"""NXP MIMXRT1060-EVK + RK043FN66HS-CTG 4.3\" parallel RGB — MicroPython
+"""NXP MIMXRT1060-EVK + RK043FN66HS-CTG 4.3\" parallel RGB - MicroPython
 
 Hardware (plug-in, no breadboard wiring):
 - MIMXRT1060-EVK / EVKB: https://circuitpython.org/board/imxrt1060_evk/
@@ -15,9 +15,10 @@ Touch (RK043 6-pin FPC on J49): Goodix GT911 on LPI2C1 (``board.SCL`` /
 CircuitPython sibling: ``cp_mimxrt1060_evk_rk043_rgb``.
 """
 
+import time
+
 from gt911 import GT911
 from machine import I2C, Pin
-import time
 
 from displaysys.fbdisplay import FBDisplay
 import eventsys
@@ -64,7 +65,7 @@ tft_pins = {
     ),
 }
 
-# Timings from NXP ELCDIF_RgbModeGetDefaultConfig (480×272 RK043)
+# Timings from NXP ELCDIF_RgbModeGetDefaultConfig (480x272 RK043)
 tft_timings = {
     "frequency": 9_000_000,
     "width": 480,
@@ -107,13 +108,8 @@ def touch_read_func():
 
 touch_rotation_table = (0, 0, 0, 0)
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

@@ -1,5 +1,4 @@
-from board_config import broker
-from eventsys import poll_quit_discarding_others
+from board_config import runtime
 # multimer types: all
 """
 color_test.py
@@ -78,6 +77,8 @@ def main():
     tft.show()
 
     while True:
+        if runtime is not None:
+            runtime.poll()
         for color in [palette.RED, palette.GREEN, palette.BLUE]:
             for x in range(tft.width):
                 tft.draw.pixel(x, 0, color)
@@ -88,7 +89,7 @@ def main():
                 tft.draw.pixel(tft.width - 1, y, color)
 
             tft.show()
-            if poll_quit_discarding_others(broker):
+            if runtime.quit_requested if runtime else False:
                 return
             sleep_ms(1000)
 

@@ -8,34 +8,31 @@ Quick start::
 
     import eventsys
 
-    broker = eventsys.Broker()
+    runtime = eventsys.Runtime()
     keypad = eventsys.KeypadDevice(read=lambda: pressed_keys)
-    broker.register(keypad)
+    runtime.register(keypad)
 
     while True:
-        for event in broker.poll():
+        for event in runtime.poll():
             if event.type == eventsys.QUIT:
                 break
 """
 
 from . import keys
-from ._broker import Broker, poll_quit_discarding_others
 from ._capabilities import capabilities
 from ._device import Device, register_device, register_device_class, types
 from ._encoder import EncoderDevice
 from ._events import events, register_event
+from ._host import HostEventsDevice, VirtualDevices
 from ._joystick import JoystickDevice, JoystickDriver
 from ._keypad import KeypadDevice
-from ._queue import QueueDevice, VirtualDevices
+from ._runtime import DEFAULT_REFRESH_MS, Runtime
 from ._touch import TouchDevice
-
-register_device_class(types.BROKER, Broker)
 
 Keys = keys.Keys
 
 # Device type constants (also available as eventsys.types.*)
-BROKER = types.BROKER
-QUEUE = types.QUEUE
+HOST = types.HOST
 TOUCH = types.TOUCH
 ENCODER = types.ENCODER
 KEYPAD = types.KEYPAD
@@ -56,8 +53,9 @@ JOYBUTTONDOWN = events.JOYBUTTONDOWN
 JOYBUTTONUP = events.JOYBUTTONUP
 
 __all__ = [
-    "BROKER",
+    "DEFAULT_REFRESH_MS",
     "ENCODER",
+    "HOST",
     "JOYAXISMOTION",
     "JOYBALLMOTION",
     "JOYBUTTONDOWN",
@@ -71,21 +69,20 @@ __all__ = [
     "MOUSEBUTTONUP",
     "MOUSEMOTION",
     "MOUSEWHEEL",
-    "QUEUE",
     "QUIT",
     "TOUCH",
-    "Broker",
     "Device",
     "EncoderDevice",
+    "HostEventsDevice",
     "JoystickDevice",
     "JoystickDriver",
+    "KeypadDevice",
     "Keys",
-    "QueueDevice",
+    "Runtime",
     "TouchDevice",
     "VirtualDevices",
     "capabilities",
     "events",
-    "poll_quit_discarding_others",
     "register_device",
     "register_event",
     "types",

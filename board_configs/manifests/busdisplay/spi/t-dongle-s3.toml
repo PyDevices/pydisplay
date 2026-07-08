@@ -1,0 +1,61 @@
+kind = "busdisplay_spi"
+slug = "t-dongle-s3"
+title = "LilyGo T-Dongle-S3 80x160 ST7735 display"
+title_cp = "LilyGo T-Dongle-S3 80x160 ST7735 — CircuitPython"
+out = "busdisplay/spi"
+circuitpython = true
+
+[display]
+module = "st7735"
+class = "ST7735"
+width = 80
+height = 160
+colstart = 0
+rowstart = 0
+rotation = 180
+mirrored = false
+color_depth = 16
+bgr = true
+reverse_bytes_in_word = false
+invert = true
+brightness = 1.0
+backlight_pin = 38
+backlight_on_high = true
+reset_pin = 1
+reset_high = true
+power_pin = "None"
+power_on_high = true
+
+[display.cp]
+width = 80
+height = 160
+colstart = 0
+rowstart = 0
+rotation = 180
+mirrored = false
+color_depth = 16
+bgr = true
+reverse_bytes_in_word = false
+invert = true
+brightness = 1.0
+backlight_pin = "board.D38"
+backlight_on_high = true
+reset_pin = "board.D1"
+reset_high = true
+
+[bus.mp.spi]
+id = 2
+baudrate = 60_000_000
+sck = 5
+mosi = 3
+dc = 2
+cs = 4
+
+[bus.cp.fourwire]
+command = "board.D2"
+chip_select = "board.D4"
+baudrate = 60_000_000
+
+[package]
+display_driver = "st7735"
+deps_mp = ["spibus"]

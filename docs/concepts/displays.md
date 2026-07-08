@@ -57,14 +57,14 @@ Planned — community help wanted.
 ## How displays expose input
 
 All display backends feed input into [`eventsys`](events.md) the same way: as a
-stream of `eventsys.events` objects drained through a **`QUEUE`** device. They
+stream of `eventsys.events` objects drained through a **`HostEventsDevice`**. They
 differ only in *how* that stream is produced, which depends on what each
 platform exposes:
 
-| Backends | Input source | Registered as |
-|----------|--------------|---------------|
-| `SDL2Display`, `PGDisplay` | module-level `get_events()` draining the native OS event queue | `QUEUE` device with `read=get_events` |
-| `JNDisplay`, `PSDisplay` | a `JNDevices` / `PSDevices` instance capturing browser input, drained via `read()` | `QUEUE` device with `read=devices_drv.read` |
+| Backends | Input source | Wired via |
+|----------|--------------|-----------|
+| `SDL2Display`, `PGDisplay` | module-level `get_events()` draining the native OS event queue | `Runtime(..., host_read=get_events)` |
+| `JNDisplay`, `PSDisplay` | a `JNDevices` / `PSDevices` instance capturing browser input, drained via `read()` | `Runtime(..., host_read=devices_drv.read)` |
 
 Either way your handler sees the same `eventsys.events` objects, so application
 code never needs to know which backend is active.
@@ -79,20 +79,18 @@ from displaysys.sdldisplay import SDLDisplay, get_events
 import eventsys
 
 display_drv = SDLDisplay(...)
-broker = eventsys.Broker()
-broker.create(type=eventsys.QUEUE, read=get_events, data=display_drv)
-broker.register_quit_cleanup(display_drv)
+runtime = eventsys.Runtime(display=display_drv, host_read=get_events)
 ```
 
 Use `poll_event()` only for optional manual single-event checks — not as the
-QUEUE `read=` callback (it returns one event, not a list).
+`host_read=` callback (it returns one event, not a list).
 
 Default quit chord on event backends is **CTRL+Q** (`display_drv.quit_chord`);
-`QueueDevice` applies it when `data=` is the display driver. Window-close still
+`HostEventsDevice` applies it when constructed with `display=`. Window-close still
 emits `events.QUIT` from SDL/PyGame.
 
 Pointer coordinates use `display_drv.touch_scale` (see `capabilities()` per
-backend); `QueueDevice` divides mouse events by that scale.
+backend); `HostEventsDevice` divides mouse events by that scale.
 
 This captures mouse motion/buttons, the wheel, the keyboard, the window-close
 (`QUIT`) event, and **joysticks/gamepads** (`JOYAXISMOTION`, `JOYBALLMOTION`,
@@ -110,9 +108,8 @@ from displaysys.psdisplay import PSDevices, PSDisplay
 import eventsys
 
 display_drv = PSDisplay("display_canvas", width, height)
-broker = eventsys.Broker()
 devices_drv = PSDevices("display_canvas", display_drv)
-broker.create(type=eventsys.QUEUE, read=devices_drv.read, data=display_drv)
+runtime = eventsys.Runtime(display=display_drv, host_read=devices_drv.read)
 ```
 
 Each captures:

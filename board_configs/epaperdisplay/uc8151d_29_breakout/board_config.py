@@ -1,6 +1,6 @@
-"""UC8151D 2.9\" flexible E-Ink breakout — MicroPython (Feather SPI pinout)"""
+"""UC8151D 2.9" flexible E-Ink breakout — MicroPython (Feather SPI pinout)"""
 
-from machine import Pin, SPI
+from machine import SPI, Pin
 from spibus import SPIBus
 from uc8151d import UC8151D
 
@@ -17,7 +17,6 @@ display_bus = SPIBus(
     cs=10,
     reset=6,
 )
-
 _epaper = UC8151D(
     display_bus,
     width=128,
@@ -28,5 +27,4 @@ _epaper = UC8151D(
 
 display_drv = EPaperDisplay(_epaper, width=128, height=296, color_depth=1)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

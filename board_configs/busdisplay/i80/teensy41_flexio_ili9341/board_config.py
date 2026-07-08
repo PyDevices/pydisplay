@@ -1,13 +1,13 @@
-"""Teensy 4.1 + external ILI9341 on FlexIO 8080 bus — MicroPython
+"""Teensy 4.1 + external ILI9341 on FlexIO 8080 bus - MicroPython
 
 Wires an 8-bit parallel ILI9341 to **MIMXRT1062 FlexIO2** pads (displayif ``i80bus``).
 Data must be eight **consecutive** FlexIO2 indices on ``GPIO_B0_xx`` / ``GPIO_B1_xx``.
 
-Example mapping (external breakout — **do not** use MIMXRT1060-EVK RK043 RGB pins):
+Example mapping (external breakout - **do not** use MIMXRT1060-EVK RK043 RGB pins):
 
 | Signal | Teensy / MP pin name |
 |--------|----------------------|
-| D0–D7  | ``GPIO_B1_00`` … ``GPIO_B1_07`` (FlexIO2 D16–D23) |
+| D0-D7  | ``GPIO_B1_00`` … ``GPIO_B1_07`` (FlexIO2 D16-D23) |
 | WR     | ``GPIO_B1_08`` (FlexIO2 D24) |
 | DC     | ``GPIO_B1_09`` |
 | CS     | ``GPIO_B1_10`` |
@@ -60,5 +60,4 @@ display_drv = ILI9341(
     power_on_high=True,
 )
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

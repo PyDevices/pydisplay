@@ -1,4 +1,4 @@
-"""SSD1351 1.5\" color OLED — MicroPython (Feather breakout pinout)"""
+"""SSD1351 1.5" color OLED — MicroPython (Feather breakout pinout)"""
 
 from spibus import SPIBus
 from ssd1351 import SSD1351
@@ -22,6 +22,4 @@ display_drv = SSD1351(
     height=128,
     rotation=0,
 )
-
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

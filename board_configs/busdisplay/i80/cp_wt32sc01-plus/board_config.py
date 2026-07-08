@@ -54,13 +54,8 @@ def touch_read_func():
 
 touch_rotation_table = None
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

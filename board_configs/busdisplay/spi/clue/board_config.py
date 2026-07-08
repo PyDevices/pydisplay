@@ -27,7 +27,14 @@ display_drv = ST7789(
     color_depth=16,
     bgr=False,
     reverse_bytes_in_word=True,
+    cp={
+        "width": 240,
+        "height": 240,
+        "rotation": 0,
+        "colstart": 0,
+        "rowstart": 80,
+        "bgr": False,
+        "reverse_bytes_in_word": True,
+    },
 )
-
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

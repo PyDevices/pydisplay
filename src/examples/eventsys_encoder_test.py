@@ -3,7 +3,7 @@
 A simple test of an encoder in eventsys.
 """
 
-from board_config import display_drv, broker
+from board_config import display_drv, runtime
 
 color_byte = 1
 bg_color = 0xFF00
@@ -26,14 +26,14 @@ display_drv.vscsad(y_pos)
 draw_line()
 
 while True:
-    if not (elist := broker.poll()):
+    if not (elist := runtime.poll()):
         continue
     quit_requested = False
     for e in elist:
-        if e.type == broker.events.QUIT:
+        if e.type == runtime.events.QUIT:
             quit_requested = True
             break
-        if e.type == broker.events.MOUSEWHEEL:
+        if e.type == runtime.events.MOUSEWHEEL:
             if e.y != 0:
                 direction = factor if e.y > 0 else -factor
                 delta = e.y * e.y * direction  # Quadratic acceleration
@@ -45,7 +45,7 @@ while True:
                 delta = e.x * e.x * direction
                 x_pos = (x_pos + delta) % w
                 draw_line()
-        elif e.type == broker.events.MOUSEBUTTONDOWN:
+        elif e.type == runtime.events.MOUSEBUTTONDOWN:
             if e.button == 2:
                 color_byte = color_byte << 1 & 0xFF
                 if color_byte == 0:

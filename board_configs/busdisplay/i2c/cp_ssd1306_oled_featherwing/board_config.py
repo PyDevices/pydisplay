@@ -17,6 +17,4 @@ display_drv = SSD1306(
     height=32,
     rotation=0,
 )
-
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

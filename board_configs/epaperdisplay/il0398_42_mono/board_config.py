@@ -1,7 +1,7 @@
 """IL0398 4.2" monochrome E-Ink — MicroPython (Feather SPI pinout)"""
 
-from machine import Pin, SPI
 from il0398 import IL0398
+from machine import SPI, Pin
 from spibus import SPIBus
 
 from displaysys.epaperdisplay import EPaperDisplay
@@ -17,7 +17,6 @@ display_bus = SPIBus(
     cs=10,
     reset=6,
 )
-
 _epaper = IL0398(
     display_bus,
     width=400,
@@ -28,5 +27,4 @@ _epaper = IL0398(
 
 display_drv = EPaperDisplay(_epaper, width=400, height=300, color_depth=1)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

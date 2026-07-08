@@ -23,7 +23,7 @@ Examples in the [browser gallery](https://PyDevices.github.io/pydisplay/pyscript
 
 ## asyncio requirement
 
-PyScript runs on asyncio. **`async`-tagged gallery demos** (`calculator`, `paint`, `eventsys_simpletest`, …) use `multimer.dual_main` / `run_forever_async`. **`all`-tagged demos** run blocking loops after you click **Run** — many now exit on `events.QUIT` via `poll_quit_discarding_others(broker)` or full `broker.poll()` dispatch. See [PyScript asyncio guide](pyscript-asyncio.md).
+PyScript runs on asyncio. **`async`-tagged gallery demos** (`calculator`, `paint`, `eventsys_simpletest`, …) use `multimer.dual_main` / `run_forever_async`. **`all`-tagged demos** run blocking loops after you click **Run** — many now exit on `events.QUIT` via `runtime.quit_requested` or full `runtime.poll()` dispatch. See [PyScript asyncio guide](pyscript-asyncio.md).
 
 ## Gallery examples (2026-06)
 
@@ -42,7 +42,7 @@ Binary-dependent demos are excluded via `# pyscript binaries:` in the example he
 
 ## Board config
 
-`board_configs/psdisplay/` — 320×480 canvas with touch broker.
+`board_configs/psdisplay/` — 320×480 canvas with host input via `runtime`.
 
 ## Next
 

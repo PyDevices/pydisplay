@@ -1,7 +1,7 @@
 """Adafruit MagTag SSD1680 E-Ink — MicroPython"""
 
+from keypad_gpio import MAGTAG_BUTTON_KEYS, GPIOButtons
 from machine import Pin
-from keypad_gpio import GPIOButtons, MAGTAG_BUTTON_KEYS
 from spibus import SPIBus
 from ssd1680 import SSD1680
 
@@ -38,11 +38,5 @@ buttons = GPIOButtons(
     }
 )
 
-broker = eventsys.Broker()
-
-keypad_dev = broker.create(
-    type=eventsys.KEYPAD,
-    read=buttons.read,
-)
-
-broker.register_quit_cleanup(display_drv)
+runtime = eventsys.Runtime(display=display_drv)
+runtime.add_keypad(read=buttons.read)

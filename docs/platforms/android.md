@@ -48,4 +48,4 @@ On Android, **multimer** selects the **`_sdl2`** backend (SDL timers on the UI t
 
 ## Your own app
 
-Copy `pydisplay_android/android_demo/board_config.py`, add `pydisplay` and `usdl2` to your `buildozer.spec`, point `p4a.local_recipes` at pydisplay_android's `p4a_recipes/` (run `build_apk.sh` once to link the `usdl2` recipe from a sibling clone), and write your main loop with `display_drv` / `broker` as usual.
+Copy `pydisplay_android/android_demo/board_config.py`, add `pydisplay` and `usdl2` to your `buildozer.spec`, point `p4a.local_recipes` at pydisplay_android's `p4a_recipes/` (run `build_apk.sh` once to link the `usdl2` recipe from a sibling clone), and write your main loop with `display_drv` / `runtime` as usual.

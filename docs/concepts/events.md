@@ -1,18 +1,20 @@
 # eventsys
 
-Cross-platform input events with PyGame/SDL2-style types. One import covers the broker, built-in devices, event constants, and key codes.
+Cross-platform input events with PyGame/SDL2-style types. One import covers the runtime, built-in devices, event constants, and key codes.
+
+For board wiring, auto-refresh, and the `runtime = None` rule, see **[Runtime](runtime.md)**.
 
 ## Quick start — poll loop
 
 ```python
 import eventsys
 
-broker = eventsys.Broker()
+runtime = eventsys.Runtime()
 keypad = eventsys.KeypadDevice(read=lambda: pressed_keys)  # set of key codes
-broker.register(keypad)
+runtime.register(keypad)
 
 while True:
-    for event in broker.poll():  # always a list — safe to iterate
+    for event in runtime.poll():  # always a list — safe to iterate
         if event.type == eventsys.KEYDOWN:
             print("down", event.key)
         elif event.type == eventsys.QUIT:
@@ -24,14 +26,14 @@ while True:
 ```python
 import eventsys
 
-broker = eventsys.Broker()
+runtime = eventsys.Runtime()
 
 def on_key(event):
     print(event)
 
-broker.on(eventsys.KEYDOWN, on_key)
-broker.on([eventsys.KEYDOWN, eventsys.KEYUP], on_key)
-broker.on_device(eventsys.KEYPAD, on_key)
+runtime.on(eventsys.KEYDOWN, on_key)
+runtime.on([eventsys.KEYDOWN, eventsys.KEYUP], on_key)
+runtime.on_device(eventsys.KEYPAD, on_key)
 ```
 
 ## Quick start — async
@@ -42,40 +44,41 @@ Pair eventsys with [multimer](multimer.md) on asyncio-native hosts:
 import eventsys
 import multimer
 
-broker = eventsys.Broker()
+runtime = eventsys.Runtime()
 
 async def main():
     while True:
-        for event in broker.poll():
+        for event in runtime.poll():
             handle(event)
         await multimer.sleep_ms(0)
 
 multimer.run(main)
 ```
 
-Or use `await multimer.run_forever_async(poll=broker.poll, delay_ms=10)`.
+Or use `await multimer.run_forever_async(poll=runtime.poll, delay_ms=10)`.
 
 ## Poll vs subscribe
 
 | Pattern | When to use |
 |---------|-------------|
 | **Poll** | Main loop owns flow; inspect every event each frame. |
-| **`broker.on()`** | React to specific event types without a big `if` chain. |
-| **`broker.on_device()`** | Handle all events from touch, keypad, joystick, etc. |
+| **`runtime.on()`** | React to specific event types without a big `if` chain. |
+| **`runtime.on_device()`** | Handle all events from touch, keypad, joystick, etc. |
 
-`broker.poll()` **always** returns a list (possibly empty). It never returns `None`.
+`runtime.poll()` **always** returns a list (possibly empty). It never returns `None`.
 
 ## Built-in devices
 
 | Device | Input contract |
 |--------|----------------|
-| `QueueDevice` | `read()` returns ready-made events (desktop SDL/PyGame bridge). |
+| `HostEventsDevice` | `read()` returns ready-made events (desktop SDL/PyGame bridge). |
 | `TouchDevice` | `read()` returns `(x, y, pressed)`; maps to mouse events. |
 | `KeypadDevice` | `read()` returns a `set` of pressed key codes. |
 | `EncoderDevice` | `read()` returns scroll delta / button state. |
 | `JoystickDevice` | `joystick_driver` with PyGame-style `get_axis`, `get_button`, `get_hat`, … |
 
-Register devices with `broker.register(dev)` or `broker.create(eventsys.TOUCH, read=…)`.
+Register devices with `runtime.register(dev)` or the constructor helpers
+(`Runtime(..., touch_read=...)`, `runtime.add_keypad(read=...)`, etc.).
 
 ### Joystick
 
@@ -91,36 +94,43 @@ joy = eventsys.JoystickDevice(
     joystick_driver=MyDriver(),
     emulate_digital=[(0, 1)],  # optional: analog axes → hat motion
 )
-broker.register(joy)
-broker.on_device(eventsys.JOYSTICK, lambda e: print(e))
+runtime.register(joy)
+runtime.on_device(eventsys.JOYSTICK, lambda e: print(e))
 ```
 
 ## Quit handling
 
-eventsys does **not** call `sys.exit` or `os._exit`. Handle `events.QUIT` in your
-loop, or wire display cleanup on the broker:
+When constructed with `display=`, the runtime handles quit implicitly: on
+`events.QUIT` it runs `before_quit` (if set), then `display.quit()`, then
+stops the shared timer. Set `runtime.before_quit` for LVGL teardown before the
+display is released.
 
 ```python
-broker.register_quit_cleanup(display_drv)
-# LVGL: broker.register_quit_cleanup(display_drv, before=_lvgl_deinit)
+runtime.before_quit = _lvgl_shutdown
 ```
 
-Display-only loops (no input dispatch) may use:
+Use **`runtime.quit_requested`** in output-only loops that do not dispatch
+events:
 
 ```python
-from eventsys import poll_quit_discarding_others
+from board_config import display_drv, runtime
 
-while True:
-    ...
-    if poll_quit_discarding_others(broker):
-        break
+while not runtime.quit_requested:
+    draw_frame()
+    runtime.poll()  # process host quit + refresh timer
 ```
 
-Do **not** use `poll_quit_discarding_others` in interactive apps — it discards
-non-QUIT events. Use full `broker.poll()` dispatch instead.
+Interactive apps should drain events each frame:
+
+```python
+while not runtime.quit_requested:
+    for event in runtime.poll():
+        handle(event)
+    draw_frame()
+```
 
 `display_drv.quit()` only releases resources (REPL-safe); your loop must still
-exit on `events.QUIT`.
+exit when `runtime.quit_requested` becomes true or you handle `events.QUIT`.
 
 ## Custom events and devices
 
@@ -135,7 +145,7 @@ Use `eventsys.capabilities()` to inspect the dialect and built-in device list.
 
 ## FAQ
 
-**No events arrive** — call `broker.poll()` frequently in your main loop.
+**No events arrive** — call `runtime.poll()` frequently in your main loop.
 
 **Touch coordinates wrong** — set `TouchDevice.rotation_table` for your panel rotation.
 
@@ -143,14 +153,15 @@ Use `eventsys.capabilities()` to inspect the dialect and built-in device list.
 
 ## pydisplay integration
 
-pydisplay wires a `QUEUE` device and `broker.register_quit_cleanup(display_drv)` in
-`board_config.py`. Display-only MCU configs set `broker = None`. See
-[Architecture](architecture.md) and [Displays](displays.md).
+pydisplay wires a `HostEventsDevice` and implicit quit cleanup in
+`board_config.py` via `eventsys.Runtime(...)`. Display-only MCU configs set
+`runtime = None`. See [Runtime](runtime.md), [Architecture](architecture.md),
+and [Displays](displays.md).
 
 ## Next
 
 - [multimer](multimer.md) — timers and async main loops
-- [Displays](displays.md) — how backends feed the broker
+- [Displays](displays.md) — how backends feed the runtime
 - [App starter](../examples/app-starter.md)
 
 ## API reference

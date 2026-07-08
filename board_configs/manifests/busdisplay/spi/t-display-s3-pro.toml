@@ -1,0 +1,79 @@
+kind = "busdisplay_spi"
+slug = "t-display-s3-pro"
+title = "T-Display-S3 Pro 222x480 ST7796 display"
+title_cp = "LilyGO T-Display-S3 Pro 222x480 ST7796 — CircuitPython"
+out = "busdisplay/spi"
+circuitpython = true
+
+[display]
+module = "st7796"
+class = "ST7796"
+width = 222
+height = 480
+colstart = 49
+rowstart = 0
+rotation = 0
+mirrored = false
+color_depth = 16
+bgr = true
+reverse_bytes_in_word = true
+invert = true
+brightness = 1.0
+backlight_pin = 48
+backlight_on_high = true
+reset_pin = 47
+reset_high = false
+power_pin = "None"
+power_on_high = true
+
+[display.cp]
+width = 222
+height = 480
+colstart = 49
+rowstart = 0
+rotation = 0
+mirrored = false
+color_depth = 16
+bgr = true
+reverse_bytes_in_word = true
+invert = true
+brightness = 1.0
+backlight_pin = "board.GP48"
+backlight_on_high = true
+reset_high = false
+
+[bus.mp.spi]
+id = 1
+baudrate = 60_000_000
+sck = 18
+mosi = 17
+miso = 8
+dc = 9
+cs = 39
+
+[bus.cp.fourwire]
+command = "board.GP9"
+chip_select = "board.GP39"
+reset = "board.GP47"
+baudrate = 60_000_000
+
+[touch]
+module = "cst226"
+class = "CST226"
+read = "get_point"
+rotation_table = [0, 5, 6, 3]
+
+[touch.chip]
+irq_pin = 21
+rst_pin = 13
+
+[touch.mp.i2c]
+id = 0
+sda = 5
+scl = 6
+freq = 100_000
+
+[package]
+display_driver = "st7796"
+touch_driver = "cst226"
+deps_mp = ["spibus"]

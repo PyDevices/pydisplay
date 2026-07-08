@@ -7,7 +7,7 @@ Usage:
     <your code here>
 """
 
-from board_config import broker, display_drv
+from board_config import display_drv, runtime
 from displaybuf import DisplayBuffer as SSD
 
 # format = SSD.GS4_HMSB  # 4-bit (16 item) lookup table of 16-bit RGB565 colors; w*h/2 buffer
@@ -19,11 +19,11 @@ ssd = SSD(display_drv, format)
 
 # enable screenshot functionality
 def screenshot(event):
-    if event.type == broker.events.MOUSEBUTTONDOWN and event.button == 3:
+    if event.type == runtime.events.MOUSEBUTTONDOWN and event.button == 3:
         ssd.screenshot()
 
 
-broker.on(broker.events.MOUSEBUTTONDOWN, screenshot)
+runtime.on(runtime.events.MOUSEBUTTONDOWN, screenshot)
 # End screenshot functionality
 
 
@@ -39,18 +39,18 @@ class Poller:
         return bool(self._touched)
 
     def callback(self, event):
-        if (event.type == broker.events.MOUSEMOTION and event.buttons[0] == 1) or (
-            event.type == broker.events.MOUSEBUTTONDOWN and event.button == 1
+        if (event.type == runtime.events.MOUSEMOTION and event.buttons[0] == 1) or (
+            event.type == runtime.events.MOUSEBUTTONDOWN and event.button == 1
         ):
             self.col, self.row = event.pos
             self._touched = True
-        elif event.type == broker.events.MOUSEBUTTONUP and event.button == 1:
+        elif event.type == runtime.events.MOUSEBUTTONUP and event.button == 1:
             self._touched = False
 
 
-tpad = Poller(broker.poll)
-broker.on(
-    [broker.events.MOUSEMOTION, broker.events.MOUSEBUTTONDOWN, broker.events.MOUSEBUTTONUP],
+tpad = Poller(runtime.poll)
+runtime.on(
+    [runtime.events.MOUSEMOTION, runtime.events.MOUSEBUTTONDOWN, runtime.events.MOUSEBUTTONUP],
     tpad.callback,
 )
 

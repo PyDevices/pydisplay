@@ -14,12 +14,12 @@ Also passes through the key from any KEYDOWN events from the display.
 
 Usage:
 from touch_keypad import Keypad
-from board_config import display_drv, broker
+from board_config import display_drv, runtime
 
 keys = [1, 2, 3, "A", "B", "C", "play", "pause", "esc"]
-keypad = Keypad(broker.poll, 0, 0, display_drv.width, display_drv.height, cols=3, rows=3, keys=keys)
+keypad = Keypad(runtime.poll, 0, 0, display_drv.width, display_drv.height, cols=3, rows=3, keys=keys)
 while True:
-    broker.poll()
+    runtime.poll()
     if keys := keypad.read():
         print(keys)
     # For held-key polling (e.g. continuous movement), use keypad.read_held()
@@ -37,9 +37,9 @@ except ImportError:
 
 
 class Keypad:
-    def __init__(self, broker, x, y, w, h, cols=3, rows=3, keys=None, translate=None):
+    def __init__(self, runtime, x, y, w, h, cols=3, rows=3, keys=None, translate=None):
         self._keys = keys if keys else list(range(cols * rows))
-        self._broker = broker
+        self._runtime = runtime
         self.x = x
         self.y = y
         self.w = w
@@ -57,7 +57,7 @@ class Keypad:
             ]
         self._state = dict.fromkeys(self._keys, False)
         self._clicks = []
-        self._broker.on(
+        self._runtime.on(
             [events.MOUSEBUTTONDOWN, events.MOUSEBUTTONUP, events.KEYDOWN, events.KEYUP],
             self.callback,
         )

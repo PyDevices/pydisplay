@@ -45,7 +45,7 @@ class BoardDisplay(DisplayDriver):
         self._group = None
         self._bitmap = None
         self._tile = None
-        super().__init__(auto_refresh=False)
+        super().__init__()
 
     def init(self) -> None:
         pass

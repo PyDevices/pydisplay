@@ -31,7 +31,7 @@ class PixelDisplay(DisplayDriver):
         self._rotation = 0
         self.color_depth = color_depth
         self._requires_byteswap = False
-        super().__init__(auto_refresh=False)
+        super().__init__()
 
     def init(self) -> None:
         pass

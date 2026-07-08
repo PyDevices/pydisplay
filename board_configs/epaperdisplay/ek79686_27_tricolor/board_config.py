@@ -1,7 +1,7 @@
 """EK79686 2.7" tri-color breakout — MicroPython (Feather SPI pinout)"""
 
-from machine import Pin, SPI
 from ek79686 import EK79686
+from machine import SPI, Pin
 from spibus import SPIBus
 
 from displaysys.epaperdisplay import EPaperDisplay
@@ -17,7 +17,6 @@ display_bus = SPIBus(
     cs=10,
     reset=6,
 )
-
 _epaper = EK79686(
     display_bus,
     width=176,
@@ -29,5 +28,4 @@ _epaper = EK79686(
 
 display_drv = EPaperDisplay(_epaper, width=176, height=264, color_depth=2)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

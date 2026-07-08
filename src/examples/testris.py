@@ -4,12 +4,11 @@ Testris game implemented in MicroPython by Brad Barnett.
 """
 
 # For the display & optional touch drivers
-from board_config import display_drv, broker
+from board_config import display_drv, runtime
 from displaysys import alloc_buffer
 from touch_keypad import Keypad
 from joystick_keypad import JoystickKeypad
 from eventsys.keys import Keys
-from eventsys import poll_quit_discarding_others
 try:
     from random import choice  # For random piece selection
 except ImportError:
@@ -49,7 +48,7 @@ LEFT = Keys.K_LEFT  # LEFT
 DOWN = Keys.K_DOWN  # DOWN
 RIGHT = Keys.K_RIGHT  # RIGHT
 keypad = Keypad(
-    broker,
+    runtime,
     0,
     0,
     display_drv.width,
@@ -58,7 +57,7 @@ keypad = Keypad(
 )
 
 joystick_keypad = JoystickKeypad(
-    broker,
+    runtime,
     joymap={
         1: {
             'hats': {
@@ -75,7 +74,7 @@ joystick_keypad = JoystickKeypad(
 
 
 def _quit_if_needed(_where):
-    if not poll_quit_discarding_others(broker):
+    if not runtime.quit_requested if runtime else False:
         return False
     display_drv.quit()
     return True
@@ -745,8 +744,4 @@ async def main_async():
     await run_forever_async(lambda: _play_poll(play), delay_ms=1)
 
 
-import board_config
-
-board_config.TIMER_ASYNC = True
-
-dual_main(main_sync, main_async, async_mode=board_config.TIMER_ASYNC)
+dual_main(main_sync, main_async, async_mode=runtime.timer_async if runtime else True)

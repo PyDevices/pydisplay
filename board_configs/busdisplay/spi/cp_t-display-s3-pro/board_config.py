@@ -14,8 +14,8 @@ display_bus = FourWire(
     board.SPI(),
     command=board.GP9,
     chip_select=board.GP39,
-    reset=board.GP47,
     baudrate=60_000_000,
+    reset=board.GP47,
 )
 
 display_drv = ST7796(
@@ -35,7 +35,6 @@ display_drv = ST7796(
     backlight_on_high=True,
     reset_high=False,
 )
-
 i2c = board.I2C()
 touch_drv = Adafruit_FocalTouch(i2c)
 
@@ -49,13 +48,8 @@ def touch_read_func():
 
 touch_rotation_table = (0, 5, 6, 3)
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

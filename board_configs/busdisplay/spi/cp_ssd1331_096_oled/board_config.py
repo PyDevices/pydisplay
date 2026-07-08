@@ -1,4 +1,4 @@
-"""Adafruit 0.96\" SSD1331 color OLED — CircuitPython"""
+"""Adafruit 0.96" SSD1331 color OLED — CircuitPython"""
 
 import board
 from displayio import release_displays
@@ -13,8 +13,8 @@ display_bus = FourWire(
     board.SPI(),
     command=board.D6,
     chip_select=board.D5,
-    reset=board.D9,
     baudrate=16_000_000,
+    reset=board.D9,
 )
 
 display_drv = SSD1331(
@@ -23,6 +23,4 @@ display_drv = SSD1331(
     height=64,
     rotation=0,
 )
-
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

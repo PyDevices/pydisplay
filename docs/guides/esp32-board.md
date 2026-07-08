@@ -67,7 +67,7 @@ import eventsys_simpletest
 - [**App starter**](../examples/app-starter.md) — copy-paste template for your first app
 - [**pydisplay_demo**](../examples/pydisplay_demo.md) — flagship feature demo (display, input, scroll)
 - [Examples catalog](../examples/index.md) — suggested learning order
-- [Events concept](../concepts/events.md) — broker poll loop
+- [Events concept](../concepts/events.md) — runtime poll loop
 - [MicroPython platform notes](../platforms/micropython.md) — bus drivers, frozen firmware
 - [Troubleshooting](../troubleshooting.md)
 

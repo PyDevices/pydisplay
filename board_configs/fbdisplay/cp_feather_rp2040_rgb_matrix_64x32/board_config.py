@@ -1,4 +1,4 @@
-"""Adafruit Feather RP2040 + RGB Matrix FeatherWing 64×32 — CircuitPython
+"""Adafruit Feather RP2040 + RGB Matrix FeatherWing 64x32 - CircuitPython
 
 Plug-in stack (Feather headers only):
 - Adafruit Feather RP2040: https://circuitpython.org/board/adafruit_feather_rp2040/
@@ -38,5 +38,4 @@ matrix = rgbmatrix.RGBMatrix(
 
 display_drv = FBDisplay(matrix, width=64, height=32)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

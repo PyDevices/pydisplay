@@ -1,11 +1,18 @@
 {
   "urls": [
-    ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/i80/cp_ili9341_i80_rp2040/board_config.py"],
-    ["ili9341.py", "github:PyDevices/pydisplay/drivers/display/ili9341.py"],
-    ["adafruit_focaltouch.py", "github:PyDevices/pydisplay/drivers/touch/circuitpython/adafruit_focaltouch.py"]
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/busdisplay/i80/cp_ili9341_i80_rp2040/board_config.py"
+    ],
+    [
+      "ili9341.py",
+      "github:PyDevices/pydisplay/drivers/display/ili9341.py"
+    ],
+    [
+      "adafruit_focaltouch.py",
+      "github:PyDevices/pydisplay/drivers/touch/circuitpython/adafruit_focaltouch.py"
+    ]
   ],
-  "deps": [
-    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"]
-  ],
+  "deps": [],
   "version": "0.1"
 }

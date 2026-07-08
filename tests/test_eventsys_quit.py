@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Tests for eventsys quit helpers and QueueDevice quit chord."""
+"""Tests for eventsys quit helpers and HostEventsDevice quit chord."""
 
 import unittest
 
@@ -9,7 +9,7 @@ import _env  # noqa: F401
 from _support import scripted
 
 import eventsys
-from eventsys import Broker, QueueDevice, events, poll_quit_discarding_others
+from eventsys import HostEventsDevice, Runtime, events
 from eventsys.keys import Keys, key_triggers_quit
 
 
@@ -26,60 +26,52 @@ class TestKeyTriggersQuit(unittest.TestCase):
         self.assertFalse(key_triggers_quit(events.KEYDOWN, Keys.K_q, 0, None))
 
 
-class TestPollQuitDiscardingOthers(unittest.TestCase):
-    def test_none_broker_returns_false(self):
-        self.assertFalse(poll_quit_discarding_others(None))
+class TestQuitRequested(unittest.TestCase):
+    def test_none_runtime_poll_is_noop(self):
+        runtime = Runtime()
+        self.assertFalse(runtime.quit_requested)
 
-    def test_quit_in_batch_returns_true(self):
-        broker = Broker()
-        q = QueueDevice(
-            read=scripted(
-                [
-                    events.Key(events.KEYDOWN, "A", 65, 0, 0, None),
-                    events.Quit(events.QUIT),
-                ]
-            )
+    def test_quit_sets_flag(self):
+        class Display:
+            needs_refresh = False
+
+            def quit(self):
+                pass
+
+        runtime = Runtime(display=Display())
+        host = HostEventsDevice(
+            host_read=scripted([events.Quit(events.QUIT)]),
+            display=Display(),
         )
-        broker.register(q)
-        self.assertTrue(poll_quit_discarding_others(broker))
-
-    def test_non_quit_batch_returns_false(self):
-        broker = Broker()
-        q = QueueDevice(read=scripted([events.Key(events.KEYDOWN, "A", 65, 0, 0, None)]))
-        broker.register(q)
-        self.assertFalse(poll_quit_discarding_others(broker))
+        runtime.register(host)
+        runtime.poll()
+        self.assertTrue(runtime.quit_requested)
 
 
-class TestRegisterQuitCleanup(unittest.TestCase):
-    def test_requires_quit_method(self):
-        broker = Broker()
-        with self.assertRaises(ValueError):
-            broker.register_quit_cleanup(object())
-
-    def test_runs_hooks_and_quit(self):
-        broker = Broker()
+class TestRuntimeQuitLifecycle(unittest.TestCase):
+    def test_before_quit_then_display_quit(self):
         order = []
 
-        class Resource:
+        class Display:
+            needs_refresh = False
+
             def quit(self):
                 order.append("quit")
 
-        broker.register_quit_cleanup(
-            Resource(),
-            before=lambda: order.append("before"),
-            after=lambda: order.append("after"),
-        )
-        broker.quit()
-        self.assertEqual(order, ["before", "quit", "after"])
+        runtime = Runtime(display=Display())
+        runtime.before_quit = lambda: order.append("before")
+        runtime._handle_quit()
+        self.assertEqual(order, ["before", "quit"])
+        self.assertTrue(runtime.quit_requested)
 
 
-class TestQueueDeviceQuitChord(unittest.TestCase):
+class TestHostEventsDeviceQuitChord(unittest.TestCase):
     def test_chord_keydown_becomes_quit(self):
         class Data:
             quit_chord = (Keys.K_q, Keys.KMOD_CTRL)
 
         ev = events.Key(events.KEYDOWN, "q", Keys.K_q, Keys.KMOD_CTRL, 0, None)
-        dev = QueueDevice(read=scripted([ev]), data=Data())
+        dev = HostEventsDevice(host_read=scripted([ev]), display=Data())
         out = dev.poll()
         self.assertEqual(len(out), 1)
         self.assertEqual(out[0].type, events.QUIT)
@@ -89,7 +81,7 @@ class TestQueueDeviceQuitChord(unittest.TestCase):
             quit_chord = (Keys.K_q, Keys.KMOD_CTRL)
 
         ev = events.Key(events.KEYUP, "q", Keys.K_q, Keys.KMOD_CTRL, 0, None)
-        dev = QueueDevice(read=scripted([ev]), data=Data())
+        dev = HostEventsDevice(host_read=scripted([ev]), display=Data())
         self.assertEqual(dev.poll(), [])
 
 

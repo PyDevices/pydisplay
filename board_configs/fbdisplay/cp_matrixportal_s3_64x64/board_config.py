@@ -38,5 +38,4 @@ matrix = rgbmatrix.RGBMatrix(
 fb = matrix
 display_drv = FBDisplay(fb, width=64, height=64)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

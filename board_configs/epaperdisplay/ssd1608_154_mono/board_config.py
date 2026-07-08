@@ -1,8 +1,8 @@
 """SSD1608 1.54" monochrome breakout — MicroPython (Feather SPI pinout)"""
 
-from machine import Pin, SPI
-from ssd1608 import SSD1608
+from machine import SPI, Pin
 from spibus import SPIBus
+from ssd1608 import SSD1608
 
 from displaysys.epaperdisplay import EPaperDisplay
 import eventsys
@@ -17,7 +17,6 @@ display_bus = SPIBus(
     cs=10,
     reset=6,
 )
-
 _epaper = SSD1608(
     display_bus,
     width=200,
@@ -28,5 +27,4 @@ _epaper = SSD1608(
 
 display_drv = EPaperDisplay(_epaper, width=200, height=200, color_depth=1)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

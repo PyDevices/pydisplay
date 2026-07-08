@@ -8,15 +8,16 @@ Early Tab5 units: ILI9881C + GT911 @ 0x14. Newer units: ST7123 integrated TDDI
 Product: https://circuitpython.org/board/m5stack_tab5/
 """
 
+import time
+
 import board
 import busio
 import displayio
 import gt911
 import mipidsi
-import time
+from tab5_ili9881c_init import TAB5_ILI9881C_INIT
 
 from displaysys.fbdisplay import FBDisplay
-from tab5_ili9881c_init import TAB5_ILI9881C_INIT
 import eventsys
 
 displayio.release_displays()
@@ -58,13 +59,8 @@ display_drv = FBDisplay(fb)
 
 touch_rotation_table = (0, 0, 0, 0)
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

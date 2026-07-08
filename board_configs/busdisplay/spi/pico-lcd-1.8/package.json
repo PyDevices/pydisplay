@@ -1,10 +1,23 @@
 {
-    "urls": [
-      ["board_config.py", "github:PyDevices/pydisplay/board_configs/busdisplay/spi/pico-lcd-1.8/board_config.py"],
-      ["st7735r.py", "github:PyDevices/pydisplay/drivers/display/st7735r_1.py"]
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/busdisplay/spi/pico-lcd-1.8/board_config.py"
     ],
-    "deps": [
-      ["github:PyDevices/pydisplay/packages/spibus.json", "main"]
+    [
+      "st7735r_1.py",
+      "github:PyDevices/pydisplay/drivers/display/st7735r_1.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
     ],
-    "version": "0.1"
-  }
+    [
+      "github:PyDevices/pydisplay/packages/spibus.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

@@ -33,7 +33,7 @@ Touch examples (e.g. [`eventsys_touch_test.py`](https://github.com/PyDevices/pyd
 
 ## Async execution model
 
-The Jupyter board config sets `TIMER_ASYNC = True`. Touch-driven examples use this flag to run an `asyncio` main loop instead of a blocking one, because the notebook kernel already drives an event loop and `ipyevents` callbacks (mouse events) are only delivered when control returns to it.
+The Jupyter board config constructs `runtime` with `timer_async=True`. Touch-driven examples use `runtime.timer_async` to run an `asyncio` main loop instead of a blocking one, because the notebook kernel already drives an event loop and `ipyevents` callbacks (mouse events) are only delivered when control returns to it.
 
 Examples launch their async main coroutine with **`multimer.run(main)`** rather than `asyncio.run(main())`. The helper detects the kernel's already-running loop and schedules `main` with `loop.create_task(...)` (so the cell returns immediately and the coroutine runs in the background), while still blocking to completion on desktop/MCU. This is why calling `asyncio.run(main())` directly in a notebook raises `RuntimeError: asyncio.run() cannot be called from a running event loop`.
 
@@ -53,7 +53,7 @@ This repo’s [`.vscode/settings.json`](https://github.com/PyDevices/pydisplay/b
 
 A touch example scheduled with `create_task` runs as a **background task** on the kernel loop, so the cell itself returns immediately and the **Stop** button won't interrupt it. To stop early, restart the kernel from the kernel picker.
 
-Synchronous, blocking examples (no `TIMER_ASYNC`) keep the cell running; use the square **Stop** button to raise `KeyboardInterrupt`. Such examples should call `sleep_ms(1)` each iteration so Stop can take effect.
+Synchronous, blocking examples (when `runtime.timer_async` is false) keep the cell running; use the square **Stop** button to raise `KeyboardInterrupt`. Such examples should call `sleep_ms(1)` each iteration so Stop can take effect.
 
 ## When to use Jupyter
 

@@ -1,0 +1,73 @@
+kind = "busdisplay_spi"
+slug = "seeed_gc9a01_on_qtpy_esp32s3"
+title = "Seeed Studio Round Display for XIAO GC9A01 240x240 display on Adafruit QT Py ESP32-S3"
+title_cp = "Seeed GC9A01 round display on QT Py ESP32-S3 — CircuitPython"
+out = "busdisplay/spi"
+circuitpython = true
+
+[display]
+module = "gc9a01"
+class = "GC9A01"
+width = 240
+height = 240
+colstart = 0
+rowstart = 0
+rotation = 0
+mirrored = false
+color_depth = 16
+bgr = true
+reverse_bytes_in_word = true
+invert = true
+brightness = 1.0
+backlight_pin = "None"
+backlight_on_high = true
+reset_pin = "None"
+reset_high = true
+power_pin = "None"
+power_on_high = true
+
+[display.cp]
+width = 240
+height = 240
+colstart = 0
+rowstart = 0
+rotation = 0
+mirrored = false
+color_depth = 16
+bgr = true
+reverse_bytes_in_word = true
+invert = true
+
+[bus.mp.spi]
+id = 1
+baudrate = 60_000_000
+sck = 36
+mosi = 35
+miso = 37
+dc = 8
+cs = 17
+
+[bus.cp.fourwire]
+command = "board.D8"
+chip_select = "board.D17"
+baudrate = 60_000_000
+
+[touch]
+module = "chsc6x"
+class = "CHSC6X"
+read = "touch_read"
+rotation_table = [0, 5, 6, 3]
+
+[touch.chip]
+irq_pin = 16
+
+[touch.mp.i2c]
+id = 0
+sda = 7
+scl = 6
+freq = 400_000
+
+[package]
+display_driver = "gc9a01"
+touch_driver = "chsc6x"
+deps_mp = ["spibus"]

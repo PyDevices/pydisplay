@@ -99,7 +99,7 @@ def _timer_class():
     try:
         import board_config
 
-        if getattr(board_config, "TIMER_ASYNC", False):
+        if getattr(board_config, "runtime.timer_async", False):
             from multimer import AsyncTimer as Timer
 
             return Timer
@@ -114,12 +114,12 @@ def _timer_class():
 
 
 def _timer_type():
-    # The board's shared broker timer drives LVGL now (lv_utils subscribes to it),
-    # so report the broker timer's class when it exists.
+    # The board's shared runtime timer drives LVGL now (lv_utils subscribes to it),
+    # so report the runtime timer's class when it exists.
     try:
-        from board_config import broker
+        from board_config import runtime
 
-        timer = getattr(broker, "_timer", None)
+        timer = getattr(runtime, "_timer", None)
         if timer is not None:
             return _format_timer_type(type(timer))
     except ImportError:
@@ -173,7 +173,7 @@ def build_ui(mode=None):
     if mode is not None:
         set_test_mode(mode)
 
-    # Pause the shared broker-timer-driven LVGL task_handler while we construct
+    # Pause the shared runtime-timer-driven LVGL task_handler while we construct
     # the UI: LVGL is not re-entrant, so timer-driven rendering must not run
     # concurrently with widget creation on the main thread.
     inst = None

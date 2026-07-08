@@ -1,4 +1,4 @@
-"""480×480 ST7701 parallel RGB — MicroPython (ESP32-S3)
+"""480x480 ST7701 parallel RGB - MicroPython (ESP32-S3)
 
 ST7701 register init uses bit-banged 3-wire SPI via the XL9535 expander.
 Pixel scanout uses ``rgbframebuffer.RGBFrameBuffer`` (displayif cmod) and
@@ -6,9 +6,9 @@ Pixel scanout uses ``rgbframebuffer.RGBFrameBuffer`` (displayif cmod) and
 """
 
 from machine import I2C, Pin
-
-from xl9535 import XL9535
 from st7701 import LCDPins, run_init
+from xl9535 import XL9535
+
 from displaysys.fbdisplay import FBDisplay
 import eventsys
 
@@ -41,7 +41,7 @@ tft_pins = {
     "data": _DATA_PINS,
 }
 
-# Panel timings — tune on hardware when rgbframebuffer driver is available
+# Panel timings - tune on hardware when rgbframebuffer driver is available
 tft_timings = {
     "frequency": 12_000_000,
     "width": 480,
@@ -79,5 +79,4 @@ backlight = Pin(_BACKLIGHT, Pin.OUT, value=1)
 fb = RGBFrameBuffer(**tft_pins, **tft_timings)
 display_drv = FBDisplay(fb)
 
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

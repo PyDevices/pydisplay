@@ -15,7 +15,7 @@ Portability is PyDisplay's defining feature. Write your display, input, and timi
 The same import works on every platform:
 
 ```python
-from board_config import display_drv, broker
+from board_config import display_drv, runtime
 ```
 
 What changes is which **display backend** `board_config` selects — automatically on desktop, PyScript, and Jupyter, or explicitly via a per-board config on hardware:

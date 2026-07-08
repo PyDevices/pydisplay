@@ -3,12 +3,11 @@
 from ft6x36 import FT6x36
 from i80bus import I80Bus
 from ili9341 import ILI9341
-from machine import I2C, Pin  # See the note about reset below
+from machine import I2C, Pin
 
 import eventsys
 
 reset = Pin(12, Pin.OUT, value=1)
-
 display_bus = I80Bus(
     dc=14,
     cs=15,
@@ -36,19 +35,13 @@ display_drv = ILI9341(
     power_pin=None,
     power_on_high=True,
 )
-
-i2c = I2C(0, sda=Pin(16), scl=Pin(17), freq=100000)  # IRQ = 11
+i2c = I2C(0, sda=Pin(16), scl=Pin(17), freq=100_000)
 touch_drv = FT6x36(i2c)
 touch_read_func = touch_drv.get_positions
 touch_rotation_table = None
 
-broker = eventsys.Broker()
-
-touch_dev = broker.create(
-    type=eventsys.TOUCH,
-    read=touch_read_func,
-    data=display_drv,
-    data2=touch_rotation_table,
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
 )
-
-broker.register_quit_cleanup(display_drv)

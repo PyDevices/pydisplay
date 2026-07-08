@@ -13,8 +13,8 @@ display_bus = FourWire(
     board.SPI(),
     command=board.TFT_DC,
     chip_select=board.TFT_CS,
-    reset=board.TFT_RESET,
     baudrate=24_000_000,
+    reset=board.TFT_RESET,
 )
 
 display_drv = ST7789(
@@ -27,6 +27,4 @@ display_drv = ST7789(
     bgr=False,
     reverse_bytes_in_word=True,
 )
-
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None

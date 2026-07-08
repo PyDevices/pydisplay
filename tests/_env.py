@@ -47,3 +47,22 @@ _DRIVERS_INPUT = os.path.join(_REPO_ROOT, "drivers", "input")
 for _path in (_DRIVERS_DISPLAY, _DRIVERS_BUS, _DRIVERS_TOUCH, _DRIVERS_INPUT):
     if _path not in sys.path:
         sys.path.insert(0, _path)
+
+
+def _ensure_micropython_shim():
+    """CPython unit tests import MCU-oriented drivers that expect ``micropython``."""
+    if "micropython" in sys.modules:
+        return
+    import types
+
+    mp = types.ModuleType("micropython")
+    mp.const = lambda x: x
+
+    def _alloc_emergency_exception_buf(_size):
+        pass
+
+    mp.alloc_emergency_exception_buf = _alloc_emergency_exception_buf
+    sys.modules["micropython"] = mp
+
+
+_ensure_micropython_shim()

@@ -28,7 +28,7 @@ The fonts were converted from True Type fonts using the
 import sys
 
 import tft_config
-from board_config import broker
+from board_config import runtime
 from multimer import Timer
 
 palette = tft_config.palette
@@ -78,7 +78,7 @@ def main():
     row += noto_mono.HEIGHT
 
     tft.show()
-    broker.poll()
+    runtime.poll()
 
 
 main()

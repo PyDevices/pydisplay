@@ -3,14 +3,14 @@ eventsys unifies input from touchscreens, mice, keypads, keyboards, encoders, an
 ## Narrative docs
 
 - [Events concept](../../concepts/events.md) — poll loop, subscribe, and built-in devices
-- [Architecture](../../concepts/architecture.md) — brokers and board_config
-- [Touch drivers](../../hardware/touch-drivers.md) — chip-level helpers
+- [Runtime concept](../../concepts/runtime.md) — board_config contract and auto-refresh
+- [Architecture](../../concepts/architecture.md) — runtime and board_config
 
 ## Key entry points
 
-- `Broker` — aggregates devices; `poll()` always returns a list
-- `poll_quit_discarding_others(broker)` — one poll pass; `True` if `QUIT` seen (display-only loops)
-- `TouchDevice`, `KeypadDevice`, `EncoderDevice`, `QueueDevice`, `JoystickDevice`
+- `Runtime` — aggregates devices; `poll()` always returns a list
+- `quit_requested` — sticky flag set after quit is processed (display-only loops)
+- `TouchDevice`, `KeypadDevice`, `EncoderDevice`, `HostEventsDevice`, `JoystickDevice`
 - `events` — event type constants and namedtuple event classes
 - `Keys` — SDL key code table
 - `register_event`, `register_device` — application extensions

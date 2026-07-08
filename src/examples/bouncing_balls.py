@@ -22,8 +22,7 @@ desktop (SDL/Pygame), MCU, and PyScript.
 
 from random import getrandbits
 
-from board_config import broker, display_drv
-from eventsys import poll_quit_discarding_others
+from board_config import display_drv, runtime
 from multimer import sleep_ms
 import graphics
 
@@ -99,7 +98,7 @@ def main():
             step(ball)
             graphics.circle(display_drv, int(ball.x), int(ball.y), ball.r, ball.color, True)
         display_drv.show()
-        if poll_quit_discarding_others(broker):
+        if runtime.quit_requested if runtime else False:
             break
         sleep_ms(10)
 

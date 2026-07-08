@@ -1,7 +1,7 @@
 """SH1107 128x64 OLED — MicroPython"""
 
-from machine import I2C, Pin
 from i2cbus import I2CBus
+from machine import I2C, Pin
 from sh1107 import SH1107
 
 import eventsys
@@ -14,6 +14,4 @@ display_drv = SH1107(
     height=64,
     rotation=0,
 )
-
-broker = eventsys.Broker()
-broker.register_quit_cleanup(display_drv)
+runtime = None
