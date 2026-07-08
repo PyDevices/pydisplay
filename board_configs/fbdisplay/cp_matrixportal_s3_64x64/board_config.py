@@ -2,7 +2,6 @@
 
 import board
 import displayio
-import framebufferio
 import rgbmatrix
 
 from displaysys.fbdisplay import FBDisplay
@@ -14,14 +13,7 @@ matrix = rgbmatrix.RGBMatrix(
     width=64,
     height=64,
     bit_depth=4,
-    rgb_pins=[
-        board.MTX_R1,
-        board.MTX_G1,
-        board.MTX_B1,
-        board.MTX_R2,
-        board.MTX_G2,
-        board.MTX_B2,
-    ],
+    rgb_pins=[board.MTX_R1, board.MTX_G1, board.MTX_B1, board.MTX_R2, board.MTX_G2, board.MTX_B2],
     addr_pins=[
         board.MTX_ADDRA,
         board.MTX_ADDRB,
@@ -36,6 +28,6 @@ matrix = rgbmatrix.RGBMatrix(
 )
 
 fb = matrix
-display_drv = FBDisplay(fb, width=64, height=64)
 
+display_drv = FBDisplay(fb, width=64, height=64)
 runtime = None

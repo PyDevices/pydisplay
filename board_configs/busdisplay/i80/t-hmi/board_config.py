@@ -1,7 +1,7 @@
 """T-HMI 240x320 ST7789V display"""
 
 from i80bus import I80Bus
-from machine import SPI, Pin  # See the note about reset below
+from machine import SPI, Pin
 from st7789 import ST7789
 from xpt2046 import Touch
 
@@ -34,7 +34,6 @@ display_drv = ST7789(
     power_pin=None,
     power_on_high=True,
 )
-
 spi = SPI(1, baudrate=1000000)
 touch_drv = Touch(
     spi=spi,

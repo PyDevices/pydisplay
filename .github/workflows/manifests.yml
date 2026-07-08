@@ -9,13 +9,12 @@ on:
       - 'packages/**'
       - 'web/pyscript/**'
       - 'sim/wokwi/**'
-      - 'board_configs/manifests/**'
+      - 'scripts/board_config/**'
       - 'board_configs/**/board_config.py'
       - 'board_configs/**/package.json'
       - 'scripts/install_*'
       - 'scripts/pyscript_gen_packages.py'
       - 'scripts/generate_board_configs.py'
-      - 'scripts/bootstrap_busdisplay_manifests.py'
       - 'scripts/audit_board_config_pairs.py'
       - '.github/workflows/manifests.yml'
   pull_request:
@@ -24,13 +23,12 @@ on:
       - 'packages/**'
       - 'web/pyscript/**'
       - 'sim/wokwi/**'
-      - 'board_configs/manifests/**'
+      - 'scripts/board_config/**'
       - 'board_configs/**/board_config.py'
       - 'board_configs/**/package.json'
       - 'scripts/install_*'
       - 'scripts/pyscript_gen_packages.py'
       - 'scripts/generate_board_configs.py'
-      - 'scripts/bootstrap_busdisplay_manifests.py'
       - 'scripts/audit_board_config_pairs.py'
       - '.github/workflows/manifests.yml'
   workflow_dispatch:
@@ -44,6 +42,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+
+      - name: Install ruff
+        run: pip install ruff
 
       - name: Audit install manifests
         run: ./scripts/install_refresh_manifests.sh --audit

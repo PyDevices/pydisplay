@@ -36,8 +36,22 @@ display_drv = ST7789(
     reset_high=True,
     power_pin=None,
     power_on_high=True,
+    cp={
+        "width": 170,
+        "height": 320,
+        "colstart": 0,
+        "rowstart": 0,
+        "rotation": 0,
+        "mirrored": False,
+        "color_depth": 16,
+        "bgr": False,
+        "reverse_bytes_in_word": True,
+        "invert": False,
+        "brightness": 1.0,
+        "backlight_pin": "board.D15",
+        "backlight_on_high": True,
+    },
 )
-
 encoder_drv = RotaryIRQ(1, 2, pull_up=True, half_step=True)
 encoder_read_func = encoder_drv.value
 encoder_button = Pin(0, Pin.IN, Pin.PULL_UP)

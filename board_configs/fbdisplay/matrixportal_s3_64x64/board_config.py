@@ -1,5 +1,6 @@
 """MatrixPortal S3 64x64 HUB75 — MicroPython"""
 
+from machine import Pin
 import rgbmatrix
 
 from displaysys.fbdisplay import FBDisplay
@@ -9,11 +10,11 @@ matrix = rgbmatrix.RGBMatrix(
     width=64,
     height=64,
     bit_depth=4,
-    rgb_pins=(42, 41, 40, 38, 39, 37),
-    addr_pins=(45, 36, 48, 35, 21),
-    clock_pin=2,
-    latch_pin=47,
-    output_enable_pin=14,
+    rgb_pins=(Pin(42), Pin(41), Pin(40), Pin(38), Pin(39), Pin(37)),
+    addr_pins=(Pin(45), Pin(36), Pin(48), Pin(35), Pin(21)),
+    clock_pin=Pin(2),
+    latch_pin=Pin(47),
+    output_enable_pin=Pin(14),
     doublebuffer=True,
 )
 

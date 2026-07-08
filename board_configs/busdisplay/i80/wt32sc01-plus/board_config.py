@@ -2,12 +2,11 @@
 
 from ft6x36 import FT6x36
 from i80bus import I80Bus
-from machine import I2C, Pin, freq  # See the note about reset below
+from machine import I2C, Pin
 from st7796 import ST7796
 
 import eventsys
 
-freq(240_000_000)
 # The WT32-SC01 Plus has the reset pins of the display IC and the touch IC both
 # tied to pin 4.  Controlling this pin with the display driver can lead to an
 # unresponsive touchscreen.  This case is uncommon.  If they aren't tied
@@ -42,8 +41,7 @@ display_drv = ST7796(
     power_pin=None,
     power_on_high=True,
 )
-
-i2c = I2C(0, sda=Pin(6), scl=Pin(5), freq=100000)
+i2c = I2C(0, sda=Pin(6), scl=Pin(5), freq=100_000)
 touch_drv = FT6x36(i2c)
 touch_read_func = touch_drv.get_positions
 touch_rotation_table = None

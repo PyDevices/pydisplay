@@ -1,13 +1,4 @@
-"""Adafruit Metro RP2350 + HSTX DVI breakout - MicroPython
-
-Metro RP2350 FPC (GPIO12-19) to Adafruit RP2350 22-pin HSTX→DVI adapter.
-Pin map differs from Pico 2 DVI Sock (lane order).
-
-https://learn.adafruit.com/adafruit-metro-rp2350/hstx-display
-https://circuitpython.org/board/adafruit_metro_rp2350/
-
-CircuitPython sibling: ``cp_adafruit_metro_rp2350_hstx_640x480``.
-"""
+"""Adafruit Metro RP2350 + HSTX DVI breakout - MicroPython"""
 
 from machine import Pin
 
@@ -19,7 +10,6 @@ try:
 except ImportError as exc:
     raise NotImplementedError("DVI output requires displayif picodvi cmod (rp2350 HSTX)") from exc
 
-# Metro RP2350 HSTX (Adafruit learning guide / Metro_RP2350_Breakout/code.py)
 fb = Framebuffer(
     width=640,
     height=480,

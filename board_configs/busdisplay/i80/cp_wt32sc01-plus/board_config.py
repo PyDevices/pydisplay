@@ -40,7 +40,6 @@ display_drv = ST7796(
     backlight_pin=board.GP45,
     backlight_on_high=True,
 )
-
 i2c = board.I2C()
 touch_drv = Adafruit_FocalTouch(i2c)
 

@@ -1,0 +1,88 @@
+kind = "fbdisplay_mipidsi"
+slug = "m5stack_tab5_ili9881c"
+title = "M5Stack Tab5 (ILI9881C + GT911) - MicroPython"
+title_cp = "M5Stack Tab5 (ILI9881C + GT911) — CircuitPython"
+out = "fbdisplay"
+circuitpython = true
+port = "esp32p4"
+touch_before_display = true
+cp_framebuffer_display = true
+
+mp_imports = ["import time", "from pi4ioe5v import tab5_init_lcd_reset"]
+
+mp_preamble_after_pins = """
+i2c = I2C(0, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA), freq=400_000)
+tab5_init_lcd_reset(i2c)
+time.sleep_ms(100)
+"""
+
+[bus]
+frequency = 730_000_000
+num_lanes = 2
+
+[display]
+init_sequence_name = "TAB5_ILI9881C_INIT"
+init_sequence_ref = true
+init_sequence_module = "tab5_ili9881c_init"
+width = 720
+height = 1280
+color_depth = 16
+pixel_clock_frequency = 60_000_000
+hsync_pulse_width = 40
+hsync_front_porch = 40
+hsync_back_porch = 140
+vsync_pulse_width = 4
+vsync_front_porch = 20
+vsync_back_porch = 20
+backlight_pin = "LCD_BACKLIGHT"
+backlight_on_high = true
+
+[display.cp]
+backlight_pin = "board.LCD_BL"
+
+[pins.mp]
+I2C_SCL = 32
+I2C_SDA = 31
+LCD_BACKLIGHT = 22
+TOUCH_INT = 23
+
+[touch]
+module = "gt911"
+class = "GT911"
+rotation_table = [0, 0, 0, 0]
+
+[touch.mp.i2c]
+id = 0
+scl = "I2C_SCL"
+sda = "I2C_SDA"
+freq = 400_000
+reuse_i2c = true
+
+[touch.chip]
+reset_pin = "None"
+irq_pin = "TOUCH_INT"
+address = "0x14"
+width = 720
+height = 1280
+touch_points = 5
+
+[touch.cp]
+driver = "gt911"
+address = "0x14"
+
+[package]
+touch_driver = "gt911"
+include_mipidsi = true
+notes_cp = "Requires CircuitPython mipidsi + gt911 on Tab5 (circup install gt911)."
+
+[[package.urls_mp]]
+name = "pi4ioe5v.py"
+url = "github:PyDevices/pydisplay/drivers/io_expander/pi4ioe5v.py"
+
+[[package.urls_mp]]
+name = "tab5_ili9881c_init.py"
+url = "github:PyDevices/pydisplay/drivers/display/tab5_ili9881c_init.py"
+
+[[package.urls_cp]]
+name = "tab5_ili9881c_init.py"
+url = "github:PyDevices/pydisplay/drivers/display/tab5_ili9881c_init.py"

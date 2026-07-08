@@ -1,8 +1,4 @@
-"""NXP MIMXRT1060-EVK + RK043FN66HS-CTG 4.3\" parallel RGB — CircuitPython
-
-Touch: Goodix GT911 on shield I2C (``board.SCL`` / ``board.SDA``), reset on
-``board.LCD_RST``, interrupt on ``board.LCD_TOUCH_INT``.
-"""
+"""NXP MIMXRT1060-EVK + RK043FN66HS-CTG 4.3" parallel RGB — CircuitPython"""
 
 import time
 
@@ -11,18 +7,10 @@ import busio
 import digitalio
 import displayio
 import gt911
+import rgbframebuffer
 
 from displaysys.fbdisplay import FBDisplay
 import eventsys
-
-displayio.release_displays()
-
-try:
-    from rgbframebuffer import RGBFrameBuffer
-except ImportError as exc:
-    raise NotImplementedError(
-        "Parallel RGB scanout requires displayif rgbframebuffer cmod (mimxrt eLCDIF)"
-    ) from exc
 
 board.LCD_BACKLIGHT.value = True
 
@@ -31,31 +19,31 @@ time.sleep(0.01)
 board.LCD_RST.value = True
 time.sleep(0.12)
 
-data_pins = (
-    board.LCD_D0,
-    board.LCD_D1,
-    board.LCD_D2,
-    board.LCD_D3,
-    board.LCD_D4,
-    board.LCD_D5,
-    board.LCD_D6,
-    board.LCD_D7,
-    board.LCD_D8,
-    board.LCD_D9,
-    board.LCD_D10,
-    board.LCD_D11,
-    board.LCD_D12,
-    board.LCD_D13,
-    board.LCD_D14,
-    board.LCD_D15,
-)
+displayio.release_displays()
 
-fb = RGBFrameBuffer(
+fb = rgbframebuffer.RGBFrameBuffer(
     de=board.LCD_ENABLE,
     vsync=board.LCD_VSYNC,
     hsync=board.LCD_HSYNC,
     dclk=board.LCD_CLK,
-    data=data_pins,
+    data=(
+        board.LCD_D0,
+        board.LCD_D1,
+        board.LCD_D2,
+        board.LCD_D3,
+        board.LCD_D4,
+        board.LCD_D5,
+        board.LCD_D6,
+        board.LCD_D7,
+        board.LCD_D8,
+        board.LCD_D9,
+        board.LCD_D10,
+        board.LCD_D11,
+        board.LCD_D12,
+        board.LCD_D13,
+        board.LCD_D14,
+        board.LCD_D15,
+    ),
     frequency=9_000_000,
     width=480,
     height=272,

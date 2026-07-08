@@ -71,8 +71,6 @@ python3 scripts/vendor_circuitpython_drivers.py --all
 |------|--------|--------|
 | `pcd8544.py` | Adafruit | vendored |
 | `community/st7565.py` | Community DisplayIO | vendored |
-| `pixel_framebuffer.py` | pydisplay helper | in repo |
-
 ## Input
 
 | File | Source | Status |

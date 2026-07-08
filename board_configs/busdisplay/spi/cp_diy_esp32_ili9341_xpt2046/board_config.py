@@ -14,8 +14,8 @@ display_bus = FourWire(
     board.SPI(),
     command=board.D5,
     chip_select=board.D15,
-    reset=board.D4,
     baudrate=40_000_000,
+    reset=board.D4,
 )
 
 display_drv = ILI9341(
@@ -33,8 +33,6 @@ display_drv = ILI9341(
     power_pin=board.D22,
     power_on_high=True,
 )
-
-# XPT2046 on separate SPI — map to analog 4-wire touchscreen pins
 touchscreen = Touchscreen(
     board.D25,
     board.D26,
@@ -51,7 +49,7 @@ def touch_read_func():
     return None
 
 
-touch_rotation_table = (0, 0, 0, 0)
+touch_rotation_table = (0, 0, 0, 4)
 
 runtime = eventsys.Runtime(
     display=display_drv,

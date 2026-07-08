@@ -14,8 +14,8 @@ display_bus = FourWire(
     board.SPI(),
     command=board.TFT_DC,
     chip_select=board.TFT_CS,
-    reset=board.TFT_RESET,
     baudrate=24_000_000,
+    reset=board.TFT_RESET,
 )
 
 display_drv = ST7789(
@@ -30,7 +30,6 @@ display_drv = ST7789(
     bgr=False,
     reverse_bytes_in_word=True,
 )
-
 buttons = GPIOButtons(
     {
         "a": (board.BUTTON_A, MAGTAG_BUTTON_KEYS[0]),
@@ -39,6 +38,7 @@ buttons = GPIOButtons(
         "d": (board.BUTTON_D, MAGTAG_BUTTON_KEYS[3]),
     }
 )
+
 
 runtime = eventsys.Runtime(display=display_drv)
 runtime.add_keypad(read=buttons.read)

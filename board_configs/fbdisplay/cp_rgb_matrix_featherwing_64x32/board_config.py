@@ -13,14 +13,7 @@ matrix = rgbmatrix.RGBMatrix(
     width=64,
     height=32,
     bit_depth=4,
-    rgb_pins=[
-        board.A0,
-        board.A1,
-        board.A2,
-        board.A3,
-        board.A4,
-        board.A5,
-    ],
+    rgb_pins=[board.A0, board.A1, board.A2, board.A3, board.A4, board.A5],
     addr_pins=[board.D6, board.D9, board.D10, board.D11],
     clock_pin=board.D12,
     latch_pin=board.D0,
@@ -28,5 +21,4 @@ matrix = rgbmatrix.RGBMatrix(
 )
 
 display_drv = FBDisplay(matrix, width=64, height=32)
-
 runtime = None

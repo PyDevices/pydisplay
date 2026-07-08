@@ -7,29 +7,8 @@
     [
       "st7789.py",
       "github:PyDevices/pydisplay/drivers/display/st7789.py"
-    ],
-    [
-      "rotary.py",
-      "github:miketeachman/micropython-rotary/rotary.py"
-    ],
-    [
-      "rotary_irq_esp.py",
-      "github:miketeachman/micropython-rotary/rotary_irq_esp.py"
-    ],
-    [
-      "adafruit_focaltouch.py",
-      "github:PyDevices/pydisplay/drivers/touch/circuitpython/adafruit_focaltouch.py"
     ]
   ],
-  "deps": [
-    [
-      "github:PyDevices/pydisplay/packages/spibus.json",
-      "main"
-    ],
-    [
-      "github:PyDevices/pydisplay/packages/displaysys.json",
-      "main"
-    ]
-  ],
+  "deps": [],
   "version": "0.1"
 }

@@ -1,0 +1,51 @@
+kind = "fbdisplay_mipidsi"
+slug = "mimxrt1170_evk_waveshare_5dsi"
+title = "NXP MIMXRT1170-EVK + Waveshare 50H-800480-IPS DSI (800x480) on J84 - MicroPython"
+title_cp = "NXP MIMXRT1170-EVK + Waveshare 50H-800480-IPS DSI (800x480) on J84 - CircuitPython"
+out = "fbdisplay"
+circuitpython = true
+port = "mimxrt1176"
+
+[bus]
+frequency = 1_000_000_000
+num_lanes = 2
+
+[display]
+init_sequence_name = "PANEL_INIT_SEQUENCE"
+init_sequence_empty = true
+width = 800
+height = 480
+color_depth = 16
+pixel_clock_frequency = 25_979_400
+hsync_pulse_width = 2
+hsync_front_porch = 1
+hsync_back_porch = 46
+vsync_pulse_width = 2
+vsync_front_porch = 7
+vsync_back_porch = 21
+
+[touch]
+module = "gt911"
+class = "GT911"
+rotation_table = [0, 0, 0, 0]
+
+[touch.mp.i2c]
+id = 0
+freq = 400_000
+
+[touch.chip]
+reset_pin = "GPIO_AD_01"
+irq_pin = "GPIO_AD_00"
+width = 800
+height = 480
+touch_points = 5
+
+[touch.cp]
+driver = "gt911"
+reset_pin = "board.D9"
+address = "0x5D"
+
+[package]
+touch_driver = "gt911"
+include_mipidsi = true
+notes_cp = "Requires CircuitPython mipidsi on MIMXRT1170-EVK and gt911 (circup install gt911)."

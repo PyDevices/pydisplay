@@ -1,12 +1,27 @@
 {
   "urls": [
-    ["board_config.py", "github:PyDevices/pydisplay/board_configs/fbdisplay/t-rgb_480/board_config.py"],
-    ["st7701.py", "github:PyDevices/pydisplay/drivers/display/st7701.py"],
-    ["xl9535.py", "github:PyDevices/pydisplay/drivers/io_expander/xl9535.py"]
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/fbdisplay/t-rgb_480/board_config.py"
+    ],
+    [
+      "st7701.py",
+      "github:PyDevices/pydisplay/drivers/display/st7701.py"
+    ],
+    [
+      "xl9535.py",
+      "github:PyDevices/pydisplay/drivers/io_expander/xl9535.py"
+    ]
   ],
   "deps": [
-    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"],
-    ["github:PyDevices/pydisplay/packages/rgbframebuffer.json", "main"]
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/rgbframebuffer.json",
+      "main"
+    ]
   ],
-  "version": "0.3"
+  "version": "0.1"
 }

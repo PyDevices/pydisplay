@@ -1,16 +1,4 @@
-"""Raspberry Pi Pico 2 + Adafruit DVI Sock (HSTX) - MicroPython
-
-Plug-in stack:
-- Raspberry Pi Pico 2 / Pico 2 W: https://circuitpython.org/board/raspberry_pi_pico2/
-- Adafruit DVI Sock for Pico (HSTX differential pairs on GP12-GP19, CK on GP14/15)
-
-Pimoroni Pico DV Demo Base uses a different pin map and is **not** HSTX-compatible on
-Pico 2 - use this config with the Adafruit DVI Sock instead.
-
-Targets displayif ``picodvi`` (RP2350 HSTX backend).
-
-CircuitPython sibling: ``cp_pico2_dvi_sock_640x480``.
-"""
+"""Raspberry Pi Pico 2 + Adafruit DVI Sock (HSTX) - MicroPython"""
 
 from machine import Pin
 

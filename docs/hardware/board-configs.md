@@ -43,7 +43,6 @@ An exact match for all four is rare; bus + display controller is usually enough 
 | `busdisplay/spi/ili9341_eyespi_qtpy_esp32s3` | Adafruit ESP32-S3 QT Py + EyeSPI ILI9341 |
 | `busdisplay/spi/ili9341_eyespi_qtpy_rp2040` | QT Py RP2040 + EyeSPI ILI9341 |
 | `busdisplay/spi/ili9341_pico_uno` | Pico + UNO-style shield |
-| `busdisplay/spi/cp_esp32_pico_eyespi_ili9341` | CircuitPython ESP32-Pico + ILI9341 |
 | `busdisplay/spi/diy_esp32_ili9341_xpt2046` | DIY ESP32 + ILI9341 + XPT2046 |
 | `busdisplay/spi/esp32_wrover_e_st7789_joystick` | ESP32 WROVER-E + ST7789 + joystick |
 | `busdisplay/spi/seeed_gc9a01_on_qtpy_esp32s3` | GC9A01 round display on QT Py ESP32-S3 |
@@ -77,8 +76,12 @@ An exact match for all four is rare; bus + display controller is usually enough 
 
 | Directory | Hardware |
 |-----------|----------|
-| `pixeldisplay/cp_neopixel_8x8_zigzag` | NeoPixel 8×8 grid |
-| `pixeldisplay/neopixel_8x8_zigzag` | MP skeleton |
+| `pixeldisplay/cp_neopixel_8x4` | NeoPixel 8×4 grid (CircuitPython) |
+| `pixeldisplay/neopixel_8x4` | NeoPixel 8×4 grid (MicroPython) |
+| `pixeldisplay/cp_dotstar_12x6` | DotStar 12×6 grid (CircuitPython) |
+| `pixeldisplay/dotstar_12x6` | DotStar 12×6 grid (MicroPython) |
+
+Draw through `display_drv` only; `_pixel_framebuf` is an internal wiring detail.
 
 ## E-paper configs
 

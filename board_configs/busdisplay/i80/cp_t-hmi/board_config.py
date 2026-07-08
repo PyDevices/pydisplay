@@ -40,7 +40,6 @@ display_drv = ST7789(
     backlight_pin=board.GP38,
     backlight_on_high=True,
 )
-
 touchscreen = Touchscreen(
     board.GP1,
     board.GP2,

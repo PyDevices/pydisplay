@@ -1,4 +1,4 @@
-"""Adafruit PiTFT 2.4\" FeatherWing ILI9341 + STMPE610 — CircuitPython"""
+"""Adafruit PiTFT 2.4" FeatherWing ILI9341 + STMPE610 — CircuitPython"""
 
 from adafruit_stmpe610 import Adafruit_STMPE610_SPI
 import board
@@ -10,15 +10,12 @@ import eventsys
 
 release_displays()
 
-# PiTFT 2.4" FeatherWing (#3315) STMPE610 calibration (rotation 90°)
-_PITFT_CALIBRATION = ((357, 3812), (390, 3555))
-
 display_bus = FourWire(
     board.SPI(),
     command=board.D10,
     chip_select=board.D9,
-    reset=board.D6,
     baudrate=24_000_000,
+    reset=board.D6,
 )
 
 display_drv = ILI9341(
@@ -33,11 +30,12 @@ display_drv = ILI9341(
     bgr=True,
     reverse_bytes_in_word=True,
 )
+_PITFT_CALIBRATION = ((357, 3_812), (390, 3_555))
 
 touch_drv = Adafruit_STMPE610_SPI(
     board.SPI(),
     board.D8,
-    baudrate=1_000_000,
+    baudrate=1000000,
     calibration=_PITFT_CALIBRATION,
     size=(display_drv.width, display_drv.height),
     disp_rotation=display_drv.rotation,

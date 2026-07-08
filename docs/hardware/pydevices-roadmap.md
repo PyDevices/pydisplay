@@ -21,7 +21,7 @@ MicroPython hardware gaps surfaced by pydisplay board configs. See also [display
 | Work item | Location | Unblocks |
 |-----------|----------|----------|
 | `EPaperDisplay` buffer → panel push | `src/lib/displaysys/epaperdisplay.py` | **Done** — CP displayio + MP `bus.send`; chip base via `epaperdisplay_chip.py` |
-| NeoPixel grid mapper | pydevices/cmods | `pixeldisplay/*` MP pairs |
+| NeoPixel / DotStar grid | pydisplay `PixelFramebuffer` | `pixeldisplay/*` MP+CP pairs |
 
 ## P3 — advanced interfaces
 

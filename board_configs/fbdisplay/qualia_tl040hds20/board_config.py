@@ -1,5 +1,4 @@
 """Qualia S3 RGB-666 with TL040HDS20 4.0" 720x720 Square Display"""
-# Similar configs may be available for RGBMatrix, is31fl3741 and picodvi
 
 from ft6x36 import FT6x36
 from machine import I2C, Pin
@@ -12,7 +11,7 @@ try:
     from rgbframebuffer import RGBFrameBuffer
 except ImportError as exc:
     raise NotImplementedError(
-        "RGB-666 dotclock scanout requires displayif rgbframebuffer cmod (esp32 port)"
+        "Parallel RGB scanout requires displayif rgbframebuffer cmod (esp32 port)"
     ) from exc
 
 
@@ -70,15 +69,16 @@ send_init_sequence(
     sck=iox.Pin(0, Pin.OUT, value=0),
     cs=iox.Pin(1, Pin.OUT, value=1),
 )
-
-
 fb = RGBFrameBuffer(**tft_pins, **tft_timings)
+
 mv = memoryview(fb)
-# mv is typecode "H" (unsigned short) and we need to fill it with 0x1234
 mv[::] = b"\x34\x12" * (fb.width * fb.height)
 fb.refresh()
 
-touch_drv = FT6x36(i2c, address=0x48)  # , irq = iox.Pin(3, Pin.OUT))
+display_drv = FBDisplay(fb)
+
+
+touch_drv = FT6x36(i2c, address=0x48)
 
 
 def touch_read_func():
@@ -87,10 +87,6 @@ def touch_read_func():
         return touches[0]["x"], touches[0]["y"]
     return None
 
-
-# Typical board_config.py setup from here on out
-
-display_drv = FBDisplay(fb)
 
 touch_rotation_table = (0, 0, 0, 0)
 

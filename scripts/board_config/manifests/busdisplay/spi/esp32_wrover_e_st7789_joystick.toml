@@ -1,0 +1,63 @@
+kind = "busdisplay_spi"
+slug = "esp32_wrover_e_st7789_joystick"
+title = "ESP32 WROVER E with ST7789 display, and joystick instead of touchscreen"
+title_cp = "ESP32 WROVER-E ST7789 with GPIO joystick — CircuitPython"
+out = "busdisplay/spi"
+circuitpython = true
+
+[display]
+module = "st7789"
+class = "ST7789"
+width = 240
+height = 240
+colstart = 0
+rowstart = 0
+rotation = 0
+mirrored = true
+color_depth = 16
+bgr = true
+reverse_bytes_in_word = true
+invert = false
+brightness = 1.0
+backlight_pin = "None"
+backlight_on_high = true
+
+[display.cp]
+width = 240
+height = 240
+colstart = 0
+rowstart = 0
+rotation = 0
+mirrored = true
+color_depth = 16
+bgr = true
+reverse_bytes_in_word = true
+invert = false
+
+[bus.mp.spi]
+id = 1
+sck = 14
+mosi = 12
+dc = 13
+cs = 15
+
+[bus.cp.fourwire]
+command = "board.D13"
+chip_select = "board.D15"
+baudrate = 40_000_000
+
+[input.joystick]
+module = "gpiojoystick"
+class = "GPIOJoystick"
+instance_id = 1
+axes = [
+    { pin = 39, atten = "ADC.ATTN_11DB" },
+    { pin = 36, atten = "ADC.ATTN_11DB" },
+]
+buttons = [4, 25, 26]
+emulate_digital = [[0, 1]]
+
+[package]
+display_driver = "st7789"
+deps_mp = ["spibus"]
+include_displaysys = false

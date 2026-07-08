@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 """Generate paired CP/MP e-paper board configs.
 
-Board definitions live in ``board_configs/manifests/epaperdisplay.toml``.
+Board definitions live in ``scripts/board_config/manifests/epaperdisplay.toml``.
 This script delegates to ``generate_board_configs.py`` for output; ``CONFIGS``
 is retained for reference and one-off manifest bootstrap only.
 """
