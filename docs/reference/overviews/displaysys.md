@@ -3,6 +3,7 @@ displaysys provides display driver classes (`BusDisplay`, `SDLDisplay`, `PGDispl
 ## Narrative docs
 
 - [Displays concept](../../concepts/displays.md) — pick a driver
+- [Display backend internals](../../concepts/display-backends.md) — GRAM/present, 565 API, color conversion
 - [Architecture](../../concepts/architecture.md) — how board_config wires the display
 - [Display drivers (chips)](../../hardware/display-drivers.md) — st7789, ili9341, etc.
 

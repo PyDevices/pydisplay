@@ -37,6 +37,7 @@ from ._framebuf_plus import (
     MONO_HMSB,
     MONO_VLSB,
     RGB565,
+    RGB888,
     FrameBuffer,
 )
 from ._shapes import (

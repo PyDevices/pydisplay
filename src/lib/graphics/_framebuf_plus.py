@@ -43,8 +43,46 @@ init_capabilities(
         "GS2_HMSB",
         "GS4_HMSB",
         "GS8",
+        "RGB888",
     ],
 )
+
+
+# pydisplay extension — not in native MicroPython framebuf
+RGB888 = 7
+
+
+class _RGB888Format:
+    depth = 24
+
+    @staticmethod
+    def set_pixel(framebuf, x, y, color):
+        index = (y * framebuf._stride + x) * 3
+        framebuf._buffer[index : index + 3] = bytes(
+            ((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF)
+        )
+
+    @staticmethod
+    def get_pixel(framebuf, x, y):
+        index = (y * framebuf._stride + x) * 3
+        r, g, b = framebuf._buffer[index : index + 3]
+        return (r << 16) | (g << 8) | b
+
+    @staticmethod
+    def fill(framebuf, color):
+        rgb = bytes(((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF))
+        for i in range(0, len(framebuf._buffer), 3):
+            framebuf._buffer[i : i + 3] = rgb
+
+    @staticmethod
+    def fill_rect(framebuf, x, y, width, height, color):
+        rgb = bytes(((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF))
+        stride = framebuf._stride
+        for _y in range(y, y + height):
+            row = _y * stride
+            for _x in range(x, x + width):
+                index = (row + _x) * 3
+                framebuf._buffer[index : index + 3] = rgb
 
 
 class FrameBuffer(_FrameBuffer):
@@ -76,6 +114,29 @@ class FrameBuffer(_FrameBuffer):
     """
 
     def __init__(self, buffer, width, height, format, *args, **kwargs):
+        if format == RGB888:
+            # Native MicroPython framebuf has no RGB888 format.  When a native-framebuf
+            # subclass's __init__ never calls the native super().__init__, MicroPython
+            # falls back to invoking native make_new with the *constructor* args — which
+            # rejects RGB888 ("invalid format", or "missing N positional arguments" when
+            # a subclass has a different signature).  So on native framebuf we initialize
+            # the base as RGB565 (2 bytes/pixel, always fits our 3 bytes/pixel buffer)
+            # purely to satisfy that init; every RGB888 pixel op below is handled by
+            # _RGB888Format against self._buffer, so the native state is never used.
+            # On CPython (pure-Python _framebuf) there is no make_new fallback, so skip
+            # it and leave the buffer untouched.
+            if _NATIVE_FRAMEBUF:
+                super().__init__(buffer, width, height, RGB565)
+            self._width = width
+            self._height = height
+            self._fb_format = format
+            self._buffer = buffer
+            stride = args[0] if args else kwargs.get("stride")
+            self._stride = stride if stride is not None else width
+            self._color_depth = 24
+            self._rgb888 = True
+            return
+        self._rgb888 = False
         super().__init__(buffer, width, height, format, *args, **kwargs)
         self._width = width
         self._height = height
@@ -128,6 +189,9 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             (Area): Bounding box of the filled rectangle
         """
+        if self._rgb888:
+            _RGB888Format.fill_rect(self, x, y, w, h, c)
+            return Area(x, y, w, h)
         super().fill_rect(x, y, w, h, c)
         return Area(x, y, w, h)
 
@@ -143,6 +207,11 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             (Area): Bounding box of the pixel
         """
+        if self._rgb888:
+            if c is None:
+                return _RGB888Format.get_pixel(self, x, y)
+            _RGB888Format.set_pixel(self, x, y, c)
+            return Area(x, y, 1, 1)
         if c is None:
             return super().pixel(x, y)
         super().pixel(x, y, c)
@@ -158,6 +227,9 @@ class FrameBuffer(_FrameBuffer):
         Returns:
             (Area): Bounding box of the filled buffer
         """
+        if self._rgb888:
+            _RGB888Format.fill(self, c)
+            return Area(0, 0, self.width, self.height)
         super().fill(c)
         return Area(0, 0, self.width, self.height)
 
