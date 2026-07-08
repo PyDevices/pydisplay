@@ -3,11 +3,16 @@
 # SPDX-License-Identifier: MIT
 """Tests for displaysys needs_refresh flags."""
 
+import importlib.util
 import os
 import unittest
 
 import _env  # noqa: F401
 from _env import DISPLAYSYS_DIR
+
+# pygame (pygame-ce) is only installed on Windows; unix uses SDL2. Tests that
+# import PGDisplay must skip gracefully when pygame is unavailable.
+HAS_PYGAME = importlib.util.find_spec("pygame") is not None
 
 
 def _module_sets_needs_refresh(module_name):
@@ -33,9 +38,10 @@ class TestNeedsRefresh(unittest.TestCase):
                 module_name,
             )
 
-        from displaysys.pgdisplay import PGDisplay
+        if HAS_PYGAME:
+            from displaysys.pgdisplay import PGDisplay
 
-        self.assertTrue(PGDisplay.needs_refresh)
+            self.assertTrue(PGDisplay.needs_refresh)
 
     def test_mcu_backends_default_false(self):
         from displaysys import DisplayDriver

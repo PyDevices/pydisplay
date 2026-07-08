@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 """PGDisplay frame recording via displaysys."""
 
+import importlib.util
 import io
 import os
 import tempfile
@@ -13,6 +14,10 @@ import _env  # noqa: F401
 from _support import quiet
 
 from displaysys import FFmpegFrameRecorder
+
+# pygame (pygame-ce) is only installed on Windows; unix uses SDL2. The PGDisplay
+# tests below skip when pygame is unavailable.
+HAS_PYGAME = importlib.util.find_spec("pygame") is not None
 
 
 def _fake_popen(cmd, stdin=None, stdout=None, stderr=None, **kwargs):
@@ -41,6 +46,7 @@ class TestFrameRecorderBase(unittest.TestCase):
             d.open_frame_recorder("/tmp/out.mp4")
 
 
+@unittest.skipUnless(HAS_PYGAME, "pygame (pygame-ce) required for PGDisplay tests")
 class TestPGDisplayFrameRecorder(unittest.TestCase):
     def setUp(self):
         os.environ["SDL_VIDEODRIVER"] = "dummy"

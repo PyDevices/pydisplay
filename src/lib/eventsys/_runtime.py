@@ -271,7 +271,12 @@ class Runtime:
         self._ticks_diff = ticks_diff
         timer_class = AsyncTimer if async_ else Timer
         timer = timer_class(-1)
-        timer.init(mode=timer_class.PERIODIC, period=tick_ms, callback=self._dispatch_tick)
+        timer.init(
+            mode=timer_class.PERIODIC,
+            period=tick_ms,
+            callback=self._dispatch_tick,
+            hard=False,
+        )
         self._timer = timer
         return timer
 
