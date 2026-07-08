@@ -177,6 +177,7 @@ Known issues: Unix SDL rotation clears the screen; scrolling while rotated has e
 
 ## Next
 
+- [Display backend internals](display-backends.md) — GRAM/present model, 565 API, color conversion per backend
 - [Events](events.md)
 - [Drawing and fonts](drawing-and-fonts.md)
 - [Display drivers (chips)](../hardware/display-drivers.md)

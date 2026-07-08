@@ -6,8 +6,6 @@ board_config.py file that is specific to your hardware from:
 https://github.com/PyDevices/pydisplay/tree/main/board_configs
 """
 
-import os
-
 # Default portrait panel (320x480). Games scale layout for taller/wider panels
 # (e.g. 480x800, 720x720) via display_drv.width / height.
 width = 320
@@ -15,7 +13,6 @@ height = 480
 rotation = 0
 scale = 2
 
-_TIMER_ASYNC = os.environ.get("PYDISPLAY_TIMER_ASYNC", "").lower() in ("1", "true", "yes")
 
 _ps = _jn = False
 try:
@@ -84,6 +81,6 @@ else:
         title=f"{sys.implementation.name} on {sys.platform}",
         scale=scale,
     )
-    runtime = eventsys.Runtime(display=display_drv, host_read=get_events, timer_async=_TIMER_ASYNC)
+    runtime = eventsys.Runtime(display=display_drv, host_read=get_events)
 
 display_drv.fill(0)
