@@ -29,6 +29,10 @@ class _TimerCore:
         self._hard = True
         self._busy = False
         self._armed = False
+        # Pre-bind for the soft (scheduled) path: evaluating ``self._invoke_callback``
+        # allocates a bound method, which fails inside a locked-heap ISR/FFI
+        # callback. Bind once here so scheduling touches only stored references.
+        self._deliver_cb = self._invoke_callback
         if kwargs:
             self.init(**kwargs)
 
@@ -79,7 +83,7 @@ class _TimerCore:
             if self._hard:
                 self._invoke_callback(self)
             else:
-                schedule(self._invoke_callback, self)
+                schedule(self._deliver_cb, self)
         finally:
             self._busy = False
 
