@@ -10,10 +10,6 @@ just needs one ``sleep_ms(0)`` per iteration plus a ``runtime.poll()`` to servic
 input and quit.
 """
 
-import os
-
-os.environ["PYDISPLAY_TIMER_ASYNC"] = "0"
-
 import display_driver  # noqa: F401
 from lv_test_timer_common import build_ui
 

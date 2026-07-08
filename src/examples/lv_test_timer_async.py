@@ -9,10 +9,6 @@ drives LVGL via lv_utils. Import display_driver inside the async main so the
 event loop is already running when lv_utils subscribes its tick to the runtime.
 """
 
-import os
-
-os.environ["PYDISPLAY_TIMER_ASYNC"] = "1"
-
 from multimer import asyncio
 
 

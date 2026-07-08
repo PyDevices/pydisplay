@@ -6,7 +6,8 @@ Each line is one JSON object with a ``kind`` field.
 """
 
 import json
-import os
+
+from _paths import ensure_parent_dir, env_get
 
 _KIND_NAMES = (
     "bark",
@@ -40,14 +41,13 @@ class TraceRecorder:
 
     def __init__(self, path):
         self._path = path
-        parent = os.path.dirname(path)
-        if parent:
-            os.makedirs(parent, exist_ok=True)
+        ensure_parent_dir(path)
         self._file = open(path, "w", encoding="utf-8")
         self.frame = 0
 
     def event(self, kind, **fields):
-        row = {"kind": kind, "frame": self.frame, **fields}
+        row = {"kind": kind, "frame": self.frame}
+        row.update(fields)
         self._file.write(json.dumps(row, separators=(",", ":")) + "\n")
 
     def log_init(self, layout, spr_w, spr_h, plats, gems, hazards, goal_y):
@@ -148,7 +148,7 @@ class TraceRecorder:
 
 
 def open_trace():
-    path = os.environ.get("TOWER_CLIMB_TRACE", "").strip()
+    path = env_get("TOWER_CLIMB_TRACE", "").strip()
     if not path:
         return None
     return TraceRecorder(path)

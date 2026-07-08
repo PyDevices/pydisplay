@@ -11,11 +11,16 @@ Layout scales from the 320×480 reference to taller panels (480×800, 720×720, 
 Built from the four core pydisplay libraries only.
 """
 
-import os
 import sys
 from collections import namedtuple
 
-_PKG_DIR = os.path.dirname(os.path.abspath(__file__))
+
+def _pkg_dir(file):
+    path = str(file).replace("\\", "/")
+    return path.rsplit("/", 1)[0] if "/" in path else "."
+
+
+_PKG_DIR = _pkg_dir(__file__)
 if _PKG_DIR not in sys.path:
     sys.path.insert(0, _PKG_DIR)
 
@@ -24,7 +29,7 @@ from displaysys import color565
 from eventsys.keys import Keys
 from graphics import BMP565, FrameBuffer, RGB565, rect, text8
 from multimer import sleep_ms
-from _paths import asset_path
+from _paths import asset_path, env_get, env_truthy
 from tower_climb_trace import open_trace
 
 try:
@@ -139,7 +144,7 @@ def _rng(lo, hi):
 
 
 def _seed_rng():
-    raw = os.environ.get("TOWER_CLIMB_SEED", "").strip()
+    raw = env_get("TOWER_CLIMB_SEED", "").strip()
     if raw:
         try:
             seed(int(raw, 0))
@@ -266,22 +271,20 @@ def _build_level():
     return plats, gems, hazards, decos
 
 _trace = open_trace()
-_bot = os.environ.get("TOWER_CLIMB_BOT", "").strip().lower() in ("1", "true", "yes")
-_record = os.environ.get("TOWER_CLIMB_RECORD", "").strip().lower() in ("1", "true", "yes")
-_hold_win = os.environ.get("TOWER_CLIMB_HOLD_WIN", "").strip().lower() in ("1", "true", "yes")
+_bot = env_truthy("TOWER_CLIMB_BOT")
+_record = env_truthy("TOWER_CLIMB_RECORD")
+_hold_win = env_truthy("TOWER_CLIMB_HOLD_WIN")
 if _record:
     _bot = True
 
 
 def _open_video_recorder():
-    path = os.environ.get("TOWER_CLIMB_VIDEO", "").strip()
+    path = env_get("TOWER_CLIMB_VIDEO", "").strip()
     if not path:
-        path = os.environ.get("PYDISPLAY_VIDEO", "").strip()
+        path = env_get("PYDISPLAY_VIDEO", "").strip()
     if not path:
         return
-    fps = int(
-        os.environ.get("TOWER_CLIMB_VIDEO_FPS") or os.environ.get("PYDISPLAY_VIDEO_FPS", "12")
-    )
+    fps = int(env_get("TOWER_CLIMB_VIDEO_FPS") or env_get("PYDISPLAY_VIDEO_FPS", "12"))
     display_drv.open_frame_recorder(path, fps=fps)
 
 
@@ -1119,7 +1122,7 @@ def _run_game(show_splash=True):
             if _bot:
                 if _hold_win and won:
                     hold_frames = int(
-                        os.environ.get(
+                        env_get(
                             "TOWER_CLIMB_HOLD_FRAMES",
                             "48" if display_drv.frame_recording else "150",
                         )

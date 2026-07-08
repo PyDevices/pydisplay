@@ -189,9 +189,6 @@ def _quit_and_exit(code=0):
 
 
 def _run_sync():
-    import os
-
-    os.environ["PYDISPLAY_TIMER_ASYNC"] = "0"
     import board_config  # noqa: F401
 
     import display_driver  # noqa: F401
@@ -219,9 +216,6 @@ def _run_sync():
 
 
 def _run_async():
-    import os
-
-    os.environ["PYDISPLAY_TIMER_ASYNC"] = "1"
     import board_config  # noqa: F401
 
     from multimer import asyncio
