@@ -3,7 +3,7 @@ From a full clone, after [display dependencies](../guides/desktop-cpython.md#dep
 ```bash
 git clone https://github.com/PyDevices/pydisplay.git
 cd pydisplay/src
-python3 -i path.py
+python3 -i lib/path.py
 ```
 
 ```python
