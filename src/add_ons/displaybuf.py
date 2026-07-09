@@ -159,6 +159,12 @@ class DisplayBuffer(framebuf.FrameBuffer):
             return setattr(self.display_drv, name, value)
         super().__setattr__(name, value)
 
+    def blit_transparent(self, buf, x, y, w, h, key):
+        """Key-color blit into the logical framebuffer (returns dirty Area)."""
+        from graphics import blit_transparent
+
+        return blit_transparent(self, buf, x, y, w, h, key)
+
     @property
     def color_palette(self):
         return self._color_palette

@@ -24,6 +24,11 @@ __all__ = [
 ]
 
 
+def _load_loop_submodule():
+    # MicroPython: ``from . import loop`` inside __getattr__ re-enters __getattr__('loop').
+    return __import__(__name__ + ".loop", None, None, ["*"])
+
+
 def __getattr__(name):
     if name == "asyncio":
         from ._asyncio_loader import load_asyncio
@@ -35,8 +40,8 @@ def __getattr__(name):
                 "firmware manifest (see docs/building.md)"
             )
         return mod
+    if name == "loop":
+        return _load_loop_submodule()
     if name in ("run", "run_forever", "run_forever_async", "dual_main"):
-        from . import loop
-
-        return getattr(loop, name)
+        return getattr(_load_loop_submodule(), name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
