@@ -66,7 +66,9 @@ def main():
             sleep_ms(0)
             sleep_ms(1)
             continue
-        elist = runtime.poll()
+        elist = runtime.poll() if runtime else []
+        if runtime and runtime.quit_requested:
+            return
         for event in elist:
             if event.type == runtime.events.QUIT:
                 return

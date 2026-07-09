@@ -194,6 +194,8 @@ Or `mpremote mip install --index "https://PyDevices.github.io/micropython-lib/mi
 
 PyDevices CPython wheels are published to [TestPyPI](https://test.pypi.org) only (not production PyPI). Browse package names there (`displaysys`, `eventsys`, `displaysys-pgdisplay`, `pydisplay-graphics`, …).
 
+**Naming:** MIP names vs pip project names (collision avoidance) — [TestPyPI naming convention](testpypi-naming-convention.md).
+
 #### Two-index `pip install` (required)
 
 Use **both** TestPyPI and PyPI on every install:
@@ -266,7 +268,7 @@ Script options: `./scripts/publish_micropython_lib.sh --help`
 |--------|------------|
 | Version already exists | Push a **new tag** with a higher semver — TestPyPI rejects duplicate versions |
 | Upload fails mid-run | Partial uploads may succeed; fix the error, bump the tag, push again |
-| `graphics` sdist 400 | Name is taken on [pypi.org/project/graphics](https://pypi.org/project/graphics); PyPI project is `pydisplay-graphics` (MIP name stays `graphics`) |
+| `graphics` sdist 400 | Name is taken on [pypi.org/project/graphics](https://pypi.org/project/graphics); PyPI project is `pydisplay-graphics` (MIP name stays `graphics`). See [naming convention](testpypi-naming-convention.md). |
 | Slow | Normal — each lib package gets hatch build + twine upload |
 | Not for devices | Boards use the **MIP index**, not TestPyPI |
 
@@ -279,7 +281,7 @@ Script options: `./scripts/publish_micropython_lib.sh --help`
 | `Resource not accessible` / 403 on checkout | Missing or wrong `MICROPYTHON_LIB_DEPLOY_TOKEN` |
 | Push to `PyDevices` fails | PAT lacks write access or SSO not authorized for PyDevices |
 | TestPyPI 403 | Bad `TESTPYPI_API_TOKEN` |
-| TestPyPI 400 on sdist (wheel OK) | PyPI project name taken on pypi.org — add a mapping in `pypi_publish_name()` in `publish_micropython_lib.sh` |
+| TestPyPI 400 on sdist (wheel OK) | PyPI project name taken on pypi.org — add a mapping in `pypi_publish_name()` ([naming convention](testpypi-naming-convention.md)) |
 | MIP compile error | Bad `manifest.py` in micropython-lib — see job log for package path |
 | `No changes to commit` | Sources already match; MIP step may still run if enabled |
 | Workflow did not start | Tag must match `v*.*.*` (e.g. `v0.0.5`, not `0.0.5`) |

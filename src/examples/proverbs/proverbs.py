@@ -100,9 +100,11 @@ def main():
             wheel = (wheel + 5) % 256
 
             tft.show()
-            if elist := runtime.poll():
-                if any(e.type == runtime.events.QUIT for e in elist):
-                    return
+            elist = runtime.poll() if runtime else []
+            if runtime.quit_requested if runtime else False:
+                return
+            if any(e.type == runtime.events.QUIT for e in elist):
+                return
             sleep_ms(5000)
 
 

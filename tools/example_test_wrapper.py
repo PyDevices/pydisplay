@@ -458,6 +458,26 @@ def _subprocess_hard_exit(code, *, headless=False):
     if name == "circuitpython":
         os._exit(code)
     try:
+        import pydisplay_test_mode
+
+        if pydisplay_test_mode.ENABLED and name == "cpython":
+            os._exit(code)
+    except ImportError:
+        pass
+    try:
+        import pydisplay_test_mode
+
+        if pydisplay_test_mode.ENABLED:
+            try:
+                from board_config import display_drv
+
+                if not display_drv._sdl_active():
+                    os._exit(code)
+            except Exception:
+                pass
+    except ImportError:
+        pass
+    try:
         from board_config import display_drv
 
         display_drv.quit(code, force=True)

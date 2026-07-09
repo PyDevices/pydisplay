@@ -33,9 +33,11 @@ runtime.on([runtime.events.KEYDOWN, runtime.events.KEYUP], buttons)
 
 print(f"Press any of these keys:  {[button.keyname for button in buttons]}")
 while True:
-    if elist := runtime.poll():
-        if any(e.type == runtime.events.QUIT for e in elist):
-            break
+    elist = runtime.poll() if runtime else []
+    if runtime.quit_requested if runtime else False:
+        break
+    if any(e.type == runtime.events.QUIT for e in elist):
+        break
     for button in buttons:
         if button.value():
             print(f"{button.name} ({button.keyname}) pressed")

@@ -65,9 +65,11 @@ def main():
         tft.draw.fill_rect(last_col, old_row, alien.WIDTH, alien.HEIGHT, 0)
         tft_bitmap.bitmap(tft, alien, col, row)
         tft.show()
-        if elist := runtime.poll():
-            if any(e.type == runtime.events.QUIT for e in elist):
-                break
+        elist = runtime.poll() if runtime else []
+        if runtime.quit_requested if runtime else False:
+            break
+        if any(e.type == runtime.events.QUIT for e in elist):
+            break
         last_col, old_row = col, row
         col, row = col + xd, row + yd
         xd = -xd if col <= 0 or col >= width - alien.WIDTH else xd

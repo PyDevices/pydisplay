@@ -32,7 +32,7 @@ Audited **2026-07-08** from local clones under `~/github/cmods` and `~/github/py
 
 **Layout:** `displaysys` is core-only (`__init__.py` + `board_config.py`); each backend is a separate `displaysys-*` package. Published packages do not include `examples/` trees.
 
-**Not on TestPyPI yet (until next pydisplay tag release):** `displaysys-*` backend subpackages — upload was disabled in `publish_micropython_lib.sh` until `displaysys` existed on TestPyPI; the real blocker was `publish_make_pyproject.py` resolving `require("displaysys")` against the pydisplay tree instead of micropython-lib. Fixed in publish scripts (2026-07-09); ships on the next `vX.Y.Z` publish.
+**Not on TestPyPI yet (until next pydisplay tag release):** ~~`displaysys-*` backend subpackages~~ — published from v0.0.8+; see [naming convention](testpypi-naming-convention.md).
 
 **Linux / Windows / Android:** universal `none-any` wheels install on all three; no per-OS wheel matrix is required for these packages.
 
@@ -68,7 +68,7 @@ Both use the same shape: matrix `ubuntu-latest` + `windows-latest`, plus a dedic
 
 | Repo | Role | Gap |
 |------|------|-----|
-| **displayif** | MP/CP display driver cmod | no publish workflow |
+| **displayif** | MCU display driver user C module | firmware-only (`USER_C_MODULES`); never micropython-lib / TestPyPI |
 | **lv_micropython_cmod** | LVGL MP glue | frozen in firmware / USER_C_MODULES |
 | **lv_circuitpython_cmod** | LVGL CP glue | separate build path |
 | **pydisplay_android** | p4a recipes + APK | consumes TestPyPI wheels; does not publish |
@@ -85,8 +85,8 @@ Both use the same shape: matrix `ubuntu-latest` + `windows-latest`, plus a dedic
 | **Native CPython extensions** (`lvgl-cpython`, `graphics-cmod`) | **Met** — CI builds linux + windows + android wheels |
 | **Pure pydisplay libs** (`displaysys`, `eventsys`, `multimer`, `pydisplay-graphics`) | **Met by design** — universal wheels; manifest `require()` graph in § Pip dependency graph |
 | **usdl2** | **Met for CPython shim** — universal wheel; MP cmod is separate |
-| **displayif** | **Not applicable yet** — no TestPyPI pipeline |
-| **displaysys-* backends** | **Not published** — still TODO in publish script |
+| **displayif** | **N/A** — firmware-only user C module, not a pip/MIP package |
+| **displaysys-* backends** | **Published** (v0.0.8+) — see [naming convention](testpypi-naming-convention.md) |
 
 No change needed for cibuildwheel repos unless you want **more Android ABIs** or **older CPython minors on Android** (today android wheels are cp313–cp314 only, per `pyproject.toml` comments).
 
@@ -127,6 +127,7 @@ After a pydisplay tag publish, run the desktop stack smoke test (headless in CI 
 
 ## Related docs
 
+- [TestPyPI naming convention](testpypi-naming-convention.md)
 - [Publishing micropython-lib](publishing-micropython-lib.md)
 - [scripts/README.md](../scripts/README.md)
 - [mip-and-freeze-sources.md](mip-and-freeze-sources.md)

@@ -29,7 +29,7 @@ import graphics
 WIDTH = display_drv.width
 HEIGHT = display_drv.height
 BG = 0x2828  # dark gray (RGB565)
-NUM_BALLS = min(100, max(20, (WIDTH * HEIGHT) // 3000))
+NUM_BALLS = min(30, max(8, (WIDTH * HEIGHT) // 8000))
 
 
 def randint(a, b):

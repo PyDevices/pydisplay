@@ -152,6 +152,7 @@ should_skip_name() {
 
 # MIP package names (eventsys, graphics, …) may differ from PyPI project names.
 # TestPyPI rejects sdists for names already registered on pypi.org (e.g. graphics).
+# Convention: docs/testpypi-naming-convention.md
 pypi_publish_name() {
     case "$1" in
         graphics) echo "pydisplay-graphics" ;;

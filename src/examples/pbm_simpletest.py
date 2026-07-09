@@ -9,10 +9,10 @@ display_drv.fill(0xF800)
 logo = PBM("examples/assets/micropython.pbm")
 
 # render direct to the display with fg and bg colors
-logo.render(display_drv, 0, 0, 0xFFFF, 0x0000)
+# logo.render(display_drv, 0, 0, 0xFFFF, 0x0000)  # Slow on desktop: every pixel refreshes SDL.
 
 # render direct to the display with fg and transparent bg
-logo.render(display_drv, 0, display_drv.height // 2, 0xFFFF)
+# logo.render(display_drv, 0, display_drv.height // 2, 0xFFFF)  # Slow on desktop: each set bit refreshes SDL.
 
 
 # render to a frame buffer

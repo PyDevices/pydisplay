@@ -9,12 +9,15 @@ def _heartbeat(_=None):
 
 
 def _poll_events():
-    if elist := runtime.poll():
-        for e in elist:
-            print(e)
-            if e.type == runtime.events.QUIT:
-                print("eventsys_simpletest: quit")
-                return True
+    elist = runtime.poll() if runtime else []
+    if runtime.quit_requested if runtime else False:
+        print("eventsys_simpletest: quit")
+        return True
+    for e in elist:
+        print(e)
+        if e.type == runtime.events.QUIT:
+            print("eventsys_simpletest: quit")
+            return True
     return False
 
 
@@ -42,12 +45,15 @@ async def main_async():
     print("eventsys_simpletest: started — click the canvas to see pointer events")
     asyncio.create_task(_heartbeat())
     while True:
-        if elist := runtime.poll():
-            for e in elist:
-                print(e)
-                if e.type == runtime.events.QUIT:
-                    print("eventsys_simpletest: quit")
-                    return
+        elist = runtime.poll() if runtime else []
+        if runtime.quit_requested if runtime else False:
+            print("eventsys_simpletest: quit")
+            return
+        for e in elist:
+            print(e)
+            if e.type == runtime.events.QUIT:
+                print("eventsys_simpletest: quit")
+                return
         await asyncio.sleep(0.02)
 
 

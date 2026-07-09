@@ -116,9 +116,11 @@ def _handle_key(key):
 
 
 def _poll_apollo():
-    if elist := runtime.poll():
-        if any(e.type == runtime.events.QUIT for e in elist):
-            return True
+    elist = runtime.poll() if runtime else []
+    if runtime.quit_requested if runtime else False:
+        return True
+    if any(e.type == runtime.events.QUIT for e in elist):
+        return True
     if _key_busy or _scrolling:
         return False
     if keys := dsky.keypad.read():
@@ -168,9 +170,11 @@ async def main_async():
 
     async def main_loop():
         while True:
-            if elist := runtime.poll():
-                if any(e.type == runtime.events.QUIT for e in elist):
-                    break
+            elist = runtime.poll() if runtime else []
+            if runtime.quit_requested if runtime else False:
+                break
+            if any(e.type == runtime.events.QUIT for e in elist):
+                break
             if keys := dsky.keypad.read():
                 for key in keys:
                     dsky.set_acty(True)

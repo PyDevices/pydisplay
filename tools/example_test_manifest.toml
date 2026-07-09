@@ -398,6 +398,7 @@ import = "pbm_create_new"
 script = "examples/pbm_create_new.py"
 kind = "oneshot"
 quit = "native_exit"
+oneshot_timeout_s = 45
 deps = ["add_ons"]
 
 [examples.pbm_simpletest]
@@ -405,7 +406,6 @@ import = "pbm_simpletest"
 script = "examples/pbm_simpletest.py"
 kind = "oneshot"
 quit = "native_exit"
-oneshot_timeout_s = 60
 deps = ["add_ons"]
 
 [examples.png_test]
@@ -435,6 +435,7 @@ import = "scroll_touch_test"
 script = "examples/scroll_touch_test.py"
 kind = "loop"
 quit = "poll"
+timeout_s = 70
 deps = ["core"]
 
 [examples.scroll_touch_test_displaybuf]
@@ -442,6 +443,7 @@ import = "scroll_touch_test_displaybuf"
 script = "examples/scroll_touch_test_displaybuf.py"
 kind = "loop"
 quit = "poll"
+timeout_s = 70
 deps = ["add_ons"]
 
 [examples.testris]

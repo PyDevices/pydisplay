@@ -43,6 +43,8 @@ def _setup_paint():
 
     def poll():
         nonlocal selected
+        if runtime.quit_requested if runtime else False:
+            return True
         if elist := runtime.poll():
             for e in elist:
                 if e.type == runtime.events.MOUSEBUTTONDOWN:

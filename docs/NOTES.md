@@ -17,12 +17,18 @@ Private working notes for this repo. Not part of the published docs.
 - [x] Jupyter install notebook: add `board_config.py` to the `displaysys` TestPyPI package (may need default `board_config` to work without eventsys) — `src/lib/board_config.py` ships with core `displaysys` on next publish
 - [x] `displaysys-*` backend subpackages on TestPyPI — v0.0.8: upload + `MICROPYTHON_LIB_DIR` fix; deps pgdisplay→pygame-ce, sdldisplay→usdl2; core `displaysys` ships `board_config.py`; no examples in wheels; removed `boarddisplay`
 - [x] Ensure each `src/lib` package is installable alone — `tools/test_testpypi_standalone.sh` passes for core TestPyPI wheels + desktop backends; MCU `displaysys-*` on CPython need MP (e.g. `micropython.const` in busdisplay)
-- [ ] Settle on naming convention for all TestPyPI packages — must avoid naming collisions with pypi.org
+- [x] Settle on naming convention for all TestPyPI packages — see [testpypi-naming-convention.md](testpypi-naming-convention.md) (MIP short names; pip maps on pypi.org collision: `pydisplay-*`, `*-cmod`, `*-cpython`)
+
+- [ ] Remove `pydisplay-bundle` everywhere — **first:** confirm all subpackages are on TestPyPI and [PyDevices/micropython-lib](https://github.com/PyDevices/micropython-lib); then drop bundle manifest, `packages/pydisplay-bundle.json`, Wokwi bundle, publish script bundle path, install manifests
+
 - [ ] Make sure all desktop backends exit gracefully in `displaysys`
+
+- [ ] Fork [figma2lvgl](https://github.com/khiyamiftikhar/figma2lvgl) and add option to output Python
+
 - [x] Make displaysys only print `requires_byteswap` when it is True
 - [x] Compile MicroPython with `os.dupterm` enabled
 
-- [ ] `bouncing_balls` has too many balls and runs too slow
+- [x] `bouncing_balls` has too many balls and runs too slow — cap 30, scale with area // 8000 (was // 3000, max 100)
 
 - [x] `board_config` scaling for PGDisplay is too big — window doesn't fit the screen (auto-clamp in `PGDisplay`)
 
@@ -49,7 +55,7 @@ Private working notes for this repo. Not part of the published docs.
 
 - [x] Port recent `src/lib/graphics` changes to `cmods/graphics` (`implementation()`, sentinels, `_framebuf_plus` default FrameBuffer)
 
-- [ ] Rework `cmods/graphics` to be all C code, no Python wrappers
+- [ ] Rework `cmods/graphics` to be all C code, no Python wrappers — **core refactor done** (`3dbcd90`); follow-ups: MP exports (`Draw`, `Font`, `FrameBuffer.buffer`), CP `import graphics`, push `gfx_area_mp.c` include fix. See `.cursor/graphics_rebuild_matrix_report.md`
 
 - [x] `cmods/graphics` publish to TestPyPI — v0.0.2 tagged and published (14 wheels on TestPyPI)
 
