@@ -74,6 +74,8 @@ joystick_keypad = JoystickKeypad(
 
 
 def _quit_if_needed(_where):
+    if runtime:
+        runtime.poll()
     if not runtime.quit_requested if runtime else False:
         return False
     display_drv.quit()

@@ -45,6 +45,32 @@ __all__ = [
 ]
 
 _DEFAULT_AUTO_REFRESH_PERIOD = 33
+_DESKTOP_SCALE_MARGIN = 48
+
+
+def fit_scale_to_desktop(
+    width, height, scale, desktop_w, desktop_h, *, margin=_DESKTOP_SCALE_MARGIN
+):
+    """Return the largest scale <= *scale* so the window fits on the desktop."""
+    if scale <= 0 or desktop_w <= 0 or desktop_h <= 0:
+        return 1.0 if scale <= 0 else scale
+    max_w = desktop_w - margin
+    max_h = desktop_h - margin
+    if max_w <= 0 or max_h <= 0:
+        return scale
+    fit = min(max_w / width, max_h / height)
+    if fit < scale:
+        return fit
+    return scale
+
+
+def notify_board_config_scale_override(driver_name, requested, fitted, *, quiet=False):
+    """Tell the user when a desktop driver reduces board_config scale to fit the screen."""
+    if quiet or fitted == requested:
+        return
+    print(
+        f"{driver_name}: overriding board_config scale {requested} -> {fitted:.2f} to fit desktop"
+    )
 
 
 def capabilities():
@@ -60,12 +86,6 @@ def capabilities():
                 "eventsys": False,
                 "auto_refresh": False,
                 "buffer_push": "displayio_or_bus",
-            },
-            "boarddisplay": {
-                "eventsys": False,
-                "auto_refresh": False,
-                "platform": "circuitpython",
-                "target": "board.DISPLAY",
             },
             "sdldisplay": {
                 "eventsys": True,

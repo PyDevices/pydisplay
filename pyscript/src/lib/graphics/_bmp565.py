@@ -182,10 +182,10 @@ class BMP565:
         self._file.seek(self.data_offset + begin * self.BPP)
         if not self._mirrored:
             return self._file.read(length * self.BPP)
-        pixels = []
+        out = bytearray()
         for _ in range(length):
-            pixels.insert(0, self._file.read(self.BPP))
-        return b"".join(pixels)
+            out[0:0] = self._file.read(self.BPP)
+        return out
 
     def deinit(self):
         if self._streamed and self._file is not None:

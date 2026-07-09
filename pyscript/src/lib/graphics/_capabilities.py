@@ -6,6 +6,7 @@
 import sys
 
 _DIALECT = sys.implementation.name
+_PYDISPLAY_LIB = True
 
 _FORMAT_NAMES = (
     "MONO_VLSB",
@@ -18,6 +19,7 @@ _FORMAT_NAMES = (
 )
 
 _CAPS = {
+    "implementation": "pydisplay_python",
     "framebuf": "pure_python",
     "dialect": _DIALECT,
     "formats": list(_FORMAT_NAMES),
@@ -32,13 +34,15 @@ _CAPS = {
 }
 
 
-def init_capabilities(*, framebuf_backend, formats=None):
+def init_capabilities(*, framebuf_backend, formats=None, implementation=None):
     """Record the selected framebuf backend and supported formats."""
     _CAPS["framebuf"] = framebuf_backend
     _CAPS["dialect"] = _DIALECT
     _CAPS["blit"]["framebuf"] = framebuf_backend
     if formats is not None:
         _CAPS["formats"] = list(formats)
+    if implementation is not None:
+        _CAPS["implementation"] = implementation
 
 
 def capabilities():
@@ -49,3 +53,8 @@ def capabilities():
 def framebuf_backend():
     """Return ``native`` or ``pure_python``."""
     return _CAPS["framebuf"]
+
+
+def implementation():
+    """Return ``native_cmod`` or ``pydisplay_python``."""
+    return _CAPS["implementation"]

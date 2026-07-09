@@ -54,11 +54,21 @@ def update():
             sys.path.insert(0, entry)
             prepended.append(entry)
 
+    try:
+        import sys as _sys
+
+        _prefer_lib = _sys.implementation.name == "micropython"
+    except AttributeError:
+        _prefer_lib = False
+
     added = []
     for directory in directories:
         entry = resolve_entry(directory)
         if entry is not None and entry not in sys.path:
-            sys.path.append(entry)
+            if _prefer_lib and directory == "lib":
+                sys.path.insert(0, entry)
+            else:
+                sys.path.append(entry)
             added.append(entry)
 
     if prepended and not _quiet():

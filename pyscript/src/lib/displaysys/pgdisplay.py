@@ -8,7 +8,14 @@ displaysys.pgdisplay
 
 import pygame as pg
 
-from displaysys import DisplayDriver, FFmpegFrameRecorder, color_rgb, default_quit_chord
+from displaysys import (
+    DisplayDriver,
+    FFmpegFrameRecorder,
+    color_rgb,
+    default_quit_chord,
+    fit_scale_to_desktop,
+    notify_board_config_scale_override,
+)
 from eventsys import events
 
 
@@ -166,6 +173,21 @@ class PGDisplay(DisplayDriver):
             self._scale = 1
 
         pg.init()
+        try:
+            info = pg.display.Info()
+            desktop_w, desktop_h = info.current_w, info.current_h
+        except Exception:
+            desktop_w, desktop_h = 0, 0
+        requested_scale = self._scale
+        fitted = fit_scale_to_desktop(
+            self.width, self.height, requested_scale, desktop_w, desktop_h
+        )
+        notify_board_config_scale_override(
+            "PGDisplay", requested_scale, fitted, quiet=getattr(self, "_quiet", False)
+        )
+        if fitted != requested_scale:
+            self._scale = fitted
+            self.touch_scale = fitted
         _init_joysticks()
 
         self._buffer = pg.Surface(size=(self._width, self._height), depth=self.color_depth)

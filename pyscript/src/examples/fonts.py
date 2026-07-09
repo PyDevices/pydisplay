@@ -62,6 +62,8 @@ def main():
                     line += font.HEIGHT
 
                     if line > tft.height - font.HEIGHT:
+                        if runtime:
+                            runtime.poll()
                         if runtime.quit_requested if runtime else False:
                             return
                         sleep_ms(3000)
@@ -70,6 +72,8 @@ def main():
                         line = 0
                         col = 0
 
+            if runtime:
+                runtime.poll()
             if runtime.quit_requested if runtime else False:
                 return
             sleep_ms(3000)

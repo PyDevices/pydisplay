@@ -36,6 +36,8 @@ def main():
         display_drv.blit_rect(ba, 0, y % display_drv.height, display_drv.width, line_height)
         display_drv.show()
         sleep_ms(0)
+        if runtime:
+            runtime.poll()
         if runtime.quit_requested if runtime else False:
             return True
         sleep_ms(100)

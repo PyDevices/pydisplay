@@ -314,6 +314,8 @@ _FFI_FUNCS = (
     ("SDL_UpdateTexture", "i", "PPPi"),
     ("SDL_AddTimer", "P", "IPP"),
     ("SDL_RemoveTimer", "i", "P"),
+    ("SDL_GetDisplayUsableBounds", "i", "iP"),
+    ("SDL_GetDesktopDisplayMode", "i", "iP"),
 )
 
 
@@ -512,6 +514,15 @@ else:
     class SDL_Point(ctypes.Structure):
         _fields_ = [("x", ctypes.c_int), ("y", ctypes.c_int)]
 
+    class SDL_DisplayMode(ctypes.Structure):
+        _fields_ = [
+            ("format", ctypes.c_uint32),
+            ("w", ctypes.c_int),
+            ("h", ctypes.c_int),
+            ("refresh_rate", ctypes.c_int),
+            ("driverdata", ctypes.c_void_p),
+        ]
+
     class SDL_CommonEvent(ctypes.Structure):
         _fields_ = [
             ("type", ctypes.c_uint),
@@ -656,6 +667,7 @@ else:
     _f = _c.c_float
     _p = _c.c_char_p
     _r = _c.POINTER(SDL_Rect)
+    _dm = _c.POINTER(SDL_DisplayMode)
     _pt = _c.POINTER(SDL_Point)
     _ce = _c.POINTER(SDL_CommonEvent)
 
@@ -690,6 +702,8 @@ else:
         ("SDL_UpdateTexture", _i, (_v, _r, _v, _i)),
         ("SDL_AddTimer", _v, (_u32, _v, _v)),
         ("SDL_RemoveTimer", _i, (_v,)),
+        ("SDL_GetDisplayUsableBounds", _i, (_i, _r)),
+        ("SDL_GetDesktopDisplayMode", _i, (_i, _dm)),
     )
     _bind_ctypes(_libSDL2, _CTYPES_FUNCS)
 
@@ -728,3 +742,34 @@ def SDL_Event(event=None):
     event_type = event.type
     struct_cls = _event_struct_map.get(event_type, SDL_CommonEvent)
     return struct_cls.from_buffer(event)
+
+
+def SDL_desktop_size(display_index=0):
+    """Return (width, height) of the usable desktop area, or (0, 0) if unknown."""
+    display_index = int(display_index)
+    try:
+        get_bounds = globals()["SDL_GetDisplayUsableBounds"]
+        get_mode = globals()["SDL_GetDesktopDisplayMode"]
+        if _USE_FFI:
+            rect = bytearray(16)
+            if get_bounds(display_index, rect) == 0:
+                w = int.from_bytes(rect[8:12], "little", signed=True)
+                h = int.from_bytes(rect[12:16], "little", signed=True)
+                if w > 0 and h > 0:
+                    return w, h
+            mode = bytearray(32)
+            if get_mode(display_index, mode) == 0:
+                w = int.from_bytes(mode[4:8], "little", signed=True)
+                h = int.from_bytes(mode[8:12], "little", signed=True)
+                if w > 0 and h > 0:
+                    return w, h
+        else:
+            rect = SDL_Rect()
+            if get_bounds(display_index, ctypes.byref(rect)) == 0 and rect.w > 0 and rect.h > 0:
+                return rect.w, rect.h
+            mode = SDL_DisplayMode()
+            if get_mode(display_index, ctypes.byref(mode)) == 0 and mode.w > 0 and mode.h > 0:
+                return mode.w, mode.h
+    except Exception:
+        pass
+    return 0, 0

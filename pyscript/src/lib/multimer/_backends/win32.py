@@ -164,7 +164,6 @@ class Timer(_TimerCore):
                 if not kernel32.QueueUserAPC(_apc_entry, _main_thread_handle, self._token):
                     break
                 if self._mode == Timer.ONE_SHOT:
-                    self._running = False
                     break
         finally:
             kernel32.CloseHandle(handle)
