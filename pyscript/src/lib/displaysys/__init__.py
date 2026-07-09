@@ -320,7 +320,8 @@ class DisplayDriver:
         self._deinitialized = False
         if not self._quiet:
             print(f"{self.__class__.__name__}: initialized.")
-            print(f"{self.__class__.__name__}: requires_byteswap = {self.requires_byteswap}")
+            if self.requires_byteswap:
+                print(f"{self.__class__.__name__}: requires_byteswap = True")
 
     def __del__(self):
         self.deinit()
