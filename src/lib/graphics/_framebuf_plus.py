@@ -35,6 +35,7 @@ except ImportError:  # If framebuf is not available, import from _framebuf.py
 
 init_capabilities(
     framebuf_backend="native" if _NATIVE_FRAMEBUF else "pure_python",
+    implementation="pydisplay_python",
     formats=[
         "MONO_VLSB",
         "MONO_HLSB",

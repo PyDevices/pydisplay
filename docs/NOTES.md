@@ -6,66 +6,54 @@ Private working notes for this repo. Not part of the published docs.
 
 <!-- Add items when asked to "add … to my todo list". Use `- [ ]` checkboxes. -->
 
-- [ ] Frozen self-installer for MicroPython (Unix + `micropython.exe`) — see [notes](#frozen-self-installer-notes) below
-  - [ ] Warn users where downloads come from: PyDevices micropython-lib MIP index (`https://PyDevices.github.io/micropython-lib/mip/PyDevices`), not the [official MicroPython micropython-lib](https://github.com/micropython/micropython-lib) package index — **maintainer-published**, not an endorsed upstream source (show URL on first run / in GUI)
-  - [ ] Freeze a small bootstrap module into desktop MicroPython builds so `from <xyz> import <clever_install_fn>` works out of the box
-  - [ ] Install or refresh all 4 core modules (`displaysys`, `eventsys`, `graphics`, `multimer`) via `mip` / `lib_install`-style fetch (skip re-download when up to date?)
-  - [ ] Post-install GUI (TBD: terminal menu vs minimal on-display UI): download more files, system/platform info, `lv_test_timer_*`-style sanity checks, link to `spotapi_remote` / spotapi
-  - [ ] Flesh out scope, module name, and UX (name the import, entry points, error handling offline)
+- [ ] Frozen self-installer for MicroPython (Unix + `micropython.exe`) — see [frozen-self-installer-notes.md](frozen-self-installer-notes.md)
 
 - [ ] Develop apps and freeze them into standalone executables — start with `spotapi_remote` in the spotapi repo
 
-- [ ] Check `display_driver.py`, `lv_utils.py`, and `multimer` for possible refactor / optimizations
+- [x] Check `display_driver.py`, `lv_utils.py`, and `multimer` for possible refactor / optimizations
 
-### Frozen self-installer notes
-
-Private design scratchpad (not for RTD).
-
-**Goal:** One-liner onboarding on MicroPython Unix and `micropython.exe` without requiring users to copy `installer.py` manually first.
-
-**Bootstrap API (draft):**
-
-```python
-from <xyz> import <clever_install_fn>  # name TBD
-<clever_install_fn>()  # fetch or refresh core libs, then optional GUI
-```
-
-**What gets installed first:** The four `src/lib` packages only — same set as micropython-lib `pydisplay-bundle` core (`displaysys`, `eventsys`, `graphics`, `multimer`). Add-ons, examples, and board configs stay optional later steps.
-
-**Source of truth:** Maintainer-published packages from the PyDevices micropython-lib fork, published via `scripts/publish_micropython_lib.sh` → MIP index at `https://PyDevices.github.io/micropython-lib/mip/PyDevices`. Same channel as `installer.py` `lib_install()` ([`docs/installation/mip-micropython-lib.md`](docs/installation/mip-micropython-lib.md) on RTD describes the index; this installer should **warn explicitly** that it is not the official MicroPython micropython-lib registry).
-
-**Suggested first-run warning (UI copy):**
-
-> Installing from PyDevices micropython-lib (maintainer-published community index).  
-> Not the official MicroPython package registry.  
-> Index: `https://PyDevices.github.io/micropython-lib/mip/PyDevices`
-
-**Post-install GUI ideas (pick subset for v1):**
-
-| Area | Ideas |
-|------|--------|
-| More packages | `add_ons`, `examples`, `board_config.py`, `path.py`, board_configs, display/touch drivers |
-| System info | Platform, `sys.implementation`, free memory, display backend detected, timer backend (`Timer` vs `AsyncTimer`) |
-| Diagnostics | Run or launch patterns like `lv_test_timer_no_pump` / `lv_test_timer_pump` / `lv_test_timer_async` / harness — platform labels, timer tick, optional touch |
-| Integrations | Deep link or install hook for `spotapi_remote` / spotapi (`src/examples/spotapi` is local-only symlink today) |
-| Maintenance | Refresh core libs, show installed versions, clear and reinstall |
-
-**Existing code to reuse / align with:**
-
-- [`installer.py`](installer.py) — `lib_install()` vs `repo_install()` split
-- [`scripts/publish_micropython_lib.sh`](scripts/publish_micropython_lib.sh) — what actually lands on the MIP index
-- Desktop `board_config` in `src/lib/board_config.py` — likely still needed after core install
-
-**Open questions:**
-
-- Frozen module lives in pydisplay repo vs MicroPython port tree?
-- Idempotent refresh: version manifest, etag, or always pull?
-- GUI toolkit on desktop MCU port: `pdwidgets`, plain print menu, or SDL text UI?
-- Relationship to future TestPyPI / pip path for CPython Jupyter (separate track)
-
-- [ ] Find all globals in `src/lib`
-- [ ] Trim `jupyter_notebook.ipynb` out of `pyscript.toml` (demo pages don't need it; bundled via `gen_repo_packages.py`)
+- [x] Find all globals in `src/lib` — see [src-lib-globals.md](src-lib-globals.md)
+- [x] Trim `jupyter_notebook.ipynb` out of `pyscript.toml` (demo pages don't need it; bundled via `gen_repo_packages.py`)
 - [ ] Jupyter install notebook: add `board_config.py` to the `displaysys` TestPyPI package (may need default `board_config` to work without eventsys)
 - [ ] Ensure each `src/lib` package is installable alone — no hard dependency on the other pydisplay libs being installed
 - [ ] Make sure all desktop backends exit gracefully in `displaysys`
 - [x] Compile MicroPython with `os.dupterm` enabled
+
+- [ ] `bouncing_balls` has too many balls and runs too slow
+
+- [x] `board_config` scaling for PGDisplay is too big — window doesn't fit the screen (auto-clamp in `PGDisplay`)
+
+- [ ] Test kit only runs `tower_climb` in PGDisplay, not SDL2
+
+- [ ] Combine all `pixel_sim_*` examples into a single file
+  - [ ] Runnable through the sim or on the normal runtime by changing a single line (e.g. add `examples/pixel_sim` to the front of the path)
+
+- [ ] Make `AGENTS.md` in cmods look for `AGENTS.md` at the root of all sub-repos
+
+- [ ] Get `pydisplay_android` working on desktop emulator
+
+- [ ] Build MicroPython with LVGL, `graphics`, `displayif`, etc. for `board_configs/fbdisplay/esp32-p4-wifi6-touch-lcd-4b`
+
+- [ ] Make all PyDevices repo automations that publish to TestPyPI or micropython-lib also attach those artifacts as GitHub release assets per tag
+
+- [ ] Make sure all PyDevices repo automations that publish to TestPyPI are publishing wheels for unix, windows, and Android
+
+- [ ] Make `--no-os-dupterm` the default for Windows MicroPython builds only (so we don't have to pass it manually)
+
+- [ ] Make all examples runnable on PyScript, then Jupyter notebook
+
+- [ ] Port RGB888 support from `graphics/_framebuf.py` to the graphics cmod library
+
+- [x] Port recent `src/lib/graphics` changes to `cmods/graphics` (`implementation()`, sentinels, `_framebuf_plus` default FrameBuffer)
+
+- [ ] Rework `cmods/graphics` to be all C code, no Python wrappers
+
+- [ ] Reorganize `board_configs` if it makes sense
+
+- [x] Verify which `mip` install methods install bare `.py` files vs precompiled `.mpy` files — see [mip-and-freeze-sources.md](mip-and-freeze-sources.md)
+
+- [x] Verify where `cmods/build_mp.sh` pulls `manifest.py` packages from — are they `.py` or `.mpy`? — see [mip-and-freeze-sources.md](mip-and-freeze-sources.md)
+
+- [ ] Change docs and scripts so cmods sub-repos don't mention or require cmods (personal workspace only — not required for other users); may need to move functionality out of cmods into sub-repos
+
+- [ ] **multimer `hard=False` on CPython (librt)** — `schedule()` does not truly defer when librt delivers on the main thread: it runs the callback inline inside the signal handler (`src/lib/multimer/_schedule.py`). That broke `timer_simpletest` on cpython-venv when both timers used `hard=False` (hang before any output). **Done for now:** example-scoped fix — `hard=False` only when `sys.implementation.name == "micropython"` (heap locked in FFI); CPython keeps default `hard=True` (`timer_simpletest`, commit `c26ce285`). **Next bot:** core change in `multimer` — detect signal-handler / non-reentrant context on CPython and always queue callbacks (true soft delivery), then revisit examples and other hard timers (`console._tick`, `pdwidgets`, etc.). Deliberate, test on librt + LVGL; not urgent while examples use the MP-only guard.
