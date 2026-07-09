@@ -26,10 +26,12 @@ from displaysys import color565
 from graphics import RGB565, FrameBuffer, text8
 from multimer import sleep_ms, ticks_add, ticks_diff, ticks_ms
 from palettes import get_palette
+# Uncomment one and only one of the following two lines
+#from board_config import display_drv, runtime
 from pixel_sim import display_drv, runtime
 
 # scroll | plasma | fire | matrix | starfield | reel
-DEMO = "fire"
+DEMO = "reel"
 
 GRID_W = display_drv.width
 GRID_H = display_drv.height
@@ -88,15 +90,15 @@ def _present(dest):
 _CHAR_W = 8
 _FONT_H = 8
 _SCROLL_Y = (GRID_H - _FONT_H) // 2
-_SCROLL_FRAME_MS = 30
-_SCROLL_STEP = 3
-_SCROLL_TEXT = "PyDisplay * rainbow marquee * "
+_SCROLL_FRAME_MS = 28
+_SCROLL_STEP = 4
+_SCROLL_TEXT = "PyDisplay!"
 _SCROLL_SRC_W = len(_SCROLL_TEXT) * _CHAR_W
 _SKY_TOP = 0xFB60
 _SKY_BOTTOM = 0x480F
 _SUN = 0xFFE0
 _SUN_EDGE = 0xFD20
-_SCROLL_HOLD = 150
+_SCROLL_HOLD = 80
 
 _scroll_pal = get_palette(name="wheel", color_depth=16, length=len(_SCROLL_TEXT))
 _scroll_src = FrameBuffer(bytearray(_SCROLL_SRC_W * GRID_H * 2), _SCROLL_SRC_W, GRID_H, RGB565)
@@ -231,10 +233,12 @@ def fire_main():
 # --- matrix -----------------------------------------------------------------
 
 _MATRIX_FRAME_MS = 45
-_MATRIX_TRAIL = 14
+_MATRIX_TRAIL_LEN = 14
 _MATRIX_BLACK = 0x0000
 _MATRIX_HEAD = color565(200, 255, 200)
-_MATRIX_TRAIL = [color565(0, max(40, 255 - i * (215 // _MATRIX_TRAIL)), 0) for i in range(_MATRIX_TRAIL)]
+_MATRIX_TRAIL = [
+    color565(0, max(40, 255 - i * (215 // _MATRIX_TRAIL_LEN)), 0) for i in range(_MATRIX_TRAIL_LEN)
+]
 _matrix_head = [_randint(-GRID_H, 0) * 8 for _ in range(GRID_W)]
 _matrix_speed = [_randint(3, 10) for _ in range(GRID_W)]
 _matrix_dest = FrameBuffer(bytearray(GRID_W * GRID_H * 2), GRID_W, GRID_H, RGB565)
@@ -246,11 +250,11 @@ def _matrix_step():
     for x in range(GRID_W):
         _matrix_head[x] += _matrix_speed[x]
         head_y = _matrix_head[x] >> 3
-        for k in range(_MATRIX_TRAIL):
+        for k in range(_MATRIX_TRAIL_LEN):
             y = head_y - k
             if 0 <= y < GRID_H:
                 pixel(x, y, _MATRIX_HEAD if k == 0 else _MATRIX_TRAIL[k])
-        if head_y - _MATRIX_TRAIL > GRID_H:
+        if head_y - _MATRIX_TRAIL_LEN > GRID_H:
             _matrix_head[x] = _randint(-GRID_H, 0) * 8
             _matrix_speed[x] = _randint(3, 10)
 

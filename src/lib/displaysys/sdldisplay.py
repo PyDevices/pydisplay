@@ -193,7 +193,7 @@ def get_events():
 
 def _flush_pending_displays():
     for display in tuple(_displays):
-        if display._render_dirty or display._show_pending:
+        if display._show_pending:
             display._flush_pending_show()
 
 
@@ -424,17 +424,7 @@ class SDLDisplay(DisplayDriver):
 
     def blit_rect(self, buffer: memoryview, x: int, y: int, w: int, h: int):
         """
-        Blits a buffer to the display.
-
-        Args:
-            buffer (memoryview): The buffer to blit.
-            x (int): The x-coordinate of the buffer.
-            y (int): The y-coordinate of the buffer.
-            w (int): The width to blit.
-            h (int): The height to blit.
-
-        Returns:
-            (tuple): A tuple containing the x, y, w, h values.
+        Blit a buffer into the display texture.  Compositing is deferred until ``show()``.
         """
         if not self._sdl_active():
             return (x, y, w, h)
@@ -453,25 +443,12 @@ class SDLDisplay(DisplayDriver):
             retcheck(usdl2.SDL_UpdateTexture(self._buffer, blitRect, buffer_ptr, pitch))
         else:
             retcheck(usdl2.SDL_UpdateTexture(self._buffer, blitRect, buffer, pitch))
-        self.render(blitRect)
+        self._render_dirty = True
         return (x, y, w, h)
 
     def fill_rect(self, x: int, y: int, w: int, h: int, c: int):
         """
-        Fill a rectangle with a color.
-
-        Renders to the texture instead of directly to the window
-        to facilitate scrolling and scaling.
-
-        Args:
-            x (int): The x-coordinate of the rectangle.
-            y (int): The y-coordinate of the rectangle.
-            w (int): The width of the rectangle.
-            h (int): The height of the rectangle.
-            c (int): The color of the rectangle.
-
-        Returns:
-            (tuple): A tuple containing the x, y, w, h values
+        Fill a rectangle in the display texture.  Compositing is deferred until ``show()``.
         """
         fillRect = usdl2.SDL_Rect(x, y, w, h)
         r, g, b = color_rgb(c)
@@ -492,7 +469,7 @@ class SDLDisplay(DisplayDriver):
         retcheck(
             usdl2.SDL_SetRenderTarget(self._renderer, None)
         )  # Reset the render target back to the window
-        self.render(fillRect)
+        self._render_dirty = True
         return (x, y, w, h)
 
     def pixel(self, x: int, y: int, c: int):
@@ -601,10 +578,7 @@ class SDLDisplay(DisplayDriver):
 
     def render(self, renderRect=None):
         """
-        Render the display.  Automatically called after blitting or filling the display.
-
-        Args:
-            renderRect (Optional[SDL_Rect], optional): The rectangle to render. Defaults to None.
+        Composite the logical framebuffer to the window.  Called from ``show()`` when draws are pending.
         """
         if not self._sdl_active():
             return
@@ -635,10 +609,10 @@ class SDLDisplay(DisplayDriver):
         """
         if not self._sdl_active():
             return
+        self._show_pending = True
         try:
             self._flush_pending_show()
         except MemoryError:
-            self._show_pending = True
             return
 
     def _flush_pending_show(self):

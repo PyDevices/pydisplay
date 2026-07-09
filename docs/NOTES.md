@@ -36,6 +36,10 @@ Private working notes for this repo. Not part of the published docs.
 
 - [x] Combine all `pixel_sim_*` examples into a single file — `pixel_sim_demos.py` with `DEMO` selector; swap `pixel_sim` vs `board_config` import for sim vs hardware
 
+- [ ] `pixel_sim_demos` fire effect — cellular flame does not look/behave correctly on the simulator (fix heat propagation / palette)
+
+- [x] SDL/PG batch mode — defer compositor `render()` until `show()` (texture updates batched in `blit_rect` / `fill_rect`)
+
 - [x] Make `AGENTS.md` in cmods look for `AGENTS.md` at the root of all sub-repos
 
 - [ ] Get `pydisplay_android` working on desktop emulator

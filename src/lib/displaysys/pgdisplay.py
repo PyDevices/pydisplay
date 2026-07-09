@@ -161,6 +161,8 @@ class PGDisplay(DisplayDriver):
         self.touch_scale = scale
         self.quit_chord = default_quit_chord()
         self._buffer = None
+        self._render_dirty = False
+        self._show_pending = False
         self._requires_byteswap = False
 
         self._bytes_per_pixel = color_depth // 8
@@ -217,48 +219,24 @@ class PGDisplay(DisplayDriver):
 
     def blit_rect(self, buffer: memoryview, x: int, y: int, w: int, h: int):
         """
-        Blits a buffer to the display.
-
-        Args:
-            buffer (memoryview): The buffer to blit.
-            x (int): The x-coordinate of the buffer.
-            y (int): The y-coordinate of the buffer.
-            w (int): The width to blit.
-            h (int): The height to blit.
-
-        Returns:
-            (tuple): A tuple containing the x, y, w, h values.
+        Blit a buffer into the logical framebuffer.  Compositing is deferred until ``show()``.
         """
 
-        blitRect = pg.Rect(x, y, w, h)
         for i in range(h):
             for j in range(w):
                 pixel_index = (i * w + j) * self._bytes_per_pixel
                 color = color_rgb(buffer[pixel_index : pixel_index + self._bytes_per_pixel])
                 self._buffer.set_at((x + j, y + i), color)
-        self.render(blitRect)
+        self._render_dirty = True
         return (x, y, w, h)
 
     def fill_rect(self, x: int, y: int, w: int, h: int, c: int):
         """
-        Fill a rectangle with a color.
-
-        Renders to the texture instead of directly to the window
-        to facilitate scrolling and scaling.
-
-        Args:
-            x (int): The x-coordinate of the rectangle.
-            y (int): The y-coordinate of the rectangle.
-            w (int): The width of the rectangle.
-            h (int): The height of the rectangle.
-            c (int): The color of the rectangle.
-
-        Returns:
-            (tuple): A tuple containing the x, y, w, h values.
+        Fill a rectangle in the logical framebuffer.  Compositing is deferred until ``show()``.
         """
         fillRect = pg.Rect(x, y, w, h)
         self._buffer.fill(color_rgb(c), fillRect)
-        self.render(fillRect)
+        self._render_dirty = True
         return (x, y, w, h)
 
     def pixel(self, x: int, y: int, c: int):
@@ -287,7 +265,7 @@ class PGDisplay(DisplayDriver):
             bfa (int): The bottom fixed area.
         """
         super().vscrdef(tfa, vsa, bfa)
-        self.render()
+        self._render_dirty = True
 
     def vscsad(self, vssa=None) -> int:
         """
@@ -301,7 +279,7 @@ class PGDisplay(DisplayDriver):
         """
         if vssa is not None:
             super().vscsad(vssa)
-            self.render()
+            self._render_dirty = True
         return self._vssa
 
     def _rotation_helper(self, value):
@@ -338,10 +316,7 @@ class PGDisplay(DisplayDriver):
 
     def render(self, renderRect=None) -> None:
         """
-        Render the display.  Automatically called after blitting or filling the display.
-
-        Args:
-            renderRect (Optional[pg.Rect], optional): The rectangle to render. Defaults to None.
+        Composite the logical framebuffer to the window.  Called from ``show()`` when draws are pending.
         """
         if not self._video_active():
             return
@@ -387,6 +362,9 @@ class PGDisplay(DisplayDriver):
         """
         if not self._video_active():
             return
+        if self._render_dirty:
+            self.render()
+            self._render_dirty = False
         if self._frame_recorder is not None:
             self._record_frame(self._buffer_rgb())
         try:
