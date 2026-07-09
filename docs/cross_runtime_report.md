@@ -1,8 +1,8 @@
 # Cross-runtime example matrix report
 
-**Last updated:** 2026-07-09 (targeted matrix fixes; MP graphics cluster green)  
-**pydisplay HEAD:** `dee5370d` + local fixes (`multimer`, `displaybuf`, `ensure_nano_gui`; unpushed)  
-**graphics-cmod:** `3363982` + local `Draw.circle` (`gfx_bindings_mp.c`; unpushed)  
+**Last updated:** 2026-07-09 (CP rebuild + targeted matrix; 34/34 MP and CP)  
+**pydisplay HEAD:** `bc20d257` + `framebuf` shim (local, may be unpushed)  
+**graphics-cmod:** `a629b7d` (`Draw.circle`; may be unpushed)  
 **Harness:** `tools/example_test_kit.py --all-except-harness --order runtimes --no-unit-tests --only-runtime micropython micropython.exe circuitpython cpython-venv python.exe`  
 **Baseline (historical):** `9abf8d6a` — 350 cells, 222 pass / 128 fail  
 **Stale full matrix (pre–cmod API batch):** Run A below — 192 pass / 158 fail (superseded for MP by targeted retest)
@@ -30,6 +30,7 @@ See `.cursor/rules/graphics-parity-and-timer-async.mdc` and `~/.cursor/rules/fix
 | `pbm_create_new` `Draw.circle` | Added `Draw.circle` binding → `gfx_shapes_circle` | graphics-cmod `gfx_bindings_mp.c` |
 | `bmp565_sprite_transparent` | `DisplayBuffer.blit_transparent` delegates to native `graphics.blit_transparent` | pydisplay `displaybuf.py` |
 | `nano_gui_simpletest` | `ensure_nano_gui` patches `gui.core.nanogui.refresh` to accept `graphics.FrameBuffer` (cmod) in addition to builtin `framebuf` | pydisplay `ensure_nano_gui.py` |
+| `framebuf_simpletest` / CP `nano_gui` | `add_ons/framebuf.py` prefers native `graphics` over missing `graphics._framebuf` on cmod | pydisplay `add_ons/framebuf.py` |
 
 **MP rebuild:** `./build_mp.sh --port unix --variant standard` after `Draw.circle` cmod change.
 
@@ -37,13 +38,17 @@ See `.cursor/rules/graphics-parity-and-timer-async.mdc` and `~/.cursor/rules/fix
 
 ## Targeted matrix — micropython (2026-07-09)
 
-**Command:** `--only-runtime micropython` on 34 examples from stale Run A graphics/widgets/BMP565 cluster.
+**Result: 34/34 ok** (SDLDisplay backend). Commits: pydisplay `bc20d257`, graphics `a629b7d`.
 
-**Result: 34/34 ok** (SDLDisplay backend).
+## Targeted matrix — circuitpython (2026-07-09)
 
-Examples: `alien`, `apollo`, `bmp565_*` (6), `bouncing_balls`, `boxlines`, `calculator`, `chango`, `color_test`, `displaybuf_simpletest`, `eventsys_touch_test`, `feathers`, `font_*`, `fonts`, `framebuf_simpletest`, `graphics_*`, `hello`, `joystick_list_select`, `logo`, `nano_gui_simpletest`, `palettes_cube`, `pbm_create_new`, `pydisplay_demo`, `pydisplay_demo_async`, `scroll_touch_test`, `tower_climb`, `widgets_calc`, `widgets_console`, `widgets_list`.
+**Command:** same 34-example cluster after `./build_target.sh cp-unix` (graphics `a629b7d`).
 
-**Inference:** Stale Run A MP error count (~45) was dominated by pre–`3363982` cmod gaps plus the five fixes above. Full MP matrix not re-run yet; expect large improvement vs Run A.
+**Result: 34/34 ok** after `add_ons/framebuf.py` shim (pydisplay post-`bc20d257`).
+
+Examples (both runtimes): `alien`, `apollo`, `bmp565_*` (6), `bouncing_balls`, `boxlines`, `calculator`, `chango`, `color_test`, `displaybuf_simpletest`, `eventsys_touch_test`, `feathers`, `font_*`, `fonts`, `framebuf_simpletest`, `graphics_*`, `hello`, `joystick_list_select`, `logo`, `nano_gui_simpletest`, `palettes_cube`, `pbm_create_new`, `pydisplay_demo`, `pydisplay_demo_async`, `scroll_touch_test`, `tower_climb`, `widgets_calc`, `widgets_console`, `widgets_list`.
+
+**Inference:** Stale Run A MP/CP error counts (~45–46 each) were dominated by pre–`3363982` cmod gaps plus session fixes. Full matrix not re-run yet.
 
 ---
 
@@ -53,7 +58,7 @@ Examples: `alien`, `apollo`, `bmp565_*` (6), `bouncing_balls`, `boxlines`, `calc
 |--------|---------|----------|
 | MicroPython unix | `./build_mp.sh --port unix --variant standard` | `import graphics` → `native_cmod`; targeted 34/34 ok |
 | MicroPython Windows | `./build_mp.sh --port windows --variant dev` | Not re-tested this session |
-| CircuitPython unix | `build_cp.sh` / patches (see `build_target.sh`) | **Stale** — 2/8 targeted fail (pre–`3363982` symptoms) |
+| CircuitPython unix | `./build_target.sh cp-unix` | `import graphics` → `native_cmod`; targeted **34/34 ok** |
 | CPython | editable `graphics-cmod` in pydisplay `.venv` | `test_parity.py` ok (prior) |
 
 Symlinks: `~/bin/micropython` → `build-dev`, `~/bin/circuitpython` → `build-coverage`.
@@ -94,25 +99,18 @@ Run B predates `dee5370d` (`Runtime.arm_async_refresh`, `multimer.run`). Post-fi
 
 ---
 
-## CircuitPython — targeted spot check (stale build)
-
-8 examples, **2/8 ok** (`calculator`, `eventsys_touch_test`). Failures match pre–`3363982` API (`from_file`, kwargs, canvas duck-typing, BMP565 subscript). **Requires CP rebuild** with current graphics-cmod when `build_cp.sh` is available in the cmods tree.
-
----
-
 ## Remaining (next)
 
 | # | Item | Notes |
 |---|------|-------|
-| 1 | **CP rebuild + targeted matrix** | Rebuild coverage unix with current `3363982` + `Draw.circle`; rerun BMP565/widgets cluster |
-| 2 | **MP.exe targeted matrix** | Teardown cluster (12 exit, 5 hang in Run A); not retested |
-| 3 | **cpython-venv hangs** | 5 in Run A: `displaysys_fill_rect_test`, `eventsys_touch_test`, `lv_test_timer_sync`, `palettes_material`, `scroll_touch_test` |
-| 4 | **`lv_touch_test`** | exit_-11 (SIGSEGV, LVGL) |
-| 5 | **`timer_async=True` targeted matrix** | Desktop `board_config` already `timer_async=True`; smoke MP async examples next |
-| 6 | Full matrix ×2 | Only after targeted passes stabilize on MP/CP/MP.exe |
-| 7 | graphics-cmod parity audit | Line-by-line vs `src/lib/graphics`; fix remaining gaps |
-| 8 | Push graphics + pydisplay | When ready |
-| 9 | PyScript matrix | serve.py / port 8000 |
+| 1 | **MP.exe targeted matrix** | Teardown cluster (12 exit, 5 hang in Run A); not retested |
+| 2 | **cpython-venv hangs** | 5 in Run A: `displaysys_fill_rect_test`, `eventsys_touch_test`, `lv_test_timer_sync`, `palettes_material`, `scroll_touch_test` |
+| 3 | **`lv_touch_test`** | exit_-11 (SIGSEGV, LVGL) |
+| 4 | **`timer_async=True` targeted matrix** | Desktop `board_config` already `timer_async=True`; smoke MP async examples next |
+| 5 | Full matrix ×2 | Only after targeted passes stabilize on MP.exe |
+| 6 | graphics-cmod parity audit | Line-by-line vs `src/lib/graphics`; fix remaining gaps |
+| 7 | Push graphics + pydisplay | When ready |
+| 8 | PyScript matrix | serve.py / port 8000 |
 
 ---
 
