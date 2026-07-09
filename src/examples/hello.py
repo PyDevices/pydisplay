@@ -85,6 +85,8 @@ def main():
                     ),
                 )
                 tft.show()
+                if runtime:
+                    runtime.poll()
                 if runtime.quit_requested if runtime else False:
                     return
                 sleep_ms(1)

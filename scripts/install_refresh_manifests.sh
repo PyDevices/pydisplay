@@ -30,7 +30,6 @@ MANUAL_PACKAGES=(
     packages/spibus.json
     packages/i2cbus.json
     packages/epaper_chip.json
-    packages/boarddisplay.json
     packages/pixeldisplay.json
     packages/epaperdisplay.json
     packages/rgbframebuffer.json
@@ -64,7 +63,6 @@ Not generated here (edit manually when drivers/bus/ or drivers/touch/ changes):
   packages/spibus.json
   packages/i2cbus.json
   packages/epaper_chip.json
-  packages/boarddisplay.json
   packages/pixeldisplay.json
   packages/epaperdisplay.json
   packages/rgbframebuffer.json

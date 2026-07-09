@@ -32,9 +32,23 @@ The [installer.py](installer.md) script combines GitHub and micropython-lib inst
 - `board_config.py` per hardware — see [board configs](../hardware/board-configs.md)
 - Display and touch drivers from `drivers/`
 
-## PyPI / pip
+## PyPI / pip (TestPyPI)
 
-CPython wheels are built to [TestPyPI](https://test.pypi.org/) for maintainer testing. End-user `pip install` is not documented yet. Use a [full clone](full-clone.md) or [desktop quick start](../guides/desktop-cpython.md).
+CPython wheels are on [TestPyPI](https://test.pypi.org/) for maintainer testing (not production PyPI). Install with **both** indexes so PyDevices packages and PyPI-only dependencies resolve:
+
+```bash
+pip install \
+  -i https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ \
+  displaysys displaysys-pgdisplay
+```
+
+- **`-i` TestPyPI** — primary index for PyDevices packages (`displaysys`, `eventsys`, `usdl2`, …).
+- **`--extra-index-url` PyPI** — secondary index for dependencies published only on [pypi.org](https://pypi.org) (for example `pygame-ce` when installing `displaysys-pgdisplay`; still `import pygame` at runtime).
+
+Omitting either index causes `pip` to fail: TestPyPI-only packages are not on PyPI, and PyPI-only deps are not on TestPyPI. Full explanation: [Publishing micropython-lib — two-index pip install](../publishing-micropython-lib.md#two-index-pip-install-required).
+
+For day-to-day desktop work without pip, use a [full clone](full-clone.md) or [desktop quick start](../guides/desktop-cpython.md).
 
 ## After installing
 

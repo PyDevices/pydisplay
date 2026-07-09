@@ -49,10 +49,10 @@ On Windows and macOS, default **`multimer.Timer`** uses **`_win32`** (APC, no pu
 
 ## PGDisplay fallback
 
-PyGame is easier to install and avoids some SDL2 issues (especially on Windows and Chromebooks):
+PyGame CE (`pygame-ce` on PyPI; `import pygame`) is easier to install and avoids some SDL2 issues (especially on Windows and Chromebooks):
 
 ```bash
-pip install pygame
+pip install pygame-ce
 ```
 
 Use the PyGame board config. From a clone, copy or symlink before running:

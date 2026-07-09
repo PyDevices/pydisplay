@@ -154,6 +154,8 @@ while True:
         ssd.text16("    " + lines[2], 0, 16, 0xFFFF)
         ssd.show()
         shown += 1
+        if runtime:
+            runtime.poll()
         if runtime.quit_requested if runtime else False:
             break
         if _max_pngs is not None and shown >= _max_pngs:
@@ -162,6 +164,8 @@ while True:
         ssd.fill_rect(pos_x, pos_y, p.width, p.height, bg_color)
         ssd.fill_rect(0, 0, ssd.width, 32, bg_color)
         sleep_ms(0)
+    if runtime:
+        runtime.poll()
     if runtime.quit_requested if runtime else False:
         break
     if _max_pngs is not None and shown >= _max_pngs:

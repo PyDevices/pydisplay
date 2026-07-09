@@ -60,7 +60,33 @@ _display_drv_get_attrs = {"set_vscroll", "tfa", "bfa", "vsa", "vscroll", "transl
 _display_drv_set_attrs = {"vscroll"}
 
 
-class DisplayBuffer(framebuf.FrameBuffer):
+def _subclassable_framebuffer_base():
+    """Return a FrameBuffer class that supports ``super().__init__`` in subclasses.
+
+    CPython's ``graphics_native.FrameBuffer`` extension type rejects subclass
+    construction; fall back to the pure-Python backend for DisplayBuffer wrappers.
+    """
+    plus = framebuf.FrameBuffer
+    mro = getattr(plus, "__mro__", (plus,))
+    if len(mro) > 1 and getattr(mro[1], "__module__", "") == "graphics_native":
+        try:
+            from graphics._framebuf_pure import FrameBuffer as PureFrameBuffer
+        except ImportError:
+            import graphics._framebuf as _fb_mod
+
+            PureFrameBuffer = _fb_mod.FrameBuffer
+            if getattr(PureFrameBuffer, "__module__", "") == "graphics_native":
+                raise RuntimeError(
+                    "graphics_native FrameBuffer cannot be subclassed on CPython"
+                ) from None
+        return PureFrameBuffer
+    return plus
+
+
+_FramebufferBase = _subclassable_framebuffer_base()
+
+
+class DisplayBuffer(_FramebufferBase):
     """
     Wrap a displaysys driver with a framebuf-compatible logical framebuffer.
 
@@ -137,9 +163,24 @@ class DisplayBuffer(framebuf.FrameBuffer):
             raise ValueError(f"Unsupported format: {format}")
 
         super().__init__(buffer, width, height, format)
-        self._mvb = memoryview(self.buffer)
+        if not hasattr(self, "_color_depth"):
+            if format == DisplayBuffer.GS8:
+                self._color_depth = 8
+            elif format == DisplayBuffer.GS4_HMSB:
+                self._color_depth = 4
+            else:
+                self._color_depth = 16
+        self._mvb = memoryview(self._buffer)
         self.show()  # Clear the display
         gc.collect()
+
+    @property
+    def buffer(self):
+        return self._buffer
+
+    @property
+    def color_depth(self):
+        return self._color_depth
 
     def __getattr__(self, name):
         if name in _display_drv_get_attrs:
@@ -258,18 +299,17 @@ class DisplayBuffer(framebuf.FrameBuffer):
             self.display_drv.blit_rect(bb, 0, chunks * lines, wd, remainder)
 
 
-class BoolPalette(framebuf.FrameBuffer):
-    # This is a 2-value color palette for rendering monochrome glyphs to color
-    # FrameBuffer instances. Supports destinations with up to 16 bit color.
+def BoolPalette(format):
+    """Return a 2x1 FrameBuffer palette with ``fg`` / ``bg`` helpers attached."""
+    buf = bytearray(4)  # OK for <= 16 bit color
+    fb = framebuf.FrameBuffer(buf, 2, 1, format)
 
-    # Copyright (c) Peter Hinch 2021
-    # Released under the MIT license see LICENSE
-    def __init__(self, format):
-        buf = bytearray(4)  # OK for <= 16 bit color
-        super().__init__(buf, 2, 1, format)
+    def fg(color):
+        fb.pixel(1, 0, color)
 
-    def fg(self, color):  # Set foreground color
-        self.pixel(1, 0, color)
+    def bg(color):
+        fb.pixel(0, 0, color)
 
-    def bg(self, color):
-        self.pixel(0, 0, color)
+    fb.fg = fg
+    fb.bg = bg
+    return fb

@@ -76,6 +76,8 @@ def main():
             if count % 2000 == 0:
                 rate = count / (time.time() - start_time)
                 print(f"blocks/sec: {rate:5.2f}")
+            if runtime:
+                runtime.poll()
             if runtime.quit_requested if runtime else False:
                 break
             if TEST_DURATION_S is not None and time.time() - start_time >= TEST_DURATION_S:

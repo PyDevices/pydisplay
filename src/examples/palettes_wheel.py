@@ -25,6 +25,8 @@ def main():
         display_drv.fill_rect(0, i % display_drv.height, display_drv.width, line_height, color)
         display_drv.show()
         sleep_ms(0)
+        if runtime:
+            runtime.poll()
         if runtime.quit_requested if runtime else False:
             return True
         sleep_ms(1)

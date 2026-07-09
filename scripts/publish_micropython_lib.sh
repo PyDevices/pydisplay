@@ -122,6 +122,7 @@ LICENSE="MIT"
 
 BASENAME=pydisplay
 DEST_REPO="${MICROPYTHON_LIB_DIR:-$HOME/github/micropython-lib}"
+export MICROPYTHON_LIB_DIR="$DEST_REPO"
 SOURCE_DIR=$SOURCE_REPO/src
 DEST_DIR=$DEST_REPO/micropython/$BASENAME
 BUNDLE_MANIFEST=$DEST_DIR/$BASENAME-bundle/manifest.py
@@ -158,40 +159,41 @@ pypi_publish_name() {
     esac
 }
 
-# Representative board_config.py for micropython-lib displaysys-* example trees.
-# Board configs live in nested directories; only a few desktop backends have a
-# flat board_configs/<name>/board_config.py path.
-displaysys_example_board_config_path() {
+# Extra micropython-lib require() lines for top-level pydisplay package manifests.
+package_manifest_requires() {
     local package="$1"
-    local board_configs="$SOURCE_REPO/board_configs"
     case "$package" in
-        displaysys-busdisplay) echo "$board_configs/busdisplay/i80/wt32sc01-plus/board_config.py" ;;
-        displaysys-fbdisplay) echo "$board_configs/fbdisplay/qualia_tl040hds20/board_config.py" ;;
-        displaysys-epaperdisplay) echo "$board_configs/epaperdisplay/cp_magtag/board_config.py" ;;
-        displaysys-pixeldisplay) echo "$board_configs/pixeldisplay/cp_neopixel_8x4/board_config.py" ;;
-        displaysys-jndisplay) echo "$board_configs/jndisplay/board_config.py" ;;
-        displaysys-pgdisplay) echo "$board_configs/pgdisplay/board_config.py" ;;
-        displaysys-psdisplay) echo "$board_configs/psdisplay/board_config.py" ;;
-        displaysys-sdldisplay) echo "$board_configs/sdldisplay/board_config.py" ;;
-        displaysys-boarddisplay) return 1 ;;
-        *) return 1 ;;
+        eventsys)
+            printf '%s\n' 'require("multimer")'
+            ;;
     esac
 }
 
-copy_displaysys_example_board_config() {
-    local package="$1"
-    local dest_dir="$2"
-    local src=""
+# multimer: no mandatory third-party PyPI deps on CPython desktop — librt (Linux),
+# win32 (Windows), or threading (fallback) use the stdlib. The sdl2 backend imports
+# usdl2 only when selected at runtime (_select.py); do not add usdl2 to multimer's
+# manifest unless we add pip optional-extras support later.
 
-    if ! src="$(displaysys_example_board_config_path "$package")"; then
-        echo "Skipping example board_config for $package"
-        return 0
-    fi
-    if [[ ! -f "$src" ]]; then
-        echo "Warning: example board_config not found for $package: $src" >&2
-        return 0
-    fi
-    cp "$src" "$dest_dir/"
+# Extra micropython-lib require() lines for displaysys-* TestPyPI / MIP manifests.
+# MODE_PYPROJECT turns micropython-lib requires into hatch dependencies; pypi= adds
+# packages that are not in micropython-lib (pygame-ce, usdl2).
+displaysys_manifest_requires() {
+    local package="$1"
+    case "$package" in
+        displaysys-pgdisplay)
+            printf '%s\n' \
+                'require("eventsys")' \
+                'require("pygame-ce", pypi="pygame-ce")'
+            ;;
+        displaysys-sdldisplay)
+            printf '%s\n' \
+                'require("eventsys")' \
+                'require("usdl2", pypi="usdl2")'
+            ;;
+        displaysys-psdisplay | displaysys-jndisplay)
+            printf '%s\n' 'require("eventsys")'
+            ;;
+    esac
 }
 
 copy_source_tree() {
@@ -256,15 +258,13 @@ metadata(
 EOF
 
 # Copy all the directories in $SOURCE_DIR/lib except displaysys to $DEST_DIR/$package
-# Copy any example files starting with the package name to $DEST_DIR/$package/examples
 for package_dir in "$SOURCE_DIR/lib"/*; do
     package=$(basename $package_dir)
     if [ -d "$package_dir" ] && [ "$package" != "displaysys" ] && ! should_skip_name "$package"; then
         echo
         echo "Processing $package"
-        mkdir -p "$DEST_DIR/$package/examples"
         copy_source_tree "$package_dir" "$DEST_DIR/$package/$package"
-        cp "$SOURCE_DIR/examples/$package"*.py "$DEST_DIR/$package/examples/" 2>/dev/null || true
+        extra_requires="$(package_manifest_requires "$package")"
         # write the following text to $DEST_DIR/$package/manifest.py
         cat <<EOF > $DEST_DIR/$package/manifest.py
 metadata(
@@ -274,6 +274,7 @@ metadata(
     license="$LICENSE",
     pypi_publish="$(pypi_publish_name "$package")",
 )
+${extra_requires}
 package("$package")
 EOF
         echo "require(\"$package\")" >> $BUNDLE_MANIFEST
@@ -293,6 +294,9 @@ for module in "$SOURCE_DIR/lib/displaysys"/*; do
     if should_skip_name "$base" || [[ "$base" == *.pyc ]] || [[ "$base" == *.pyo ]]; then
         continue
     fi
+    if [[ "$base" == boarddisplay.py ]]; then
+        continue
+    fi
     if [[ "$base" == __init__.py ]]; then
         package=displaysys
     else
@@ -303,8 +307,8 @@ for module in "$SOURCE_DIR/lib/displaysys"/*; do
     echo "Processing $package"
     mkdir -p "$DEST_DIR/displaysys/$package/displaysys"
     copy_displaysys_module "$module" "$DEST_DIR/displaysys/$package/displaysys"
-    mkdir -p "$DEST_DIR/displaysys/$package/examples"
     if [[ $package == displaysys ]]; then
+        cp "$SOURCE_DIR/lib/board_config.py" "$DEST_DIR/displaysys/$package/board_config.py"
         cat <<EOF > $DEST_DIR/displaysys/$package/manifest.py
 metadata(
     description="$DESCRIPTION_PREFIX $package",
@@ -313,6 +317,29 @@ metadata(
     license="$LICENSE",
     pypi_publish="$(pypi_publish_name "$package")",
 )
+package("displaysys")
+module("board_config.py")
+EOF
+        echo "require(\"$package\")" >> $BUNDLE_MANIFEST
+        cp $README_FULL_PATH $DEST_DIR/displaysys/$package/README.md
+        if [[ "$SKIP_PYPI" -eq 0 ]]; then
+            ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package $DEST_DIR/displaysys/$package/manifest.py
+            pushd $PYPI_DIR/$package
+            build_and_upload_pypi
+            popd
+        fi
+    else
+        extra_requires="$(displaysys_manifest_requires "$package")"
+        cat <<EOF > $DEST_DIR/displaysys/$package/manifest.py
+metadata(
+    description="$DESCRIPTION_PREFIX $package",
+    version="$VERSION",
+    author="$AUTHOR",
+    license="$LICENSE",
+    pypi_publish="$(pypi_publish_name "$package")",
+)
+require("displaysys")
+${extra_requires}
 package("displaysys")
 EOF
         echo "require(\"$package\")" >> $BUNDLE_MANIFEST
@@ -323,28 +350,6 @@ EOF
             build_and_upload_pypi
             popd
         fi
-        cp $SOURCE_DIR/examples/$package*.py $DEST_DIR/displaysys/$package/examples/
-    else
-        cat <<EOF > $DEST_DIR/displaysys/$package/manifest.py
-metadata(
-    description="$DESCRIPTION_PREFIX $package",
-    version="$VERSION",
-    author="$AUTHOR",
-    license="$LICENSE",
-    pypi_publish="$(pypi_publish_name "$package")",
-)
-require("displaysys")
-package("displaysys")
-EOF
-        ## TODO:  After publishing displaysys to PyPi, uncomment the following 7 lines
-        # echo "require(\"$package\")" >> $BUNDLE_MANIFEST
-        # cp $README_FULL_PATH $DEST_DIR/displaysys/$package/README.md
-        # ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package $DEST_DIR/displaysys/$package/manifest.py
-        # pushd $PYPI_DIR/$package
-        # hatch build
-        # twine upload --repository testpypi dist/*
-        # popd
-        copy_displaysys_example_board_config "$package" "$DEST_DIR/displaysys/$package/examples/"
     fi
 done
 

@@ -23,6 +23,8 @@ def main():
 while True:
     main()
     sleep_ms(0)
+    if runtime:
+        runtime.poll()
     if runtime.quit_requested if runtime else False:
         break
     sleep_ms(1)

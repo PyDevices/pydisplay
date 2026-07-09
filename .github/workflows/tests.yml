@@ -26,7 +26,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install test dependencies
-        run: pip install pygame ruff
+        run: pip install pygame-ce ruff
 
       - name: Run stdlib unittest suite
         env:

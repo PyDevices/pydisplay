@@ -76,6 +76,8 @@ if sys.platform != "win32":
 
     while True:
         sleep_ms(0)
+        if runtime:
+            runtime.poll()
         if runtime.quit_requested if runtime else False:
             break
         if _test_start is not None and ticks_diff(ticks_ms(), _test_start) >= _test_duration_ms:

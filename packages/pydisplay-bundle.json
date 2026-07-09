@@ -13,10 +13,6 @@
       "github:PyDevices/pydisplay/src/lib/displaysys/__init__.py"
     ],
     [
-      "lib/displaysys/boarddisplay.py",
-      "github:PyDevices/pydisplay/src/lib/displaysys/boarddisplay.py"
-    ],
-    [
       "lib/displaysys/busdisplay.py",
       "github:PyDevices/pydisplay/src/lib/displaysys/busdisplay.py"
     ],

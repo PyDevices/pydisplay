@@ -19,7 +19,7 @@ The default `src/lib/board_config.py` uses **`PGDisplay`** (PyGame) on CPython w
 If SDL2 fails (common on Windows):
 
 ```bash
-pip install pygame
+pip install pygame-ce
 cp board_configs/pgdisplay/board_config.py src/lib/board_config.py
 cd pydisplay/src
 python3 -i path.py

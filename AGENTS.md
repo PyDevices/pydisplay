@@ -15,9 +15,9 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 - Only the `cpython-venv` runtime is available here. `micropython`,
   `micropython.exe`, `circuitpython`, and `python.exe` are **not** installed, so
   cross-runtime matrices only exercise CPython.
-- The desktop display backend on CPython is `PGDisplay` (pygame). `pygame` and
+- The desktop display backend on CPython is `PGDisplay` (pygame-ce; `import pygame`). `pygame-ce` and
   `ruff` are installed on top of `requirements-dev.txt` (they are intentionally
-  not listed there — SDL2 is the documented primary and pygame is the fallback).
+  not listed there — SDL2 is the documented primary and pygame-ce is the fallback).
 
 ### Tests and lint
 

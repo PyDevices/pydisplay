@@ -84,6 +84,8 @@ def main():
                     pal[randint(0, len(pal) - 1)],
                     scale,
                 )
+                if runtime:
+                    runtime.poll()
                 if runtime.quit_requested if runtime else False:
                     return
 

@@ -115,7 +115,7 @@ python scripts/pyscript_gen_packages.py --check    # CI freshness
 
 `manifestfile.py` is a shared library for the publish scripts (not prefixed).
 
-Manual packages (not generated): `packages/i80bus.json`, `packages/spibus.json`, `packages/i2cbus.json`, `packages/epaper_chip.json`, `packages/boarddisplay.json`, `packages/pixeldisplay.json`, `packages/epaperdisplay.json`, `packages/rgbframebuffer.json`, `packages/tt21100.json`, `packages/stmpe610.json`, `packages/keypad_shift.json`.
+Manual packages (not generated): `packages/i80bus.json`, `packages/spibus.json`, `packages/i2cbus.json`, `packages/epaper_chip.json`, `packages/pixeldisplay.json`, `packages/epaperdisplay.json`, `packages/rgbframebuffer.json`, `packages/tt21100.json`, `packages/stmpe610.json`, `packages/keypad_shift.json`.
 
 ### Board config generation
 

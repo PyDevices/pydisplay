@@ -88,6 +88,8 @@ def main():
                     scale,
                 )
                 display_drv.show()
+                if runtime:
+                    runtime.poll()
                 if runtime.quit_requested if runtime else False:
                     return
 

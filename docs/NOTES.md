@@ -14,7 +14,8 @@ Private working notes for this repo. Not part of the published docs.
 
 - [x] Find all globals in `src/lib` — see [src-lib-globals.md](src-lib-globals.md)
 - [x] Trim `jupyter_notebook.ipynb` out of `pyscript.toml` (demo pages don't need it; bundled via `gen_repo_packages.py`)
-- [ ] Jupyter install notebook: add `board_config.py` to the `displaysys` TestPyPI package (may need default `board_config` to work without eventsys)
+- [x] Jupyter install notebook: add `board_config.py` to the `displaysys` TestPyPI package (may need default `board_config` to work without eventsys) — `src/lib/board_config.py` ships with core `displaysys` on next publish
+- [x] `displaysys-*` backend subpackages on TestPyPI — v0.0.8: upload + `MICROPYTHON_LIB_DIR` fix; deps pgdisplay→pygame-ce, sdldisplay→usdl2; core `displaysys` ships `board_config.py`; no examples in wheels; removed `boarddisplay`
 - [ ] Ensure each `src/lib` package is installable alone — no hard dependency on the other pydisplay libs being installed
 - [ ] Make sure all desktop backends exit gracefully in `displaysys`
 - [x] Compile MicroPython with `os.dupterm` enabled
@@ -28,17 +29,17 @@ Private working notes for this repo. Not part of the published docs.
 - [ ] Combine all `pixel_sim_*` examples into a single file
   - [ ] Runnable through the sim or on the normal runtime by changing a single line (e.g. add `examples/pixel_sim` to the front of the path)
 
-- [ ] Make `AGENTS.md` in cmods look for `AGENTS.md` at the root of all sub-repos
+- [x] Make `AGENTS.md` in cmods look for `AGENTS.md` at the root of all sub-repos
 
 - [ ] Get `pydisplay_android` working on desktop emulator
 
 - [ ] Build MicroPython with LVGL, `graphics`, `displayif`, etc. for `board_configs/fbdisplay/esp32-p4-wifi6-touch-lcd-4b`
 
-- [ ] Make all PyDevices repo automations that publish to TestPyPI or micropython-lib also attach those artifacts as GitHub release assets per tag
+- [ ] Make all PyDevices repo automations that publish to TestPyPI or micropython-lib also attach those artifacts as GitHub release assets per tag — see [testpypi-publish-audit.md](testpypi-publish-audit.md) (gap: none do today)
 
-- [ ] Make sure all PyDevices repo automations that publish to TestPyPI are publishing wheels for unix, windows, and Android
+- [x] Audit PyDevices TestPyPI / micropython-lib publish workflows and wheel coverage — see [testpypi-publish-audit.md](testpypi-publish-audit.md) (native wheels OK; release assets still open; displaysys-* on TestPyPI from v0.0.8)
 
-- [ ] Make `--no-os-dupterm` the default for Windows MicroPython builds only (so we don't have to pass it manually)
+- [x] Make `--no-os-dupterm` the default for Windows MicroPython builds only (so we don't have to pass it manually)
 
 - [ ] Make all examples runnable on PyScript, then Jupyter notebook
 
@@ -47,6 +48,8 @@ Private working notes for this repo. Not part of the published docs.
 - [x] Port recent `src/lib/graphics` changes to `cmods/graphics` (`implementation()`, sentinels, `_framebuf_plus` default FrameBuffer)
 
 - [ ] Rework `cmods/graphics` to be all C code, no Python wrappers
+
+- [x] `cmods/graphics` publish to TestPyPI — v0.0.2 tagged and published (14 wheels on TestPyPI)
 
 - [ ] Reorganize `board_configs` if it makes sense
 

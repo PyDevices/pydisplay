@@ -50,6 +50,18 @@ HOME_PAGE = "https://github.com/PyDevices/pydisplay"
 TESTPYPI = "https://test.pypi.org/simple/"
 
 
+def _resolve_mpy_lib_dir():
+    """Micropython-lib root for require() resolution when building PyPI packages."""
+    env_dir = os.environ.get("MICROPYTHON_LIB_DIR")
+    if env_dir:
+        return os.path.abspath(env_dir)
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    sibling = os.path.join(os.path.dirname(repo_root), "micropython-lib")
+    if os.path.isdir(os.path.join(sibling, "micropython")):
+        return sibling
+    return repo_root
+
+
 def quoted_escape(s):
     return s.replace('"', '\\"')
 
@@ -67,7 +79,7 @@ def build(manifest_path, output_path):
     ensure_path_exists(toml_path)
 
     path_vars = {
-        "MPY_LIB_DIR": os.path.abspath(os.path.join(os.path.dirname(__file__), "..")),
+        "MPY_LIB_DIR": _resolve_mpy_lib_dir(),
     }
 
     # .../foo/manifest.py -> foo
@@ -95,6 +107,7 @@ def build(manifest_path, output_path):
     # This is the root path of all .py files that are copied. We ensure that
     # they all match.
     top_level_package = None
+    root_modules = []
 
     for result in manifest.files():
         # This isn't allowed in micropython-lib anyway.
@@ -106,19 +119,15 @@ def build(manifest_path, output_path):
         # "foo/nested/bar/baz.py" --> "foo" (not "foo/nested")
         # "baz.py" --> ""
         normalized = result.target_path.replace("\\", "/")
-        if "/" in normalized:
-            result_package = normalized.split("/", 1)[0]
-        else:
-            result_package = ""
+        result_package = normalized.split("/", 1)[0] if "/" in normalized else ""
 
         if not result_package:
-            # This is a standalone .py file.
-            print(
-                error_color("Error:"),
-                "Unsupported single-file module: {}".format(result.target_path),
-                file=sys.stderr,
-            )
-            sys.exit(1)
+            root_modules.append(normalized)
+            with manifestfile.tagged_py_file(result.full_path, result.metadata) as tagged_path:
+                dest_path = os.path.join(output_path, result.target_path)
+                ensure_path_exists(dest_path)
+                shutil.copyfile(tagged_path, dest_path)
+            continue
         if top_level_package and result_package != top_level_package:
             # This likely suggests that something needs to use require(..., pypi="...").
             print(
@@ -136,6 +145,10 @@ def build(manifest_path, output_path):
             dest_path = os.path.join(output_path, result.target_path)
             ensure_path_exists(dest_path)
             shutil.copyfile(tagged_path, dest_path)
+
+    if not top_level_package and not root_modules:
+        print(error_color("Error:"), "No package or module files in manifest.", file=sys.stderr)
+        sys.exit(1)
 
     # Copy README.md if it exists
     readme_path = os.path.join(os.path.dirname(manifest_path), "README.md")
@@ -192,13 +205,30 @@ urls = {{ Homepage = "{}" }}
             file=toml_file,
         )
 
-        print(
-            """
-[tool.hatch.build]
+        if top_level_package:
+            print(
+                """
+[tool.hatch.build.targets.wheel]
 packages = ["{}"]
 """.format(top_level_package),
-            file=toml_file,
-        )
+                file=toml_file,
+            )
+            if root_modules:
+                print("[tool.hatch.build.targets.wheel.force-include]", file=toml_file)
+                for module_path in root_modules:
+                    print(
+                        '"{}" = "{}"'.format(module_path, module_path),
+                        file=toml_file,
+                    )
+        else:
+            only_include = ", ".join('"{}"'.format(m) for m in root_modules)
+            print(
+                """
+[tool.hatch.build.targets.wheel]
+only-include = [{}]
+""".format(only_include),
+                file=toml_file,
+            )
 
     print("Done.")
 

@@ -67,10 +67,13 @@ Typical runtime: **~10–20 minutes**.
 - [ ] Workflow succeeded on the [Actions tab](https://github.com/PyDevices/pydisplay/actions)
 - [ ] [micropython/pydisplay](https://github.com/PyDevices/micropython-lib/tree/PyDevices/micropython/pydisplay) has a new commit from `github-actions[bot]`
 - [ ] MIP index updated — e.g. `…/package/6/displaysys/latest.json` shows the new version
-- [ ] TestPyPI packages exist at the new version (optional desktop check):
+- [ ] TestPyPI packages exist at the new version (optional desktop check — [two-index install](#two-index-pip-install-required)):
 
   ```bash
-  pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ displaysys
+  pip install \
+    -i https://test.pypi.org/simple/ \
+    --extra-index-url https://pypi.org/simple/ \
+    displaysys
   ```
 
 - [ ] One hardware smoke test: `mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")`
@@ -181,15 +184,36 @@ Or `mpremote mip install --index "https://PyDevices.github.io/micropython-lib/mi
 
 ### TestPyPI
 
-- Browse [test.pypi.org](https://test.pypi.org) for package names (`displaysys`, `eventsys`, `pydisplay-graphics`, …)
-- Desktop venv test:
+PyDevices CPython wheels are published to [TestPyPI](https://test.pypi.org) only (not production PyPI). Browse package names there (`displaysys`, `eventsys`, `displaysys-pgdisplay`, `pydisplay-graphics`, …).
 
-  ```bash
-  pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ displaysys
-  pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ pydisplay-graphics
-  ```
+#### Two-index `pip install` (required)
 
-TestPyPI is for **CPython testing**, not MicroPython on hardware.
+Use **both** TestPyPI and PyPI on every install:
+
+```bash
+pip install \
+  -i https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ \
+  displaysys
+```
+
+Example with a desktop backend (pulls in `pygame-ce` from PyPI; imports as `pygame`):
+
+```bash
+pip install \
+  -i https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ \
+  displaysys displaysys-pgdisplay
+```
+
+| Flag | Index | Why it is needed |
+|------|-------|------------------|
+| `-i https://test.pypi.org/simple/` | **TestPyPI** (primary) | Resolves PyDevices packages you install and their deps that exist **only** on TestPyPI (`displaysys`, `eventsys`, `multimer`, `usdl2`, `displaysys-sdldisplay`, …). |
+| `--extra-index-url https://pypi.org/simple/` | **PyPI** (secondary) | Resolves dependencies published **only** on production PyPI (`pygame-ce` for `displaysys-pgdisplay`, and other third-party libs). |
+
+**Both must be present.** If you omit TestPyPI, pip cannot find PyDevices wheels. If you omit PyPI, pip fails when a declared dependency (for example `pygame-ce`) is not on TestPyPI.
+
+TestPyPI is for **CPython maintainer testing**, not MicroPython on hardware (boards use the [MIP index](installation/mip-micropython-lib.md)).
 
 ---
 

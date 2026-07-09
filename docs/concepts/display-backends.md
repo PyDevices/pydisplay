@@ -204,7 +204,6 @@ These follow the 565 API without a separate “present” stage in the same sens
 |-------|---------|-------|
 | **BusDisplay** | Panel GRAM via SPI/I80 | Optional byteswap; true 565 |
 | **FBDisplay** | CircuitPython framebuf | RAM mirror + `refresh()` |
-| **BoardDisplay** | displayio Bitmap | 565 buffer → bitmap on `show()` |
 | **EPaperDisplay** | 1/2/4 bpp packed | `color_depth` matches panel |
 
 ## Consolidation direction
