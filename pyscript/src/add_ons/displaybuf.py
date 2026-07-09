@@ -56,7 +56,15 @@ if not _has_viper_tools:
 gc.collect()
 
 
-_display_drv_get_attrs = {"set_vscroll", "tfa", "bfa", "vsa", "vscroll", "translate_point"}
+_display_drv_get_attrs = {
+    "set_vscroll",
+    "tfa",
+    "bfa",
+    "vsa",
+    "vscroll",
+    "translate_point",
+    "blit_rect",
+}
 _display_drv_set_attrs = {"vscroll"}
 
 

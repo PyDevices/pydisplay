@@ -7,10 +7,8 @@ from random import getrandbits
 from displaybuf import DisplayBuffer
 
 
-canvas = DisplayBuffer(display_drv)
-
-
 def main():
+    canvas = DisplayBuffer(display_drv)
     line_height = 16
     canvas.set_vscroll(16, 16)  # Does not have to == line_height
 
@@ -45,12 +43,18 @@ def main():
         txt = f"vssa: {y}, vscroll: {y - canvas.tfa}"
         draw.text14(txt, 1, y + 1, fg)
         draw.rect(canvas.width - 20, y + 2, 12, 12, fg)
-        canvas.show()
-        display_drv.show()
+
+    canvas.show()
+
+    # DisplayBuffer owns the logical buffer; stop periodic display_drv refresh
+    # so the shared timer does not call show() while we poll events.
+    if runtime:
+        runtime.stop_timer()
 
     while True:
         elist = runtime.poll() if runtime else []
         if runtime.quit_requested if runtime else False:
+            display_drv.quit()
             break
         quit_requested = False
         for e in elist:
@@ -58,20 +62,21 @@ def main():
                 quit_requested = True
                 break
             if e.type == runtime.events.MOUSEBUTTONDOWN:
-                    x, y = canvas.translate_point(e.pos)
-                    if y < canvas.tfa:
-                        canvas.vscroll -= line_height
-                    elif y > canvas.height - canvas.bfa:
-                        canvas.vscroll += line_height
-                    else:
-                        y_pos = (y // line_height) * line_height
-                        canvas.fill_rect(
-                            canvas.width - 20, y_pos + 2, 12, 12, getrandbits(canvas.color_depth)
-                        )
-                    canvas.show()
-                    display_drv.show()
-            if quit_requested:
-                break
+                x, y = canvas.translate_point(e.pos)
+                if y < canvas.tfa:
+                    canvas.vscroll -= line_height
+                elif y > canvas.height - canvas.bfa:
+                    canvas.vscroll += line_height
+                else:
+                    y_pos = (y // line_height) * line_height
+                    canvas.fill_rect(
+                        canvas.width - 20, y_pos + 2, 12, 12, getrandbits(canvas.color_depth)
+                    )
+                canvas.show()
+                display_drv.show()
+        if quit_requested:
+            display_drv.quit()
+            break
         sleep_ms(0)
 
 

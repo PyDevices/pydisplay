@@ -367,9 +367,6 @@ class Runtime:
             import pydisplay_test_mode
 
             if pydisplay_test_mode.ENABLED:
-                display = self._display
-                if display is not None and callable(getattr(display, "quit", None)):
-                    display.quit()
                 self.stop_timer()
                 return
         except ImportError:
