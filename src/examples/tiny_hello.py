@@ -42,7 +42,10 @@ tft = tft_config.config(tft_config.WIDE)
 
 
 def _quit_requested():
-    return runtime.quit_requested if runtime else False
+    if runtime:
+        runtime.poll()
+        return runtime.quit_requested
+    return False
 
 
 def randint(a, b):

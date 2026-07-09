@@ -12,7 +12,16 @@ try:
     import sys as _sys
 
     # librt callbacks on MicroPython unix run with the heap locked; defer delivery.
-    _timer_hard = _sys.implementation.name != "micropython"
+    _timer_hard = True
+    if _sys.implementation.name == "micropython":
+        try:
+            from multimer._select import Timer as _timer_cls
+
+            mod = getattr(_timer_cls, "__module__", "") if _timer_cls else ""
+            if mod.endswith("librt"):
+                _timer_hard = False
+        except ImportError:
+            pass
 except AttributeError:
     _timer_hard = True
 

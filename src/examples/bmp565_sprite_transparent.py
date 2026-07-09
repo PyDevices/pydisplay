@@ -60,6 +60,8 @@ canvas.show(draw_sprite(*location, *sprite))
 step = 3
 dir = choice(directions)
 while True:
+    if runtime:
+        runtime.poll()
     if runtime.quit_requested if runtime else False:
         break
     if choice((True, False, False, False, False)):
@@ -86,6 +88,8 @@ while True:
         dirty += draw_sprite(*location, pos, dir)
         canvas.show(dirty)
         sleep_ms(0)
+        if runtime:
+            runtime.poll()
         if runtime.quit_requested if runtime else False:
             break
         sleep_ms(100)

@@ -56,6 +56,8 @@ draw_sprite(*location, *sprite)
 step = 3
 dir = choice(directions)
 while True:
+    if runtime:
+        runtime.poll()
     if runtime.quit_requested if runtime else False:
         break
     if choice((True, False, False, False, False)):
@@ -89,6 +91,8 @@ while True:
         draw_sprite(*location, pos, dir)
         display_drv.show()
         sleep_ms(0)
+        if runtime:
+            runtime.poll()
         if runtime.quit_requested if runtime else False:
             break
         sleep_ms(100)

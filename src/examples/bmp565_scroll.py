@@ -31,6 +31,8 @@ while True:
     draw_bg(0, i % display_drv.height, 0, i % image.height)
     display_drv.show()
     sleep_ms(0)
+    if runtime:
+        runtime.poll()
     if runtime.quit_requested if runtime else False:
         break
     sleep_ms(1)
