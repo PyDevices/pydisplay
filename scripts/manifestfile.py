@@ -446,6 +446,10 @@ class ManifestFile:
             if self._require_from_path(lib_dir, name, version, kwargs):
                 return
 
+        if pypi:
+            # PyPI-only dependency (e.g. pygame-ce). Not bundled in MIP / micropython-lib.
+            return
+
         raise ValueError("Package '{}' not found in any known library.".format(name))
 
     def add_library(self, library, library_path, prepend=False):

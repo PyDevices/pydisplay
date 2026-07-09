@@ -220,6 +220,8 @@ copy_displaysys_module() {
     if [ -d "$module" ]; then
         copy_source_tree "$module" "$dest_dir/$base"
     elif [ -f "$module" ] && [[ "$base" == *.py ]]; then
+        local stem="${base%.py}"
+        rm -rf "$dest_dir/$stem"
         cp "$module" "$dest_dir/"
     fi
 }
