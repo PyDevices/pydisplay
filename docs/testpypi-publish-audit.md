@@ -105,6 +105,12 @@ Declared for the next tag publish (MIP + TestPyPI `pyproject.toml`):
 
 Install any of these from TestPyPI using the [two-index `pip` command](publishing-micropython-lib.md#two-index-pip-install-required): TestPyPI as `-i` (PyDevices packages) and PyPI as `--extra-index-url` (deps like `pygame-ce` that are not on TestPyPI).
 
+After a pydisplay tag publish, run the desktop stack smoke test (headless in CI or SSH):
+
+```bash
+./tools/test_testpypi_desktop.sh --headless
+```
+
 ### “GitHub release assets per tag”
 
 **Universal gap:** every publisher uploads to TestPyPI only. Tags exist (`v0.0.7` pydisplay, `v9.5.6` lv_cpython_mod, `v0.0.3` usdl2, …) but:

@@ -76,6 +76,14 @@ Typical runtime: **~10–20 minutes**.
     displaysys
   ```
 
+  Fuller desktop stack smoke test (`displaysys-sdldisplay`, `graphics-cmod`, `lvgl-cpython`, `board_config` draw):
+
+  ```bash
+  ./tools/test_testpypi_desktop.sh --headless
+  ```
+
+  Omit `--headless` to open a real SDL window. See [`tools/test_testpypi_desktop.sh`](../tools/test_testpypi_desktop.sh).
+
 - [ ] One hardware smoke test: `mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")`
 
 ### Retries without a new tag

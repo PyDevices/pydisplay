@@ -49,6 +49,19 @@ python tools/example_test_kit.py --only-example calculator --only-runtime microp
 | [`run_test_timers.py`](run_test_timers.py) | multimer backend probes |
 | [`test_timers.py`](test_timers.py) | Host timer probes |
 
+## TestPyPI desktop smoke test
+
+| Script | Purpose |
+|--------|---------|
+| [`test_testpypi_desktop.sh`](test_testpypi_desktop.sh) | Fresh venv, two-index pip install, `board_config` + SDL draw check |
+
+```bash
+./tools/test_testpypi_desktop.sh              # real SDL window
+./tools/test_testpypi_desktop.sh --headless   # CI / SSH without DISPLAY
+```
+
+Installs `displaysys-sdldisplay`, `graphics-cmod`, and `lvgl-cpython` (no version pins). See [Publishing micropython-lib — verify after publish](../docs/publishing-micropython-lib.md#4-verify).
+
 ## Other dev aids
 
 | Script | Purpose |
