@@ -220,9 +220,11 @@ def main():
             sprite.draw()
 
         tft.show()
-        if elist := runtime.poll():
-            if any(e.type == runtime.events.QUIT for e in elist):
-                break
+        elist = runtime.poll() if runtime else []
+        if runtime.quit_requested if runtime else False:
+            break
+        if any(e.type == runtime.events.QUIT for e in elist):
+            break
         gc.collect()
         sleep_ms(50)
 

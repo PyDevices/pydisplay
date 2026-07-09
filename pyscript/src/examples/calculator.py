@@ -148,6 +148,8 @@ class _Calculator:
         if runtime is None:
             return False
         elist = runtime.poll()
+        if runtime.quit_requested:
+            return True
         return elist and any(e.type == eventsys.QUIT for e in elist)
 
     def read_presses(self):

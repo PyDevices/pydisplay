@@ -32,16 +32,19 @@ Example:
 
 import os
 
-from framebuf import MONO_HLSB, RGB565, FrameBuffer
+from graphics import MONO_HLSB, RGB565, FrameBuffer
 
 sep = os.sep if hasattr(os, "sep") else "/"  # PyScipt doesn't have os.sep
 
 
-class PBM(FrameBuffer):
+class PBM:
+    """Monochrome PBM (P4) bitmap; render to any canvas via ``render()``."""
+
     def __init__(
         self, filename=None, fg=0xFFFF, bg=0x0000, format=RGB565, width=None, height=None
     ):
         self._palette = FrameBuffer(memoryview(bytearray(2 * 2)), 2, 1, format)
+        self._format = MONO_HLSB
         self.bg = bg
         self.fg = fg
         if filename and not (width or height):
@@ -53,7 +56,15 @@ class PBM(FrameBuffer):
             self._height = height
         else:
             raise ValueError("PBM:  Invalid arguments - must provide filename or width and height")
-        super().__init__(self._buffer, self._width, self._height, MONO_HLSB)
+        self._fb = FrameBuffer(self._buffer, self._width, self._height, MONO_HLSB)
+
+    def fill(self, c):
+        return self._fb.fill(c)
+
+    def pixel(self, x, y, c=None):
+        if c is None:
+            return self._fb.pixel(x, y)
+        return self._fb.pixel(x, y, c)
 
     def _read_file(self, filename):
         self._filename = filename
@@ -77,6 +88,10 @@ class PBM(FrameBuffer):
                 self._width, self._height = map(int, dims.split())
                 self._buffer = memoryview(bytearray((self._width + 7) // 8 * self._height))
                 self._buffer[:] = data
+
+    @property
+    def format(self):
+        return self._format
 
     def render(self, canvas, x, y, fg=0, bg=None):
         col = row = 0
