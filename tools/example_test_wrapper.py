@@ -471,7 +471,7 @@ def _subprocess_hard_exit(code, *, headless=False):
 
 def main(argv=None):
     argv = argv if argv is not None else sys.argv
-    tools = _dir_of(os.path.abspath(__file__))
+    tools = _dir_of(__file__)
     if tools not in sys.path:
         sys.path.insert(0, tools)
     try:

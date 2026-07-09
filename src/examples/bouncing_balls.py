@@ -93,6 +93,8 @@ def step(ball):
 def main():
     balls = make_balls()
     while True:
+        if runtime:
+            runtime.poll()
         graphics.fill(display_drv, BG)
         for ball in balls:
             step(ball)
