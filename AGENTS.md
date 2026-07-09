@@ -13,10 +13,11 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   (`.venv/bin/python`, `.venv/bin/ruff`). The system `python3` has no project
   dependencies installed.
 - Only the `cpython-venv` runtime is available here. `micropython`,
-  `micropython.exe`, `circuitpython`, and `python.exe` are **not** installed, so
-  cross-runtime matrices only exercise CPython.
-- The desktop display backend on CPython is `PGDisplay` (pygame-ce; `import pygame`). `pygame-ce` and
-  `ruff` are installed on top of `requirements-dev.txt` (they are intentionally
+  `micropython.exe`, `circuitpython`, and `python.exe` are installed on the system path, so
+  cross-runtime matrices can exercise all 5.  ./tools/jupyter.sh and ./tools/pyscript.sh aid
+  development in Jupyter Notebook and PyScript respectively.
+- The desktop display backend on CPython on Windows is `PGDisplay` (pygame-ce; `import pygame`).
+  `pygame-ce` is installed on top of `requirements-dev.txt` (it is intentionally
   not listed there — SDL2 is the documented primary and pygame-ce is the fallback).
 
 ### Tests and lint
@@ -41,7 +42,7 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   [`tools/example_runtimes.toml`](tools/example_runtimes.toml) and per-example
   metadata is [`tools/example_test_manifest.toml`](tools/example_test_manifest.toml).
 - The cross-runtime example harness is `tools/example_test_kit.py`. To run the
-  CPython matrix headlessly, set dummy SDL drivers so pygame needs no display:
+  CPython matrix headlessly, set dummy SDL drivers so pygame or SDL needs no display:
   `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv`
   Use `--only-example <name> ...` to scope. Results are written to
   `.cursor/example_test_results.json` (gitignored).
@@ -50,10 +51,8 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   `"<impl> on <platform>"`, which can be screenshotted/recorded with `ffmpeg`
   (`-f x11grab -i :1`).
 - Known pre-existing example failures on CPython (not environment issues to
-  "fix"): `lv_test_timer_*`/`lv_touch_test` need `lvgl` (not installed),
-  `nano_gui_simpletest` needs the `gui` package, `png_test` needs
-  `PYDISPLAY_PNG_DIR`, and `testris`/`bmp565_scroll_sprite`/`lv_test_timer_async`
-  fail identically on `main` (unrelated to timer/display code).
+  "fix"): `nano_gui_simpletest` needs the `gui` package and `png_test` needs
+  `PYDISPLAY_PNG_DIR`.
 
 ### Architecture note: timers and refresh
 
