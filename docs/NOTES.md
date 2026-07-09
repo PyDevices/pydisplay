@@ -13,6 +13,7 @@ Private working notes for this repo. Not part of the published docs.
 
 ### displaysys & desktop
 
+- [ ] SDL rescaling to fit the window on the screen is still too large in MicroPython
 - [ ] Make sure all desktop backends exit gracefully in `displaysys`
 
 ### Examples & demos

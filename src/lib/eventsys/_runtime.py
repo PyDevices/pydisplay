@@ -104,6 +104,7 @@ class Runtime:
         self._refresh_subscription = None
         self._refresh_paused = False
         self._refresh_claim = None
+        self._pending_async_refresh = None
         self.host_dev = None
         self.touch_dev = None
         self.keypad_dev = None
@@ -136,6 +137,28 @@ class Runtime:
     @property
     def timer_async(self):
         return self._timer_async
+
+    @staticmethod
+    def _event_loop_running():
+        """True when asyncio already has a running loop (PyScript, Jupyter, async main)."""
+        try:
+            from multimer import asyncio
+
+            if hasattr(asyncio, "get_running_loop"):
+                asyncio.get_running_loop()
+                return True
+        except (ImportError, RuntimeError):
+            pass
+        return False
+
+    def arm_async_refresh(self):
+        """Wire deferred display refresh once the asyncio event loop is running."""
+        pending = self._pending_async_refresh
+        if pending is None:
+            return
+        self._pending_async_refresh = None
+        show_fn, period = pending
+        self._refresh_subscription = self.on_tick(show_fn, period=period, async_=True)
 
     @property
     def quit_requested(self):
@@ -308,6 +331,7 @@ class Runtime:
         self._refresh_subscription = None
         self._refresh_paused = False
         self._refresh_claim = None
+        self._pending_async_refresh = None
         if timer is not None:
             timer.deinit()
 
@@ -350,7 +374,15 @@ class Runtime:
                 return
             display.show(timer_obj)
 
-        self._refresh_subscription = self.on_tick(_show, period=period, async_=self._timer_async)
+        if self._timer_async and not self._event_loop_running():
+            self._pending_async_refresh = (_show, period)
+            return
+
+        self._refresh_subscription = self.on_tick(
+            _show,
+            period=period,
+            async_=self._timer_async,
+        )
 
     def _install_default_quit(self):
         display = self._display

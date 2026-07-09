@@ -2,6 +2,7 @@
 from board_config import display_drv, runtime
 from graphics import Draw
 from multimer import sleep_ms
+from multimer.loop import run_forever
 from palettes import get_palette
 from random import getrandbits
 
@@ -48,30 +49,32 @@ def main():
 
     canvas.show()
 
-    while True:
+    def poll_events():
         elist = runtime.poll() if runtime else []
         if runtime.quit_requested if runtime else False:
-            break
+            return True
         quit_requested = False
         for e in elist:
             if e.type == runtime.events.QUIT:
                 quit_requested = True
                 break
             if e.type == runtime.events.MOUSEBUTTONDOWN:
-                    x, y = canvas.translate_point(e.pos)
-                    if y < canvas.tfa:
-                        canvas.vscroll -= line_height
-                    elif y > canvas.height - canvas.bfa:
-                        canvas.vscroll += line_height
-                    else:
-                        y_pos = (y // line_height) * line_height
-                        canvas.fill_rect(
-                            canvas.width - 20, y_pos + 2, 12, 12, getrandbits(canvas.color_depth)
-                        )
-                    canvas.show()
+                x, y = canvas.translate_point(e.pos)
+                if y < canvas.tfa:
+                    canvas.vscroll -= line_height
+                elif y > canvas.height - canvas.bfa:
+                    canvas.vscroll += line_height
+                else:
+                    y_pos = (y // line_height) * line_height
+                    canvas.fill_rect(
+                        canvas.width - 20, y_pos + 2, 12, 12, getrandbits(canvas.color_depth)
+                    )
+                canvas.show()
             if quit_requested:
-                break
-        sleep_ms(0)
+                return True
+        return False
+
+    run_forever(poll_events, delay_ms=0)
 
 
 main()

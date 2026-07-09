@@ -81,6 +81,6 @@ else:
         title=f"{sys.implementation.name} on {sys.platform}",
         scale=scale,
     )
-    runtime = eventsys.Runtime(display=display_drv, host_read=get_events)
+    runtime = eventsys.Runtime(display=display_drv, host_read=get_events, timer_async=True)
 
 display_drv.fill(0)

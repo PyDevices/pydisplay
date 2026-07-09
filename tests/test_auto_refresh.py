@@ -57,6 +57,29 @@ class TestRuntimeOwnedRefresh(unittest.TestCase):
         self.addCleanup(runtime.stop_timer)
         self.assertTrue(_wait(lambda: display.shows > 0), "display.show never called")
 
+    def test_timer_async_defers_refresh_until_armed(self):
+        display = _FakeDisplay()
+        runtime = Runtime(display=display, timer_async=True)
+        self.addCleanup(runtime.stop_timer)
+        self.assertIsNone(runtime._timer)
+        self.assertIsNotNone(runtime._pending_async_refresh)
+
+        async def _arm_and_wait():
+            runtime.arm_async_refresh()
+            deadline = time.monotonic() + 1.0
+            while time.monotonic() < deadline:
+                if display.shows > 0:
+                    return
+                await __import__("asyncio").sleep(0.01)
+            raise AssertionError("display.show never called")
+
+        import asyncio
+
+        asyncio.run(_arm_and_wait())
+        from multimer import AsyncTimer
+
+        self.assertIsInstance(runtime._timer, AsyncTimer)
+
     def test_subscription_deinit_unsubscribes(self):
         hits = []
         sub = self.runtime.on_tick(hits.append, period=20)

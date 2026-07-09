@@ -1,40 +1,97 @@
 # Cross-runtime example matrix report
 
-**Last updated:** 2026-07-09 (`cb6ac634`)  
-**Baseline:** `9abf8d6a` — 350 cells, 222 pass / 128 fail  
-**Latest full matrix:** 350 cells, **282 pass / 68 fail** (44 exit, 15 hang, 9 error) — **stale** (predates commits through `cb6ac634`; re-run needed)  
-**Harness:** `tools/example_test_kit.py --all-except-harness --order runtimes` (5 runtimes, no pyscript)
+**Last updated:** 2026-07-09 (full matrix ×2 after MP/CP rebuild)  
+**pydisplay HEAD:** `ad373bde`  
+**Harness:** `tools/example_test_kit.py --all-except-harness --order runtimes --no-unit-tests --only-runtime micropython micropython.exe circuitpython cpython-venv python.exe`  
+**Baseline (historical):** `9abf8d6a` — 350 cells, 222 pass / 128 fail  
+**Prior stale matrix:** 350 cells, 282 pass / 68 fail (pre-rebuild, mixed graphics stack)
 
 ---
 
-## Commits since last full matrix
+## Phase 0 — Rebuilds (2026-07-09)
 
-| Commit | Summary |
-|--------|---------|
-| `8ff1330d` | Harness quit handling + hang cluster (poll before quit, test-mode `_handle_quit`, wrapper `os._exit`, PBM composition, manifest timeouts) |
-| `4ca8e1b7` | Fix `scroll_touch_test_displaybuf` hang — `runtime.stop_timer()` before poll loop; no `display.quit()` from inject thread |
-| `c695451f` | SDL/PG batch compositing until `show()`; pixel_sim panel blit; proxy `blit_rect` on `DisplayBuffer` |
-| `cb6ac634` | NOTES only (no example changes) |
+| Target | Command | Verified |
+|--------|---------|----------|
+| MicroPython unix | `./build_mp.sh --port unix --variant standard` | `import graphics` → `native_cmod` |
+| MicroPython Windows | `./build_mp.sh --port windows --variant dev` | `micropython.exe` → `native_cmod` |
+| CircuitPython unix | `apply_cp_unix_graphics_patches.sh` + `build_cp.sh --port unix --variant coverage` | `import graphics` → `native_cmod` |
+| CPython | editable `graphics-cmod` @ `036e9b4` in pydisplay `.venv` | `test_parity.py` ok |
+
+Symlinks: `~/bin/micropython`, `~/bin/micropython.exe` → `build-dev`, `~/bin/circuitpython` → `build-coverage`.
+
+**TestPyPI:** `graphics-cmod` **v0.0.3** published (`6166038` — CPython wheel GCC 14 fix only; no MP/CP rebuild needed).
+
+**Note:** First matrix attempt included pyscript/jupyter; PyScript server failed to start on port 8000. Both reported runs use **5 subprocess runtimes only** (matches historical desktop matrix scope).
 
 ---
 
-## Incremental kit verify (post-fix)
+## Run A — sync timer (`timer_async=False`, default desktop)
 
-Spot checks after the commits above (not a full matrix):
+**Config:** `board_config.py` line 84 unchanged (`Runtime(..., host_read=get_events)`).
 
-| Example | cpython-venv | micropython | Notes |
-|---------|--------------|-------------|-------|
-| `pbm_create_new` | ok | — | prior batch |
-| `pbm_simpletest` | ok | — | prior batch |
-| `scroll_touch_test` | ok | — | prior batch |
-| `testris` | ok | — | prior batch |
-| `bmp565_scroll_sprite` | ok | — | prior batch |
-| `scroll_touch_test_displaybuf` | ok | ok | was hang on cpython-venv |
-| `displaybuf_blit` | ok | ok | was `AttributeError` on MP |
-| `font_simpletest3` | ok | ok | graphics-cmod smoke |
-| `displaybuf_simpletest` | ok | — | graphics-cmod smoke |
+| Metric | Count |
+|--------|------:|
+| Cells | 350 |
+| **Pass** | **192** |
+| Fail | 158 |
+| — error | 134 |
+| — hang | 11 |
+| — exit | 13 |
 
-**graphics-cmod:** `036e9b4` / TestPyPI **`v0.0.3`** (publish in progress). Full `graphics.__all__` parity on MP, CPython, CircuitPython — see `.cursor/graphics_cmod_parity_report.md`.
+### Per runtime (Run A)
+
+| Runtime | ok | error | hang | exit |
+|---------|---:|------:|-----:|-----:|
+| micropython | 25 | 45 | 0 | 0 |
+| micropython.exe | 10 | 43 | 5 | 12 |
+| circuitpython | 24 | 46 | 0 | 0 |
+| cpython-venv | 64 | 0 | 5 | 1 |
+| python.exe | 69 | 0 | 1 | 0 |
+
+**Artifacts:** `.cursor/example_test_results_sync.json`
+
+### Run A — notable outcomes
+
+**cpython-venv / python.exe:** Strong pass rate (64/70, 69/70). Remaining cpython-venv issues: hangs on `displaysys_fill_rect_test`, `eventsys_touch_test`, `palettes_material`, `scroll_touch_test`; `lv_touch_test` exit_-11 (SIGSEGV).
+
+**micropython / circuitpython (native cmod):** Many errors — examples expect Python `graphics` API (`FrameBuffer` duck typing, `BMP565` subscript/bpp, `from_file`, keyword args, `text16`, etc.). Confirms cmod is active; example/cmod API gaps dominate (not display-driver regressions).
+
+**micropython.exe:** Teardown cluster persists — 12 exit, 5 hang (e.g. `displaybuf_simpletest` exit_3, `displaysys_block_test` exit_5, encoder/touch hangs). 10 ok vs 25 on MP unix.
+
+**Fixed vs prior incremental smoke:** `displaybuf_blit`, `scroll_touch_test_displaybuf` **ok** on cpython-venv and micropython in full matrix.
+
+---
+
+## Run B — async timer (`timer_async=True` on desktop SDL/PG branch)
+
+**Config:** line 84 temporarily `Runtime(..., host_read=get_events, timer_async=True)` (reverted after run).
+
+| Metric | Count | Δ vs Run A |
+|--------|------:|-----------:|
+| Cells | 350 | — |
+| **Pass** | **59** | **−133** |
+| Fail | 291 | +133 |
+| — error | 285 | +151 |
+| — hang | 5 | −6 |
+| — exit | 1 | −12 |
+
+### Per runtime (Run B)
+
+| Runtime | ok | error | hang | exit |
+|---------|---:|------:|-----:|-----:|
+| micropython | 27 | 43 | 0 | 0 |
+| micropython.exe | 2 | 67 | 0 | 1 |
+| circuitpython | 24 | 46 | 0 | 0 |
+| cpython-venv | 3 | 67 | 0 | 0 |
+| python.exe | 3 | 62 | 5 | 0 |
+
+**Artifacts:** `.cursor/example_test_results_async.json`
+
+### Run B — analysis (superseded)
+
+Run B predates the **timer_async host** fix (`Runtime.arm_async_refresh`, `multimer.run`, deferred refresh). That run failed because refresh armed `AsyncTimer` at import without a loop.
+
+**Post-fix limited matrix** (`timer_async=True` on desktop): cpython-venv **8/8** ok on smoke set; MP failures are graphics cmod API gaps only.
 
 ---
 
@@ -42,24 +99,23 @@ Spot checks after the commits above (not a full matrix):
 
 | # | Item | Notes |
 |---|------|-------|
-| 1 | **Re-run full matrix** | Baseline counts predate `4ca8e1b7`–`c695451f`; expect fewer cpython hangs/errors and MP `displaybuf_blit` pass |
-| 2 | MP.exe post-loop / teardown | exit_3/exit_5/hang — 44 exit cells in stale matrix |
-| 3 | Hang cluster (non-cpython) | MP.exe: `font_simpletest2`, `bmp565_sprite_transparent`, `displaysys_fill_rect_test`, etc. |
-| 4 | LVGL kit teardown | deferred (`matrix=false`) |
-| 5 | `pixel_sim_demos` fire effect | simulator flame looks wrong (NOTES todo) |
-
-**Cleared since baseline:** cpython DisplayBuffer/`graphics_native` subclass; `scroll_touch_test_displaybuf` hang; MP `displaybuf_blit`; hang-cluster quit contract + SDL teardown path for desktop loop examples.
+| 1 | MP/CP example vs cmod API | ~45–46 errors/runtime: `FrameBuffer required`, BMP565, `from_file`, kwargs, `text16` |
+| 2 | MP.exe teardown | 12 exit + 5 hang in Run A; async made worse (67 errors) |
+| 3 | cpython-venv hangs | 5 in Run A: fill_rect, touch, palettes_material, scroll_touch |
+| 4 | `lv_touch_test` | exit_-11 on cpython-venv (LVGL; `matrix=false` in manifest?) |
+| 5 | graphics-cmod TestPyPI v0.0.3 | **published** (`6166038`) |
+| 6 | Full matrix + pyscript | Optional; fix serve.py / port 8000 for launcher runtimes |
 
 ---
 
 ## Rules of thumb
 
 1. Loop examples: call `runtime.poll()` before checking `quit_requested`.
-2. Test harness: test-mode `_handle_quit` sets `quit_requested` and calls `stop_timer()` only — do **not** call `display.quit()` from the inject daemon thread (SDL deadlock with DisplayBuffer refresh).
-3. DisplayBuffer loop examples: call `runtime.stop_timer()` before the poll loop so periodic refresh does not fight manual `show()` / `blit_rect`.
-4. CPython test mode: wrapper uses `os._exit` after result to skip slow `SDL_Quit`; oneshot examples should not call `display_drv.quit()`.
-5. `timer_simpletest`: `hard=False` only on micropython **librt** (unix), not MP.exe sdl2.
-6. MP matrix from `src/`: `lib/` must precede `.frozen` (path.py prepend).
+2. Test harness: test-mode `_handle_quit` → `stop_timer()` only; no `display.quit()` from inject thread.
+3. DisplayBuffer loops: `runtime.stop_timer()` before manual poll/`show()` loop.
+4. **`timer_async`:** Desktop SDL/PG use `timer_async=True` like PyScript/Jupyter. Display refresh defers until `multimer.run()` / `dual_main` / `run_forever` starts the asyncio loop and calls `runtime.arm_async_refresh()`. Loop examples should use `run_forever` or `dual_main`, not raw `while` + `sleep_ms`.
+5. CPython test mode: wrapper `os._exit`; oneshot examples skip `display_drv.quit()`.
+6. MP matrix from `src/`: `lib/` before `.frozen` (path.py prepend).
 
 ---
 
@@ -67,7 +123,8 @@ Spot checks after the commits above (not a full matrix):
 
 ```bash
 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/example_test_kit.py \
-  --all-except-harness --order runtimes --no-unit-tests
+  --all-except-harness --order runtimes --no-unit-tests \
+  --only-runtime micropython micropython.exe circuitpython cpython-venv python.exe
 ```
 
-Results: `.cursor/example_test_results.json`
+Results: `.cursor/example_test_results.json` (copy to `_sync.json` / `_async.json` when comparing configs).

@@ -35,4 +35,8 @@ def __getattr__(name):
                 "firmware manifest (see docs/building.md)"
             )
         return mod
+    if name in ("run", "run_forever", "run_forever_async", "dual_main"):
+        from . import loop
+
+        return getattr(loop, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
