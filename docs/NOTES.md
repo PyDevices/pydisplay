@@ -16,15 +16,17 @@ Private working notes for this repo. Not part of the published docs.
 - [x] Trim `jupyter_notebook.ipynb` out of `pyscript.toml` (demo pages don't need it; bundled via `gen_repo_packages.py`)
 - [x] Jupyter install notebook: add `board_config.py` to the `displaysys` TestPyPI package (may need default `board_config` to work without eventsys) — `src/lib/board_config.py` ships with core `displaysys` on next publish
 - [x] `displaysys-*` backend subpackages on TestPyPI — v0.0.8: upload + `MICROPYTHON_LIB_DIR` fix; deps pgdisplay→pygame-ce, sdldisplay→usdl2; core `displaysys` ships `board_config.py`; no examples in wheels; removed `boarddisplay`
-- [ ] Ensure each `src/lib` package is installable alone — no hard dependency on the other pydisplay libs being installed
+- [x] Ensure each `src/lib` package is installable alone — `tools/test_testpypi_standalone.sh` passes for core TestPyPI wheels + desktop backends; MCU `displaysys-*` on CPython need MP (e.g. `micropython.const` in busdisplay)
+- [ ] Settle on naming convention for all TestPyPI packages — must avoid naming collisions with pypi.org
 - [ ] Make sure all desktop backends exit gracefully in `displaysys`
+- [x] Make displaysys only print `requires_byteswap` when it is True
 - [x] Compile MicroPython with `os.dupterm` enabled
 
 - [ ] `bouncing_balls` has too many balls and runs too slow
 
 - [x] `board_config` scaling for PGDisplay is too big — window doesn't fit the screen (auto-clamp in `PGDisplay`)
 
-- [ ] Test kit only runs `tower_climb` in PGDisplay, not SDL2
+- [x] Test kit only runs `tower_climb` in PGDisplay, not SDL2 — `example_runtimes.toml` sets `display_backend = SDLDisplay` for desktop runtimes; matrix shows `tower_climb | SDLDisplay, ok`
 
 - [ ] Combine all `pixel_sim_*` examples into a single file
   - [ ] Runnable through the sim or on the normal runtime by changing a single line (e.g. add `examples/pixel_sim` to the front of the path)

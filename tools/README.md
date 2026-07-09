@@ -62,6 +62,15 @@ python tools/example_test_kit.py --only-example calculator --only-runtime microp
 
 Installs `displaysys-sdldisplay`, `graphics-cmod`, and `lvgl-cpython` (no version pins). See [Publishing micropython-lib — verify after publish](../docs/publishing-micropython-lib.md#4-verify).
 
+| Script | Purpose |
+|--------|---------|
+| [`test_testpypi_standalone.sh`](test_testpypi_standalone.sh) | Per-package TestPyPI venv import smoke (`multimer`, `displaysys`, `eventsys`, `pydisplay-graphics`; `--desktop` adds backend stacks) |
+
+```bash
+./tools/test_testpypi_standalone.sh
+./tools/test_testpypi_standalone.sh --desktop
+```
+
 ## Other dev aids
 
 | Script | Purpose |

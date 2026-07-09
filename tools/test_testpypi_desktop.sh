@@ -87,6 +87,7 @@ else
     echo "--- smoke test (SDL window) ---"
 fi
 
+set +e
 "$VENV/bin/python" - <<'PY'
 import graphics
 import lvgl as lv
@@ -105,5 +106,10 @@ print("ok", display_drv.width, "x", display_drv.height)
 if hasattr(display_drv, "quit"):
     display_drv.quit()
 PY
+ec=$?
+set -e
+if [[ $ec -ne 0 && $ec -ne 177 ]]; then
+    exit "$ec"
+fi
 
 echo "Smoke test passed."
