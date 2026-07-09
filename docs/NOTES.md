@@ -34,8 +34,7 @@ Private working notes for this repo. Not part of the published docs.
 
 - [x] Test kit only runs `tower_climb` in PGDisplay, not SDL2 — `example_runtimes.toml` sets `display_backend = SDLDisplay` for desktop runtimes; matrix shows `tower_climb | SDLDisplay, ok`
 
-- [ ] Combine all `pixel_sim_*` examples into a single file
-  - [ ] Runnable through the sim or on the normal runtime by changing a single line (e.g. add `examples/pixel_sim` to the front of the path)
+- [x] Combine all `pixel_sim_*` examples into a single file — `pixel_sim_demos.py` with `DEMO` selector; swap `pixel_sim` vs `board_config` import for sim vs hardware
 
 - [x] Make `AGENTS.md` in cmods look for `AGENTS.md` at the root of all sub-repos
 

@@ -189,28 +189,8 @@
       "github:PyDevices/pydisplay/src/examples/pbm_simpletest.py"
     ],
     [
-      "pixel_sim_fire.py",
-      "github:PyDevices/pydisplay/src/examples/pixel_sim_fire.py"
-    ],
-    [
-      "pixel_sim_matrix.py",
-      "github:PyDevices/pydisplay/src/examples/pixel_sim_matrix.py"
-    ],
-    [
-      "pixel_sim_plasma.py",
-      "github:PyDevices/pydisplay/src/examples/pixel_sim_plasma.py"
-    ],
-    [
-      "pixel_sim_reel.py",
-      "github:PyDevices/pydisplay/src/examples/pixel_sim_reel.py"
-    ],
-    [
-      "pixel_sim_scroll.py",
-      "github:PyDevices/pydisplay/src/examples/pixel_sim_scroll.py"
-    ],
-    [
-      "pixel_sim_starfield.py",
-      "github:PyDevices/pydisplay/src/examples/pixel_sim_starfield.py"
+      "pixel_sim_demos.py",
+      "github:PyDevices/pydisplay/src/examples/pixel_sim_demos.py"
     ],
     [
       "png_test.py",
