@@ -265,20 +265,20 @@ def _start_multimer_quit_schedule(duration_s, quit_mode, kind, injected):
 
 
 def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode):
-    import quit_inject
-
     injected = [False]
     cooperative = _cooperative_lvgl_quit(kind)
 
-    def delayed_inject():
-        touch_delay = _touch_delay_s(duration_s)
-        if quit_mode == "inject" and touch_delay > 0:
-            _sleep(touch_delay)
-            quit_inject.inject_synthetic_touch(broker_poll=False)
-        _sleep(max(0, duration_s - touch_delay))
-        _inject_quit_now(quit_inject, kind, injected)
-
     if not cooperative:
+        import quit_inject
+
+        def delayed_inject():
+            touch_delay = _touch_delay_s(duration_s)
+            if quit_mode == "inject" and touch_delay > 0:
+                _sleep(touch_delay)
+                quit_inject.inject_synthetic_touch(broker_poll=False)
+            _sleep(max(0, duration_s - touch_delay))
+            _inject_quit_now(quit_inject, kind, injected)
+
         try:
             import threading
 
