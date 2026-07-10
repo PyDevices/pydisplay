@@ -150,6 +150,19 @@ def run_forever():
     multimer_run_forever(poll, delay_ms=Display.tick_period)
 
 
+_POINTER_EVENTS = (events.MOUSEBUTTONDOWN, events.MOUSEBUTTONUP, events.MOUSEMOTION)
+
+
+def _cond_pointer(child, event, point):
+    """Event condition: child's padded area contains the (translated) pointer."""
+    return child.padded_area.contains(point)
+
+
+def _cond_always(child, event, point):
+    """Event condition: always deliver (non-pointer events)."""
+    return True
+
+
 _display_drv_get_attrs = {
     "set_vscroll",
     "tfa",
@@ -294,32 +307,48 @@ class Widget:
         self._event_callbacks[event_type][callback] = data
 
     def remove_event_cb(self, event_type: int, callback: callable):
-        # Look in self._event_callbacks for the event_type.  If found, remove the callback from the dictionary.
+        """
+        Remove a previously registered event callback.
+
+        Args:
+            event_type (int): ``eventsys.events`` constant the callback was
+                registered for.
+            callback (callable): The callback to remove. No error if absent.
+        """
         if event_type in self._event_callbacks:
             self._event_callbacks[event_type].pop(callback, None)
 
-    def handle_event(self, event, condition=None):
+    def handle_event(self, event, condition=None, point=None):
         """
-        Handle an event and propagate it to child widgets.  Subclasses that need to handle events
-        should override this method and call this method to propagate the event to children.
+        Handle an event and propagate it to child widgets.
+
+        Subclasses that need to handle events should override this method and
+        call it to propagate the event to children.
+
+        The default ``condition`` is a module-level function (not a per-call
+        closure), and for pointer events the pointer is translated to display
+        coordinates once per dispatch rather than once per child.
 
         Args:
             event (Event): The event to handle.
-            condition (callable): A function that returns True if the event should be handled by the child widget.
+            condition (callable): ``condition(child, event, point)`` returning
+                True when the event should be delivered to ``child``. Defaults
+                to a pointer-hit test for mouse events, else always True.
+            point (tuple): Pre-translated pointer position, shared across the
+                recursion for pointer events.
         """
         if condition is None:
-            if event.type in (events.MOUSEBUTTONDOWN, events.MOUSEBUTTONUP, events.MOUSEMOTION):
-                condition = lambda child, e: child.padded_area.contains(  # noqa: E731
-                    self.display.translate_point(e.pos)
-                )
+            if event.type in _POINTER_EVENTS:
+                condition = _cond_pointer
+                point = self.display.translate_point(event.pos)
             else:
-                condition = lambda child, e: True  # noqa: E731
+                condition = _cond_always
         for child in self.children:
             if child.visible:
-                if condition(child, event):
+                if condition(child, event, point):
                     for callback, data in child._event_callbacks.get(event.type, {}).items():
                         callback(data, event)
-                child.handle_event(event, condition)
+                child.handle_event(event, condition, point)
 
     @property
     def parent(self):
@@ -490,9 +519,16 @@ class Widget:
             self.display.framebuf.fill_rect(*area, self.bg)
 
     def hide(self, hide=True):
+        """
+        Show or hide the widget.
+
+        Args:
+            hide (bool): ``True`` to hide, ``False`` to show.
+        """
         self.visible = not hide
 
     def invalidate(self):
+        """Mark this widget (and its descendants) as needing a redraw."""
         if not self.invalidated:
             self.invalidated = True
             if self.parent:
@@ -506,9 +542,29 @@ class Widget:
         self.invalidate()
 
     def set_change_cb(self, callback):
+        """
+        Set the callback invoked when the widget's value changes.
+
+        Args:
+            callback (callable): Called as ``callback(widget)`` on change.
+        """
         self._change_callback = callback
 
     def set_position(self, x=None, y=None, w=None, h=None, align=None, align_to=None):
+        """
+        Update any subset of the widget's geometry and re-layout.
+
+        Only the arguments that are not ``None`` are changed. Changing geometry
+        invalidates the parent so the affected area is redrawn.
+
+        Args:
+            x (int): New relative x-coordinate.
+            y (int): New relative y-coordinate.
+            w (int): New width.
+            h (int): New height.
+            align (int): New ``ALIGN`` constant.
+            align_to (Widget): New widget to align against.
+        """
         changed = False
         if x is not None:
             self._x = x
@@ -543,6 +599,7 @@ class Widget:
             self.parent.add_dirty_descendant(self)
 
     def render(self):
+        """Redraw this widget if invalidated, then clear its dirty flags."""
         if self.invalidated:
             _log("Drawing", self, "on", self.parent, "at", self.area)
             self.draw()
@@ -559,6 +616,12 @@ class Widget:
         self.dirty_descendants.discard(branch)
 
     def set_value(self, value):
+        """
+        Set the widget's value (equivalent to assigning ``widget.value``).
+
+        Args:
+            value: The new value; triggers ``changed`` when it differs.
+        """
         self.value = value
 
 
@@ -671,6 +734,16 @@ class Display(Widget):
         self._align_to = None
 
     def add_task(self, callback, delay):
+        """
+        Schedule a repeating task run from :meth:`tick`.
+
+        Args:
+            callback (callable): Zero-argument callable to run.
+            delay (int): Interval between runs, in milliseconds.
+
+        Returns:
+            Task: The created task (pass to :meth:`remove_task` to cancel).
+        """
         new_task = Task(callback, delay)
         self._tasks.append(new_task)
         return new_task
@@ -698,6 +771,12 @@ class Display(Widget):
         self.display_drv.show()
 
     def remove_task(self, task):
+        """
+        Cancel a scheduled task.
+
+        Args:
+            task (Task): A task previously returned by :meth:`add_task`.
+        """
         self._tasks.remove(task)
 
     def quit(self):
@@ -747,6 +826,7 @@ class Display(Widget):
         self._tick_busy = False
 
     def render_dirty_widgets(self):
+        """Redraw all invalidated widgets, breadth-first, without recursion."""
         # Non-recursive redraw traversal using an explicit stack
         # Use a stack to avoid recursion / stack overflow
         stack = list(self.dirty_descendants)
@@ -1096,6 +1176,9 @@ class TextBox(Widget):
 
 class Icon(Widget):
     cache = {}
+    # Reusable 2-entry (bg, fg) palette. Rewritten on every draw, so a single
+    # shared buffer avoids allocating a 4-byte FrameBuffer per draw call.
+    _palette = FrameBuffer(memoryview(bytearray(4)), 2, 1, RGB565)
 
     def __init__(
         self,
@@ -1158,9 +1241,9 @@ class Icon(Widget):
 
     def draw(self, _=None):
         """
-        Draw the icon on the screen.
+        Draw the icon on the screen using the shared 2-entry palette buffer.
         """
-        pal = FrameBuffer(memoryview(bytearray(4)), 2, 1, RGB565)
+        pal = Icon._palette
         if self.bg is self.parent.color_theme.transparent:
             key = ~self.fg
             pal.pixel(0, 0, key)
@@ -1378,15 +1461,33 @@ class CheckBox(Toggle):
         )
 
 
-class RadioGroup:
-    def __init__(self):
+class RadioGroup(Widget):
+    def __init__(self, parent: Widget):
         """
         Initialize a RadioGroup to manage a group of RadioButtons.
+
+        RadioGroup is a real (but invisible, zero-size) :class:`Widget` so it
+        participates in the widget tree for lifecycle consistency with every
+        other widget. It draws nothing and is skipped by the dirty-rect render
+        pass (``invalidate`` and ``draw`` are no-ops). The member RadioButtons
+        are normal children of their own parent; the group only tracks them for
+        mutual exclusion.
+
+        Args:
+            parent (Widget): The parent widget or screen that owns this group.
 
         See Also:
             RadioButton
         """
         self.radio_buttons = []
+        super().__init__(parent, x=0, y=0, w=0, h=0, visible=False)
+        self._w = self._h = 0
+
+    def invalidate(self):
+        """No-op: an invisible, zero-size group never needs redrawing."""
+
+    def draw(self, area=None):
+        """No-op: the group draws nothing."""
 
     def add(self, radio_button):
         """
