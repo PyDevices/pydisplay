@@ -1,18 +1,34 @@
 from . import _files, _font, _shapes
 from ._area import Area
 from ._blit_hooks import clip_blit_bounds
-from .framebuf import (
-    GS2_HMSB,
-    GS4_HMSB,
-    GS8,
-    MONO_HLSB,
-    MONO_HMSB,
-    MONO_VLSB,
-    RGB565,
-)
-from .framebuf import (
-    FrameBuffer as _FrameBuffer,
-)
+
+try:
+    # Local submodule: present in TestPyPI wheels and after tools/sync_framebuf.py runs.
+    from .framebuf import (
+        GS2_HMSB,
+        GS4_HMSB,
+        GS8,
+        MONO_HLSB,
+        MONO_HMSB,
+        MONO_VLSB,
+        RGB565,
+    )
+    from .framebuf import FrameBuffer as _FrameBuffer
+except ImportError:
+    # graphics/framebuf.py is a generated packaging artifact (gitignored) not present
+    # in all deploy paths (PyScript, mip-install from GitHub, bare CP/MP without wheel).
+    # Fall back to the bare framebuf module: native C on MicroPython hardware,
+    # or add_ons/framebuf.py when add_ons/ is on sys.path (PyScript, CircuitPython, etc.).
+    from framebuf import (  # type: ignore[no-redef]
+        GS2_HMSB,
+        GS4_HMSB,
+        GS8,
+        MONO_HLSB,
+        MONO_HMSB,
+        MONO_VLSB,
+        RGB565,
+    )
+    from framebuf import FrameBuffer as _FrameBuffer  # type: ignore[no-redef]
 
 # pydisplay extension — not in MicroPython framebuf
 RGB888 = 7
