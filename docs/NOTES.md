@@ -50,7 +50,6 @@ Private working notes for this repo. Not part of the published docs.
 
 ### Examples & demos
 
-- [ ] **pdwidgets** — other agent lands `FrameBuffer.circle` first; then re-enable `widgets_*.py` in example matrix and PyScript gallery (`matrix=false` + `# pyscript skip: gallery` until stable)
 - [ ] `pixel_sim_demos` fire effect — cellular flame does not look/behave correctly on the simulator (fix heat propagation / palette)
 - [ ] Make all examples runnable on PyScript, then Jupyter notebook
 
@@ -71,7 +70,7 @@ Private working notes for this repo. Not part of the published docs.
 
 ### Tooling & ecosystem
 
-- [ ] Add a GUI to the matrix test kit (`tools/example_test_kit.py`) — after cloud agent reworks pdwidgets (and remaining matrix failures are cleared)
+- [ ] Add a GUI to the matrix test kit (`tools/example_test_kit.py`)
 - [ ] Verify `manifest.py` selection order in `~/github/cmods`
 - [ ] Fork [figma2lvgl](https://github.com/khiyamiftikhar/figma2lvgl) and add option to output Python
 - [ ] Change docs and scripts so cmods sub-repos don't mention or require cmods (personal workspace only — not required for other users); may need to move functionality out of cmods into sub-repos
@@ -109,3 +108,4 @@ Private working notes for this repo. Not part of the published docs.
 - [x] SDL rescaling to fit the window on the screen is still too large in MicroPython — init `SDL_INIT_VIDEO` before querying usable desktop bounds (`SDL_INIT_EVERYTHING` left bounds at 0 on MP); ffi path uses `struct.unpack_from` (no `signed=` kw on MP)
 - [x] Refactor `src/lib/board_config.py` for readability (same behavior; short comments OK)
 - [x] Re-run full desktop matrix and refresh `cross_runtime_report.md` (2026-07-10: 292/294 sync, 290/294 async executed)
+- [x] **pdwidgets rework** — bug fixes (competing timer, `tick()` coalescing), hardening, `pct` perf, new widgets (`Card`, `Row`/`Column`, `Badge`, `Switch`, `NumberStepper`, `TextInput`, `Dropdown`, `Dialog`), visual design system, 3 showcase examples; `widgets_*.py` re-enabled in the example matrix and PyScript gallery (PR #62)
