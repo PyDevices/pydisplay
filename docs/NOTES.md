@@ -6,15 +6,53 @@ Private working notes for this repo. Not part of the published docs.
 
 <!-- Add items when asked to "add … to my todo list". Use `- [ ]` checkboxes. -->
 
-### Publishing & packaging
+### add_ons
 
-- [ ] Remove `pydisplay-bundle` everywhere — **first:** confirm all subpackages are on TestPyPI and [PyDevices/micropython-lib](https://github.com/PyDevices/micropython-lib); then drop bundle manifest, `packages/pydisplay-bundle.json`, Wokwi bundle, publish script bundle path, install manifests
-- [ ] Make all PyDevices repo automations that publish to TestPyPI or micropython-lib also attach those artifacts as GitHub release assets per tag — see [testpypi-publish-audit.md](testpypi-publish-audit.md) (gap: none do today)
+- [ ] Consolidate or merge `add_ons/` modules where possible (fewer top-level files)
+- [ ] `wifi.py` — minimal MicroPython shim for CircuitPython's `wifi` API; audit parity with [CP `wifi`](https://docs.circuitpython.org/en/latest/shared-bindings/wifi/index.html) (`radio.connect`, etc.)
+- [ ] Fix `add_ons/README.md`: `add_ons.add_path` is gone — path setup is `import lib.path`
+
+### Peter Hinch GUIs (work as a set)
+
+[nano-gui](https://github.com/peterhinch/micropython-nano-gui), [micro-gui](https://github.com/peterhinch/micropython-micro-gui), and [micropython-touch](https://github.com/peterhinch/micropython-touch) share `DisplayBuffer` / `framebuf` patterns — treat pydisplay integration for all three together (not one library at a time).
+
+| Library | Upstream setup file | pydisplay `add_ons/` today |
+|---------|---------------------|----------------------------|
+| nano-gui | `color_setup.py` → `ssd` | `color_setup.py` (+ `ensure_nano_gui.py`, `uctypes.py`) |
+| micro-gui | `hardware_setup.py` → `ssd`, `Display` | **missing** — need `hardware_setup.py` for buttons/encoder |
+| micropython-touch | `touch_setup.py` → `ssd`, `display` | `hardware_setup.py` (**wrong name**; upstream renamed Dec 2024) |
+
+- [ ] **Peter Hinch trio** — shared plan: mip install helpers, `DisplayBuffer`/`graphics.FrameBuffer` patches, CP shims, examples, and matrix coverage for nano-gui + micro-gui + micropython-touch
+- [ ] Add `touch_setup.py` for micropython-touch; migrate content from misnamed `hardware_setup.py` (upstream expects `import touch_setup` first)
+- [ ] Add proper `hardware_setup.py` for micro-gui (button/encoder `Display`; separate from touch)
+- [ ] Merge `ensure_nano_gui.py` + `uctypes.py` into `color_setup.py` (nano-gui on CircuitPython); drop the separate files
+
+### LVGL
+
+- [ ] Combine `display_driver.py` + `lv_utils.py` → `lv_runtime.py`
+- [ ] `lv_runtime.py` — support multiple LVGL displays
+- [ ] Ship `lv_runtime.py` with `lv_cpython_mod`, `lv_micropython_cmod`, and `lv_circuitpython_mod`
+- [ ] Rename `eventsys.events.TOUCH` → `POINTER` (breaking; match LVGL `INDEV_TYPE.POINTER` naming)
+
+### usdl2 & SDL
+
+- [ ] `usdl2` all-C user module for MicroPython **and** CPython (like `graphics-cmod`; replace ctypes/ffi Python shims)
+- [ ] Fix `add_ons/usdl2.py` docstring — should be: **ctypes** on CPython (unix + win32); **ffi/uctypes** on MicroPython unix (not “MP win32 uses ctypes”)
+- [ ] Add `FFmpegFrameRecorder` / `open_frame_recorder` to `SDLDisplay` (already on `PGDisplay` via `displaysys`)
 
 ### displaysys & desktop
 
 - [ ] SDL rescaling to fit the window on the screen is still too large in MicroPython
+- [ ] **CircuitPython `SDLDisplay` forced software renderer** — `sdldisplay.py` downgrades accelerated GL on CP only (`SetRenderTarget` / `glFramebufferTexture2DEXT` fails on rotated render targets). On the same host MP unix uses SDL2 too; investigate whether this is a real CP/usdl2-binding difference or an outdated workaround — goal: HW-accelerated SDL on CP unix matching MP, or document the actual root cause
+- [ ] Refactor `src/lib/board_config.py` for readability (same behavior; short comments OK)
+- [ ] Rework `_hard_process_exit` in `sdldisplay.py` — used when `quit(force=True)` / kit teardown must skip SDL cleanup (`usdl2.process_exit`, `ffi` `_exit`, `os._exit` fallbacks); audit whether still needed after harness changes
 - [ ] Make sure all desktop backends exit gracefully in `displaysys`
+- [ ] Update backend docs: drivers need `blit_rect`, `fill_rect`, and `pixel` — not only `show()` and `quit()`
+
+### Publishing & packaging
+
+- [ ] Remove `pydisplay-bundle` everywhere — **first:** confirm all subpackages are on TestPyPI and [PyDevices/micropython-lib](https://github.com/PyDevices/micropython-lib); then drop bundle manifest, `packages/pydisplay-bundle.json`, Wokwi bundle, publish script bundle path, install manifests
+- [ ] Make all PyDevices repo automations that publish to TestPyPI or micropython-lib also attach those artifacts as GitHub release assets per tag — see [testpypi-publish-audit.md](testpypi-publish-audit.md) (gap: none do today)
 
 ### Examples & demos
 
@@ -42,6 +80,7 @@ Private working notes for this repo. Not part of the published docs.
 
 ### Tooling & ecosystem
 
+- [ ] Add `ruff` to `requirements-dev.txt` (repo uses `.venv/bin/ruff` but it is not listed today)
 - [ ] Verify `manifest.py` selection order in `~/github/cmods`
 - [ ] Fork [figma2lvgl](https://github.com/khiyamiftikhar/figma2lvgl) and add option to output Python
 - [ ] Change docs and scripts so cmods sub-repos don't mention or require cmods (personal workspace only — not required for other users); may need to move functionality out of cmods into sub-repos
@@ -69,4 +108,4 @@ Private working notes for this repo. Not part of the published docs.
 - [x] Rework `cmods/graphics` to be all C code, no Python wrappers — full `graphics.__all__` parity on MP, CPython, and CircuitPython (`036e9b4`). CP rebuild: `apply_cp_unix_graphics_patches.sh` then `build_cp.sh --port unix --variant coverage`. See `.cursor/graphics_cmod_parity_report.md`
 - [x] `cmods/graphics` publish to TestPyPI — v0.0.2 tagged and published (14 wheels on TestPyPI)
 - [x] Verify which `mip` install methods install bare `.py` files vs precompiled `.mpy` files — see [mip-and-freeze-sources.md](mip-and-freeze-sources.md)
-- [x] Verify where `cmods/build_mp.sh` pulls `manifest.py` packages from — are they `.py` or `.mpy`? — see [mip-and-freeze-sources.md](mip-and-freeze-sources.md)
+- [x] Move `SDL_desktop_size()` out of `usdl2` into `sdldisplay.py`; expose `SDL_GetDisplayUsableBounds` / `SDL_GetDesktopDisplayMode` on usdl2 instead
