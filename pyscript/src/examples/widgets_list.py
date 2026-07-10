@@ -6,7 +6,6 @@ Test ListView widget
 import board_config
 import pdwidgets as pd
 
-
 pd.DEBUG = False
 pd.MARK_UPDATES = False
 pd.init_timer(10)  # Remove this line to use polled mode in a while loop
@@ -70,7 +69,7 @@ remove.add_event_cb(pd.events.MOUSEBUTTONUP, lambda sender, e: remove_item(list_
 down.add_event_cb(pd.events.MOUSEBUTTONDOWN, lambda sender, e: list_view.scroll_down())
 up.add_event_cb(pd.events.MOUSEBUTTONDOWN, lambda sender, e: list_view.scroll_up())
 list_view.set_change_cb(
-    lambda sender: status.set_value(f"Item {sender.value+1} of {len(sender.children)}")
+    lambda sender: status.set_value(f"Item {sender.value + 1} of {len(sender.children)}")
 )
 
 

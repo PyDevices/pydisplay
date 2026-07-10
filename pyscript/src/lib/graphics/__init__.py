@@ -3,7 +3,7 @@ graphics — cross-platform 2D drawing for *Python.
 
 Extends MicroPython's ``framebuf`` with shape helpers, fonts, image loaders, and
 ``Area`` bounding boxes for partial updates.  On CPython and CircuitPython the
-built-in pure-Python ``_framebuf`` fallback is used automatically.
+built-in pure-Python ``framebuf`` fallback is used automatically.
 
 Quick start::
 
@@ -13,13 +13,10 @@ Quick start::
     fb.fill(0)
     area = fb.fill_rect(1, 1, 6, 6, 0xFFFF)
     graphics.text8(fb, "Hi", 0, 0, 0xFFFF)
-
-    print(graphics.capabilities())
 """
 
 from ._area import Area
 from ._bmp565 import BMP565
-from ._capabilities import _PYDISPLAY_LIB, capabilities, framebuf_backend, implementation
 from ._draw import Draw
 from ._files import (
     bmp_to_framebuffer,
@@ -61,6 +58,12 @@ from ._shapes import (
     vline,
 )
 
+
+def implementation():
+    """Return ``pydisplay_python`` (this package) vs ``native_cmod`` on embedded builds."""
+    return "pydisplay_python"
+
+
 __all__ = [
     "BMP565",
     "GS2_HMSB",
@@ -79,12 +82,10 @@ __all__ = [
     "blit_rect",
     "blit_transparent",
     "bmp_to_framebuffer",
-    "capabilities",
     "circle",
     "ellipse",
     "fill",
     "fill_rect",
-    "framebuf_backend",
     "gradient_rect",
     "hline",
     "implementation",

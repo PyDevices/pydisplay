@@ -1,55 +1,20 @@
 from . import _files, _font, _shapes
 from ._area import Area
-from ._capabilities import init_capabilities
-
-_NATIVE_FRAMEBUF = False
-
-try:  # Try to import framebuf from MicroPython
-    from framebuf import (
-        GS2_HMSB,
-        GS4_HMSB,
-        GS8,
-        MONO_HLSB,
-        MONO_HMSB,
-        MONO_VLSB,
-        RGB565,
-    )
-    from framebuf import (
-        FrameBuffer as _FrameBuffer,
-    )
-
-    _NATIVE_FRAMEBUF = True
-except ImportError:  # If framebuf is not available, import from _framebuf.py
-    from ._framebuf import (
-        GS2_HMSB,
-        GS4_HMSB,
-        GS8,
-        MONO_HLSB,
-        MONO_HMSB,
-        MONO_VLSB,
-        RGB565,
-    )
-    from ._framebuf import (
-        FrameBuffer as _FrameBuffer,
-    )
-
-init_capabilities(
-    framebuf_backend="native" if _NATIVE_FRAMEBUF else "pure_python",
-    implementation="pydisplay_python",
-    formats=[
-        "MONO_VLSB",
-        "MONO_HLSB",
-        "MONO_HMSB",
-        "RGB565",
-        "GS2_HMSB",
-        "GS4_HMSB",
-        "GS8",
-        "RGB888",
-    ],
+from ._blit_hooks import clip_blit_bounds
+from .framebuf import (
+    GS2_HMSB,
+    GS4_HMSB,
+    GS8,
+    MONO_HLSB,
+    MONO_HMSB,
+    MONO_VLSB,
+    RGB565,
+)
+from .framebuf import (
+    FrameBuffer as _FrameBuffer,
 )
 
-
-# pydisplay extension — not in native MicroPython framebuf
+# pydisplay extension — not in MicroPython framebuf
 RGB888 = 7
 
 
@@ -95,9 +60,10 @@ class FrameBuffer(_FrameBuffer):
     as color_depth, width, height, buffer, and format.  Also adds a save method to save
     the framebuffer to a file, and a from_file method to load a framebuffer from a file.
 
-    Inherits from framebuf.FrameBuffer, which may be compiled into MicroPython
-    or may be from _framebuf.py.  Methods should return an Area object, but
-    the MicroPython framebuf module returns None, so the methods inherited from
+    Inherits from the bundled pure-Python ``.framebuf.FrameBuffer`` (never the
+    compiled native ``framebuf`` module, to guarantee identical behavior across
+    runtimes). Methods should return an Area object, but the MicroPython
+    framebuf module returns None, so the methods inherited from
     framebuf.FrameBuffer are overridden to return an Area object.
 
     Args:
@@ -115,35 +81,23 @@ class FrameBuffer(_FrameBuffer):
     """
 
     def __init__(self, buffer, width, height, format, *args, **kwargs):
-        if format == RGB888:
-            # Native MicroPython framebuf has no RGB888 format.  When a native-framebuf
-            # subclass's __init__ never calls the native super().__init__, MicroPython
-            # falls back to invoking native make_new with the *constructor* args — which
-            # rejects RGB888 ("invalid format", or "missing N positional arguments" when
-            # a subclass has a different signature).  So on native framebuf we initialize
-            # the base as RGB565 (2 bytes/pixel, always fits our 3 bytes/pixel buffer)
-            # purely to satisfy that init; every RGB888 pixel op below is handled by
-            # _RGB888Format against self._buffer, so the native state is never used.
-            # On CPython (pure-Python _framebuf) there is no make_new fallback, so skip
-            # it and leave the buffer untouched.
-            if _NATIVE_FRAMEBUF:
-                super().__init__(buffer, width, height, RGB565)
-            self._width = width
-            self._height = height
-            self._fb_format = format
-            self._buffer = buffer
-            stride = args[0] if args else kwargs.get("stride")
-            self._stride = stride if stride is not None else width
-            self._color_depth = 24
-            self._rgb888 = True
-            return
-        self._rgb888 = False
-        super().__init__(buffer, width, height, format, *args, **kwargs)
+        self._rgb888 = format == RGB888
+        # RGB888 is a pydisplay extension; base framebuf never implements it.
+        # Initialize the C extmod base as RGB565 so MicroPython does not fall back
+        # to make_new with an invalid format.  Pixel ops use _RGB888Format below.
+        if self._rgb888:
+            super().__init__(buffer, width, height, RGB565)
+        else:
+            super().__init__(buffer, width, height, format, *args, **kwargs)
         self._width = width
         self._height = height
         self._fb_format = format
         self._buffer = buffer
-        if format in (MONO_VLSB, MONO_HLSB, MONO_HMSB):
+        if self._rgb888:
+            stride = args[0] if args else kwargs.get("stride")
+            self._stride = stride if stride is not None else width
+            self._color_depth = 24
+        elif format in (MONO_VLSB, MONO_HLSB, MONO_HMSB):
             self._color_depth = 1
         elif format == RGB565:
             self._color_depth = 16
@@ -374,21 +328,26 @@ class FrameBuffer(_FrameBuffer):
             self, s, x, y, c, scale=scale, inverted=inverted, font_data=font_data, height=height
         )
 
-    def blit(self, buf, x, y, key=-1, palette=None):
+    def blit(self, source, x, y, key=-1, palette=None):
         """
         Blit the given buffer at the given location.
 
         Args:
-            buf (FrameBuffer): FrameBuffer to blit
+            source (FrameBuffer): FrameBuffer to blit
             x (int): x coordinate
             y (int): y coordinate
             key (int): Color key (default: -1)
-            palette (list): Palette (default: None)
+            palette (FrameBuffer): Palette (default: None)
 
         Returns:
             (Area): Bounding box of the blitted buffer
         """
-        return _shapes.blit(self, buf, x, y, key, palette)
+        super().blit(source, x, y, key, palette)
+        clipped = clip_blit_bounds(self, source, x, y)
+        if clipped is None:
+            return None
+        x0, y0, w, h, _, _ = clipped
+        return Area(x0, y0, w, h)
 
     ########### Additional methods
 

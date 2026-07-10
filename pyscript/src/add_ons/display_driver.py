@@ -191,6 +191,8 @@ def run():
         loop_i += 1
         if runtime is not None and (loop_i & 3) == 0:
             runtime.poll()
+        if runtime is not None and runtime.quit_requested:
+            return
         if getattr(display_drv, "_deinitialized", False):
             return
 

@@ -292,12 +292,13 @@ class DisplayDriver:
     """
     Base class for all display backends (BusDisplay, SDLDisplay, PGDisplay, FBDisplay, etc.).
 
-    Subclasses implement bus- or platform-specific drawing and refresh. Most applications
-    use a concrete driver from ``board_config.display`` rather than instantiating this
-    class directly.
+    Subclasses implement drawing (``blit_rect``, ``fill_rect``, ``pixel``),
+    presentation (``show()``), and teardown (``quit()`` / ``deinit()``). Most
+    applications use a concrete driver from ``board_config.display`` rather than
+    instantiating this class directly.
 
     Periodic presentation when needed is driven by ``eventsys.Runtime`` (see
-    ``needs_refresh``); the driver only implements ``show()`` and ``deinit()``.
+    ``needs_refresh``).
     """
 
     needs_refresh = False

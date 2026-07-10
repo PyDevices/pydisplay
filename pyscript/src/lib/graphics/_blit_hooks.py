@@ -1,10 +1,9 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Dispatch blit operations to canvas fast paths when available."""
+"""Blit helpers for display-driver fast paths and clipping."""
 
 from ._area import Area
-from ._capabilities import framebuf_backend
 
 _RGB565_BPP = 2
 
@@ -58,70 +57,10 @@ def _source_rgb565_bytes_per_pixel(source):
     return _RGB565_BPP if fmt == RGB565 else None
 
 
-def _framebuf_blit_base():
-    """Return a real native ``framebuf.FrameBuffer`` base, or ``None`` for the desktop shim."""
-    from ._framebuf_plus import FrameBuffer as _GfxFrameBuffer
-
-    try:
-        mro = _GfxFrameBuffer.__mro__
-    except AttributeError:
-        return None
-    if len(mro) < 2:
-        return None
-    base = mro[1]
-    if getattr(base, "__module__", "") == "graphics._framebuf":
-        return None
-    return base
-
-
-def _can_use_native_framebuffer_blit(canvas, source):
-    if framebuf_backend() != "native":
-        return False
-    if not (
-        hasattr(canvas, "buffer")
-        and hasattr(source, "buffer")
-        and hasattr(canvas, "format")
-        and hasattr(source, "format")
-    ):
-        return False
-    from ._framebuf_plus import FrameBuffer
-
-    if not (isinstance(canvas, FrameBuffer) and isinstance(source, FrameBuffer)):
-        return False
-    return _framebuf_blit_base() is not None
-
-
-def _native_framebuffer_blit(canvas, source, x, y, key=-1, palette=None):
-    """Call the underlying ``framebuf.FrameBuffer.blit`` (C on MCU)."""
-    base = _framebuf_blit_base()
-    if base is None:
-        raise RuntimeError("native framebuffer blit unavailable")
+def _framebuffer_base_blit(canvas, source, x, y, key=-1, palette=None):
+    """Call ``framebuf.FrameBuffer.blit`` without re-entering graphics overrides."""
+    base = type(canvas).__mro__[1]
     base.blit(canvas, source, x, y, key, palette)
-
-
-def _pure_framebuffer_blit(canvas, source, x, y, key=-1, palette=None):
-    """Blit between pure-Python FrameBuffers without re-entering ``_shapes.blit``."""
-    clipped = clip_blit_bounds(canvas, source, x, y)
-    if clipped is None:
-        return None
-
-    x0, y0, w, h, src_x, src_y = clipped
-    src_fmt = source._format
-    dst_fmt = canvas._format
-    pal_fmt = palette._format if palette is not None else None
-
-    for row in range(h):
-        sy = src_y + row
-        dy = y0 + row
-        for col in range(w):
-            sx = src_x + col
-            dx = x0 + col
-            color = src_fmt.get_pixel(source, sx, sy)
-            if pal_fmt is not None:
-                color = pal_fmt.get_pixel(palette, color, 0)
-            if color != key:
-                dst_fmt.set_pixel(canvas, dx, dy, color)
-    return Area(x0, y0, w, h)
 
 
 def _extract_rgb565_rows(source, src_x, src_y, w, h):
@@ -165,7 +104,7 @@ def blit_rect_dispatch(canvas, buf, x, y, w, h):
 
 
 def try_fast_framebuffer_blit(canvas, source, x, y, key=-1, palette=None):
-    """Framebuffer blit via native or ``blit_rect`` fast paths.
+    """Use framebuffer or display fast paths when available.
 
     Returns an :class:`Area` on success, or ``None`` to use the pixel loop.
     """
@@ -175,22 +114,11 @@ def try_fast_framebuffer_blit(canvas, source, x, y, key=-1, palette=None):
 
     x0, y0, w, h, src_x, src_y = clipped
 
-    if _can_use_native_framebuffer_blit(canvas, source):
-        _native_framebuffer_blit(canvas, source, x, y, key, palette)
-        return Area(x0, y0, w, h)
-
     from ._framebuf_plus import FrameBuffer
 
-    if (
-        isinstance(canvas, FrameBuffer)
-        and isinstance(source, FrameBuffer)
-        and hasattr(canvas, "_format")
-        and hasattr(source, "_format")
-        and _framebuf_blit_base() is None
-    ):
-        pure = _pure_framebuffer_blit(canvas, source, x, y, key, palette)
-        if pure is not None:
-            return pure
+    if isinstance(canvas, FrameBuffer) and isinstance(source, FrameBuffer):
+        _framebuffer_base_blit(canvas, source, x, y, key, palette)
+        return Area(x0, y0, w, h)
 
     if key != -1 or palette is not None:
         return None

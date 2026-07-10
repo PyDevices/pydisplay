@@ -13,29 +13,18 @@ https://github.com/spacerace/romfont
 import os
 import struct
 
+from . import _font_8x8, _font_8x14, _font_8x16
 from ._area import Area
 
 sep = os.sep if hasattr(os, "sep") else "/"  # PyScipt doesn't have os.sep
 
-# Default font files or memoryviews to use if none is specified.
-# Should be 8 pixels wide to keep framebuf.py compatible with MicroPython framebuf module
-# Try to import the font data from .py files in the same directory as this module.
-# If that fails, use the .bin files in the same directory.
-try:
-    from . import _font_8x8, _font_8x14, _font_8x16
+# Default embedded romfont data (https://github.com/spacerace/romfont).
 
-    _FONTS = {
-        8: _font_8x8.FONT,
-        14: _font_8x14.FONT,
-        16: _font_8x16.FONT,
-    }
-except ImportError:
-    font_dir = __file__.split(sep)[0:-1]  # get the path this module is in
-    _FONTS = {
-        8: f"{font_dir + sep}font_8x8.bin",
-        14: f"{font_dir + sep}font_8x14.bin",
-        16: f"{font_dir + sep}font_8x16.bin",
-    }
+_FONTS = {
+    8: _font_8x8.FONT,
+    14: _font_8x14.FONT,
+    16: _font_8x16.FONT,
+}
 
 _DEFAULT_FONT = _FONTS[8]
 

@@ -3,7 +3,6 @@ import board_config
 import pdwidgets as pd
 from pdwidgets import pct
 
-
 pd.DEBUG = False
 pd.MARK_UPDATES = False
 pd.init_timer(10)  # Remove this line to use polled mode in a while loop

@@ -1,7 +1,7 @@
 # multimer types: all
 from board_config import display_drv, runtime
 from graphics import Draw
-from multimer import sleep_ms
+from multimer.loop import run_forever
 from palettes import get_palette
 from random import getrandbits
 from displaybuf import DisplayBuffer
@@ -51,11 +51,11 @@ def main():
     if runtime:
         runtime.stop_timer()
 
-    while True:
+    def poll_events():
         elist = runtime.poll() if runtime else []
         if runtime.quit_requested if runtime else False:
             display_drv.quit()
-            break
+            return True
         quit_requested = False
         for e in elist:
             if e.type == runtime.events.QUIT:
@@ -74,10 +74,12 @@ def main():
                     )
                 canvas.show()
                 display_drv.show()
-        if quit_requested:
-            display_drv.quit()
-            break
-        sleep_ms(0)
+            if quit_requested:
+                display_drv.quit()
+                return True
+        return False
+
+    run_forever(poll_events, delay_ms=0)
 
 
 main()

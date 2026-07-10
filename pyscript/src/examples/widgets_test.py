@@ -77,7 +77,7 @@ def jump(sender, event):
 
 jmp_button.add_event_cb(pd.events.MOUSEBUTTONUP, (jump))
 
-radio_group = pd.RadioGroup()
+radio_group = pd.RadioGroup(screen)
 radio1 = pd.RadioButton(
     screen, group=radio_group, y=10, align_to=checkbox, align=pd.ALIGN.OUTER_BOTTOM, value=False
 )
