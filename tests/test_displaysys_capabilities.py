@@ -32,11 +32,19 @@ class TestDisplaysysCapabilities(unittest.TestCase):
             self.assertIn("auto_refresh", modules[name])
 
     def test_no_backend_import_side_effects(self):
+        """``capabilities()`` must not import concrete display backends.
+
+        Other tests may already have loaded ``pgdisplay`` / ``sdldisplay`` into
+        ``sys.modules`` (especially when pygame is installed). Assert only that
+        *this* call does not pull them in.
+        """
         import displaysys
 
-        self.assertNotIn("displaysys.pgdisplay", sys.modules)
-        self.assertNotIn("displaysys.sdldisplay", sys.modules)
+        before = set(sys.modules)
         _ = displaysys.capabilities()
+        newly = set(sys.modules) - before
+        self.assertNotIn("displaysys.pgdisplay", newly)
+        self.assertNotIn("displaysys.sdldisplay", newly)
 
 
 if __name__ == "__main__":

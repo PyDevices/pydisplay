@@ -13,13 +13,9 @@ from unittest import mock
 import _env  # noqa: F401
 from _support import quiet
 
-try:
-    from displaysys.pgdisplay import FFmpegFrameRecorder
-except ImportError:
-    FFmpegFrameRecorder = None
-
 # pygame (pygame-ce) is only installed on Windows; unix uses SDL2. The PGDisplay
-# tests below skip when pygame is unavailable.
+# tests below skip when pygame is unavailable. Import backends lazily so
+# collection does not preload ``displaysys.pgdisplay`` into ``sys.modules``.
 HAS_PYGAME = importlib.util.find_spec("pygame") is not None
 
 
@@ -99,7 +95,7 @@ class TestPGDisplayFrameRecorder(unittest.TestCase):
                 os.environ.pop("PYDISPLAY_VIDEO_FPS", None)
 
 
-@unittest.skipUnless(FFmpegFrameRecorder is not None, "pygame required to import pgdisplay")
+@unittest.skipUnless(HAS_PYGAME, "pygame required to import pgdisplay")
 class TestFFmpegFrameRecorder(unittest.TestCase):
     def setUp(self):
         self._popen = mock.patch("subprocess.Popen", side_effect=_fake_popen)
@@ -109,6 +105,8 @@ class TestFFmpegFrameRecorder(unittest.TestCase):
         self._popen.stop()
 
     def test_write_rejects_bad_frame_size(self):
+        from displaysys.pgdisplay import FFmpegFrameRecorder
+
         with tempfile.TemporaryDirectory() as tmp:
             out = os.path.join(tmp, "bad.mp4")
             rec = FFmpegFrameRecorder(out, 4, 4, fps=6)
