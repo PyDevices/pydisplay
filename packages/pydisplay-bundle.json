@@ -145,10 +145,6 @@
       "github:PyDevices/pydisplay/src/lib/graphics/_shapes.py"
     ],
     [
-      "lib/graphics/framebuf.py",
-      "github:PyDevices/pydisplay/src/lib/graphics/framebuf.py"
-    ],
-    [
       "lib/multimer/__init__.py",
       "github:PyDevices/pydisplay/src/lib/multimer/__init__.py"
     ],

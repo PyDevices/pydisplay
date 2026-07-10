@@ -51,10 +51,6 @@
     [
       "graphics/_shapes.py",
       "github:PyDevices/pydisplay/src/lib/graphics/_shapes.py"
-    ],
-    [
-      "graphics/framebuf.py",
-      "github:PyDevices/pydisplay/src/lib/graphics/framebuf.py"
     ]
   ],
   "deps": [],

@@ -173,7 +173,6 @@
 "./src/lib/graphics/_font_8x8.py" = "/lib/graphics/"
 "./src/lib/graphics/_framebuf_plus.py" = "/lib/graphics/"
 "./src/lib/graphics/_shapes.py" = "/lib/graphics/"
-"./src/lib/graphics/framebuf.py" = "/lib/graphics/"
 
 "./src/lib/multimer/__init__.py" = "/lib/multimer/"
 "./src/lib/multimer/_async_timer.py" = "/lib/multimer/"
