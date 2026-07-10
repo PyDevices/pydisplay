@@ -5,6 +5,10 @@
       "github:PyDevices/pydisplay/src/lib/board_config.py"
     ],
     [
+      "lib/env_util.py",
+      "github:PyDevices/pydisplay/src/lib/env_util.py"
+    ],
+    [
       "lib/path.py",
       "github:PyDevices/pydisplay/src/lib/path.py"
     ],
@@ -105,10 +109,6 @@
       "github:PyDevices/pydisplay/src/lib/graphics/_bmp565.py"
     ],
     [
-      "lib/graphics/_capabilities.py",
-      "github:PyDevices/pydisplay/src/lib/graphics/_capabilities.py"
-    ],
-    [
       "lib/graphics/_clip.py",
       "github:PyDevices/pydisplay/src/lib/graphics/_clip.py"
     ],
@@ -135,10 +135,6 @@
     [
       "lib/graphics/_font_8x8.py",
       "github:PyDevices/pydisplay/src/lib/graphics/_font_8x8.py"
-    ],
-    [
-      "lib/graphics/_framebuf.py",
-      "github:PyDevices/pydisplay/src/lib/graphics/_framebuf.py"
     ],
     [
       "lib/graphics/_framebuf_plus.py",

@@ -1,5 +1,4 @@
 # multimer types: all
-# pyscript skip: gallery
 import board_config
 import pdwidgets as pd
 
@@ -47,7 +46,7 @@ max_history_chars = (history.width // history.char_width) - 1
 history.format = f">{max_history_chars}"
 entry = pd.TextBox(readout, align=pd.ALIGN.BOTTOM, scale=2)
 max_entry_chars = (entry.width // entry.char_width) - 1
-entry.format = f">{max_entry_chars+1}"
+entry.format = f">{max_entry_chars + 1}"
 
 
 def clock_toggle_callback(sender, event):

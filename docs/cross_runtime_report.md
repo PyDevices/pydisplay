@@ -20,6 +20,49 @@ Desktop timers: default **`timer_async=False`**; set **`PYDISPLAY_TIMER_ASYNC=1`
 
 ---
 
+## pdwidgets rework (2026-07-10)
+
+The 11 `widgets_*.py` examples are now first-class matrix members (`matrix = false`
+removed) and 10 of them (all but the `widgets_stub` boilerplate) are in the
+PyScript browser gallery (`# pyscript skip: gallery` removed, gallery regenerated).
+
+| Runtime | `timer_async=0` | `timer_async=1` |
+|---------|-----------------|-----------------|
+| `cpython-venv` | **11/11 ok** | **11/11 ok** |
+| `micropython` (unix) | **11/11 ok** | **11/11 ok** |
+| `circuitpython` (unix) | **11/11 ok** | pre-existing CP-unix asyncio limit¹ |
+| `jupyter` (JNDisplay, asyncio-native) | — | **11/11 ok** (real render) |
+| `pyscript` (PSDisplay, asyncio-native) | — | loads/runs² |
+
+**Timer rework:** pdwidgets now owns **no** timer — frames are driven from one
+poll function via `multimer.loop.run_forever` (sync `while` loop or shared
+asyncio loop, chosen from `runtime.timer_async`). `Display.timer` is always
+`None` in both modes, so a sync `Timer` never races the asyncio loop
+(the former "competing timer" bug). Verified:
+`PYDISPLAY_TIMER_ASYNC=1 … python -c "import board_config, pdwidgets as pd; pd.init_timer(10); assert pd.Display.timer is None"`.
+
+¹ **CircuitPython unix + `PYDISPLAY_TIMER_ASYNC=1`** raises
+`AttributeError: 'SingletonGenerator' object has no attribute '__await__'` for
+**every** async example (core `pydisplay_demo_async` fails identically) — a
+pre-existing CP-unix/`multimer` asyncio limitation, not pdwidgets. The default
+matrix runs `timer_async=0`, where CP passes 11/11.
+
+² **PyScript** (`micropython-webassembly-pyscript@1.28.0-6`): the pinned CDN
+firmware ships **no frozen `asyncio`/`_asyncio`**, so `multimer.loop.run` falls
+through to `multimer._mpasyncio` (needs the `_asyncio` builtin) and raises
+`AttributeError: module 'multimer' has no attribute '_mpasyncio'` at loop
+launch. This hits **the entire gallery** — `calculator`, `paint`,
+`eventsys_simpletest`, `pydisplay_demo_async` all fail identically — so it is a
+firmware/`multimer` limitation (both out of scope here), not pdwidgets. The kit
+still reports `PSDisplay, ok` because the `js_timer` autotest smoke fires after
+the display backend initializes. Two in-scope packaging fixes were needed just
+to reach that point (both in `scripts/install_gen_manifests.py`): the generated
+`pyscript.toml`/`packages/*.json` were stale after the `framebuf` refactor
+(referenced removed `_framebuf.py`/`_capabilities.py` → 404, blank canvas) and
+never listed `env_util.py` (imported by `board_config`).
+
+---
+
 ## Full desktop matrix (2026-07-10)
 
 **Command:** parallel passes, `PYDISPLAY_TIMER_ASYNC=0` and `1`, 5 runtimes (`micropython`, `micropython.exe`, `circuitpython`, `cpython-venv`, `python.exe`), `--order examples`, SDL dummy.
@@ -35,7 +78,7 @@ Desktop timers: default **`timer_async=False`**; set **`PYDISPLAY_TIMER_ASYNC=1`
 
 | Issue | Examples / runtimes |
 |-------|---------------------|
-| `FrameBuffer` has no `circle` | `widgets_demo`, `widgets_scrollbar`, `widgets_test` on MP/CP (other agent) |
+| `FrameBuffer` has no `circle` | ✅ resolved — `graphics-cmod` ships `circle`/`round_rect`; widgets `11/11 ok` on MP/CP (see pdwidgets section) |
 | `lv_touch_test` | skipped on `micropython.exe` (`skip_runtimes`); `matrix=false` / event-loop work on `cpython-venv` |
 | `timer_simpletest` | was `TypeError` @ `circuitpython` (`timer_async=1` only); spot retest passes |
 
@@ -135,5 +178,5 @@ SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/example_test_
 |------|--------|
 | Full desktop matrix sync + async | **Done** — 320–325/335 per mode; see above |
 | `lv_touch_test` on cpython | `matrix=false`; needs event-loop work |
-| PyScript matrix | Optional; needs Playwright + serve |
+| PyScript matrix | Loads via Playwright + serve; async loop launch blocked by CDN firmware without frozen `asyncio` (whole gallery, see pdwidgets §²) |
 | Push cmods + graphics | When requested |

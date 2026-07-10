@@ -59,6 +59,6 @@ Griffe warnings mean a docstring parameter does not appear in the signature — 
 |------|---------|
 | P0 | `displaysys`, `eventsys`, `graphics.FrameBuffer`, `graphics._shapes` |
 | P1 | `graphics.Draw`, `displaybuf`, `eventsys` helpers |
-| P2 | `pdwidgets` lifecycle (`Display.tick`, `refresh`, event registration) |
+| P2 | ✅ `pdwidgets` — done: Google-style docstrings on all public classes/methods (lifecycle `Display.tick`/`render`/event registration + every widget) |
 
 See [Contributing](../contributing.md) for the PR workflow.

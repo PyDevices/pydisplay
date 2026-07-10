@@ -1,9 +1,7 @@
 # multimer types: all
-# pyscript skip: gallery
 import board_config
 import pdwidgets as pd
 from pdwidgets.console import Console
-
 
 pd.DEBUG = False
 pd.MARK_UPDATES = False
