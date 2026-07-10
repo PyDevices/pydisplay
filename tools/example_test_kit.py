@@ -894,6 +894,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--fail-fast", action="store_true")
     parser.add_argument("--verbose", action="store_true")
     parser.add_argument("--json", action="store_true", help="Print full JSON rows to stdout")
+    parser.add_argument(
+        "--results-json",
+        metavar="PATH",
+        help="Write full result rows to PATH (default: .cursor/example_test_results.json)",
+    )
     args = parser.parse_args(argv)
 
     if not args.no_unit_tests:
@@ -962,7 +967,11 @@ def main(argv: list[str] | None = None) -> int:
     print()
     print_table(rows, args.order)
 
-    out_path = REPO / ".cursor" / "example_test_results.json"
+    out_path = (
+        Path(args.results_json)
+        if args.results_json
+        else REPO / ".cursor" / "example_test_results.json"
+    )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(rows, indent=2) + "\n", encoding="utf-8")
     print(f"\nFull results: {out_path}", file=sys.stderr)

@@ -9,7 +9,6 @@ Private working notes for this repo. Not part of the published docs.
 ### add_ons
 
 - [ ] Consolidate or merge `add_ons/` modules where possible (fewer top-level files)
-- [ ] `wifi.py` — minimal MicroPython shim for CircuitPython's `wifi` API; audit parity with [CP `wifi`](https://docs.circuitpython.org/en/latest/shared-bindings/wifi/index.html) (`radio.connect`, etc.)
 
 ### Peter Hinch GUIs (work as a set)
 
@@ -53,6 +52,7 @@ Private working notes for this repo. Not part of the published docs.
 
 ### Examples & demos
 
+- [ ] **pdwidgets** — work in progress; re-enable `widgets_*.py` in example matrix and PyScript gallery when stable (`matrix=false` + `# pyscript skip: gallery` until then)
 - [ ] `pixel_sim_demos` fire effect — cellular flame does not look/behave correctly on the simulator (fix heat propagation / palette)
 - [ ] Make all examples runnable on PyScript, then Jupyter notebook
 
@@ -77,6 +77,7 @@ Private working notes for this repo. Not part of the published docs.
 
 ### Tooling & ecosystem
 
+- [ ] Add a GUI to the matrix test kit (`tools/example_test_kit.py`) — after cloud agent has fixed matrix errors and improved pdwidgets
 - [ ] Verify `manifest.py` selection order in `~/github/cmods`
 - [ ] Fork [figma2lvgl](https://github.com/khiyamiftikhar/figma2lvgl) and add option to output Python
 - [ ] Change docs and scripts so cmods sub-repos don't mention or require cmods (personal workspace only — not required for other users); may need to move functionality out of cmods into sub-repos
@@ -110,3 +111,4 @@ Private working notes for this repo. Not part of the published docs.
 - [x] Update backend docs: drivers need `blit_rect`, `fill_rect`, and `pixel` — not only `show()` and `quit()`
 - [x] Add `ruff` to `requirements-dev.txt`
 - [x] Doc drift: Broker→Runtime in README/tests; DisplayDriver docstring + audit tag wording; add_ons README; display-ecosystem `runtime` contract; micropython.md TestPyPI `usdl2` note (no version pins)
+- [x] `wifi.py` — MP shim audited vs CP; wait for DHCP IP, `ipv4_address` None until assigned, `connect()` returns None

@@ -14,9 +14,32 @@
 | **micropython unix** | 67/67 ok (full manifest, SDL dummy) |
 | **circuitpython** | 34/34 ok |
 | **micropython.exe** | **36/36 ok** on graphics cluster (`timer_async=False`) |
-| **Full 350-cell matrix** | In progress — sync vs async timer runs below |
+| **Full desktop matrix** | **320/335** (`timer_async=0`) · **325/335** (`timer_async=1`) — 2026-07-10 parallel run |
 
 Desktop timers: default **`timer_async=False`**; set **`PYDISPLAY_TIMER_ASYNC=1`** for asyncio mode. `Runtime: timer_async=…` prints at init.
+
+---
+
+## Full desktop matrix (2026-07-10)
+
+**Command:** parallel passes, `PYDISPLAY_TIMER_ASYNC=0` and `1`, 5 runtimes (`micropython`, `micropython.exe`, `circuitpython`, `cpython-venv`, `python.exe`), `--order examples`, SDL dummy.
+
+| Mode | Pass | Notes |
+|------|-----:|-------|
+| `timer_async=0` | **320/335** | 15 `matrix=false` rows listed but not executed |
+| `timer_async=1` | **325/335** | async mode slightly better on MP.exe widgets |
+
+**Artifacts:** `.cursor/example_test_results_timer_async_{0,1}.json`
+
+**Known failures (both modes unless noted):**
+
+| Issue | Examples / runtimes |
+|-------|---------------------|
+| `FrameBuffer` has no `circle` | `widgets_demo`, `widgets_scrollbar`, `widgets_test` on MP/CP (sync only on unix MP) |
+| `hang` | `displaysys_simpletest`, `eventsys_encoder_test` @ `micropython.exe`; `lv_touch_test` @ `python.exe` |
+| `exit_5` | `console_advanced_demo`, `lv_touch_test` @ `micropython.exe` |
+| `lv_touch_test` | also `exit_-11` / `RuntimeError: no running event loop` on `cpython-venv` |
+| `timer_simpletest` | `TypeError` @ `circuitpython` (`timer_async=1` only) |
 
 ---
 
@@ -72,16 +95,19 @@ Symlinks: `~/bin/micropython`, `~/bin/micropython.exe`.
 
 ## Matrix commands
 
-**Default matrix** (67 examples × available runtimes; excludes `matrix=false` and harnesses):
+**Desktop matrix (parallel, 5 runtimes, example order):**
 
 ```bash
-# Sync timers (desktop default)
-SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy PYDISPLAY_TIMER_ASYNC=0 \
-  .venv/bin/python tools/example_test_kit.py --no-unit-tests --order runtimes
+tools/run_full_matrix_both_timer_modes.sh
+```
 
-# Async timers
-SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy PYDISPLAY_TIMER_ASYNC=1 \
-  .venv/bin/python tools/example_test_kit.py --no-unit-tests --order runtimes
+**Single pass:**
+
+```bash
+SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy PYDISPLAY_TIMER_ASYNC=0 \
+  .venv/bin/python tools/example_test_kit.py --no-unit-tests --order examples \
+  --only-runtime micropython micropython.exe circuitpython cpython-venv python.exe \
+  --results-json .cursor/example_test_results_timer_async_0.json
 ```
 
 **MP.exe 36-cluster** (quick regression):
@@ -106,7 +132,7 @@ SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/example_test_
 
 | Item | Status |
 |------|--------|
-| Full matrix sync + async | Running / update this doc |
+| Full desktop matrix sync + async | **Done** — 320–325/335 per mode; see above |
 | `lv_touch_test` on cpython | `matrix=false`; needs event-loop work |
 | PyScript matrix | Optional; needs Playwright + serve |
 | Push cmods + graphics | When requested |
