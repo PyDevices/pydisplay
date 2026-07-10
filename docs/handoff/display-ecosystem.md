@@ -80,7 +80,7 @@ New MIP manifests: `i2cbus`, `epaper_chip`, `boarddisplay`, `pixeldisplay`, `epa
 | **BoardDisplay builtins** | No `cp_*_builtin` proliferation; keep `BoardDisplay` as optional CP-only helper |
 | **RGB naming** | Parallel RGB uses `rgbframebuffer.RGBFrameBuffer` + `FBDisplay` — no `RGBDisplay` / `present()` path |
 | **displayif location** | Native RGB/HUB75/Qualia drivers live in **`PyDevices/displayif`** repo (see its `HANDOFF.md`) |
-| **board_config contract** | `display_drv`, `broker`, optional `touch_read_func` + `touch_rotation_table`, KEYPAD via `broker.create(type=eventsys.KEYPAD, ...)` |
+| **board_config contract** | `display_drv`, `runtime` (`eventsys.Runtime` with optional `host_read`, `touch_read`, `touch_rotation_table`; keypad via `runtime.add_keypad`, etc.) |
 | **E-paper tri-color** | `color_depth=2` (0=white, 1=black, 2=accent) + `highlight_color=True` on chip driver |
 | **circup** | Postponed |
 

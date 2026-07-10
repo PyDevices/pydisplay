@@ -39,7 +39,7 @@ See also: https://pydisplay.readthedocs.io/en/latest/concepts/displays/
 ## pydisplay-specific notes
 
 - **`Area` returns:** Many `graphics` methods return an `Area` (`x`, `y`, `w`, `h`) for partial refresh.
-- **Brokers:** Document poll/subscribe patterns; link to [Events concept](../concepts/events.md).
+- **Runtime:** Document poll/subscribe patterns; link to [Events concept](../concepts/events.md).
 - **Delegates:** `Draw` and `FrameBuffer` shape methods delegate to `graphics._shapes` — signatures must match.
 - **Private API:** Names starting with `_` are excluded from mkdocstrings output; minimal or no docstrings are fine.
 

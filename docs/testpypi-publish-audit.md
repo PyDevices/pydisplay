@@ -62,7 +62,7 @@ Both use the same shape: matrix `ubuntu-latest` + `windows-latest`, plus a dedic
 - **Workflow:** `usdl2/.github/workflows/publish-testpypi.yml`
 - **Package:** pure-Python ctypes shim (`py3-none-any`); native code is the **MicroPython user C module** built into firmware, not a CPython wheel
 - **Linux / Windows / Android:** one universal wheel is intentional — Android/desktop load `libSDL2.so` / `SDL2.dll` at runtime via ctypes
-- **Tags on GitHub:** `v0.0.3`, `v0.0.2`, … exist; **no GitHub Release** objects
+- **Tags on GitHub:** semver release tags (`v*.*.*`) exist; **no GitHub Release** objects
 
 ## Repos without TestPyPI automation
 
@@ -113,7 +113,7 @@ After a pydisplay tag publish, run the desktop stack smoke test (headless in CI 
 
 ### “GitHub release assets per tag”
 
-**Universal gap:** every publisher uploads to TestPyPI only. Tags exist (`v0.0.7` pydisplay, `v9.5.6` lv_cpython_mod, `v0.0.3` usdl2, …) but:
+**Universal gap:** every publisher uploads to TestPyPI only. Release tags exist on each repo but:
 
 - `gh release list` shows **no releases** for usdl2, graphics, lv_cpython_mod
 - pydisplay `v0.1.0-alpha` release exists with **zero assets**

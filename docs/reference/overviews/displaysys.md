@@ -9,7 +9,7 @@ displaysys provides display driver classes (`BusDisplay`, `SDLDisplay`, `PGDispl
 
 ## Key entry points
 
-- `DisplayDriver` — base class for all backends
+- `DisplayDriver` — base class for all backends (`blit_rect`, `fill_rect`, `pixel`, `show`, `quit`)
 - `BusDisplay` — SPI/I80 displays on MCUs
 - `SDLDisplay` / `PGDisplay` — desktop backends (SDL2 / PyGame)
 - `PSDisplay` / `JNDisplay` — PyScript browser / Jupyter Notebook

@@ -20,6 +20,22 @@ Application and example code assume a **16-bit RGB565** surface:
 - `blit_rect` source buffers sized `w * h * 2`
 - `blit_transparent` key colors as 2-byte 565 values
 
+Every concrete backend must implement the **drawing** and **lifecycle** methods
+below. Application code, `graphics`, and examples assume they exist — not only
+`show()` and `quit()`:
+
+| Method | Role |
+|--------|------|
+| `blit_rect(buffer, x, y, w, h)` | Copy a 565 buffer region into the driver's logical framebuffer |
+| `fill_rect(x, y, w, h, color)` | Fill a rectangle with a 565 color |
+| `pixel(x, y, color)` | Set one pixel (often implemented via a 1×1 `blit_rect`) |
+| `show()` | Present the logical framebuffer (immediate on MCU buses; batched on SDL/pygame until `show()` on desktop) |
+| `quit(code=0, force=False)` | Release native resources; `Runtime` calls this on app quit |
+
+Optional but common: `deinit()` (called from `quit()`), scroll helpers (`vscroll`,
+`set_vscroll`), `blit_transparent`, and `needs_refresh` for runtime-driven
+presentation on hosted backends.
+
 **BusDisplay**, **FBDisplay**, and most TFT paths are **565 end-to-end** — the
 API matches the hardware framebuffer.
 

@@ -72,18 +72,31 @@ def init_timer(period=10):
     Args:
         period (int): The period in milliseconds to call the tick function.
     """
-    if Display.timer is None:
-        from multimer import Timer
+    if Display.timer is not None:
+        return
+    try:
+        from board_config import runtime
 
-        if Timer is not None:
-            Display.timer = Timer(-1)
-            Display.timer.init(mode=Timer.PERIODIC, period=period, callback=tick)
+        if runtime is not None and not runtime.timer_async:
+            return
+    except ImportError:
+        pass
+    from multimer import Timer
+
+    if Timer is not None:
+        Display.timer = Timer(-1)
+        Display.timer.init(mode=Timer.PERIODIC, period=period, callback=tick)
 
 
 def _poll_widgets():
-    """Poll all widget displays; return True when ``events.QUIT`` is seen."""
+    """Poll all widget displays; return True when quit is requested."""
     for display in list(Display.displays):
-        if elist := display.runtime.poll():
+        runtime = display.runtime
+        if runtime is not None and runtime.quit_requested:
+            return True
+        if runtime is None:
+            continue
+        if elist := runtime.poll():
             for e in elist:
                 if e.type == events.QUIT:
                     return True
@@ -107,7 +120,15 @@ def run_forever():
     init_timer(10)
     from multimer.loop import run_forever as multimer_run_forever
 
-    multimer_run_forever(_poll_widgets)
+    if Display.timer is None:
+
+        def poll():
+            tick()
+            return _poll_widgets()
+
+        multimer_run_forever(poll)
+    else:
+        multimer_run_forever(_poll_widgets)
 
 
 _display_drv_get_attrs = {

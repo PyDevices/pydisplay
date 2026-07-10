@@ -10,7 +10,6 @@ Private working notes for this repo. Not part of the published docs.
 
 - [ ] Consolidate or merge `add_ons/` modules where possible (fewer top-level files)
 - [ ] `wifi.py` — minimal MicroPython shim for CircuitPython's `wifi` API; audit parity with [CP `wifi`](https://docs.circuitpython.org/en/latest/shared-bindings/wifi/index.html) (`radio.connect`, etc.)
-- [ ] Fix `add_ons/README.md`: `add_ons.add_path` is gone — path setup is `import lib.path`
 
 ### Peter Hinch GUIs (work as a set)
 
@@ -37,7 +36,6 @@ Private working notes for this repo. Not part of the published docs.
 ### usdl2 & SDL
 
 - [ ] `usdl2` all-C user module for MicroPython **and** CPython (like `graphics-cmod`; replace ctypes/ffi Python shims)
-- [ ] Fix `add_ons/usdl2.py` docstring — should be: **ctypes** on CPython (unix + win32); **ffi/uctypes** on MicroPython unix (not “MP win32 uses ctypes”)
 - [ ] Add `FFmpegFrameRecorder` / `open_frame_recorder` to `SDLDisplay` (already on `PGDisplay` via `displaysys`)
 
 ### displaysys & desktop
@@ -47,7 +45,6 @@ Private working notes for this repo. Not part of the published docs.
 - [ ] Refactor `src/lib/board_config.py` for readability (same behavior; short comments OK)
 - [ ] Rework `_hard_process_exit` in `sdldisplay.py` — used when `quit(force=True)` / kit teardown must skip SDL cleanup (`usdl2.process_exit`, `ffi` `_exit`, `os._exit` fallbacks); audit whether still needed after harness changes
 - [ ] Make sure all desktop backends exit gracefully in `displaysys`
-- [ ] Update backend docs: drivers need `blit_rect`, `fill_rect`, and `pixel` — not only `show()` and `quit()`
 
 ### Publishing & packaging
 
@@ -80,7 +77,6 @@ Private working notes for this repo. Not part of the published docs.
 
 ### Tooling & ecosystem
 
-- [ ] Add `ruff` to `requirements-dev.txt` (repo uses `.venv/bin/ruff` but it is not listed today)
 - [ ] Verify `manifest.py` selection order in `~/github/cmods`
 - [ ] Fork [figma2lvgl](https://github.com/khiyamiftikhar/figma2lvgl) and add option to output Python
 - [ ] Change docs and scripts so cmods sub-repos don't mention or require cmods (personal workspace only — not required for other users); may need to move functionality out of cmods into sub-repos
@@ -109,3 +105,8 @@ Private working notes for this repo. Not part of the published docs.
 - [x] `cmods/graphics` publish to TestPyPI — v0.0.2 tagged and published (14 wheels on TestPyPI)
 - [x] Verify which `mip` install methods install bare `.py` files vs precompiled `.mpy` files — see [mip-and-freeze-sources.md](mip-and-freeze-sources.md)
 - [x] Move `SDL_desktop_size()` out of `usdl2` into `sdldisplay.py`; expose `SDL_GetDisplayUsableBounds` / `SDL_GetDesktopDisplayMode` on usdl2 instead
+- [x] Fix `add_ons/README.md`: path setup is `import lib.path` (not `add_ons.add_path`)
+- [x] Fix `add_ons/usdl2.py` docstring — ctypes on CPython unix+win32; ffi/uctypes on MicroPython unix
+- [x] Update backend docs: drivers need `blit_rect`, `fill_rect`, and `pixel` — not only `show()` and `quit()`
+- [x] Add `ruff` to `requirements-dev.txt`
+- [x] Doc drift: Broker→Runtime in README/tests; DisplayDriver docstring + audit tag wording; add_ons README; display-ecosystem `runtime` contract; micropython.md TestPyPI `usdl2` note (no version pins)

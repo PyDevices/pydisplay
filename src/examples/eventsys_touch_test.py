@@ -78,6 +78,8 @@ def _clear_target(x, y, half_width, half_height):
 
 
 def _poll_touch():
+    if runtime.quit_requested:
+        raise SystemExit(0)
     if elist := runtime.poll():
         for event in elist:
             if event.type == runtime.events.QUIT:

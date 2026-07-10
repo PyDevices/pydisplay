@@ -1,6 +1,6 @@
 # Cross-runtime example matrix report
 
-**Last updated:** 2026-07-09 (PYDISPLAY_TIMER_ASYNC; MP.exe unix vs .exe compare)  
+**Last updated:** 2026-07-10 (MP.exe 36-cluster post-harness commit `8742556b`)  
 **pydisplay HEAD:** ahead of `origin/main` (compare tools + font docs; see git log)  
 **graphics-cmod:** romfont headers + `gfx_shapes_line` parity + `scripts/sync_fonts.py` (rebuild MP unix after pull)  
 **cmods:** `manifest.py` asyncio freeze on windows dev (`3984ee8`+); MP unix links graphics from submodule  
@@ -47,6 +47,33 @@ Visual 2×2 text compare: `src/examples/framebuf_text_compare.py` (framebuf + gr
 ## Targeted matrix — circuitpython (2026-07-09)
 
 **Result: 34/34 ok** (prior cluster). Post-refactor spot check: `framebuf_simpletest`, `nano_gui_simpletest` **2/2 ok**.
+
+---
+
+## Targeted matrix — micropython.exe (2026-07-10, post `8742556b`)
+
+**Command:** 36-example graphics cluster, `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy`.
+
+| Metric | Before rebuild | After rebuild | Post-harness (`8742556b`) |
+|--------|----------------:|--------------:|--------------------------:|
+| **ok** | 3 | 19 | **30** |
+| hang | — | 5 | 2 |
+| exit_5 | — | 11 | 2 |
+| exit_3 | — | — | 2 |
+
+### Still failing (6/36)
+
+| Example | Result | Notes |
+|---------|--------|-------|
+| `eventsys_touch_test` | hang | Interactive touch calibration; blocks for 16 corner touches |
+| `widgets_console` | hang | pdwidgets + SDL sync timers (poll-mode fix in progress) |
+| `pydisplay_demo` | exit_3/5 | `Timer(-1)` scroll — poll-driven fix in progress |
+| `pydisplay_demo_async` | exit_5 | sync path same as above when `timer_async=False` |
+| `joystick_list_select` | exit_3/hang | `pd.run_forever()` → `init_timer(10)` |
+| `widgets_calc` | exit_5/hang | explicit `pd.init_timer(10)` |
+| `widgets_list` | exit_5 | schedule queue full |
+
+**Cleared since rebuild:** `apollo`, `color_test`, `feathers`, `font_simpletest2`, `scroll_touch_test`, `hello`, `bouncing_balls`, and most former exit_5 bucket.
 
 ---
 

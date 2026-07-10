@@ -9,7 +9,7 @@ from board_config import display_drv, runtime
 
 from displaysys import color565
 from graphics import RGB565, Area, Font, FrameBuffer
-from multimer import Timer
+from multimer import sleep_ms, ticks_add, ticks_diff, ticks_ms
 from multimer.loop import run_forever
 
 TOP, BOT = 36, 20
@@ -55,6 +55,7 @@ TIPS = (
 state = {"rotation": 0, "scroll": 0, "color_i": 0}
 rotate_btn = color_btn = None
 _scroll_paused = False
+_scroll_next_at = 0
 
 FONT = Font(height=16)
 BPP = display_drv.color_depth // 8
@@ -124,15 +125,23 @@ def redraw():
     display_drv.show()
 
 
-def on_tick(_=None):
+def _scroll_tick(now=None):
     if _scroll_paused:
         return
+    if now is None:
+        now = ticks_ms()
+    global _scroll_next_at
+    if ticks_diff(now, _scroll_next_at) < 0:
+        return
+    _scroll_next_at = ticks_add(now, 40)
     state["scroll"] = (state["scroll"] + 1) % scroll_height()
     display_drv.vscroll = state["scroll"]
-    # The runtime's shared timer refreshes the display; just advance the scroll.
 
 
 def handle_events():
+    _scroll_tick()
+    if runtime.quit_requested:
+        return True
     if elist := runtime.poll():
         for e in elist:
             if e.type == runtime.events.QUIT:
@@ -156,15 +165,11 @@ def handle_events():
 
 
 def main():
+    global _scroll_next_at
     setup_scroll()
     redraw()
-
-    timer = Timer(-1)
-    timer.init(mode=Timer.PERIODIC, period=40, callback=on_tick)
-    try:
-        run_forever(handle_events)
-    finally:
-        timer.deinit()
+    _scroll_next_at = ticks_add(ticks_ms(), 40)
+    run_forever(handle_events)
 
 
 main()

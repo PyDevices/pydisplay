@@ -5,8 +5,8 @@
 Pure-Python ``usdl2`` implementation when the native C module is unavailable.
 
 Shipped as ``add_ons/usdl2.py`` so MicroPython loads it via ``sys.path`` only when
-the built-in/frozen ``usdl2`` module is not present. Uses ctypes on CPython and
-MicroPython win32; ffi/uctypes on MicroPython unix.
+the built-in/frozen ``usdl2`` module is not present. Uses **ctypes** on CPython
+(unix and win32); **ffi/uctypes** on MicroPython unix.
 """
 
 import sys

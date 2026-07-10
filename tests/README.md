@@ -36,7 +36,7 @@ python tests/test_multimer.py
 |--------|------|
 | `test_multimer.py` | public multimer API (`Timer`, `AsyncTimer`, `schedule`, `sleep_ms`, and `ticks_*`) |
 | `test_events.py` | the `events` types/classes and `eventsys.register_event` |
-| `test_devices.py` | `Broker` and the `Queue`/`Touch`/`Encoder`/`Keypad` devices plus `register_device` |
+| `test_devices.py` | `Runtime` and the `Queue`/`Touch`/`Encoder`/`Keypad` devices plus `register_device` |
 | `test_joystick.py` | `JoystickDevice` with a mock driver |
 | `test_keys.py` | the `Keys` key/modifier tables and `keyname`/`key`/`modname`/`mod` helpers |
 | `test_area.py` | the `Area` rectangle helper (containment, overlap, transforms, protocols) |
