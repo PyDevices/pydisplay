@@ -6,6 +6,8 @@ from graphics import Area
 button_area = Area(display_drv.fill_rect(10, 10, 100, 100, 0xF800))
 display_drv.show()
 while True:
+    if runtime.quit_requested:
+        break
     if elist := runtime.poll():
         quit_requested = False
         for e in elist:

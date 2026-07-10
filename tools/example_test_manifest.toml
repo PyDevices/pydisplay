@@ -364,6 +364,8 @@ kind = "lvgl"
 quit = "inject"
 deps = ["lvgl"]
 timeout_s = 45
+# MP win32: LVGL + SDL sync timers flood micropython.schedule (exit 5 / no EXAMPLE_RESULT).
+skip_runtimes = ["micropython.exe"]
 
 [examples.nano_gui_simpletest]
 import = "nano_gui_simpletest"

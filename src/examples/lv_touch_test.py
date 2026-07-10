@@ -24,10 +24,6 @@ alignments = (
 )
 
 
-def _pump_if_needed():
-    sleep_ms(0)
-
-
 def _build_ui():
     style_default = lv.style_t()
     style_default.init()
@@ -56,30 +52,29 @@ def _build_ui():
         label = lv.label(btn)
         label.set_text(f"Btn{i}")
         label.center()
-        _pump_if_needed()
 
 
 _build_ui()
 
 display_driver.run()
 if sys.platform != "win32":
-    from board_config import runtime
+        from board_config import runtime
 
-    try:
-        import pydisplay_test_mode as _ptm
+        try:
+            import pydisplay_test_mode as _ptm
 
-        _test_duration_ms = int(_ptm.DURATION_S * 1000) if _ptm.ENABLED else None
-    except ImportError:
-        _test_duration_ms = None
+            _test_duration_ms = int(_ptm.DURATION_S * 1000) if _ptm.ENABLED else None
+        except ImportError:
+            _test_duration_ms = None
 
-    _test_start = ticks_ms() if _test_duration_ms is not None else None
+        _test_start = ticks_ms() if _test_duration_ms is not None else None
 
-    while True:
-        sleep_ms(0)
-        if runtime:
-            runtime.poll()
-        if runtime.quit_requested if runtime else False:
-            break
-        if _test_start is not None and ticks_diff(ticks_ms(), _test_start) >= _test_duration_ms:
-            break
-        sleep_ms(1)
+        while True:
+            sleep_ms(0)
+            if runtime:
+                runtime.poll()
+            if runtime.quit_requested if runtime else False:
+                break
+            if _test_start is not None and ticks_diff(ticks_ms(), _test_start) >= _test_duration_ms:
+                break
+            sleep_ms(1)

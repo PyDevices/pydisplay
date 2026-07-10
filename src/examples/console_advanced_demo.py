@@ -75,6 +75,11 @@ if _test_mode:
     display_drv.show()
 
     def _poll():
+        if runtime.quit_requested:
+            return True
+        from multimer import sleep_ms
+
+        sleep_ms(0)
         if elist := runtime.poll():
             for e in elist:
                 if e.type == runtime.events.QUIT:

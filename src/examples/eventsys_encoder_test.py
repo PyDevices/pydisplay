@@ -26,6 +26,8 @@ display_drv.vscsad(y_pos)
 draw_line()
 
 while True:
+    if runtime.quit_requested:
+        break
     if not (elist := runtime.poll()):
         continue
     quit_requested = False

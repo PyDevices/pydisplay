@@ -42,7 +42,10 @@ import sys
 from board_config import runtime
 import lvgl as lv
 
-from multimer import asyncio
+try:
+    from multimer import asyncio
+except ImportError:
+    asyncio = None
 
 asyncio_available = asyncio is not None
 
