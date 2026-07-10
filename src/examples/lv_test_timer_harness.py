@@ -216,6 +216,9 @@ def _run_sync():
 
 
 def _run_async():
+    import os
+
+    os.environ["PYDISPLAY_TIMER_ASYNC"] = "1"
     import board_config  # noqa: F401
 
     from multimer import asyncio

@@ -93,13 +93,13 @@ def step(ball):
 def main():
     balls = make_balls()
     while True:
-        if runtime:
-            runtime.poll()
         graphics.fill(display_drv, BG)
         for ball in balls:
             step(ball)
             graphics.circle(display_drv, int(ball.x), int(ball.y), ball.r, ball.color, True)
         display_drv.show()
+        if runtime:
+            runtime.poll()
         if runtime.quit_requested if runtime else False:
             break
         sleep_ms(10)

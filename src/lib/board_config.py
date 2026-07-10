@@ -6,6 +6,12 @@ board_config.py file that is specific to your hardware from:
 https://github.com/PyDevices/pydisplay/tree/main/board_configs
 """
 
+from env_util import env_bool
+
+# Default timer mode for PG/SDL desktop when PYDISPLAY_TIMER_ASYNC is unset.
+# PyScript and Jupyter always use asyncio timers (see branches below).
+DEFAULT_TIMER_ASYNC = False
+
 # Default portrait panel (320x480). Games scale layout for taller/wider panels
 # (e.g. 480x800, 720x720) via display_drv.width / height.
 width = 320
@@ -81,6 +87,10 @@ else:
         title=f"{sys.implementation.name} on {sys.platform}",
         scale=scale,
     )
-    runtime = eventsys.Runtime(display=display_drv, host_read=get_events, timer_async=True)
+    runtime = eventsys.Runtime(
+        display=display_drv,
+        host_read=get_events,
+        timer_async=env_bool("PYDISPLAY_TIMER_ASYNC", DEFAULT_TIMER_ASYNC),
+    )
 
 display_drv.fill(0)

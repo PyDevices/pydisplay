@@ -6,6 +6,7 @@
 displaysys.sdldisplay — SDL2 desktop display driver.
 """
 
+import struct
 from sys import implementation
 
 import usdl2
@@ -266,6 +267,51 @@ def retcheck(retvalue):
         raise RuntimeError(usdl2.SDL_GetError())
 
 
+def _desktop_size(display_index=0):
+    """Return (width, height) of the usable desktop area, or (0, 0) if unknown."""
+    display_index = int(display_index)
+    try:
+        get_bounds = usdl2.SDL_GetDisplayUsableBounds
+        get_mode = usdl2.SDL_GetDesktopDisplayMode
+    except AttributeError:
+        return 0, 0
+
+    use_ffi = getattr(usdl2, "_USE_FFI", False)
+    try:
+        if use_ffi:
+            rect = bytearray(16)
+            if get_bounds(display_index, rect) == 0:
+                w = int.from_bytes(rect[8:12], "little", signed=True)
+                h = int.from_bytes(rect[12:16], "little", signed=True)
+                if w > 0 and h > 0:
+                    return w, h
+            mode = bytearray(32)
+            if get_mode(display_index, mode) == 0:
+                w = int.from_bytes(mode[4:8], "little", signed=True)
+                h = int.from_bytes(mode[8:12], "little", signed=True)
+                if w > 0 and h > 0:
+                    return w, h
+        else:
+            rect = usdl2.SDL_Rect()
+            if isinstance(rect, (bytes, bytearray, memoryview)):
+                buf = bytearray(rect) if len(rect) >= 16 else bytearray(16)
+                if get_bounds(display_index, buf) == 0:
+                    w, h = struct.unpack_from("<ii", buf, 8)
+                    if w > 0 and h > 0:
+                        return w, h
+            elif hasattr(rect, "w") and get_bounds(display_index, rect) == 0:
+                if rect.w > 0 and rect.h > 0:
+                    return rect.w, rect.h
+            mode_buf = bytearray(32)
+            if get_mode(display_index, mode_buf) == 0:
+                w, h = struct.unpack_from("<ii", mode_buf, 4)
+                if w > 0 and h > 0:
+                    return w, h
+    except Exception:
+        pass
+    return 0, 0
+
+
 def _hard_process_exit(code: int = 0) -> None:
     """Terminate immediately without SDL teardown (kit subprocesses)."""
     try:
@@ -359,7 +405,7 @@ class SDLDisplay(DisplayDriver):
         _save_tty()
         retcheck(usdl2.SDL_Init(usdl2.SDL_INIT_EVERYTHING))
         requested_scale = self._scale
-        desktop_w, desktop_h = usdl2.SDL_desktop_size()
+        desktop_w, desktop_h = _desktop_size()
         fitted = fit_scale_to_desktop(
             self.width, self.height, requested_scale, desktop_w, desktop_h
         )

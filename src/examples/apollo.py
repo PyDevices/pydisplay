@@ -31,16 +31,15 @@ from board_config import display_drv, runtime
 import apollo_dsky as dsky
 import time
 
-from multimer import Timer
-from multimer.loop import dual_main, run_forever
+from multimer import sleep_ms, ticks_add, ticks_diff, ticks_ms
+from multimer.loop import dual_main, run
 
 _last_time = (0, 0, 0, 0, 0, 0)
 _key_busy = False
 _scrolling = False
 _scroll_i = 0
 _scroll_end = 0
-_scroll_timer = Timer(-1)
-_key_timer = Timer(-2)
+_key_release_at = None
 _pending_key = None
 
 
@@ -54,7 +53,7 @@ def _init_apollo():
     display_drv.show()
 
 
-def _write_time_tick(_=None):
+def _update_time():
     global _last_time
     y, mo, d, h, m, s, *_ = time.localtime()
     if s != _last_time[5]:
@@ -67,7 +66,7 @@ def _write_time_tick(_=None):
         display_drv.show()
 
 
-def _scroll_tick(_=None):
+def _scroll_step():
     global _scrolling, _scroll_i
     if not _scrolling:
         return
@@ -76,7 +75,6 @@ def _scroll_tick(_=None):
     _scroll_i += 1
     if _scroll_i >= _scroll_end:
         _scrolling = False
-        _scroll_timer.deinit()
 
 
 def _start_scroll():
@@ -87,21 +85,21 @@ def _start_scroll():
     _scroll_i = start
     _scroll_end = display_drv.height + 1
     _scrolling = True
-    _scroll_timer.init(mode=Timer.PERIODIC, period=1, callback=_scroll_tick)
 
 
-def _key_release(_=None):
-    global _key_busy, _pending_key
+def _key_release():
+    global _key_busy, _pending_key, _key_release_at
     if _pending_key is not None:
         dsky.set_button(_pending_key, False)
         _pending_key = None
     dsky.set_acty(False)
     display_drv.show()
     _key_busy = False
+    _key_release_at = None
 
 
 def _handle_key(key):
-    global _key_busy, _pending_key
+    global _key_busy, _pending_key, _key_release_at
     _key_busy = True
     dsky.set_acty(True)
     dsky.set_button(key, True)
@@ -112,10 +110,18 @@ def _handle_key(key):
     else:
         _start_scroll()
 
-    _key_timer.init(mode=Timer.ONE_SHOT, period=200, callback=_key_release)
+    _key_release_at = ticks_add(ticks_ms(), 200)
 
 
 def _poll_apollo():
+    _update_time()
+
+    if _key_release_at is not None and ticks_diff(_key_release_at, ticks_ms()) >= 0:
+        _key_release()
+
+    if _scrolling:
+        _scroll_step()
+
     elist = runtime.poll() if runtime else []
     if runtime.quit_requested if runtime else False:
         return True
@@ -131,12 +137,10 @@ def _poll_apollo():
 
 def main_sync():
     _init_apollo()
-    timer = Timer(-1)
-    timer.init(mode=Timer.PERIODIC, period=500, callback=_write_time_tick)
-    try:
-        run_forever(_poll_apollo)
-    finally:
-        timer.deinit()
+    while True:
+        if _poll_apollo():
+            break
+        sleep_ms(1 if _scrolling else 20)
 
 
 async def main_async():

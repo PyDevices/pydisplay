@@ -164,6 +164,10 @@ def run_case(
 ) -> dict:
     cmd = [*cmd_base, HARNESS_ARG, mode]
     env = os.environ.copy()
+    if mode == "async":
+        env["PYDISPLAY_TIMER_ASYNC"] = "1"
+    elif mode == "sync":
+        env["PYDISPLAY_TIMER_ASYNC"] = "0"
     run_cwd = str(cwd or SRC)
     try:
         proc = subprocess.run(

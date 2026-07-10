@@ -55,12 +55,13 @@ def main():
     tft = tft_config.config(tft_config.WIDE)
 
     while True:
-        if runtime is not None:
-            runtime.poll()
         for rotation in range(4):
             tft.rotation = rotation
             tft.draw.fill(0)
             tft.show()
+            if runtime:
+                runtime.poll()
+            sleep_ms(0)
             col_max = tft.width - font.WIDTH * 5
             row_max = tft.height - font.HEIGHT
             if col_max < 0 or row_max < 0:

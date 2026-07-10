@@ -105,6 +105,7 @@ class Runtime:
         self._refresh_paused = False
         self._refresh_claim = None
         self._pending_async_refresh = None
+        self._pending_sync_refresh = None
         self.host_dev = None
         self.touch_dev = None
         self.keypad_dev = None
@@ -133,6 +134,8 @@ class Runtime:
         if display is not None:
             self._wire_display_refresh(refresh_period)
             self._install_default_quit()
+
+        print(f"Runtime: timer_async={self._timer_async}.")
 
     @property
     def timer_async(self):
@@ -266,8 +269,44 @@ class Runtime:
         self.register(self.joystick_dev)
         return self.joystick_dev
 
+    @staticmethod
+    def _sync_refresh_needs_deferred_arm():
+        """True when sync timers need a poll/sleep drain loop (SDL2, Win32 APC)."""
+        try:
+            from multimer._select import _drain
+
+            return _drain is not None
+        except ImportError:
+            return False
+
+    def _maybe_arm_pending_sync_refresh(self):
+        pending = self._pending_sync_refresh
+        if pending is None:
+            return
+        show_fn, period = pending
+        self._pending_sync_refresh = None
+        self._refresh_subscription = self.on_tick(
+            show_fn,
+            period=period,
+            async_=False,
+        )
+
+    @staticmethod
+    def _drain_timers():
+        try:
+            from multimer._schedule import _run_pending
+            from multimer._select import _drain
+
+            _run_pending()
+            if _drain is not None:
+                _drain()
+        except ImportError:
+            pass
+
     def poll(self):
         """Poll all registered devices and return aggregated events."""
+        self._drain_timers()
+        self._maybe_arm_pending_sync_refresh()
         eventlist = []
         for device in self.devices:
             dev_events = device.poll()
@@ -332,6 +371,7 @@ class Runtime:
         self._refresh_paused = False
         self._refresh_claim = None
         self._pending_async_refresh = None
+        self._pending_sync_refresh = None
         if timer is not None:
             timer.deinit()
 
@@ -359,6 +399,13 @@ class Runtime:
         display = self._display
         if display is None:
             return
+        try:
+            import pydisplay_test_mode
+
+            if pydisplay_test_mode.ENABLED:
+                return
+        except ImportError:
+            pass
         if refresh_period is None:
             wire = bool(getattr(display, "needs_refresh", False))
             period = DEFAULT_REFRESH_MS
@@ -376,6 +423,10 @@ class Runtime:
 
         if self._timer_async and not self._event_loop_running():
             self._pending_async_refresh = (_show, period)
+            return
+
+        if self._sync_refresh_needs_deferred_arm():
+            self._pending_sync_refresh = (_show, period)
             return
 
         self._refresh_subscription = self.on_tick(

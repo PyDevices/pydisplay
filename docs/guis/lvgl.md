@@ -52,8 +52,8 @@ Use **`runtime.timer_async`** (set in `board_config.py` when constructing `Runti
 
 | `runtime.timer_async` | Use when |
 |---------------|----------|
-| `False` (default) | MCU, MicroPython unix, CPython Linux — default `multimer.Timer` |
-| `True` | PyScript and other asyncio-native apps — `multimer.AsyncTimer` |
+| `False` (desktop default) | MCU, MicroPython unix, CPython Linux — default `multimer.Timer` |
+| `True` | PyScript, Jupyter, or desktop with `PYDISPLAY_TIMER_ASYNC=1` — `multimer.AsyncTimer` |
 
 [`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py) passes this to `lv_utils.event_loop(async_=runtime.timer_async)`.
 
@@ -61,13 +61,17 @@ When **`runtime.timer_async` is true**, `display_driver` claims runtime-driven r
 
 On CPython Win/mac (sync timers), call **`multimer.pump()`** from your main loop when using threaded timer backends — see [multimer](../concepts/multimer.md). Full apps call **`display_driver.run()`** after UI setup: it returns immediately on MicroPython unix and CPython Linux (REPL stays live) and blocks only on Windows SDL or macOS.
 
-Force async mode before import (LVGL timer tests):
+`src/lib/board_config.py` reads **`PYDISPLAY_TIMER_ASYNC`** for the PG/SDL
+desktop branch (default `False`). PyScript and Jupyter always use
+`timer_async=True`. Force async on desktop before `board_config` loads:
 
 ```python
 import os
 os.environ["PYDISPLAY_TIMER_ASYNC"] = "1"
 import display_driver
 ```
+
+Or set `PYDISPLAY_TIMER_ASYNC=1` on the command line when launching the process.
 
 ## Timer test examples
 

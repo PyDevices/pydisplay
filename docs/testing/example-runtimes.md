@@ -70,6 +70,8 @@ Subprocess runs use `[tools/example_test_wrapper.py](../../tools/example_test_wr
 
 - `PYDISPLAY_TEST_TRACE=1` — wrapper logs progress on stderr
 - `--verbose` — kit logs skipped runtimes
+- **`PYDISPLAY_TIMER_ASYNC`** — desktop sync (`0` / unset) vs asyncio (`1`) timers in `src/lib/board_config.py`. Set on the command line before launching the kit, or let `tools/lv_timer_test_kit.py` set it per mode (`sync` → `0`, `async` → `1`). Must be in the environment before `import board_config`.
+- **`micropython.exe` quit injection** — no `threading` / `_thread`; `example_test_wrapper.py` arms quit via a patched `Runtime.poll` deadline instead of a multimer SDL one-shot timer (avoids `schedule queue full` when the queue is saturated).
 - PyScript autotest posts to `tools/serve.py` `/__debug/example_autotest` when quit injection runs
 - JS timer smoke: `embed.html?autotest=1&duration=5` logs `EXAMPLE_RESULT=` after N seconds (for async demos that block on import)
 

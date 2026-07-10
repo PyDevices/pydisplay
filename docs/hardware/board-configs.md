@@ -162,6 +162,25 @@ Tri-color / 4-gray configs use `color_depth=2` (0=white, 1=black, 2=accent). ACe
 
 `src/lib/board_config.py` — auto-selected for desktop, PyScript, and Jupyter when no other config is installed.
 
+| Branch | `runtime.timer_async` |
+|--------|------------------------|
+| PyScript | `True` (asyncio-native host) |
+| Jupyter | `True` (ipyevents / kernel loop) |
+| PG/SDL desktop | `False` unless **`PYDISPLAY_TIMER_ASYNC`** is set |
+
+Set the env var **before** `import board_config` (or any import that loads it).
+Truthy: `1`, `true`, `yes`, `on`. Falsey: `0`, `false`, `no`, `off`. Unknown
+values fall back to the desktop default (`False`). Parsing lives in
+[`src/lib/env_util.py`](../../src/lib/env_util.py) (`env_bool`).
+
+```bash
+# Force asyncio timers on desktop (LVGL async smoke, matrix column)
+PYDISPLAY_TIMER_ASYNC=1 python my_example.py
+```
+
+Per-board configs under `board_configs/` pass `timer_async=` explicitly in
+their `Runtime(...)` call; they do not read this env var unless you wire it in.
+
 ## Custom config
 
 Copy the closest match, edit pin assignments and driver imports, and test with `import pydisplay_demo` or `import displaysys_simpletest`. See the [**pydisplay_demo** guide](../examples/pydisplay_demo.md) for a walkthrough of the recommended smoke test.

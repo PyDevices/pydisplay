@@ -81,9 +81,28 @@ eventsys.Runtime(
     touch_read=None,           # callable returning touch point(s) or falsy
     touch_rotation_table=None, # optional 4-item rotation mask table
     refresh_period=None,       # ms; None = use DEFAULT_REFRESH_MS when needs_refresh
-    timer_async=False,         # True for PyScript / asyncio-native hosts
+    timer_async=False,         # True for PyScript / Jupyter; desktop default in lib/board_config
 )
 ```
+
+### `timer_async` in `src/lib/board_config.py`
+
+The shipped default config sets `timer_async` per host:
+
+| Host | Value |
+|------|-------|
+| PyScript | `True` |
+| Jupyter | `True` |
+| PG/SDL desktop | `False`, or `env_bool("PYDISPLAY_TIMER_ASYNC", False)` |
+
+Set **`PYDISPLAY_TIMER_ASYNC`** in the process environment before
+`board_config` is imported to run desktop examples with asyncio timers (LVGL
+async path, cross-runtime matrix columns). See
+[`env_util.py`](../../src/lib/env_util.py) and [Board configs — default](../hardware/board-configs.md#default-config).
+
+On SDL2 / Win32 sync timer hosts (`micropython.exe`, and similar), display
+refresh is **deferred until the first `runtime.poll()`** so importing
+`board_config` in a REPL does not start an SDL timer without a drain loop.
 
 Additional inputs after construction:
 

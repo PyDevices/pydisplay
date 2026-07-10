@@ -742,34 +742,3 @@ def SDL_Event(event=None):
     event_type = event.type
     struct_cls = _event_struct_map.get(event_type, SDL_CommonEvent)
     return struct_cls.from_buffer(event)
-
-
-def SDL_desktop_size(display_index=0):
-    """Return (width, height) of the usable desktop area, or (0, 0) if unknown."""
-    display_index = int(display_index)
-    try:
-        get_bounds = globals()["SDL_GetDisplayUsableBounds"]
-        get_mode = globals()["SDL_GetDesktopDisplayMode"]
-        if _USE_FFI:
-            rect = bytearray(16)
-            if get_bounds(display_index, rect) == 0:
-                w = int.from_bytes(rect[8:12], "little", signed=True)
-                h = int.from_bytes(rect[12:16], "little", signed=True)
-                if w > 0 and h > 0:
-                    return w, h
-            mode = bytearray(32)
-            if get_mode(display_index, mode) == 0:
-                w = int.from_bytes(mode[4:8], "little", signed=True)
-                h = int.from_bytes(mode[8:12], "little", signed=True)
-                if w > 0 and h > 0:
-                    return w, h
-        else:
-            rect = SDL_Rect()
-            if get_bounds(display_index, ctypes.byref(rect)) == 0 and rect.w > 0 and rect.h > 0:
-                return rect.w, rect.h
-            mode = SDL_DisplayMode()
-            if get_mode(display_index, ctypes.byref(mode)) == 0 and mode.w > 0 and mode.h > 0:
-                return mode.w, mode.h
-    except Exception:
-        pass
-    return 0, 0

@@ -57,6 +57,26 @@ class TestRuntimeOwnedRefresh(unittest.TestCase):
         self.addCleanup(runtime.stop_timer)
         self.assertTrue(_wait(lambda: display.shows > 0), "display.show never called")
 
+    def test_test_mode_skips_auto_refresh(self):
+        import os
+        import sys
+
+        tools = os.path.join(os.path.dirname(__file__), "..", "tools")
+        if tools not in sys.path:
+            sys.path.insert(0, tools)
+        import pydisplay_test_mode
+
+        display = _FakeDisplay()
+        try:
+            pydisplay_test_mode.ENABLED = True
+            runtime = Runtime(display=display)
+            self.addCleanup(runtime.stop_timer)
+            self.assertIsNone(runtime._timer)
+            sleep_ms(80)
+            self.assertEqual(display.shows, 0)
+        finally:
+            pydisplay_test_mode.ENABLED = False
+
     def test_timer_async_defers_refresh_until_armed(self):
         display = _FakeDisplay()
         runtime = Runtime(display=display, timer_async=True)
@@ -79,6 +99,19 @@ class TestRuntimeOwnedRefresh(unittest.TestCase):
         from multimer import AsyncTimer
 
         self.assertIsInstance(runtime._timer, AsyncTimer)
+
+    def test_sync_refresh_deferred_when_backend_needs_drain(self):
+        import multimer._select as sel
+
+        display = _FakeDisplay()
+        runtime = Runtime(display=display, timer_async=False)
+        self.addCleanup(runtime.stop_timer)
+        if not sel._drain:
+            self.skipTest("no drain backend on this platform")
+        self.assertIsNone(runtime._timer)
+        self.assertIsNotNone(runtime._pending_sync_refresh)
+        runtime._maybe_arm_pending_sync_refresh()
+        self.assertTrue(_wait(lambda: display.shows > 0), "display.show never called")
 
     def test_subscription_deinit_unsubscribes(self):
         hits = []

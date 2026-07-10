@@ -209,6 +209,69 @@ def _touch_delay_s(duration_s):
     return min(duration_s * 0.2, max(0.5, duration_s - 1.0))
 
 
+def _has_background_inject():
+    """True when a daemon thread can sleep then inject quit (not MP win32)."""
+    try:
+        import threading
+
+        threading.Thread  # noqa: B018
+        return True
+    except ImportError:
+        pass
+    try:
+        import _thread  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
+def _install_poll_deadline_quit(duration_s, injected=None):
+    """Arm quit via the next ``runtime.poll()`` when background inject is unavailable.
+
+    MicroPython ``micropython.exe`` has no ``threading`` / ``_thread``; the multimer
+    SDL quit timer often never fires when the schedule queue is full. Patching
+    ``Runtime.poll`` avoids a competing timer while keeping quit on the example
+    main thread. Does not import ``board_config`` (examples must load it).
+    """
+    try:
+        import eventsys
+    except Exception:
+        return False
+    runtime_cls = eventsys.Runtime
+    if getattr(runtime_cls, "_pydisplay_poll_deadline_armed", False):
+        return True
+    deadline = _monotonic() + duration_s
+    state = {"fired": False}
+    orig_poll = runtime_cls.poll
+
+    def poll(self):
+        if not state["fired"] and _monotonic() >= deadline:
+            state["fired"] = True
+            try:
+                import pydisplay_test_mode
+
+                if pydisplay_test_mode.ENABLED:
+                    self._handle_quit()
+                    if injected is not None:
+                        injected[0] = True
+                    return orig_poll(self)
+            except ImportError:
+                pass
+            import quit_inject
+
+            if (
+                quit_inject.inject_quit(broker_poll=False, pump_count=0, deinit=False)
+                and injected is not None
+            ):
+                injected[0] = True
+        return orig_poll(self)
+
+    runtime_cls.poll = poll
+    runtime_cls._pydisplay_poll_deadline_armed = True
+    return True
+
+
 def _inject_quit_now(quit_inject, kind, injected, *, pump_count=20):
     lvgl = kind == "lvgl"
     ok = quit_inject.inject_quit(
@@ -267,8 +330,11 @@ def _start_multimer_quit_schedule(duration_s, quit_mode, kind, injected):
 def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode):
     injected = [False]
     cooperative = _cooperative_lvgl_quit(kind)
+    use_poll_deadline = not cooperative and not _has_background_inject()
 
-    if not cooperative:
+    if use_poll_deadline:
+        _install_poll_deadline_quit(duration_s, injected)
+    elif not cooperative:
         import quit_inject
 
         def delayed_inject():

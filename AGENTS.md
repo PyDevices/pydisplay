@@ -54,6 +54,38 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   "fix"): `nano_gui_simpletest` needs the `gui` package and `png_test` needs
   `PYDISPLAY_PNG_DIR`.
 
+### `PYDISPLAY_TIMER_ASYNC` (default `board_config`)
+
+`src/lib/board_config.py` sets `runtime.timer_async` when constructing
+`eventsys.Runtime`:
+
+| Host branch | `timer_async` |
+|-------------|---------------|
+| PyScript (`PSDisplay`) | always `True` |
+| Jupyter (`JNDisplay`) | always `True` |
+| PG/SDL desktop | `False` by default; override with env |
+
+Desktop override: set **`PYDISPLAY_TIMER_ASYNC`** before `board_config` is
+imported. Truthy: `1`, `true`, `yes`, `on`. Falsey: `0`, `false`, `no`, `off`.
+Helper: `src/lib/env_util.py` (`env_bool`). Per-board configs under
+`board_configs/` are unchanged unless they opt in.
+
+Matrix / local runs:
+
+```bash
+PYDISPLAY_TIMER_ASYNC=1 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
+  .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv
+```
+
+LVGL asyncio examples (`lv_test_timer_async.py`, `lv_test_timer_harness.py` async mode) set the env (or use
+`PYDISPLAY_TIMER_ASYNC=1` on the command line) before importing
+`display_driver` / `board_config`.
+
+**`micropython.exe` matrix:** no `threading` / `_thread`. `example_test_wrapper.py` uses a
+`Runtime.poll` deadline quit (not a multimer SDL quit timer). With
+`pydisplay_test_mode.ENABLED`, `Runtime` skips auto-refresh wiring so examples
+that call `show()` themselves avoid a competing SDL refresh timer.
+
 ### Architecture note: timers and refresh
 
 - The single shared periodic timer is owned by `eventsys.Runtime`
@@ -81,3 +113,5 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   daemon-thread quit injection is incompatible — and are covered by the kit
   instead. In this VNC/SDL environment, external desktop mouse clicks do not reach
   the pygame window; use the kit's event-queue injection to exercise input.
+- **`multimer` is fragile** — read [`.cursor/rules/multimer-fragile.mdc`](.cursor/rules/multimer-fragile.mdc)
+  before editing `src/lib/multimer/` (thinking model required, small diffs, revert failures).

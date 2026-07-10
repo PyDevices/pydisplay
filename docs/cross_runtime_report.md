@@ -1,6 +1,6 @@
 # Cross-runtime example matrix report
 
-**Last updated:** 2026-07-09 (graphics cmod font parity; compare tools)  
+**Last updated:** 2026-07-09 (PYDISPLAY_TIMER_ASYNC; MP.exe unix vs .exe compare)  
 **pydisplay HEAD:** ahead of `origin/main` (compare tools + font docs; see git log)  
 **graphics-cmod:** romfont headers + `gfx_shapes_line` parity + `scripts/sync_fonts.py` (rebuild MP unix after pull)  
 **cmods:** `manifest.py` asyncio freeze on windows dev (`3984ee8`+); MP unix links graphics from submodule  
@@ -13,7 +13,7 @@
 ## Session objectives
 
 1. **graphics-cmod ↔ `src/lib/graphics`:** **DONE** — `tools/compare_graphics_mp.py` all checks pass on MP unix after romfont header regen.
-2. **`timer_async`:** All examples pass with **`timer_async=False` and `timer_async=True`** (MP unix manifest).
+2. **`timer_async`:** Desktop default **`False`**; override with **`PYDISPLAY_TIMER_ASYNC=1`**. `Runtime: timer_async=…` prints at init. Sync refresh deferred until `poll()` on SDL/Win32 drain backends (fixes REPL import spam).
 3. **Matrix:** Prefer targeted `--only-example` runs; full 350-cell deferred until MP.exe stable.
 4. **Verification:** Agent runs matrix locally; update this report.
 5. **framebuf refactor + dedupe:** **DONE** — `tools/sync_framebuf.py`, `tools/compare_framebuf_mp.py`.
@@ -66,12 +66,32 @@ Visual 2×2 text compare: `src/examples/framebuf_text_compare.py` (framebuf + gr
 1. **Stale `micropython.exe`** — linked graphics cmod missing APIs → rebuild `build_mp.sh --port windows --variant dev`.
 2. **Missing frozen asyncio** — `cmods/manifest.py` now includes `ports/windows/variants/dev/manifest.py`.
 
-### Still failing on MP.exe (19/36 ok)
+### Unix vs `.exe` spot check (2026-07-09, post-defer + harness)
+
+| Example | `micropython` | `micropython.exe` |
+|---------|---------------|-------------------|
+| `font_simpletest` | ok | **ok** |
+| `hello` | ok | **ok** (poll after rotation `show()` + harness quit) |
+| `bouncing_balls` | ok | **ok** (poll after `show()`; test-mode skips auto-refresh) |
+| `apollo` | ok | **ok** — sync path no longer uses extra SDL `Timer`s (poll-driven time/scroll/key) |
+
+**Harness fixes (`example_test_wrapper.py`, no multimer edits):**
+
+1. **`Runtime.poll` deadline quit** when `threading` / `_thread` unavailable (`micropython.exe`).
+2. **`pydisplay_test_mode.ENABLED`** → `Runtime` skips auto-refresh wiring (`eventsys`); matrix examples call `show()` themselves, avoiding a competing SDL refresh timer.
+
+**Example fixes:** `hello` — poll after rotation `show()` + `sleep_ms(0)`; `bouncing_balls` — poll after `show()`.
+
+**Do not conflate:** kit **`hang`** = subprocess timed out without `EXAMPLE_RESULT`; the display can still be updating.
+
+### Still failing on MP.exe (~20/36 ok after defer; re-run full cluster to confirm)
 
 | Bucket | Examples | Notes |
 |--------|----------|-------|
 | **hang** (5) | `apollo`, `color_test`, `feathers`, `font_simpletest2`, `scroll_touch_test` | Harness timeout @ 5s; no `EXAMPLE_RESULT` |
-| **exit_5** (11) | `bmp565_sprite_transparent`, `bouncing_balls`, `boxlines`, `font_simpletest`, `font_simpletest3`, `hello`, `joystick_list_select`, `tower_climb`, `widgets_calc`, `widgets_console`, `widgets_list` | `returncode=5`, no result JSON — loop/quit contract |
+| **exit_5** (11) | `bmp565_sprite_transparent`, `bouncing_balls`, `boxlines`, `font_simpletest`, `font_simpletest3`, `hello`, `joystick_list_select`, `tower_climb`, `widgets_calc`, `widgets_console`, `widgets_list` | `returncode=5`, no result JSON — often SDL `schedule queue full` spam under sync timers; do not patch `multimer` speculatively |
+
+**2026-07-09 follow-up:** `PYDISPLAY_TIMER_ASYNC` + deferred sync refresh in `eventsys.Runtime` (poll-only arm) fixes REPL import spam. MP.exe matrix failures need per-example harness/timer investigation — not broad `multimer/_backends/sdl2.py` changes (starved-registry experiment reverted; caused hangs).
 
 **Next for MP.exe:** bucket exit_5 vs hang; compare same examples on `micropython` unix; quit / `EXAMPLE_RESULT` on windows port.
 
@@ -112,7 +132,7 @@ Symlinks: `~/bin/micropython` → unix build; `~/bin/micropython.exe` → window
 
 | # | Item | Status |
 |---|------|--------|
-| 1 | **MP.exe exit_5 + hang** | 11 + 5 in 36-cluster — **primary matrix work** |
+| 1 | **MP.exe exit_5 + hang** | Sync SDL `schedule queue full` on win32 port; per-example + harness; **no speculative multimer edits** — see `.cursor/rules/multimer-fragile.mdc` |
 | 2 | ~~cpython-venv hangs~~ | Cleared (stale) |
 | 3 | **`lv_touch_test`** | cpython event loop; `matrix=false` |
 | 4 | ~~framebuf / graphics parity~~ | **DONE** — compare tools green |
