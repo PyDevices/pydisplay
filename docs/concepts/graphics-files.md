@@ -26,7 +26,7 @@ Built into [`graphics`](graphics.md):
 | `GS8` | PGM (P5, max 255) | 8-bit grayscale |
 | `RGB565` | BMP | 16-bit RGB565 Windows BMP |
 
-`MONO_VLSB`, `MONO_HMSB`, and other display-native formats are not saved directly — convert or blit to a supported buffer first. `graphics.capabilities()["image_io"]` lists supported file extensions.
+`MONO_VLSB`, `MONO_HMSB`, and other display-native formats are not saved directly — convert or blit to a supported buffer first.
 
 Use these for icons and sprites that fit in RAM on MCU or desktop.
 

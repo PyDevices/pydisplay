@@ -20,9 +20,12 @@ import sys
 
 _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 _SRC_LIB = os.path.join(_REPO_ROOT, "src", "lib")
+_SRC_ADDONS = os.path.join(_REPO_ROOT, "src", "add_ons")
 
 if _SRC_LIB not in sys.path:
     sys.path.insert(0, _SRC_LIB)
+if _SRC_ADDONS not in sys.path:
+    sys.path.insert(0, _SRC_ADDONS)
 
 #: Absolute path to the ``multimer`` package directory.
 MULTIMER_DIR = os.path.join(_SRC_LIB, "multimer")

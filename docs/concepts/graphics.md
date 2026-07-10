@@ -15,14 +15,10 @@ fb.circle(8, 8, 3, 0x1234)
 graphics.text8(fb, "Hi", 0, 0, 0xFFFF)
 ```
 
-Inspect the runtime backend:
-
-```python
-print(graphics.capabilities())
-# {"framebuf": "native" | "pure_python", "dialect": "...", "formats": [...]}
-```
-
-On CPython and CircuitPython, `graphics` bundles a pure-Python framebuf implementation — no add-ons required.
+`graphics` bundles its own pure-Python `framebuf` implementation (`graphics.framebuf`, MP-parity
+with `modframebuf.c`) and always builds `graphics.FrameBuffer` on top of it — the same code path
+runs on MicroPython, CircuitPython, and CPython, so there is no native-vs-pure-Python backend to
+inspect or branch on.
 
 ## FrameBuffer vs Draw vs module functions
 
@@ -65,8 +61,6 @@ display_drv.blit_rect(fb.buffer, dirty.x, dirty.y, dirty.w, dirty.h)
 | `GS8` | 8 bpp |
 | `RGB565` | 16 bpp |
 
-`capabilities()["formats"]` lists names supported on this port.
-
 ## Fonts
 
 Built-in heights: `text8`, `text14`, `text16`, or `Font(height=8)` with optional `.bin` romfont path.
@@ -99,10 +93,9 @@ fb = graphics.load_image("image.bmp")  # or FrameBuffer.from_file(...)
 | Destination | Fast path |
 |-------------|-----------|
 | Display driver (`blit_rect` / `blit_transparent`) | SPI/SDL/pygame bulk copy |
-| `FrameBuffer` (MCU) | Native `framebuf.blit` when available |
-| `FrameBuffer` (CPython) | Row-wise `blit_rect` into buffer |
+| `FrameBuffer` | `graphics.framebuf`'s `blit()` (same implementation on every runtime) |
 
-Use `Draw(display_drv).blit(sprite_fb, x, y)` instead of a per-pixel loop — it routes to `display_drv.blit_rect` for RGB565 sprites. `graphics.capabilities()["blit"]` reports `framebuf` backend and `rect_hook` support.
+Use `Draw(display_drv).blit(sprite_fb, x, y)` instead of a per-pixel loop — it routes to `display_drv.blit_rect` for RGB565 sprites.
 
 ### Clip regions
 
@@ -128,9 +121,7 @@ See [Drawing and fonts](drawing-and-fonts.md) for the wider pydisplay drawing st
 
 ## FAQ
 
-**Which framebuf am I using?** — `graphics.capabilities()["framebuf"]` is `native` on MicroPython MCU, `pure_python` on CPython.
-
-**Draw method returned nothing?** — Use `graphics.FrameBuffer` or `Draw`; raw `framebuf.FrameBuffer` base methods do not return `Area`.
+**Draw method returned nothing?** — Use `graphics.FrameBuffer` or `Draw`; the bare `graphics.framebuf.FrameBuffer` base methods do not return `Area`.
 
 ## Next
 

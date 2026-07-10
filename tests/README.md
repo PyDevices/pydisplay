@@ -9,9 +9,10 @@ runner or build step is required. The shared bootstrap in
 [`_env.py`](_env.py) puts `src/lib` on `sys.path`, so nothing needs to be
 installed first.
 
-On CPython the graphics package falls back to its pure-Python
-`graphics._framebuf` implementation (the native `framebuf` module only exists
-on MicroPython), so those tests exercise that fallback directly.
+`graphics.FrameBuffer` always builds on the bundled pure-Python
+`graphics.framebuf` module (never the native `framebuf` module compiled into
+MicroPython/CircuitPython firmware), so the same implementation is exercised
+on every runtime.
 
 ## Running
 
@@ -39,10 +40,9 @@ python tests/test_multimer.py
 | `test_joystick.py` | `JoystickDevice` with a mock driver |
 | `test_keys.py` | the `Keys` key/modifier tables and `keyname`/`key`/`modname`/`mod` helpers |
 | `test_area.py` | the `Area` rectangle helper (containment, overlap, transforms, protocols) |
-| `test_capabilities.py` | `capabilities()` and framebuf backend introspection |
 | `test_blit_hooks.py` | blit dispatch to display hooks and framebuffer fast paths |
 | `test_clip.py` | clip helpers and ``ClippedCanvas`` |
-| `test_framebuf.py` | the pure-Python `graphics._framebuf` fallback (pixels, fill, scroll) |
+| `test_framebuf.py` | the bundled MP-parity `graphics.framebuf` module (pixels, fill, scroll, text, blit, poly) |
 | `test_framebuf_plus.py` | the exported `graphics.FrameBuffer` (properties + `Area` returns) |
 | `test_shapes.py` | the drawing primitives (`line`, `rect`, `circle`, `poly`, `blit`, ...) |
 | `test_font.py` | `Font` and the `text` / `text8` / `text14` / `text16` helpers |
@@ -62,9 +62,11 @@ The device tests drive each device through its `poll()` method using small
 scripted `read` callbacks from [`_support.py`](_support.py), so they run
 identically on every host without any hardware.
 
-Graphics tests deliberately avoid the format paths that cannot work under
-CPython's pure-Python fallback (for example `GS8` pixel writes), and focus on
-the broad surface that behaves identically on MicroPython and CPython.
+Graphics tests exercise every `framebuf` format (`MONO_VLSB`, `MONO_HLSB`,
+`MONO_HMSB`, `RGB565`, `GS2_HMSB`, `GS4_HMSB`, `GS8`) against the single
+bundled `graphics.framebuf` implementation, which is verified byte-for-byte
+against the real MicroPython `framebuf` C module (fuzz-tested; see
+`test_framebuf.py`).
 
 The displaysys driver tests run on plain CPython using a hardware-free
 framebuffer (`_support.FakeFrameBuffer`) and a quiet-stdout helper. Tests that

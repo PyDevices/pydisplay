@@ -34,7 +34,7 @@ Private working notes for this repo. Not part of the published docs.
 
 ### graphics cmod
 
-- [ ] Port RGB888 support from `graphics/_framebuf.py` to the graphics cmod library
+- [ ] Port RGB888 support from `graphics/_framebuf_plus.py` to the graphics cmod library
 
 ### multimer
 
@@ -42,6 +42,7 @@ Private working notes for this repo. Not part of the published docs.
 
 ### Tooling & ecosystem
 
+- [ ] Verify `manifest.py` selection order in `~/github/cmods`
 - [ ] Fork [figma2lvgl](https://github.com/khiyamiftikhar/figma2lvgl) and add option to output Python
 - [ ] Change docs and scripts so cmods sub-repos don't mention or require cmods (personal workspace only — not required for other users); may need to move functionality out of cmods into sub-repos
 

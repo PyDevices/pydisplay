@@ -63,7 +63,6 @@ Mutated via method calls (`.append`, `.clear`, dict insert) without a `global` d
 | `multimer/_backends/polling.py` | `_active` | `[]` | timer register/deregister |
 | `multimer/_backends/librt.py` | `_ALLOCATED_DEFAULT_IDS` | `set()` | timer ID allocation |
 | `path.py` | `prepend_directories` | `[]` | `prepend()` |
-| `graphics/_framebuf_plus.py` | `_NATIVE_FRAMEBUF` | `False` | set `True` if native `framebuf` imports |
 
 ## Import-time configuration flags
 
@@ -75,7 +74,6 @@ Set once at import, not mutated later:
 | `displaysys/sdldisplay.py` | `_HAS_JOYSTICK_API` | SDL joystick API probe |
 | `multimer/_backends/librt.py` | `_USE_CTYPES` | `sys.implementation.name == "cpython"` |
 | `eventsys/_capabilities.py` | `_DIALECT` | `sys.implementation.name` |
-| `graphics/_capabilities.py` | `_DIALECT` | `sys.implementation.name` |
 
 ## Public re-exports (`eventsys/__init__.py`)
 
@@ -110,12 +108,12 @@ Event type constants and `Keys` re-exported from submodules (aliases, not mutabl
 
 ### `graphics/`
 
-- **`_framebuf.py`:** format constants (`MONO_*`, `RGB565`, `GS*`)
-- **`_framebuf_plus.py`:** `_NATIVE_FRAMEBUF`, `RGB888`
+- **`framebuf.py`:** bundled MP-parity `framebuf` module (format constants `MONO_*`, `RGB565`, `GS*`; no `graphics` imports)
+- **`_framebuf_plus.py`:** `RGB888` (subclasses `framebuf.FrameBuffer`; no native-vs-Python branching)
 - **`_bmp565.py`:** `BMP565_BPP`, `BMP565_BYTES_PER_PIXEL`
 - **`_font*.py`:** embedded `_FONT` blobs, public `FONT` memoryviews
 - **`_font.py`:** `sep`, `_DEFAULT_FONT`
-- **`_capabilities.py`**, **`_clip.py`**, **`_blit_hooks.py`**, **`_files.py`:** internal constants/maps
+- **`_clip.py`**, **`_blit_hooks.py`**, **`_files.py`:** internal constants/maps
 
 ### `multimer/`
 
