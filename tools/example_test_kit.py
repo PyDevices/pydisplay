@@ -380,7 +380,7 @@ def _server_ready(port: int = PYSCRIPT_PORT) -> bool:
         return False
 
 
-HTML_DIR = REPO / "html"
+HTML_DIR = REPO / "web" / "pyscript"
 
 
 def pyscript_embed_query(example_id: str, example_meta: dict) -> str:
@@ -530,6 +530,7 @@ def _write_jupyter_notebook(example_id: str, example_meta: dict, duration_s: flo
             "import pydisplay_test_mode",
             "pydisplay_test_mode.ENABLED = True",
             f"pydisplay_test_mode.DURATION_S = {duration_s}",
+            "pydisplay_test_mode.install_deadline_hook()",
             "",
         ]
     )

@@ -251,7 +251,45 @@ def _install_test_mode():
     mode = _PyDisplayTestMode()
     mode.ENABLED = True
     mode.DURATION_S = _autotest_duration_s()
+    mode._start_s = None
+    mode._deadline_fired = False
     sys.modules["pydisplay_test_mode"] = mode
+
+    def _deadline_hook():
+        if getattr(mode, "_deadline_fired", False):
+            return True
+        import time
+
+        now = time.time()
+        start = getattr(mode, "_start_s", None)
+        if start is None:
+            mode._start_s = now
+            return False
+        if now - start < float(mode.DURATION_S):
+            return False
+        mode._deadline_fired = True
+        try:
+            import board_config
+
+            rt = getattr(board_config, "runtime", None)
+            if rt is not None:
+                request = getattr(rt, "request_quit", None)
+                if callable(request):
+                    request()
+                elif not getattr(rt, "quit_requested", False):
+                    handle = getattr(rt, "_handle_quit", None)
+                    if callable(handle):
+                        handle()
+        except Exception:
+            pass
+        return True
+
+    try:
+        import multimer
+
+        multimer.set_deadline_hook(_deadline_hook)
+    except ImportError:
+        pass
 
 def _parse_comma(raw):
     names = []

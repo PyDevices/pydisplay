@@ -6,6 +6,9 @@ Experimental browser support via [PyScript](https://pyscript.net/) and `displays
 
 **Asyncio porting:** [PyScript asyncio guide](../guides/pyscript-asyncio.md).
 
+**Agent troubleshooting** (Playwright, hangs, multimer/WASM):
+[PyScript troubleshooting](../testing/pyscript-troubleshooting.md).
+
 !!! warning "Work in progress"
     PyScript support is experimental. The [browser gallery](https://PyDevices.github.io/pydisplay/pyscript/) ships curated `async` and `all` examples (Run-gated). Other scripts may still use blocking `while True` loops and need asyncio porting — see [PyScript asyncio guide](../guides/pyscript-asyncio.md).
 

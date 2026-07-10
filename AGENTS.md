@@ -53,6 +53,11 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 - Known pre-existing example failures on CPython (not environment issues to
   "fix"): `nano_gui_simpletest` needs the `gui` package and `png_test` needs
   `PYDISPLAY_PNG_DIR`.
+- **PyScript hangs / multimer / WASM:** read
+  [`docs/testing/pyscript-troubleshooting.md`](docs/testing/pyscript-troubleshooting.md)
+  before poking the IDE browser. Prefer Playwright helpers
+  (`tools/ps_debug.py`, `ps_shot.py`) and console/CDP capture — sync
+  `sleep_ms` on the main thread often wedges `page.evaluate` and screenshots.
 
 ### `PYDISPLAY_TIMER_ASYNC` (default `board_config`)
 

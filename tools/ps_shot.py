@@ -2,6 +2,12 @@
 """
 Take a screenshot after N seconds using a separate process with a hard kill.
 Uses threading to kill the browser after the wait, then saves the final screenshot.
+
+Use when Chromium may stall under sync MicroPython-WASM loops. See
+``docs/testing/pyscript-troubleshooting.md``.
+
+Usage:
+    python tools/ps_shot.py URL [wait_sec] [out.png]
 """
 
 import base64

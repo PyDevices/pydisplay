@@ -91,6 +91,45 @@ MicroPython-compatible names:
 - `ticks_ms()`, `ticks_add()`, `ticks_diff()`, `ticks_less()`
 - `sleep_ms(ms)` — blocks in sync code; returns an awaitable when called inside a running asyncio loop (`await multimer.sleep_ms(100)`)
 
+## Development / troubleshooting — deadline hooks
+
+!!! warning "Not for application code"
+    `set_deadline_hook` / `run_deadline_hook` exist only for **test harnesses and
+    interactive debugging**. Leave them unset in production apps. For Playwright
+    and WASM main-thread caveats when debugging these hooks, see
+    [PyScript troubleshooting](../testing/pyscript-troubleshooting.md).
+
+Some hosts are single-threaded (notably browser WASM / PyScript): a sync
+`while True` loop that calls `sleep_ms` holds the main thread, so a background
+timer cannot inject “please quit.” For bounded smoke tests, register a
+cooperative deadline hook instead:
+
+```python
+import multimer
+
+def on_deadline():
+    # e.g. set a quit flag your loop already checks
+    runtime.request_quit()
+    return True
+
+multimer.set_deadline_hook(on_deadline)
+try:
+    run_demo()
+finally:
+    multimer.set_deadline_hook(None)  # always clear when done
+```
+
+| API | Role |
+|-----|------|
+| `set_deadline_hook(hook)` | Register a zero-arg callable, or `None` to clear |
+| `run_deadline_hook()` | Invoke the hook if set; returns its result or `False` |
+| `sleep_ms` | Calls `run_deadline_hook()` before and after sleeping |
+
+`eventsys.Runtime.poll()` also calls `run_deadline_hook()` so loops that poll
+without sleeping still hit the deadline. Application demos should keep using
+normal quit handling (`runtime.quit_requested`); only harness code should
+install a hook.
+
 ## Async helpers
 
 | Function | Purpose |

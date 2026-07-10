@@ -27,6 +27,22 @@ python tools/serve.py
 
 See [Run the notebook interactively](../docs/platforms/jupyter-run.md) and [PyScript local development](../docs/guides/pyscript.md).
 
+## PyScript headless debug (Playwright)
+
+| Script | Purpose |
+|--------|---------|
+| [`ps_debug.py`](ps_debug.py) | CDP console + network probe for an embed/load URL |
+| [`ps_screenshot.py`](ps_screenshot.py) | Timed screenshot; console via CDP (avoids `evaluate` during WASM sleep) |
+| [`ps_shot.py`](ps_shot.py) | Screenshot with a hard kill if Chromium stalls |
+
+Agent-oriented guide: [PyScript troubleshooting](../docs/testing/pyscript-troubleshooting.md).
+
+```bash
+python tools/serve.py   # separate terminal
+.venv/bin/python tools/ps_debug.py \
+  'http://127.0.0.1:8000/web/pyscript/embed.html?modules=calculator&autotest=1' 20
+```
+
 ## Example test matrix
 
 | Script | Purpose |

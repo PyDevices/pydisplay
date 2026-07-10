@@ -4,6 +4,10 @@ Thorough PyScript debug runner — captures all JS console output via CDP,
 monitors #log div for Python print() output, tracks network requests,
 and checks for WASM loading errors.
 
+Prefer this over Cursor Browser screenshots when sync Python may be blocking
+the main thread (``page.evaluate`` / screenshots often hang). See
+``docs/testing/pyscript-troubleshooting.md``.
+
 Usage:
     python tools/ps_debug.py URL [timeout_sec]
 """

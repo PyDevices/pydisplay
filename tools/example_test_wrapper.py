@@ -361,6 +361,7 @@ def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode
 
             pydisplay_test_mode.ENABLED = True
             pydisplay_test_mode.DURATION_S = duration_s
+            pydisplay_test_mode.install_deadline_hook()
         except ImportError:
             pass
 
@@ -591,6 +592,7 @@ def main(argv=None):
 
         pydisplay_test_mode.ENABLED = True
         pydisplay_test_mode.DURATION_S = args["duration"]
+        pydisplay_test_mode.install_deadline_hook()
     except Exception:
         pass
 

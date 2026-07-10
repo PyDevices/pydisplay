@@ -171,6 +171,14 @@ class Runtime:
     def quit_requested(self):
         return self._quit_requested
 
+    def request_quit(self):
+        """Request a clean shutdown (same path as a device QUIT event).
+
+        Useful from application code and from development deadline hooks
+        registered via ``multimer.set_deadline_hook``.
+        """
+        self._handle_quit()
+
     @property
     def before_quit(self):
         return self._before_quit
@@ -308,7 +316,18 @@ class Runtime:
             pass
 
     def poll(self):
-        """Poll all registered devices and return aggregated events."""
+        """Poll all registered devices and return aggregated events.
+
+        Also invokes ``multimer.run_deadline_hook()`` when present so test
+        harnesses can enforce a wall-clock deadline on single-threaded hosts.
+        Application code should not rely on that hook.
+        """
+        try:
+            from multimer import run_deadline_hook
+
+            run_deadline_hook()
+        except ImportError:
+            pass
         self._drain_timers()
         self._maybe_arm_pending_sync_refresh()
         eventlist = []
