@@ -25,11 +25,11 @@ Every runnable example (top-level scripts under `src/examples/*.py` and the subd
 
 | Tag | Meaning |
 |-----|---------|
-| `all` | Same code on MCU, desktop sync, and PyScript/Jupyter blocking mode — poll/`sleep_ms` loops with quit handling, guarded `needs_pump()`/`pump()`, or library helpers (`pd.run_forever`) that hide pump details |
-| `queued, sync` | Explicit `run_forever`/`periodic` timer loop or pump-centric game/LVGL test (`pydisplay_demo`, `testris`, `timer_simpletest`, `lv_test_timer_*`) |
-| `sync` | Sync-only or one-shot on the main thread (`lv_test_timer_no_pump.py` hangs on pump backends; `console_advanced_demo.py` uses `os.dupterm` + one `display_drv.show()`) |
+| `all` | Same code on MCU, desktop sync, and PyScript/Jupyter — poll/`sleep_ms` loops with quit handling, or library helpers (`pd.run_forever`) |
+| `queued, sync` | Explicit `run_forever`/`periodic` timer loop or game/LVGL test (`pydisplay_demo`, `testris`, `lv_test_timer`) |
+| `sync` | Sync-only or one-shot on the main thread (`console_advanced_demo.py` uses `os.dupterm` + one `display_drv.show()`) |
 | `async` | `runtime.timer_async` + `asyncio` main loop |
-| `NA` | Not applicable — shared module or test harness, not a runnable portability example (`lv_test_timer_common.py`, `lv_test_timer_harness.py`) |
+| `NA` | Not applicable — shared module or test harness, not a runnable portability example |
 
 ### Search commands
 
@@ -114,64 +114,33 @@ while True:
             display_drv.show()
 ```
 
-**Finite queued/sync test** — [`timer_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/timer_simpletest.py):
-
-```python
-while not _done:
-    pump()
-    sleep_ms(1)
-```
-
-**Forever LVGL / library-driven app** — [`lv_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_touch_test.py): setup UI, then drain the queue only when needed:
-
-```python
-from multimer import Timer, pump, sleep_ms
-
-if getattr(Timer, "NEEDS_PUMP", False):
-    while True:
-        pump()
-        sleep_ms(1)
-```
-
-On sync platforms the `if` block is skipped; on queued platforms (CPython SDL, CircuitPython threading) the loop keeps timer callbacks and display refresh alive.
+**Forever LVGL / library-driven app** — [`lv_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_touch_test.py): follows `runtime.timer_async` via `dual_main` (no env vars). Sync path uses a cooperative deadline/`time.sleep` loop; async path uses `await asyncio.sleep(0)` plus `runtime.poll()`.
 
 **`tft_config` animation / one-shot** — subdirectory demos [`alien/alien.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/alien/alien.py), [`tiny_toasters/tiny_toasters.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/tiny_toasters/tiny_toasters.py), [`chango/chango.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/chango/chango.py):
 
 ```python
 from board_config import runtime
-from multimer import Timer, needs_pump, pump
 
 tft.show()
-if needs_pump():
-    pump()
 if runtime is not None:
     runtime.poll()  # SDL message pump — required on MicroPython Windows
 ```
 
-On **MicroPython Windows** (and other ports using `multimer._polling`), `multimer.needs_pump()` is false but `Timer.NEEDS_PUMP` is true — check the **timer class** flag when the module flag is false. Without `runtime.poll()`, the SDL window can freeze after the first frame even when the Python loop keeps running.
+Without `runtime.poll()`, the SDL window can freeze after the first frame even when the Python loop keeps running.
 
-**LVGL apps** — [`lv_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_touch_test.py):
-
-```python
-import display_driver
-
-# ... build LVGL UI ...
-display_driver.run()
-```
-
-`display_driver.run()` returns immediately on **MicroPython unix** and **CPython** (non-Windows) when `lv_utils` is already running — REPL stays usable. It blocks on **Windows** (`pump()` + `runtime.poll()`) and **macOS** (`lv_utils` tick loop). See [LVGL guide](../guis/lvgl.md).
+**LVGL apps** — [`lv_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_touch_test.py) / [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py): import `display_driver` from sync/async entrypoints and drive the loop with `dual_main` (follows `runtime.timer_async`). See [LVGL guide](../guis/lvgl.md).
 
 **PyWidgets (pdwidgets)** — [`widgets_stub.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_stub.py): build UI, then:
 
 ```python
 import pdwidgets as pd
 
-pd.init_timer(10)  # optional; omit for poll mode
+pd.init_timer(10)  # optional; sets poll delay for run_forever
 # ... widgets ...
 pd.run_forever()
 ```
 
-`run_forever()` drains `pump()` on queued backends; in poll mode it calls `pd.tick()`. On sync MCU with a timer, it returns immediately. On CPython Linux SDL it drives `tick()` from the main loop. See [PyWidgets](../guis/pywidgets.md#event-loop).
+`run_forever()` calls `pd.tick()` each frame then polls the runtime. During setup bursts before `run_forever()`, call `pd.tick()` to flush draws. See [PyWidgets](../guis/pywidgets.md#event-loop).
 
 ### Notes
 
@@ -277,12 +246,9 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `displaybuf_blit.py` | DisplayBuffer blit | MCU | add_ons |
 | `scroll.py` | Scrolling text | CPython · MCU | core |
 | `rotations.py` | Display rotation | CPython · MCU | core |
-| `timer_simpletest.py` | multimer timer | CPython · MCU | core |
 | `nano_gui_simpletest.py` | Nano-GUI hardware check | CPython · MCU | add_ons + upstream `gui/` |
 | `lv_touch_test.py` | LVGL touch grid | MCU | LVGL |
-| `lv_test_timer_no_pump.py` | LVGL timer — no pump loop | MCU · CPython Linux | LVGL |
-| `lv_test_timer_pump.py` | LVGL timer — `pump()` drain loop | CPython · MCU | LVGL |
-| `lv_test_timer_async.py` | LVGL timer — asyncio / PyScript | CPython · PyScript | LVGL |
+| `lv_test_timer.py` | LVGL timer (follows `runtime.timer_async`) | CPython · MCU · PyScript | LVGL |
 
 ## Subdirectories
 
@@ -290,8 +256,8 @@ Runnable demos in subfolders use the same multimer markers as top-level examples
 
 | Directory | Script | Tag | Platforms | Notes |
 |-----------|--------|-----|-----------|-------|
-| `alien/` | `alien.py` | `all` | CPython · MP · MCU | Sprite bounce; `needs_pump()` + `runtime.poll()` quit each frame |
-| `chango/` | `chango.py` | `all` | CPython · MP · MCU · PyScript | One-shot font demo; `needs_pump()` + `runtime.poll()` after draws |
+| `alien/` | `alien.py` | `all` | CPython · MP · MCU | Sprite bounce; `runtime.poll()` quit each frame |
+| `chango/` | `chango.py` | `all` | CPython · MP · MCU · PyScript | One-shot font demo; `runtime.poll()` after draws |
 | `noto_fonts/` | `noto_fonts.py` | `all` | MP · MCU · PyScript | One-shot Noto font demo; same tail as `chango` |
 | `proverbs/` | `proverbs.py` | `all` | CPython · MP · MCU | Chinese proverb slideshow; quit via `runtime.poll()` |
 | `tiny_toasters/` | `tiny_toasters.py` | `all` | CPython · MP · MCU | Sprite animation; quit via `runtime.poll()` |

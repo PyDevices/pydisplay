@@ -57,9 +57,9 @@ Use **`runtime.timer_async`** (set in `board_config.py` when constructing `Runti
 
 [`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py) passes this to `lv_utils.event_loop(async_=runtime.timer_async)`.
 
-When **`runtime.timer_async` is true**, `display_driver` claims runtime-driven refresh and calls `display.show()` from the aio LVGL refresh loop instead. CircuitPython's default `multimer.Timer` uses a background thread and requires `pump()` — which an asyncio app does not call — so the window would never be presented otherwise.
+When **`runtime.timer_async` is true**, `display_driver` claims runtime-driven refresh and calls `display.show()` from the aio LVGL refresh loop instead — so presentation stays on the asyncio path even when a sync timer backend would otherwise be used.
 
-On CPython Win/mac (sync timers), call **`multimer.pump()`** from your main loop when using threaded timer backends — see [multimer](../concepts/multimer.md). Full apps call **`display_driver.run()`** after UI setup: it returns immediately on MicroPython unix and CPython Linux (REPL stays live) and blocks only on Windows SDL or macOS.
+Full apps typically drive the loop with `dual_main` (see [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py)) or call **`display_driver.run()`** after UI setup: it returns immediately on MicroPython unix and CPython Linux (REPL stays live) and blocks only on Windows SDL or macOS.
 
 `src/lib/board_config.py` reads **`PYDISPLAY_TIMER_ASYNC`** for the PG/SDL
 desktop branch (default `False`). PyScript and Jupyter always use
@@ -73,33 +73,25 @@ import display_driver
 
 Or set `PYDISPLAY_TIMER_ASYNC=1` on the command line when launching the process.
 
-## Timer test examples
+## Timer test example
 
-Three scripts share the same UI via `lv_test_timer_common.build_ui()` and differ only in how multimer drives LVGL ticks:
+[`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py) is a single smoke test that follows **`runtime.timer_async`** (via `dual_main`). It does **not** read or write environment variables — set `PYDISPLAY_TIMER_ASYNC` in the parent process / shell if you want a specific desktop mode before `board_config` loads.
 
-| Script | When to run |
-|--------|-------------|
-| [`lv_test_timer_no_pump.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_no_pump.py) | MCU, MP-unix, CPython Linux — no main loop; **hangs** on pump-required platforms |
-| [`lv_test_timer_pump.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_pump.py) | CPython Win/mac — `pump()` drain loop only |
-| [`lv_test_timer_async.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_async.py) | PyScript / asyncio — `PYDISPLAY_TIMER_ASYNC=1`, deferred `import display_driver`, `await asyncio.sleep(0)` loop |
+The UI shows autodetected **runtime**, **OS**, **display** driver class, **timer** backend, **mode** (`sync`/`async`), and **LVGL** version, plus a seconds counter, spinning arc, and tap button.
 
-The shared UI ([`lv_test_timer_common.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_common.py)) shows autodetected **runtime**, **OS**, **display** driver class, **timer** backend, and **LVGL** version.
-
-### Automated harness
-
-[`lv_test_timer_harness.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer_harness.py) runs a timed LVGL timer + input check, prints a `KIT_RESULT=` JSON line on stdout, then injects `events.Quit` through the queue read path (same as clicking the window X) and expects the process to exit cleanly. Run from `src/`:
+### Automated kit mode
 
 ```bash
 cd src
-micropython examples/lv_test_timer_harness.py pump
-.venv/bin/python examples/lv_test_timer_harness.py async
+PYDISPLAY_TIMER_ASYNC=0 .venv/bin/python examples/lv_test_timer.py kit
+PYDISPLAY_TIMER_ASYNC=1 .venv/bin/python examples/lv_test_timer.py kit
 ```
 
-Modes: `no_pump`, `pump`, `async`.
+Kit mode runs a timed LVGL timer + input check, prints a `KIT_RESULT=` JSON line on stdout, then quits. Prefer [`tools/lv_timer_test_kit.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/lv_timer_test_kit.py) to drive sync/async across desktop runtimes.
 
 ### Desktop test suite
 
-[`tools/run_desktop_lv_tests.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/run_desktop_lv_tests.py) runs the harness across **five desktop Python+LVGL executables** in sequence (ten subprocess runs total — `pump` and `async` per runtime; **async is omitted on MicroPython Windows** because that port has no asyncio).
+[`tools/run_desktop_lv_tests.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/run_desktop_lv_tests.py) runs the kit across **five desktop Python+LVGL executables** in sequence (ten subprocess runs total — `sync` and `async` per runtime).
 
 | Executable | How resolved |
 |------------|--------------|
@@ -126,17 +118,17 @@ From `src/`:
 
 The script prints a summary table (`queued` / `async` columns) and writes full results to a JSON file. Exit code **1** if any run hangs, crashes, fails timers, or fails click checks (strict policy).
 
-For the full desktop matrix (micropython, circuitpython, cpython-venv, micropython.exe, python.exe × sync/queued/async), use [`tools/lv_timer_test_kit.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/lv_timer_test_kit.py):
+For the full desktop matrix (micropython, circuitpython, cpython-venv, micropython.exe, python.exe × sync/async), use [`tools/lv_timer_test_kit.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/lv_timer_test_kit.py):
 
 ```bash
 python tools/lv_timer_test_kit.py
-python tools/lv_timer_test_kit.py --only python.exe sync
-python tools/lv_timer_test_kit.py --only cpython-venv --modes queued async
+python tools/lv_timer_test_kit.py --only python.exe --modes sync
+python tools/lv_timer_test_kit.py --only cpython-venv --modes sync async
 ```
 
-On Windows, **sync** uses the default **`multimer._win32`** backend (`needs_pump()` is false); the table shows the timer backend in each cell (e.g. `_win32, ok`).
+The table shows the timer backend in each cell (e.g. `librt.Timer, ok` / `_async_timer, ok`).
 
-[`tools/run_desktop_lv_tests.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/run_desktop_lv_tests.py) is a shorter wrapper: same runtimes, **queued** and **async** only, with strict click checks.
+[`tools/run_desktop_lv_tests.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/run_desktop_lv_tests.py) is a shorter wrapper: same runtimes, **sync** and **async**, with strict click checks.
 
 ## Next
 

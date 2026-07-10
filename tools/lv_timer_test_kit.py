@@ -2,13 +2,13 @@
 """
 Run the LVGL timer/input harness across desktop Python runtimes.
 
-Subprocesses run ``examples/lv_test_timer_harness.py`` from ``src/`` (~4 s of
+Subprocesses run ``examples/lv_test_timer.py kit`` from ``src/`` (~4 s of
 checks, then an injected ``events.Quit``). Each child prints ``KIT_RESULT=`` on
 stdout; exit code 0 is expected on success.
 
-The board's shared runtime timer drives LVGL (``multimer.Timer`` never needs
-"pumping"), so there is no pump/no_pump distinction: the only modes are ``sync``
-and ``async``.
+The example follows ``runtime.timer_async`` (it does not set env vars). This kit
+sets ``PYDISPLAY_TIMER_ASYNC`` in the child environment so ``board_config``
+constructs sync or async timers; modes are ``sync`` and ``async``.
 
 From repo root:
     python tools/lv_timer_test_kit.py
@@ -32,7 +32,7 @@ import sys
 REPO = Path(__file__).resolve().parent.parent
 SRC = REPO / "src"
 TOOLS = REPO / "tools"
-HARNESS_ARG = "examples/lv_test_timer_harness.py"
+HARNESS_ARG = "examples/lv_test_timer.py"
 RESULT_RE = re.compile(r"^KIT_RESULT=(.+)$", re.MULTILINE)
 DEFAULT_TIMEOUT = 45
 DEFAULT_RESULTS = REPO / ".cursor" / "lv_timer_test_kit_results.json"
@@ -82,17 +82,6 @@ def _resolve_interpreters(only: list[str] | None) -> dict[str, list[str] | None]
     return out
 
 
-def load_default_timer_needs_pump(
-    runtimes: tuple[str, ...] | list[str] | None = None,
-) -> dict[str, bool]:
-    """Compatibility shim: ``multimer.Timer`` never needs pumping now (all False).
-
-    Kept so older report tools that still import this keep working.
-    """
-    wanted = tuple(runtimes or LVGL_RUNTIMES)
-    return dict.fromkeys(wanted, False)
-
-
 def parse_result(stdout: str) -> dict | None:
     for match in RESULT_RE.finditer(stdout):
         try:
@@ -124,7 +113,6 @@ def compute_exit_code(
     rows: list[dict],
     *,
     strict_clicks: bool = False,
-    needs_pump_map: dict[str, bool | None] | None = None,
 ) -> int:
     for row in rows:
         if row.get("summary") == "missing":
@@ -160,9 +148,8 @@ def run_case(
     timeout: int = DEFAULT_TIMEOUT,
     *,
     cwd: Path | None = None,
-    needs_pump: bool | None = None,  # accepted for backward compat; unused
 ) -> dict:
-    cmd = [*cmd_base, HARNESS_ARG, mode]
+    cmd = [*cmd_base, HARNESS_ARG, "kit"]
     env = os.environ.copy()
     if mode == "async":
         env["PYDISPLAY_TIMER_ASYNC"] = "1"

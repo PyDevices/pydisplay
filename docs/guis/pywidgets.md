@@ -37,18 +37,16 @@ display = pd.Display(...)
 pd.run_forever()
 ```
 
-**Setup bursts** — during initialization writes before `run_forever()`, call `pd.pump()` each iteration so queued/SDL backends drain timer callbacks and poll-mode apps refresh:
+**Setup bursts** — during initialization writes before `run_forever()`, call `pd.tick()` each iteration so draws flush to the display:
 
 ```python
 while i < 60:
     console.write(f"{i}\n")
-    pd.pump()
+    pd.tick()
 pd.run_forever()
 ```
 
-On queued/SDL backends (CircuitPython SDL, CPython desktop), `Display.refresh()` calls `display_drv.show()` after blitting when `multimer.needs_pump()` is true (same pattern as [`color_setup.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/color_setup.py)).
-
-On **CPython Linux** (`multimer._librt`), `run_forever()` drives `tick()` from the main loop instead of a pdwidgets timer — the module `needs_pump()` flag is true while `Timer.needs_pump()` is false on that backend. Library code checks both flags where relevant.
+`run_forever()` already calls `tick()` each frame. pdwidgets owns no timer of its own — frames are driven cooperatively from the multimer loop selected by `runtime.timer_async`.
 
 ## Examples
 

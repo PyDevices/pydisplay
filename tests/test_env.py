@@ -13,6 +13,7 @@ import env_util
 class TestEnvBool(unittest.TestCase):
     def test_missing_returns_default(self):
         os.environ.pop("PYDISPLAY_TEST_ENV_BOOL", None)
+        env_util._overrides.pop("PYDISPLAY_TEST_ENV_BOOL", None)
         self.assertFalse(env_util.env_bool("PYDISPLAY_TEST_ENV_BOOL", False))
         self.assertTrue(env_util.env_bool("PYDISPLAY_TEST_ENV_BOOL", True))
 
@@ -31,8 +32,19 @@ class TestEnvBool(unittest.TestCase):
         self.assertFalse(env_util.env_bool("PYDISPLAY_TEST_ENV_BOOL", False))
         self.assertTrue(env_util.env_bool("PYDISPLAY_TEST_ENV_BOOL", True))
 
+    def test_env_set_override_without_os_environ(self):
+        env_util._overrides.pop("PYDISPLAY_TEST_ENV_SET", None)
+        os.environ.pop("PYDISPLAY_TEST_ENV_SET", None)
+        env_util.env_set("PYDISPLAY_TEST_ENV_SET", "1")
+        self.assertTrue(env_util.env_bool("PYDISPLAY_TEST_ENV_SET", False))
+        env_util.env_set("PYDISPLAY_TEST_ENV_SET", "0")
+        self.assertFalse(env_util.env_bool("PYDISPLAY_TEST_ENV_SET", True))
+
     def tearDown(self):
         os.environ.pop("PYDISPLAY_TEST_ENV_BOOL", None)
+        os.environ.pop("PYDISPLAY_TEST_ENV_SET", None)
+        env_util._overrides.pop("PYDISPLAY_TEST_ENV_BOOL", None)
+        env_util._overrides.pop("PYDISPLAY_TEST_ENV_SET", None)
 
 
 if __name__ == "__main__":

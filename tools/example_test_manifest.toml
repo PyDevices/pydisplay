@@ -18,7 +18,6 @@ script = "examples/pydisplay_demo.py"
 kind = "loop"
 quit = "poll"
 deps = ["core"]
-skip_runtimes = ["jupyter"]
 
 [examples.pydisplay_demo_async]
 import = "pydisplay_demo_async"
@@ -78,15 +77,6 @@ kind = "loop"
 quit = "poll"
 deps = ["add_ons", "tft_config"]
 
-[examples.timer_simpletest]
-import = "timer_simpletest"
-script = "examples/timer_simpletest.py"
-kind = "oneshot"
-quit = "native_exit"
-duration_s = 6
-timeout_s = 20
-deps = ["core"]
-
 [examples.chango]
 import = "chango.chango"
 script = "examples/chango/chango.py"
@@ -94,47 +84,18 @@ kind = "loop"
 quit = "inject"
 deps = ["add_ons", "tft_config"]
 
-# --- harnesses (excluded from matrix) ---
+# --- LVGL timer smoke test (matrix) ---
+# Also covered by tools/lv_timer_test_kit.py (``lv_test_timer.py kit``).
+# Follows runtime.timer_async; does not set PYDISPLAY_TIMER_ASYNC itself.
 
-[examples.lv_test_timer_harness]
-import = "lv_test_timer_harness"
-script = "examples/lv_test_timer_harness.py"
-kind = "harness"
-quit = "inject"
-deps = ["lvgl"]
-matrix = false
-
-[examples.lv_test_timer_common]
-import = "lv_test_timer_common"
-script = "examples/lv_test_timer_common.py"
-kind = "harness"
-matrix = false
-
-# --- LVGL timer mode scripts (matrix) ---
-
-# LVGL timer tests are driven by tools/lv_timer_test_kit.py (its harness owns the
-# loop and quit). The generic matrix injects quit by pumping lv.task_handler on a
-# daemon thread, which is incompatible with the shared broker timer driving LVGL,
-# so these are excluded from the matrix (matrix = false).
-[examples.lv_test_timer_sync]
-import = "lv_test_timer_sync"
-script = "examples/lv_test_timer_sync.py"
+[examples.lv_test_timer]
+import = "lv_test_timer"
+script = "examples/lv_test_timer.py"
 kind = "lvgl"
 quit = "inject"
 deps = ["lvgl"]
 duration_s = 5
 timeout_s = 45
-matrix = false
-
-[examples.lv_test_timer_async]
-import = "lv_test_timer_async"
-script = "examples/lv_test_timer_async.py"
-kind = "async"
-quit = "inject"
-deps = ["lvgl"]
-duration_s = 5
-timeout_s = 45
-matrix = false
 
 # --- displaysys harness scripts (matrix) ---
 
@@ -364,8 +325,6 @@ kind = "lvgl"
 quit = "inject"
 deps = ["lvgl"]
 timeout_s = 45
-# MP win32: LVGL + SDL sync timers flood micropython.schedule (exit 5 / no EXAMPLE_RESULT).
-skip_runtimes = ["micropython.exe"]
 
 [examples.nano_gui_simpletest]
 import = "nano_gui_simpletest"
@@ -416,7 +375,6 @@ script = "examples/png_test.py"
 kind = "loop"
 quit = "poll"
 deps = ["add_ons"]
-skip_runtimes = ["pyscript", "jupyter"]
 
 [examples.rotations]
 import = "rotations"
@@ -585,4 +543,3 @@ script = "examples/keypins_simpletest.py"
 kind = "loop"
 quit = "poll"
 deps = ["add_ons"]
-matrix = false

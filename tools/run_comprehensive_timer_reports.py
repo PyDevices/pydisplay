@@ -3,7 +3,7 @@
 Run comprehensive multimer timer tests and write markdown reports.
 
 Phase 1 — no LVGL: ``tools/test_timers.py`` on every desktop subprocess runtime.
-Phase 2 — with LVGL: ``lv_test_timer_harness.py`` x no_pump / pump / async (modes).
+Phase 2 — with LVGL: ``lv_test_timer.py kit`` x sync / async (via child env).
 
 From repo root:
     python tools/run_comprehensive_timer_reports.py
@@ -33,7 +33,6 @@ from example_test_kit import (  # noqa: E402
 from lv_timer_test_kit import (  # noqa: E402
     LVGL_RUNTIMES,
     MODES,
-    load_default_timer_needs_pump,
     parse_result,
 )
 from lv_timer_test_kit import (  # noqa: E402
@@ -49,13 +48,12 @@ LVGL_REPORT = REPO / ".cursor" / "comprehensive_timers_lvgl_report.md"
 EXAMPLE_ID = "test_timers"
 
 _PROBE_HEADER = re.compile(r"^([^\s].*):$")
-_PROBE_NEEDS_PUMP = re.compile(r"^\s*NEEDS_PUMP:\s*(True|False)")
 _PROBE_STATUS = re.compile(r"^\s*(PASS|FAIL|SKIP)(?:\s*\(import\)|\s*\(runtime\))?:\s*(.*)$")
 _PROBE_REASON = re.compile(r"^\s*reason:\s*(.*)$")
 
 
 def _parse_probe_details(stdout: str) -> dict[str, dict]:
-    """Full probe parse: status, needs_pump, detail, skip_reason."""
+    """Full probe parse: status, detail, skip_reason."""
     out: dict[str, dict] = {}
     current: str | None = None
     for line in stdout.splitlines():
@@ -64,7 +62,6 @@ def _parse_probe_details(stdout: str) -> dict[str, dict]:
             current = m.group(1)
             out[current] = {
                 "status": "?",
-                "needs_pump": None,
                 "detail": "",
                 "skip_reason": "",
             }
@@ -72,10 +69,6 @@ def _parse_probe_details(stdout: str) -> dict[str, dict]:
         if current is None:
             continue
         row = out[current]
-        mp = _PROBE_NEEDS_PUMP.match(line)
-        if mp:
-            row["needs_pump"] = mp.group(1) == "True"
-            continue
         st = _PROBE_STATUS.match(line)
         if st:
             row["status"] = st.group(1)
@@ -95,7 +88,7 @@ def _parse_probe_details(stdout: str) -> dict[str, dict]:
     simple = _parse_probe_results(stdout)
     for name, status in simple.items():
         if name not in out:
-            out[name] = {"status": status, "needs_pump": None, "detail": "", "skip_reason": ""}
+            out[name] = {"status": status, "detail": "", "skip_reason": ""}
         elif out[name]["status"] == "?" and status != "?":
             out[name]["status"] = status
 
@@ -175,7 +168,6 @@ def _lvgl_timeout(runtime_id: str) -> int:
 def run_lvgl_matrix() -> list[dict]:
     from lv_timer_test_kit import _resolve_command
 
-    needs_pump_map = load_default_timer_needs_pump(LVGL_RUNTIMES)
     rows = []
     for runtime_id in LVGL_RUNTIMES:
         cmd = _resolve_command(runtime_id)
@@ -201,7 +193,6 @@ def run_lvgl_matrix() -> list[dict]:
                 cmd,
                 mode,
                 timeout=timeout,
-                needs_pump=needs_pump_map.get(runtime_id),
             )
             stdout = row.get("stdout_tail") or ""
             result = parse_result(stdout)
@@ -273,15 +264,13 @@ def write_no_lvgl_report(rows: list[dict]) -> None:
         for pl in row.get("platform") or []:
             lines.append(f"- {pl}")
         lines.append("")
-        lines.append("| Probe | NEEDS_PUMP | Result | Detail |")
-        lines.append("|-------|:----------:|--------|--------|")
+        lines.append("| Probe | Result | Detail |")
+        lines.append("|-------|--------|--------|")
         for probe in PROBE_COLUMNS:
             info = row.get("probes", {}).get(probe, {})
-            np = info.get("needs_pump")
-            np_s = "—" if np is None else ("True" if np else "False")
             status = info.get("status", "?")
             detail = info.get("detail") or info.get("skip_reason") or ""
-            lines.append(f"| `{probe}` | {np_s} | {_status_cell(status)} | {detail} |")
+            lines.append(f"| `{probe}` | {_status_cell(status)} | {detail} |")
         if row.get("stderr"):
             lines.extend(
                 [
@@ -330,8 +319,8 @@ def write_lvgl_report(rows: list[dict]) -> None:
         f"Generated: {now}  ",
         'Command: `export PATH="$HOME/bin:$PATH" && python tools/run_comprehensive_timer_reports.py --phase lvgl`',
         "",
-        "Runs ``examples/lv_test_timer_harness.py`` (no_pump / pump / async) on every desktop runtime.",
-        "``no_pump`` on pump-required backends (``multimer.Timer`` NEEDS_PUMP=True) may hang or report no timers — both are expected.",
+        "Runs ``examples/lv_test_timer.py kit`` (sync / async via ``PYDISPLAY_TIMER_ASYNC`` in the child env) on every desktop runtime.",
+        "The example follows ``runtime.timer_async`` and does not set environment variables itself.",
         "",
         "## Summary matrix",
         "",
@@ -365,9 +354,7 @@ def write_lvgl_report(rows: list[dict]) -> None:
         if row.get("summary") == "missing":
             lines.append("- **Status:** missing runtime")
         elif row.get("timed_out"):
-            lines.append(
-                "- **Status:** subprocess timeout (expected for no_pump on pump backends)"
-            )
+            lines.append("- **Status:** subprocess timeout")
         else:
             lines.append(f"- **Summary:** {row.get('summary')}")
             lines.append(f"- **Exit code:** {row.get('returncode')}")
@@ -392,7 +379,6 @@ def write_lvgl_report(rows: list[dict]) -> None:
             "## Legend",
             "",
             "- **ok** — timers ≥2 s and click checks passed",
-            "- **no timers (expected)** / **hang (expected)** — ``no_pump`` on a runtime whose default ``multimer.Timer`` has NEEDS_PUMP=True",
             "- **hang** — subprocess timed out unexpectedly (often post-``KIT_RESULT`` quit teardown)",
             "- **missing** — runtime executable not on PATH",
             "",

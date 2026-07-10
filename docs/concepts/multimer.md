@@ -25,7 +25,7 @@ Mode constants live on the timer class (`Timer.PERIODIC`, `Timer.ONE_SHOT`), not
 
 Lazy helpers (also importable as `multimer.run`, etc.): `run`, `run_forever`, `run_forever_async`, `dual_main`.
 
-There is **no** public `pump()`, `needs_pump()`, `periodic()`, `capabilities()`, or `backend_name()`.
+There is **no** public queue-drain API; timer backends deliver callbacks without an app-level `pump` step.
 
 ## Quick start — sync
 

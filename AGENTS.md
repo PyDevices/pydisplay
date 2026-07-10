@@ -82,9 +82,9 @@ PYDISPLAY_TIMER_ASYNC=1 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
   .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv
 ```
 
-LVGL asyncio examples (`lv_test_timer_async.py`, `lv_test_timer_harness.py` async mode) set the env (or use
-`PYDISPLAY_TIMER_ASYNC=1` on the command line) before importing
-`display_driver` / `board_config`.
+`lv_test_timer.py` follows `runtime.timer_async` and does not set env vars.
+To force async on desktop for that example (or the LVGL kit), set
+`PYDISPLAY_TIMER_ASYNC=1` on the command line before launch.
 
 **`micropython.exe` matrix:** no `threading` / `_thread`. `example_test_wrapper.py` uses a
 `Runtime.poll` deadline quit (not a multimer SDL quit timer). With
@@ -109,14 +109,13 @@ that call `show()` themselves avoid a competing SDL refresh timer.
 - `add_ons/lv_utils.py` subscribes its LVGL tick to the runtime's shared timer
   (`runtime.on_tick`) and imports `asyncio` from `multimer`; `add_ons/display_driver.py`
   claims runtime display refresh so LVGL presents frames from `task_handler`.
-- Test LVGL timers with `tools/lv_timer_test_kit.py` (modes: `sync`, `async` —
-  there is no pump/no_pump). Headless: `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/lv_timer_test_kit.py --only cpython-venv`.
+- Test LVGL timers with `tools/lv_timer_test_kit.py` (modes: `sync`, `async`).
+  Headless: `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/lv_timer_test_kit.py --only cpython-venv`.
 - Non-obvious: the sync `multimer.Timer` backend on CPython/Linux delivers via a
   main-thread signal handler. LVGL is not re-entrant, so the app loop must not
-  touch LVGL/pygame concurrently (just `sleep_ms(0)`); the LVGL timer examples
-  are therefore excluded from the generic example matrix (`matrix = false`) — its
-  daemon-thread quit injection is incompatible — and are covered by the kit
-  instead. In this VNC/SDL environment, external desktop mouse clicks do not reach
-  the pygame window; use the kit's event-queue injection to exercise input.
+  touch LVGL/pygame concurrently while that tick runs; LVGL examples use
+  cooperative deadline/`time.sleep` (sync) or `asyncio.sleep` (async). The LVGL
+  timer kit covers dedicated click checks — its daemon-thread quit injection is
+  incompatible with the generic example matrix for some ports.
 - **`multimer` is fragile** — read [`.cursor/rules/multimer-fragile.mdc`](.cursor/rules/multimer-fragile.mdc)
   before editing `src/lib/multimer/` (thinking model required, small diffs, revert failures).

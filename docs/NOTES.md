@@ -67,7 +67,7 @@ Private working notes for this repo. Not part of the published docs.
 
 ### multimer
 
-- [ ] **multimer `hard=False` on CPython (librt)** — `schedule()` does not truly defer when librt delivers on the main thread: it runs the callback inline inside the signal handler (`src/lib/multimer/_schedule.py`). That broke `timer_simpletest` on cpython-venv when both timers used `hard=False` (hang before any output). **Done for now:** example-scoped fix — `hard=False` only when `sys.implementation.name == "micropython"` (heap locked in FFI); CPython keeps default `hard=True` (`timer_simpletest`, commit `c26ce285`). **Next bot:** core change in `multimer` — detect signal-handler / non-reentrant context on CPython and always queue callbacks (true soft delivery), then revisit examples and other hard timers (`console._tick`, `pdwidgets`, etc.). Deliberate, test on librt + LVGL; not urgent while examples use the MP-only guard.
+- [ ] **multimer `hard=False` on CPython (librt)** — `schedule()` does not truly defer when librt delivers on the main thread: it runs the callback inline inside the signal handler (`src/lib/multimer/_schedule.py`). **Next bot:** core change in `multimer` — detect signal-handler / non-reentrant context on CPython and always queue callbacks (true soft delivery), then revisit examples and other hard timers (`console._tick`, `pdwidgets`, etc.). Deliberate, test on librt + LVGL.
 
 ### MCU optimization
 
@@ -78,15 +78,18 @@ Private working notes for this repo. Not part of the published docs.
 
 ### Tooling & ecosystem
 
-- [ ] Remove redundant and consolidate overlapping scripts and tools; remove any unnecessary scripts and tools that are no longer needed or used
-- [ ] List all `.py` files under `board_configs/`, `drivers/`, and `src/` that read environment variables; remove env access where unnecessary. Keep `src/lib/board_config` reading the env for the default `timer_async` value; prefer no other scripts in those directories access envars
+- [ ] Remove redundant and consolidate overlapping tools under `tools/`; remove any unnecessary tools that are no longer needed or used
+- [ ] Eliminate `src/lib/env_util.py` or move it out of `src/lib` (only used by `board_config` for `PYDISPLAY_TIMER_ASYNC`)
 - [ ] Add a GUI to the matrix test kit (`tools/example_test_kit.py`)
-- [ ] Verify `manifest.py` selection order in `~/github/cmods`
 - [ ] Fork [figma2lvgl](https://github.com/khiyamiftikhar/figma2lvgl) and add option to output Python
 - [ ] Change docs and scripts so cmods sub-repos don't mention or require cmods (personal workspace only — not required for other users); may need to move functionality out of cmods into sub-repos
 
 ### Done
 
+- [x] Fix cmods `manifest.py` / `build_mp.sh` frozen-manifest selection — `build_mp.sh` exports `FROZEN_MANIFEST_UPSTREAM` to the MicroPython freeze file for the build; static `cmods/manifest.py` includes cmod siblings then that path (no generated wrapper). Verified via `cmods/scripts/verify_frozen_manifest_parity.sh`: unix standard/coverage, windows dev, webassembly pyscript, esp32 ESP32_GENERIC_P4/C6_WIFI + M5STACK_ATOM, rp2 RPI_PICO
+- [x] Verify `manifest.py` selection order in `~/github/cmods` — **was incorrect;** fixed (see above)
+- [x] Remove redundant and consolidate overlapping scripts under `scripts/`; remove unused ones — deleted `migrate_*_to_runtime.py` and `generate_epaper_board_configs.py` (use `generate_board_configs.py` / `--kind epaper`); moved `tools/make_color_icons.py` → `scripts/assets_make_color_icons.py`; docs/tests updated
+- [x] List all `.py` files under `board_configs/`, `drivers/`, and `src/` that read environment variables; remove env access where unnecessary. Keep `src/lib/board_config` reading the env for the default `timer_async` value; prefer no other scripts in those directories access envars — inventory done; removed `PGDisplay.open_frame_recorder_from_env` (callers use `open_frame_recorder(path, fps=…)`). Example env use left for examples audit
 - [x] Check `display_driver.py`, `lv_utils.py`, and `multimer` for possible refactor / optimizations
 - [x] Find all globals in `src/lib` — see [src-lib-globals.md](../.cursor/src-lib-globals.md)
 - [x] Trim `jupyter_notebook.ipynb` out of `pyscript.toml` (demo pages don't need it; bundled via `gen_repo_packages.py`)
