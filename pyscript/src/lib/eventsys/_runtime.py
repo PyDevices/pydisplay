@@ -144,6 +144,10 @@ class Runtime:
     @staticmethod
     def _event_loop_running():
         """True when asyncio already has a running loop (PyScript, Jupyter, async main)."""
+        import sys
+
+        if sys.platform in ("emscripten", "webassembly"):
+            return True
         try:
             from multimer import asyncio
 
