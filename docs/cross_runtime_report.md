@@ -54,26 +54,13 @@ Visual 2×2 text compare: `src/examples/framebuf_text_compare.py` (framebuf + gr
 
 **Command:** 36-example graphics cluster, `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy`.
 
-| Metric | Before rebuild | After rebuild | Post-harness (`8742556b`) |
-|--------|----------------:|--------------:|--------------------------:|
-| **ok** | 3 | 19 | **30** |
-| hang | — | 5 | 2 |
-| exit_5 | — | 11 | 2 |
-| exit_3 | — | — | 2 |
+| Metric | Before rebuild | After rebuild | Post-harness (`8742556b`) | Post quit_requested + poll tick |
+|--------|----------------:|--------------:|--------------------------:|--------------------------------:|
+| **ok** | 3 | 19 | 30 | **36** |
+| hang | — | 5 | 2 | 0 |
+| exit_5 / exit_3 | — | 11 | 4 | 0 |
 
-### Still failing (6/36)
-
-| Example | Result | Notes |
-|---------|--------|-------|
-| `eventsys_touch_test` | hang | Interactive touch calibration; blocks for 16 corner touches |
-| `widgets_console` | hang | pdwidgets + SDL sync timers (poll-mode fix in progress) |
-| `pydisplay_demo` | exit_3/5 | `Timer(-1)` scroll — poll-driven fix in progress |
-| `pydisplay_demo_async` | exit_5 | sync path same as above when `timer_async=False` |
-| `joystick_list_select` | exit_3/hang | `pd.run_forever()` → `init_timer(10)` |
-| `widgets_calc` | exit_5/hang | explicit `pd.init_timer(10)` |
-| `widgets_list` | exit_5 | schedule queue full |
-
-**Cleared since rebuild:** `apollo`, `color_test`, `feathers`, `font_simpletest2`, `scroll_touch_test`, `hello`, `bouncing_balls`, and most former exit_5 bucket.
+**Follow-up (`89f098c2`):** poll-driven scroll in `pydisplay_demo*`, `pdwidgets.init_timer` skips SDL `Timer(-1)` when `timer_async=False` (poll `tick()` in `run_forever`), `runtime.quit_requested` checks in demo/widgets/`eventsys_touch_test` so harness poll-deadline quit works on `micropython.exe`.
 
 ---
 
@@ -159,7 +146,7 @@ Symlinks: `~/bin/micropython` → unix build; `~/bin/micropython.exe` → window
 
 | # | Item | Status |
 |---|------|--------|
-| 1 | **MP.exe exit_5 + hang** | Sync SDL `schedule queue full` on win32 port; per-example + harness; **no speculative multimer edits** — see `.cursor/rules/multimer-fragile.mdc` |
+| 1 | **MP.exe exit_5 + hang** | **36/36 ok** on graphics cluster (2026-07-10) |
 | 2 | ~~cpython-venv hangs~~ | Cleared (stale) |
 | 3 | **`lv_touch_test`** | cpython event loop; `matrix=false` |
 | 4 | ~~framebuf / graphics parity~~ | **DONE** — compare tools green |
