@@ -37,7 +37,6 @@ from random import getrandbits  # for MARK_UPDATES
 from time import localtime  # for DigitalClock
 
 from eventsys import events
-import graphics
 from graphics import RGB565, Area, FrameBuffer
 
 from ._constants import ALIGN, DEFAULT_PADDING, ICON_SIZE, PAD, POSITION, TEXT_SIZE, TEXT_WIDTH
@@ -890,16 +889,16 @@ class Button(Widget):
         Draw the button background and shape only.
         """
         self.parent.draw(self.area)
-        graphics.round_rect(self.display.framebuf, *self.padded_area, self.radius, self.bg, True)
+        self.display.framebuf.round_rect(*self.padded_area, self.radius, self.bg, f=True)
 
     def press(self, data=None, event=None):
         self._pressed = True
-        graphics.round_rect(self.display.framebuf, *self.padded_area, self.radius, self.fg, False)
+        self.display.framebuf.round_rect(*self.padded_area, self.radius, self.fg, f=False)
         self.display.refresh(self.area)
 
     def release(self, data=None, event=None):
         self._pressed = False
-        graphics.round_rect(self.display.framebuf, *self.padded_area, self.radius, self.bg, False)
+        self.display.framebuf.round_rect(*self.padded_area, self.radius, self.bg, f=False)
         self.display.refresh(self.area)
 
 
@@ -1501,38 +1500,34 @@ class ProgressBar(Widget):
         """
         pa = self.padded_area
         if self.vertical:
-            graphics.circle(
-                self.display.framebuf,
+            self.display.framebuf.circle(
                 pa.x + self.end_radius,
                 pa.y + self.end_radius,
                 self.end_radius,
                 self.fg if self.reverse else self.bg,
-                True,
+                f=True,
             )
-            graphics.circle(
-                self.display.framebuf,
+            self.display.framebuf.circle(
                 pa.x + self.end_radius,
                 pa.y + pa.h - self.end_radius,
                 self.end_radius,
                 self.fg if not self.reverse else self.bg,
-                True,
+                f=True,
             )
         else:
-            graphics.circle(
-                self.display.framebuf,
+            self.display.framebuf.circle(
                 pa.x + pa.w - self.end_radius,
                 pa.y + self.end_radius,
                 self.end_radius,
                 self.fg if self.reverse else self.bg,
-                True,
+                f=True,
             )
-            graphics.circle(
-                self.display.framebuf,
+            self.display.framebuf.circle(
                 pa.x + self.end_radius,
                 pa.y + self.end_radius,
                 self.end_radius,
                 self.fg if not self.reverse else self.bg,
-                True,
+                f=True,
             )
 
     def draw(self, _=None):
@@ -1651,9 +1646,7 @@ class Slider(ProgressBar):
         knob_center = self._get_knob_center()
 
         # Draw the knob as a filled circle with correct radius
-        graphics.circle(
-            self.display.framebuf, *knob_center, self.knob_radius, self.knob_color, True
-        )
+        self.display.framebuf.circle(*knob_center, self.knob_radius, self.knob_color, f=True)
 
     def event_callback(self, data, event):
         """Handle user input events like clicks, dragging, and mouse movements."""
