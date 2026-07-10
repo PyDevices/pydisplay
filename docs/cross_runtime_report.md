@@ -117,7 +117,7 @@ Symlinks: `~/bin/micropython` → unix build; `~/bin/micropython.exe` → `ports
 | 6 | graphics-cmod parity audit | Ongoing |
 | 7 | Push cmods + pydisplay | When Brad asks |
 | 8 | PyScript matrix | Not run |
-| 9 | **framebuf single-source dedupe** | Post-build (Brad); see refactor plan |
+| 9 | ~~framebuf single-source dedupe~~ | **DONE** — `tools/sync_framebuf.py` (option B) |
 
 ---
 

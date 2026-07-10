@@ -1,5 +1,8 @@
 src/add_ons/gui
 
+# Generated from src/add_ons/framebuf.py (tools/sync_framebuf.py; publish + tests)
+src/lib/graphics/framebuf.py
+
 # Cursor IDE / local debug
 .cursor/
 

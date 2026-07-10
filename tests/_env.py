@@ -27,6 +27,17 @@ if _SRC_LIB not in sys.path:
 if _SRC_ADDONS not in sys.path:
     sys.path.insert(0, _SRC_ADDONS)
 
+
+def _sync_graphics_framebuf():
+    """Materialize ``graphics/framebuf.py`` from ``add_ons/framebuf.py`` (single source)."""
+    import subprocess
+
+    sync = os.path.join(_REPO_ROOT, "tools", "sync_framebuf.py")
+    subprocess.run([sys.executable, sync], cwd=_REPO_ROOT, check=True)
+
+
+_sync_graphics_framebuf()
+
 #: Absolute path to the ``multimer`` package directory.
 MULTIMER_DIR = os.path.join(_SRC_LIB, "multimer")
 

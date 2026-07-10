@@ -42,7 +42,8 @@ python tests/test_multimer.py
 | `test_area.py` | the `Area` rectangle helper (containment, overlap, transforms, protocols) |
 | `test_blit_hooks.py` | blit dispatch to display hooks and framebuffer fast paths |
 | `test_clip.py` | clip helpers and ``ClippedCanvas`` |
-| `test_framebuf.py` | the bundled MP-parity `graphics.framebuf` module (pixels, fill, scroll, text, blit, poly) |
+| `test_framebuf.py` | the MP-parity `add_ons/framebuf` module (pixels, fill, scroll, text, blit, poly) |
+| `test_framebuf_sync.py` | generated `graphics/framebuf.py` matches canonical `add_ons/framebuf.py` |
 | `test_framebuf_plus.py` | the exported `graphics.FrameBuffer` (properties + `Area` returns) |
 | `test_shapes.py` | the drawing primitives (`line`, `rect`, `circle`, `poly`, `blit`, ...) |
 | `test_font.py` | `Font` and the `text` / `text8` / `text14` / `text16` helpers |
