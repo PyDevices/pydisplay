@@ -1,4 +1,4 @@
-# multimer types: all
+# pyscript gallery: all
 """
 Test the Area return type of the shapes functions.
 

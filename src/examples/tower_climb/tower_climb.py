@@ -1,4 +1,4 @@
-# multimer types: all
+# pyscript gallery: all
 # pyscript binaries: tower_climb/assets/climber.bmp, tower_climb/assets/tower_tiles.bmp, tower_climb/assets/tower_bg.bmp
 """
 tower_climb.py — 1980s-style vertical scrolling platformer.

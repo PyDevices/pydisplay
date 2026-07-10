@@ -1,4 +1,4 @@
-# multimer types: all
+# pyscript gallery: all
 """
 Simple test example to demonstrate the use of framebuf.FrameBuffer.
 """

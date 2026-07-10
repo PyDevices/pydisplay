@@ -1,5 +1,5 @@
 from board_config import runtime
-# multimer types: all
+# pyscript gallery: all
 """
 boxlines.py
 ===========

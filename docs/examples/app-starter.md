@@ -19,10 +19,9 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
 
 === "Sync (queued / sync)"
 
-    Blocking main loop via `multimer.run_forever()`. Use on MCU, desktop CPython, and any port where your app is not asyncio-native. Tagged `# multimer types: queued, sync`.
+    Blocking main loop via `multimer.run_forever()`. Use on MCU, desktop CPython, and any port where your app is not asyncio-native.
 
     ```python
-    # multimer types: queued, sync
     """
     my_app.py — starting point for a pydisplay app.
 
@@ -83,10 +82,10 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
 
 === "Async (asyncio)"
 
-    Asyncio main loop via `multimer.run_forever()`. Use on PyScript or any port where the app already runs under `asyncio` / `uasyncio`. Tagged `# multimer types: async`.
+    Asyncio main loop via `multimer.run_forever()`. Use on PyScript or any port where the app already runs under `asyncio` / `uasyncio`. For the browser gallery, add `# pyscript gallery: async`.
 
     ```python
-    # multimer types: async
+    # pyscript gallery: async
     """
     my_app_async.py — asyncio starting point for a pydisplay app.
 
@@ -147,10 +146,10 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
 
 === "Dual (sync + async)"
 
-    One entry file for desktop **and** PyScript. `runtime.timer_async` selects the path; `dual_main()` calls `main_sync()` or schedules `main_async()`. Tagged `# multimer types: async` (PyScript gallery convention). Pass `async_=runtime.timer_async` to `periodic()` when you add periodic timers.
+    One entry file for desktop **and** PyScript. `runtime.timer_async` selects the path; `dual_main()` calls `main_sync()` or schedules `main_async()`. For the browser gallery, add `# pyscript gallery: async`. Pass `async_=runtime.timer_async` to `periodic()` when you add periodic timers.
 
     ```python
-    # multimer types: async
+    # pyscript gallery: async
     """
     my_app_dual.py — one file for sync desktop and async PyScript.
 

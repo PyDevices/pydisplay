@@ -1,4 +1,4 @@
-# multimer types: all
+# pyscript gallery: all
 """
 widgets_settings
 ====================================================

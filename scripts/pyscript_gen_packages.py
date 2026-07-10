@@ -2,7 +2,7 @@
 """
 pyscript_gen_packages.py — refresh the pydisplay PyScript browser gallery.
 
-Scans ``src/examples/`` for ``# multimer types: async|all`` headers, then
+Scans ``src/examples/`` for ``# pyscript gallery: async|all`` headers, then
 resolves PyScript file lists automatically (with optional header overrides):
 
   - **Single-file examples** — the entry ``.py`` only
@@ -20,7 +20,7 @@ Optional headers (first 10 lines):
   - ``# pyscript skip:`` — ``examples/``-relative ``.py`` paths or directories
     omitted from package auto-discovery (e.g. ``my_pkg/dev`` skips all ``.py``
     files under that tree); the token ``gallery`` excludes the example from the
-    browser card grid (multimer tag unchanged)
+    browser card grid (gallery section tag unchanged)
   - ``# pyscript modules:`` — extra ``examples/``-relative ``.py`` paths for
     multi-module loaders when import scanning is insufficient
 
@@ -353,9 +353,9 @@ def parse_example(path: Path) -> Example | None:
     text = path.read_text(encoding="utf-8", errors="replace")
     lines = text.splitlines()
     mtype = ""
-    for line in lines[:5]:
+    for line in lines[:HEADER_SCAN_LINES]:
         s = line.strip()
-        if s.startswith("# multimer types:"):
+        if s.startswith("# pyscript gallery:"):
             mtype = s.split(":", 1)[1].strip().lower()
             break
     if not mtype:

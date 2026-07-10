@@ -1,4 +1,4 @@
-# multimer types: all
+# pyscript gallery: all
 # pyscript binaries: assets/longstreet.bmp
 from board_config import display_drv, runtime
 from graphics import BMP565

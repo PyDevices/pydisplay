@@ -1,4 +1,4 @@
-# multimer types: all
+# pyscript gallery: all
 from board_config import runtime
 from keypins import KeyPins, Keys
 

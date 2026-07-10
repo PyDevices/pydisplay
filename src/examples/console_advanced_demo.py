@@ -1,4 +1,3 @@
-# multimer types: sync
 """
 console_advanced_demo.py - Advanced demo of the mpconsole module
 """

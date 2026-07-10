@@ -1,4 +1,4 @@
-# multimer types: all
+# pyscript gallery: all
 # pyscript binaries: assets/font_8x8.bin, assets/font_8x14.bin, assets/font_8x16.bin
 """
 font_simpletest3.py -- Simple test of the Font class.

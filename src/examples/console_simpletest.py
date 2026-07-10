@@ -1,4 +1,4 @@
-# multimer types: all
+# pyscript gallery: all
 """
 console_simpletest.py
 

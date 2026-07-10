@@ -1,4 +1,4 @@
-# multimer types: all
+# pyscript gallery: all
 """
 A simple test of an encoder in eventsys.
 """

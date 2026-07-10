@@ -1,4 +1,4 @@
-# multimer types: all
+# pyscript gallery: all
 from board_config import display_drv, runtime
 from multimer import sleep_ms
 from palettes import get_palette

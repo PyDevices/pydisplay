@@ -1,4 +1,4 @@
-# multimer types: all
+# pyscript gallery: all
 # pyscript binaries: assets/longstreet.bmp, assets/runner.bmp
 from collections import namedtuple
 

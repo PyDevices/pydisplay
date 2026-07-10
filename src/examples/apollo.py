@@ -1,4 +1,4 @@
-# multimer types: async
+# pyscript gallery: async
 # pyscript binaries: apollo_dsky/Apollo_DSKY_interface.bmp
 """
 apollo.py — Apollo Guidance Computer DSKY emulator.
