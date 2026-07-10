@@ -2387,8 +2387,18 @@ class Card(Widget):
                 font=font,
             )
 
-    def draw(self, _=None):
-        """Draw the card's shadow and rounded surface."""
+    def draw(self, area=None):
+        """
+        Draw the card's shadow and rounded surface.
+
+        When a child asks the card to repaint just its sub-area (via
+        ``parent.draw(child.area)``), only that region is refilled with the card
+        color so sibling widgets are not erased; a full (``area is None``) draw
+        repaints the shadow and rounded surface.
+        """
+        if area is not None:
+            self.display.framebuf.fill_rect(*area, self.bg)
+            return
         self.parent.draw(self.area)
         pa = self.padded_area
         if self.shadow:
@@ -2957,8 +2967,12 @@ class Dropdown(Widget):
         # pointer capture while open; the option Card lives inside it.
         screen = _root_screen(self)
         self._overlay = Widget(
-            screen, 0, 0, self.display.width, self.display.height, bg=None, visible=False
+            screen, 0, 0, self.display.width, self.display.height, visible=False
         )
+        # A None bg makes the overlay's draw a no-op (Widget.__init__ would
+        # otherwise inherit the parent's bg and repaint the whole screen); the
+        # overlay is a transparent, click-catching modal layer only.
+        self._overlay.bg = None
         self._overlay.add_event_cb(events.MOUSEBUTTONDOWN, self._on_overlay)
         option_h = ICON_SIZE.LARGE
         self._panel = Card(
@@ -3031,8 +3045,11 @@ class Dropdown(Widget):
         self._sel_label.value = str(self._value or "")
         super().changed()
 
-    def draw(self, _=None):
-        """Draw the dropdown header (rounded surface)."""
+    def draw(self, area=None):
+        """Draw the dropdown header (rounded surface); repaint sub-areas flat."""
+        if area is not None:
+            self.display.framebuf.fill_rect(*area, self.bg)
+            return
         self.parent.draw(self.area)
         self.display.framebuf.round_rect(*self.padded_area, self.radius, self.bg, f=True)
         self.display.framebuf.round_rect(
@@ -3109,20 +3126,21 @@ class Dialog(Widget):
             bg=bg,
         )
         labels = list(buttons) if buttons else ["OK"]
-        btn_w = (w - PAD * (len(labels) + 2)) // len(labels)
-        prev = None
-        for lbl in labels:
+        gap = PAD * 3
+        n = len(labels)
+        btn_w = (w - gap * (n + 1)) // n
+        for i, lbl in enumerate(labels):
             btn = Button(
                 self.card,
                 w=btn_w,
-                y=-PAD * 2,
-                align=ALIGN.BOTTOM if prev is None else ALIGN.OUTER_RIGHT,
-                align_to=self.card if prev is None else prev,
+                x=gap + i * (btn_w + gap),
+                y=-gap,
+                align=ALIGN.BOTTOM_LEFT,
+                align_to=self.card,
                 label=lbl,
                 radius=6,
             )
             btn.add_event_cb(events.MOUSEBUTTONDOWN, self._make_result(lbl))
-            prev = btn
 
     def _make_result(self, label):
         """Return a callback that reports ``label`` and closes the dialog."""
@@ -3145,6 +3163,13 @@ class Dialog(Widget):
         self.set_modal(False)
         self.visible = False
 
-    def draw(self, _=None):
-        """Paint the opaque scrim across the screen behind the card."""
-        self.display.framebuf.fill_rect(*self.area, self.scrim)
+    def draw(self, area=None):
+        """
+        Paint the opaque scrim behind the card.
+
+        A full draw fills the whole screen; a child's ``parent.draw(child.area)``
+        request fills just that sub-region with the scrim so the card's children
+        are not erased.
+        """
+        area = area or self.area
+        self.display.framebuf.fill_rect(*area, self.scrim)
