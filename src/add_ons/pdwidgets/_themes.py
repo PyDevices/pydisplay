@@ -76,26 +76,46 @@ icon_theme = IconTheme(sep.join(__file__.split(sep)[0:-1]) + sep + "icons" + sep
 
 class ColorTheme:
     """
-    A class to manage color themes.  The color theme is based on the Material Design color palette.
+    Semantic color theme for pdwidgets.
+
+    The default palette is a friendly, slightly colorful "early color Mac" look:
+    a soft warm-cream background, near-black ink, and a small set of muted
+    pastel accents (slate blue, warm gold, soft coral) with warm greys for
+    inactive states — chunky-but-clean rather than a saturated Material blue.
+
+    Colors are computed through ``pal.color565`` so the display's byteswap is
+    respected. Widgets reference these slots by name, so re-skinning the whole
+    toolkit is a matter of assigning different values here (or after
+    construction via ``display.color_theme``).
 
     Args:
-        pal (Palette): A palette object from the graphics library.
+        pal (Palette): A palette object from the ``palettes`` package; used only
+            for its ``color565`` conversion (and byteswap handling).
     """
 
     def __init__(self, pal):
-        self.background = pal.WHITE
-        self.on_background = pal.BLACK
-        self.surface = pal.WHITE
-        self.on_surface = pal.BLACK
-        self.primary = pal.BLUE_S900
-        self.on_primary = pal.WHITE
-        self.secondary = pal.AMBER_S100
-        self.on_secondary = pal.BLACK
-        self.error = pal.RED
-        self.on_error = pal.WHITE
-        self.primary_variant = pal.BLUE_S600
-        self.secondary_variant = pal.DEEP_PURPLE
-        self.tertiary = pal.AMBER_S700
-        self.on_tertiary = pal.BLACK
-        self.tertiary_variant = pal.AMBER_S400
+        c = pal.color565
+        # Neutrals
+        self.background = c(0xF2EEE3)  # warm cream page
+        self.on_background = c(0x2A2A30)  # near-black ink
+        self.surface = c(0xFBF8F0)  # card / raised surface
+        self.on_surface = c(0x2A2A30)
+        self.surface_variant = c(0xE7E1D3)  # subtle sunken panel
+        self.outline = c(0xB6AE9C)  # hairline borders
+        self.shadow = c(0xCAC3B4)  # cheap fake drop shadow (warm grey)
+        # Accents
+        self.primary = c(0x4E6E8E)  # muted slate blue
+        self.on_primary = c(0xFFFFFF)
+        self.primary_variant = c(0x3A536B)  # darker slate (pressed / shadow)
+        self.secondary = c(0xE6B24C)  # warm muted gold
+        self.on_secondary = c(0x2A2A30)
+        self.secondary_variant = c(0xCC7A5C)  # soft coral (third accent)
+        self.tertiary = c(0x9E978A)  # warm grey (inactive)
+        self.on_tertiary = c(0x2A2A30)
+        self.tertiary_variant = c(0xC4BDAD)  # light warm grey
+        # Status
+        self.error = c(0xC1544A)  # muted brick red
+        self.on_error = c(0xFFFFFF)
+        self.success = c(0x5E9E6E)  # muted green (status dots, badges)
+        self.on_success = c(0xFFFFFF)
         self.transparent = False

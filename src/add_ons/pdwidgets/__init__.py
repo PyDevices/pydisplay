@@ -34,6 +34,13 @@ Functions:
     pump: Processes one widget frame during setup bursts.
     run_forever: Drives the cooperative widget loop until quit.
 
+Optional add-on dependency:
+    ``Label`` (and widgets built on it) gains proportional-font rendering when a
+    ``font`` module is supplied. That path lazily imports **``add_ons/tft_write``**
+    (the russhughes ``write_font_converter`` renderer) — the only ``add_ons/*``
+    module pdwidgets touches, and only when a proportional font is actually
+    used. The default romfont path has no such dependency.
+
 Timer architecture:
     pdwidgets owns **no** timer of its own. Frames are driven cooperatively from
     a single poll function that ``multimer.loop.run_forever`` runs either in a
@@ -923,6 +930,7 @@ class Button(Widget):
         text_height=TEXT_SIZE.LARGE,
         icon_file=None,
         icon_color=None,
+        shadow=0,
     ):
         """
         Initialize a Button widget to display an icon and/or text.
@@ -948,9 +956,12 @@ class Button(Widget):
             text_height (int): The height of the text label (default is TEXT_SIZE.LARGE).
             icon_file (str): The icon file to display on the widget.
             icon_color (int): The color of the icon.
+            shadow (int): Fake drop-shadow offset in pixels drawn behind the
+                button in ``color_theme.shadow`` (0 disables; the default).
         """
         self.radius = radius
         self.pressed_offset = pressed_offset
+        self.shadow = shadow
         self._pressed = pressed
         if w is None and label:
             w = (len(label) + 1) * TEXT_WIDTH + 2 * PAD
@@ -987,10 +998,23 @@ class Button(Widget):
 
     def draw(self, _=None):
         """
-        Draw the button background and shape only.
+        Draw the button background and shape (with an optional drop shadow).
         """
         self.parent.draw(self.area)
-        self.display.framebuf.round_rect(*self.padded_area, self.radius, self.bg, f=True)
+        pa = self.padded_area
+        if self.shadow:
+            # Cheap fake drop shadow: a shape-colored round_rect offset behind
+            # the button. Two fills, no alpha blending.
+            self.display.framebuf.round_rect(
+                pa.x + self.shadow,
+                pa.y + self.shadow,
+                pa.w,
+                pa.h,
+                self.radius,
+                self.color_theme.shadow,
+                f=True,
+            )
+        self.display.framebuf.round_rect(*pa, self.radius, self.bg, f=True)
 
     def press(self, data=None, event=None):
         self._pressed = True
@@ -1022,9 +1046,17 @@ class Label(Widget):
         scale=1,
         inverted=False,
         font_data=None,
+        font=None,
     ):
         """
         Initialize a Label widget to display text.
+
+        By default the built-in 8-pixel-wide romfont is used. Passing ``font``
+        (a proportional bitmap font module from the ``write_font_converter``
+        pipeline, e.g. ``chango_32``) renders the text with the optional
+        ``add_ons/tft_write`` renderer instead — see the module docstring note
+        on that dependency. Proportional text is opaque, so a solid ``bg`` is
+        used (the parent's ``bg`` when none is given).
 
         Args:
             parent (Widget): The parent widget or screen that contains this label.
@@ -1039,18 +1071,28 @@ class Label(Widget):
             visible (bool): The visibility of the label.
             value (str): The text content of the label.
             padding (tuple): The padding on each side of the label.
-            text_height (int): The height of the text (default is TEXT_SIZE.LARGE).
-            scale (int): The scale of the text (default is 1).
-            inverted (bool): The inversion of the text (default is False).
-            font_data (str): The font file to use for the text.
+            text_height (int): The height of the romfont text (default TEXT_SIZE.LARGE).
+            scale (int): The scale of the romfont text (default is 1).
+            inverted (bool): Invert the romfont text (default is False).
+            font_data (str): Alternate romfont file/memoryview for the text.
+            font (module): Proportional bitmap font module (``tft_write`` style);
+                when given, overrides romfont rendering and sizing.
         """
         if text_height not in TEXT_SIZE:
             raise ValueError("Text height must be 8, 14 or 16 pixels.")
         padding = padding if padding is not None else (0, 0, 0, 0)
-        w = w or len(value) * TEXT_WIDTH * scale + padding[0] + padding[2]
-        h = h or text_height * scale + padding[1] + padding[3]
-        align = align if align is not None else ALIGN.CENTER
         value = value if value is not None else ""
+        self._font = font
+        if font is not None:
+            from tft_write import write_width
+
+            w = w or write_width(font, value) + padding[0] + padding[2]
+            h = h or font.HEIGHT + padding[1] + padding[3]
+            bg = bg if bg is not None else parent.bg
+        else:
+            w = w or len(value) * TEXT_WIDTH * scale + padding[0] + padding[2]
+            h = h or text_height * scale + padding[1] + padding[3]
+        align = align if align is not None else ALIGN.CENTER
         self.text_height = text_height
         self.scale = scale
         self._inverted = inverted
@@ -1063,11 +1105,19 @@ class Label(Widget):
         Draw the label's text on the screen, using absolute coordinates.
         Optionally fills the background first if `bg` is set.
         """
+        x, y, _, _ = self.padded_area
+        if self._font is not None:
+            # Proportional font: tft_write fills each glyph's background itself.
+            from tft_write import write as _tft_write
+
+            bg = self.bg if self.bg is not self.parent.color_theme.transparent else self.parent.bg
+            self.display.framebuf.fill_rect(*self.padded_area, bg)
+            _tft_write(self.display.framebuf, self._font, self.value, x, y, self.fg, bg)
+            return
         if self.bg is not self.parent.color_theme.transparent:
             self.display.framebuf.fill_rect(
                 *self.padded_area, self.bg
             )  # Draw background if bg is specified
-        x, y, _, _ = self.padded_area
         self.display.framebuf.text(
             self.value,
             x,
@@ -1194,10 +1244,17 @@ class Icon(Widget):
         visible=True,
         value=None,
         padding=None,
+        chroma=None,
     ):
         """
-        Initialize an Icon widget to display an icon.  Currently only supports PBM files.
-        PBM files are monochrome (1 bit per pixel) bitmaps.
+        Initialize an Icon widget to display an icon.
+
+        Two asset kinds are supported, both loaded via ``FrameBuffer.from_file``:
+
+        * **Monochrome ``.pbm``** (1 bit-per-pixel) — recolored to the icon's
+          ``fg``/``bg`` at draw time via a 2-entry palette (the default).
+        * **Color RGB565 ``.bmp`` (BMP565)** — blitted as-is; pass ``chroma`` to
+          treat one color as transparent. No PNG is used anywhere.
 
         Args:
             parent (Widget): The parent widget or screen that contains this icon.
@@ -1207,17 +1264,20 @@ class Icon(Widget):
             h (int): The height of the icon.
             align (int): The alignment of the icon.
             align_to (Widget): The widget to align to.
-            fg (int): The color of the icon.
+            fg (int): The color of the icon (monochrome assets only).
             bg (int): The background color of the icon.
             visible (bool): The visibility of the icon.
-            value (str): The icon file to display.
+            value (str): The icon file to display (``.pbm`` or BMP565 ``.bmp``).
             padding (tuple): The padding on each side of the icon.
+            chroma (int): Transparent color key for color (BMP565) icons.
 
         Usage:
             icon = Icon(screen, value="icon.pbm")
+            status = Icon(bar, value="battery_color_24dp.bmp")
         """
         if not value:
             raise ValueError("Icon value must be set to the filename with path.")
+        self.chroma = chroma
         self.load_icon(value)
         padding = padding if padding is not None else DEFAULT_PADDING
         w = w or self._icon_width + padding[0] + padding[2]
@@ -1225,13 +1285,29 @@ class Icon(Widget):
         super().__init__(parent, x, y, w, h, align, align_to, fg, bg, visible, value, padding)
 
     def load_icon(self, value):
-        """Load icon file and store pixel data."""
+        """Load icon file, cache it, and record whether it is a color asset."""
         if value in Icon.cache:
             self._fbuf = Icon.cache[value]
         else:
             self._fbuf = FrameBuffer.from_file(value)
             Icon.cache[value] = self._fbuf
         self._icon_width, self._icon_height = self._fbuf.width, self._fbuf.height
+        self._is_color = self._fbuf.format == RGB565
+        self._swapped = None
+
+    def _swapped_color(self):
+        """Return (byteswapped color FrameBuffer, swapped chroma), cached."""
+        if self._swapped is None:
+            src = self._fbuf.buffer
+            swp = bytearray(len(src))
+            swp[0::2] = src[1::2]
+            swp[1::2] = src[0::2]
+            fbuf = FrameBuffer(memoryview(swp), self._fbuf.width, self._fbuf.height, RGB565)
+            chroma = self.chroma
+            if chroma is not None:
+                chroma = ((chroma & 0xFF) << 8) | (chroma >> 8)
+            self._swapped = (fbuf, chroma)
+        return self._swapped
 
     def changed(self):
         """Update the icon when the value (file) changes."""
@@ -1241,8 +1317,25 @@ class Icon(Widget):
 
     def draw(self, _=None):
         """
-        Draw the icon on the screen using the shared 2-entry palette buffer.
+        Draw the icon on the screen.
+
+        Color (BMP565) icons are blitted directly (with ``chroma`` as the
+        transparent key when set); monochrome icons are recolored to
+        ``fg``/``bg`` via the shared 2-entry palette buffer.
         """
+        px, py = self.padded_area.x, self.padded_area.y
+        if self._is_color:
+            fbuf = self._fbuf
+            chroma = self.chroma
+            # BMP565 assets are stored non-swapped; match the display's byte
+            # order when it draws pre-swapped colors (swapped MCU panels).
+            if self.display.needs_swap:
+                fbuf, chroma = self._swapped_color()
+            if chroma is not None:
+                self.display.framebuf.blit(fbuf, px, py, chroma)
+            else:
+                self.display.framebuf.blit(fbuf, px, py)
+            return
         pal = Icon._palette
         if self.bg is self.parent.color_theme.transparent:
             key = ~self.fg
@@ -1251,7 +1344,7 @@ class Icon(Widget):
             key = -1
             pal.pixel(0, 0, self.bg)
         pal.pixel(1, 0, self.fg)
-        self.display.framebuf.blit(self._fbuf, self.padded_area.x, self.padded_area.y, key, pal)
+        self.display.framebuf.blit(self._fbuf, px, py, key, pal)
 
 
 class IconButton(Button):
