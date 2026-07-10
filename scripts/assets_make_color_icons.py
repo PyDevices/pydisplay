@@ -11,23 +11,26 @@ them with a transparent background. No PNG is shipped or decoded at runtime.
 
 Usage::
 
-    .venv/bin/python tools/make_color_icons.py
+    .venv/bin/python scripts/assets_make_color_icons.py
 
 Requires: Pillow (dev dependency) and network access. This is a build-time
 authoring tool; the generated .bmp assets are committed.
 """
+
 import io
 import os
 import sys
 import urllib.request
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "lib"))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "add_ons"))
+_ROOT = os.path.join(os.path.dirname(__file__), "..")
+sys.path.insert(0, os.path.join(_ROOT, "src", "lib"))
+sys.path.insert(0, os.path.join(_ROOT, "src", "add_ons"))
 
-import graphics
-from PIL import Image
+from PIL import Image  # noqa: E402
 
-ICON_DIR = os.path.join(os.path.dirname(__file__), "..", "src", "add_ons", "pdwidgets", "icons")
+import graphics  # noqa: E402
+
+ICON_DIR = os.path.join(_ROOT, "src", "add_ons", "pdwidgets", "icons")
 
 # Magenta chroma key (non-swapped RGB565): (255, 0, 255).
 CHROMA_RGB = (255, 0, 255)

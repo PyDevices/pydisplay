@@ -43,9 +43,10 @@ rm -rf board_configs
 **34 structured** busdisplay manifests (`busdisplay_spi`, `busdisplay_i2c`, `busdisplay_i80`).
 **2 structured** fbdisplay manifests (`fbdisplay_mipidsi`). **13 more** fbdisplay boards use
 ``fbdisplay_picodvi``, ``fbdisplay_rgbmatrix``, or ``fbdisplay_rgbframebuffer``.
-All **18 e-paper** families are in `manifests/epaperdisplay.toml`. **2 pixeldisplay** manifests
-(`pixeldisplay` — NeoPixel / DotStar grids). Use `mp_preamble` for board-specific setup lines
-(e.g. shared reset GPIO on WT32-SC01 Plus).
+All **18 e-paper** families are in `manifests/epaperdisplay.toml` (generate with
+`scripts/generate_board_configs.py`, or `--kind epaper` to limit). **2 pixeldisplay**
+manifests (`pixeldisplay` — NeoPixel / DotStar grids). Use `mp_preamble` for
+board-specific setup lines (e.g. shared reset GPIO on WT32-SC01 Plus).
 
 ## Schema — busdisplay SPI (`kind = "busdisplay_spi"`)
 

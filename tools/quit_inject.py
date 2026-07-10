@@ -1,7 +1,7 @@
 """
 Inject events.Quit through the QUEUE device read path (desktop SDL / PG backends).
 
-Used by example_test_wrapper.py and lv_test_timer_harness.py.
+Used by example_test_wrapper.py and lv_test_timer.py (kit mode).
 Must stay importable on MicroPython, CircuitPython, and CPython.
 """
 

@@ -10,6 +10,7 @@ material-design-icons PNG tree into `assets/icons/` using the icons' own
 upstream file names), this script produces the small, curated, renamed set
 that `pdwidgets._themes.IconTheme` actually expects, at every `ICON_SIZE`
 (18/24/36/48dp), using the "materialicons" (baseline/filled) family.
+For color BMP565 status icons, see `assets_make_color_icons.py`.
 
 Run from the repo root:
 

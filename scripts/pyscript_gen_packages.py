@@ -9,7 +9,7 @@ resolves PyScript file lists automatically (with optional header overrides):
   - **Package examples** (``examples/<pkg>/<pkg>.py``) — all ``.py`` files under
     ``examples/<pkg>/``, minus any ``# pyscript skip:`` paths
   - **Multi-module examples** — entry plus same-directory imports discovered from
-    ``import`` / ``from … import`` (e.g. ``lv_test_timer_async`` + ``common``)
+    ``import`` / ``from … import`` (e.g. ``lv_test_timer``)
 
 Optional headers (first 10 lines):
 
@@ -99,9 +99,9 @@ CURATED: dict[str, dict] = {
         "experimental": True,
         "icon": "rocket",
     },
-    "lv_test_timer_async": {
-        "title": "LVGL Timer (async)",
-        "blurb": "Drives an LVGL UI from a <code>multimer</code> timer on the asyncio loop.",
+    "lv_test_timer": {
+        "title": "LVGL Timer",
+        "blurb": "LVGL UI driven by the board <code>runtime</code> timer (sync or async).",
         "experimental": True,
         "icon": "timer",
     },

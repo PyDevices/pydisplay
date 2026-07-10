@@ -38,14 +38,8 @@ class TestGenerateBoardConfigs(unittest.TestCase):
         ]
         self.assertEqual(stray, [])
 
-    def test_epaper_wrapper_delegates(self):
-        proc = subprocess.run(
-            [str(PYTHON), str(ROOT / "scripts" / "generate_epaper_board_configs.py"), "--check"],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+    def test_epaper_kind_check_passes(self):
+        proc = self._run("--kind", "epaper", "--check")
         self.assertEqual(proc.returncode, 0, proc.stderr or proc.stdout)
 
 

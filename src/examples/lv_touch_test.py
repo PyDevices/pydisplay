@@ -1,30 +1,34 @@
-# multimer types: queued, sync
+# multimer types: async
 """
 lv_touch_test.py
-Tests touchscreen and allows changing touch driver rotation
-to find a rotation that matches the display rotation.
+
+Touch/rotation grid for LVGL. Follows ``runtime.timer_async`` — does not read
+or write environment variables.
 """
 
-import display_driver
-import lvgl as lv
-from multimer import sleep_ms, ticks_diff, ticks_ms
-import sys
+from board_config import display_drv, runtime
+from multimer.loop import dual_main
+import time
 
-
-alignments = (
-    (lv.ALIGN.TOP_LEFT, 0, 0),
-    (lv.ALIGN.TOP_MID, 0, 0),
-    (lv.ALIGN.TOP_RIGHT, 0, 0),
-    (lv.ALIGN.LEFT_MID, 0, 0),
-    (lv.ALIGN.CENTER, 0, 0),
-    (lv.ALIGN.RIGHT_MID, 0, 0),
-    (lv.ALIGN.BOTTOM_LEFT, 0, 0),
-    (lv.ALIGN.BOTTOM_MID, 0, 0),
-    (lv.ALIGN.BOTTOM_RIGHT, 0, 0),
-)
+alignments = None  # filled in _build_ui after lvgl import
 
 
 def _build_ui():
+    import lvgl as lv
+
+    global alignments
+    alignments = (
+        (lv.ALIGN.TOP_LEFT, 0, 0),
+        (lv.ALIGN.TOP_MID, 0, 0),
+        (lv.ALIGN.TOP_RIGHT, 0, 0),
+        (lv.ALIGN.LEFT_MID, 0, 0),
+        (lv.ALIGN.CENTER, 0, 0),
+        (lv.ALIGN.RIGHT_MID, 0, 0),
+        (lv.ALIGN.BOTTOM_LEFT, 0, 0),
+        (lv.ALIGN.BOTTOM_MID, 0, 0),
+        (lv.ALIGN.BOTTOM_RIGHT, 0, 0),
+    )
+
     style_default = lv.style_t()
     style_default.init()
     style_default.set_width(lv.pct(33))
@@ -54,27 +58,43 @@ def _build_ui():
         label.center()
 
 
-_build_ui()
+def _setup():
+    import display_driver  # noqa: F401
 
-display_driver.run()
-if sys.platform != "win32":
-        from board_config import runtime
+    _build_ui()
 
-        try:
-            import pydisplay_test_mode as _ptm
 
-            _test_duration_ms = int(_ptm.DURATION_S * 1000) if _ptm.ENABLED else None
-        except ImportError:
-            _test_duration_ms = None
+def _done():
+    if runtime.quit_requested:
+        return True
+    if getattr(display_drv, "_deinitialized", False):
+        return True
+    return False
 
-        _test_start = ticks_ms() if _test_duration_ms is not None else None
 
-        while True:
-            sleep_ms(0)
-            if runtime:
-                runtime.poll()
-            if runtime.quit_requested if runtime else False:
-                break
-            if _test_start is not None and ticks_diff(ticks_ms(), _test_start) >= _test_duration_ms:
-                break
-            sleep_ms(1)
+def main_sync():
+    _setup()
+    # Avoid multimer.sleep_ms / runtime.poll on the main thread while a
+    # signal- or SDL-driven LVGL tick is live (CPython librt segfault; CP races).
+    # Matrix quit uses the test-mode deadline hook (cooperative LVGL path).
+    from multimer import run_deadline_hook
+
+    while True:
+        run_deadline_hook()
+        if _done():
+            break
+        time.sleep(0.01)
+
+
+async def main_async():
+    _setup()
+    from multimer import asyncio
+
+    while True:
+        runtime.poll()
+        if _done():
+            break
+        await asyncio.sleep(0)
+
+
+dual_main(main_sync, main_async, async_mode=runtime.timer_async)

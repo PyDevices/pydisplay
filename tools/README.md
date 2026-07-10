@@ -76,8 +76,8 @@ Exit 0 when buffers and constants match; prints each check and exits 1 on mismat
 
 | Script | Purpose |
 |--------|---------|
-| [`run_desktop_lv_tests.py`](run_desktop_lv_tests.py) | LVGL desktop matrix (pump/async, strict clicks) |
-| [`lv_timer_test_kit.py`](lv_timer_test_kit.py) | Full LVGL timer matrix (no_pump/pump/async, all runtimes) |
+| [`run_desktop_lv_tests.py`](run_desktop_lv_tests.py) | LVGL desktop matrix (sync/async, strict clicks) |
+| [`lv_timer_test_kit.py`](lv_timer_test_kit.py) | Full LVGL timer matrix (sync/async, all runtimes) |
 | [`run_test_timers.py`](run_test_timers.py) | multimer backend probes |
 | [`test_timers.py`](test_timers.py) | Host timer probes |
 

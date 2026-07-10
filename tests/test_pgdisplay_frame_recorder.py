@@ -73,27 +73,6 @@ class TestPGDisplayFrameRecorder(unittest.TestCase):
             self.assertTrue(os.path.getsize(out) > 0)
             d.deinit()
 
-    def test_open_from_env(self):
-        from displaysys.pgdisplay import PGDisplay
-
-        with tempfile.TemporaryDirectory() as tmp:
-            out = os.path.join(tmp, "env.mp4")
-            os.environ["PYDISPLAY_VIDEO"] = out
-            os.environ["PYDISPLAY_VIDEO_FPS"] = "8"
-            try:
-                with quiet():
-                    d = PGDisplay(16, 16, scale=1, title="env-rec")
-                recorder = d.open_frame_recorder_from_env()
-                self.assertIsNotNone(recorder)
-                d.fill(0x07E0)
-                d.show()
-                d.close_frame_recorder()
-                self.assertTrue(os.path.getsize(out) > 0)
-                d.deinit()
-            finally:
-                os.environ.pop("PYDISPLAY_VIDEO", None)
-                os.environ.pop("PYDISPLAY_VIDEO_FPS", None)
-
 
 @unittest.skipUnless(HAS_PYGAME, "pygame required to import pgdisplay")
 class TestFFmpegFrameRecorder(unittest.TestCase):

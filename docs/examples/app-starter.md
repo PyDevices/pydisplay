@@ -289,11 +289,11 @@ All three boilerplate tabs use the shared **`run_forever(poll)`** helpers instea
 
 | Tab | Helper | Each iteration |
 |-----|--------|----------------|
-| Sync | `multimer.run_forever(poll_events)` | `pump()` → `poll_events()` → `sleep_ms(1)` |
+| Sync | `multimer.run_forever(poll_events)` | `poll_events()` → short sleep |
 | Async | `await multimer.run_forever(poll_events, delay_ms=10)` | yield to asyncio → `poll_events()` → short sleep |
 | Dual | `dual_main(main_sync, main_async, async_mode=runtime.timer_async)` | picks sync or async path from [board config](../hardware/board-configs.md) |
 
-On backends that queue timer callbacks to the main thread, `pump()` inside `run_forever` delivers them — see [multimer](../concepts/multimer.md).
+`run_forever` delivers timer callbacks on the active backend — see [multimer](../concepts/multimer.md).
 
 For the **dual** tab, PyScript and Jupyter board configs construct `runtime` with `timer_async=True`; desktop MCU/SDL configs use sync timers. Your app reads `runtime.timer_async` and passes it to `dual_main()` — multimer does not import `board_config`.
 

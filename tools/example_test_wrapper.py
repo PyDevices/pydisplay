@@ -200,9 +200,10 @@ def _cooperative_lvgl_quit(kind):
         name = sys.implementation.name
     except AttributeError:
         return False
-    # CircuitPython: daemon inject + LVGL is unsafe. CPython: daemon inject deadlocks
-    # with librt sync timers (see lv_test_timer_sync matrix notes).
-    return name in ("circuitpython", "cpython")
+    # CircuitPython / CPython: daemon inject + LVGL is unsafe (librt deadlock).
+    # MicroPython (incl. micropython.exe): no background inject thread; prefer
+    # deadline-hook cooperative exit over poll-patch + SDL quit timers.
+    return name in ("circuitpython", "cpython", "micropython")
 
 
 def _touch_delay_s(duration_s):
@@ -478,6 +479,7 @@ def _parse_args(argv):
         "bootstrap": "full",
         "duration": 5.0,
         "timeout": 30.0,
+        "timer_async": None,
     }
     i = 2
     while i < len(argv):
@@ -499,6 +501,9 @@ def _parse_args(argv):
             i += 2
         elif arg == "--timeout" and i + 1 < len(argv):
             out["timeout"] = float(argv[i + 1])
+            i += 2
+        elif arg == "--timer-async" and i + 1 < len(argv):
+            out["timer_async"] = argv[i + 1]
             i += 2
         else:
             raise ValueError("unknown argument: {}".format(arg))
@@ -608,6 +613,16 @@ def main(argv=None):
         }
         _print_result(payload)
         return 1
+
+    # Windows PE under WSL does not see Linux-exported env vars via getenv.
+    # Apply PYDISPLAY_TIMER_ASYNC from argv before examples import board_config.
+    if args.get("timer_async") is not None:
+        try:
+            from env_util import env_set
+
+            env_set("PYDISPLAY_TIMER_ASYNC", args["timer_async"])
+        except Exception:
+            pass
 
     backend = "headless" if headless else "?"
     quit_injected = False

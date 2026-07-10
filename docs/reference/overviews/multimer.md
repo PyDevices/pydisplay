@@ -17,6 +17,6 @@ multimer provides cross-platform periodic timers compatible with `machine.Timer`
 - `multimer.ticks_ms` / `multimer.sleep_ms` / `multimer.monotonic` — portable time primitives
 - `multimer.set_deadline_hook` / `multimer.run_deadline_hook` — **dev/troubleshooting only**; cooperative wall-clock deadline for single-threaded harnesses (see [multimer concept — deadline hooks](../../concepts/multimer.md#development--troubleshooting--deadline-hooks))
 
-There is no public `pump()`, `needs_pump()`, or `periodic()`.
+Timer backends deliver callbacks without an app-level queue-drain step.
 
 Generated API pages for each module appear below (build time).

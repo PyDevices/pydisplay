@@ -3,6 +3,36 @@
 # SPDX-License-Identifier: MIT
 """Cross-runtime environment variable helpers (CPython, MicroPython, CircuitPython)."""
 
+# Process-local overrides for ports without ``os.environ`` / ``os.putenv``.
+_overrides = {}
+
+
+def env_set(name, value):
+    """Set an environment variable portably (CPython, MicroPython, CircuitPython).
+
+    Always records a process-local override so ``env_bool`` / ``env_get`` see the
+    value even when the host ``os`` module has no ``environ``. When available,
+    also updates ``os.environ`` or calls ``os.putenv``.
+    """
+    text = "" if value is None else str(value)
+    _overrides[name] = text
+
+    import os
+
+    environ = getattr(os, "environ", None)
+    if environ is not None:
+        try:
+            environ[name] = text
+            return
+        except Exception:
+            pass
+    putenv = getattr(os, "putenv", None)
+    if putenv is not None:
+        try:
+            putenv(name, text)
+        except Exception:
+            pass
+
 
 def env_bool(name, default=False):
     """Read a truthy/falsey environment variable with a portable fallback chain."""
@@ -18,6 +48,9 @@ def env_bool(name, default=False):
 
 
 def _env_raw(name):
+    if name in _overrides:
+        return _overrides[name]
+
     import os
 
     environ = getattr(os, "environ", None)

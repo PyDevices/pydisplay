@@ -145,20 +145,8 @@
       "github:PyDevices/pydisplay/src/examples/logo.py"
     ],
     [
-      "lv_test_timer_async.py",
-      "github:PyDevices/pydisplay/src/examples/lv_test_timer_async.py"
-    ],
-    [
-      "lv_test_timer_common.py",
-      "github:PyDevices/pydisplay/src/examples/lv_test_timer_common.py"
-    ],
-    [
-      "lv_test_timer_harness.py",
-      "github:PyDevices/pydisplay/src/examples/lv_test_timer_harness.py"
-    ],
-    [
-      "lv_test_timer_sync.py",
-      "github:PyDevices/pydisplay/src/examples/lv_test_timer_sync.py"
+      "lv_test_timer.py",
+      "github:PyDevices/pydisplay/src/examples/lv_test_timer.py"
     ],
     [
       "lv_touch_test.py",
@@ -227,10 +215,6 @@
     [
       "testris.py",
       "github:PyDevices/pydisplay/src/examples/testris.py"
-    ],
-    [
-      "timer_simpletest.py",
-      "github:PyDevices/pydisplay/src/examples/timer_simpletest.py"
     ],
     [
       "tiny_hello.py",

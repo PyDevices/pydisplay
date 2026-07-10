@@ -77,7 +77,9 @@ Other scripts (see scripts/README.md):
   mkdocs_gen_ref_pages.py   — runs automatically via mkdocs build
   publish_micropython_lib.sh  — micropython-lib / PyPI publishing
   build.py                    — mip index for micropython-lib gh-pages
-  assets_convert_md_png_to_pbm.py — Material Design icon conversion
+  assets_convert_md_png_to_pbm.py — Material Design PNG → PBM (bulk)
+  assets_generate_pdwidgets_icons.py — curated pdwidgets mono icons
+  assets_make_color_icons.py — color BMP565 status icons for pdwidgets
 EOF
 }
 

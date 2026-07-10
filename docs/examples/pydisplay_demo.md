@@ -11,7 +11,7 @@ It demonstrates:
 - **Input** — touch or mouse clicks via `eventsys` and `graphics.Area`
 - **Rotation** — `display_drv.rotation` in 90° steps
 - **Hardware-style scrolling** — fixed top/bottom chrome with a scrolling middle panel
-- **Timers** — default `multimer.Timer` with a `pump()` main loop
+- **Timers** — `multimer.Timer` with a `run_forever` / poll main loop
 
 Tagged `# multimer types: queued, sync` (not `multimer` / PyScript).
 
@@ -68,7 +68,7 @@ Constants in the script: `TOP = 36`, `BOT = 20`, `ROW = 20` (height of each tip 
 | `displaysys.color565` | RGB → RGB565 color values |
 | `graphics.Area` | Rectangle hit-testing for buttons |
 | `graphics.Font`, `FrameBuffer`, `RGB565` | Text rendered in RAM, blitted once |
-| `multimer.Timer`, `pump`, `sleep_ms` | Periodic scroll + queue drain |
+| `multimer.Timer`, `run_forever`, `sleep_ms` | Periodic scroll + main loop |
 
 ## Code walkthrough
 
@@ -124,14 +124,8 @@ Scroll is **paused** (`_scroll_paused`) during `redraw()` so the timer cannot ad
 def main():
     setup_scroll()
     redraw()
-
     periodic(on_tick, period=40, warn=False)
-
-    while True:
-        pump()
-        if elist := runtime.poll():
-            ...
-        sleep_ms(1)
+    run_forever(handle_events)
 
 main()
 ```
@@ -139,8 +133,8 @@ main()
 - **`setup_scroll()`** — calls `display_drv.set_vscroll(TOP, BOT)` to define fixed regions.
 - **`periodic(on_tick, period=40)`** — allocates the next timer id after `display_drv` (SDLDisplay `auto_refresh` already took id 1 via `periodic(show, …)`). No need to pick a timer number yourself.
 - **`on_tick(_=None)`** — every 40 ms, increments `state["scroll"]` and sets `display_drv.vscroll`. The optional timer argument matches the `machine.Timer` / `periodic` callback contract.
-- **`pump()`** — drains multimer callbacks on backends that queue timer work to the main thread ([multimer](../concepts/multimer.md)).
-- **`runtime.poll()`** — returns touch/mouse events; the demo handles `MOUSEBUTTONDOWN` only.
+- **`run_forever(handle_events)`** — cooperative main loop that polls input and yields to the timer backend ([multimer](../concepts/multimer.md)).
+- **`runtime.poll()`** (inside `handle_events`) — returns touch/mouse events; the demo handles `MOUSEBUTTONDOWN` only.
 
 **Rotate** pauses scroll, updates `display_drv.rotation`, resets scroll to 0, calls `setup_scroll()` and `redraw()`, then resumes scroll.
 
@@ -240,10 +234,7 @@ Also **pause the scroll timer** during redraw. If `on_tick` runs in the middle o
 This script is intentionally **not** a multimer test, but it uses the default timer the way many real apps should:
 
 ```python
-while True:
-    pump()      # deliver timer callbacks on queued backends
-    ...               # poll input, update UI
-    sleep_ms(1)
+run_forever(handle_events)  # poll input; timer callbacks run on the active backend
 ```
 
 See [multimer](../concepts/multimer.md) for `queued` vs `sync` vs `async` tags on other examples.
@@ -257,18 +248,17 @@ import lib.path
 import pydisplay_demo_async
 ```
 
-The script runs on PyScript/Jupyter where `runtime.timer_async` is true, starts the scroll timer inside `async def main()` (required for `aio.Timer.init`), and yields with `await pump()` each frame. UI, colours, scroll pause during redraw, and buffered text are unchanged.
+The script runs on PyScript/Jupyter where `runtime.timer_async` is true, starts the scroll timer inside `async def main()` (required for `aio.Timer.init`), and yields with `await asyncio.sleep(...)` / `run_forever_async` each frame. UI, colours, scroll pause during redraw, and buffered text are unchanged.
 
-To migrate from sync to async, compare the two `main()` functions side by side:
+To migrate from sync to async, compare the two entrypoints side by side:
 
 | Sync (`pydisplay_demo`) | Async (`pydisplay_demo_async`) |
 |-------------------------|------------------------------|
-| `def main():` | `async def main():` |
-| `from multimer import periodic, pump, sleep_ms` | `from multimer import periodic` + `from multimer import run` |
+| `def main():` | `async def main_async():` |
+| `from multimer.loop import run_forever` | `dual_main` / `run_forever_async` |
 | `periodic(on_tick, period=40, warn=False)` | `periodic(on_tick, period=40, async_=True, warn=False)` |
-| `pump()` at top of loop | `await pump()` at end of loop |
-| `sleep_ms(1)` | (omit — `await pump()` yields) |
-| `main()` at bottom | `run(main)` at bottom |
+| `run_forever(handle_events)` | `await run_forever_async(handle_events, …)` |
+| `main()` at bottom | `dual_main(...)` at bottom |
 
 ## Related docs
 

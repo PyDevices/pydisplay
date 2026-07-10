@@ -329,6 +329,10 @@ def run_subprocess_case(
         str(timeout),
     ]
     env = os.environ.copy()
+    # micropython.exe (Windows PE) cannot read WSL-exported env; pass via argv.
+    timer_async = env.get("PYDISPLAY_TIMER_ASYNC")
+    if timer_async is not None:
+        cmd.extend(["--timer-async", str(timer_async)])
     try:
         proc = subprocess.run(
             cmd,
@@ -535,7 +539,6 @@ def _write_jupyter_notebook(example_id: str, example_meta: dict, duration_s: flo
         ]
     )
 
-    out = SRC / f"run-{example_id}.ipynb"
     cells = [
         {
             "cell_type": "code",
@@ -572,6 +575,9 @@ def _write_jupyter_notebook(example_id: str, example_meta: dict, duration_s: flo
         },
         "cells": cells,
     }
+    # Unique path so concurrent matrix workers (runtime x timer_async) do not clobber.
+    mode = os.environ.get("PYDISPLAY_TIMER_ASYNC", "x")
+    out = SRC / f"run-{example_id}-async{mode}-{os.getpid()}.ipynb"
     out.write_text(json.dumps(nb, indent=1) + "\n", encoding="utf-8")
     return out
 
@@ -935,7 +941,6 @@ def main(argv: list[str] | None = None) -> int:
             "graphics_simpletest",
             "framebuf_simpletest",
             "color_test",
-            "timer_simpletest",
             "chango",
         }
         examples = {k: v for k, v in examples.items() if k in curated}

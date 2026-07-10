@@ -12,7 +12,6 @@ from usdl2 import (
 )
 
 from .._core import _TimerCore
-from .._schedule import schedule
 
 _sdl2_timer_inited = False
 
@@ -63,19 +62,30 @@ class Timer(_TimerCore):
     def _handler(self, interval, _param=None):
         if self._mode is None:
             return 0
-        if not self._pending:
-            self._pending = True
-            try:
-                schedule(self._scheduled_deliver, None)
-            except RuntimeError:
-                self._pending = False
-                return interval
-        if self._mode == self.ONE_SHOT:
+        # usdl2's SDL trampoline already ``mp_sched_schedule``s onto the VM
+        # thread before invoking this callback. Do not schedule again — with
+        # ``hard=False`` (Runtime) that was a third hop and overflowed
+        # ``MICROPY_SCHEDULER_DEPTH`` on micropython.exe.
+        self._pending = False
+        self._deliver()
+        if self._mode is None or self._mode == self.ONE_SHOT:
             return 0
         return interval
 
-    def _scheduled_deliver(self, _arg):
-        self._pending = False
-        if self._mode is None:
+    def _deliver(self):
+        """Invoke the timer callback directly.
+
+        Soft (``hard=False``) timers normally ``schedule`` again from
+        ``_TimerCore._deliver``. That is redundant here: usdl2 already
+        marshalled onto the VM thread, and the extra hop stalls LVGL under
+        load on micropython.exe.
+        """
+        if self._busy:
             return
-        self._deliver()
+        self._busy = True
+        try:
+            self._invoke_callback(self)
+        finally:
+            self._busy = False
+        if self._mode == self.ONE_SHOT:
+            self.deinit()
