@@ -176,7 +176,9 @@ pd.run_forever()
 ### Notes
 
 - `displaysys_simpletest.py` handles `events.QUIT` in its poll loop (tagged `all`). Same quit pattern as [`scroll_touch_test_displaybuf.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll_touch_test_displaybuf.py).
-- `font_simpletest.py` is tagged `all`; blits a small framebuffer with `display_drv.blit_rect()` and calls `display_drv.show()` after each draw.
+- `font_simpletest.py` — string-sized `FrameBuffer`, opaque background, one `blit_rect` per draw (see [Font rendering patterns](../concepts/graphics.md#choosing-a-font-rendering-pattern)).
+- `font_simpletest2.py` — `Font.text(display_drv, …)`; transparent, per-pixel (slowest bus pattern).
+- `font_simpletest3.py` — `DisplayBuffer` + `show(dirty)`; transparent, best when RAM allows a full-screen buffer.
 - `nano_gui_simpletest.py` is tagged `all`; requires upstream [`gui/`](../guis/nano-gui.md) in `add_ons/`.
 **Legend:** Platforms = CPython · MCU · PyScript · Wokwi · Packages = core · add_ons · LVGL
 
@@ -231,9 +233,10 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `framebuf_simpletest.py` | framebuf API | CPython · MCU | core |
 | `graphics_simpletest.py` | graphics module | CPython · MCU | core |
 | `graphics_area_test.py` | Area bounding boxes | CPython · MCU | core |
-| `font_simpletest.py` | Font rendering | CPython · MCU | core |
-| `font_simpletest2.py`, `font_simpletest3.py` | More fonts | CPython · MCU | core |
-| `font_list.py` | Font picker | CPython · MCU | core |
+| `font_simpletest.py` | Font: string FB + one `blit_rect` (opaque bg) | CPython · MCU | core |
+| `font_simpletest2.py` | Font: direct on `display_drv` (transparent, per-pixel) | CPython · MCU | core |
+| `font_simpletest3.py` | Font: `DisplayBuffer` + dirty blit (transparent, lowest bus cost) | CPython · MCU | core |
+| `font_list.py` | List / preview `.bin` fonts from a directory | CPython · MCU | core |
 | `fonts.py` | Page through fonts | CPython · MCU | core |
 | `boxlines.py` | Lines and boxes | CPython · MCU | core |
 | `bouncing_balls.py` | Colored balls animation | CPython · MCU · PyScript | core |

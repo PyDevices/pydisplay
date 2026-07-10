@@ -40,6 +40,22 @@ python tools/example_test_kit.py --curated-only
 python tools/example_test_kit.py --only-example calculator --only-runtime micropython
 ```
 
+## MicroPython framebuf parity
+
+| Script | Purpose |
+|--------|---------|
+| [`compare_framebuf_mp.py`](compare_framebuf_mp.py) | Compare built-in C ``framebuf`` vs ``src/add_ons/framebuf.py`` on-device |
+| [`compare_graphics_mp.py`](compare_graphics_mp.py) | Compare native ``graphics`` cmod vs ``src/lib/graphics`` on-device |
+| [`sync_framebuf.py`](sync_framebuf.py) | Copy canonical ``add_ons/framebuf.py`` → ``lib/graphics/framebuf.py`` |
+
+```bash
+micropython tools/compare_framebuf_mp.py
+micropython tools/compare_graphics_mp.py
+micropython.exe tools/compare_framebuf_mp.py
+```
+
+Exit 0 when buffers and constants match; prints each check and exits 1 on mismatch.
+
 ## LVGL / timer harnesses
 
 | Script | Purpose |

@@ -1,26 +1,44 @@
 # Cross-runtime example matrix report
 
-**Last updated:** 2026-07-09 (framebuf refactor complete; MP.exe rebuild + manifest fix)  
-**pydisplay HEAD:** local (uncommitted — framebuf refactor + report)  
-**graphics-cmod:** `a629b7d`+ (windows rebuild links current cmod)  
-**cmods:** `manifest.py` includes `windows/variants/dev` for asyncio freeze (uncommitted in cmods repo)  
+**Last updated:** 2026-07-09 (graphics cmod font parity; compare tools)  
+**pydisplay HEAD:** ahead of `origin/main` (compare tools + font docs; see git log)  
+**graphics-cmod:** romfont headers + `gfx_shapes_line` parity + `scripts/sync_fonts.py` (rebuild MP unix after pull)  
+**cmods:** `manifest.py` asyncio freeze on windows dev (`3984ee8`+); MP unix links graphics from submodule  
 **Harness:** `tools/example_test_kit.py`  
 **Baseline (historical):** `9abf8d6a` — 350 cells, 222 pass / 128 fail  
-**Stale full matrix:** Run A below — 192 pass / 158 fail (superseded for MP unix/CP by 34/34 targeted)
+**Stale full matrix:** Run A below — 192 pass / 158 fail (superseded for MP unix/CP by targeted retests)
 
 ---
 
 ## Session objectives
 
-1. **graphics-cmod ↔ `src/lib/graphics`:** 100% parity. Fix at cmod, not example workarounds.
-2. **`timer_async`:** All examples pass with **`timer_async=False` and `timer_async=True`**.
-3. **Matrix:** Prefer targeted `--only-example` runs; full 350-cell only when needed.
-4. **Verification:** Agent runs matrix locally; update this report. Do not ask Brad to reproduce unless blocked.
-5. **framebuf refactor:** **DONE** — see `.cursor/framebuf-graphics-refactor-plan.md` (Post-build dedupe still open).
+1. **graphics-cmod ↔ `src/lib/graphics`:** **DONE** — `tools/compare_graphics_mp.py` all checks pass on MP unix after romfont header regen.
+2. **`timer_async`:** All examples pass with **`timer_async=False` and `timer_async=True`** (MP unix manifest).
+3. **Matrix:** Prefer targeted `--only-example` runs; full 350-cell deferred until MP.exe stable.
+4. **Verification:** Agent runs matrix locally; update this report.
+5. **framebuf refactor + dedupe:** **DONE** — `tools/sync_framebuf.py`, `tools/compare_framebuf_mp.py`.
 
 ---
 
-## Targeted matrix — micropython unix post-framebuf (2026-07-09)
+## Parity tools (MP unix)
+
+| Tool | Compares |
+|------|----------|
+| `tools/compare_framebuf_mp.py` | C `framebuf` vs `add_ons/framebuf.py` |
+| `tools/compare_graphics_mp.py` | `graphics` cmod vs staged `src/lib/graphics` |
+
+```bash
+micropython tools/compare_framebuf_mp.py
+micropython tools/compare_graphics_mp.py
+```
+
+Visual 2×2 text compare: `src/examples/framebuf_text_compare.py` (framebuf + graphics quadrants).
+
+**graphics cmod fixes (2026-07-09):** Regenerated `font_8x8/14/16.h` from pydisplay romfont (`scripts/sync_fonts.py`); dropped corrupt headers + unused `font_petme128_8x8.h`; aligned `gfx_shapes_line` with Python `_shapes.line`.
+
+---
+
+## Targeted matrix — micropython unix (2026-07-09)
 
 **Result: 67/67 ok** (full example manifest, SDLDisplay) after framebuf refactor.
 
@@ -45,42 +63,27 @@
 
 ### Root cause (confirmed)
 
-1. **Stale `micropython.exe`** — linked graphics cmod missing `from_file`, `text16`, full `mp_canvas_resolve` → `FrameBuffer required` / `canvas required` / BMP565 API errors.
-2. **Missing frozen asyncio** — `cmods/manifest.py` fallback chain never included `ports/windows/variants/dev/manifest.py`, so `uasyncio`/`asyncio` absent on MP.exe.
-
-### Fixes applied
-
-| Fix | Repo |
-|-----|------|
-| `./build_mp.sh --port windows --variant dev` | cmods (relinks current graphics cmod) |
-| Include `$(PORT_DIR)/variants/dev/manifest.py` in root frozen manifest | `cmods/manifest.py` |
+1. **Stale `micropython.exe`** — linked graphics cmod missing APIs → rebuild `build_mp.sh --port windows --variant dev`.
+2. **Missing frozen asyncio** — `cmods/manifest.py` now includes `ports/windows/variants/dev/manifest.py`.
 
 ### Still failing on MP.exe (19/36 ok)
 
 | Bucket | Examples | Notes |
 |--------|----------|-------|
-| **hang** (5) | `apollo`, `color_test`, `feathers`, `font_simpletest2`, `scroll_touch_test` | Harness timeout @ 5s; no `EXAMPLE_RESULT` (e.g. `apollo` empty stdout) |
-| **exit_5** (11) | `bmp565_sprite_transparent`, `bouncing_balls`, `boxlines`, `font_simpletest`, `font_simpletest3`, `hello`, `joystick_list_select`, `tower_climb`, `widgets_calc`, `widgets_console`, `widgets_list` | Ran ~5s, `returncode=5`, no result JSON — loop/quit contract or wine/SDL edge |
+| **hang** (5) | `apollo`, `color_test`, `feathers`, `font_simpletest2`, `scroll_touch_test` | Harness timeout @ 5s; no `EXAMPLE_RESULT` |
+| **exit_5** (11) | `bmp565_sprite_transparent`, `bouncing_balls`, `boxlines`, `font_simpletest`, `font_simpletest3`, `hello`, `joystick_list_select`, `tower_climb`, `widgets_calc`, `widgets_console`, `widgets_list` | `returncode=5`, no result JSON — loop/quit contract |
 
-**Next for MP.exe:** bucket exit_5 vs hang; compare same examples on `micropython` unix; check quit injection / `EXAMPLE_RESULT` contract on windows port.
+**Next for MP.exe:** bucket exit_5 vs hang; compare same examples on `micropython` unix; quit / `EXAMPLE_RESULT` on windows port.
 
 ---
 
-## cpython-venv — hang bucket (2026-07-09)
+## cpython-venv
 
-**Stale (Run A).** Re-tested the five names from Run A:
+**Hang bucket (Run A): stale.** Re-tested five names: **4/4 ok** (`lv_test_timer_sync` excluded).
 
-| Example | Result |
-|---------|--------|
-| `displaysys_fill_rect_test` | ok |
-| `eventsys_touch_test` | ok |
-| `palettes_material` | ok |
-| `scroll_touch_test` | ok |
-| `lv_test_timer_sync` | `matrix=false` (excluded) |
+`lv_touch_test`: `RuntimeError: no running event loop` (`matrix=false`).
 
-MP unix async smoke (`pydisplay_demo_async`, `eventsys_touch_test`, `alien`, `calculator`): **4/4 ok**.
-
-`lv_touch_test` on cpython-venv: `RuntimeError: no running event loop` (`matrix=false`).
+MP unix async smoke: **4/4 ok**.
 
 ---
 
@@ -88,18 +91,18 @@ MP unix async smoke (`pydisplay_demo_async`, `eventsys_touch_test`, `alien`, `ca
 
 | Target | Command | Verified |
 |--------|---------|----------|
-| MicroPython unix | `./build_mp.sh --port unix --variant standard` | 34/34 targeted ok |
-| **MicroPython Windows** | `./build_mp.sh --port windows --variant dev` | **Rebuilt 2026-07-09**; 19/36 cluster ok |
-| CircuitPython unix | `./build_target.sh cp-unix` | 34/34 + post-refactor 2/2 ok |
-| CPython | editable `graphics-cmod` in `.venv` | parity tests ok |
+| MicroPython unix | `./build_mp.sh --port unix` | 67/67 manifest; compare tools pass |
+| MicroPython Windows | `./build_mp.sh --port windows --variant dev` | 19/36 cluster (rebuild after graphics font fix TBD on .exe) |
+| CircuitPython unix | `./build_target.sh cp-unix` | 34/34 + 2/2 spot |
+| CPython | editable `graphics-cmod` in `.venv` | unit tests ok |
 
-Symlinks: `~/bin/micropython` → unix build; `~/bin/micropython.exe` → `ports/windows/build-dev/micropython.exe`.
+Symlinks: `~/bin/micropython` → unix build; `~/bin/micropython.exe` → windows dev build.
 
 ---
 
 ## Run A — sync timer — STALE
 
-350 cells, 192 pass / 158 fail. MP/CP columns superseded by 34/34 targeted retests. MP.exe column superseded by 19/36 post-rebuild cluster.
+350 cells, 192 pass / 158 fail. Superseded by targeted retests above.
 
 **Artifacts:** `.cursor/example_test_results_sync.json`
 
@@ -109,15 +112,14 @@ Symlinks: `~/bin/micropython` → unix build; `~/bin/micropython.exe` → `ports
 
 | # | Item | Status |
 |---|------|--------|
-| 1 | **MP.exe exit_5 + hang buckets** | 11 + 5 in 36-cluster; investigate vs unix |
-| 2 | ~~cpython-venv hangs~~ | **Cleared** (stale) |
+| 1 | **MP.exe exit_5 + hang** | 11 + 5 in 36-cluster — **primary matrix work** |
+| 2 | ~~cpython-venv hangs~~ | Cleared (stale) |
 | 3 | **`lv_touch_test`** | cpython event loop; `matrix=false` |
-| 4 | ~~framebuf refactor verify~~ | **DONE** — CP 2/2; MP manifest 67/67 |
-| 5 | Full matrix ×2 | Defer until MP.exe + framebuf stable |
-| 6 | graphics-cmod parity audit | Ongoing |
-| 7 | Push cmods + pydisplay | When Brad asks |
-| 8 | PyScript matrix | Not run |
-| 9 | ~~framebuf single-source dedupe~~ | **DONE** — `tools/sync_framebuf.py` (option B) |
+| 4 | ~~framebuf / graphics parity~~ | **DONE** — compare tools green |
+| 5 | Full 350-cell matrix | Defer until MP.exe stable |
+| 6 | PyScript matrix | Not run |
+| 7 | Push cmods + pydisplay + graphics | When Brad asks |
+| 8 | Rebuild **MP.exe** after graphics font commit | Recommended before re-cluster |
 
 ---
 
@@ -136,10 +138,12 @@ SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/example_test_
   pydisplay_demo_async scroll_touch_test tower_climb widgets_calc widgets_console widgets_list
 ```
 
-**Rebuild MP.exe after cmod/manifest changes:**
+**Parity + rebuild:**
 
 ```bash
-cd ~/github/cmods && ./build_mp.sh --port windows --variant dev
+cd ~/github/cmods/graphics && python3 scripts/sync_fonts.py --pydisplay ~/github/pydisplay
+cd ~/github/cmods && ./build_mp.sh --port unix
+micropython tools/compare_graphics_mp.py
 ```
 
 Results: `.cursor/example_test_results.json`

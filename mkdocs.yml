@@ -101,6 +101,7 @@ nav:
     - Runtime: concepts/runtime.md
     - multimer: concepts/multimer.md
     - Drawing and fonts: concepts/drawing-and-fonts.md
+    - Graphics: concepts/graphics.md
     - Graphics files: concepts/graphics-files.md
     - Config files: concepts/config-files.md
   - Portability & platforms:
