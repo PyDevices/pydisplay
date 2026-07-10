@@ -470,7 +470,6 @@ kind = "pdwidgets"
 quit = "inject"
 deps = ["add_ons"]
 timeout_s = 45
-matrix = false
 
 [examples.widgets_console]
 import = "widgets_console"
@@ -479,7 +478,6 @@ kind = "pdwidgets"
 quit = "inject"
 deps = ["add_ons"]
 timeout_s = 45
-matrix = false
 
 [examples.widgets_demo]
 import = "widgets_demo"
@@ -488,7 +486,6 @@ kind = "pdwidgets"
 quit = "inject"
 deps = ["add_ons"]
 timeout_s = 45
-matrix = false
 
 [examples.widgets_list]
 import = "widgets_list"
@@ -497,7 +494,6 @@ kind = "pdwidgets"
 quit = "inject"
 deps = ["add_ons"]
 timeout_s = 45
-matrix = false
 
 [examples.widgets_percent]
 import = "widgets_percent"
@@ -506,7 +502,6 @@ kind = "pdwidgets"
 quit = "inject"
 deps = ["add_ons"]
 timeout_s = 45
-matrix = false
 
 [examples.widgets_scrollbar]
 import = "widgets_scrollbar"
@@ -515,7 +510,6 @@ kind = "pdwidgets"
 quit = "inject"
 deps = ["add_ons"]
 timeout_s = 45
-matrix = false
 
 [examples.widgets_stub]
 import = "widgets_stub"
@@ -524,7 +518,6 @@ kind = "pdwidgets"
 quit = "inject"
 deps = ["add_ons"]
 timeout_s = 45
-matrix = false
 
 [examples.widgets_test]
 import = "widgets_test"
@@ -533,7 +526,6 @@ kind = "pdwidgets"
 quit = "inject"
 deps = ["add_ons"]
 timeout_s = 45
-matrix = false
 
 [examples.widgets_device_panel]
 import = "widgets_device_panel"
@@ -542,7 +534,6 @@ kind = "pdwidgets"
 quit = "inject"
 deps = ["add_ons"]
 timeout_s = 45
-matrix = false
 
 [examples.widgets_smartwatch]
 import = "widgets_smartwatch"
@@ -551,7 +542,6 @@ kind = "pdwidgets"
 quit = "inject"
 deps = ["add_ons"]
 timeout_s = 45
-matrix = false
 
 [examples.widgets_settings]
 import = "widgets_settings"
@@ -560,7 +550,6 @@ kind = "pdwidgets"
 quit = "inject"
 deps = ["add_ons"]
 timeout_s = 45
-matrix = false
 
 [examples.alien]
 import = "alien.alien"

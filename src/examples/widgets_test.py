@@ -1,5 +1,4 @@
 # multimer types: all
-# pyscript skip: gallery
 import board_config
 import pdwidgets as pd
 

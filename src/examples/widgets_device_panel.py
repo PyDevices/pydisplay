@@ -1,5 +1,4 @@
 # multimer types: all
-# pyscript skip: gallery
 """
 widgets_device_panel
 ====================================================

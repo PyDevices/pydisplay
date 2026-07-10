@@ -1,5 +1,4 @@
 # multimer types: all
-# pyscript skip: gallery
 """
 Test ListView widget
 """
