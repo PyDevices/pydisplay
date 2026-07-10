@@ -86,15 +86,14 @@ Implemented in pydisplay’s **PGDisplay** backend, driven from the game via
    a video path env var is set.
 2. On every `PGDisplay.show()`, the driver exports the **logical** RGB24
    framebuffer (`_buffer`, 320×480 for this game) through
-   `FFmpegFrameRecorder` in `src/lib/displaysys/__init__.py`.
+   `FFmpegFrameRecorder` in `src/lib/displaysys/pgdisplay.py`.
 3. ffmpeg encodes raw RGB24 piped on stdin to H.264 MP4.
 
 Properties:
 
 - One encoded frame per game `show()` — duration matches gameplay.
 - Resolution is the game’s logical size, not the scaled pygame window.
-- **PGDisplay only**; `DisplayDriver.open_frame_recorder()` raises
-  `NotImplementedError` on other backends (e.g. SDLDisplay).
+- **PGDisplay only**; other backends omit ``open_frame_recorder`` (e.g. SDLDisplay).
 - Unit tests: `tests/test_pgdisplay_frame_recorder.py`.
 
 Typical invocation (what `record_win.sh` runs):

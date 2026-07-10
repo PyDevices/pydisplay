@@ -10,13 +10,86 @@ import pygame as pg
 
 from displaysys import (
     DisplayDriver,
-    FFmpegFrameRecorder,
     color_rgb,
     default_quit_chord,
     fit_scale_to_desktop,
     notify_board_config_scale_override,
 )
 from eventsys import events
+
+__all__ = ["FFmpegFrameRecorder", "PGDisplay", "get_events", "poll_event"]
+
+
+class FFmpegFrameRecorder:
+    """Pipe fixed-size RGB24 frames to ffmpeg for MP4 output."""
+
+    __slots__ = ("_closed", "_frame_bytes", "_frames", "_proc", "fps", "height", "path", "width")
+
+    def __init__(self, path, width, height, fps=12):
+        import subprocess
+
+        self.path = path
+        self.width = width
+        self.height = height
+        self.fps = fps
+        self._frames = 0
+        self._closed = False
+        self._frame_bytes = width * height * 3
+        self._proc = subprocess.Popen(
+            [
+                "ffmpeg",
+                "-y",
+                "-f",
+                "rawvideo",
+                "-pix_fmt",
+                "rgb24",
+                "-s",
+                f"{width}x{height}",
+                "-r",
+                str(fps),
+                "-i",
+                "pipe:0",
+                "-an",
+                "-c:v",
+                "libx264",
+                "-pix_fmt",
+                "yuv420p",
+                path,
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+        )
+
+    def write(self, rgb_bytes):
+        if self._closed:
+            return
+        if len(rgb_bytes) != self._frame_bytes:
+            raise ValueError(
+                f"frame size {len(rgb_bytes)} != expected {self._frame_bytes} "
+                f"for {self.width}x{self.height} RGB24"
+            )
+        self._proc.stdin.write(rgb_bytes)
+        self._frames += 1
+
+    def close(self):
+        if self._closed:
+            return self._frames
+        self._closed = True
+        try:
+            self._proc.stdin.close()
+        except Exception:
+            pass
+        err = self._proc.stderr.read().decode("utf-8", errors="replace")
+        try:
+            self._proc.stderr.close()
+        except Exception:
+            pass
+        rc = self._proc.wait()
+        if rc != 0:
+            tail = "\n".join(err.strip().splitlines()[-8:])
+            raise RuntimeError(f"ffmpeg exited {rc} for {self.path}:\n{tail}")
+        return self._frames
 
 
 def _pg_key_name(key):
@@ -164,6 +237,7 @@ class PGDisplay(DisplayDriver):
         self._render_dirty = False
         self._show_pending = False
         self._requires_byteswap = False
+        self._frame_recorder = None
 
         self._bytes_per_pixel = color_depth // 8
 
@@ -307,12 +381,41 @@ class PGDisplay(DisplayDriver):
             return pg.image.tostring(self._buffer, "RGB")
         return pg.image.tobytes(self._buffer, "RGB")
 
+    @property
+    def frame_recording(self) -> bool:
+        """True while an ffmpeg frame recorder is attached."""
+        return self._frame_recorder is not None
+
     def open_frame_recorder(self, path, *, fps=12, width=None, height=None):
+        """Attach an ffmpeg-backed recorder that receives one RGB24 frame per ``show()``."""
         self.close_frame_recorder()
         w = self.width if width is None else width
         h = self.height if height is None else height
         self._frame_recorder = FFmpegFrameRecorder(path, w, h, fps)
         return self._frame_recorder
+
+    def open_frame_recorder_from_env(
+        self, env_var="PYDISPLAY_VIDEO", fps_env="PYDISPLAY_VIDEO_FPS"
+    ):
+        """Open a recorder when ``env_var`` points at an output ``.mp4`` path."""
+        import os
+
+        path = os.environ.get(env_var, "").strip()
+        if not path:
+            return None
+        fps = int(os.environ.get(fps_env, "12"))
+        return self.open_frame_recorder(path, fps=fps)
+
+    def close_frame_recorder(self):
+        """Finalize and detach any active frame recorder."""
+        recorder = self._frame_recorder
+        self._frame_recorder = None
+        if recorder is not None:
+            recorder.close()
+
+    def _record_frame(self, rgb_bytes) -> None:
+        if self._frame_recorder is not None:
+            self._frame_recorder.write(rgb_bytes)
 
     def render(self, renderRect=None) -> None:
         """
@@ -393,6 +496,7 @@ class PGDisplay(DisplayDriver):
 
     def _deinit(self) -> None:
         """Release pygame resources."""
+        self.close_frame_recorder()
         global _joysticks
         try:
             pg.joystick.quit()

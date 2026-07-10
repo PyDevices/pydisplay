@@ -13,7 +13,10 @@ from unittest import mock
 import _env  # noqa: F401
 from _support import quiet
 
-from displaysys import FFmpegFrameRecorder
+try:
+    from displaysys.pgdisplay import FFmpegFrameRecorder
+except ImportError:
+    FFmpegFrameRecorder = None
 
 # pygame (pygame-ce) is only installed on Windows; unix uses SDL2. The PGDisplay
 # tests below skip when pygame is unavailable.
@@ -37,13 +40,12 @@ def _fake_popen(cmd, stdin=None, stdout=None, stderr=None, **kwargs):
 
 
 class TestFrameRecorderBase(unittest.TestCase):
-    def test_fbdisplay_rejects_frame_recorder(self):
+    def test_fbdisplay_has_no_frame_recorder(self):
         with quiet():
             from _support import make_fbdisplay
 
             d, _ = make_fbdisplay(8, 4)
-        with self.assertRaises(NotImplementedError):
-            d.open_frame_recorder("/tmp/out.mp4")
+        self.assertFalse(hasattr(d, "open_frame_recorder"))
 
 
 @unittest.skipUnless(HAS_PYGAME, "pygame (pygame-ce) required for PGDisplay tests")
@@ -97,6 +99,7 @@ class TestPGDisplayFrameRecorder(unittest.TestCase):
                 os.environ.pop("PYDISPLAY_VIDEO_FPS", None)
 
 
+@unittest.skipUnless(FFmpegFrameRecorder is not None, "pygame required to import pgdisplay")
 class TestFFmpegFrameRecorder(unittest.TestCase):
     def setUp(self):
         self._popen = mock.patch("subprocess.Popen", side_effect=_fake_popen)

@@ -19,49 +19,38 @@ height = 480
 rotation = 0
 scale = 2
 
+_DESKTOP_PLATFORMS = frozenset(("linux", "darwin", "win32", "unix", "webassembly", "emscripten"))
 
-_ps = _jn = False
-try:
-    import pyscript
 
-    _ps = True
-except ImportError:
+def _host_kind():
     try:
-        get_ipython()
-        _jn = True
-    except NameError:
+        import pyscript  # noqa: F401
+
+        return "pyscript"
+    except ImportError:
         pass
+    try:
+        get_ipython()  # noqa: F821
+        return "jupyter"
+    except NameError:
+        return "desktop"
 
-if _ps:
-    from displaysys.psdisplay import PSDevices, PSDisplay
+
+def _make_runtime(display, host_read, *, timer_async):
     import eventsys
 
-    display_drv = PSDisplay("display_canvas", width, height)
-    devices_drv = PSDevices("display_canvas", display_drv)
-    runtime = eventsys.Runtime(
-        display=display_drv,
-        host_read=devices_drv.read,
-        timer_async=True,
+    return eventsys.Runtime(
+        display=display,
+        host_read=host_read,
+        timer_async=timer_async,
     )
-elif _jn:
-    from displaysys.jndisplay import JNDevices, JNDisplay
-    import eventsys
 
-    display_drv = JNDisplay(width, height)
-    devices_drv = JNDevices(display_drv)
-    runtime = eventsys.Runtime(
-        display=display_drv,
-        host_read=devices_drv.read,
-        timer_async=True,
-    )
-else:
+
+def _warn_embedded_default_board():
     import sys
 
-    _DESKTOP_PLATFORMS = frozenset(
-        ("linux", "darwin", "win32", "unix", "webassembly", "emscripten")
-    )
-    _impl = sys.implementation.name
-    if _impl in ("micropython", "circuitpython") and sys.platform not in _DESKTOP_PLATFORMS:
+    impl = sys.implementation.name
+    if impl in ("micropython", "circuitpython") and sys.platform not in _DESKTOP_PLATFORMS:
         print(
             "board_config: default board_config.py from lib/ is for desktop "
             "displaysys only.\n"
@@ -71,8 +60,8 @@ else:
             "  https://github.com/PyDevices/pydisplay/tree/main/board_configs"
         )
 
-    import eventsys
 
+def _desktop_display(title):
     try:
         from displaysys.pgdisplay import PGDisplay as DTDisplay
         from displaysys.pgdisplay import get_events
@@ -84,12 +73,34 @@ else:
         width=width,
         height=height,
         rotation=rotation,
-        title=f"{sys.implementation.name} on {sys.platform}",
+        title=title,
         scale=scale,
     )
-    runtime = eventsys.Runtime(
-        display=display_drv,
-        host_read=get_events,
+    return display_drv, get_events
+
+
+_host = _host_kind()
+
+if _host == "pyscript":
+    from displaysys.psdisplay import PSDevices, PSDisplay
+
+    display_drv = PSDisplay("display_canvas", width, height)
+    devices_drv = PSDevices("display_canvas", display_drv)
+    runtime = _make_runtime(display_drv, devices_drv.read, timer_async=True)
+elif _host == "jupyter":
+    from displaysys.jndisplay import JNDevices, JNDisplay
+
+    display_drv = JNDisplay(width, height)
+    devices_drv = JNDevices(display_drv)
+    runtime = _make_runtime(display_drv, devices_drv.read, timer_async=True)
+else:
+    import sys
+
+    _warn_embedded_default_board()
+    display_drv, get_events = _desktop_display(f"{sys.implementation.name} on {sys.platform}")
+    runtime = _make_runtime(
+        display_drv,
+        get_events,
         timer_async=env_bool("PYDISPLAY_TIMER_ASYNC", DEFAULT_TIMER_ASYNC),
     )
 

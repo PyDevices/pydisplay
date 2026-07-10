@@ -284,6 +284,8 @@ def _open_video_recorder():
         path = env_get("PYDISPLAY_VIDEO", "").strip()
     if not path:
         return
+    if not hasattr(display_drv, "open_frame_recorder"):
+        return
     fps = int(env_get("TOWER_CLIMB_VIDEO_FPS") or env_get("PYDISPLAY_VIDEO_FPS", "12"))
     display_drv.open_frame_recorder(path, fps=fps)
 
@@ -1124,7 +1126,9 @@ def _run_game(show_splash=True):
                     hold_frames = int(
                         env_get(
                             "TOWER_CLIMB_HOLD_FRAMES",
-                            "48" if display_drv.frame_recording else "150",
+                            "48"
+                            if getattr(display_drv, "frame_recording", False)
+                            else "150",
                         )
                     )
                     for _ in range(hold_frames):
@@ -1144,7 +1148,8 @@ def _run_game(show_splash=True):
         _restore_display_refresh()
         if _trace is not None:
             _trace.close()
-        display_drv.close_frame_recorder()
+        if hasattr(display_drv, "close_frame_recorder"):
+            display_drv.close_frame_recorder()
 
 
 def main():

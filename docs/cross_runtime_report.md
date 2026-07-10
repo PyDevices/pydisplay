@@ -14,7 +14,7 @@
 | **micropython unix** | 67/67 ok (full manifest, SDL dummy) |
 | **circuitpython** | 34/34 ok |
 | **micropython.exe** | **36/36 ok** graphics cluster; harness fixes for poll-deadline quit (`3d226ce5`) |
-| **Full desktop matrix** | **320/335** (`timer_async=0`) · **325/335** (`timer_async=1`) — re-run after `3d226ce5` for updated MP.exe rows |
+| **Full desktop matrix** | **292/294** (`timer_async=0`) · **290/294** (`timer_async=1`) — 2026-07-10 re-run (349 manifest rows; 55 `matrix=false` listed) |
 
 Desktop timers: default **`timer_async=False`**; set **`PYDISPLAY_TIMER_ASYNC=1`** for asyncio mode. `Runtime: timer_async=…` prints at init.
 
@@ -65,16 +65,16 @@ never listed `env_util.py` (imported by `board_config`).
 
 ## Full desktop matrix (2026-07-10)
 
-**Command:** parallel passes, `PYDISPLAY_TIMER_ASYNC=0` and `1`, 5 runtimes (`micropython`, `micropython.exe`, `circuitpython`, `cpython-venv`, `python.exe`), `--order examples`, SDL dummy.
+**Command:** `tools/run_full_matrix_both_timer_modes.sh` — parallel passes, `PYDISPLAY_TIMER_ASYNC=0` and `1`, 5 runtimes, `--order examples`, SDL dummy.
 
-| Mode | Pass | Notes |
-|------|-----:|-------|
-| `timer_async=0` | **320/335** | 15 `matrix=false` rows listed but not executed |
-| `timer_async=1` | **325/335** | async mode slightly better on MP.exe widgets |
+| Mode | Pass (executed) | Notes |
+|------|----------------:|-------|
+| `timer_async=0` | **292/294** | 55 `matrix=false` rows listed; widgets_* excluded |
+| `timer_async=1` | **290/294** | + `console_advanced_demo` exit_5 @ `micropython.exe`; `timer_simpletest` @ `circuitpython` |
 
-**Artifacts:** `.cursor/example_test_results_timer_async_{0,1}.json`
+**Artifacts:** `.cursor/example_test_results_timer_async_{0,1}.json` · logs: `.cursor/matrix_timer_async_{0,1}.log`
 
-**Known failures (both modes unless noted):**
+**Remaining failures (executed rows only):**
 
 | Issue | Examples / runtimes |
 |-------|---------------------|
@@ -82,7 +82,7 @@ never listed `env_util.py` (imported by `board_config`).
 | `lv_touch_test` | skipped on `micropython.exe` (`skip_runtimes`); `matrix=false` / event-loop work on `cpython-venv` |
 | `timer_simpletest` | was `TypeError` @ `circuitpython` (`timer_async=1` only); spot retest passes |
 
-**Fixed @ `micropython.exe` (`3d226ce5`):** `displaysys_simpletest`, `eventsys_encoder_test`, `console_advanced_demo` — examples honor `runtime.quit_requested`; `display_driver.run` exits on quit; `lv_utils` optional `asyncio` import.
+**Fixed since prior report:** MP.exe `displaysys_simpletest`, `eventsys_encoder_test`, `console_advanced_demo` (sync mode); `widgets_*` now `matrix=false` pending pdwidgets work.
 
 ---
 
@@ -176,7 +176,7 @@ SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/example_test_
 
 | Item | Status |
 |------|--------|
-| Full desktop matrix sync + async | **Done** — 320–325/335 per mode; see above |
+| Full desktop matrix sync + async | **Done** — 292/294 and 290/294 executed (2026-07-10 re-run); see above |
 | `lv_touch_test` on cpython | `matrix=false`; needs event-loop work |
 | PyScript matrix | Loads via Playwright + serve; async loop launch blocked by CDN firmware without frozen `asyncio` (whole gallery, see pdwidgets §²) |
 | Push cmods + graphics | When requested |
