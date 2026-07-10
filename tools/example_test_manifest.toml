@@ -535,6 +535,33 @@ deps = ["add_ons"]
 timeout_s = 45
 matrix = false
 
+[examples.widgets_device_panel]
+import = "widgets_device_panel"
+script = "examples/widgets_device_panel.py"
+kind = "pdwidgets"
+quit = "inject"
+deps = ["add_ons"]
+timeout_s = 45
+matrix = false
+
+[examples.widgets_smartwatch]
+import = "widgets_smartwatch"
+script = "examples/widgets_smartwatch.py"
+kind = "pdwidgets"
+quit = "inject"
+deps = ["add_ons"]
+timeout_s = 45
+matrix = false
+
+[examples.widgets_settings]
+import = "widgets_settings"
+script = "examples/widgets_settings.py"
+kind = "pdwidgets"
+quit = "inject"
+deps = ["add_ons"]
+timeout_s = 45
+matrix = false
+
 [examples.alien]
 import = "alien.alien"
 script = "examples/alien/alien.py"
