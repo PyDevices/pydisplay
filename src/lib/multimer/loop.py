@@ -45,6 +45,10 @@ async def run_forever_async(poll, delay_ms=20):
 
 
 def _event_loop_running():
+    import sys
+
+    if sys.platform in ("emscripten", "webassembly"):
+        return True
     try:
         from . import asyncio
 
