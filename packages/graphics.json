@@ -17,10 +17,6 @@
       "github:PyDevices/pydisplay/src/lib/graphics/_bmp565.py"
     ],
     [
-      "graphics/_capabilities.py",
-      "github:PyDevices/pydisplay/src/lib/graphics/_capabilities.py"
-    ],
-    [
       "graphics/_clip.py",
       "github:PyDevices/pydisplay/src/lib/graphics/_clip.py"
     ],
@@ -49,16 +45,16 @@
       "github:PyDevices/pydisplay/src/lib/graphics/_font_8x8.py"
     ],
     [
-      "graphics/_framebuf.py",
-      "github:PyDevices/pydisplay/src/lib/graphics/_framebuf.py"
-    ],
-    [
       "graphics/_framebuf_plus.py",
       "github:PyDevices/pydisplay/src/lib/graphics/_framebuf_plus.py"
     ],
     [
       "graphics/_shapes.py",
       "github:PyDevices/pydisplay/src/lib/graphics/_shapes.py"
+    ],
+    [
+      "graphics/framebuf.py",
+      "github:PyDevices/pydisplay/src/lib/graphics/framebuf.py"
     ]
   ],
   "deps": [],

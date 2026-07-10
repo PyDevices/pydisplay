@@ -5,6 +5,10 @@
       "github:PyDevices/pydisplay/src/lib/board_config.py"
     ],
     [
+      "env_util.py",
+      "github:PyDevices/pydisplay/src/lib/env_util.py"
+    ],
+    [
       "path.py",
       "github:PyDevices/pydisplay/src/lib/path.py"
     ],

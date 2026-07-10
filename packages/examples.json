@@ -117,6 +117,10 @@
       "github:PyDevices/pydisplay/src/examples/framebuf_simpletest.py"
     ],
     [
+      "framebuf_text_compare.py",
+      "github:PyDevices/pydisplay/src/examples/framebuf_text_compare.py"
+    ],
+    [
       "graphics_area_test.py",
       "github:PyDevices/pydisplay/src/examples/graphics_area_test.py"
     ],
@@ -245,6 +249,10 @@
       "github:PyDevices/pydisplay/src/examples/widgets_demo.py"
     ],
     [
+      "widgets_device_panel.py",
+      "github:PyDevices/pydisplay/src/examples/widgets_device_panel.py"
+    ],
+    [
       "widgets_list.py",
       "github:PyDevices/pydisplay/src/examples/widgets_list.py"
     ],
@@ -255,6 +263,14 @@
     [
       "widgets_scrollbar.py",
       "github:PyDevices/pydisplay/src/examples/widgets_scrollbar.py"
+    ],
+    [
+      "widgets_settings.py",
+      "github:PyDevices/pydisplay/src/examples/widgets_settings.py"
+    ],
+    [
+      "widgets_smartwatch.py",
+      "github:PyDevices/pydisplay/src/examples/widgets_smartwatch.py"
     ],
     [
       "widgets_stub.py",
