@@ -30,7 +30,25 @@ Classes:
 
 Functions:
     tick: Calls the tick method of all Display objects.
-    init_timer: Initializes the timer to call the tick function at regular intervals.
+    init_timer: Records the desired tick period (compatibility shim).
+    pump: Processes one widget frame during setup bursts.
+    run_forever: Drives the cooperative widget loop until quit.
+
+Timer architecture:
+    pdwidgets owns **no** timer of its own. Frames are driven cooperatively from
+    a single poll function that ``multimer.loop.run_forever`` runs either in a
+    plain ``while`` loop (sync) or on the shared ``asyncio`` loop (async),
+    selected automatically from ``board_config.runtime.timer_async``. This is the
+    ``apollo.py`` pattern: own no timer, poll ``tick()`` from the loop callback.
+
+    An earlier design created a plain sync ``multimer.Timer`` inside
+    ``init_timer`` even when ``runtime.timer_async`` was ``True``, which raced the
+    asyncio loop with a background sync timer — exactly the "competing timer"
+    the repo forbids once ``timer_async`` is ``True``. Driving ticks from the
+    loop instead means ``Display.timer`` is always ``None`` and there is never a
+    sync timer running alongside the async loop, on any runtime (desktop SDL/PG,
+    MicroPython/CircuitPython unix, ``micropython.exe``, PyScript, Jupyter). It
+    also keeps ``multimer`` untouched — only its public loop helpers are used.
 """
 
 from random import getrandbits  # for MARK_UPDATES
@@ -59,7 +77,11 @@ def _log(*args, **kwargs):
 
 def tick(_=None):
     """
-    Function to call the tick method of all Display objects.
+    Call the ``tick`` method of every registered :class:`Display`.
+
+    Args:
+        _ (Any): Ignored positional argument so this may also be used as a
+            timer/``on_tick`` callback signature.
     """
     for display in Display.displays:
         display.tick()
@@ -67,25 +89,18 @@ def tick(_=None):
 
 def init_timer(period=10):
     """
-    Initialize the timer to call the tick function at regular intervals.
+    Record the desired widget tick period (compatibility shim).
+
+    pdwidgets no longer owns a timer (see the module "Timer architecture"
+    note): frames are driven cooperatively by :func:`run_forever` / :func:`pump`.
+    This function is retained so existing examples that call
+    ``pd.init_timer(10)`` keep working; it only stores ``period`` as the poll
+    delay used by :func:`run_forever`.
 
     Args:
-        period (int): The period in milliseconds to call the tick function.
+        period (int): The desired inter-frame period in milliseconds.
     """
-    if Display.timer is not None:
-        return
-    try:
-        from board_config import runtime
-
-        if runtime is not None and not runtime.timer_async:
-            return
-    except ImportError:
-        pass
-    from multimer import Timer
-
-    if Timer is not None:
-        Display.timer = Timer(-1)
-        Display.timer.init(mode=Timer.PERIODIC, period=period, callback=tick)
+    Display.tick_period = period
 
 
 def _poll_widgets():
@@ -107,28 +122,32 @@ def _poll_widgets():
 
 def pump():
     """
-    Process one frame during setup bursts (before ``run_forever``).
+    Process one widget frame during setup bursts (before :func:`run_forever`).
 
-    When no timer is active, also calls ``tick()``.
+    Because pdwidgets owns no timer, this always calls :func:`tick` so drawing
+    performed while building the UI (e.g. a ``Console`` writing in a ``while``
+    loop) is flushed to the display.
     """
-    if Display.timer is None:
-        tick()
+    tick()
 
 
 def run_forever():
-    """Run ``multimer.run_forever`` with widget tick + runtime poll until quit."""
-    init_timer(10)
+    """
+    Drive the cooperative widget loop until quit is requested.
+
+    Uses ``multimer.loop.run_forever``, which selects a plain ``while`` loop
+    (sync) or the shared ``asyncio`` loop (async) based on
+    ``board_config.runtime.timer_async``. The poll callback calls :func:`tick`
+    (flush dirty regions, run tasks, redraw) then polls the runtime for events.
+    No timer is created, so an async loop never coexists with a sync timer.
+    """
     from multimer.loop import run_forever as multimer_run_forever
 
-    if Display.timer is None:
+    def poll():
+        tick()
+        return _poll_widgets()
 
-        def poll():
-            tick()
-            return _poll_widgets()
-
-        multimer_run_forever(poll)
-    else:
-        multimer_run_forever(_poll_widgets)
+    multimer_run_forever(poll, delay_ms=Display.tick_period)
 
 
 _display_drv_get_attrs = {
@@ -545,7 +564,8 @@ class Widget:
 
 class Display(Widget):
     displays = []
-    timer = None
+    timer = None  # pdwidgets owns no timer; kept as None for API/back-compat.
+    tick_period = 10  # Poll delay (ms) used by run_forever; set via init_timer.
 
     def __init__(self, display_drv, runtime, tfa=0, bfa=0, format=RGB565):
         """
@@ -681,15 +701,9 @@ class Display(Widget):
         self._tasks.remove(task)
 
     def quit(self):
-        Display.displays.remove(self)
-        if Display.timer and not Display.displays:
-            timer = Display.timer
-            Display.timer = None
-            if not getattr(timer, "_busy", False):
-                try:
-                    timer.deinit()
-                except Exception:
-                    pass
+        """Remove this display from the active list (called on QUIT)."""
+        if self in Display.displays:
+            Display.displays.remove(self)
 
     def tick(self):
         """
@@ -704,17 +718,24 @@ class Display(Widget):
         self._tick_busy = True
 
         if self._dirty_areas:
-            # combine overlapping areas in self._dirty_areas into a new list called dirty_areas
-            dirty_areas = []
-            while self._dirty_areas:
-                area = self._dirty_areas.pop()
-                for i, other in enumerate(self._dirty_areas):
-                    if area.touches_or_intersects(other):
-                        area += other
-                        self._dirty_areas.pop(i)
-                dirty_areas.append(area)
+            # Coalesce touching/overlapping dirty rectangles before flushing.
+            # Take ownership of the pending list up front so we never mutate a
+            # list while iterating it, and merge transitively (a freshly merged
+            # area may now touch one merged earlier).
+            pending = self._dirty_areas
+            self._dirty_areas = []
+            merged = []
+            for area in pending:
+                i = 0
+                while i < len(merged):
+                    if area.touches_or_intersects(merged[i]):
+                        area += merged.pop(i)
+                        i = 0
+                    else:
+                        i += 1
+                merged.append(area)
 
-            for dirty in dirty_areas:
+            for dirty in merged:
                 self.refresh(dirty)
         else:
             t = ticks_ms()
