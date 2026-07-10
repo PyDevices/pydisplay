@@ -36,7 +36,7 @@ For each package the build script writes **two** index entries:
 
 `mip.install()` on a device selects the bytecode version matching the running firmware unless `mpy=False` / `--no-mpy` is used, in which case it pulls from the `py/` channel.
 
-See also [installation/mip-micropython-lib.md](installation/mip-micropython-lib.md).
+See also [installation/mip-micropython-lib.md](../docs/installation/mip-micropython-lib.md).
 
 ## GitHub MIP (always `.py`)
 

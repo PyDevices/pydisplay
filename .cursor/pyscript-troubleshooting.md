@@ -4,11 +4,11 @@ How to investigate PyScript / MicroPython-WASM issues in this repo — especiall
 when **multimer**, timers, or sync loops are involved. Prefer evidence from a
 running browser over guessing from source alone.
 
-Related: [PyScript local development](../guides/pyscript.md),
-[PyScript asyncio](../guides/pyscript-asyncio.md),
-[multimer deadline hooks](../concepts/multimer.md#development--troubleshooting--deadline-hooks),
+Related: [PyScript local development](../docs/guides/pyscript.md),
+[PyScript asyncio](../docs/guides/pyscript-asyncio.md),
+[multimer deadline hooks](../docs/concepts/multimer.md#development--troubleshooting--deadline-hooks),
 [example runtimes](example-runtimes.md),
-[`.cursor/rules/pyscript-browser-verify.mdc`](../../.cursor/rules/pyscript-browser-verify.mdc).
+[`.cursor/rules/pyscript-browser-verify.mdc`](rules/pyscript-browser-verify.mdc).
 
 ## Pages and servers
 
@@ -61,9 +61,9 @@ process timeout.
 
 | Script | Purpose |
 |--------|---------|
-| [`ps_debug.py`](../../tools/ps_debug.py) | Headless navigate + CDP console/log/network; good first probe |
-| [`ps_screenshot.py`](../../tools/ps_screenshot.py) | Wait N seconds, screenshot; CDP console only (avoids `evaluate` during sleep) |
-| [`ps_shot.py`](../../tools/ps_shot.py) | Screenshot with a hard kill timer if the browser stalls |
+| [`ps_debug.py`](../tools/ps_debug.py) | Headless navigate + CDP console/log/network; good first probe |
+| [`ps_screenshot.py`](../tools/ps_screenshot.py) | Wait N seconds, screenshot; CDP console only (avoids `evaluate` during sleep) |
+| [`ps_shot.py`](../tools/ps_shot.py) | Screenshot with a hard kill timer if the browser stalls |
 
 ```bash
 # Server must already be up
@@ -95,7 +95,7 @@ Patterns that work well in ad-hoc scripts:
   Python `EXAMPLE_RESULT=` (or times out as `hang`)
 - On WASM, `multimer.Timer` is typically **unavailable** (async-only runtime);
   embed arms a JS `setTimeout` and/or a cooperative
-  [`set_deadline_hook`](../concepts/multimer.md#development--troubleshooting--deadline-hooks)
+  [`set_deadline_hook`](../docs/concepts/multimer.md#development--troubleshooting--deadline-hooks)
   so sync loops can still finish under autotest
 
 ## Multimer on PyScript — mental model

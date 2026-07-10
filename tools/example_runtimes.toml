@@ -1,5 +1,5 @@
 # Canonical runtime targets for cross-runtime example tests.
-# Agents: read this file and docs/testing/example-runtimes.md before running the matrix.
+# Agents: read this file and .cursor/example-runtimes.md before running the matrix.
 #
 # Run from repo root:
 #   python tools/example_test_kit.py

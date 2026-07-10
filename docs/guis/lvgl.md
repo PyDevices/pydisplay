@@ -124,7 +124,7 @@ From `src/`:
 ../tools/run_desktop_lv_tests.py
 ```
 
-The script prints a summary table (`queued` / `async` columns) and writes full results to `.cursor/desktop_lv_test_results.json`. Exit code **1** if any run hangs, crashes, fails timers, or fails click checks (strict policy).
+The script prints a summary table (`queued` / `async` columns) and writes full results to a JSON file. Exit code **1** if any run hangs, crashes, fails timers, or fails click checks (strict policy).
 
 For the full desktop matrix (micropython, circuitpython, cpython-venv, micropython.exe, python.exe × sync/queued/async), use [`tools/lv_timer_test_kit.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/lv_timer_test_kit.py):
 

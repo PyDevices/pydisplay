@@ -30,7 +30,7 @@ from example_test_kit import (  # noqa: E402
 )
 
 EXAMPLE_ID = "test_timers"
-REPORT_PATH = REPO / "docs" / "testing" / "test_timers_report.md"
+REPORT_PATH = REPO / ".cursor" / "test_timers_report.md"
 
 # Public probe labels in report column order.
 PROBE_COLUMNS = (

@@ -1,9 +1,9 @@
 # Cross-runtime example tests
 
-Automated **smoke tests** that run `[src/examples/](../../src/examples/)` scripts on every available **runtime** (desktop interpreter or launcher). These are not unit tests — run unit tests first.
+Automated **smoke tests** that run `[src/examples/](../src/examples/)` scripts on every available **runtime** (desktop interpreter or launcher). These are not unit tests — run unit tests first.
 
 - Runtimes
-  The canonical runtime list lives in `[tools/example_runtimes.toml](../../tools/example_runtimes.toml)`. Agents should read that file before running the matrix.
+  The canonical runtime list lives in `[tools/example_runtimes.toml](../tools/example_runtimes.toml)`. Agents should read that file before running the matrix.
   The desktop interpreter runtimes are `micropython`, `micropython.exe`, `circuitpython`, `python.exe`, and repo-root `.venv/bin/python` (`cpython-venv` in the harness). The launcher runtimes are `tools/jupyter.sh` and `tools/pyscript.sh`.
 
   | Runtime id        | Platform            | How it runs                                                                                        |
@@ -16,7 +16,7 @@ Automated **smoke tests** that run `[src/examples/](../../src/examples/)` script
   | `pyscript`        | PyScript browser    | `tools/pyscript.sh` launcher; autotest uses `embed.html?modules=…&autotest=1` via `tools/serve.py` |
   | `jupyter`         | Jupyter notebook    | `tools/jupyter.sh` launcher; executes generated `src/run-{example}.ipynb`                          |
 
-  **Platform** (MicroPython, PyScript, …) is the product category in [Portability & platforms](../platforms/index.md). **Runtime** is the concrete executable or launcher used in automation.
+  **Platform** (MicroPython, PyScript, …) is the product category in [Portability & platforms](../docs/platforms/index.md). **Runtime** is the concrete executable or launcher used in automation.
   ## Prerequisites
   1. **Unit tests pass** (default gate):
     ```bash
@@ -50,7 +50,7 @@ Automated **smoke tests** that run `[src/examples/](../../src/examples/)` script
   ```
   Results: summary table on stderr, full JSON at `.cursor/example_test_results.json`.
   ## Example manifest
-  Per-example metadata (kind, quit handling, timeouts, skip lists) is in `[tools/example_test_manifest.toml](../../tools/example_test_manifest.toml)`. Inventory of all example *files* is in `[packages/examples.json](../../packages/examples.json)` (regenerate with `./scripts/install_refresh_manifests.sh`).
+  Per-example metadata (kind, quit handling, timeouts, skip lists) is in `[tools/example_test_manifest.toml](../tools/example_test_manifest.toml)`. Inventory of all example *files* is in `[packages/examples.json](../packages/examples.json)` (regenerate with `./scripts/install_refresh_manifests.sh`).
   ### Example contract
   Every matrix example should be one of:
   1. **Oneshot** — draws and exits with code 0 (`timer_simpletest`, `graphics_simpletest`).
@@ -59,12 +59,12 @@ Automated **smoke tests** that run `[src/examples/](../../src/examples/)` script
   Harness scripts (`lv_test_timer_*`, `displaysys_*_test`) are tagged `kind = harness` and are never included in the matrix.
   By default, examples with `matrix = false` or `kind = legacy` + `quit = pending` appear in the results table with those labels but are **not executed**. Use `--all-except-harness` to run them (still excludes harnesses only).
   ## API (for scripts)
-  `[tools/example_test_kit.py](../../tools/example_test_kit.py)` exposes:
+  `[tools/example_test_kit.py](../tools/example_test_kit.py)` exposes:
   - `test_all_examples()` — outer loop: example → all runtimes
   - `test_all_runtimes()` — outer loop: runtime → all examples
   - `run_case(example, runtime, …)` — single cell
 
-Subprocess runs use `[tools/example_test_wrapper.py](../../tools/example_test_wrapper.py)`, which prints `EXAMPLE_RESULT=` JSON on stdout (same pattern as `KIT_RESULT=` in the LVGL harness).
+Subprocess runs use `[tools/example_test_wrapper.py](../tools/example_test_wrapper.py)`, which prints `EXAMPLE_RESULT=` JSON on stdout (same pattern as `KIT_RESULT=` in the LVGL harness).
 
 ## Debugging
 
@@ -73,7 +73,7 @@ Subprocess runs use `[tools/example_test_wrapper.py](../../tools/example_test_wr
 - **`PYDISPLAY_TIMER_ASYNC`** — desktop sync (`0` / unset) vs asyncio (`1`) timers in `src/lib/board_config.py`. Set on the command line before launching the kit, or let `tools/lv_timer_test_kit.py` set it per mode (`sync` → `0`, `async` → `1`). Must be in the environment before `import board_config`.
 - **`micropython.exe` quit injection** — no `threading` / `_thread`; `example_test_wrapper.py` arms quit via a patched `Runtime.poll` deadline instead of a multimer SDL one-shot timer (avoids `schedule queue full` when the queue is saturated).
 - PyScript autotest posts to `tools/serve.py` `/__debug/example_autotest` when quit injection runs
-- PyScript sync loops: `embed.html` registers a cooperative `multimer.set_deadline_hook` (dev/troubleshooting API — see [multimer — deadline hooks](../concepts/multimer.md#development--troubleshooting--deadline-hooks)) so single-threaded WASM can exit after `duration` without a background quit thread
+- PyScript sync loops: `embed.html` registers a cooperative `multimer.set_deadline_hook` (dev/troubleshooting API — see [multimer — deadline hooks](../docs/concepts/multimer.md#development--troubleshooting--deadline-hooks)) so single-threaded WASM can exit after `duration` without a background quit thread
 - JS timer smoke: `embed.html?autotest=1&duration=5` logs `EXAMPLE_RESULT=` after N seconds (for async demos that block on import)
 - **PyScript hangs / multimer / Playwright:** see [PyScript troubleshooting (agents)](pyscript-troubleshooting.md) — `tools/ps_debug.py`, `ps_shot.py`, CDP console capture, and WASM main-thread caveats
 
@@ -81,8 +81,8 @@ Subprocess runs use `[tools/example_test_wrapper.py](../../tools/example_test_wr
 
 ## Related
 
-- [Unit tests](../../tests/README.md)
-- [LVGL desktop test suite](../guis/lvgl.md#desktop-test-suite)
+- [Unit tests](../tests/README.md)
+- [LVGL desktop test suite](../docs/guis/lvgl.md#desktop-test-suite)
 - [PyScript troubleshooting (agents)](pyscript-troubleshooting.md)
-- `[tools/README.md](../../tools/README.md)`
+- `[tools/README.md](../tools/README.md)`
 

@@ -18,7 +18,7 @@ climbers. Early work focused on:
 - Landing/collision physics stable enough for repeated jumps up procedurally
   placed branches
 - The shared periodic timer via ``eventsys.Runtime`` for display refresh
-  (see repo `AGENTS.md` for the timer/display split)
+  (see `docs/concepts/runtime.md` for the timer/display split)
 
 Gameplay bugs (flicker, respawn deaths, camera clamp at the crown, bot pathing)
 were fixed iteratively using the trace stream and bot playtests below rather than

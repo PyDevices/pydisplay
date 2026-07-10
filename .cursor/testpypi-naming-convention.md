@@ -64,7 +64,7 @@ Dependencies that live on **pypi.org** stay on the **secondary** index (`--extra
 - `pygame-ce` (imports as `pygame`) — `displaysys-pgdisplay`
 - Other upstream libs — never renamed to PyDevices prefixes
 
-See [Two-index pip install](publishing-micropython-lib.md#two-index-pip-install-required).
+See [Two-index pip install](../docs/publishing-micropython-lib.md#two-index-pip-install-required).
 
 ### 6. Before first publish of a new name
 
@@ -135,6 +135,6 @@ See [PyDevices/displayif](https://github.com/PyDevices/displayif) and board conf
 
 ## Related docs
 
-- [Publishing micropython-lib](publishing-micropython-lib.md)
+- [Publishing micropython-lib](../docs/publishing-micropython-lib.md)
 - [TestPyPI publish audit](testpypi-publish-audit.md)
-- [Installation — TestPyPI](installation/index.md#pypi--pip-testpypi)
+- [Installation — TestPyPI](../docs/installation/index.md#pypi--pip-testpypi)

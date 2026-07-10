@@ -35,7 +35,7 @@ See [Run the notebook interactively](../docs/platforms/jupyter-run.md) and [PySc
 | [`ps_screenshot.py`](ps_screenshot.py) | Timed screenshot; console via CDP (avoids `evaluate` during WASM sleep) |
 | [`ps_shot.py`](ps_shot.py) | Screenshot with a hard kill if Chromium stalls |
 
-Agent-oriented guide: [PyScript troubleshooting](../docs/testing/pyscript-troubleshooting.md).
+Agent-oriented guide: [PyScript troubleshooting](../.cursor/pyscript-troubleshooting.md).
 
 ```bash
 python tools/serve.py   # separate terminal

@@ -46,10 +46,11 @@ Private working notes for this repo. Not part of the published docs.
 ### Publishing & packaging
 
 - [ ] Remove `pydisplay-bundle` everywhere — **first:** confirm all subpackages are on TestPyPI and [PyDevices/micropython-lib](https://github.com/PyDevices/micropython-lib); then drop bundle manifest, `packages/pydisplay-bundle.json`, Wokwi bundle, publish script bundle path, install manifests
-- [ ] Make all PyDevices repo automations that publish to TestPyPI or micropython-lib also attach those artifacts as GitHub release assets per tag — see [testpypi-publish-audit.md](testpypi-publish-audit.md) (gap: none do today)
+- [ ] Make all PyDevices repo automations that publish to TestPyPI or micropython-lib also attach those artifacts as GitHub release assets per tag — see [testpypi-publish-audit.md](../.cursor/testpypi-publish-audit.md) (gap: none do today)
 
 ### Examples & demos
 
+- [ ] Audit all examples: for each, note what it demonstrates and how it helps users and/or the matrix test kit; decide keep, consolidate, or delete. Many were small development probes (e.g. scrolling/rotation for touch→screen coords) that may have limited value now that those bugs are fixed; others (e.g. `font_simpletest*.py`) overlap but show different methods with different speed/resource/transparency tradeoffs — keep distinct approaches where that teaching value matters. Large surface area, but a structured pass should be relatively quick
 - [ ] `pixel_sim_demos` fire effect — cellular flame does not look/behave correctly on the simulator (fix heat propagation / palette)
 - [ ] Make all examples runnable on PyScript, then Jupyter notebook
 
@@ -61,15 +62,24 @@ Private working notes for this repo. Not part of the published docs.
 
 ### Frozen & standalone apps
 
-- [ ] Frozen self-installer for MicroPython (Unix + `micropython.exe`) — see [frozen-self-installer-notes.md](frozen-self-installer-notes.md)
+- [ ] Frozen self-installer for MicroPython (Unix + `micropython.exe`) — see [frozen-self-installer-notes.md](../.cursor/frozen-self-installer-notes.md)
 - [ ] Develop apps and freeze them into standalone executables — start with `spotapi_remote` in the spotapi repo
 
 ### multimer
 
 - [ ] **multimer `hard=False` on CPython (librt)** — `schedule()` does not truly defer when librt delivers on the main thread: it runs the callback inline inside the signal handler (`src/lib/multimer/_schedule.py`). That broke `timer_simpletest` on cpython-venv when both timers used `hard=False` (hang before any output). **Done for now:** example-scoped fix — `hard=False` only when `sys.implementation.name == "micropython"` (heap locked in FFI); CPython keeps default `hard=True` (`timer_simpletest`, commit `c26ce285`). **Next bot:** core change in `multimer` — detect signal-handler / non-reentrant context on CPython and always queue callbacks (true soft delivery), then revisit examples and other hard timers (`console._tick`, `pdwidgets`, etc.). Deliberate, test on librt + LVGL; not urgent while examples use the MP-only guard.
 
+### MCU optimization
+
+(Multimer is out of scope for this work.)
+
+- [ ] Optimize `lib/graphics` first, then `graphics_cmod`, for microcontrollers — memory, storage, and speed
+- [ ] Same MCU optimization pass for `eventsys` and `displaysys` (consecutively or concurrently with graphics)
+
 ### Tooling & ecosystem
 
+- [ ] Remove redundant and consolidate overlapping scripts and tools; remove any unnecessary scripts and tools that are no longer needed or used
+- [ ] List all `.py` files under `board_configs/`, `drivers/`, and `src/` that read environment variables; remove env access where unnecessary. Keep `src/lib/board_config` reading the env for the default `timer_async` value; prefer no other scripts in those directories access envars
 - [ ] Add a GUI to the matrix test kit (`tools/example_test_kit.py`)
 - [ ] Verify `manifest.py` selection order in `~/github/cmods`
 - [ ] Fork [figma2lvgl](https://github.com/khiyamiftikhar/figma2lvgl) and add option to output Python
@@ -78,13 +88,13 @@ Private working notes for this repo. Not part of the published docs.
 ### Done
 
 - [x] Check `display_driver.py`, `lv_utils.py`, and `multimer` for possible refactor / optimizations
-- [x] Find all globals in `src/lib` — see [src-lib-globals.md](src-lib-globals.md)
+- [x] Find all globals in `src/lib` — see [src-lib-globals.md](../.cursor/src-lib-globals.md)
 - [x] Trim `jupyter_notebook.ipynb` out of `pyscript.toml` (demo pages don't need it; bundled via `gen_repo_packages.py`)
 - [x] Jupyter install notebook: add `board_config.py` to the `displaysys` TestPyPI package (may need default `board_config` to work without eventsys) — `src/lib/board_config.py` ships with core `displaysys` on next publish
 - [x] `displaysys-*` backend subpackages on TestPyPI — v0.0.8: upload + `MICROPYTHON_LIB_DIR` fix; deps pgdisplay→pygame-ce, sdldisplay→usdl2; core `displaysys` ships `board_config.py`; no examples in wheels; removed `boarddisplay`
 - [x] Ensure each `src/lib` package is installable alone — `tools/test_testpypi_standalone.sh` passes for core TestPyPI wheels + desktop backends; MCU `displaysys-*` on CPython need MP (e.g. `micropython.const` in busdisplay)
-- [x] Settle on naming convention for all TestPyPI packages — see [testpypi-naming-convention.md](testpypi-naming-convention.md) (MIP short names; pip maps on pypi.org collision: `pydisplay-*`, `*-cmod`, `*-cpython`)
-- [x] Audit PyDevices TestPyPI / micropython-lib publish workflows and wheel coverage — see [testpypi-publish-audit.md](testpypi-publish-audit.md) (native wheels OK; release assets still open; displaysys-* on TestPyPI from v0.0.8)
+- [x] Settle on naming convention for all TestPyPI packages — see [testpypi-naming-convention.md](../.cursor/testpypi-naming-convention.md) (MIP short names; pip maps on pypi.org collision: `pydisplay-*`, `*-cmod`, `*-cpython`)
+- [x] Audit PyDevices TestPyPI / micropython-lib publish workflows and wheel coverage — see [testpypi-publish-audit.md](../.cursor/testpypi-publish-audit.md) (native wheels OK; release assets still open; displaysys-* on TestPyPI from v0.0.8)
 - [x] Make displaysys only print `requires_byteswap` when it is True
 - [x] SDL/PG batch mode — defer compositor `render()` until `show()` (texture updates batched in `blit_rect` / `fill_rect`)
 - [x] `board_config` scaling for PGDisplay is too big — window doesn't fit the screen (auto-clamp in `PGDisplay`)
@@ -98,7 +108,7 @@ Private working notes for this repo. Not part of the published docs.
 - [x] Rework `cmods/graphics` to be all C code, no Python wrappers — full `graphics.__all__` parity on MP, CPython, and CircuitPython (`036e9b4`). CP rebuild: `apply_cp_unix_graphics_patches.sh` then `build_cp.sh --port unix --variant coverage`. See `.cursor/graphics_cmod_parity_report.md`
 - [x] `cmods/graphics` publish to TestPyPI — v0.0.2 tagged and published (14 wheels on TestPyPI)
 - [x] Port RGB888 support from `graphics/_framebuf_plus.py` to the graphics cmod library — already in cmod (`GFX_RGB888` + rgb888 pixel ops in `gfx_framebuffer.c`); `_framebuf_plus` Python path kept for non-cmod fallbacks
-- [x] Verify which `mip` install methods install bare `.py` files vs precompiled `.mpy` files — see [mip-and-freeze-sources.md](mip-and-freeze-sources.md)
+- [x] Verify which `mip` install methods install bare `.py` files vs precompiled `.mpy` files — see [mip-and-freeze-sources.md](../.cursor/mip-and-freeze-sources.md)
 - [x] Move `SDL_desktop_size()` out of `usdl2` into `sdldisplay.py`; expose `SDL_GetDisplayUsableBounds` / `SDL_GetDesktopDisplayMode` on usdl2 instead
 - [x] Fix `add_ons/README.md`: path setup is `import lib.path` (not `add_ons.add_path`)
 - [x] Fix `add_ons/usdl2.py` docstring — ctypes on CPython unix+win32; ffi/uctypes on MicroPython unix
@@ -107,5 +117,5 @@ Private working notes for this repo. Not part of the published docs.
 - [x] Doc drift: Broker→Runtime in README/tests; DisplayDriver docstring + audit tag wording; add_ons README; display-ecosystem `runtime` contract; micropython.md TestPyPI `usdl2` note (no version pins)
 - [x] SDL rescaling to fit the window on the screen is still too large in MicroPython — init `SDL_INIT_VIDEO` before querying usable desktop bounds (`SDL_INIT_EVERYTHING` left bounds at 0 on MP); ffi path uses `struct.unpack_from` (no `signed=` kw on MP)
 - [x] Refactor `src/lib/board_config.py` for readability (same behavior; short comments OK)
-- [x] Re-run full desktop matrix and refresh `cross_runtime_report.md` (2026-07-10: 292/294 sync, 290/294 async executed)
+- [x] Re-run full desktop matrix and refresh `.cursor/cross_runtime_report.md` (2026-07-10: 292/294 sync, 290/294 async executed)
 - [x] **pdwidgets rework** — bug fixes (competing timer, `tick()` coalescing), hardening, `pct` perf, new widgets (`Card`, `Row`/`Column`, `Badge`, `Switch`, `NumberStepper`, `TextInput`, `Dropdown`, `Dialog`), visual design system, 3 showcase examples; `widgets_*.py` re-enabled in the example matrix and PyScript gallery (PR #62)

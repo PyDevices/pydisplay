@@ -26,7 +26,7 @@ Created at import time; examples import these by convention:
 
 Prints `Runtime: timer_async=…` at construction (same always-on style as display init).
 
-Desktop PG/SDL reads **`PYDISPLAY_TIMER_ASYNC`** via [`env_util.py`](../../src/lib/env_util.py)
+Desktop PG/SDL reads **`PYDISPLAY_TIMER_ASYNC`** via [`env_util.py`](../src/lib/env_util.py)
 (`env_bool`); PyScript/Jupyter branches ignore it (`timer_async=True`).
 
 Also sets private flags `_ps`, `_jn` and (desktop MCU branch) `_DESKTOP_PLATFORMS`, `_impl`.

@@ -47,7 +47,6 @@ Binary-dependent demos are excluded via `# pyscript binaries:` in the example he
 ## Next
 
 - [PyScript asyncio porting](pyscript-asyncio.md)
-- [PyScript troubleshooting (agents)](../testing/pyscript-troubleshooting.md) — Playwright, hangs, multimer/WASM
 - [Try pydisplay](../try/index.md)
 - [Platform notes](../platforms/pyscript.md)
 

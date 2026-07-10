@@ -43,8 +43,8 @@ from run_test_timers import DESKTOP_RUNTIMES, PROBE_COLUMNS, _parse_probe_result
 
 NO_LVGL_JSON = REPO / ".cursor" / "comprehensive_timers_no_lvgl_results.json"
 LVGL_JSON = REPO / ".cursor" / "comprehensive_timers_lvgl_results.json"
-NO_LVGL_REPORT = REPO / "docs" / "testing" / "comprehensive_timers_no_lvgl_report.md"
-LVGL_REPORT = REPO / "docs" / "testing" / "comprehensive_timers_lvgl_report.md"
+NO_LVGL_REPORT = REPO / ".cursor" / "comprehensive_timers_no_lvgl_report.md"
+LVGL_REPORT = REPO / ".cursor" / "comprehensive_timers_lvgl_report.md"
 
 EXAMPLE_ID = "test_timers"
 

@@ -35,7 +35,7 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 
 ### Running examples headlessly (GUI smoke tests)
 
-- **Read [`docs/testing/example-runtimes.md`](docs/testing/example-runtimes.md)
+- **Read [`.cursor/example-runtimes.md`](.cursor/example-runtimes.md)
   first** — it is the source of truth for the cross-runtime example test system
   (runtimes, prerequisites, the example contract, the matrix commands, and
   debugging). The canonical runtime list is
@@ -54,7 +54,7 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   "fix"): `nano_gui_simpletest` needs the `gui` package and `png_test` needs
   `PYDISPLAY_PNG_DIR`.
 - **PyScript hangs / multimer / WASM:** read
-  [`docs/testing/pyscript-troubleshooting.md`](docs/testing/pyscript-troubleshooting.md)
+  [`.cursor/pyscript-troubleshooting.md`](.cursor/pyscript-troubleshooting.md)
   before poking the IDE browser. Prefer Playwright helpers
   (`tools/ps_debug.py`, `ps_shot.py`) and console/CDP capture — sync
   `sleep_ms` on the main thread often wedges `page.evaluate` and screenshots.

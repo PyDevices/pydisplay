@@ -41,7 +41,7 @@ multimer.run(main)
 
 If `runtime.poll()` is synchronous, call it inside the async loop and **await a yield each iteration** so touch redraw and timers run. Use `await multimer.sleep_ms(0)` — no need to import asyncio.
 
-For periodic callbacks, use `multimer.AsyncTimer` or `multimer.periodic(..., async_=True)` inside `async def main()` after the loop is running.
+For periodic callbacks, use `multimer.AsyncTimer` inside `async def main()` after the loop is running.
 
 ## Examples to study
 

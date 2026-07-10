@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-07-10  
 **Harness:** `tools/example_test_kit.py` · **Manifest:** `tools/example_test_manifest.toml`  
-**Docs:** [`docs/testing/example-runtimes.md`](testing/example-runtimes.md)
+**Docs:** [`.cursor/example-runtimes.md`](example-runtimes.md)
 
 ---
 

@@ -21,7 +21,7 @@ from <xyz> import <clever_install_fn>  # name TBD
 
 **What gets installed first:** The four `src/lib` packages only — same set as micropython-lib `pydisplay-bundle` core (`displaysys`, `eventsys`, `graphics`, `multimer`). Add-ons, examples, and board configs stay optional later steps.
 
-**Source of truth:** Maintainer-published packages from the PyDevices micropython-lib fork, published via `scripts/publish_micropython_lib.sh` → MIP index at `https://PyDevices.github.io/micropython-lib/mip/PyDevices`. Same channel as `installer.py` `lib_install()` ([`installation/mip-micropython-lib.md`](installation/mip-micropython-lib.md) on RTD describes the index; this installer should **warn explicitly** that it is not the official MicroPython micropython-lib registry).
+**Source of truth:** Maintainer-published packages from the PyDevices micropython-lib fork, published via `scripts/publish_micropython_lib.sh` → MIP index at `https://PyDevices.github.io/micropython-lib/mip/PyDevices`. Same channel as `installer.py` `lib_install()` ([`installation/mip-micropython-lib.md`](../docs/installation/mip-micropython-lib.md) on RTD describes the index; this installer should **warn explicitly** that it is not the official MicroPython micropython-lib registry).
 
 **Suggested first-run warning (UI copy):**
 

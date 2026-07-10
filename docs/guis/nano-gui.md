@@ -67,7 +67,7 @@ Adjust `target=` so `gui/` and `color_setup.py` sit in the same path root.
 
 [`src/examples/nano_gui_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/nano_gui_simpletest.py) — hardware verification script from the [upstream Nano-GUI docs](https://github.com/peterhinch/micropython-nano-gui#23-verifying-hardware-configuration).
 
-On MicroPython and CircuitPython (including the [example test matrix](../testing/example-runtimes.md)), the example calls [`ensure_nano_gui.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/ensure_nano_gui.py) before importing `gui.*`, which runs the upstream `mip.install` into `add_ons/` when `gui/` is missing. First run needs network access. CircuitPython also picks up [`uctypes.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/uctypes.py) from `add_ons/` for nano-gui's color writer.
+On MicroPython and CircuitPython, the example calls [`ensure_nano_gui.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/ensure_nano_gui.py) before importing `gui.*`, which runs the upstream `mip.install` into `add_ons/` when `gui/` is missing. First run needs network access. CircuitPython also picks up [`uctypes.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/uctypes.py) from `add_ons/` for nano-gui's color writer.
 
 Run from a full clone:
 

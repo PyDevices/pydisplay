@@ -43,7 +43,7 @@ flowchart TB
 | **`displaysys`** | Display backends (`BusDisplay`, `SDLDisplay`, `PGDisplay`, `PSDisplay`, `JNDisplay`, `FBDisplay`) with a unified drawing API. |
 | **`eventsys`** | `Runtime` polls hardware and enqueues PyGame/SDL2-style events; your loop calls `runtime.poll()`. |
 | **`graphics`** | Optional helpers on top of `framebuf` (rounded rects, gradients, `Area` bounding boxes). |
-| **`multimer`** | Cross-platform timers, `pump()`, and sync/async main-loop helpers (`run_forever`, `dual_main`). |
+| **`multimer`** | Cross-platform `Timer` / `AsyncTimer`, ticks/sleep, and sync/async main-loop helpers (`run_forever`, `dual_main`). |
 | **`add_ons`** | Optional shims and integrations (`framebuf` on CPython, `displaybuf`, `pdwidgets`, config templates). |
 
 ## Typical boot sequence
@@ -51,12 +51,11 @@ flowchart TB
 1. Install packages (MIP, clone, or Wokwi `mip.install`).
 2. Import or install `board_config.py` for your hardware.
 3. `board_config` constructs `display_drv` and `runtime` (or `runtime = None` on display-only MCU boards).
-4. Your main loop: draw on `display_drv`, poll input via `runtime`, call `multimer.pump()` when `needs_pump()` is true.
+4. Your main loop: draw on `display_drv`, poll input via `runtime` (hosted backends refresh via `Runtime` when `needs_refresh` is true).
 
 ```python
 from board_config import display_drv, runtime
 import eventsys
-import multimer
 
 while not runtime.quit_requested:
     for event in runtime.poll():
@@ -64,9 +63,6 @@ while not runtime.quit_requested:
             break
         ...  # handle touch, keys, etc.
     display_drv.fill_rect(0, 0, 10, 10, 0xF800)
-    display_drv.show()
-    if multimer.needs_pump():
-        multimer.pump()
 ```
 
 Or use `multimer.run_forever(poll=runtime.poll)` — see [Runtime](runtime.md), [multimer](multimer.md), and [Events](events.md).

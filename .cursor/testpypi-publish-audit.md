@@ -103,7 +103,7 @@ Declared for the next tag publish (MIP + TestPyPI `pyproject.toml`):
 | `displaysys-psdisplay`, `displaysys-jndisplay` | `displaysys`, `eventsys` |
 | Other `displaysys-*` | `displaysys` only |
 
-Install any of these from TestPyPI using the [two-index `pip` command](publishing-micropython-lib.md#two-index-pip-install-required): TestPyPI as `-i` (PyDevices packages) and PyPI as `--extra-index-url` (deps like `pygame-ce` that are not on TestPyPI).
+Install any of these from TestPyPI using the [two-index `pip` command](../docs/publishing-micropython-lib.md#two-index-pip-install-required): TestPyPI as `-i` (PyDevices packages) and PyPI as `--extra-index-url` (deps like `pygame-ce` that are not on TestPyPI).
 
 After a pydisplay tag publish, run the desktop stack smoke test (headless in CI or SSH):
 
@@ -128,7 +128,7 @@ After a pydisplay tag publish, run the desktop stack smoke test (headless in CI 
 ## Related docs
 
 - [TestPyPI naming convention](testpypi-naming-convention.md)
-- [Publishing micropython-lib](publishing-micropython-lib.md)
+- [Publishing micropython-lib](../docs/publishing-micropython-lib.md)
 - [scripts/README.md](../scripts/README.md)
 - [mip-and-freeze-sources.md](mip-and-freeze-sources.md)
-- [Android platform notes](platforms/android.md) — TestPyPI wheels for `lvgl-cpython`
+- [Android platform notes](../docs/platforms/android.md) — TestPyPI wheels for `lvgl-cpython`

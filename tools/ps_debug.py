@@ -6,7 +6,7 @@ and checks for WASM loading errors.
 
 Prefer this over Cursor Browser screenshots when sync Python may be blocking
 the main thread (``page.evaluate`` / screenshots often hang). See
-``docs/testing/pyscript-troubleshooting.md``.
+``.cursor/pyscript-troubleshooting.md``.
 
 Usage:
     python tools/ps_debug.py URL [timeout_sec]

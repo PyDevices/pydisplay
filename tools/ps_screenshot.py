@@ -2,7 +2,7 @@
 """
 Screenshot-only PyScript runner. Navigates, waits N seconds, takes a screenshot.
 Uses CDP console-only monitoring (no page.evaluate which hangs during ASYNCIFY /
-sync WASM sleep). See ``docs/testing/pyscript-troubleshooting.md``.
+sync WASM sleep). See ``.cursor/pyscript-troubleshooting.md``.
 
 Usage:
     python tools/ps_screenshot.py URL [wait_sec] [out.png]
