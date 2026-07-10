@@ -13,8 +13,8 @@
 | **graphics / framebuf parity** | `compare_graphics_mp.py` + `compare_framebuf_mp.py` pass on MP unix |
 | **micropython unix** | 67/67 ok (full manifest, SDL dummy) |
 | **circuitpython** | 34/34 ok |
-| **micropython.exe** | **36/36 ok** on graphics cluster (`timer_async=False`) |
-| **Full desktop matrix** | **320/335** (`timer_async=0`) · **325/335** (`timer_async=1`) — 2026-07-10 parallel run |
+| **micropython.exe** | **36/36 ok** graphics cluster; harness fixes for poll-deadline quit (`3d226ce5`) |
+| **Full desktop matrix** | **320/335** (`timer_async=0`) · **325/335** (`timer_async=1`) — re-run after `3d226ce5` for updated MP.exe rows |
 
 Desktop timers: default **`timer_async=False`**; set **`PYDISPLAY_TIMER_ASYNC=1`** for asyncio mode. `Runtime: timer_async=…` prints at init.
 
@@ -35,11 +35,11 @@ Desktop timers: default **`timer_async=False`**; set **`PYDISPLAY_TIMER_ASYNC=1`
 
 | Issue | Examples / runtimes |
 |-------|---------------------|
-| `FrameBuffer` has no `circle` | `widgets_demo`, `widgets_scrollbar`, `widgets_test` on MP/CP (sync only on unix MP) |
-| `hang` | `displaysys_simpletest`, `eventsys_encoder_test` @ `micropython.exe`; `lv_touch_test` @ `python.exe` |
-| `exit_5` | `console_advanced_demo`, `lv_touch_test` @ `micropython.exe` |
-| `lv_touch_test` | also `exit_-11` / `RuntimeError: no running event loop` on `cpython-venv` |
-| `timer_simpletest` | `TypeError` @ `circuitpython` (`timer_async=1` only) |
+| `FrameBuffer` has no `circle` | `widgets_demo`, `widgets_scrollbar`, `widgets_test` on MP/CP (other agent) |
+| `lv_touch_test` | skipped on `micropython.exe` (`skip_runtimes`); `matrix=false` / event-loop work on `cpython-venv` |
+| `timer_simpletest` | was `TypeError` @ `circuitpython` (`timer_async=1` only); spot retest passes |
+
+**Fixed @ `micropython.exe` (`3d226ce5`):** `displaysys_simpletest`, `eventsys_encoder_test`, `console_advanced_demo` — examples honor `runtime.quit_requested`; `display_driver.run` exits on quit; `lv_utils` optional `asyncio` import.
 
 ---
 
@@ -53,6 +53,7 @@ Desktop timers: default **`timer_async=False`**; set **`PYDISPLAY_TIMER_ASYNC=1`
 | Post-rebuild | 19 | 5 | 11 exit_5 |
 | Post-harness (`8742556b`) | 30 | 2 | 4 |
 | **Final (`89f098c2`)** | **36** | **0** | **0** |
+| **Harness quit (`3d226ce5`)** | displaysys / encoder / console ok on MP.exe full kit |
 
 **Fixes (no multimer backend edits):**
 
