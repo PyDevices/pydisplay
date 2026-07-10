@@ -1,4 +1,4 @@
-# multimer types: async
+# pyscript gallery: async
 """
 lv_test_timer.py
 

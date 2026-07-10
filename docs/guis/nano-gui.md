@@ -78,7 +78,7 @@ micropython -i lib/path.py examples/nano_gui_simpletest.py
 
 Desktop CPython / MicroPython unix also work when `board_config` provides an SDL or PG display.
 
-Tagged `# multimer types: all` in the [examples catalog](../examples/index.md#multimer-portability-markers).
+See `scripts/pyscript_gen_packages.py` and [examples catalog](../examples/index.md#pyscript-gallery-markers).
 
 ## Platform
 

@@ -1,4 +1,4 @@
-# multimer types: async
+# pyscript gallery: async
 """
 lv_touch_test.py
 
@@ -16,46 +16,62 @@ alignments = None  # filled in _build_ui after lvgl import
 def _build_ui():
     import lvgl as lv
 
-    global alignments
-    alignments = (
-        (lv.ALIGN.TOP_LEFT, 0, 0),
-        (lv.ALIGN.TOP_MID, 0, 0),
-        (lv.ALIGN.TOP_RIGHT, 0, 0),
-        (lv.ALIGN.LEFT_MID, 0, 0),
-        (lv.ALIGN.CENTER, 0, 0),
-        (lv.ALIGN.RIGHT_MID, 0, 0),
-        (lv.ALIGN.BOTTOM_LEFT, 0, 0),
-        (lv.ALIGN.BOTTOM_MID, 0, 0),
-        (lv.ALIGN.BOTTOM_RIGHT, 0, 0),
-    )
+    # Pause shared LVGL task_handler while constructing widgets (not re-entrant).
+    # Same pattern as lv_test_timer.build_ui — under matrix load, librt ticks
+    # during widget create can SIGSEGV on CPython (exit_-11).
+    inst = None
+    try:
+        import lv_utils
 
-    style_default = lv.style_t()
-    style_default.init()
-    style_default.set_width(lv.pct(33))
-    style_default.set_height(lv.pct(33))
-    style_default.set_bg_color(lv.palette_main(lv.PALETTE.BLUE))
+        inst = lv_utils.event_loop.current_instance()
+    except ImportError:
+        inst = None
+    if inst is not None:
+        inst.disable()
+    try:
+        global alignments
+        alignments = (
+            (lv.ALIGN.TOP_LEFT, 0, 0),
+            (lv.ALIGN.TOP_MID, 0, 0),
+            (lv.ALIGN.TOP_RIGHT, 0, 0),
+            (lv.ALIGN.LEFT_MID, 0, 0),
+            (lv.ALIGN.CENTER, 0, 0),
+            (lv.ALIGN.RIGHT_MID, 0, 0),
+            (lv.ALIGN.BOTTOM_LEFT, 0, 0),
+            (lv.ALIGN.BOTTOM_MID, 0, 0),
+            (lv.ALIGN.BOTTOM_RIGHT, 0, 0),
+        )
 
-    style_pressed = lv.style_t()
-    style_pressed.init()
-    style_pressed.set_transform_width(-10)
-    style_pressed.set_transform_height(-10)
-    style_pressed.set_bg_color(lv.palette_main(lv.PALETTE.GREEN))
+        style_default = lv.style_t()
+        style_default.init()
+        style_default.set_width(lv.pct(33))
+        style_default.set_height(lv.pct(33))
+        style_default.set_bg_color(lv.palette_main(lv.PALETTE.BLUE))
 
-    style_focused = lv.style_t()
-    style_focused.init()
-    style_focused.set_bg_color(lv.palette_main(lv.PALETTE.RED))
+        style_pressed = lv.style_t()
+        style_pressed.init()
+        style_pressed.set_transform_width(-10)
+        style_pressed.set_transform_height(-10)
+        style_pressed.set_bg_color(lv.palette_main(lv.PALETTE.GREEN))
 
-    parent = lv.screen_active()
+        style_focused = lv.style_t()
+        style_focused.init()
+        style_focused.set_bg_color(lv.palette_main(lv.PALETTE.RED))
 
-    for i, alignment in enumerate(alignments, start=1):
-        btn = lv.button(parent)
-        btn.align(*alignment)
-        btn.add_style(style_default, 0)
-        btn.add_style(style_pressed, lv.STATE.PRESSED)
-        btn.add_style(style_focused, lv.STATE.FOCUSED)
-        label = lv.label(btn)
-        label.set_text(f"Btn{i}")
-        label.center()
+        parent = lv.screen_active()
+
+        for i, alignment in enumerate(alignments, start=1):
+            btn = lv.button(parent)
+            btn.align(*alignment)
+            btn.add_style(style_default, 0)
+            btn.add_style(style_pressed, lv.STATE.PRESSED)
+            btn.add_style(style_focused, lv.STATE.FOCUSED)
+            label = lv.label(btn)
+            label.set_text(f"Btn{i}")
+            label.center()
+    finally:
+        if inst is not None:
+            inst.enable()
 
 
 def _setup():

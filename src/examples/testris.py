@@ -1,4 +1,4 @@
-# multimer types: async
+# pyscript gallery: async
 """
 Testris game implemented in MicroPython by Brad Barnett.
 """

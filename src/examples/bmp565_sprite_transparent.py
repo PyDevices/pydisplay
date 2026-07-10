@@ -1,4 +1,4 @@
-# multimer types: all
+# pyscript gallery: all
 # pyscript binaries: assets/warrior.bmp
 from collections import namedtuple
 try:

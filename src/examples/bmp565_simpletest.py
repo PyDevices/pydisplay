@@ -1,4 +1,4 @@
-# multimer types: all
+# pyscript gallery: all
 # pyscript binaries: assets/warrior.bmp
 # Loads the full bitmap into memory before blitting it to the display.
 # Will raise a MemoryError on low memory boards # such as RP2040.

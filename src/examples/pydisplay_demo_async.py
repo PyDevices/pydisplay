@@ -1,4 +1,4 @@
-# multimer types: async
+# pyscript gallery: async
 """
 pydisplay_demo_async.py — asyncio version of pydisplay_demo.
 

@@ -1,4 +1,4 @@
-# multimer types: all
+# pyscript gallery: all
 # pyscript binaries: assets/font_8x8.bin, assets/font_8x14.bin, assets/font_8x16.bin
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 #

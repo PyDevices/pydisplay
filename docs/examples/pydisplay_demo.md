@@ -13,7 +13,7 @@ It demonstrates:
 - **Hardware-style scrolling** — fixed top/bottom chrome with a scrolling middle panel
 - **Timers** — `multimer.Timer` with a `run_forever` / poll main loop
 
-Tagged `# multimer types: queued, sync` (not `multimer` / PyScript).
+Desktop-oriented sync demo (not in the PyScript gallery; see the async variant below).
 
 ## Run it
 
@@ -237,11 +237,11 @@ This script is intentionally **not** a multimer test, but it uses the default ti
 run_forever(handle_events)  # poll input; timer callbacks run on the active backend
 ```
 
-See [multimer](../concepts/multimer.md) for `queued` vs `sync` vs `async` tags on other examples.
+See [multimer](../concepts/multimer.md) for timer backends and `timer_async`.
 
 ## Async variant
 
-[`pydisplay_demo_async.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo_async.py) is the same demo with an **asyncio** main loop and **`multimer.AsyncTimer`** for scrolling (tagged `# multimer types: async`). Use it on PyScript or any port where the app already runs under `asyncio` / `uasyncio`:
+[`pydisplay_demo_async.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo_async.py) is the same demo with an **asyncio** main loop and **`multimer.AsyncTimer`** for scrolling (`# pyscript gallery: async`). Use it on PyScript or any port where the app already runs under `asyncio` / `uasyncio`:
 
 ```python
 import lib.path

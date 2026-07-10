@@ -1,4 +1,4 @@
-# multimer types: async
+# pyscript gallery: async
 """
 A simple paint application demonstrating the use of displaysys.
 """

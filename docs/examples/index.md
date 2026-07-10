@@ -11,60 +11,27 @@ Use `import lib.path` first in a development clone (see [full clone](../installa
 !!! tip "Start here"
     New to pydisplay? Copy the [**App starter**](app-starter.md) boilerplate to begin your first app, then read the [**pydisplay_demo** guide](pydisplay_demo.md) for rotation, scrolling, and buffered text.
 
-## multimer portability markers
+## PyScript gallery markers
 
-As examples are reviewed for [multimer](../concepts/multimer.md) portability (sync, queued, and async timer patterns), each updated script gets a **first-line comment** tagging which timer styles it supports:
+Examples that appear in the [browser gallery](https://PyDevices.github.io/pydisplay/pyscript/) carry a header comment used by `scripts/pyscript_gen_packages.py`:
 
 ```python
-# multimer types: all
+# pyscript gallery: all
 ```
 
-Every runnable example (top-level scripts under `src/examples/*.py` and the subdirectory demos) carries a marker. Shared modules and test harnesses are tagged `NA`.
+| Tag | Gallery section |
+|-----|-----------------|
+| `async` | Async demos (asyncio / `dual_main` / `timer_async`) |
+| `all` | Blocking or dual-path demos that still run after **Run** in the browser |
 
-### Tag values
-
-| Tag | Meaning |
-|-----|---------|
-| `all` | Same code on MCU, desktop sync, and PyScript/Jupyter — poll/`sleep_ms` loops with quit handling, or library helpers (`pd.run_forever`) |
-| `queued, sync` | Explicit `run_forever`/`periodic` timer loop or game/LVGL test (`pydisplay_demo`, `testris`, `lv_test_timer`) |
-| `sync` | Sync-only or one-shot on the main thread (`console_advanced_demo.py` uses `os.dupterm` + one `display_drv.show()`) |
-| `async` | `runtime.timer_async` + `asyncio` main loop |
-| `NA` | Not applicable — shared module or test harness, not a runnable portability example |
+Omit the marker (or use `# pyscript skip: gallery`) to keep a script out of the card grid. Binary-dependent demos use `# pyscript binaries:` and are excluded automatically. See [PyScript local development](../guides/pyscript.md).
 
 ### Search commands
 
-List all marked examples:
-
 ```bash
-rg '^# multimer types:' src/examples/*.py
-```
-
-List examples tagged for every timer style:
-
-```bash
-rg '^# multimer types: all' src/examples/*.py
-```
-
-List unmarked top-level examples:
-
-```bash
-comm -23 \
-  <(ls -1 src/examples/*.py | xargs -I{} basename {} | sort) \
-  <(rg -l '# multimer types:' src/examples/*.py | xargs -I{} basename {} | sort)
-```
-
-List all marked examples (recursive, including subdirectories):
-
-```bash
-rg '^# multimer types:' src/examples/
-```
-
-List unmarked runnable scripts (path-based; excludes support modules without markers by design):
-
-```bash
-comm -23 \
-  <(find src/examples -path '*/.*' -prune -o -name '*.py' -print | sort) \
-  <(rg -l '# multimer types:' src/examples/ -g '*.py' | sort)
+rg '^# pyscript gallery:' src/examples/
+rg '^# pyscript gallery: async' src/examples/
+rg '^# pyscript gallery: all' src/examples/
 ```
 
 ### Canonical patterns
@@ -144,11 +111,11 @@ pd.run_forever()
 
 ### Notes
 
-- `displaysys_simpletest.py` handles `events.QUIT` in its poll loop (tagged `all`). Same quit pattern as [`scroll_touch_test_displaybuf.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll_touch_test_displaybuf.py).
+- `displaysys_simpletest.py` handles `events.QUIT` in its poll loop. Same quit pattern as [`scroll_touch_test_displaybuf.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll_touch_test_displaybuf.py).
 - `font_simpletest.py` — string-sized `FrameBuffer`, opaque background, one `blit_rect` per draw (see [Font rendering patterns](../concepts/graphics.md#choosing-a-font-rendering-pattern)).
 - `font_simpletest2.py` — `Font.text(display_drv, …)`; transparent, per-pixel (slowest bus pattern).
 - `font_simpletest3.py` — `DisplayBuffer` + `show(dirty)`; transparent, best when RAM allows a full-screen buffer.
-- `nano_gui_simpletest.py` is tagged `all`; requires upstream [`gui/`](../guis/nano-gui.md) in `add_ons/`.
+- `nano_gui_simpletest.py` requires upstream [`gui/`](../guis/nano-gui.md) in `add_ons/`.
 **Legend:** Platforms = CPython · MCU · PyScript · Wokwi · Packages = core · add_ons · LVGL
 
 ## Suggested learning order
@@ -252,17 +219,17 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 
 ## Subdirectories
 
-Runnable demos in subfolders use the same multimer markers as top-level examples (`# multimer types: …` first line).
+Runnable demos in subfolders may use the same `# pyscript gallery:` markers as top-level examples.
 
-| Directory | Script | Tag | Platforms | Notes |
-|-----------|--------|-----|-----------|-------|
-| `alien/` | `alien.py` | `all` | CPython · MP · MCU | Sprite bounce; `runtime.poll()` quit each frame |
-| `chango/` | `chango.py` | `all` | CPython · MP · MCU · PyScript | One-shot font demo; `runtime.poll()` after draws |
-| `noto_fonts/` | `noto_fonts.py` | `all` | MP · MCU · PyScript | One-shot Noto font demo; same tail as `chango` |
-| `proverbs/` | `proverbs.py` | `all` | CPython · MP · MCU | Chinese proverb slideshow; quit via `runtime.poll()` |
-| `tiny_toasters/` | `tiny_toasters.py` | `all` | CPython · MP · MCU | Sprite animation; quit via `runtime.poll()` |
-| `apollo_dsky/` | — | — | — | Support module for top-level `apollo.py` |
-| `assets/` | — | — | — | Shared fonts and images |
+| Directory | Script | Platforms | Notes |
+|-----------|--------|-----------|-------|
+| `alien/` | `alien.py` | CPython · MP · MCU | Sprite bounce; `runtime.poll()` quit each frame |
+| `chango/` | `chango.py` | CPython · MP · MCU · PyScript | One-shot font demo; `runtime.poll()` after draws |
+| `noto_fonts/` | `noto_fonts.py` | MP · MCU · PyScript | One-shot Noto font demo; same tail as `chango` |
+| `proverbs/` | `proverbs.py` | CPython · MP · MCU | Chinese proverb slideshow; quit via `runtime.poll()` |
+| `tiny_toasters/` | `tiny_toasters.py` | CPython · MP · MCU | Sprite animation; quit via `runtime.poll()` |
+| `apollo_dsky/` | — | — | Support module for top-level `apollo.py` |
+| `assets/` | — | — | Shared fonts and images |
 
 ## Screenshots and live demos
 
