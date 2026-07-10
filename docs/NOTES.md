@@ -27,6 +27,8 @@ Private working notes for this repo. Not part of the published docs.
 
 ### LVGL
 
+- [ ] `lv_touch_test` on `micropython.exe` — fix LVGL/SDL timer queue / `micropython.schedule` overflow so it can re-enter matrix (currently `skip_runtimes`)
+- [ ] `lv_touch_test` on `cpython-venv` — event-loop work (`matrix=false` today)
 - [ ] Combine `display_driver.py` + `lv_utils.py` → `lv_runtime.py`
 - [ ] `lv_runtime.py` — support multiple LVGL displays
 - [ ] Ship `lv_runtime.py` with `lv_cpython_mod`, `lv_micropython_cmod`, and `lv_circuitpython_mod`
@@ -39,7 +41,6 @@ Private working notes for this repo. Not part of the published docs.
 
 ### displaysys & desktop
 
-- [ ] SDL rescaling to fit the window on the screen is still too large in MicroPython
 - [ ] **CircuitPython `SDLDisplay` forced software renderer** — `sdldisplay.py` downgrades accelerated GL on CP only (`SetRenderTarget` / `glFramebufferTexture2DEXT` fails on rotated render targets). On the same host MP unix uses SDL2 too; investigate whether this is a real CP/usdl2-binding difference or an outdated workaround — goal: HW-accelerated SDL on CP unix matching MP, or document the actual root cause
 - [ ] Refactor `src/lib/board_config.py` for readability (same behavior; short comments OK)
 - [ ] Rework `_hard_process_exit` in `sdldisplay.py` — used when `quit(force=True)` / kit teardown must skip SDL cleanup (`usdl2.process_exit`, `ffi` `_exit`, `os._exit` fallbacks); audit whether still needed after harness changes
@@ -52,7 +53,7 @@ Private working notes for this repo. Not part of the published docs.
 
 ### Examples & demos
 
-- [ ] **pdwidgets** — work in progress; re-enable `widgets_*.py` in example matrix and PyScript gallery when stable (`matrix=false` + `# pyscript skip: gallery` until then)
+- [ ] **pdwidgets** — other agent lands `FrameBuffer.circle` first; then re-enable `widgets_*.py` in example matrix and PyScript gallery (`matrix=false` + `# pyscript skip: gallery` until stable)
 - [ ] `pixel_sim_demos` fire effect — cellular flame does not look/behave correctly on the simulator (fix heat propagation / palette)
 - [ ] Make all examples runnable on PyScript, then Jupyter notebook
 
@@ -77,7 +78,8 @@ Private working notes for this repo. Not part of the published docs.
 
 ### Tooling & ecosystem
 
-- [ ] Add a GUI to the matrix test kit (`tools/example_test_kit.py`) — after cloud agent has fixed matrix errors and improved pdwidgets
+- [ ] Re-run full desktop matrix (`tools/run_full_matrix_both_timer_modes.sh`) after other agent lands `FrameBuffer.circle` and MP.exe harness fixes; refresh `cross_runtime_report.md` counts — **then** start cloud agent on remaining matrix failures
+- [ ] Add a GUI to the matrix test kit (`tools/example_test_kit.py`) — after cloud agent has cleared remaining matrix errors (circle/pdwidgets done before cloud agent starts)
 - [ ] Verify `manifest.py` selection order in `~/github/cmods`
 - [ ] Fork [figma2lvgl](https://github.com/khiyamiftikhar/figma2lvgl) and add option to output Python
 - [ ] Change docs and scripts so cmods sub-repos don't mention or require cmods (personal workspace only — not required for other users); may need to move functionality out of cmods into sub-repos
@@ -111,4 +113,4 @@ Private working notes for this repo. Not part of the published docs.
 - [x] Update backend docs: drivers need `blit_rect`, `fill_rect`, and `pixel` — not only `show()` and `quit()`
 - [x] Add `ruff` to `requirements-dev.txt`
 - [x] Doc drift: Broker→Runtime in README/tests; DisplayDriver docstring + audit tag wording; add_ons README; display-ecosystem `runtime` contract; micropython.md TestPyPI `usdl2` note (no version pins)
-- [x] `wifi.py` — MP shim audited vs CP; wait for DHCP IP, `ipv4_address` None until assigned, `connect()` returns None
+- [x] SDL rescaling to fit the window on the screen is still too large in MicroPython — init `SDL_INIT_VIDEO` before querying usable desktop bounds (`SDL_INIT_EVERYTHING` left bounds at 0 on MP); ffi path uses `struct.unpack_from` (no `signed=` kw on MP)

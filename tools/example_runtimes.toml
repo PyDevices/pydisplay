@@ -18,8 +18,8 @@ available_on = ["linux", "wsl", "macos"]
 kind = "subprocess"
 command = ["micropython"]
 cwd = "src"
-resolve = ["PATH", "~/bin/micropython"]
-setup_notes = "MicroPython unix build with SDL display support."
+resolve = ["PATH", "~/bin/micropython", "repo:bin/micropython"]
+setup_notes = "MicroPython unix build with SDL display support. Falls back to bin/micropython (committed copy) when ~/bin and PATH don't have it, e.g. in a Cursor Cloud checkout."
 
 [runtimes."micropython.exe"]
 platform = "micropython"
@@ -28,8 +28,8 @@ available_on = ["windows", "wsl"]
 kind = "subprocess"
 command = ["micropython.exe"]
 cwd = "src"
-resolve = ["PATH", "~/bin/micropython.exe"]
-setup_notes = "MicroPython Windows (.exe). Async modes may be limited."
+resolve = ["PATH", "~/bin/micropython.exe", "repo:bin/micropython.exe"]
+setup_notes = "MicroPython Windows (.exe). Async modes may be limited. bin/micropython.exe is committed for completeness only — Cursor Cloud agents cannot execute Windows binaries, so this runtime is not part of the cloud matrix."
 timeout_s = 60
 
 [runtimes.circuitpython]
@@ -39,8 +39,8 @@ available_on = ["linux", "wsl", "macos"]
 kind = "subprocess"
 command = ["circuitpython"]
 cwd = "src"
-resolve = ["PATH", "~/bin/circuitpython"]
-setup_notes = "CircuitPython unix with SDL."
+resolve = ["PATH", "~/bin/circuitpython", "repo:bin/circuitpython"]
+setup_notes = "CircuitPython unix with SDL. Falls back to bin/circuitpython (committed copy) when ~/bin and PATH don't have it, e.g. in a Cursor Cloud checkout."
 
 [runtimes.cpython-venv]
 platform = "cpython"

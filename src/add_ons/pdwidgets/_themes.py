@@ -28,6 +28,14 @@ class IconTheme:
     _radio_button_unchecked = "radio_button_unchecked_"
     _toggle_on = "toggle_on_"
     _toggle_off = "toggle_off_"
+    _close = "close_"
+    _add = "add_"
+    _remove = "remove_"
+    _info = "info_"
+    _warning = "warning_"
+    _error = "error_"
+    _dropdown = "expand_more_"
+    _menu = "menu_"
 
     def __init__(self, path):
         """

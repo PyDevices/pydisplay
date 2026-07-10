@@ -267,6 +267,14 @@ def retcheck(retvalue):
         raise RuntimeError(usdl2.SDL_GetError())
 
 
+def _sdl_init_display():
+    """Init SDL for desktop display; video first so usable desktop bounds work."""
+    retcheck(usdl2.SDL_Init(usdl2.SDL_INIT_VIDEO))
+    extra = usdl2.SDL_INIT_EVERYTHING & ~usdl2.SDL_INIT_VIDEO
+    if extra:
+        retcheck(usdl2.SDL_InitSubSystem(extra))
+
+
 def _desktop_size(display_index=0):
     """Return (width, height) of the usable desktop area, or (0, 0) if unknown."""
     display_index = int(display_index)
@@ -281,14 +289,12 @@ def _desktop_size(display_index=0):
         if use_ffi:
             rect = bytearray(16)
             if get_bounds(display_index, rect) == 0:
-                w = int.from_bytes(rect[8:12], "little", signed=True)
-                h = int.from_bytes(rect[12:16], "little", signed=True)
+                w, h = struct.unpack_from("<ii", rect, 8)
                 if w > 0 and h > 0:
                     return w, h
             mode = bytearray(32)
             if get_mode(display_index, mode) == 0:
-                w = int.from_bytes(mode[4:8], "little", signed=True)
-                h = int.from_bytes(mode[8:12], "little", signed=True)
+                w, h = struct.unpack_from("<ii", mode, 4)
                 if w > 0 and h > 0:
                     return w, h
         else:
@@ -403,7 +409,7 @@ class SDLDisplay(DisplayDriver):
             raise ValueError("Unsupported color_depth")
 
         _save_tty()
-        retcheck(usdl2.SDL_Init(usdl2.SDL_INIT_EVERYTHING))
+        _sdl_init_display()
         requested_scale = self._scale
         desktop_w, desktop_h = _desktop_size()
         fitted = fit_scale_to_desktop(
