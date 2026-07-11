@@ -253,6 +253,8 @@ def _poll_done():
 def main_sync():
     _setup()
     # Avoid multimer.sleep_ms with LVGL (librt signal-handler deadlock risk).
+    # Do not call runtime.poll() while LVGL owns input: VirtualDevices drain the
+    # host queue from indev read_cb; a parallel poll steals mouse events.
     from multimer import run_deadline_hook
 
     while True:
@@ -266,11 +268,12 @@ async def main_async():
     _setup()
     from multimer import asyncio
 
+    # See main_sync: do not runtime.poll() — LVGL indev reads the host device.
     while True:
-        runtime.poll()
         if _poll_done():
             break
-        await asyncio.sleep(0)
+        # sleep(0) starves the browser main thread on PyScript (same class as delay_ms=0).
+        await asyncio.sleep(0.01)
 
 
 dual_main(main_sync, main_async, async_mode=runtime.timer_async)
