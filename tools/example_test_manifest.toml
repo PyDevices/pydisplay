@@ -33,6 +33,29 @@ kind = "async"
 quit = "poll"
 deps = ["core"]
 
+[examples.calc_graphics]
+import = "calc_graphics"
+script = "examples/calc_graphics.py"
+kind = "async"
+quit = "poll"
+deps = ["core"]
+
+[examples.calc_widgets]
+import = "calc_widgets"
+script = "examples/calc_widgets.py"
+kind = "pdwidgets"
+quit = "inject"
+deps = ["add_ons"]
+timeout_s = 45
+
+[examples.calc_lvgl]
+import = "calc_lvgl"
+script = "examples/calc_lvgl.py"
+kind = "lvgl"
+quit = "inject"
+deps = ["lvgl"]
+timeout_s = 45
+
 [examples.paint]
 import = "paint"
 script = "examples/paint.py"
