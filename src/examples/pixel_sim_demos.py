@@ -18,13 +18,13 @@ and returns.
 """
 
 import math
-import time
 from random import getrandbits
 
 import graphics
 from displaysys import color565
 from graphics import RGB565, FrameBuffer, text8
 from multimer import sleep_ms, ticks_add, ticks_diff, ticks_ms
+from multimer.loop import dual_main
 from palettes import get_palette
 # Uncomment one and only one of the following two lines
 #from board_config import display_drv, runtime
@@ -43,7 +43,7 @@ try:
 except ImportError:
     _TEST_DURATION_S = None
 
-_START = time.time()
+_START = ticks_ms()
 _REEL_START = ticks_ms()
 
 
@@ -53,7 +53,7 @@ def _stop():
         runtime.poll()
         if runtime.quit_requested:
             return True
-    if _TEST_DURATION_S is not None and time.time() - _START >= _TEST_DURATION_S:
+    if _TEST_DURATION_S is not None and ticks_diff(ticks_ms(), _START) >= _TEST_DURATION_S * 1000:
         return True
     return False
 
@@ -117,20 +117,20 @@ def _scroll_gradient_scene():
 
 
 def scroll_main():
-    """One scroll+gradient cycle."""
+    """One scroll+gradient cycle (yields frame delays)."""
     for scroll in range(0, GRID_W + _SCROLL_SRC_W + 1, _SCROLL_STEP):
         _scroll_dest.fill(0x0000)
         _scroll_dest.blit(_scroll_src, GRID_W - scroll, 0)
         _present(_scroll_dest)
         if _stop():
             return
-        sleep_ms(_SCROLL_FRAME_MS)
+        yield _SCROLL_FRAME_MS
     _scroll_gradient_scene()
     _present(_scroll_dest)
     for _ in range(_SCROLL_HOLD):
         if _stop():
             return
-        sleep_ms(_SCROLL_FRAME_MS)
+        yield _SCROLL_FRAME_MS
 
 
 # --- plasma -----------------------------------------------------------------
@@ -167,7 +167,7 @@ def plasma_main():
     _plasma_render(_plasma_t)
     _present(_plasma_dest)
     _plasma_t += _PLASMA_TIME_STEP
-    sleep_ms(_PLASMA_FRAME_MS)
+    yield _PLASMA_FRAME_MS
 
 
 # --- fire -------------------------------------------------------------------
@@ -245,7 +245,7 @@ def fire_main():
     _fire_propagate()
     _fire_paint()
     _present(_fire_dest)
-    sleep_ms(_FIRE_FRAME_MS)
+    yield _FIRE_FRAME_MS
 
 
 # --- matrix -----------------------------------------------------------------
@@ -280,7 +280,7 @@ def _matrix_step():
 def matrix_main():
     _matrix_step()
     _present(_matrix_dest)
-    sleep_ms(_MATRIX_FRAME_MS)
+    yield _MATRIX_FRAME_MS
 
 
 # --- starfield --------------------------------------------------------------
@@ -330,7 +330,7 @@ def _star_step():
 def starfield_main():
     _star_step()
     _present(_star_dest)
-    sleep_ms(_STAR_FRAME_MS)
+    yield _STAR_FRAME_MS
 
 
 # --- reel -------------------------------------------------------------------
@@ -346,19 +346,30 @@ _REEL_SECONDS = 6
 
 
 def _reel_play(frame_main, seconds):
+    """Drive ``frame_main`` (a delay generator) for ``seconds``; yields frame delays."""
     deadline = ticks_add(ticks_ms(), int(seconds * 1000))
+    gen = frame_main()
     while ticks_diff(deadline, ticks_ms()) > 0:
-        frame_main()
+        try:
+            ms = next(gen)
+        except StopIteration:
+            gen = frame_main()
+            try:
+                ms = next(gen)
+            except StopIteration:
+                return
+        yield ms
         if _reel_stop():
-            return True
-    return False
+            return
 
 
 def reel_main():
     """Play every demo once, in order (returns early on quit)."""
     for _name, frame_main in _REEL_DEMOS:
-        if _reel_play(frame_main, _REEL_SECONDS):
-            return
+        for ms in _reel_play(frame_main, _REEL_SECONDS):
+            yield ms
+            if _reel_stop():
+                return
 
 
 _DEMO_MAIN = {
@@ -371,18 +382,45 @@ _DEMO_MAIN = {
 }
 
 
-def main():
+def _demo_gen():
     frame_main = _DEMO_MAIN.get(DEMO)
     if frame_main is None:
         raise ValueError(f"unknown DEMO {DEMO!r}; choose from {tuple(_DEMO_MAIN)}")
-    frame_main()
+    return frame_main()
 
 
-main()
-
-if __name__ == "__main__":
+def _drive_sync(gen):
     try:
-        while not _stop():
-            main()
-    except KeyboardInterrupt:
+        while True:
+            if _stop():
+                return
+            ms = next(gen)
+            sleep_ms(ms)
+    except StopIteration:
         pass
+
+
+async def _drive_async(gen):
+    from multimer import asyncio
+
+    try:
+        while True:
+            if _stop():
+                return
+            ms = next(gen)
+            await asyncio.sleep(ms / 1000)
+    except StopIteration:
+        pass
+
+
+def main_sync():
+    while not _stop():
+        _drive_sync(_demo_gen())
+
+
+async def main_async():
+    while not _stop():
+        await _drive_async(_demo_gen())
+
+
+dual_main(main_sync, main_async, async_mode=runtime.timer_async if runtime else False)

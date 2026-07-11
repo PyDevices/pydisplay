@@ -25,11 +25,7 @@ except ImportError:
     def const(x):
         return x
 
-try:
-    from time import ticks_ms, ticks_diff  # For timing
-except ImportError:
-    from multimer import ticks_diff, ticks_ms
-
+from multimer import ticks_diff, ticks_ms
 from multimer.loop import dual_main, run_forever, run_forever_async
 
 if display_drv.width > display_drv.height:
@@ -508,20 +504,35 @@ def _build_testris():  # noqa: C901, PLR0915
         nonlocal high_score
 
         if SPLASH_ENABLED and show_splash_screen:  # Show the splash screen and wait for the user to press a key
-            clear_screen()  # Clear the screen
-            show_splash()  # Show the splash screen
+            clear_screen()
+            yield False  # yield so PyScript can paint / service the event loop
+            # Draw splash row-by-row so WASM does not block the browser for one long blit burst.
+            splash_x = (display_width - len(splash[0]) * block_size) // 2
+            splash_y = (display_height - len(splash) * block_size) // 2
+            for y, row in enumerate(splash):
+                for x, block in enumerate(row):
+                    if block:
+                        draw_block(
+                            splash_x + x * block_size,
+                            splash_y + y * block_size,
+                            block,
+                        )
+                yield False
             draw_banner(
                 f"High Score {high_score:,}\n\nPress any key\nto continue.",
                 x=(display_width - 5 * block_size) // 2,
                 y=(display_height - 2 * block_size),
             )
             display_drv.show()
-            for event in _yield_wait(loop):
-                if event is True:
+            # Flat wait loop (no nested generators) — keeps PyScript yielding reliably.
+            while True:
+                if loop.poll("splash_wait"):
                     yield True
                     return
-                if event is not False:
+                keys = _gather_keys()
+                if keys:
                     break
+                yield False
 
         while True:  # Outer loop - play the game repeatedly
             #     print("Outer loop")
@@ -738,12 +749,17 @@ def _start_play():
 
 def main_sync():
     play = _start_play()
-    run_forever(lambda: _play_poll(play), delay_ms=1)
+    run_forever(lambda: _play_poll(play), delay_ms=20)
 
 
 async def main_async():
-    play = _start_play()
-    await run_forever_async(lambda: _play_poll(play), delay_ms=1)
+    from multimer import asyncio
+
+    await asyncio.sleep(0)
+    _get_game()
+    await asyncio.sleep(0)
+    play = _get_game()(_Loop())
+    await run_forever_async(lambda: _play_poll(play), delay_ms=20)
 
 
 dual_main(main_sync, main_async, async_mode=runtime.timer_async if runtime else True)

@@ -119,4 +119,5 @@ def _setup():
 
 # run_forever blocks on desktop/MCU but yields to the event loop on PyScript
 # and Jupyter (runtime.timer_async), so the browser main thread stays live.
-run_forever(_setup(), delay_ms=0)
+# delay_ms=0 starves the browser (asyncio.sleep(0) is not enough yield).
+run_forever(_setup(), delay_ms=1)

@@ -1,6 +1,5 @@
 from board_config import display_drv, runtime
 from graphics import Draw
-from multimer import sleep_ms
 from multimer.loop import run_forever
 from palettes import get_palette
 from random import getrandbits
@@ -73,7 +72,7 @@ def main():
                 return True
         return False
 
-    run_forever(poll_events, delay_ms=0)
+    run_forever(poll_events, delay_ms=1)
 
 
 main()

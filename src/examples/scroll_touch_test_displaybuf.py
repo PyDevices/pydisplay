@@ -78,7 +78,7 @@ def main():
                 return True
         return False
 
-    run_forever(poll_events, delay_ms=0)
+    run_forever(poll_events, delay_ms=1)
 
 
 main()
