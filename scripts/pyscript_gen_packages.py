@@ -354,7 +354,7 @@ def render_card(ex: Example, base: str = LOADER_BASE) -> str:
         if ex.featured
         else ""
     )
-    return f'''                <a class="card" href="{ex.loader_href(base)}">
+    return f'''                <a class="card" href="{ex.loader_href(base)}" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon">{GENERIC_ICON}</span>{tag}
                     </div>
