@@ -101,6 +101,8 @@
     <script>
         (function () {
             var SAFE_LOADER_NAME = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+            // Package stems may include hyphens (e.g. micropython-nano-gui).
+            var SAFE_PACKAGE_NAME = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
 
             function parseCommaList(raw) {
                 return raw.split(',').map(function (s) {
@@ -121,6 +123,7 @@
             function parseLoaderQuery(search) {
                 const modules = [];
                 const manifests = [];
+                const packages = [];
                 let entryKind = null;
                 let entryName = null;
                 const raw = search.startsWith('?') ? search.slice(1) : search;
@@ -145,9 +148,17 @@
                             entryName = list[0];
                         }
                         manifests.push.apply(manifests, list);
+                    } else if (key === 'packages') {
+                        packages.push.apply(packages, parseCommaList(val));
                     }
                 }
-                return { modules: modules, manifests: manifests, entryKind: entryKind, entryName: entryName };
+                return {
+                    modules: modules,
+                    manifests: manifests,
+                    packages: packages,
+                    entryKind: entryKind,
+                    entryName: entryName,
+                };
             }
 
             function invalidLoaderNames(plan) {
@@ -159,6 +170,11 @@
                 });
                 plan.manifests.forEach(function (name) {
                     if (!SAFE_LOADER_NAME.test(name)) {
+                        bad.push(name);
+                    }
+                });
+                plan.packages.forEach(function (name) {
+                    if (!SAFE_PACKAGE_NAME.test(name)) {
                         bad.push(name);
                     }
                 });
@@ -197,6 +213,7 @@
             window.__pydisplayLoaderReady = true;
             window.__pydisplayModules = plan.modules.join(',');
             window.__pydisplayManifests = plan.manifests.join(',');
+            window.__pydisplayPackages = plan.packages.join(',');
             window.__pydisplayEntryKind = plan.entryKind || '';
             window.__pydisplayEntry = plan.entryName || '';
 
@@ -305,6 +322,7 @@
         def _loader_plan():
             modules = _parse_comma(_from_window("__pydisplayModules"))
             manifests = _parse_comma(_from_window("__pydisplayManifests"))
+            packages = _parse_comma(_from_window("__pydisplayPackages"))
             entry_kind = _from_window("__pydisplayEntryKind")
             entry = _from_window("__pydisplayEntry")
             if not entry and modules:
@@ -313,7 +331,7 @@
             elif not entry and manifests:
                 entry_kind = entry_kind or "manifest"
                 entry = manifests[0]
-            return modules, manifests, entry_kind, entry
+            return modules, manifests, packages, entry_kind, entry
 
         def _mip_base():
             _host = document.location.hostname
@@ -323,6 +341,38 @@
                 return document.location.origin + _site_root
             return "github:PyDevices/pydisplay/web/pyscript/"
 
+        def _packages_from_entry(entry):
+            """Read ``# pyscript packages:`` from the installed example (first 10 lines)."""
+            for path in ("examples/" + entry + ".py", entry + ".py"):
+                try:
+                    with open(path) as f:
+                        for i, line in enumerate(f):
+                            if i >= 10:
+                                break
+                            s = line.strip()
+                            if s.startswith("# pyscript packages:"):
+                                body = s.split(":", 1)[1].strip()
+                                return [p.strip() for p in body.split(",") if p.strip()]
+                except OSError:
+                    continue
+            return []
+
+        def _install_packages(packages):
+            if not packages:
+                return
+            import sys
+
+            if "/add_ons" not in sys.path:
+                sys.path.insert(0, "/add_ons")
+            from fetch_ph_gui import fetch_ph_gui
+
+            for which in packages:
+                _set("Installing " + which + "…")
+                _log_print("Installing package:", which)
+                # Pre-seed only — patches need SSD from color_setup / hardware_setup / touch_setup.
+                if not fetch_ph_gui(which, apply_patches=False):
+                    raise RuntimeError("Failed to install " + which)
+
         def _loader_disabled():
             return bool(_from_window("__pydisplayLoaderDisabled"))
 
@@ -330,7 +380,7 @@
             global _started
             if _started or _loader_disabled():
                 return
-            modules, manifests, entry_kind, entry = _loader_plan()
+            modules, manifests, packages, entry_kind, entry = _loader_plan()
             if not entry:
                 _log_print("Missing ?modules= and/or ?manifests= in the URL.")
                 _set("Error — add ?modules= and/or ?manifests=.")
@@ -349,8 +399,11 @@
                     )
                 for name in modules:
                     mip.install(mip_base + "src/examples/" + name + ".py")
+                import lib.path  # add_ons on path before fetch_ph_gui / packages
+                if not packages:
+                    packages = _packages_from_entry(entry)
+                _install_packages(packages)
                 _set("Importing " + entry + "…")
-                import lib.path
                 __import__(entry)
                 _set("Running.")
             except Exception as e:

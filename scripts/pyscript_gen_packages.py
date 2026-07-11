@@ -15,6 +15,8 @@ Optional headers (first 10 lines):
   - ``# pyscript featured`` — pin card to the top of the gallery (badge)
   - ``# pyscript modules:`` — extra ``examples/``-relative module stems for
     multi-module loaders (e.g. ``calc_engine``)
+  - ``# pyscript packages:`` — repo-root mip package stems (e.g.
+    ``micropython-nano-gui``) pre-installed into ``/add_ons`` before import
   - ``# pyscript skip: gallery`` — omit from the browser card grid
 
 Then:
@@ -84,6 +86,7 @@ class Example:
         self.kind = kind  # "module" | "manifest"
         self.docstring_blurb = ""
         self.pyscript_files: list[str] = []
+        self.pyscript_packages: list[str] = []
         self.featured = False
 
     @property
@@ -100,8 +103,12 @@ class Example:
     def loader_href(self, base: str = LOADER_BASE) -> str:
         if self.kind == "module":
             stems = ",".join(Path(path).stem for path in self.pyscript_files)
-            return f"{base}?modules={stems}"
-        return f"{base}?manifests={self.name}"
+            href = f"{base}?modules={stems}"
+        else:
+            href = f"{base}?manifests={self.name}"
+        if self.pyscript_packages:
+            href += f"&packages={','.join(self.pyscript_packages)}"
+        return href
 
 
 def parse_header_list(lines: list[str], prefix: str) -> list[str]:
@@ -268,6 +275,7 @@ def parse_example(path: Path) -> Example | None:
     ex.featured = header_has_featured(lines)
     ex.docstring_blurb = extract_blurb(text, name)
     ex.pyscript_files = resolve_pyscript_paths(path, kind, name, lines, text)
+    ex.pyscript_packages = parse_header_list(lines, "# pyscript packages:")
     for entry in ex.pyscript_files:
         if not (EXAMPLES_DIR / entry).is_file():
             raise SystemExit(f"{rel}: missing pyscript file {entry}")

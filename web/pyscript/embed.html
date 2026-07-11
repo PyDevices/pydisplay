@@ -13,6 +13,7 @@
 <script>
 (function () {
     var SAFE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+    var SAFE_PACKAGE = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
 
     function parseList(raw) {
         return raw.split(',').map(function (s) {
@@ -27,6 +28,7 @@
     function parseQuery(search) {
         var modules = [];
         var manifests = [];
+        var packages = [];
         var entryKind = null;
         var entryName = null;
         var debug = false;
@@ -54,6 +56,8 @@
                     entryName = list[0];
                 }
                 manifests.push.apply(manifests, list);
+            } else if (key === 'packages') {
+                packages.push.apply(packages, parseList(val));
             } else if (key === 'debug') {
                 debug = val === '' || /^(1|true|yes)$/i.test(val);
             } else if (key === 'autotest') {
@@ -68,6 +72,7 @@
         return {
             modules: modules,
             manifests: manifests,
+            packages: packages,
             entryKind: entryKind,
             entryName: entryName,
             debug: debug,
@@ -88,6 +93,11 @@
                 bad.push(name);
             }
         });
+        plan.packages.forEach(function (name) {
+            if (!SAFE_PACKAGE.test(name)) {
+                bad.push(name);
+            }
+        });
         return bad;
     }
 
@@ -104,6 +114,7 @@
 
     window.__pydisplayModules = plan.modules.join(',');
     window.__pydisplayManifests = plan.manifests.join(',');
+    window.__pydisplayPackages = plan.packages.join(',');
     window.__pydisplayEntryKind = plan.entryKind || '';
     window.__pydisplayEntry = plan.entryName || '';
     window.__pydisplayDebug = plan.debug ? '1' : '';
@@ -323,12 +334,13 @@ def _parse_comma(raw):
 def _loader_plan():
     modules = _parse_comma(_from_window("__pydisplayModules"))
     manifests = _parse_comma(_from_window("__pydisplayManifests"))
+    packages = _parse_comma(_from_window("__pydisplayPackages"))
     entry = _from_window("__pydisplayEntry")
     if not entry and modules:
         entry = modules[0]
     elif not entry and manifests:
         entry = manifests[0]
-    return modules, manifests, entry
+    return modules, manifests, packages, entry
 
 def _mip_base():
     host = document.location.hostname
@@ -338,17 +350,47 @@ def _mip_base():
         return document.location.origin + site_root
     return "github:PyDevices/pydisplay/web/pyscript/"
 
+def _packages_from_entry(entry):
+    for path in ("examples/" + entry + ".py", entry + ".py"):
+        try:
+            with open(path) as f:
+                for i, line in enumerate(f):
+                    if i >= 10:
+                        break
+                    s = line.strip()
+                    if s.startswith("# pyscript packages:"):
+                        body = s.split(":", 1)[1].strip()
+                        return [p.strip() for p in body.split(",") if p.strip()]
+        except OSError:
+            continue
+    return []
+
+def _install_packages(packages):
+    if not packages:
+        return
+    import sys
+
+    if "/add_ons" not in sys.path:
+        sys.path.insert(0, "/add_ons")
+    from fetch_ph_gui import fetch_ph_gui
+
+    for which in packages:
+        print("Installing package:", which)
+        # Pre-seed only — patches need SSD from color_setup / hardware_setup / touch_setup.
+        if not fetch_ph_gui(which, apply_patches=False):
+            raise RuntimeError("Failed to install " + which)
+
 def _run():
     # #region loader trace
     _mark("run_start")
     # #endregion
     if _from_window("__pydisplayLoaderDisabled"):
         return
-    modules, manifests, entry = _loader_plan()
+    modules, manifests, packages, entry = _loader_plan()
     if not entry:
         return
     # #region loader trace
-    _mark("plan", entry=entry, modules=",".join(modules), manifests=",".join(manifests))
+    _mark("plan", entry=entry, modules=",".join(modules), manifests=",".join(manifests), packages=",".join(packages))
     _mark("before_import_mip")
     # #endregion
     import mip
@@ -372,15 +414,27 @@ def _run():
         # #region loader trace
         _mark("after_mip_module", name=name)
         # #endregion
+    # #region loader trace
+    _mark("before_import_lib_path")
+    # #endregion
+    import lib.path  # add_ons on path before fetch_ph_gui / packages
+    # #region loader trace
+    _mark("after_import_lib_path")
+    # #endregion
+    if not packages:
+        packages = _packages_from_entry(entry)
+    if packages:
+        # #region loader trace
+        _mark("before_install_packages", packages=",".join(packages))
+        # #endregion
+        _install_packages(packages)
+        # #region loader trace
+        _mark("after_install_packages")
+        # #endregion
     if _autotest_enabled():
         _install_test_mode()
         _schedule_pyscript_autotest(entry)
     # #region loader trace
-    _mark("before_import_lib_path")
-    # #endregion
-    import lib.path
-    # #region loader trace
-    _mark("after_import_lib_path")
     _mark("before_import_entry", entry=entry)
     # #endregion
     __import__(entry)

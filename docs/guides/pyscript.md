@@ -34,6 +34,9 @@ Regenerate the card list with `python scripts/pyscript_gen_packages.py`. Every e
 | `# pyscript skip: gallery` | Omit from the card grid |
 | `# pyscript featured` | Pin to the top (badge) |
 | `# pyscript modules: …` | Extra modules to install with the entry |
+| `# pyscript packages: …` | Pre-install repo-root mip packages (e.g. `micropython-nano-gui`) into `/add_ons` before import |
+
+Hinch GUI smokes (`nano_gui_simpletest`, `micro_gui_simpletest`, `touch_gui_simpletest`) use `# pyscript packages:` so the loader downloads one `gui/` tree via `github:PyDevices/pydisplay/packages/…` before the example imports. First open needs network; later loads in the same session reuse the VFS until reload.
 
 Featured starters: `pydisplay_demo`, `testris`. See `scripts/pyscript_gen_packages.py` and [examples catalog](../examples/index.md#pyscript-gallery-markers).
 

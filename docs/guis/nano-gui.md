@@ -41,6 +41,8 @@ mip.install("github:PyDevices/pydisplay/packages/micropython-nano-gui.json", tar
 
 [`src/examples/nano_gui_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/nano_gui_simpletest.py) — hardware verification from the [upstream docs](https://github.com/peterhinch/micropython-nano-gui#23-verifying-hardware-configuration).
 
+Browser gallery: mark with `# pyscript packages: micropython-nano-gui` so [PyScript](../guides/pyscript.md) pre-installs `gui/` before import ([live loader](https://PyDevices.github.io/pydisplay/pyscript/load.html?modules=nano_gui_simpletest&packages=micropython-nano-gui)).
+
 ```bash
 cd pydisplay/src
 micropython -i lib/path.py examples/nano_gui_simpletest.py

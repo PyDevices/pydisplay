@@ -29,6 +29,7 @@ Optional header comments (first 10 lines):
 # pyscript skip: gallery
 # pyscript featured
 # pyscript modules: calc_engine
+# pyscript packages: micropython-nano-gui
 ```
 
 | Marker | Effect |
@@ -36,6 +37,7 @@ Optional header comments (first 10 lines):
 | `# pyscript skip: gallery` | Omit from the card grid |
 | `# pyscript featured` | Pin to the top of the gallery (badge) |
 | `# pyscript modules: …` | Extra same-tree modules to mip-install with the entry |
+| `# pyscript packages: …` | Repo-root mip packages (e.g. Hinch `gui/`) pre-installed into `/add_ons` before import |
 
 See [PyScript local development](../guides/pyscript.md).
 
@@ -45,6 +47,7 @@ See [PyScript local development](../guides/pyscript.md).
 rg '^# pyscript skip:' src/examples/
 rg '^# pyscript featured' src/examples/
 rg '^# pyscript modules:' src/examples/
+rg '^# pyscript packages:' src/examples/
 ```
 
 ### Canonical patterns
@@ -209,9 +212,9 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `displaybuf_blit.py` | DisplayBuffer blit | MCU | add_ons |
 | `scroll.py` | Scrolling text | CPython · MCU | core |
 | `rotations.py` | Display rotation | CPython · MCU | core |
-| `nano_gui_simpletest.py` | Nano-GUI hardware check | CPython · MCU | add_ons + `micropython-nano-gui` |
-| `micro_gui_simpletest.py` | Micro-GUI smoke | CPython · MCU | add_ons + `micropython-micro-gui` |
-| `touch_gui_simpletest.py` | Touch GUI smoke | CPython · MCU | add_ons + `micropython-touch` |
+| `nano_gui_simpletest.py` | Nano-GUI hardware check | CPython · MCU · PyScript | add_ons + `micropython-nano-gui` |
+| `micro_gui_simpletest.py` | Micro-GUI smoke | CPython · MCU · PyScript | add_ons + `micropython-micro-gui` |
+| `touch_gui_simpletest.py` | Touch GUI smoke | CPython · MCU · PyScript | add_ons + `micropython-touch` |
 | `lv_test_timer.py` | LVGL timer (follows `runtime.timer_async`) | CPython · MCU · PyScript | LVGL |
 
 ## Subdirectories

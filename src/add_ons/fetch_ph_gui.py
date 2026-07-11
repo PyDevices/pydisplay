@@ -180,7 +180,14 @@ def _patch_time_ticks():
 
 
 def _patch_machine_pin():
-    """Stub machine.Pin on hosts that lack it (CPython desktop)."""
+    """Stub machine.Pin on hosts that lack it (CPython desktop, MicroPython-WASM).
+
+    Uses a plain class instance rather than ``types.ModuleType(name)`` — the
+    latter's attribute exists on MicroPython-WASM but its constructor raises
+    ``TypeError: can't create 'module' instances`` (native runtime
+    limitation). A plain object works identically for ``sys.modules``
+    caching: ``import machine`` returns whatever is registered there.
+    """
     import sys
 
     if "machine" in sys.modules:
@@ -211,13 +218,10 @@ def _patch_machine_pin():
         def irq(self, *args, **kwargs):
             return None
 
-    try:
-        import types
+    class _FakeMachineModule:
+        pass
 
-        mod = types.ModuleType("machine")
-    except (ImportError, AttributeError):
-        # MicroPython without types.ModuleType — should have real machine
-        return
+    mod = _FakeMachineModule()
     mod.Pin = Pin
     sys.modules["machine"] = mod
 
@@ -307,8 +311,14 @@ def _apply_patches(which):
         _prime_primitives()
 
 
-def fetch_ph_gui(which):
-    """Ensure ``which`` GUI is in add_ons/gui/ and patched. Returns True when ready."""
+def fetch_ph_gui(which, apply_patches=True):
+    """Ensure ``which`` GUI is in add_ons/gui/ and optionally patched.
+
+    Returns True when ready. Pass ``apply_patches=False`` when pre-seeding
+    (e.g. PyScript loader) before the setup module defines ``SSD`` — callers
+    that import ``color_setup`` / ``hardware_setup`` / ``touch_setup`` will
+    call again with patches enabled.
+    """
     if which not in _CORE_FILES:
         raise ValueError(
             "which must be micropython-nano-gui, micropython-micro-gui, or micropython-touch"
@@ -316,7 +326,8 @@ def fetch_ph_gui(which):
 
     present = _detect_core()
     if present == which:
-        _apply_patches(which)
+        if apply_patches:
+            _apply_patches(which)
         return True
 
     try:
@@ -331,6 +342,7 @@ def fetch_ph_gui(which):
     mip.install(_PACKAGES[which], target=_add_ons_dir())
     _purge_gui_modules()
     if _detect_core() == which:
-        _apply_patches(which)
+        if apply_patches:
+            _apply_patches(which)
         return True
     return False
