@@ -435,7 +435,7 @@ function updateMemoryViews() {
   var b = wasmMemory.buffer;
   HEAP8 = new Int8Array(b);
   HEAP16 = new Int16Array(b);
-  Module['HEAPU8'] = HEAPU8 = new Uint8Array(b);
+  HEAPU8 = new Uint8Array(b);
   HEAPU16 = new Uint16Array(b);
   HEAP32 = new Int32Array(b);
   HEAPU32 = new Uint32Array(b);
@@ -3599,6 +3599,68 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
   }
   
 
+  var syscallGetVarargI = () => {
+      assert(SYSCALLS.varargs != undefined);
+      // the `+` prepended here is necessary to convince the JSCompiler that varargs is indeed a number.
+      var ret = HEAP32[((+SYSCALLS.varargs)>>2)];
+      SYSCALLS.varargs += 4;
+      return ret;
+    };
+  var syscallGetVarargP = syscallGetVarargI;
+  
+  
+  function ___syscall_fcntl64(fd, cmd, varargs) {
+  SYSCALLS.varargs = varargs;
+  try {
+  
+      var stream = SYSCALLS.getStreamFromFD(fd);
+      switch (cmd) {
+        case 0: {
+          var arg = syscallGetVarargI();
+          if (arg < 0) {
+            return -28;
+          }
+          while (FS.streams[arg]) {
+            arg++;
+          }
+          var newStream;
+          newStream = FS.dupStream(stream, arg);
+          return newStream.fd;
+        }
+        case 1:
+        case 2:
+          return 0;  // FD_CLOEXEC makes no sense for a single process.
+        case 3:
+          return stream.flags;
+        case 4: {
+          var arg = syscallGetVarargI();
+          var mask = 289792;
+          stream.flags = (stream.flags & ~mask) | (arg & mask);
+          return 0;
+        }
+        case 12: {
+          var arg = syscallGetVarargP();
+          var offset = 0;
+          // We're always unlocked.
+          HEAP16[(((arg)+(offset))>>1)] = 2;
+          return 0;
+        }
+        case 13:
+        case 14:
+          // Pretend that the locking is successful. These are process-level locks,
+          // and Emscripten programs are a single process. If we supported linking a
+          // filesystem between programs, we'd need to do more here.
+          // See https://github.com/emscripten-core/emscripten/issues/23697
+          return 0;
+      }
+      return -28;
+    } catch (e) {
+    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    return -e.errno;
+  }
+  }
+  
+
   function ___syscall_fstat64(fd, buf) {
   try {
   
@@ -3692,6 +3754,104 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
   }
   
 
+  
+  function ___syscall_ioctl(fd, op, varargs) {
+  SYSCALLS.varargs = varargs;
+  try {
+  
+      var stream = SYSCALLS.getStreamFromFD(fd);
+      switch (op) {
+        case 21509: {
+          if (!stream.tty) return -59;
+          return 0;
+        }
+        case 21505: {
+          if (!stream.tty) return -59;
+          if (stream.tty.ops.ioctl_tcgets) {
+            var termios = stream.tty.ops.ioctl_tcgets(stream);
+            var argp = syscallGetVarargP();
+            HEAP32[((argp)>>2)] = termios.c_iflag || 0;
+            HEAP32[(((argp)+(4))>>2)] = termios.c_oflag || 0;
+            HEAP32[(((argp)+(8))>>2)] = termios.c_cflag || 0;
+            HEAP32[(((argp)+(12))>>2)] = termios.c_lflag || 0;
+            for (var i = 0; i < 32; i++) {
+              HEAP8[(argp + i)+(17)] = termios.c_cc[i] || 0;
+            }
+            return 0;
+          }
+          return 0;
+        }
+        case 21510:
+        case 21511:
+        case 21512: {
+          if (!stream.tty) return -59;
+          return 0; // no-op, not actually adjusting terminal settings
+        }
+        case 21506:
+        case 21507:
+        case 21508: {
+          if (!stream.tty) return -59;
+          if (stream.tty.ops.ioctl_tcsets) {
+            var argp = syscallGetVarargP();
+            var c_iflag = HEAP32[((argp)>>2)];
+            var c_oflag = HEAP32[(((argp)+(4))>>2)];
+            var c_cflag = HEAP32[(((argp)+(8))>>2)];
+            var c_lflag = HEAP32[(((argp)+(12))>>2)];
+            var c_cc = []
+            for (var i = 0; i < 32; i++) {
+              c_cc.push(HEAP8[(argp + i)+(17)]);
+            }
+            return stream.tty.ops.ioctl_tcsets(stream.tty, op, { c_iflag, c_oflag, c_cflag, c_lflag, c_cc });
+          }
+          return 0; // no-op, not actually adjusting terminal settings
+        }
+        case 21519: {
+          if (!stream.tty) return -59;
+          var argp = syscallGetVarargP();
+          HEAP32[((argp)>>2)] = 0;
+          return 0;
+        }
+        case 21520: {
+          if (!stream.tty) return -59;
+          return -28; // not supported
+        }
+        case 21537:
+        case 21531: {
+          var argp = syscallGetVarargP();
+          return FS.ioctl(stream, op, argp);
+        }
+        case 21523: {
+          // TODO: in theory we should write to the winsize struct that gets
+          // passed in, but for now musl doesn't read anything on it
+          if (!stream.tty) return -59;
+          if (stream.tty.ops.ioctl_tiocgwinsz) {
+            var winsize = stream.tty.ops.ioctl_tiocgwinsz(stream.tty);
+            var argp = syscallGetVarargP();
+            HEAP16[((argp)>>1)] = winsize[0];
+            HEAP16[(((argp)+(2))>>1)] = winsize[1];
+          }
+          return 0;
+        }
+        case 21524: {
+          // TODO: technically, this ioctl call should change the window size.
+          // but, since emscripten doesn't have any concept of a terminal window
+          // yet, we'll just silently throw it away as we do TIOCGWINSZ
+          if (!stream.tty) return -59;
+          return 0;
+        }
+        case 21515: {
+          if (!stream.tty) return -59;
+          return 0;
+        }
+        default: return -28; // not supported
+      }
+    } catch (e) {
+    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    return -e.errno;
+  }
+  }
+  
+
   function ___syscall_lstat64(path, buf) {
   try {
   
@@ -3736,13 +3896,6 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
   }
   
 
-  var syscallGetVarargI = () => {
-      assert(SYSCALLS.varargs != undefined);
-      // the `+` prepended here is necessary to convince the JSCompiler that varargs is indeed a number.
-      var ret = HEAP32[((+SYSCALLS.varargs)>>2)];
-      SYSCALLS.varargs += 4;
-      return ret;
-    };
   
   function ___syscall_openat(dirfd, path, flags, varargs) {
   SYSCALLS.varargs = varargs;
@@ -4207,7 +4360,6 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
 
 
 
-
   FS.createPreloadedFile = FS_createPreloadedFile;
   FS.preloadFile = FS_preloadFile;
   FS.staticInit();;
@@ -4451,6 +4603,7 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'INT53_MIN',
   'bigintToI53Checked',
   'HEAP8',
+  'HEAPU8',
   'HEAP16',
   'HEAPU16',
   'HEAP32',
@@ -4726,14 +4879,16 @@ var _proxy_c_to_js_has_attr = Module['_proxy_c_to_js_has_attr'] = makeInvalidEar
 var _proxy_c_to_js_lookup_attr = Module['_proxy_c_to_js_lookup_attr'] = makeInvalidEarlyAccess('_proxy_c_to_js_lookup_attr');
 var _proxy_c_to_js_store_attr = Module['_proxy_c_to_js_store_attr'] = makeInvalidEarlyAccess('_proxy_c_to_js_store_attr');
 var _proxy_c_to_js_delete_attr = Module['_proxy_c_to_js_delete_attr'] = makeInvalidEarlyAccess('_proxy_c_to_js_delete_attr');
-var _proxy_c_to_js_get_type_and_data = Module['_proxy_c_to_js_get_type_and_data'] = makeInvalidEarlyAccess('_proxy_c_to_js_get_type_and_data');
+var _proxy_c_to_js_get_type = Module['_proxy_c_to_js_get_type'] = makeInvalidEarlyAccess('_proxy_c_to_js_get_type');
+var _proxy_c_to_js_get_array = Module['_proxy_c_to_js_get_array'] = makeInvalidEarlyAccess('_proxy_c_to_js_get_array');
+var _proxy_c_to_js_get_dict = Module['_proxy_c_to_js_get_dict'] = makeInvalidEarlyAccess('_proxy_c_to_js_get_dict');
 var _proxy_c_to_js_get_iter = Module['_proxy_c_to_js_get_iter'] = makeInvalidEarlyAccess('_proxy_c_to_js_get_iter');
 var _proxy_c_to_js_iternext = Module['_proxy_c_to_js_iternext'] = makeInvalidEarlyAccess('_proxy_c_to_js_iternext');
 var _proxy_c_to_js_resume = Module['_proxy_c_to_js_resume'] = makeInvalidEarlyAccess('_proxy_c_to_js_resume');
 var _fflush = makeInvalidEarlyAccess('_fflush');
-var _strerror = makeInvalidEarlyAccess('_strerror');
 var _emscripten_stack_get_end = makeInvalidEarlyAccess('_emscripten_stack_get_end');
 var _emscripten_stack_get_base = makeInvalidEarlyAccess('_emscripten_stack_get_base');
+var _strerror = makeInvalidEarlyAccess('_strerror');
 var _setThrew = makeInvalidEarlyAccess('_setThrew');
 var _emscripten_stack_init = makeInvalidEarlyAccess('_emscripten_stack_init');
 var _emscripten_stack_get_free = makeInvalidEarlyAccess('_emscripten_stack_get_free');
@@ -4766,14 +4921,16 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['proxy_c_to_js_lookup_attr'] != 'undefined', 'missing Wasm export: proxy_c_to_js_lookup_attr');
   assert(typeof wasmExports['proxy_c_to_js_store_attr'] != 'undefined', 'missing Wasm export: proxy_c_to_js_store_attr');
   assert(typeof wasmExports['proxy_c_to_js_delete_attr'] != 'undefined', 'missing Wasm export: proxy_c_to_js_delete_attr');
-  assert(typeof wasmExports['proxy_c_to_js_get_type_and_data'] != 'undefined', 'missing Wasm export: proxy_c_to_js_get_type_and_data');
+  assert(typeof wasmExports['proxy_c_to_js_get_type'] != 'undefined', 'missing Wasm export: proxy_c_to_js_get_type');
+  assert(typeof wasmExports['proxy_c_to_js_get_array'] != 'undefined', 'missing Wasm export: proxy_c_to_js_get_array');
+  assert(typeof wasmExports['proxy_c_to_js_get_dict'] != 'undefined', 'missing Wasm export: proxy_c_to_js_get_dict');
   assert(typeof wasmExports['proxy_c_to_js_get_iter'] != 'undefined', 'missing Wasm export: proxy_c_to_js_get_iter');
   assert(typeof wasmExports['proxy_c_to_js_iternext'] != 'undefined', 'missing Wasm export: proxy_c_to_js_iternext');
   assert(typeof wasmExports['proxy_c_to_js_resume'] != 'undefined', 'missing Wasm export: proxy_c_to_js_resume');
   assert(typeof wasmExports['fflush'] != 'undefined', 'missing Wasm export: fflush');
-  assert(typeof wasmExports['strerror'] != 'undefined', 'missing Wasm export: strerror');
   assert(typeof wasmExports['emscripten_stack_get_end'] != 'undefined', 'missing Wasm export: emscripten_stack_get_end');
   assert(typeof wasmExports['emscripten_stack_get_base'] != 'undefined', 'missing Wasm export: emscripten_stack_get_base');
+  assert(typeof wasmExports['strerror'] != 'undefined', 'missing Wasm export: strerror');
   assert(typeof wasmExports['setThrew'] != 'undefined', 'missing Wasm export: setThrew');
   assert(typeof wasmExports['emscripten_stack_init'] != 'undefined', 'missing Wasm export: emscripten_stack_init');
   assert(typeof wasmExports['emscripten_stack_get_free'] != 'undefined', 'missing Wasm export: emscripten_stack_get_free');
@@ -4802,14 +4959,16 @@ function assignWasmExports(wasmExports) {
   _proxy_c_to_js_lookup_attr = Module['_proxy_c_to_js_lookup_attr'] = createExportWrapper('proxy_c_to_js_lookup_attr', 3);
   _proxy_c_to_js_store_attr = Module['_proxy_c_to_js_store_attr'] = createExportWrapper('proxy_c_to_js_store_attr', 3);
   _proxy_c_to_js_delete_attr = Module['_proxy_c_to_js_delete_attr'] = createExportWrapper('proxy_c_to_js_delete_attr', 2);
-  _proxy_c_to_js_get_type_and_data = Module['_proxy_c_to_js_get_type_and_data'] = createExportWrapper('proxy_c_to_js_get_type_and_data', 2);
+  _proxy_c_to_js_get_type = Module['_proxy_c_to_js_get_type'] = createExportWrapper('proxy_c_to_js_get_type', 1);
+  _proxy_c_to_js_get_array = Module['_proxy_c_to_js_get_array'] = createExportWrapper('proxy_c_to_js_get_array', 2);
+  _proxy_c_to_js_get_dict = Module['_proxy_c_to_js_get_dict'] = createExportWrapper('proxy_c_to_js_get_dict', 2);
   _proxy_c_to_js_get_iter = Module['_proxy_c_to_js_get_iter'] = createExportWrapper('proxy_c_to_js_get_iter', 1);
   _proxy_c_to_js_iternext = Module['_proxy_c_to_js_iternext'] = createExportWrapper('proxy_c_to_js_iternext', 2);
   _proxy_c_to_js_resume = Module['_proxy_c_to_js_resume'] = createExportWrapper('proxy_c_to_js_resume', 2);
   _fflush = createExportWrapper('fflush', 1);
-  _strerror = createExportWrapper('strerror', 1);
   _emscripten_stack_get_end = wasmExports['emscripten_stack_get_end'];
   _emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'];
+  _strerror = createExportWrapper('strerror', 1);
   _setThrew = createExportWrapper('setThrew', 2);
   _emscripten_stack_init = wasmExports['emscripten_stack_init'];
   _emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'];
@@ -4824,11 +4983,15 @@ var wasmImports = {
   /** @export */
   __syscall_chdir: ___syscall_chdir,
   /** @export */
+  __syscall_fcntl64: ___syscall_fcntl64,
+  /** @export */
   __syscall_fstat64: ___syscall_fstat64,
   /** @export */
   __syscall_getcwd: ___syscall_getcwd,
   /** @export */
   __syscall_getdents64: ___syscall_getdents64,
+  /** @export */
+  __syscall_ioctl: ___syscall_ioctl,
   /** @export */
   __syscall_lstat64: ___syscall_lstat64,
   /** @export */
@@ -5527,20 +5690,25 @@ class PyProxy {
             return js_obj;
         }
 
-        const obj_data = Module._malloc(2 * 4);
         const type = Module.ccall(
-            "proxy_c_to_js_get_type_and_data",
+            "proxy_c_to_js_get_type",
             "number",
-            ["number", "pointer"],
-            [js_obj._ref, obj_data],
+            ["number"],
+            [js_obj._ref],
         );
 
-        let js_obj_out;
         if (type === 1 || type === 2) {
             // List or tuple.
+            const array_ref = Module._malloc(2 * 4);
             const item = Module._malloc(3 * 4);
-            const len = Module.getValue(obj_data, "i32");
-            const items_ptr = Module.getValue(obj_data + 4, "i32");
+            Module.ccall(
+                "proxy_c_to_js_get_array",
+                "null",
+                ["number", "pointer"],
+                [js_obj._ref, array_ref],
+            );
+            const len = Module.getValue(array_ref, "i32");
+            const items_ptr = Module.getValue(array_ref + 4, "i32");
             const js_array = [];
             for (let i = 0; i < len; ++i) {
                 Module.ccall(
@@ -5552,13 +5720,23 @@ class PyProxy {
                 const js_item = proxy_convert_mp_to_js_obj_jsside(item);
                 js_array.push(PyProxy.toJs(js_item));
             }
+            Module._free(array_ref);
             Module._free(item);
-            js_obj_out = js_array;
-        } else if (type === 3) {
+            return js_array;
+        }
+
+        if (type === 3) {
             // Dict.
+            const map_ref = Module._malloc(2 * 4);
             const item = Module._malloc(3 * 4);
-            const alloc = Module.getValue(obj_data, "i32");
-            const table_ptr = Module.getValue(obj_data + 4, "i32");
+            Module.ccall(
+                "proxy_c_to_js_get_dict",
+                "null",
+                ["number", "pointer"],
+                [js_obj._ref, map_ref],
+            );
+            const alloc = Module.getValue(map_ref, "i32");
+            const table_ptr = Module.getValue(map_ref + 4, "i32");
             const js_dict = {};
             for (let i = 0; i < alloc; ++i) {
                 const mp_key = Module.getValue(table_ptr + i * 8, "i32");
@@ -5589,20 +5767,13 @@ class PyProxy {
                     js_dict[js_key] = PyProxy.toJs(js_value);
                 }
             }
+            Module._free(map_ref);
             Module._free(item);
-            js_obj_out = js_dict;
-        } else if (type === 4) {
-            // Buffer protocol; create a copy of the data to a new Uint8Array.
-            const len = Module.getValue(obj_data, "i32");
-            const buf = Module.getValue(obj_data + 4, "i32");
-            js_obj_out = Module.HEAPU8.slice(buf, buf + len);
-        } else {
-            // Cannot convert to JS, leave as a PyProxy.
-            js_obj_out = js_obj;
+            return js_dict;
         }
 
-        Module._free(obj_data);
-        return js_obj_out;
+        // Cannot convert to JS, leave as a PyProxy.
+        return js_obj;
     }
 }
 
