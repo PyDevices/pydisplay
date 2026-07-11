@@ -183,4 +183,4 @@ their `Runtime(...)` call; they do not read this env var unless you wire it in.
 
 ## Custom config
 
-Copy the closest match, edit pin assignments and driver imports, and test with `import pydisplay_demo` or `import displaysys_simpletest`. See the [**pydisplay_demo** guide](../examples/pydisplay_demo.md) for a walkthrough of the recommended smoke test.
+Copy the closest match, edit pin assignments and driver imports, and test with `import pydisplay_demo`. See the [**pydisplay_demo** guide](../examples/pydisplay_demo.md) for a walkthrough of the recommended smoke test.

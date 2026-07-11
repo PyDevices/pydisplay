@@ -75,7 +75,7 @@ mip.install("github:PyDevices/pydisplay/board_configs/sdldisplay")  # desktop SD
 
 **Cause:** Only asyncio-compatible examples run in the browser.
 
-**Fix:** Start with `calculator.py`, `paint.py`, or `eventsys_simpletest.py`.
+**Fix:** Start with `calc_graphics.py`, `paint.py`, or `eventsys_simpletest.py`.
 
 ## Wokwi
 

@@ -53,7 +53,7 @@ pd.run_forever()
 | Script | Description |
 |--------|-------------|
 | `widgets_demo.py` | Widget showcase |
-| `widgets_calc.py` | Calculator UI |
+| `calc_widgets.py` | Calculator UI |
 | `widgets_list.py` | List widget |
 | `widgets_scrollbar.py` | Scrollbar |
 | `widgets_console.py` | Console widget |

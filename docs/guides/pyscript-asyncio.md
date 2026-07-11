@@ -47,7 +47,7 @@ For periodic callbacks, use `multimer.AsyncTimer` inside `async def main()` afte
 
 | Script | What to copy |
 |--------|--------------|
-| `calculator.py` | Full async UI loop |
+| `calc_graphics.py` | Full async UI loop |
 | `eventsys_simpletest.py` | Minimal poll + await |
 | `paint.py` | Touch drawing with asyncio |
 

@@ -19,7 +19,7 @@ python3 -m venv .venv
 
 python tools/serve.py
 # http://127.0.0.1:8000/web/pyscript/index.html
-# http://127.0.0.1:8000/web/pyscript/load.html?modules=calculator
+# http://127.0.0.1:8000/web/pyscript/load.html?modules=calc_graphics,calc_engine
 
 ./tools/pyscript.sh calculator
 ./tools/jupyter.sh calculator --cursor
@@ -40,7 +40,7 @@ Agent-oriented guide: [PyScript troubleshooting](../.cursor/pyscript-troubleshoo
 ```bash
 python tools/serve.py   # separate terminal
 .venv/bin/python tools/ps_debug.py \
-  'http://127.0.0.1:8000/web/pyscript/embed.html?modules=calculator&autotest=1' 20
+  'http://127.0.0.1:8000/web/pyscript/embed.html?modules=calc_graphics,calc_engine&autotest=1' 20
 ```
 
 ## Example test matrix

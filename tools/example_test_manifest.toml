@@ -19,13 +19,6 @@ kind = "async"
 quit = "poll"
 deps = ["core"]
 
-[examples.calculator]
-import = "calculator"
-script = "examples/calculator.py"
-kind = "async"
-quit = "poll"
-deps = ["core"]
-
 [examples.calc_graphics]
 import = "calc_graphics"
 script = "examples/calc_graphics.py"
@@ -53,13 +46,6 @@ timeout_s = 45
 import = "paint"
 script = "examples/paint.py"
 kind = "async"
-quit = "poll"
-deps = ["core"]
-
-[examples.displaysys_simpletest]
-import = "displaysys_simpletest"
-script = "examples/displaysys_simpletest.py"
-kind = "loop"
 quit = "poll"
 deps = ["core"]
 
@@ -228,13 +214,6 @@ kind = "oneshot"
 quit = "native_exit"
 deps = ["add_ons"]
 
-[examples.displaybuf_blit]
-import = "displaybuf_blit"
-script = "examples/displaybuf_blit.py"
-kind = "oneshot"
-quit = "native_exit"
-deps = ["add_ons"]
-
 [examples.displaybuf_simpletest]
 import = "displaybuf_simpletest"
 script = "examples/displaybuf_simpletest.py"
@@ -296,13 +275,6 @@ import = "fonts"
 script = "examples/fonts.py"
 kind = "loop"
 quit = "poll"
-deps = ["core"]
-
-[examples.graphics_area_test]
-import = "graphics_area_test"
-script = "examples/graphics_area_test.py"
-kind = "oneshot"
-quit = "native_exit"
 deps = ["core"]
 
 [examples.hello]
@@ -434,14 +406,6 @@ script = "examples/tiny_hello.py"
 kind = "loop"
 quit = "poll"
 deps = ["core"]
-
-[examples.widgets_calc]
-import = "widgets_calc"
-script = "examples/widgets_calc.py"
-kind = "pdwidgets"
-quit = "inject"
-deps = ["add_ons"]
-timeout_s = 45
 
 [examples.widgets_console]
 import = "widgets_console"

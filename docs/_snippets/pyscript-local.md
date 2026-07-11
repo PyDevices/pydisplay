@@ -14,15 +14,14 @@ The script runs [`tools/serve.py`](https://github.com/PyDevices/pydisplay/blob/m
 | Calculator | `./tools/pyscript.sh calculator` | Run one example by module name |
 | Chango | `./tools/pyscript.sh chango` | Manifest demo (`web/pyscript/chango.json`) |
 | Gallery | `./tools/pyscript.sh` | Example card grid |
-| Test runner | open `http://127.0.0.1:8000/web/pyscript/test.html` | Example picker |
 | REPL | open `http://127.0.0.1:8000/web/pyscript/repl.html` | REPL + canvas |
-| Editor | open `http://127.0.0.1:8000/web/pyscript/editor.html` | mpy-editor with `paint.py` |
+| Simple | open `http://127.0.0.1:8000/web/pyscript/simple.html` | Minimal PyScript HTML shell |
 
 Manual URLs (when the server is already running):
 
 | Page | Local URL |
 |------|-----------|
-| Calculator | [127.0.0.1:8000/web/pyscript/embed.html?modules=calculator](http://127.0.0.1:8000/web/pyscript/embed.html?modules=calculator) |
+| Calculator | [127.0.0.1:8000/web/pyscript/embed.html?modules=calc_graphics,calc_engine](http://127.0.0.1:8000/web/pyscript/embed.html?modules=calc_graphics,calc_engine) |
 
 After editing files under `src/`, refresh the PyScript file manifest:
 

@@ -53,10 +53,6 @@
       "github:PyDevices/pydisplay/src/examples/calc_widgets.py"
     ],
     [
-      "calculator.py",
-      "github:PyDevices/pydisplay/src/examples/calculator.py"
-    ],
-    [
       "color_test.py",
       "github:PyDevices/pydisplay/src/examples/color_test.py"
     ],
@@ -69,10 +65,6 @@
       "github:PyDevices/pydisplay/src/examples/console_simpletest.py"
     ],
     [
-      "displaybuf_blit.py",
-      "github:PyDevices/pydisplay/src/examples/displaybuf_blit.py"
-    ],
-    [
       "displaybuf_simpletest.py",
       "github:PyDevices/pydisplay/src/examples/displaybuf_simpletest.py"
     ],
@@ -83,10 +75,6 @@
     [
       "displaysys_fill_rect_test.py",
       "github:PyDevices/pydisplay/src/examples/displaysys_fill_rect_test.py"
-    ],
-    [
-      "displaysys_simpletest.py",
-      "github:PyDevices/pydisplay/src/examples/displaysys_simpletest.py"
     ],
     [
       "eventsys_encoder_test.py",
@@ -133,10 +121,6 @@
       "github:PyDevices/pydisplay/src/examples/framebuf_text_compare.py"
     ],
     [
-      "graphics_area_test.py",
-      "github:PyDevices/pydisplay/src/examples/graphics_area_test.py"
-    ],
-    [
       "graphics_simpletest.py",
       "github:PyDevices/pydisplay/src/examples/graphics_simpletest.py"
     ],
@@ -161,16 +145,12 @@
       "github:PyDevices/pydisplay/src/examples/lv_test_timer.py"
     ],
     [
-      "nano_gui_simpletest.py",
-      "github:PyDevices/pydisplay/src/examples/nano_gui_simpletest.py"
-    ],
-    [
       "micro_gui_simpletest.py",
       "github:PyDevices/pydisplay/src/examples/micro_gui_simpletest.py"
     ],
     [
-      "touch_gui_simpletest.py",
-      "github:PyDevices/pydisplay/src/examples/touch_gui_simpletest.py"
+      "nano_gui_simpletest.py",
+      "github:PyDevices/pydisplay/src/examples/nano_gui_simpletest.py"
     ],
     [
       "paint.py",
@@ -233,8 +213,8 @@
       "github:PyDevices/pydisplay/src/examples/tiny_hello.py"
     ],
     [
-      "widgets_calc.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_calc.py"
+      "touch_gui_simpletest.py",
+      "github:PyDevices/pydisplay/src/examples/touch_gui_simpletest.py"
     ],
     [
       "widgets_console.py",

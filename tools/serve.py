@@ -9,13 +9,13 @@ and refresh:
     python tools/serve.py
     # then open:
     #   http://127.0.0.1:8000/web/pyscript/index.html       (gallery)
-    #   http://127.0.0.1:8000/web/pyscript/load.html?modules=calculator
+    #   http://127.0.0.1:8000/web/pyscript/load.html?modules=calc_graphics,calc_engine
     #   http://127.0.0.1:8000/web/landing/index.html      (marketing landing)
 
 Why a custom server instead of `python -m http.server`?
 
 1. Cross-origin isolation headers (COOP/COEP/CORP).
-   PyScript's worker-backed pages (REPL, example picker) need
+   PyScript's worker-backed pages (REPL, simple) need
    SharedArrayBuffer, which the browser only enables on a cross-origin-isolated
    page. In production the bundled `mini-coi-fd.js` service worker injects these
    headers; this server sends the *same* headers directly so local behaviour
@@ -196,8 +196,8 @@ def main(argv: list[str] | None = None) -> int:
     print("")
     print("Open one of:")
     print(f"  {base}/web/pyscript/index.html")
-    print(f"  {base}/web/pyscript/load.html?modules=calculator")
-    print(f"  {base}/web/pyscript/embed.html?modules=calculator")
+    print(f"  {base}/web/pyscript/load.html?modules=calc_graphics,calc_engine")
+    print(f"  {base}/web/pyscript/embed.html?modules=calc_graphics,calc_engine")
     print(f"  {base}/web/landing/index.html")
     print("")
     print(PAGE_SNIPPET)

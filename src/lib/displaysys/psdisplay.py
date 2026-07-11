@@ -316,6 +316,10 @@ class PSDisplay(DisplayDriver):
             self._rgba_lut = lut
         sx, _sy = self._pointer_scale()
         self.touch_scale = sx
+        # Match PGDisplay / SDLDisplay / JNDisplay: default full-height scroll region
+        # so vscsad() works before an explicit set_vscroll/vscrdef.
+        super().vscrdef(0, self.height, 0)
+        self._vssa = False
 
     def fill_rect(self, x, y, w, h, c):
         """

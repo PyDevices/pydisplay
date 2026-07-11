@@ -55,7 +55,7 @@ INDEX = PYSCRIPT_DIR / "index.html"
 
 MIP_MANIFEST_VERSION = "0.0.5"
 
-KEEP_HTML = frozenset({"index", "load", "repl", "editor", "test", "embed"})
+KEEP_HTML = frozenset({"index", "load", "repl", "simple", "embed"})
 LOADER_BASE = "load.html"
 
 ARROW = (

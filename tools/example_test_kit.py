@@ -935,7 +935,6 @@ def main(argv: list[str] | None = None) -> int:
             "pydisplay_demo",
             "calculator",
             "paint",
-            "displaysys_simpletest",
             "eventsys_simpletest",
             "graphics_simpletest",
             "framebuf_simpletest",

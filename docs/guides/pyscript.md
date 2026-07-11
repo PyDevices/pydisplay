@@ -10,16 +10,15 @@
 
 | Page | URL |
 |------|-----|
-| Calculator | [pyscript/load.html?modules=calculator](https://PyDevices.github.io/pydisplay/pyscript/load.html?modules=calculator) |
-| Test runner | [pyscript/test.html](https://PyDevices.github.io/pydisplay/pyscript/test.html) |
+| Calculator | [pyscript/load.html?modules=calc_graphics,calc_engine](https://PyDevices.github.io/pydisplay/pyscript/load.html?modules=calc_graphics,calc_engine) |
+| Simple | [pyscript/simple.html](https://PyDevices.github.io/pydisplay/pyscript/simple.html) |
 | REPL | [pyscript/repl.html](https://PyDevices.github.io/pydisplay/pyscript/repl.html) |
-| Editor | [pyscript/editor.html](https://PyDevices.github.io/pydisplay/pyscript/editor.html) |
 
 ## Run locally
 
 --8<-- "_snippets/pyscript-local.md"
 
-Examples in the [browser gallery](https://PyDevices.github.io/pydisplay/pyscript/) are copied to the deploy site and installed from the same origin on GitHub Pages. Locally, `tools/serve.py` serves your working tree — gallery pages load `src/examples/` via `web/pyscript/load.html?modules=…`. Non-gallery pages (`repl.html`, `editor.html`) may still use `github:` installs.
+Examples in the [browser gallery](https://PyDevices.github.io/pydisplay/pyscript/) are copied to the deploy site and installed from the same origin on GitHub Pages. Locally, `tools/serve.py` serves your working tree — gallery pages load `src/examples/` via `web/pyscript/load.html?modules=…`. Non-gallery pages (`repl.html`, `simple.html`) may still use `github:` installs.
 
 ## asyncio requirement
 

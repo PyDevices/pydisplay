@@ -52,7 +52,7 @@ rg '^# pyscript packages:' src/examples/
 
 ### Canonical patterns
 
-**`run_forever` with poll** — [`hello.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/hello.py), [`scroll.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll.py), [`displaysys_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/displaysys_simpletest.py), [`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py), [`calculator.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/calculator.py):
+**`run_forever` with poll** — [`hello.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/hello.py), [`scroll.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll.py), [`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py), [`calc_graphics.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/calc_graphics.py):
 
 ```python
 from board_config import display_drv, runtime
@@ -111,7 +111,6 @@ pd.run_forever()
 
 ### Notes
 
-- `displaysys_simpletest.py` handles `events.QUIT` in its poll loop. Same quit pattern as [`scroll_touch_test_displaybuf.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll_touch_test_displaybuf.py).
 - `font_simpletest.py` — string-sized `FrameBuffer`, opaque background, one `blit_rect` per draw (see [Font rendering patterns](../concepts/graphics.md#choosing-a-font-rendering-pattern)).
 - `font_simpletest2.py` — `Font.text(display_drv, …)`; transparent, per-pixel (slowest bus pattern).
 - `font_simpletest3.py` — `DisplayBuffer` + `show(dirty)`; transparent, best when RAM allows a full-screen buffer.
@@ -125,14 +124,13 @@ pd.run_forever()
 | 0 | [**App starter**](app-starter.md) (doc boilerplate) | CPython · MCU · PyScript | core | — |
 | 1 | [`pydisplay_demo.py`](pydisplay_demo.md) | CPython · MCU | core | — |
 | 2 | `color_test.py` | CPython · MCU | core | [color_test](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/color_test.png) |
-| 3 | `displaysys_simpletest.py` | CPython · MCU | core | — |
-| 4 | `eventsys_simpletest.py` | CPython · MCU · PyScript | core | — |
-| 5 | `framebuf_simpletest.py` | CPython · MCU | core | [framebuf](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/framebuf_simpletest.png) |
-| 6 | `graphics_simpletest.py` | CPython · MCU | core | [shapes](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/shapes_simpletest.png) |
-| 7 | `eventsys_touch_test.py` | CPython · MCU | core | — |
-| 8 | `calculator.py` | CPython · PyScript | core | [calculator](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/calculator.png) |
-| 9 | `paint.py` | CPython · PyScript | core | [paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/paint.png) |
-| 10 | `widgets_simpletest.py` | CPython · MCU | add_ons | — |
+| 3 | `eventsys_simpletest.py` | CPython · MCU · PyScript | core | — |
+| 4 | `framebuf_simpletest.py` | CPython · MCU | core | [framebuf](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/framebuf_simpletest.png) |
+| 5 | `graphics_simpletest.py` | CPython · MCU | core | [shapes](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/shapes_simpletest.png) |
+| 6 | `eventsys_touch_test.py` | CPython · MCU | core | — |
+| 7 | `calc_graphics.py` | CPython · PyScript | core | — |
+| 8 | `paint.py` | CPython · PyScript | core | [paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/paint.png) |
+| 9 | `widgets_simpletest.py` | CPython · MCU | add_ons | — |
 
 PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-asyncio.md).
 
@@ -145,7 +143,6 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `hello.py` | Minimal text (`tft_config`) | CPython · MCU · Wokwi | core |
 | `color_test.py` | Color bars | CPython · MCU | core |
 | `logo.py` | Logo drawing | CPython · MCU | core |
-| `displaysys_simpletest.py` | Display smoke test | CPython · MCU | core |
 | `displaysys_block_test.py` | Block transfer test | CPython · MCU | core |
 | `displaysys_fill_rect_test.py` | Fill rect test | CPython · MCU | core |
 
@@ -167,7 +164,6 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 |--------|-------------|-----------|----------|
 | `framebuf_simpletest.py` | framebuf API | CPython · MCU | core |
 | `graphics_simpletest.py` | graphics module | CPython · MCU | core |
-| `graphics_area_test.py` | Area bounding boxes | CPython · MCU | core |
 | `font_simpletest.py` | Font: string FB + one `blit_rect` (opaque bg) | CPython · MCU | core |
 | `font_simpletest2.py` | Font: direct on `display_drv` (transparent, per-pixel) | CPython · MCU | core |
 | `font_simpletest3.py` | Font: `DisplayBuffer` + dirty blit (transparent, lowest bus cost) | CPython · MCU | core |
@@ -196,7 +192,9 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 
 | Script | Description | Platforms | Packages |
 |--------|-------------|-----------|----------|
-| `calculator.py` | Async calculator | CPython · PyScript | core |
+| `calc_graphics.py` | Pocket calculator (graphics) | CPython · MCU · PyScript | core |
+| `calc_widgets.py` | Pocket calculator (pdwidgets) | CPython · MCU · PyScript | add_ons |
+| `calc_lvgl.py` | Pocket calculator (LVGL) | CPython · MCU · PyScript | LVGL |
 | `paint.py` | Paint app | CPython · PyScript | core |
 | `testris.py` | Tetris-like game | CPython · MCU | core |
 | `apollo.py` | Apollo DSKY | CPython · PyScript | core |
@@ -209,7 +207,6 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | Script | Description | Platforms | Packages |
 |--------|-------------|-----------|----------|
 | `displaybuf_simpletest.py` | DisplayBuffer | CPython · MCU | add_ons |
-| `displaybuf_blit.py` | DisplayBuffer blit | MCU | add_ons |
 | `scroll.py` | Scrolling text | CPython · MCU | core |
 | `rotations.py` | Display rotation | CPython · MCU | core |
 | `nano_gui_simpletest.py` | Nano-GUI hardware check | CPython · MCU · PyScript | add_ons + `micropython-nano-gui` |
