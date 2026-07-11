@@ -51,7 +51,7 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   `"<impl> on <platform>"`, which can be screenshotted/recorded with `ffmpeg`
   (`-f x11grab -i :1`).
 - Known pre-existing example failures on CPython (not environment issues to
-  "fix"): `nano_gui_simpletest` needs the `gui` package and `png_test` needs
+  "fix"): `nano_gui_simpletest` needs the matching Hinch `gui/` package and `png_test` needs
   `PYDISPLAY_PNG_DIR`.
 - **PyScript hangs / multimer / WASM:** read
   [`.cursor/pyscript-troubleshooting.md`](.cursor/pyscript-troubleshooting.md)

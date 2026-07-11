@@ -21,68 +21,16 @@
       "github:peterhinch/micropython-nano-gui/gui/core/writer.py"
     ],
     [
-      "gui/fonts/arial_50.py",
-      "github:peterhinch/micropython-nano-gui/gui/fonts/arial_50.py"
-    ],
-    [
-      "gui/fonts/arial10.py",
-      "github:peterhinch/micropython-nano-gui/gui/fonts/arial10.py"
-    ],
-    [
-      "gui/fonts/arial35.py",
-      "github:peterhinch/micropython-nano-gui/gui/fonts/arial35.py"
-    ],
-    [
-      "gui/fonts/courier20.py",
-      "github:peterhinch/micropython-nano-gui/gui/fonts/courier20.py"
-    ],
-    [
-      "gui/fonts/font6.py",
-      "github:peterhinch/micropython-nano-gui/gui/fonts/font6.py"
-    ],
-    [
-      "gui/fonts/font10.py",
-      "github:peterhinch/micropython-nano-gui/gui/fonts/font10.py"
-    ],
-    [
-      "gui/fonts/freesans20.py",
-      "github:peterhinch/micropython-nano-gui/gui/fonts/freesans20.py"
-    ],
-    [
-      "gui/widgets/__init__.py",
-      "github:peterhinch/micropython-nano-gui/gui/widgets/__init__.py"
-    ],
-    [
-      "gui/widgets/dial.py",
-      "github:peterhinch/micropython-nano-gui/gui/widgets/dial.py"
-    ],
-    [
-      "gui/widgets/label.py",
-      "github:peterhinch/micropython-nano-gui/gui/widgets/label.py"
-    ],
-    [
-      "gui/widgets/led.py",
-      "github:peterhinch/micropython-nano-gui/gui/widgets/led.py"
-    ],
-    [
-      "gui/widgets/meter.py",
-      "github:peterhinch/micropython-nano-gui/gui/widgets/meter.py"
-    ],
-    [
-      "gui/widgets/scale.py",
-      "github:peterhinch/micropython-nano-gui/gui/widgets/scale.py"
-    ],
-    [
-      "gui/widgets/textbox.py",
-      "github:peterhinch/micropython-nano-gui/gui/widgets/textbox.py"
-    ],
-    [
-      "gui/demos/aclock_large.py",
-      "github:peterhinch/micropython-nano-gui/gui/demos/aclock_large.py"
+      "gui/demos/__init__.py",
+      "github:peterhinch/micropython-nano-gui/gui/demos/__init__.py"
     ],
     [
       "gui/demos/aclock.py",
       "github:peterhinch/micropython-nano-gui/gui/demos/aclock.py"
+    ],
+    [
+      "gui/demos/aclock_large.py",
+      "github:peterhinch/micropython-nano-gui/gui/demos/aclock_large.py"
     ],
     [
       "gui/demos/aclock_ttgo.py",
@@ -117,6 +65,10 @@
       "github:peterhinch/micropython-nano-gui/gui/demos/color96.py"
     ],
     [
+      "gui/demos/epd21_sync.py",
+      "github:peterhinch/micropython-nano-gui/gui/demos/epd21_sync.py"
+    ],
+    [
       "gui/demos/epd29_async.py",
       "github:peterhinch/micropython-nano-gui/gui/demos/epd29_async.py"
     ],
@@ -141,6 +93,10 @@
       "github:peterhinch/micropython-nano-gui/gui/demos/mono_test.py"
     ],
     [
+      "gui/demos/round.py",
+      "github:peterhinch/micropython-nano-gui/gui/demos/round.py"
+    ],
+    [
       "gui/demos/scale.py",
       "github:peterhinch/micropython-nano-gui/gui/demos/scale.py"
     ],
@@ -151,6 +107,62 @@
     [
       "gui/demos/tbox.py",
       "github:peterhinch/micropython-nano-gui/gui/demos/tbox.py"
+    ],
+    [
+      "gui/fonts/arial10.py",
+      "github:peterhinch/micropython-nano-gui/gui/fonts/arial10.py"
+    ],
+    [
+      "gui/fonts/arial35.py",
+      "github:peterhinch/micropython-nano-gui/gui/fonts/arial35.py"
+    ],
+    [
+      "gui/fonts/arial_50.py",
+      "github:peterhinch/micropython-nano-gui/gui/fonts/arial_50.py"
+    ],
+    [
+      "gui/fonts/courier20.py",
+      "github:peterhinch/micropython-nano-gui/gui/fonts/courier20.py"
+    ],
+    [
+      "gui/fonts/font10.py",
+      "github:peterhinch/micropython-nano-gui/gui/fonts/font10.py"
+    ],
+    [
+      "gui/fonts/font6.py",
+      "github:peterhinch/micropython-nano-gui/gui/fonts/font6.py"
+    ],
+    [
+      "gui/fonts/freesans20.py",
+      "github:peterhinch/micropython-nano-gui/gui/fonts/freesans20.py"
+    ],
+    [
+      "gui/widgets/__init__.py",
+      "github:peterhinch/micropython-nano-gui/gui/widgets/__init__.py"
+    ],
+    [
+      "gui/widgets/dial.py",
+      "github:peterhinch/micropython-nano-gui/gui/widgets/dial.py"
+    ],
+    [
+      "gui/widgets/label.py",
+      "github:peterhinch/micropython-nano-gui/gui/widgets/label.py"
+    ],
+    [
+      "gui/widgets/led.py",
+      "github:peterhinch/micropython-nano-gui/gui/widgets/led.py"
+    ],
+    [
+      "gui/widgets/meter.py",
+      "github:peterhinch/micropython-nano-gui/gui/widgets/meter.py"
+    ],
+    [
+      "gui/widgets/scale.py",
+      "github:peterhinch/micropython-nano-gui/gui/widgets/scale.py"
+    ],
+    [
+      "gui/widgets/textbox.py",
+      "github:peterhinch/micropython-nano-gui/gui/widgets/textbox.py"
     ]
   ],
   "version": "0.1"

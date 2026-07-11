@@ -12,18 +12,18 @@ Private working notes for this repo. Not part of the published docs.
 
 ### Peter Hinch GUIs (work as a set)
 
-[nano-gui](https://github.com/peterhinch/micropython-nano-gui), [micro-gui](https://github.com/peterhinch/micropython-micro-gui), and [micropython-touch](https://github.com/peterhinch/micropython-touch) share `DisplayBuffer` / `framebuf` patterns — treat pydisplay integration for all three together (not one library at a time).
+[nano-gui](https://github.com/peterhinch/micropython-nano-gui), [micro-gui](https://github.com/peterhinch/micropython-micro-gui), and [micropython-touch](https://github.com/peterhinch/micropython-touch) share `DisplayBuffer` / `framebuf` patterns — treat pydisplay integration for all three together.
 
-| Library | Upstream setup file | pydisplay `add_ons/` today |
-|---------|---------------------|----------------------------|
-| nano-gui | `color_setup.py` → `ssd` | `color_setup.py` (+ `ensure_nano_gui.py`, `uctypes.py`) |
-| micro-gui | `hardware_setup.py` → `ssd`, `Display` | **missing** — need `hardware_setup.py` for buttons/encoder |
-| micropython-touch | `touch_setup.py` → `ssd`, `display` | `hardware_setup.py` (**wrong name**; upstream renamed Dec 2024) |
+| Library | Setup file | Bridge |
+|---------|------------|--------|
+| micropython-nano-gui | `color_setup.py` → `ssd` | `fetch_ph_gui("micropython-nano-gui")` |
+| micropython-micro-gui | `hardware_setup.py` → `Display` | `fetch_ph_gui("micropython-micro-gui")` |
+| micropython-touch | `touch_setup.py` → `display` | `fetch_ph_gui("micropython-touch")` |
 
-- [ ] **Peter Hinch trio** — shared plan: mip install helpers, `DisplayBuffer`/`graphics.FrameBuffer` patches, CP shims, examples, and matrix coverage for nano-gui + micro-gui + micropython-touch
-- [ ] Add `touch_setup.py` for micropython-touch; migrate content from misnamed `hardware_setup.py` (upstream expects `import touch_setup` first)
-- [ ] Add proper `hardware_setup.py` for micro-gui (button/encoder `Display`; separate from touch)
-- [ ] Merge `ensure_nano_gui.py` + `uctypes.py` into `color_setup.py` (nano-gui on CircuitPython); drop the separate files
+Packages: `packages/micropython-nano-gui.json`, `micropython-micro-gui.json`, `micropython-touch.json` (full `gui/` only). Active tree: `add_ons/gui/` (one at a time). `uctypes.py` stays in `add_ons/` for CircuitPython.
+
+- [x] Setup bridges + `fetch_ph_gui` + full mip packages
+- [ ] Matrix coverage for nano / micro / touch simpletests across runtimes
 
 ### LVGL
 

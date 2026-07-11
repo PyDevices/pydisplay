@@ -6,9 +6,11 @@ Templates for GUI libraries and ported examples live in [`src/add_ons/`](https:/
 |------|----------|--------------|
 | `board_config.py` | `board_configs/` or `src/lib/` | **Always** — display, touch, brokers, setup |
 | `path.py` | `src/lib/` | Development layout — adds `lib/`, `add_ons/`, `examples/` to path |
-| `color_setup.py` | `src/add_ons/` | [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui) — display instance for `ssd` |
-| `gui/` | `src/add_ons/gui/` | [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui) — **upstream**; copy locally ([install](../guis/nano-gui.md#install-the-gui-package)) |
-| `hardware_setup.py` | `src/add_ons/` | [MicroPython-Touch](https://github.com/peterhinch/micropython-touch) |
+| `color_setup.py` | `src/add_ons/` | [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui) — fetch + `ssd` |
+| `hardware_setup.py` | `src/add_ons/` | [Micro-GUI](https://github.com/peterhinch/micropython-micro-gui) — fetch + button/encoder `Display` |
+| `touch_setup.py` | `src/add_ons/` | [MicroPython-Touch](https://github.com/peterhinch/micropython-touch) — fetch + touch `Display` |
+| `fetch_ph_gui.py` | `src/add_ons/` | Installs one of the three `gui/` trees into `add_ons/gui/` |
+| `gui/` | `src/add_ons/gui/` | Active Peter Hinch GUI (mip / fetch; not in git) |
 | `tft_config.py` | `src/add_ons/` | @russhughes st7789py_mpy examples |
 
 Install add-on templates with [add_ons package](../installation/mip-github.md) or copy files from a full clone.

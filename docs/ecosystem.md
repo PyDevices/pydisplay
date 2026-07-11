@@ -28,6 +28,7 @@ PyDisplay also drops in under other GUI stacks:
 |---------|-------|
 | [LVGL](guis/lvgl.md) | Full-featured C toolkit via the sister projects above. |
 | [Nano-GUI](guis/nano-gui.md) | @peterhinch's lightweight `FrameBuffer` GUI (display-only). |
+| [Micro-GUI](guis/micro-gui.md) | @peterhinch's button / encoder GUI. |
 | [MicroPython-Touch](guis/micropython-touch.md) | @peterhinch's touch GUI. |
 | [TFT / st7789py ports](guis/tft-gui.md) | russhughes-style font and bitmap rendering. |
 | [PyWidgets](guis/pywidgets.md) | The bundled `add_ons/pdwidgets` toolkit. |

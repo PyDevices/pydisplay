@@ -331,7 +331,21 @@ import = "nano_gui_simpletest"
 script = "examples/nano_gui_simpletest.py"
 kind = "oneshot"
 quit = "native_exit"
-deps = ["nano_gui"]
+deps = ["micropython-nano-gui"]
+
+[examples.micro_gui_simpletest]
+import = "micro_gui_simpletest"
+script = "examples/micro_gui_simpletest.py"
+kind = "oneshot"
+quit = "native_exit"
+deps = ["micropython-micro-gui"]
+
+[examples.touch_gui_simpletest]
+import = "touch_gui_simpletest"
+script = "examples/touch_gui_simpletest.py"
+kind = "oneshot"
+quit = "native_exit"
+deps = ["micropython-touch"]
 
 [examples.palettes_cube]
 import = "palettes_cube"

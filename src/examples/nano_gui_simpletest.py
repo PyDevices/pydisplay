@@ -1,11 +1,9 @@
 """
 nano_gui_simpletest.py - Copied from:
 https://github.com/peterhinch/micropython-nano-gui/tree/master?tab=readme-ov-file#23-verifying-hardware-configuration
+
+``color_setup`` fetches micropython-nano-gui into add_ons/gui/ when needed.
 """
-
-from ensure_nano_gui import ensure_nano_gui
-
-ensure_nano_gui()
 
 from color_setup import ssd  # Create a display instance
 from gui.core.colors import RED, BLUE, GREEN

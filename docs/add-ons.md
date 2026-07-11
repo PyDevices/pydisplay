@@ -36,7 +36,7 @@ Third-party trees copied locally (not in `add_ons.json`):
 
 | Path | Purpose |
 |------|---------|
-| `gui/` | [Nano-GUI](guis/nano-gui.md) — copy `gui/` from [micropython-nano-gui](https://github.com/peterhinch/micropython-nano-gui); gitignored |
+| `gui/` | Peter Hinch GUIs — install via [`fetch_ph_gui`](guis/nano-gui.md); gitignored; one of nano / micro / touch at a time |
 
 Many examples in `src/examples/` depend on add_ons. They are excluded from the micropython-lib bundle — install from GitHub only.
 

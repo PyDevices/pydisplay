@@ -25,8 +25,8 @@
       "github:PyDevices/pydisplay/src/add_ons/displaybuf.py"
     ],
     [
-      "ensure_nano_gui.py",
-      "github:PyDevices/pydisplay/src/add_ons/ensure_nano_gui.py"
+      "fetch_ph_gui.py",
+      "github:PyDevices/pydisplay/src/add_ons/fetch_ph_gui.py"
     ],
     [
       "framebuf.py",
@@ -87,6 +87,10 @@
     [
       "touch_keypad.py",
       "github:PyDevices/pydisplay/src/add_ons/touch_keypad.py"
+    ],
+    [
+      "touch_setup.py",
+      "github:PyDevices/pydisplay/src/add_ons/touch_setup.py"
     ],
     [
       "uctypes.py",

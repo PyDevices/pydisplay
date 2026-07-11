@@ -1,5 +1,8 @@
 """
-color_setup.py - color setup for DisplayBuffer with displaysys
+color_setup.py - color setup for DisplayBuffer with displaysys (nano-gui bridge).
+
+Fetches micropython-nano-gui into add_ons/gui/ when needed.
+
 Usage:
     from color_setup import ssd
     <your code here>
@@ -27,3 +30,9 @@ def show(area=None):
 
 
 ssd.show = show
+
+# After SSD exists: gui.core.colors imports SSD from this module.
+# Best-effort: displaybuf-only callers may not need gui/; nano demos need it present.
+from fetch_ph_gui import fetch_ph_gui  # noqa: E402
+
+fetch_ph_gui("micropython-nano-gui")

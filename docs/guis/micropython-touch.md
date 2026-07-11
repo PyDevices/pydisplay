@@ -1,29 +1,40 @@
 # MicroPython-Touch
 
-[MicroPython-Touch](https://github.com/peterhinch/micropython-touch) by Peter Hinch provides widgets and async UI patterns for MicroPython.
+[micropython-touch](https://github.com/peterhinch/micropython-touch) by Peter Hinch — touch widgets and async UI (developed from micro-gui).
 
 ## Requirements
 
-- pydisplay `displaysys` + `eventsys`
-- `add_ons/displaybuf.py` (DisplayBuffer)
-- `hardware_setup.py` from MicroPython-Touch
-- MicroPython only (not CircuitPython or CPython)
+| Component | Location | Notes |
+|-----------|----------|-------|
+| `board_config.py` | `board_configs/` or `src/lib/` | display + `eventsys.Runtime` |
+| `touch_setup.py` | `src/add_ons/` | Fetches touch GUI; mouse/touch `Poller` → `Display(ssd, tpad)` |
+| `fetch_ph_gui.py` | `src/add_ons/` | mip install into `add_ons/gui/` + FrameBuffer patches |
+| `displaybuf.py` | `src/add_ons/` | `ssd` framebuffer |
+| `uctypes.py` | `src/add_ons/` | CircuitPython shim for `writer.py` |
+
+Upstream renamed `hardware_setup.py` → `touch_setup.py` (Dec 2024). pydisplay follows that name. Do **not** install upstream `drivers/` or `touch/` packages for the pydisplay bridge — input comes from `eventsys`.
 
 ## Config
 
-Copy `hardware_setup.py` from the MicroPython-Touch repo and point it at your pydisplay `board_config.py`.
-
-## Examples
-
-MicroPython-Touch demos import as:
-
 ```python
-import lib.path
-import gui.demos.various  # external MicroPython-Touch tree
+import touch_setup  # fetch + Display
+from gui.core.tgui import Screen, ssd
 ```
 
-pydisplay examples such as `nano_gui_simpletest.py` show related patterns.
+## Install
 
-## Fonts
+```python
+import mip
+mip.install("github:PyDevices/pydisplay/packages/micropython-touch.json", target="./add_ons")
+```
 
-Peter Hinch's **Writer** class works on MicroPython but does not return `Area` objects for partial refresh.
+Or rely on `import touch_setup`.
+
+## Example
+
+[`src/examples/touch_gui_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/touch_gui_simpletest.py) — framebuffer smoke test. Full demos: `import touch_setup` then `import gui.demos.simple`.
+
+## See also
+
+- [Nano-GUI](nano-gui.md)
+- [Micro-GUI](micro-gui.md)

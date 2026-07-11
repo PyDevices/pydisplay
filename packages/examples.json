@@ -165,6 +165,14 @@
       "github:PyDevices/pydisplay/src/examples/nano_gui_simpletest.py"
     ],
     [
+      "micro_gui_simpletest.py",
+      "github:PyDevices/pydisplay/src/examples/micro_gui_simpletest.py"
+    ],
+    [
+      "touch_gui_simpletest.py",
+      "github:PyDevices/pydisplay/src/examples/touch_gui_simpletest.py"
+    ],
+    [
       "paint.py",
       "github:PyDevices/pydisplay/src/examples/paint.py"
     ],

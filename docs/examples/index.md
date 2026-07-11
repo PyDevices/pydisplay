@@ -112,7 +112,7 @@ pd.run_forever()
 - `font_simpletest.py` — string-sized `FrameBuffer`, opaque background, one `blit_rect` per draw (see [Font rendering patterns](../concepts/graphics.md#choosing-a-font-rendering-pattern)).
 - `font_simpletest2.py` — `Font.text(display_drv, …)`; transparent, per-pixel (slowest bus pattern).
 - `font_simpletest3.py` — `DisplayBuffer` + `show(dirty)`; transparent, best when RAM allows a full-screen buffer.
-- `nano_gui_simpletest.py` requires upstream [`gui/`](../guis/nano-gui.md) in `add_ons/`.
+- `nano_gui_simpletest.py` / `micro_gui_simpletest.py` / `touch_gui_simpletest.py` need the matching Peter Hinch `gui/` in `add_ons/` (via `fetch_ph_gui` / mip).
 **Legend:** Platforms = CPython · MCU · PyScript · Wokwi · Packages = core · add_ons · LVGL
 
 ## Suggested learning order
@@ -209,7 +209,9 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `displaybuf_blit.py` | DisplayBuffer blit | MCU | add_ons |
 | `scroll.py` | Scrolling text | CPython · MCU | core |
 | `rotations.py` | Display rotation | CPython · MCU | core |
-| `nano_gui_simpletest.py` | Nano-GUI hardware check | CPython · MCU | add_ons + upstream `gui/` |
+| `nano_gui_simpletest.py` | Nano-GUI hardware check | CPython · MCU | add_ons + `micropython-nano-gui` |
+| `micro_gui_simpletest.py` | Micro-GUI smoke | CPython · MCU | add_ons + `micropython-micro-gui` |
+| `touch_gui_simpletest.py` | Touch GUI smoke | CPython · MCU | add_ons + `micropython-touch` |
 | `lv_test_timer.py` | LVGL timer (follows `runtime.timer_async`) | CPython · MCU · PyScript | LVGL |
 
 ## Subdirectories

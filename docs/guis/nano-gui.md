@@ -2,90 +2,52 @@
 
 [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui) by Peter Hinch — lightweight GUI for memory-constrained MicroPython boards.
 
-pydisplay does **not** vendor Nano-GUI in the git repo. You install Peter Hinch's `gui` tree locally (see below) and wire the display through pydisplay's [`color_setup.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/color_setup.py) and [`displaybuf.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/displaybuf.py).
+pydisplay does **not** vendor Nano-GUI in the git repo. [`color_setup.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/color_setup.py) calls [`fetch_ph_gui`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/fetch_ph_gui.py) to install the `gui/` tree into `add_ons/` and patch `graphics.FrameBuffer` isinstance checks. Display wiring uses [`displaybuf.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/displaybuf.py).
 
 ## Requirements
 
 | Component | Location | Notes |
 |-----------|----------|-------|
 | `board_config.py` | `board_configs/` or `src/lib/` | pydisplay display and touch setup |
-| `color_setup.py` | `src/add_ons/` | Ships with pydisplay — creates `ssd` via DisplayBuffer |
-| `gui/` | `src/add_ons/gui/` | **Upstream** — copy from [micropython-nano-gui](https://github.com/peterhinch/micropython-nano-gui) |
-| `uctypes.py` | `src/add_ons/` | pydisplay shim — nano-gui `writer.py` on CircuitPython (no firmware `uctypes`) |
-| `lib.path` | `src/lib/path.py` | Dev clone — puts `add_ons/` on `sys.path` so `import gui` works |
+| `color_setup.py` | `src/add_ons/` | Ships with pydisplay — fetches nano-gui, creates `ssd` |
+| `fetch_ph_gui.py` | `src/add_ons/` | mip install + FrameBuffer patches |
+| `gui/` | `src/add_ons/gui/` | **Upstream** — installed by fetch (not in git) |
+| `uctypes.py` | `src/add_ons/` | CircuitPython shim for nano-gui `writer.py` |
+| `lib.path` | `src/lib/path.py` | Dev clone — puts `add_ons/` on `sys.path` |
 
-Peter Hinch's `drivers/` tree is for bare-metal MCU displays. With pydisplay you use `color_setup.ssd` instead; you do **not** need `drivers/` for the pydisplay examples.
+Peter Hinch's `drivers/` tree is for bare-metal MCU displays. With pydisplay you use `color_setup.ssd` instead; you do **not** need `drivers/`.
 
 ## Install the `gui` package
 
-### Full clone (development)
+Usually you do not install manually — importing `color_setup` runs `fetch_ph_gui("micropython-nano-gui")`.
 
-From the pydisplay repo root, copy only the `gui` directory into `add_ons/`:
+### Full clone (development)
 
 ```bash
 curl -sL https://github.com/peterhinch/micropython-nano-gui/archive/refs/heads/master.tar.gz \
   | tar xz --strip-components=2 -C src/add_ons micropython-nano-gui-master/gui
 ```
 
-`src/add_ons/gui/` is listed in [`.gitignore`](https://github.com/PyDevices/pydisplay/blob/main/.gitignore) — it is a local upstream checkout, not part of the pydisplay tree.
-
-Expected layout:
-
-```
-src/add_ons/
-├── color_setup.py      # pydisplay — wires board_config → DisplayBuffer
-├── displaybuf.py
-└── gui/                # Peter Hinch — not in git
-    ├── core/
-    ├── fonts/
-    ├── widgets/
-    └── demos/
-```
-
-Because [`path.py`](https://github.com/PyDevices/pydisplay/blob/main/src/lib/path.py) adds `add_ons/` to `sys.path`, imports match upstream Nano-GUI:
-
-```python
-from color_setup import ssd
-from gui.core.colors import RED, BLUE, GREEN
-from gui.core.nanogui import refresh
-```
-
-### MicroPython device (MIP)
-
-On hardware, install Nano-GUI into the same directory as `color_setup.py` (typically `./add_ons` or `/lib`):
+Or via mip / our full package manifest:
 
 ```python
 import mip
-mip.install("github:peterhinch/micropython-nano-gui", target="./add_ons")
-# or: mip.install("github:PyDevices/pydisplay/packages/nano_gui.json", target="./add_ons")
-mip.install("github:PyDevices/pydisplay/packages/add_ons.json", target="./add_ons")
+mip.install("github:PyDevices/pydisplay/packages/micropython-nano-gui.json", target="./add_ons")
 ```
 
-Adjust `target=` so `gui/` and `color_setup.py` sit in the same path root.
+`src/add_ons/gui/` is gitignored. Only one Hinch GUI may occupy `add_ons/gui/` at a time; `fetch_ph_gui` empties the directory when switching.
 
 ## Example
 
-[`src/examples/nano_gui_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/nano_gui_simpletest.py) — hardware verification script from the [upstream Nano-GUI docs](https://github.com/peterhinch/micropython-nano-gui#23-verifying-hardware-configuration).
-
-On MicroPython and CircuitPython, the example calls [`ensure_nano_gui.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/ensure_nano_gui.py) before importing `gui.*`, which runs the upstream `mip.install` into `add_ons/` when `gui/` is missing. First run needs network access. CircuitPython also picks up [`uctypes.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/uctypes.py) from `add_ons/` for nano-gui's color writer.
-
-Run from a full clone:
+[`src/examples/nano_gui_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/nano_gui_simpletest.py) — hardware verification from the [upstream docs](https://github.com/peterhinch/micropython-nano-gui#23-verifying-hardware-configuration).
 
 ```bash
 cd pydisplay/src
 micropython -i lib/path.py examples/nano_gui_simpletest.py
 ```
 
-Desktop CPython / MicroPython unix also work when `board_config` provides an SDL or PG display.
-
-See `scripts/pyscript_gen_packages.py` and [examples catalog](../examples/index.md#pyscript-gallery-markers).
-
-## Platform
-
-MicroPython and CPython (via pydisplay `displaybuf` + desktop `board_config`). Not CircuitPython or PyScript.
-
 ## See also
 
-- [Config files](../concepts/config-files.md) — `color_setup.py` and add-on layout
-- [Add-ons](../add-ons.md) — `displaybuf.py` and pydisplay add-on packages
-- [Drawing and fonts](../concepts/drawing-and-fonts.md) — DisplayBuffer overview
+- [Micro-GUI](micro-gui.md) — buttons / encoder
+- [MicroPython-Touch](micropython-touch.md) — touch widgets
+- [Config files](../concepts/config-files.md)
