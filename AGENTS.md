@@ -72,7 +72,7 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 
 Desktop override: set **`PYDISPLAY_TIMER_ASYNC`** before `board_config` is
 imported. Truthy: `1`, `true`, `yes`, `on`. Falsey: `0`, `false`, `no`, `off`.
-Helper: `src/lib/env_util.py` (`env_bool`). Per-board configs under
+Helper: `displaysys.env_bool`. Per-board configs under
 `board_configs/` are unchanged unless they opt in.
 
 Matrix / local runs:

@@ -171,7 +171,7 @@ Tri-color / 4-gray configs use `color_depth=2` (0=white, 1=black, 2=accent). ACe
 Set the env var **before** `import board_config` (or any import that loads it).
 Truthy: `1`, `true`, `yes`, `on`. Falsey: `0`, `false`, `no`, `off`. Unknown
 values fall back to the desktop default (`False`). Parsing lives in
-[`src/lib/env_util.py`](../../src/lib/env_util.py) (`env_bool`).
+[`displaysys.env_bool`](../../src/lib/displaysys/__init__.py).
 
 ```bash
 # Force asyncio timers on desktop (LVGL async smoke, matrix column)

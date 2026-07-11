@@ -618,7 +618,7 @@ def main(argv=None):
     # Apply PYDISPLAY_TIMER_ASYNC from argv before examples import board_config.
     if args.get("timer_async") is not None:
         try:
-            from env_util import env_set
+            from displaysys import env_set
 
             env_set("PYDISPLAY_TIMER_ASYNC", args["timer_async"])
         except Exception:

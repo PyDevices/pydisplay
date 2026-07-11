@@ -10,21 +10,6 @@ Private working notes for this repo. Not part of the published docs.
 
 - [ ] Consolidate or merge `add_ons/` modules where possible (fewer top-level files)
 
-### Peter Hinch GUIs (work as a set)
-
-[nano-gui](https://github.com/peterhinch/micropython-nano-gui), [micro-gui](https://github.com/peterhinch/micropython-micro-gui), and [micropython-touch](https://github.com/peterhinch/micropython-touch) share `DisplayBuffer` / `framebuf` patterns — treat pydisplay integration for all three together.
-
-| Library | Setup file | Bridge |
-|---------|------------|--------|
-| micropython-nano-gui | `color_setup.py` → `ssd` | `fetch_ph_gui("micropython-nano-gui")` |
-| micropython-micro-gui | `hardware_setup.py` → `Display` | `fetch_ph_gui("micropython-micro-gui")` |
-| micropython-touch | `touch_setup.py` → `display` | `fetch_ph_gui("micropython-touch")` |
-
-Packages: `packages/micropython-nano-gui.json`, `micropython-micro-gui.json`, `micropython-touch.json` (full `gui/` only). Active tree: `add_ons/gui/` (one at a time). `uctypes.py` stays in `add_ons/` for CircuitPython.
-
-- [x] Setup bridges + `fetch_ph_gui` + full mip packages
-- [ ] Matrix coverage for nano / micro / touch simpletests across runtimes
-
 ### LVGL
 
 - [ ] Combine `display_driver.py` + `lv_utils.py` → `lv_runtime.py`
@@ -48,7 +33,6 @@ Packages: `packages/micropython-nano-gui.json`, `micropython-micro-gui.json`, `m
 ### Examples & demos
 
 - [ ] Audit all examples: for each, note what it demonstrates and how it helps users and/or the matrix test kit; decide keep, consolidate, or delete. Many were small development probes (e.g. scrolling/rotation for touch→screen coords) that may have limited value now that those bugs are fixed; others (e.g. `font_simpletest*.py`) overlap but show different methods with different speed/resource/transparency tradeoffs — keep distinct approaches where that teaching value matters. Large surface area, but a structured pass should be relatively quick
-- [ ] Make all examples runnable on PyScript, then Jupyter notebook
 
 ### Platforms & hardware
 
@@ -75,13 +59,14 @@ Packages: `packages/micropython-nano-gui.json`, `micropython-micro-gui.json`, `m
 ### Tooling & ecosystem
 
 - [ ] Remove redundant and consolidate overlapping tools under `tools/`; remove any unnecessary tools that are no longer needed or used
-- [ ] Eliminate `src/lib/env_util.py` or move it out of `src/lib` (only used by `board_config` for `PYDISPLAY_TIMER_ASYNC`)
 - [ ] Add a GUI to the matrix test kit (`tools/example_test_kit.py`)
 - [ ] Fork [figma2lvgl](https://github.com/khiyamiftikhar/figma2lvgl) and add option to output Python
 - [ ] Change docs and scripts so cmods sub-repos don't mention or require cmods (personal workspace only — not required for other users); may need to move functionality out of cmods into sub-repos
 
 ### Done
 
+- [x] Make all examples runnable on PyScript, then Jupyter notebook
+- [x] Eliminate `src/lib/env_util.py` — moved `env_bool` / `env_set` into `displaysys`
 - [x] `pixel_sim_demos` fire effect — Doom-style heat rise with height-scaled cooling, gappy embers, black→white palette (was blurry average + cooling=3 that filled a short 16-row grid solid)
 - [x] Make sure all desktop backends exit gracefully in `displaysys`
 - [x] Fix cmods `manifest.py` / `build_mp.sh` frozen-manifest selection — `build_mp.sh` exports `FROZEN_MANIFEST_UPSTREAM` to the MicroPython freeze file for the build; static `cmods/manifest.py` includes cmod siblings then that path (no generated wrapper). Verified via `cmods/scripts/verify_frozen_manifest_parity.sh`: unix standard/coverage, windows dev, webassembly pyscript, esp32 ESP32_GENERIC_P4/C6_WIFI + M5STACK_ATOM, rp2 RPI_PICO

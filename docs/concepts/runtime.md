@@ -98,7 +98,7 @@ The shipped default config sets `timer_async` per host:
 Set **`PYDISPLAY_TIMER_ASYNC`** in the process environment before
 `board_config` is imported to run desktop examples with asyncio timers (LVGL
 async path, cross-runtime matrix columns). See
-[`env_util.py`](../../src/lib/env_util.py) and [Board configs — default](../hardware/board-configs.md#default-config).
+[`displaysys.env_bool`](../../src/lib/displaysys/__init__.py) and [Board configs — default](../hardware/board-configs.md#default-config).
 
 On SDL2 / Win32 sync timer hosts (`micropython.exe`, and similar), display
 refresh is **deferred until the first `runtime.poll()`** so importing
