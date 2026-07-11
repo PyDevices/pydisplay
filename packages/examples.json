@@ -37,6 +37,22 @@
       "github:PyDevices/pydisplay/src/examples/boxlines.py"
     ],
     [
+      "calc_engine.py",
+      "github:PyDevices/pydisplay/src/examples/calc_engine.py"
+    ],
+    [
+      "calc_graphics.py",
+      "github:PyDevices/pydisplay/src/examples/calc_graphics.py"
+    ],
+    [
+      "calc_lvgl.py",
+      "github:PyDevices/pydisplay/src/examples/calc_lvgl.py"
+    ],
+    [
+      "calc_widgets.py",
+      "github:PyDevices/pydisplay/src/examples/calc_widgets.py"
+    ],
+    [
       "calculator.py",
       "github:PyDevices/pydisplay/src/examples/calculator.py"
     ],
@@ -63,10 +79,6 @@
     [
       "displaysys_block_test.py",
       "github:PyDevices/pydisplay/src/examples/displaysys_block_test.py"
-    ],
-    [
-      "displaysys_deinit_test.py",
-      "github:PyDevices/pydisplay/src/examples/displaysys_deinit_test.py"
     ],
     [
       "displaysys_fill_rect_test.py",
@@ -187,10 +199,6 @@
     [
       "pydisplay_demo.py",
       "github:PyDevices/pydisplay/src/examples/pydisplay_demo.py"
-    ],
-    [
-      "pydisplay_demo_async.py",
-      "github:PyDevices/pydisplay/src/examples/pydisplay_demo_async.py"
     ],
     [
       "rotations.py",
@@ -363,14 +371,6 @@
     [
       "noto_fonts/noto_fonts.py",
       "github:PyDevices/pydisplay/src/examples/noto_fonts/noto_fonts.py"
-    ],
-    [
-      "pixel_sim/__init__.py",
-      "github:PyDevices/pydisplay/src/examples/pixel_sim/__init__.py"
-    ],
-    [
-      "pixel_sim/board_config.py",
-      "github:PyDevices/pydisplay/src/examples/pixel_sim/board_config.py"
     ],
     [
       "proverbs/__init__.py",

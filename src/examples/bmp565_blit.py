@@ -1,5 +1,4 @@
-# pyscript gallery: all
-# pyscript binaries: assets/warrior.bmp
+# pyscript skip: gallery
 from color_setup import ssd
 from graphics import BMP565
 from multimer import sleep_ms

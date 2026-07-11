@@ -1,4 +1,3 @@
-# pyscript gallery: async
 """
 Simple calculator example to demonstrate the use of graphics.FrameBuffer
 """

@@ -107,7 +107,6 @@ Installs `displaysys-sdldisplay`, `graphics-cmod`, and `lvgl-cpython` (no versio
 
 | Script | Purpose |
 |--------|---------|
-| [`run_display_teardown_tests.py`](run_display_teardown_tests.py) | Display backend teardown checks |
 | [`test_keypad_*_sim.py`](test_keypad_click_sim.py) | Keypad simulation |
 | [`quit_inject.py`](quit_inject.py) | Inject quit into running examples |
 | [`pydisplay_test_mode.py`](pydisplay_test_mode.py) | Test-mode env for examples |

@@ -20,13 +20,13 @@ Grid size defaults to 64x16; override with ``PIXEL_SIM_WIDTH`` /
 
 import os
 
-import graphics
-from displaysys import color565, color_rgb
-from displaysys.pixeldisplay import PixelDisplay
-
 # ``lib/`` is on sys.path (via lib/path.py), so import the host board_config bare
 # — ``from lib import board_config`` fails on MicroPython (no namespace packages).
 import board_config as _host  # noqa: E402
+
+from displaysys import color565, color_rgb
+from displaysys.pixeldisplay import PixelDisplay
+import graphics
 
 
 def _env_int(name, default):

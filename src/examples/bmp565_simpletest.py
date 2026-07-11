@@ -1,5 +1,4 @@
-# pyscript gallery: all
-# pyscript binaries: assets/warrior.bmp
+# pyscript skip: gallery
 # Loads the full bitmap into memory before blitting it to the display.
 # Will raise a MemoryError on low memory boards # such as RP2040.
 # See bmp565_scroll_sprite.py for an example of streaming one line at

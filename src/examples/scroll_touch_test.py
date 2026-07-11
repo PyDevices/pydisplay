@@ -1,4 +1,3 @@
-# pyscript gallery: all
 from board_config import display_drv, runtime
 from graphics import Draw
 from multimer import sleep_ms

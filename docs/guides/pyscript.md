@@ -23,22 +23,19 @@ Examples in the [browser gallery](https://PyDevices.github.io/pydisplay/pyscript
 
 ## asyncio requirement
 
-PyScript runs on asyncio. **`async` gallery demos** (`calculator`, `paint`, `eventsys_simpletest`, …) use `multimer.dual_main` / `run_forever_async`. **`all` gallery demos** run blocking loops after you click **Run** — many now exit on `events.QUIT` via `runtime.quit_requested` or full `runtime.poll()` dispatch. See [PyScript asyncio guide](pyscript-asyncio.md).
+PyScript runs on asyncio. Prefer `multimer.loop.run_forever` / `dual_main` so demos yield to the event loop in the browser. See [PyScript asyncio guide](pyscript-asyncio.md).
 
-## Gallery examples (2026-06)
+## Gallery examples
 
-Regenerate the card list with `python scripts/pyscript_gen_packages.py`. Current gallery: **6 async**, **42 all** (48 total). Highlights:
+Regenerate the card list with `python scripts/pyscript_gen_packages.py`. Every example entry under `src/examples/` is included by default.
 
-| Script | Tag | Notes |
-|--------|-----|-------|
-| `calculator.py` | async | Best starting point |
-| `paint.py` | async | Used by `web/pyscript/editor.html` |
-| `eventsys_simpletest.py` | async | Minimal event loop |
-| `pydisplay_demo_async.py` | async | Flagship showcase |
-| `hello.py`, `scroll.py`, `displaysys_simpletest.py` | all | Quit-aware blocking loops |
-| `chango`, `noto_fonts` | all | One-shot draws (package manifests) |
+| Marker | Effect |
+|--------|--------|
+| `# pyscript skip: gallery` | Omit from the card grid |
+| `# pyscript featured` | Pin to the top (badge) |
+| `# pyscript modules: …` | Extra modules to install with the entry |
 
-Binary-dependent demos are excluded via `# pyscript binaries:` in the example header. Use `# pyscript skip: gallery` to omit a demo from the card grid. See `scripts/pyscript_gen_packages.py`.
+Featured starters: `pydisplay_demo`, `testris`. See `scripts/pyscript_gen_packages.py` and [examples catalog](../examples/index.md#pyscript-gallery-markers).
 
 ## Board config
 

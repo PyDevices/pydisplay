@@ -30,4 +30,4 @@ mip.install(
 import lib.path  # noqa: E402
 import testris  # noqa: E402
 # isort: on
-# Full catalog: import hello, bmp565_simpletest, pydisplay_demo_async, etc. after uncommenting above
+# Full catalog: import hello, bmp565_simpletest, pydisplay_demo, etc. after uncommenting above

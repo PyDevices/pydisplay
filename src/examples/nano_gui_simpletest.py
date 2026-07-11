@@ -1,4 +1,3 @@
-# pyscript gallery: all
 """
 nano_gui_simpletest.py - Copied from:
 https://github.com/peterhinch/micropython-nano-gui/tree/master?tab=readme-ov-file#23-verifying-hardware-configuration

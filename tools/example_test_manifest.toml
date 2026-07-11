@@ -15,13 +15,6 @@ oneshot_timeout_s = 15
 [examples.pydisplay_demo]
 import = "pydisplay_demo"
 script = "examples/pydisplay_demo.py"
-kind = "loop"
-quit = "poll"
-deps = ["core"]
-
-[examples.pydisplay_demo_async]
-import = "pydisplay_demo_async"
-script = "examples/pydisplay_demo_async.py"
 kind = "async"
 quit = "poll"
 deps = ["core"]
@@ -121,14 +114,6 @@ duration_s = 5
 timeout_s = 45
 
 # --- displaysys harness scripts (matrix) ---
-
-[examples.displaysys_deinit_test]
-import = "displaysys_deinit_test"
-script = "examples/displaysys_deinit_test.py"
-kind = "oneshot"
-quit = "native_exit"
-deps = ["core"]
-oneshot_timeout_s = 15
 
 [examples.displaysys_block_test]
 import = "displaysys_block_test"

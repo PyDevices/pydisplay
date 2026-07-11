@@ -1,4 +1,3 @@
-# pyscript gallery: all
 """
 Visual text compare: framebuf and graphics, native C vs Python.
 

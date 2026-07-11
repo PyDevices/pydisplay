@@ -1,4 +1,3 @@
-# pyscript gallery: all
 """
 displaybuf_simpletest.py - Simple test program for displaybuf.py
 """

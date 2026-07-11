@@ -1,4 +1,3 @@
-# pyscript gallery: all
 from board_config import display_drv, runtime
 from multimer.loop import run_forever
 from palettes import get_palette

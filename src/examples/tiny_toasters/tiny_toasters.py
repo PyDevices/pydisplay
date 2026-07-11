@@ -1,4 +1,3 @@
-# pyscript gallery: all
 """
 tiny_toasters.py
 ================

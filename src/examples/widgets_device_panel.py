@@ -1,4 +1,3 @@
-# pyscript gallery: all
 """
 widgets_device_panel
 ====================================================

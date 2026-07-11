@@ -1,4 +1,3 @@
-# pyscript gallery: all
 """
 Test ListView widget
 """

@@ -539,6 +539,14 @@
     [
       "pdwidgets/icons/warning_48dp.pbm",
       "github:PyDevices/pydisplay/src/add_ons/pdwidgets/icons/warning_48dp.pbm"
+    ],
+    [
+      "pixel_sim/__init__.py",
+      "github:PyDevices/pydisplay/src/add_ons/pixel_sim/__init__.py"
+    ],
+    [
+      "pixel_sim/board_config.py",
+      "github:PyDevices/pydisplay/src/add_ons/pixel_sim/board_config.py"
     ]
   ],
   "deps": [],

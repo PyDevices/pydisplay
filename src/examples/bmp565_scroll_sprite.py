@@ -1,5 +1,4 @@
-# pyscript gallery: all
-# pyscript binaries: assets/longstreet.bmp, assets/runner.bmp
+# pyscript skip: gallery
 from collections import namedtuple
 
 from board_config import display_drv, runtime

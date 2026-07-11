@@ -1,5 +1,4 @@
 from board_config import runtime
-# pyscript gallery: all
 """
 color_test.py
 =============

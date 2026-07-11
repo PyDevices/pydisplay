@@ -1,5 +1,4 @@
-# pyscript gallery: async
-# pyscript binaries: apollo_dsky/Apollo_DSKY_interface.bmp
+# pyscript skip: gallery
 """
 apollo.py — Apollo Guidance Computer DSKY emulator.
 

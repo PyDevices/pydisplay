@@ -1,15 +1,18 @@
+# pyscript featured
 """
-pydisplay_demo.py — minimal board_config demo: clicks, rotation, scrolling.
+pydisplay_demo.py — flagship board_config demo: clicks, rotation, scrolling.
 
-Uses only src/lib modules (board_config, graphics, multimer, eventsys).
+Uses multimer.dual_main / run_forever so the same script runs on desktop (sync)
+and PyScript/Jupyter (async). Uses only src/lib modules (board_config, graphics,
+multimer, eventsys).
 """
 
 from board_config import display_drv, runtime
 
 from displaysys import color565
 from graphics import RGB565, Area, Font, FrameBuffer
-from multimer import sleep_ms, ticks_add, ticks_diff, ticks_ms
-from multimer.loop import run_forever
+from multimer import AsyncTimer, ticks_add, ticks_diff, ticks_ms
+from multimer.loop import dual_main, run_forever, run_forever_async
 
 TOP, BOT = 36, 20
 ROW, ACCENT = 20, 4
@@ -48,7 +51,7 @@ TIPS = (
     "or the mouse.",
     "Display: board_config",
     "Events: eventsys",
-    "Timers: multimer",
+    "Timers: multimer.AsyncTimer",
 )
 
 state = {"rotation": 0, "scroll": 0, "color_i": 0}
@@ -137,8 +140,16 @@ def _scroll_tick(now=None):
     display_drv.vscroll = state["scroll"]
 
 
+def on_tick(_=None):
+    if _scroll_paused:
+        return
+    state["scroll"] = (state["scroll"] + 1) % scroll_height()
+    display_drv.vscroll = state["scroll"]
+
+
 def handle_events():
-    _scroll_tick()
+    if not runtime.timer_async:
+        _scroll_tick()
     if runtime.quit_requested:
         return True
     if elist := runtime.poll():
@@ -163,7 +174,7 @@ def handle_events():
     return False
 
 
-def main():
+def main_sync():
     global _scroll_next_at
     setup_scroll()
     redraw()
@@ -171,4 +182,15 @@ def main():
     run_forever(handle_events)
 
 
-main()
+async def main_async():
+    setup_scroll()
+    redraw()
+    timer = AsyncTimer(-1)
+    timer.init(mode=AsyncTimer.PERIODIC, period=40, callback=on_tick)
+    try:
+        await run_forever_async(handle_events, delay_ms=20)
+    finally:
+        timer.deinit()
+
+
+dual_main(main_sync, main_async, async_mode=runtime.timer_async)

@@ -1,4 +1,3 @@
-# pyscript gallery: async
 from board_config import runtime
 from multimer import Timer
 from multimer.loop import dual_main, run_forever

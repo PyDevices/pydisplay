@@ -28,7 +28,7 @@ Use `main.py` as committed. On first boot, `mip` downloads packages from GitHub 
 
 Uncomment the two `add_ons` and `examples` lines in `main.py`, then restart the simulation. First boot takes several minutes.
 
-Enables the full example catalog (`hello.py`, `bmp565_*`, `pydisplay_demo_async`, LVGL prep examples, and more under `examples/`).
+Enables the full example catalog (`hello.py`, `bmp565_*`, `pydisplay_demo`, LVGL prep examples, and more under `examples/`).
 
 ## Wiring (GPIO)
 

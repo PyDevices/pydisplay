@@ -347,6 +347,12 @@ kbd {
   background: rgba(108, 123, 255, 0.12);
 }
 
+.tag.featured {
+  color: var(--indigo);
+  border-color: rgba(108, 123, 255, 0.4);
+  background: rgba(108, 123, 255, 0.12);
+}
+
 .tag.all {
   color: var(--good);
   border-color: rgba(67, 197, 158, 0.4);

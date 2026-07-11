@@ -1,5 +1,4 @@
-# pyscript gallery: all
-# pyscript binaries: assets/micropython.pbm
+# pyscript skip: gallery
 from board_config import display_drv
 from graphics import FrameBuffer, RGB565
 from pbm import PBM

@@ -13,50 +13,47 @@ Use `import lib.path` first in a development clone (see [full clone](../installa
 
 ## PyScript gallery markers
 
-Examples that appear in the [browser gallery](https://PyDevices.github.io/pydisplay/pyscript/) carry a header comment used by `scripts/pyscript_gen_packages.py`:
+Every example **entry point** under `src/examples/` is included in the
+[browser gallery](https://PyDevices.github.io/pydisplay/pyscript/) by default
+(`scripts/pyscript_gen_packages.py`):
+
+| Entry | Kind |
+|-------|------|
+| `examples/<name>.py` | module (`?modules=`) |
+| `examples/<name>/<name>.py` | package manifest (`?manifests=`) |
+| `examples/<name>/__init__.py` | package manifest (if no `<name>.py`) |
+
+Optional header comments (first 10 lines):
 
 ```python
-# pyscript gallery: all
+# pyscript skip: gallery
+# pyscript featured
+# pyscript modules: calc_engine
 ```
 
-| Tag | Gallery section |
-|-----|-----------------|
-| `async` | Async demos (asyncio / `dual_main` / `timer_async`) |
-| `all` | Blocking or dual-path demos that still run after **Run** in the browser |
+| Marker | Effect |
+|--------|--------|
+| `# pyscript skip: gallery` | Omit from the card grid |
+| `# pyscript featured` | Pin to the top of the gallery (badge) |
+| `# pyscript modules: …` | Extra same-tree modules to mip-install with the entry |
 
-Omit the marker (or use `# pyscript skip: gallery`) to keep a script out of the card grid. Binary-dependent demos use `# pyscript binaries:` and are excluded automatically. See [PyScript local development](../guides/pyscript.md).
+See [PyScript local development](../guides/pyscript.md).
 
 ### Search commands
 
 ```bash
-rg '^# pyscript gallery:' src/examples/
-rg '^# pyscript gallery: async' src/examples/
-rg '^# pyscript gallery: all' src/examples/
+rg '^# pyscript skip:' src/examples/
+rg '^# pyscript featured' src/examples/
+rg '^# pyscript modules:' src/examples/
 ```
 
 ### Canonical patterns
 
-**Quit-aware poll loop** — [`hello.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/hello.py), [`scroll.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll.py), [`displaysys_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/displaysys_simpletest.py):
+**`run_forever` with poll** — [`hello.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/hello.py), [`scroll.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll.py), [`displaysys_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/displaysys_simpletest.py), [`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py), [`calculator.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/calculator.py):
 
 ```python
 from board_config import display_drv, runtime
-
-while True:
-    if runtime is not None:
-        runtime.poll()
-    ...  # draw
-    display_drv.show()
-    if runtime is not None and runtime.quit_requested:
-        return
-    sleep_ms(1)
-```
-
-Or dispatch all events and break on `events.QUIT` (see `displaysys_simpletest.py`).
-
-**`run_forever` with poll** — [`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py), [`calculator.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/calculator.py):
-
-```python
-from multimer import run_forever
+from multimer.loop import run_forever
 import eventsys
 
 def handle_events():
@@ -141,8 +138,7 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | Resource | Description | Platforms | Packages |
 |----------|-------------|-----------|----------|
 | [**App starter**](app-starter.md) | Copy-paste app boilerplate (doc only) | CPython · MCU · PyScript | core |
-| [`pydisplay_demo.py`](pydisplay_demo.md) | Clicks, rotation, scroll (`board_config` + multimer) | CPython · MCU | core |
-| `pydisplay_demo_async.py` | Same as pydisplay_demo with `multimer` | CPython · MCU · PyScript | core |
+| [`pydisplay_demo.py`](pydisplay_demo.md) | Clicks, rotation, scroll (`dual_main` / `run_forever`) | CPython · MCU · PyScript | core |
 | `hello.py` | Minimal text (`tft_config`) | CPython · MCU · Wokwi | core |
 | `color_test.py` | Color bars | CPython · MCU | core |
 | `logo.py` | Logo drawing | CPython · MCU | core |
@@ -218,7 +214,7 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 
 ## Subdirectories
 
-Runnable demos in subfolders may use the same `# pyscript gallery:` markers as top-level examples.
+Runnable demos in subfolders use the same entry rules (`<name>/<name>.py` or `__init__.py`) and optional `# pyscript skip:` / `featured` / `modules:` headers.
 
 | Directory | Script | Platforms | Notes |
 |-----------|--------|-----------|-------|

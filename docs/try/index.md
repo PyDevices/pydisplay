@@ -30,7 +30,7 @@ Evaluate pydisplay without installing anything on your machine.
 Full guide (asyncio porting, compatible examples, board config): [PyScript local development](../guides/pyscript.md).
 
 !!! note "Browser gallery"
-    The [live demo hub](https://PyDevices.github.io/pydisplay/pyscript/) lists examples tagged `# pyscript gallery: async` or `all`. Click **Run** on each page — blocking loops start only after Run. Async examples (`calculator`, `paint`, …) are the smoothest fit. See [PyScript asyncio guide](../guides/pyscript-asyncio.md).
+    The [live demo hub](https://PyDevices.github.io/pydisplay/pyscript/) lists every example entry by default (opt out with `# pyscript skip: gallery`). Click **Run** on each page. Prefer `run_forever` / `dual_main` so demos stay responsive. See [PyScript asyncio guide](../guides/pyscript-asyncio.md).
 
 ## Wokwi (simulator)
 

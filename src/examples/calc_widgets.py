@@ -1,4 +1,4 @@
-# pyscript gallery: all
+# pyscript modules: calc_engine
 """
 calc_widgets
 ====================================================

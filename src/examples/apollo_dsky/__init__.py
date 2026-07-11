@@ -1,3 +1,4 @@
+# pyscript skip: gallery
 """
 Apollo Guidance Computer DSKY Emulator
 

@@ -7,7 +7,7 @@ Pick an effect with ``DEMO`` (``scroll``, ``plasma``, ``fire``, ``matrix``,
 
 **Simulator (default):** ``import lib.path`` from ``src/`` and run::
 
-    cd src && python -c "import lib.path, runpy; runpy.run_path('examples/pixel_sim_demos.py', run_name='__main__')"
+    cd src && python -c "import lib.path, runpy; runpy.run_path('add_ons/pixel_sim_demos.py', run_name='__main__')"
 
 **Real PixelDisplay hardware:** use ``from board_config import display_drv, runtime``
 instead of ``from pixel_sim import …`` (your hardware ``board_config`` must wire

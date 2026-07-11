@@ -1,5 +1,4 @@
-# pyscript gallery: all
-# pyscript binaries: assets/font_8x8.bin, assets/font_8x14.bin, assets/font_8x16.bin
+# pyscript skip: gallery
 """
 font_simpletest.py -- Simple test of the Font class.
 inspired by Russ Hughes's hello.py

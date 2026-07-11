@@ -1,4 +1,3 @@
-# pyscript gallery: all
 """displaysys_fill_rect_test.py"""
 
 from random import getrandbits

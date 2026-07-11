@@ -1,5 +1,4 @@
-# pyscript gallery: all
-# pyscript binaries: assets/warrior.bmp
+# pyscript skip: gallery
 from collections import namedtuple
 try:
     from random import choice

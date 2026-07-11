@@ -933,7 +933,6 @@ def main(argv: list[str] | None = None) -> int:
     if args.curated_only:
         curated = {
             "pydisplay_demo",
-            "pydisplay_demo_async",
             "calculator",
             "paint",
             "displaysys_simpletest",

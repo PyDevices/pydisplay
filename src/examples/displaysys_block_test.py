@@ -1,4 +1,3 @@
-# pyscript gallery: all
 """displaysys_block_test.py"""
 
 from random import getrandbits

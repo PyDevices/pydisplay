@@ -1,4 +1,4 @@
-# pyscript gallery: all
+# pyscript skip: gallery
 import os
 from collections import namedtuple
 

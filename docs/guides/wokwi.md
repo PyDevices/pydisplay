@@ -34,7 +34,7 @@ The browser sim ships MicroPython — no local tools or firmware download needed
 | **User action** | Use `main.py` as committed | Uncomment `add_ons` + `examples` lines |
 | **First boot** | ~30 s | Several minutes |
 | **Demo** | `testris` | Same + full `examples/` catalog |
-| **Also enables** | — | `hello.py`, bmp565, `pydisplay_demo`, `pydisplay_demo_async`, LVGL prep, etc. |
+| **Also enables** | — | `hello.py`, bmp565, `pydisplay_demo`, LVGL prep, etc. |
 
 ---
 

@@ -1,4 +1,3 @@
-# pyscript gallery: all
 """
 console_simpletest.py
 

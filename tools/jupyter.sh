@@ -40,7 +40,7 @@ Environment:
 Examples:
   ./tools/jupyter.sh calculator
   ./tools/jupyter.sh calculator --cursor
-  ./tools/jupyter.sh pydisplay_demo_async --cursor
+  ./tools/jupyter.sh pydisplay_demo --cursor
 
 Requires (in JUPYTER_VENV):
   pip install pillow ipywidgets ipyevents jupyterlab

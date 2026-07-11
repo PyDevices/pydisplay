@@ -239,26 +239,9 @@ run_forever(handle_events)  # poll input; timer callbacks run on the active back
 
 See [multimer](../concepts/multimer.md) for timer backends and `timer_async`.
 
-## Async variant
+## Async / PyScript
 
-[`pydisplay_demo_async.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo_async.py) is the same demo with an **asyncio** main loop and **`multimer.AsyncTimer`** for scrolling (`# pyscript gallery: async`). Use it on PyScript or any port where the app already runs under `asyncio` / `uasyncio`:
-
-```python
-import lib.path
-import pydisplay_demo_async
-```
-
-The script runs on PyScript/Jupyter where `runtime.timer_async` is true, starts the scroll timer inside `async def main()` (required for `aio.Timer.init`), and yields with `await asyncio.sleep(...)` / `run_forever_async` each frame. UI, colours, scroll pause during redraw, and buffered text are unchanged.
-
-To migrate from sync to async, compare the two entrypoints side by side:
-
-| Sync (`pydisplay_demo`) | Async (`pydisplay_demo_async`) |
-|-------------------------|------------------------------|
-| `def main():` | `async def main_async():` |
-| `from multimer.loop import run_forever` | `dual_main` / `run_forever_async` |
-| `periodic(on_tick, period=40, warn=False)` | `periodic(on_tick, period=40, async_=True, warn=False)` |
-| `run_forever(handle_events)` | `await run_forever_async(handle_events, …)` |
-| `main()` at bottom | `dual_main(...)` at bottom |
+`pydisplay_demo.py` uses `multimer.loop.dual_main` so the same file runs sync on desktop and async on PyScript/Jupyter (`runtime.timer_async`). There is no separate `_async` twin.
 
 ## Related docs
 

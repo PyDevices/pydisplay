@@ -1,4 +1,4 @@
-# pyscript gallery: async
+# pyscript modules: calc_engine
 """
 calc_graphics
 ====================================================

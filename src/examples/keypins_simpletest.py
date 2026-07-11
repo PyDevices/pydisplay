@@ -1,4 +1,3 @@
-# pyscript gallery: all
 from board_config import runtime
 from keypins import KeyPins, Keys
 from multimer.loop import run_forever

@@ -1,4 +1,3 @@
-# pyscript gallery: all
 import board_config
 import pdwidgets as pd
 from pdwidgets import pct

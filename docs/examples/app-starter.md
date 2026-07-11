@@ -82,11 +82,10 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
 
 === "Async (asyncio)"
 
-    Asyncio main loop via `multimer.run_forever()`. Use on PyScript or any port where the app already runs under `asyncio` / `uasyncio`. For the browser gallery, add `# pyscript gallery: async`.
+    Asyncio main loop via `multimer.run_forever()`. Use on PyScript or any port where the app already runs under `asyncio` / `uasyncio`. Included in the browser gallery by default; add `# pyscript skip: gallery` to omit or `# pyscript featured` to pin.
 
     ```python
-    # pyscript gallery: async
-    """
+        """
     my_app_async.py — asyncio starting point for a pydisplay app.
 
     Copy and rename to build your own project. Uses board_config, graphics,
@@ -146,11 +145,10 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
 
 === "Dual (sync + async)"
 
-    One entry file for desktop **and** PyScript. `runtime.timer_async` selects the path; `dual_main()` calls `main_sync()` or schedules `main_async()`. For the browser gallery, add `# pyscript gallery: async`. Pass `async_=runtime.timer_async` to `periodic()` when you add periodic timers.
+    One entry file for desktop **and** PyScript. `runtime.timer_async` selects the path; `dual_main()` calls `main_sync()` or schedules `main_async()`. Included in the browser gallery by default; add `# pyscript skip: gallery` to omit or `# pyscript featured` to pin. Pass `async_=runtime.timer_async` to `periodic()` when you add periodic timers.
 
     ```python
-    # pyscript gallery: async
-    """
+        """
     my_app_dual.py — one file for sync desktop and async PyScript.
 
     Copy and rename to build your own project. Uses board_config, graphics,

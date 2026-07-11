@@ -1,5 +1,4 @@
 from board_config import runtime
-# pyscript gallery: all
 """
 fonts.py
 ========
