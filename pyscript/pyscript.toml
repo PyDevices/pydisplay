@@ -141,7 +141,6 @@ interpreter = "./vendor/micropython/micropython.mjs"
 "./src/add_ons/pixel_sim/board_config.py" = "/add_ons/pixel_sim/"
 
 "./src/lib/board_config.py" = "/lib/"
-"./src/lib/env_util.py" = "/lib/"
 "./src/lib/path.py" = "/lib/"
 "./src/lib/displaysys/__init__.py" = "/lib/displaysys/"
 "./src/lib/displaysys/busdisplay.py" = "/lib/displaysys/"

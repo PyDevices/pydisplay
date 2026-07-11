@@ -6,7 +6,7 @@ board_config.py file that is specific to your hardware from:
 https://github.com/PyDevices/pydisplay/tree/main/board_configs
 """
 
-from env_util import env_bool
+from displaysys import env_bool
 
 # Default timer mode for PG/SDL desktop when PYDISPLAY_TIMER_ASYNC is unset.
 # PyScript and Jupyter always use asyncio timers (see branches below).
