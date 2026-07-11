@@ -286,7 +286,7 @@ class JNDisplay(DisplayDriver):
 
     _next_display_id = 0
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, *, quiet=False):
         self._display_id = f"JNDisplay_{JNDisplay._next_display_id}"
         JNDisplay._next_display_id += 1
         self._width = width
@@ -302,7 +302,7 @@ class JNDisplay(DisplayDriver):
         self.quit_chord = default_quit_chord()
         self._visible = None
 
-        super().__init__()
+        super().__init__(quiet=quiet)
 
     ############### Required API Methods ################
 

@@ -223,6 +223,8 @@ class PGDisplay(DisplayDriver):
         title="displaysys",
         scale=1.0,
         window_flags=pg.SHOWN,
+        *,
+        quiet=False,
     ):
         self._width = width
         self._height = height
@@ -242,7 +244,7 @@ class PGDisplay(DisplayDriver):
         self._bytes_per_pixel = color_depth // 8
 
         if self._scale != 1 and not hasattr(pg.transform, "scale_by"):
-            if not getattr(self, "_quiet", False):
+            if not quiet:
                 print(
                     f"PGDisplay:  Scaling is set to {self._scale}, but pygame {pg.ver} does not support it."
                 )
@@ -258,9 +260,7 @@ class PGDisplay(DisplayDriver):
         fitted = fit_scale_to_desktop(
             self.width, self.height, requested_scale, desktop_w, desktop_h
         )
-        notify_board_config_scale_override(
-            "PGDisplay", requested_scale, fitted, quiet=getattr(self, "_quiet", False)
-        )
+        notify_board_config_scale_override("PGDisplay", requested_scale, fitted, quiet=quiet)
         if fitted != requested_scale:
             self._scale = fitted
             self.touch_scale = fitted
@@ -269,7 +269,7 @@ class PGDisplay(DisplayDriver):
         self._buffer = pg.Surface(size=(self._width, self._height), depth=self.color_depth)
         self._buffer.fill((0, 0, 0))
 
-        super().__init__()
+        super().__init__(quiet=quiet)
 
     ############### Required API Methods ################
 

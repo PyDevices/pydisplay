@@ -23,7 +23,9 @@ class FBDisplay(DisplayDriver):
         color_depth (int): The color depth of the display
     """
 
-    def __init__(self, buffer, width=None, height=None, reverse_bytes_in_word=False):
+    def __init__(
+        self, buffer, width=None, height=None, reverse_bytes_in_word=False, *, quiet=False
+    ):
         self._raw_buffer = buffer
         self._buffer = memoryview(buffer)
         self._width = width if width else buffer.width
@@ -32,7 +34,7 @@ class FBDisplay(DisplayDriver):
         self._rotation = 0
         self.color_depth = 16
 
-        super().__init__()
+        super().__init__(quiet=quiet)
 
     ############### Required API Methods ################
 

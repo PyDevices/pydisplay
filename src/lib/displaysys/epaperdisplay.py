@@ -34,7 +34,9 @@ class EPaperDisplay(DisplayDriver):
     - ``color_depth=4`` — ACeP / advanced color (4 bits per pixel, 2 per byte)
     """
 
-    def __init__(self, epaper, width=None, height=None, buffer=None, color_depth=None):
+    def __init__(
+        self, epaper, width=None, height=None, buffer=None, color_depth=None, *, quiet=False
+    ):
         self._epaper = epaper
         self._width = width if width is not None else epaper.width
         self._height = height if height is not None else epaper.height
@@ -48,7 +50,7 @@ class EPaperDisplay(DisplayDriver):
         self._rotation = 0
         self._requires_byteswap = False
         self._displayio_group = None
-        super().__init__()
+        super().__init__(quiet=quiet)
 
     def _buffer_byte_size(self):
         return (self._width * self._height * self.color_depth + 7) // 8

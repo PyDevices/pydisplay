@@ -374,6 +374,8 @@ class SDLDisplay(DisplayDriver):
         render_flags=usdl2.SDL_RENDERER_ACCELERATED | usdl2.SDL_RENDERER_PRESENTVSYNC,
         x=usdl2.SDL_WINDOWPOS_CENTERED,
         y=usdl2.SDL_WINDOWPOS_CENTERED,
+        *,
+        quiet=False,
     ):
         self._width = width
         self._height = height
@@ -415,9 +417,7 @@ class SDLDisplay(DisplayDriver):
         fitted = fit_scale_to_desktop(
             self.width, self.height, requested_scale, desktop_w, desktop_h
         )
-        notify_board_config_scale_override(
-            "SDLDisplay", requested_scale, fitted, quiet=getattr(self, "_quiet", False)
-        )
+        notify_board_config_scale_override("SDLDisplay", requested_scale, fitted, quiet=quiet)
         if fitted != requested_scale:
             self._scale = fitted
         _init_joysticks()
@@ -452,7 +452,7 @@ class SDLDisplay(DisplayDriver):
         retcheck(usdl2.SDL_SetTextureBlendMode(self._buffer, usdl2.SDL_BLENDMODE_NONE))
 
         _displays.append(self)
-        super().__init__()
+        super().__init__(quiet=quiet)
 
     ############### Required API Methods ################
 

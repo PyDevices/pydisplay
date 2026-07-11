@@ -178,14 +178,14 @@ class PixelDisplay(DisplayDriver):
         pixel_buffer: ``PixelFramebuffer`` (or Adafruit equivalent on CircuitPython).
     """
 
-    def __init__(self, pixel_buffer):
+    def __init__(self, pixel_buffer, *, quiet=False):
         self._raw_buffer = pixel_buffer
         self._width = pixel_buffer.width
         self._height = pixel_buffer.height
         self._rotation = getattr(pixel_buffer, "rotation", 0)
         self.color_depth = 16
         self._requires_byteswap = False
-        super().__init__()
+        super().__init__(quiet=quiet)
 
     def init(self) -> None:
         pass
