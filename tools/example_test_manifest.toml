@@ -318,14 +318,6 @@ kind = "oneshot"
 quit = "native_exit"
 deps = ["core"]
 
-[examples.lv_touch_test]
-import = "lv_touch_test"
-script = "examples/lv_touch_test.py"
-kind = "lvgl"
-quit = "inject"
-deps = ["lvgl"]
-timeout_s = 45
-
 [examples.nano_gui_simpletest]
 import = "nano_gui_simpletest"
 script = "examples/nano_gui_simpletest.py"

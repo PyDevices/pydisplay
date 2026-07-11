@@ -149,10 +149,6 @@
       "github:PyDevices/pydisplay/src/examples/lv_test_timer.py"
     ],
     [
-      "lv_touch_test.py",
-      "github:PyDevices/pydisplay/src/examples/lv_touch_test.py"
-    ],
-    [
       "nano_gui_simpletest.py",
       "github:PyDevices/pydisplay/src/examples/nano_gui_simpletest.py"
     ],
