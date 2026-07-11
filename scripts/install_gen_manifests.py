@@ -3,6 +3,7 @@
 import json
 import os
 from pathlib import Path
+import subprocess
 import sys
 
 _scripts = Path(__file__).resolve().parent
@@ -67,6 +68,22 @@ WOKWI_BUNDLE_EXTRA_DESTS = [
 
 def should_include_file(filename):
     return not any(filename.endswith(suffix) for suffix in SKIP_FILE_SUFFIXES)
+
+
+def is_gitignored(path):
+    """Skip generated/local-only files (e.g. graphics/framebuf.py from sync_framebuf)."""
+    try:
+        return (
+            subprocess.run(
+                ["git", "-C", repo_dir, "check-ignore", "-q", "--", path],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            ).returncode
+            == 0
+        )
+    except OSError:
+        return False
 
 
 def exclude_from_wokwi_bundle(dest):
@@ -146,6 +163,8 @@ for package_path, deps, extra_files in packages:
                 continue
             # Add the file to the package
             full_file_path = os.path.join(root, f)
+            if is_gitignored(full_file_path):
+                continue
             dest_file = package_sub_dir + os.path.relpath(full_file_path, full_path)
             src_file = repo_url + os.path.relpath(full_file_path, repo_dir)
             package_dicts[package_name]["urls"].append([dest_file, src_file])
