@@ -1,4 +1,3 @@
-# multimer types: all
 """
 displaybuf_simpletest.py - Simple test program for displaybuf.py
 """

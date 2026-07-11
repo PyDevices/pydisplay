@@ -1,4 +1,3 @@
-# multimer types: all
 import board_config
 import pdwidgets as pd
 from pdwidgets.console import Console
@@ -25,7 +24,7 @@ while i < 60:
     console.write(
         f"{i}:  vscroll={display.vscroll}, y_rel={console._cursor_y_rel}, y_pos={console._cursor_y_pos}\n"
     )
-    pd.pump()
+    pd.tick()
     # console.by_char = not console.by_char
     i += 1
 

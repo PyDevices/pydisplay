@@ -1,9 +1,10 @@
-# multimer types: async
+# pyscript featured
 """
-pydisplay_demo_async.py — asyncio version of pydisplay_demo.
+pydisplay_demo.py — flagship board_config demo: clicks, rotation, scrolling.
 
-Same UI and behaviour; uses multimer.AsyncTimer and an async main loop.
-Uses only src/lib modules (board_config, graphics, multimer, eventsys).
+Uses multimer.dual_main / run_forever so the same script runs on desktop (sync)
+and PyScript/Jupyter (async). Uses only src/lib modules (board_config, graphics,
+multimer, eventsys).
 """
 
 from board_config import display_drv, runtime

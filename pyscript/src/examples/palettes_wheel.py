@@ -1,6 +1,5 @@
-# multimer types: all
 from board_config import display_drv, runtime
-from multimer import sleep_ms
+from multimer.loop import run_forever
 from palettes import get_palette
 
 if display_drv.requires_byteswap:
@@ -14,30 +13,30 @@ palette = get_palette(name="wheel", swapped=needs_swap, length=256, saturation=1
 
 line_height = 2
 
-i = 0
 
+def _setup():
+    colors = list(palette)
+    n = len(colors)
+    st = {"ci": 0, "i": 0}
 
-def main():
-    global i
-    for color in palette:
-        if i >= display_drv.height:
-            display_drv.vscsad((line_height + i) % display_drv.height)
-        display_drv.fill_rect(0, i % display_drv.height, display_drv.width, line_height, color)
-        display_drv.show()
-        sleep_ms(0)
+    def poll():
         if runtime:
             runtime.poll()
-        if runtime.quit_requested if runtime else False:
-            return True
-        sleep_ms(1)
-        i += line_height
-    return False
+            if runtime.quit_requested:
+                return True
+        if st["i"] >= display_drv.height:
+            display_drv.vscsad((line_height + st["i"]) % display_drv.height)
+        display_drv.fill_rect(
+            0, st["i"] % display_drv.height, display_drv.width, line_height, colors[st["ci"]]
+        )
+        display_drv.show()
+        st["i"] += line_height
+        st["ci"] = (st["ci"] + 1) % n
+        return False
+
+    return poll
 
 
-def loop():
-    while True:
-        if main():
-            break
-
-
-loop()
+# run_forever blocks on desktop/MCU but yields to the event loop on PyScript
+# and Jupyter (runtime.timer_async), so the browser main thread stays live.
+run_forever(_setup(), delay_ms=1)

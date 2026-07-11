@@ -1,4 +1,3 @@
-# multimer types: all
 from board_config import display_drv
 from palettes import get_palette
 import graphics

@@ -1,4 +1,3 @@
-# multimer types: all
 import board_config
 import pdwidgets as pd
 

@@ -1,4 +1,3 @@
-# multimer types: async
 """
 A simple paint application demonstrating the use of displaysys.
 """

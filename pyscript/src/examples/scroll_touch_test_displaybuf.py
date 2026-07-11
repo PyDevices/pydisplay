@@ -1,4 +1,3 @@
-# multimer types: all
 from board_config import display_drv, runtime
 from graphics import Draw
 from multimer.loop import run_forever

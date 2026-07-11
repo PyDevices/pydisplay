@@ -1,10 +1,9 @@
-# multimer types: all
 """displaysys_fill_rect_test.py"""
 
 from random import getrandbits
 
 from board_config import display_drv, runtime
-from multimer import sleep_ms
+from multimer.loop import run_forever
 import gc
 import time
 
@@ -28,38 +27,38 @@ else:
     needs_swap = False
 
 
-def main():
+def _setup():
     block_size = 32
 
     max_x = display_drv.width - block_size - 1
     max_y = display_drv.height - block_size - 1
 
     print("Drawing blocks on display")
-    count = 0
-    start_time = time.time()
-    try:
-        while True:
-            display_drv.fill_rect(
-                randint(0, max_x),
-                randint(0, max_y),
-                block_size,
-                block_size,
-                getrandbits(16),
-            )
-            if getattr(runtime, "_timer", None) is None:
-                display_drv.show()
-            sleep_ms(0)
-            count += 1
-            if count % 1000 == 0:
-                rate = count / (time.time() - start_time)
-                print(f"blocks/sec: {rate:5.2f}")
-            if runtime:
-                runtime.poll()
-            if runtime.quit_requested if runtime else False:
-                break
-            sleep_ms(1)
-    except KeyboardInterrupt:
-        print("\nStopped.")
+    st = {"count": 0, "start_time": time.time()}
+
+    def poll():
+        display_drv.fill_rect(
+            randint(0, max_x),
+            randint(0, max_y),
+            block_size,
+            block_size,
+            getrandbits(16),
+        )
+        if getattr(runtime, "_timer", None) is None:
+            display_drv.show()
+        st["count"] += 1
+        if st["count"] % 1000 == 0:
+            rate = st["count"] / (time.time() - st["start_time"])
+            print(f"blocks/sec: {rate:5.2f}")
+        if runtime:
+            runtime.poll()
+        if runtime.quit_requested if runtime else False:
+            return True
+        return False
+
+    return poll
 
 
-main()
+# run_forever blocks on desktop/MCU but yields to the event loop on PyScript
+# and Jupyter (runtime.timer_async), so the browser main thread stays live.
+run_forever(_setup(), delay_ms=1)

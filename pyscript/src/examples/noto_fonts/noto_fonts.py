@@ -1,4 +1,3 @@
-# multimer types: all
 """
 noto_fonts.py
 =============

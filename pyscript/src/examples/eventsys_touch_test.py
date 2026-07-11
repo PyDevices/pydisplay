@@ -1,4 +1,3 @@
-# multimer types: all
 """
 eventsys_touch_test.py - Touch rotation test.
 Tests the touch driver and finds the correct rotation masks for the touch screen.

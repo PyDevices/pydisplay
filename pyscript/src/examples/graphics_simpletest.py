@@ -1,4 +1,3 @@
-# multimer types: all
 """
 Simple test example to demonstrate the use of graphics.
 """

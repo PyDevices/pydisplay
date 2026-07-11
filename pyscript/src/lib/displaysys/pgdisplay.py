@@ -394,18 +394,6 @@ class PGDisplay(DisplayDriver):
         self._frame_recorder = FFmpegFrameRecorder(path, w, h, fps)
         return self._frame_recorder
 
-    def open_frame_recorder_from_env(
-        self, env_var="PYDISPLAY_VIDEO", fps_env="PYDISPLAY_VIDEO_FPS"
-    ):
-        """Open a recorder when ``env_var`` points at an output ``.mp4`` path."""
-        import os
-
-        path = os.environ.get(env_var, "").strip()
-        if not path:
-            return None
-        fps = int(os.environ.get(fps_env, "12"))
-        return self.open_frame_recorder(path, fps=fps)
-
     def close_frame_recorder(self):
         """Finalize and detach any active frame recorder."""
         recorder = self._frame_recorder

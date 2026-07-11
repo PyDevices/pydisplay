@@ -1,5 +1,4 @@
 from board_config import runtime
-# multimer types: all
 """
 boxlines.py
 ===========
@@ -24,6 +23,7 @@ Draws lines and rectangles in random colors at random locations on the display.
 from random import getrandbits
 
 import tft_config
+from multimer.loop import run_forever
 
 palette = tft_config.palette
 
@@ -40,13 +40,14 @@ def randint(a, b):
     return a + getrandbits(bits) % span
 
 
-def main():
-    """main"""
+def _setup():
     tft = tft_config.config(tft_config.WIDE)
 
-    while True:
-        if runtime is not None:
+    def poll():
+        if runtime:
             runtime.poll()
+            if runtime.quit_requested:
+                return True
         color = palette.color565(getrandbits(8), getrandbits(8), getrandbits(8))
 
         tft.draw.line(
@@ -69,8 +70,11 @@ def main():
             palette.color565(getrandbits(8), getrandbits(8), getrandbits(8)),
         )
         tft.show()
-        if runtime.quit_requested if runtime else False:
-            break
+        return False
+
+    return poll
 
 
-main()
+# run_forever blocks on desktop/MCU but yields to the event loop on PyScript
+# and Jupyter (runtime.timer_async), so the browser main thread stays live.
+run_forever(_setup(), delay_ms=0)

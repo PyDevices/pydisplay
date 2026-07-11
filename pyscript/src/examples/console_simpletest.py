@@ -1,4 +1,3 @@
-# multimer types: all
 """
 console_simpletest.py
 

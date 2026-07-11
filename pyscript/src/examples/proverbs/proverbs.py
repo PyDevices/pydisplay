@@ -1,4 +1,3 @@
-# multimer types: all
 """
 proverbs.py
 ===========
@@ -32,7 +31,8 @@ import sys
 import tft_write
 import tft_config
 from board_config import runtime
-from multimer import Timer, sleep_ms
+from multimer import Timer
+from multimer.loop import run_forever
 
 palette = tft_config.palette
 sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
@@ -76,36 +76,41 @@ def main():
     line_height = font.HEIGHT + 8
     half_height = tft.height // 2
     half_width = tft.width // 2
-    wheel = 0
+    st = {"index": 0, "wheel": 0}
 
-    while True:
-        for proverb in proverbs:
-            proverb_lines = proverb.split("，")
-            half_lines_height = len(proverb_lines) * line_height // 2
+    def poll():
+        proverb = proverbs[st["index"]]
+        proverb_lines = proverb.split("，")
+        half_lines_height = len(proverb_lines) * line_height // 2
 
-            tft.draw.fill(palette.BLACK)
+        tft.draw.fill(palette.BLACK)
 
-            for count, proverb_line in enumerate(proverb_lines):
-                half_length = tft_write.write_width(font, proverb_line) // 2
+        for count, proverb_line in enumerate(proverb_lines):
+            half_length = tft_write.write_width(font, proverb_line) // 2
 
-                tft_write.write(
-                    tft,
-                    font,
-                    proverb_line,
-                    half_width - half_length,
-                    half_height - half_lines_height + count * line_height,
-                    color_wheel(wheel),
-                )
+            tft_write.write(
+                tft,
+                font,
+                proverb_line,
+                half_width - half_length,
+                half_height - half_lines_height + count * line_height,
+                color_wheel(st["wheel"]),
+            )
 
-            wheel = (wheel + 5) % 256
+        st["wheel"] = (st["wheel"] + 5) % 256
 
-            tft.show()
-            elist = runtime.poll() if runtime else []
-            if runtime.quit_requested if runtime else False:
-                return
-            if any(e.type == runtime.events.QUIT for e in elist):
-                return
-            sleep_ms(5000)
+        tft.show()
+        elist = runtime.poll() if runtime else []
+        if runtime.quit_requested if runtime else False:
+            return True
+        if any(e.type == runtime.events.QUIT for e in elist):
+            return True
+        st["index"] = (st["index"] + 1) % len(proverbs)
+        return False
+
+    # run_forever blocks on desktop/MCU but yields to the event loop on
+    # PyScript/Jupyter (runtime.timer_async); delay_ms pauses between proverbs.
+    run_forever(poll, delay_ms=5000)
 
 
 main()

@@ -1,4 +1,3 @@
-# multimer types: all
 """
 alien.py
 =========
@@ -27,13 +26,9 @@ https://github.com/erikflowers/weather-icons and is licensed under SIL OFL 1.1
 
 """
 
-try:
-    from time import ticks_ms
-except ImportError:
-    from multimer import ticks_ms
-
 from board_config import runtime
-from multimer import Timer, sleep_ms
+from multimer import Timer
+from multimer.loop import run_forever
 
 import tft_config
 import tft_bitmap
@@ -56,27 +51,32 @@ def main():
 
     tft = tft_config.config(tft_config.WIDE)
     width, height = tft.width, tft.height
-    col, row = width // 2 - alien.WIDTH // 2, height // 2 - alien.HEIGHT // 2
-    xd, yd = SPEED_X, SPEED_Y
-    last_col, old_row = col, row
+    st = {
+        "col": width // 2 - alien.WIDTH // 2,
+        "row": height // 2 - alien.HEIGHT // 2,
+        "xd": SPEED_X,
+        "yd": SPEED_Y,
+    }
+    st["last_col"], st["old_row"] = st["col"], st["row"]
 
-    while True:
-        last = ticks_ms()
-        tft.draw.fill_rect(last_col, old_row, alien.WIDTH, alien.HEIGHT, 0)
-        tft_bitmap.bitmap(tft, alien, col, row)
+    def poll():
+        tft.draw.fill_rect(st["last_col"], st["old_row"], alien.WIDTH, alien.HEIGHT, 0)
+        tft_bitmap.bitmap(tft, alien, st["col"], st["row"])
         tft.show()
         elist = runtime.poll() if runtime else []
         if runtime.quit_requested if runtime else False:
-            break
+            return True
         if any(e.type == runtime.events.QUIT for e in elist):
-            break
-        last_col, old_row = col, row
-        col, row = col + xd, row + yd
-        xd = -xd if col <= 0 or col >= width - alien.WIDTH else xd
-        yd = -yd if row <= 0 or row >= height - alien.HEIGHT else yd
+            return True
+        st["last_col"], st["old_row"] = st["col"], st["row"]
+        st["col"], st["row"] = st["col"] + st["xd"], st["row"] + st["yd"]
+        st["xd"] = -st["xd"] if st["col"] <= 0 or st["col"] >= width - alien.WIDTH else st["xd"]
+        st["yd"] = -st["yd"] if st["row"] <= 0 or st["row"] >= height - alien.HEIGHT else st["yd"]
+        return False
 
-        if ticks_ms() - last < TICKS:
-            sleep_ms(TICKS - (ticks_ms() - last))
+    # run_forever blocks on desktop/MCU but yields to the event loop on
+    # PyScript/Jupyter (runtime.timer_async); delay_ms sets the frame pace.
+    run_forever(poll, delay_ms=TICKS)
 
 
 main()

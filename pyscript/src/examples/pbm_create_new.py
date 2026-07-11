@@ -1,4 +1,3 @@
-# multimer types: all
 from board_config import display_drv
 from graphics import Draw, FrameBuffer, RGB565
 from pbm import PBM

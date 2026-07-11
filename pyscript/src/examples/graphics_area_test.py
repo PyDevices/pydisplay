@@ -1,4 +1,3 @@
-# multimer types: all
 """
 Test the Area return type of the shapes functions.
 

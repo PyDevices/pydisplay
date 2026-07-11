@@ -40,7 +40,6 @@ Classes:
 Functions:
     tick: Calls the tick method of all Display objects.
     init_timer: Records the desired tick period (compatibility shim).
-    pump: Processes one widget frame during setup bursts.
     run_forever: Drives the cooperative widget loop until quit.
 
 Optional add-on dependency:
@@ -108,7 +107,7 @@ def init_timer(period=10):
     Record the desired widget tick period (compatibility shim).
 
     pdwidgets no longer owns a timer (see the module "Timer architecture"
-    note): frames are driven cooperatively by :func:`run_forever` / :func:`pump`.
+    note): frames are driven cooperatively by :func:`run_forever` / :func:`tick`.
     This function is retained so existing examples that call
     ``pd.init_timer(10)`` keep working; it only stores ``period`` as the poll
     delay used by :func:`run_forever`.
@@ -134,17 +133,6 @@ def _poll_widgets():
                 if e.type in events.filter:
                     display.handle_event(e)
     return False
-
-
-def pump():
-    """
-    Process one widget frame during setup bursts (before :func:`run_forever`).
-
-    Because pdwidgets owns no timer, this always calls :func:`tick` so drawing
-    performed while building the UI (e.g. a ``Console`` writing in a ``while``
-    loop) is flushed to the display.
-    """
-    tick()
 
 
 def run_forever():

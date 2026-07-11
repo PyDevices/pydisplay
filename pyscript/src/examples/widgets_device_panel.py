@@ -1,4 +1,3 @@
-# multimer types: all
 """
 widgets_device_panel
 ====================================================

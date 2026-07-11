@@ -18,6 +18,11 @@ from ._area import Area
 
 sep = os.sep if hasattr(os, "sep") else "/"  # PyScipt doesn't have os.sep
 
+try:  # MicroPython-WASM (PyScript) does not define FileNotFoundError.
+    _FileNotFoundError = FileNotFoundError
+except NameError:
+    _FileNotFoundError = OSError
+
 # Default embedded romfont data (https://github.com/spacerace/romfont).
 
 _FONTS = {
@@ -185,7 +190,7 @@ class Font:
                     f"Invalid font file: {self.font_data} is {filesize} bytes, expected {256 * self.height}"
                 )
         except OSError as err:
-            raise FileNotFoundError(f"Could not find font file: {self.font_data}") from err
+            raise _FileNotFoundError(f"Could not find font file: {self.font_data}") from err
         except OverflowError:
             # os.stat can throw this on boards without long int support
             # just hope the font file is valid and press on

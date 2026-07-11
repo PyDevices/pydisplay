@@ -1,5 +1,4 @@
 from board_config import runtime
-# multimer types: all
 """
 color_test.py
 =============
@@ -23,7 +22,7 @@ gradient.  Then repeatedly draws a borders around the display in the same colors
 
 """
 
-from multimer import sleep_ms
+from multimer.loop import run_forever
 import tft_config
 import tft_text
 import vga2_bold_16x32 as font
@@ -76,22 +75,28 @@ def main():
 
     tft.show()
 
-    while True:
-        if runtime is not None:
+    border_colors = [palette.RED, palette.GREEN, palette.BLUE]
+    st = {"ci": 0}
+
+    def poll():
+        if runtime:
             runtime.poll()
-        for color in [palette.RED, palette.GREEN, palette.BLUE]:
-            for x in range(tft.width):
-                tft.draw.pixel(x, 0, color)
-                tft.draw.pixel(x, tft.height - 1, color)
+            if runtime.quit_requested:
+                return True
+        color = border_colors[st["ci"]]
+        for x in range(tft.width):
+            tft.draw.pixel(x, 0, color)
+            tft.draw.pixel(x, tft.height - 1, color)
+        for y in range(tft.height):
+            tft.draw.pixel(0, y, color)
+            tft.draw.pixel(tft.width - 1, y, color)
+        tft.show()
+        st["ci"] = (st["ci"] + 1) % len(border_colors)
+        return False
 
-            for y in range(tft.height):
-                tft.draw.pixel(0, y, color)
-                tft.draw.pixel(tft.width - 1, y, color)
-
-            tft.show()
-            if runtime.quit_requested if runtime else False:
-                return
-            sleep_ms(1000)
+    # run_forever blocks on desktop/MCU but yields to the event loop on PyScript
+    # and Jupyter (runtime.timer_async), so the browser main thread stays live.
+    run_forever(poll, delay_ms=1000)
 
 
 main()

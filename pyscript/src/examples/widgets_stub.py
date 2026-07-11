@@ -1,6 +1,5 @@
 import board_config
 import pdwidgets as pd
-from pdwidgets import pct
 
 pd.DEBUG = False
 pd.MARK_UPDATES = False
@@ -26,24 +25,14 @@ status = pd.TextBox(
 clock_toggle.add_event_cb(
     pd.events.MOUSEBUTTONDOWN, lambda sender, e: clock.hide(not sender.value)
 )
-
-
-box = pd.Widget(main, align=pd.ALIGN.CENTER, w=100, h=100, bg=display.color_theme.primary)
-button = pd.Button(
-    box,
-    align=pd.ALIGN.CENTER,
-    w=pct.Width(50, box),
-    h=pct.Height(50, box),
-    bg=display.color_theme.secondary,
+button = pd.Button(main, label="Button")
+button.add_event_cb(
+    pd.events.MOUSEBUTTONDOWN, lambda sender, e: status.set_value("Button clicked!")
 )
-
-
-def inflate_box():
-    box.set_position(w=box.width + 10, h=box.height + 10)
-
-
-button.add_event_cb(pd.events.MOUSEBUTTONUP, lambda sender, e: inflate_box())
-
+button.add_event_cb(
+    pd.events.MOUSEBUTTONUP, lambda sender, e: status.set_value("Button released.")
+)
 screen.visible = True
+
 
 pd.run_forever()

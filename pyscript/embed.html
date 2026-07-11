@@ -106,6 +106,7 @@
     window.__pydisplayManifests = plan.manifests.join(',');
     window.__pydisplayEntryKind = plan.entryKind || '';
     window.__pydisplayEntry = plan.entryName || '';
+    window.__pydisplayDebug = plan.debug ? '1' : '';
     window.__pydisplayAutotest = plan.autotest ? '1' : '';
     window.__pydisplayAutotestDuration = String(plan.autotestDuration);
 
@@ -127,6 +128,24 @@
 import builtins
 from js import document
 import sys
+
+# Loader trace: emits `MARK:<step>` console lines for debugging the PyScript
+# bootstrap (mip install, imports, entry). Opt-in only — no-op unless the page
+# is loaded with `?debug=1`, so normal gallery visitors see no console noise.
+def _mark(step, **data):
+    try:
+        from js import window, console
+
+        flag = str(getattr(window, "__pydisplayDebug", "") or "").strip().lower()
+        if flag not in ("1", "true", "yes"):
+            return
+        extra = "" if not data else " " + " ".join("%s=%s" % (k, v) for k, v in data.items())
+        console.log("MARK:" + step + extra)
+    except Exception:
+        pass
+
+
+_mark("mpy_top")
 
 MANIFEST_MIP_TARGET = "examples"
 
@@ -320,22 +339,54 @@ def _mip_base():
     return "github:PyDevices/pydisplay/web/pyscript/"
 
 def _run():
+    # #region loader trace
+    _mark("run_start")
+    # #endregion
     if _from_window("__pydisplayLoaderDisabled"):
         return
     modules, manifests, entry = _loader_plan()
     if not entry:
         return
+    # #region loader trace
+    _mark("plan", entry=entry, modules=",".join(modules), manifests=",".join(manifests))
+    _mark("before_import_mip")
+    # #endregion
     import mip
+    # #region loader trace
+    _mark("after_import_mip")
+    # #endregion
     mip_base = _mip_base()
     for name in manifests:
+        # #region loader trace
+        _mark("before_mip_manifest", name=name)
+        # #endregion
         mip.install(mip_base + name + ".json", target=MANIFEST_MIP_TARGET)
+        # #region loader trace
+        _mark("after_mip_manifest", name=name)
+        # #endregion
     for name in modules:
+        # #region loader trace
+        _mark("before_mip_module", name=name)
+        # #endregion
         mip.install(mip_base + "src/examples/" + name + ".py")
+        # #region loader trace
+        _mark("after_mip_module", name=name)
+        # #endregion
     if _autotest_enabled():
         _install_test_mode()
         _schedule_pyscript_autotest(entry)
+    # #region loader trace
+    _mark("before_import_lib_path")
+    # #endregion
     import lib.path
+    # #region loader trace
+    _mark("after_import_lib_path")
+    _mark("before_import_entry", entry=entry)
+    # #endregion
     __import__(entry)
+    # #region loader trace
+    _mark("after_import_entry", entry=entry)
+    # #endregion
     if _autotest_enabled() and not _autotest_sent[0]:
         try:
             import asyncio

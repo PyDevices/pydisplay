@@ -1,5 +1,4 @@
 from board_config import runtime
-# multimer types: all
 """
 rotations.py
 ============
@@ -23,7 +22,7 @@ number and the color of the display background.
 
 """
 
-from multimer import sleep_ms
+from multimer.loop import run_forever
 import tft_config
 import tft_text
 import vga1_16x16 as font
@@ -78,35 +77,34 @@ def main():
         ("Magenta", palette.MAGENTA, palette.BLACK),
     )
 
-    color_idx = 0
-    while True:
-        if runtime is not None:
+    st = {"rotation": 0, "color_idx": 0}
+
+    def poll():
+        if runtime:
             runtime.poll()
-        for rotation in range(4):
-            tft.rotation = rotation
-            height = tft.height
-            width = tft.width
-            fg = colors[color_idx][2]
-            bg = colors[color_idx][1]
+            if runtime.quit_requested:
+                return True
+        rotation = st["rotation"]
+        color_idx = st["color_idx"]
+        tft.rotation = rotation
+        height = tft.height
+        width = tft.width
+        fg = colors[color_idx][2]
+        bg = colors[color_idx][1]
 
-            tft.draw.fill(bg)
+        tft.draw.fill(bg)
+        tft.draw.rect(0, 0, width, height, palette.WHITE)
+        center_on(tft, font, "Rotation", height // 3 - font.HEIGHT // 2, fg, bg)
+        center_on(tft, font, str(rotation), height // 2 - font.HEIGHT // 2, fg, bg)
+        center_on(tft, font, colors[color_idx][0], height // 3 * 2 - font.HEIGHT // 2, fg, bg)
+        tft.show()
+        st["color_idx"] = (color_idx + 1) % len(colors)
+        st["rotation"] = (rotation + 1) % 4
+        return False
 
-            tft.draw.rect(0, 0, width, height, palette.WHITE)
-            center_on(tft, font, "Rotation", height // 3 - font.HEIGHT // 2, fg, bg)
-            center_on(tft, font, str(rotation), height // 2 - font.HEIGHT // 2, fg, bg)
-            center_on(
-                tft,
-                font,
-                colors[color_idx][0],
-                height // 3 * 2 - font.HEIGHT // 2,
-                fg,
-                bg,
-            )
-            tft.show()
-            color_idx = (color_idx + 1) % len(colors)
-            if runtime.quit_requested if runtime else False:
-                return
-            sleep_ms(2000)
+    # run_forever blocks on desktop/MCU but yields to the event loop on PyScript
+    # and Jupyter (runtime.timer_async), so the browser main thread stays live.
+    run_forever(poll, delay_ms=2000)
 
 
 main()

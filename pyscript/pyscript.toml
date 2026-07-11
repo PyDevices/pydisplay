@@ -134,6 +134,8 @@
 "./src/add_ons/pdwidgets/icons/warning_24dp.pbm" = "/add_ons/pdwidgets/icons/"
 "./src/add_ons/pdwidgets/icons/warning_36dp.pbm" = "/add_ons/pdwidgets/icons/"
 "./src/add_ons/pdwidgets/icons/warning_48dp.pbm" = "/add_ons/pdwidgets/icons/"
+"./src/add_ons/pixel_sim/__init__.py" = "/add_ons/pixel_sim/"
+"./src/add_ons/pixel_sim/board_config.py" = "/add_ons/pixel_sim/"
 
 "./src/lib/board_config.py" = "/lib/"
 "./src/lib/env_util.py" = "/lib/"
