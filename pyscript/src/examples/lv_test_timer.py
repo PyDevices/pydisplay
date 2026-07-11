@@ -234,8 +234,9 @@ def main_sync():
     _setup()
     # Avoid multimer.sleep_ms here: on CPython/Linux the librt signal handler
     # drives LVGL, and sleeping in the timer backend can deadlock the main thread.
-    # Do not call runtime.poll() either while the signal-driven LVGL tick is live —
-    # quit comes from the test-mode deadline hook (or window close via force_quit).
+    # Do not call runtime.poll() while LVGL owns input: VirtualDevices drain the
+    # host queue from indev read_cb; a parallel poll steals mouse events.
+    # Quit comes from the test-mode deadline hook (or window close via force_quit).
     from multimer import run_deadline_hook
 
     while True:
@@ -249,11 +250,12 @@ async def main_async():
     _setup()
     from multimer import asyncio
 
+    # See main_sync: do not runtime.poll() — LVGL indev reads the host device.
     while True:
-        runtime.poll()
         if _poll_done():
             break
-        await asyncio.sleep(0)
+        # sleep(0) starves the browser main thread on PyScript (same class as delay_ms=0).
+        await asyncio.sleep(0.01)
 
 
 # --- kit / automated path (tools/lv_timer_test_kit.py) ---
@@ -387,8 +389,8 @@ async def _run_kit_async():
     deadline = time.time() + _DURATION_S
     clicked_taps = None
     while time.time() < deadline:
-        runtime.poll()
-        await asyncio.sleep(0)
+        # See main_sync: do not runtime.poll() while LVGL owns the host queue.
+        await asyncio.sleep(0.01)
         if clicked_taps is None and get_state()["seconds"] >= 2:
             cx, cy = _button_center(btn)
             clicked_taps = await _inject_click_async(cx, cy)

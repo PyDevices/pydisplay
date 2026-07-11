@@ -141,6 +141,7 @@ class BusDisplay(DisplayDriver):
         brightness_command=None,  # For color OLEDs
         data_as_commands=False,  # For color OLEDs
         single_byte_bounds=False,  # For color OLEDs
+        quiet=False,
     ):
         gc.collect()
         self.display_bus = display_bus
@@ -199,7 +200,7 @@ class BusDisplay(DisplayDriver):
         # This should run immediately after _init_bytes() or _init_list() but before
         # sending other commands such as _INVON, _INVOFF, _COLMOD, brightness, etc.
         self._initialized = False
-        super().__init__()
+        super().__init__(quiet=quiet)
         if not self._initialized:
             raise RuntimeError("Display driver init() must call super().init()")
 

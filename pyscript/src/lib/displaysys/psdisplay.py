@@ -275,7 +275,7 @@ class PSDisplay(DisplayDriver):
         height (int, optional): The height of the display. Defaults to None.
     """
 
-    def __init__(self, id, width=None, height=None):
+    def __init__(self, id, width=None, height=None, *, quiet=False):
         self._canvas = document.getElementById(id)
         self._vis_ctx = self._canvas.getContext("2d")
         self._buffer = None
@@ -284,12 +284,11 @@ class PSDisplay(DisplayDriver):
         self._height = height or self._canvas.height
         self._requires_byteswap = False
         self._rotation = 0
-        self._quiet = True
         self.color_depth = 16
         self.quit_chord = default_quit_chord()
         self.touch_scale = 1.0
 
-        super().__init__()
+        super().__init__(quiet=quiet)
 
     ############### Required API Methods ################
 

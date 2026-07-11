@@ -10,12 +10,9 @@
             from pyscript import document
             term = document.querySelector('script[terminal]').terminal
             term.resize(99, 24)
-            print('To download example code, type:')
-            print('  import mip')
-            print('  mip.install("github:PyDevices/pydisplay/packages/examples.json", target="examples")')
-
             import code
             code.interact(local=globals())
+            import lib.path
         </script>
         <canvas id="display_canvas" width="1" height="1" style="background-color: black; border:2px solid black;"></canvas>
     </body>

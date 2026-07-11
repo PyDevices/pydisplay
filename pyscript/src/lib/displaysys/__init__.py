@@ -230,9 +230,8 @@ class DisplayDriver:
 
     needs_refresh = False
 
-    def __init__(self):
-        if not hasattr(self, "_quiet"):
-            self._quiet = False
+    def __init__(self, *, quiet=False):
+        self._quiet = quiet
         if not self._quiet:
             print(f"Initializing {self.__class__.__name__}...")
         gc.collect()
