@@ -171,18 +171,24 @@ def plasma_main():
 
 
 # --- fire -------------------------------------------------------------------
+# Doom-style heat map: seed the bottom row, each cell samples below with a
+# random horizontal drift and cools. Cooling scales with grid height so a
+# short LED matrix (e.g. 64x16) still tapers to black instead of filling solid.
 
 _FIRE_FRAME_MS = 30
-_FIRE_COOLING = 3
+_FIRE_COOLING = max(2, 200 // GRID_H)
 
 
 def _fire_color(i):
-    if i < 64:
+    """Black → red → orange → yellow → white (heat index 0..255)."""
+    if i < 32:
         return color565(i * 4, 0, 0)
-    if i < 128:
-        return color565(255, (i - 64) * 4, 0)
-    if i < 192:
-        return color565(255, 255, (i - 128) * 4)
+    if i < 96:
+        return color565(128 + (i - 32), (i - 32) * 2, 0)
+    if i < 160:
+        return color565(255, 128 + (i - 96) * 2, 0)
+    if i < 224:
+        return color565(255, 255, (i - 160) * 4)
     return color565(255, 255, 255)
 
 
@@ -192,23 +198,35 @@ _fire_dest = FrameBuffer(bytearray(GRID_W * GRID_H * 2), GRID_W, GRID_H, RGB565)
 
 
 def _fire_seed():
+    """Hot, gappy embers along the bottom row."""
     base = (GRID_H - 1) * GRID_W
     for x in range(GRID_W):
-        _fire_heat[base + x] = 255 if getrandbits(3) else 160 + getrandbits(6)
+        r = getrandbits(3)
+        if r == 0:
+            _fire_heat[base + x] = 0
+        elif r < 3:
+            _fire_heat[base + x] = 96 + getrandbits(6)
+        else:
+            _fire_heat[base + x] = 192 + getrandbits(6)
 
 
 def _fire_propagate():
     w = GRID_W
+    h = GRID_H
     heat = _fire_heat
-    for y in range(GRID_H - 1):
+    cool = _FIRE_COOLING
+    # Top → bottom so each cell reads the still-old row below (heat rises 1/frame).
+    for y in range(h - 1):
         row = y * w
         below = row + w
         for x in range(w):
-            b = below + x
-            left = b - 1 if x > 0 else b
-            right = b + 1 if x < w - 1 else b
-            below2 = b + w if y + 2 < GRID_H else b
-            v = (heat[b] + heat[left] + heat[right] + heat[below2]) // 4 - _FIRE_COOLING
+            drift = (getrandbits(2) % 3) - 1  # -1, 0, or +1
+            sx = x + drift
+            if sx < 0:
+                sx = 0
+            elif sx >= w:
+                sx = w - 1
+            v = heat[below + sx] - cool - getrandbits(2)
             heat[row + x] = v if v > 0 else 0
 
 

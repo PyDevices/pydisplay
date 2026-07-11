@@ -39,7 +39,6 @@ Private working notes for this repo. Not part of the published docs.
 ### displaysys & desktop
 
 - [ ] **CircuitPython `SDLDisplay` forced software renderer** — `sdldisplay.py` downgrades accelerated GL on CP only (`SetRenderTarget` / `glFramebufferTexture2DEXT` fails on rotated render targets). On the same host MP unix uses SDL2 too; investigate whether this is a real CP/usdl2-binding difference or an outdated workaround — goal: HW-accelerated SDL on CP unix matching MP, or document the actual root cause
-- [ ] Make sure all desktop backends exit gracefully in `displaysys`
 
 ### Publishing & packaging
 
@@ -49,7 +48,6 @@ Private working notes for this repo. Not part of the published docs.
 ### Examples & demos
 
 - [ ] Audit all examples: for each, note what it demonstrates and how it helps users and/or the matrix test kit; decide keep, consolidate, or delete. Many were small development probes (e.g. scrolling/rotation for touch→screen coords) that may have limited value now that those bugs are fixed; others (e.g. `font_simpletest*.py`) overlap but show different methods with different speed/resource/transparency tradeoffs — keep distinct approaches where that teaching value matters. Large surface area, but a structured pass should be relatively quick
-- [ ] `pixel_sim_demos` fire effect — cellular flame does not look/behave correctly on the simulator (fix heat propagation / palette)
 - [ ] Make all examples runnable on PyScript, then Jupyter notebook
 
 ### Platforms & hardware
@@ -84,6 +82,8 @@ Private working notes for this repo. Not part of the published docs.
 
 ### Done
 
+- [x] `pixel_sim_demos` fire effect — Doom-style heat rise with height-scaled cooling, gappy embers, black→white palette (was blurry average + cooling=3 that filled a short 16-row grid solid)
+- [x] Make sure all desktop backends exit gracefully in `displaysys`
 - [x] Fix cmods `manifest.py` / `build_mp.sh` frozen-manifest selection — `build_mp.sh` exports `FROZEN_MANIFEST_UPSTREAM` to the MicroPython freeze file for the build; static `cmods/manifest.py` includes cmod siblings then that path (no generated wrapper). Verified via `cmods/scripts/verify_frozen_manifest_parity.sh`: unix standard/coverage, windows dev, webassembly pyscript, esp32 ESP32_GENERIC_P4/C6_WIFI + M5STACK_ATOM, rp2 RPI_PICO
 - [x] Verify `manifest.py` selection order in `~/github/cmods` — **was incorrect;** fixed (see above)
 - [x] Remove redundant and consolidate overlapping scripts under `scripts/`; remove unused ones — deleted `migrate_*_to_runtime.py` and `generate_epaper_board_configs.py` (use `generate_board_configs.py` / `--kind epaper`); moved `tools/make_color_icons.py` → `scripts/assets_make_color_icons.py`; docs/tests updated
