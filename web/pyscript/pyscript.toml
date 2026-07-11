@@ -1,3 +1,5 @@
+interpreter = "./vendor/micropython/micropython.mjs"
+
 [files]
 "./src/add_ons/README.md" = "/add_ons/"
 "./src/add_ons/byteswap.py" = "/add_ons/"

@@ -101,6 +101,8 @@ def wokwi_bundle_from_master(master):
 
 # Paths in pyscript.toml [files] — relative to web/pyscript/ (browser URL ./src/...).
 PYSCRIPT_TOML_SRC_PREFIX = "./"
+# Local MicroPython WASM (vendor/); PyScript config key to use it instead of the CDN build.
+PYSCRIPT_INTERPRETER = "./vendor/micropython/micropython.mjs"
 
 
 def pyscript_toml_file_entry(repo_relative_path: str, mount: str) -> str:
@@ -110,7 +112,11 @@ def pyscript_toml_file_entry(repo_relative_path: str, mount: str) -> str:
 
 package_dicts = {}
 master_package = {"urls": [], "version": package_ver}
-master_toml = ["[files]"]
+master_toml = [
+    f'interpreter = "{PYSCRIPT_INTERPRETER}"',
+    "",
+    "[files]",
+]
 # Standalone files included in the bundle but not discovered by package walks.
 extra_files_added_to_master = [os.path.join(src_dir, "jupyter_notebook.ipynb")]
 
