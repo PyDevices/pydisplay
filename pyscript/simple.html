@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Editor</title>
+        <title>Simple</title>
         <script src="./mini-coi-fd.js"></script>
-        <script type="module" src="./vendor/core.js"></script>    </head>
+        <script type="module" src="./vendor/core.js"></script>
+    </head>
     <body>
         <canvas id="display_canvas" width="1" height="1" style="background-color: black; border:2px solid black;"></canvas>
         <script type="mpy-editor" config="./pyscript.toml">
             import mip
-            mip.install("github:PyDevices/pydisplay/src/examples/paint.py")
+            mip.install("github:PyDevices/pydisplay/src/examples/pydisplay_demo.py")
 
             import lib.path
-            import paint
+            import pydisplay_demo
         </script>
     </body>
 </html>
