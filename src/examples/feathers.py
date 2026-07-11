@@ -27,6 +27,7 @@ import math
 from random import getrandbits
 
 import tft_config
+from multimer.loop import run_forever
 from palettes.wheel import WheelPalette
 
 
@@ -48,10 +49,7 @@ def between(left, right, along):
     return left * (1 - dist) + right * dist
 
 
-def main():
-    """
-    The big show!
-    """
+def _setup():
     tft = tft_config.config(tft_config.FEATHERS)
 
     if tft.requires_byteswap:
@@ -67,48 +65,59 @@ def main():
     tfa = tft_config.TFA
     bfa = tft_config.BFA
 
-    scroll = 0
-    wheel = 0
-
     tft.vscrdef(tfa, height, bfa)
-    tft.vscsad(scroll + tfa)
+    tft.vscsad(0 + tfa)
     tft.draw.fill(palette.BLACK)
     tft.show()
 
     half = (width >> 1) - 1
-    interval = 0
-    increment = 0
-    counter = 1
-    current_x = 0
-    last_x = 0
-
     y_offsets = [i * (height // 8) - 1 for i in range(2, 9)]
 
-    while True:
-        if runtime is not None:
-            runtime.poll()
-        if counter > interval:
-            last_x = current_x
-            current_x = randint(0, half)
-            counter = 0
-            interval = randint(10, 100)
-            increment = 1 / interval
+    st = {
+        "scroll": 0,
+        "wheel": 0,
+        "interval": 0,
+        "increment": 0,
+        "counter": 1,
+        "current_x": 0,
+        "last_x": 0,
+    }
 
+    def poll():
+        if runtime:
+            runtime.poll()
+            if runtime.quit_requested:
+                return True
+        if st["counter"] > st["interval"]:
+            st["last_x"] = st["current_x"]
+            st["current_x"] = randint(0, half)
+            st["counter"] = 0
+            st["interval"] = randint(10, 100)
+            st["increment"] = 1 / st["interval"]
+
+        scroll = st["scroll"]
         tft.draw.hline(0, scroll, width, palette.BLACK)
         tft.vscsad(scroll + tfa)
 
-        tween = int(between(last_x, current_x, counter * increment))
+        tween = int(between(st["last_x"], st["current_x"], st["counter"] * st["increment"]))
 
         for i, y_offset in enumerate(y_offsets):
-            tft.draw.pixel(half + tween, (scroll + y_offset) % height, palette[wheel + (i << 2)])
-            tft.draw.pixel(half - tween, (scroll + y_offset) % height, palette[wheel + (i << 2)])
+            tft.draw.pixel(
+                half + tween, (scroll + y_offset) % height, palette[st["wheel"] + (i << 2)]
+            )
+            tft.draw.pixel(
+                half - tween, (scroll + y_offset) % height, palette[st["wheel"] + (i << 2)]
+            )
 
         tft.show()
-        if runtime.quit_requested if runtime else False:
-            break
-        scroll = (scroll + 1) % height
-        wheel = (wheel + 1) % 256
-        counter += 1
+        st["scroll"] = (scroll + 1) % height
+        st["wheel"] = (st["wheel"] + 1) % 256
+        st["counter"] += 1
+        return False
+
+    return poll
 
 
-main()
+# run_forever blocks on desktop/MCU but yields to the event loop on PyScript
+# and Jupyter (runtime.timer_async), so the browser main thread stays live.
+run_forever(_setup(), delay_ms=0)

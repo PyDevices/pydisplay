@@ -35,7 +35,8 @@ from random import getrandbits
 import tft_bitmap
 import tft_config
 from board_config import runtime
-from multimer import Timer, sleep_ms
+from multimer import Timer
+from multimer.loop import run_forever
 
 palette = tft_config.palette
 sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
@@ -213,7 +214,7 @@ def main():
 
     # move and draw sprites
 
-    while True:
+    def poll():
         for sprite in sprites:
             sprite.clear()
             sprite.move(sprites)
@@ -222,11 +223,15 @@ def main():
         tft.show()
         elist = runtime.poll() if runtime else []
         if runtime.quit_requested if runtime else False:
-            break
+            return True
         if any(e.type == runtime.events.QUIT for e in elist):
-            break
+            return True
         gc.collect()
-        sleep_ms(50)
+        return False
+
+    # run_forever blocks on desktop/MCU but yields to the event loop on
+    # PyScript/Jupyter (runtime.timer_async), keeping the browser responsive.
+    run_forever(poll, delay_ms=50)
 
 
 main()

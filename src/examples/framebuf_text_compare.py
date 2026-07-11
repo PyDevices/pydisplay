@@ -25,10 +25,10 @@ if _src not in sys.path:
 
 import lib.path  # noqa: F401
 
-from board_config import display_drv
+from board_config import display_drv, runtime
 import framebuf as native_fb
 import graphics as gfx_native
-from multimer import sleep_ms
+from multimer.loop import run_forever
 
 _GRAPHICS_PY_FILES = (
     "__init__.py",
@@ -183,14 +183,16 @@ print("  bottom-left  = graphics cmod (text8/14/16, text, FB.text)")
 print("  bottom-right = lib/graphics (same APIs)")
 print("Close the window or press Ctrl+C here.")
 
-try:
-    from displaysys.sdldisplay import get_events
-except ImportError:
-    from displaysys.pgdisplay import get_events
 
-while True:
-    events = get_events()
-    if events:
-        for _ev in events:
-            pass
-    sleep_ms(50)
+def poll():
+    if runtime:
+        runtime.poll()
+        if runtime.quit_requested:
+            return True
+    return False
+
+
+# The comparison image is static: draw once (above) then just service events.
+# run_forever blocks on desktop/MCU but yields to the event loop on PyScript
+# and Jupyter (runtime.timer_async), so the browser main thread stays live.
+run_forever(poll, delay_ms=50)

@@ -4,6 +4,7 @@ A simple test of an encoder in eventsys.
 """
 
 from board_config import display_drv, runtime
+from multimer.loop import run_forever
 
 color_byte = 1
 bg_color = 0xFF00
@@ -25,16 +26,16 @@ def draw_line():
 display_drv.vscsad(y_pos)
 draw_line()
 
-while True:
+
+def poll():
+    global color_byte, bg_color, y_pos, x_pos
     if runtime.quit_requested:
-        break
+        return True
     if not (elist := runtime.poll()):
-        continue
-    quit_requested = False
+        return False
     for e in elist:
         if e.type == runtime.events.QUIT:
-            quit_requested = True
-            break
+            return True
         if e.type == runtime.events.MOUSEWHEEL:
             if e.y != 0:
                 direction = factor if e.y > 0 else -factor
@@ -56,5 +57,9 @@ while True:
             elif e.button == 3:
                 bg_color = ~bg_color
                 draw_line()
-    if quit_requested:
-        break
+    return False
+
+
+# run_forever blocks on desktop/MCU but yields to the event loop on PyScript
+# and Jupyter (runtime.timer_async), so the browser main thread stays live.
+run_forever(poll, delay_ms=20)

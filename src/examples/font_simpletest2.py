@@ -15,6 +15,7 @@ from board_config import display_drv, runtime
 from graphics import Font
 from random import getrandbits
 from palettes import get_palette
+from multimer.loop import run_forever
 
 
 def randint(a, b):
@@ -37,10 +38,7 @@ def write(font, string, x, y, fg_color, bg_color, scale):
     font.text(display_drv, string, x, y, fg_color, scale)
 
 
-def main():
-    """
-    The big show!
-    """
+def _setup():
     pal = get_palette()
 
     write_text = "Hello!"
@@ -56,33 +54,51 @@ def main():
     max_width = max([font.width for font in fonts])
     max_height = max([font.height for font in fonts])
 
-    while True:
-        for rotation in range(4):
-            scale = rotation + 1
-            display_drv.rotation = rotation * 90
-            width, height = display_drv.width, display_drv.height
-            # display_drv.fill_rect(0, 0, width, height, 0x0000)
+    # count starts full so the first poll opens a fresh rotation before drawing.
+    st = {"rotation": 0, "count": iterations, "scale": 1, "col_max": 0, "row_max": 0}
 
-            col_max = width - max_width * scale * text_len
-            row_max = height - max_height * scale
-            if col_max < 0 or row_max < 0:
-                raise RuntimeError("This font is too big to display on this screen.")
+    def start_rotation():
+        st["scale"] = st["rotation"] + 1
+        display_drv.rotation = st["rotation"] * 90
+        width, height = display_drv.width, display_drv.height
+        st["col_max"] = width - max_width * st["scale"] * text_len
+        st["row_max"] = height - max_height * st["scale"]
+        if st["col_max"] < 0 or st["row_max"] < 0:
+            raise RuntimeError("This font is too big to display on this screen.")
+        st["count"] = 0
+        st["rotation"] = (st["rotation"] + 1) % 4
 
-            for _ in range(iterations):
-                write(
-                    fonts[randint(0, len(fonts) - 1)],
-                    write_text,
-                    randint(0, col_max),
-                    randint(0, row_max),
-                    pal[randint(0, len(pal) - 1)],
-                    pal[randint(0, len(pal) - 1)],
-                    scale,
-                )
-                display_drv.show()
-                if runtime:
-                    runtime.poll()
-                if runtime.quit_requested if runtime else False:
-                    return
+    def poll():
+        if runtime:
+            runtime.poll()
+            if runtime.quit_requested:
+                return True
+        if st["count"] >= iterations:
+            start_rotation()
+            return False
+        write(
+            fonts[randint(0, len(fonts) - 1)],
+            write_text,
+            randint(0, st["col_max"]),
+            randint(0, st["row_max"]),
+            pal[randint(0, len(pal) - 1)],
+            pal[randint(0, len(pal) - 1)],
+            st["scale"],
+        )
+        display_drv.show()
+        st["count"] += 1
+        return False
+
+    return poll
+
+
+def main():
+    """
+    The big show!
+    """
+    # run_forever blocks on desktop/MCU but yields to the event loop on PyScript
+    # and Jupyter (runtime.timer_async), so the browser main thread stays live.
+    run_forever(_setup(), delay_ms=1)
 
 
 main()

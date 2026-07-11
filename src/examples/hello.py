@@ -25,12 +25,14 @@ https://www.youtube.com/watch?v=atBa0BYPAAc
 
 from random import getrandbits
 
-from multimer import sleep_ms
 import tft_config
 import tft_text
 import vga2_bold_16x32 as font
+from multimer.loop import run_forever
 
 palette = tft_config.palette
+
+WORDS_PER_ROTATION = 100
 
 
 def randint(a, b):
@@ -48,49 +50,53 @@ def randint(a, b):
     return a + getrandbits(bits) % span
 
 
+def _setup():
+    tft = tft_config.config(tft_config.WIDE)
+    # count starts full so the first poll opens a fresh rotation before drawing.
+    st = {"rotation": 0, "count": WORDS_PER_ROTATION, "col_max": 0, "row_max": 0}
+
+    def start_rotation():
+        tft.rotation = st["rotation"]
+        tft.draw.fill(0)
+        tft.show()
+        st["col_max"] = tft.width - font.WIDTH * 5
+        st["row_max"] = tft.height - font.HEIGHT
+        if st["col_max"] < 0 or st["row_max"] < 0:
+            raise RuntimeError("This font is too big to display on this screen.")
+        st["count"] = 0
+        st["rotation"] = (st["rotation"] + 1) % 4
+
+    def poll():
+        if runtime:
+            runtime.poll()
+            if runtime.quit_requested:
+                return True
+        if st["count"] >= WORDS_PER_ROTATION:
+            start_rotation()
+            return False
+        tft_text.text(
+            tft,
+            font,
+            "Hello",
+            randint(0, st["col_max"]),
+            randint(0, st["row_max"]),
+            palette.color565(getrandbits(8), getrandbits(8), getrandbits(8)),
+            palette.color565(getrandbits(8), getrandbits(8), getrandbits(8)),
+        )
+        tft.show()
+        st["count"] += 1
+        return False
+
+    return poll
+
+
 def main():
     """
     The big show!
     """
-    tft = tft_config.config(tft_config.WIDE)
-
-    while True:
-        for rotation in range(4):
-            tft.rotation = rotation
-            tft.draw.fill(0)
-            tft.show()
-            if runtime:
-                runtime.poll()
-            sleep_ms(0)
-            col_max = tft.width - font.WIDTH * 5
-            row_max = tft.height - font.HEIGHT
-            if col_max < 0 or row_max < 0:
-                raise RuntimeError("This font is too big to display on this screen.")
-
-            for _ in range(100):
-                tft_text.text(
-                    tft,
-                    font,
-                    "Hello",
-                    randint(0, col_max),
-                    randint(0, row_max),
-                    palette.color565(
-                        getrandbits(8),
-                        getrandbits(8),
-                        getrandbits(8),
-                    ),
-                    palette.color565(
-                        getrandbits(8),
-                        getrandbits(8),
-                        getrandbits(8),
-                    ),
-                )
-                tft.show()
-                if runtime:
-                    runtime.poll()
-                if runtime.quit_requested if runtime else False:
-                    return
-                sleep_ms(1)
+    # run_forever blocks on desktop/MCU but yields to the event loop on PyScript
+    # and Jupyter (runtime.timer_async), so the browser main thread stays live.
+    run_forever(_setup(), delay_ms=1)
 
 
 main()

@@ -26,7 +26,8 @@ https://www.youtube.com/watch?v=2cnAhEucPD4
 
 """
 
-from multimer import sleep_ms
+from multimer import ticks_add, ticks_diff, ticks_ms
+from multimer.loop import run_forever
 
 import tft_config
 import tft_text
@@ -37,46 +38,72 @@ import vga2_bold_16x32 as font4
 
 palette = tft_config.palette
 
+PAGE_PAUSE_MS = 3000
 
-def main():
+
+def _setup():
     tft = tft_config.config(tft_config.WIDE)
     tft.vscrdef(0, tft.height, 0)
+    fonts = (font1, font2, font3, font4)
+    st = {"fi": -1, "font": None, "char": 0, "col": 0, "line": 0, "resume_at": None, "after": None}
 
-    while True:
-        if runtime is not None:
+    def new_font():
+        st["fi"] = (st["fi"] + 1) % len(fonts)
+        st["font"] = fonts[st["fi"]]
+        tft.draw.fill(palette.BLUE)
+        tft.show()
+        st["char"] = st["font"].FIRST
+        st["col"] = 0
+        st["line"] = 0
+
+    new_font()
+
+    def poll():
+        if runtime:
             runtime.poll()
-        if runtime.quit_requested if runtime else False:
-            return
-        for font in (font1, font2, font3, font4):
-            tft.draw.fill(palette.BLUE)
-            tft.show()
-            line = 0
-            col = 0
-
-            for char in range(font.FIRST, font.LAST):
-                tft_text.text(tft, font, chr(char), col, line, palette.WHITE, palette.BLUE)
+            if runtime.quit_requested:
+                return True
+        now = ticks_ms()
+        if st["resume_at"] is not None:
+            if ticks_diff(now, st["resume_at"]) < 0:
+                return False
+            st["resume_at"] = None
+            action = st["after"]
+            st["after"] = None
+            if action == "next_font":
+                new_font()
+            elif action == "clear_page":
+                tft.draw.fill(palette.BLUE)
                 tft.show()
-                col += font.WIDTH
-                if col > tft.width - font.WIDTH:
-                    col = 0
-                    line += font.HEIGHT
+                st["line"] = 0
+                st["col"] = 0
+            return False
 
-                    if line > tft.height - font.HEIGHT:
-                        if runtime:
-                            runtime.poll()
-                        if runtime.quit_requested if runtime else False:
-                            return
-                        sleep_ms(3000)
-                        tft.draw.fill(palette.BLUE)
-                        tft.show()
-                        line = 0
-                        col = 0
+        font = st["font"]
+        if st["char"] >= font.LAST:
+            st["resume_at"] = ticks_add(now, PAGE_PAUSE_MS)
+            st["after"] = "next_font"
+            return False
 
-            if runtime:
-                runtime.poll()
-            if runtime.quit_requested if runtime else False:
-                return
-            sleep_ms(3000)
+        tft_text.text(tft, font, chr(st["char"]), st["col"], st["line"], palette.WHITE, palette.BLUE)
+        tft.show()
+        st["char"] += 1
+        st["col"] += font.WIDTH
+        if st["col"] > tft.width - font.WIDTH:
+            st["col"] = 0
+            st["line"] += font.HEIGHT
+            if st["line"] > tft.height - font.HEIGHT:
+                st["resume_at"] = ticks_add(now, PAGE_PAUSE_MS)
+                st["after"] = "clear_page"
+        return False
+
+    return poll
+
+
+def main():
+    # run_forever blocks on desktop/MCU but yields to the event loop on PyScript
+    # and Jupyter (runtime.timer_async), so the browser main thread stays live.
+    run_forever(_setup(), delay_ms=1)
 
 
 main()
