@@ -27,8 +27,6 @@ Private working notes for this repo. Not part of the published docs.
 
 ### LVGL
 
-- [ ] `lv_touch_test` on `micropython.exe` — fix LVGL/SDL timer queue / `micropython.schedule` overflow so it can re-enter matrix (currently `skip_runtimes`)
-- [ ] `lv_touch_test` on `cpython-venv` — event-loop work (`matrix=false` today)
 - [ ] Combine `display_driver.py` + `lv_utils.py` → `lv_runtime.py`
 - [ ] `lv_runtime.py` — support multiple LVGL displays
 - [ ] Ship `lv_runtime.py` with `lv_cpython_mod`, `lv_micropython_cmod`, and `lv_circuitpython_mod`

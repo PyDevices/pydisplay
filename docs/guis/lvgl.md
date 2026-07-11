@@ -29,16 +29,16 @@ Connect LVGL's display flush callback to copy LVGL's draw buffer through `displa
 
 With [`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py), LVGL input is wired automatically: each indev `read_cb` polls the runtime's host device via virtual touch/encoder/keypad devices. **Do not call `runtime.poll()` in your LVGL main loop** — `lv.task_handler()` (driven by `lv_utils` + multimer) already drains input. Calling both competes for the same event queue and breaks clicks. Window-close (`QUIT`) is handled on the same path inside `HostEventsDevice`.
 
-### 4. Run the touch test example
+### 4. Run the LVGL timer example
 
 Install examples package, then on device:
 
 ```python
 import lib.path  # development layout only
-import lv_touch_test
+import lv_test_timer
 ```
 
-Requires LVGL-enabled firmware. See `src/examples/lv_touch_test.py` in the repo.
+Requires LVGL-enabled firmware. See `src/examples/lv_test_timer.py` in the repo.
 
 ### 5. Faster ESP32 buses
 

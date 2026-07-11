@@ -81,7 +81,7 @@ while True:
             display_drv.show()
 ```
 
-**Forever LVGL / library-driven app** — [`lv_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_touch_test.py): follows `runtime.timer_async` via `dual_main` (no env vars). Sync path uses a cooperative deadline/`time.sleep` loop; async path uses `await asyncio.sleep(0)` plus `runtime.poll()`.
+**Forever LVGL / library-driven app** — [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py): follows `runtime.timer_async` via `dual_main` (no env vars). Sync path uses a cooperative deadline/`time.sleep` loop; async path uses `await asyncio.sleep(0)` plus `runtime.poll()`.
 
 **`tft_config` animation / one-shot** — subdirectory demos [`alien/alien.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/alien/alien.py), [`tiny_toasters/tiny_toasters.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/tiny_toasters/tiny_toasters.py), [`chango/chango.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/chango/chango.py):
 
@@ -95,7 +95,7 @@ if runtime is not None:
 
 Without `runtime.poll()`, the SDL window can freeze after the first frame even when the Python loop keeps running.
 
-**LVGL apps** — [`lv_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_touch_test.py) / [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py): import `display_driver` from sync/async entrypoints and drive the loop with `dual_main` (follows `runtime.timer_async`). See [LVGL guide](../guis/lvgl.md).
+**LVGL apps** — [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py): import `display_driver` from sync/async entrypoints and drive the loop with `dual_main` (follows `runtime.timer_async`). See [LVGL guide](../guis/lvgl.md).
 
 **PyWidgets (pdwidgets)** — [`widgets_stub.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_stub.py): build UI, then:
 
@@ -214,7 +214,6 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `scroll.py` | Scrolling text | CPython · MCU | core |
 | `rotations.py` | Display rotation | CPython · MCU | core |
 | `nano_gui_simpletest.py` | Nano-GUI hardware check | CPython · MCU | add_ons + upstream `gui/` |
-| `lv_touch_test.py` | LVGL touch grid | MCU | LVGL |
 | `lv_test_timer.py` | LVGL timer (follows `runtime.timer_async`) | CPython · MCU · PyScript | LVGL |
 
 ## Subdirectories
