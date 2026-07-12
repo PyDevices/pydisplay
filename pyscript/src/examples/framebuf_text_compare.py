@@ -3,7 +3,7 @@ Visual text compare: framebuf and graphics, native C vs Python.
 
 Run from ``src/``::
 
-    cd ~/github/pydisplay/src
+    cd ~/gh/pydevices/pydisplay/src
     micropython examples/framebuf_text_compare.py
 
 2×2 layout (320×480 default)::
