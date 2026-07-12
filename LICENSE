@@ -19,10 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-A few files retain their own, more specific copyright/license notices where
-they carry code originally from other authors (e.g. `src/add_ons/tft_text.py`,
-`tft_write.py`, `tft_bitmap.py`, and the `polygon()` function in
-`src/lib/graphics/_shapes.py`, tracing back through Russ Hughes' st7789_mpy
-driver to Ivan Belokobylskiy's st7789py_mpy). Those in-file notices govern
-those specific files/functions; this file governs everything else.
