@@ -15,7 +15,7 @@ class TestFramebufSync(unittest.TestCase):
     def test_generated_graphics_framebuf_matches_canonical(self):
         repo = Path(__file__).resolve().parents[1]
         proc = subprocess.run(
-            [sys.executable, "tools/sync_framebuf.py", "--check"],
+            [sys.executable, "scripts/install_sync_framebuf.py", "--check"],
             cwd=repo,
             capture_output=True,
             text=True,

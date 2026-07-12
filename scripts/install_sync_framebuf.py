@@ -9,8 +9,8 @@ is generated (gitignored) so the pydisplay-graphics wheel and standalone ``graph
 copytree tests stay self-contained without maintaining two copies by hand.
 
 Usage:
-    .venv/bin/python tools/sync_framebuf.py          # write copy
-    .venv/bin/python tools/sync_framebuf.py --check  # fail if missing or stale
+    .venv/bin/python scripts/install_sync_framebuf.py          # write copy
+    .venv/bin/python scripts/install_sync_framebuf.py --check  # fail if missing or stale
 """
 
 from __future__ import annotations
@@ -35,12 +35,12 @@ def sync_framebuf(*, check: bool = False) -> None:
         if not _GENERATED.is_file():
             raise SystemExit(
                 f"missing {_GENERATED.relative_to(_REPO_ROOT)} — "
-                "run: .venv/bin/python tools/sync_framebuf.py"
+                "run: .venv/bin/python scripts/install_sync_framebuf.py"
             )
         if _GENERATED.read_bytes() != canonical:
             raise SystemExit(
                 f"{_GENERATED.relative_to(_REPO_ROOT)} is stale — "
-                "edit src/add_ons/framebuf.py, then run tools/sync_framebuf.py"
+                "edit src/add_ons/framebuf.py, then run scripts/install_sync_framebuf.py"
             )
         return
 

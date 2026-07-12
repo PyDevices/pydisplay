@@ -32,7 +32,7 @@ def _sync_graphics_framebuf():
     """Materialize ``graphics/framebuf.py`` from ``add_ons/framebuf.py`` (single source)."""
     import subprocess
 
-    sync = os.path.join(_REPO_ROOT, "tools", "sync_framebuf.py")
+    sync = os.path.join(_REPO_ROOT, "scripts", "install_sync_framebuf.py")
     subprocess.run([sys.executable, sync], cwd=_REPO_ROOT, check=True)
 
 

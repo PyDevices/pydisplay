@@ -62,7 +62,6 @@ python tools/example_test_kit.py --only-example calculator --only-runtime microp
 |--------|---------|
 | [`compare_framebuf_mp.py`](compare_framebuf_mp.py) | Compare built-in C ``framebuf`` vs ``src/add_ons/framebuf.py`` on-device |
 | [`compare_graphics_mp.py`](compare_graphics_mp.py) | Compare native ``graphics`` cmod vs ``src/lib/graphics`` on-device |
-| [`sync_framebuf.py`](sync_framebuf.py) | Copy canonical ``add_ons/framebuf.py`` → ``lib/graphics/framebuf.py`` |
 
 ```bash
 micropython tools/compare_framebuf_mp.py

@@ -71,7 +71,7 @@ def should_include_file(filename):
 
 
 def is_gitignored(path):
-    """Skip generated/local-only files (e.g. graphics/framebuf.py from sync_framebuf)."""
+    """Skip generated/local-only files (e.g. graphics/framebuf.py from install_sync_framebuf)."""
     try:
         return (
             subprocess.run(

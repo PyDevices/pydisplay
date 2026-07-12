@@ -117,7 +117,7 @@ fi
 echo "Release version: $VERSION"
 
 # graphics.framebuf is generated from add_ons/framebuf.py before packaging.
-"$SOURCE_REPO/tools/sync_framebuf.py"
+"$SOURCE_REPO/scripts/install_sync_framebuf.py"
 
 DESCRIPTION_PREFIX="PyDisplay"
 AUTHOR="Brad Barnett <contact@pydevices.com>"
