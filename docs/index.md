@@ -27,7 +27,7 @@ Portability is PyDisplay's headline feature:
 
 Develop on your laptop with a mouse, then deploy the *same* code to a touchscreen on an ESP32. See **[Portability & platforms](platforms/index.md)** for the full story.
 
-## Get started
+## 🚀 Get started
 
 | I want to… | Start here |
 |------------|------------|

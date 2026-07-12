@@ -1,4 +1,4 @@
-# pydisplay_demo
+# 🎨 pydisplay_demo
 
 !!! tip "Need a minimal template?"
     Copy the [**App starter**](app-starter.md) boilerplate to begin your first app without rotation or scrolling.

@@ -1,4 +1,4 @@
-# Troubleshooting
+# ⚠️ Troubleshooting
 
 Common problems when installing, importing, or running pydisplay.
 
@@ -93,7 +93,7 @@ Known Wokwi simulator quirk — may not reproduce on real hardware.
 
 Docstring parameter names do not match the function signature (often `*args` wrappers). The site still builds; fix docstrings or signatures in source when you touch that module.
 
-## Still stuck?
+## 💬 Still stuck?
 
 See [Getting help](getting-help.md) for issue reporting guidelines.
 

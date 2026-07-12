@@ -1,4 +1,4 @@
-# Getting started
+# 🚀 Getting started
 
 This page is a **router**. Pick the path that matches how you want to use pydisplay.
 

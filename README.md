@@ -98,7 +98,7 @@ The right display backend is selected automatically: `BusDisplay` on MCUs, `SDLD
 
 Full details and per-platform notes: **[Portability & platforms](https://pydisplay.readthedocs.io/en/latest/platforms/)**.
 
-## 3. Quick start
+## 3. 🚀 Quick start
 
 ### 3.1 Try it in the browser (no install)
 
@@ -183,7 +183,7 @@ PyDisplay also integrates with:
 - [russhughes TFT / st7789py](https://pydisplay.readthedocs.io/en/latest/guis/tft-gui/) ports
 - the bundled [PyWidgets](https://pydisplay.readthedocs.io/en/latest/guis/pywidgets/) toolkit (`add_ons/pdwidgets`)
 
-## 7. Documentation map
+## 7. 📚 Documentation map
 
 Everything lives in one place — the **[documentation site](https://pydisplay.readthedocs.io)**:
 
@@ -197,7 +197,7 @@ Everything lives in one place — the **[documentation site](https://pydisplay.r
 | GUI libraries | [GUI integration](https://pydisplay.readthedocs.io/en/latest/guis/lvgl/) |
 | API | [API reference](https://pydisplay.readthedocs.io/en/latest/reference/) |
 
-## 8. Contributing
+## 8. 🤝 Contributing
 
 Fork, branch, and open a PR. See the [Contributing guide](https://pydisplay.readthedocs.io/en/latest/contributing/) and the open [GitHub Issues](https://github.com/PyDevices/pydisplay/issues). Roadmap items include EPaper displays, CircuitPython `circup` packages, end-user PyPI wheels, and more C bus drivers.
 

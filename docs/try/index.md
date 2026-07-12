@@ -1,4 +1,4 @@
-# Try pydisplay
+# 🚀 Try pydisplay
 
 Evaluate pydisplay without installing anything on your machine.
 

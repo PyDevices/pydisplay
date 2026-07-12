@@ -1,4 +1,4 @@
-# App starter
+# 🎨 App starter
 
 Copy one of the scripts below to start your first pydisplay app. Each is a single file that uses only **`src/lib`** modules — no `add_ons`, no `tft_config`, no `displaybuf`.
 

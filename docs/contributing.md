@@ -1,4 +1,4 @@
-# Contributing
+# 🤝 Contributing
 
 pydisplay is a community project. Bug reports, board configs, drivers, docs, and examples are all welcome.
 

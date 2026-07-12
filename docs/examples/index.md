@@ -1,4 +1,4 @@
-# Examples catalog
+# 🎨 Examples catalog
 
 All examples live in [`src/examples/`](https://github.com/PyDevices/pydisplay/tree/main/src/examples/).
 

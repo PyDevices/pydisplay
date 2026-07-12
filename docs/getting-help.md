@@ -1,4 +1,4 @@
-# Getting help
+# 💬 Getting help
 
 ## Documentation
 
@@ -26,7 +26,7 @@
 - [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui)
 - [st7789py_mpy](https://github.com/russhughes/st7789py_mpy) — many ported examples
 
-## Reporting bugs
+## 🐛 Reporting bugs
 
 Include:
 
