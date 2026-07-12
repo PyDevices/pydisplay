@@ -34,7 +34,7 @@
 #   - ``scripts/publish_make_pyproject.py`` — shared ``ensure_path_exists`` / ``error_color``
 #
 # Direct use (micropython-lib checkout required as ``--lib-dir``):
-#   ./scripts/build.py --lib-dir ~/github/micropython-lib \\
+#   ./scripts/build.py --lib-dir ~/gh/pydevices/micropython-lib \\
 #       --micropython /tmp/micropython \\
 #       --mpy-cross /tmp/micropython/mpy-cross/build/mpy-cross \\
 #       --output /tmp/mip-out
@@ -43,7 +43,7 @@
 # into a directory suitable for serving to "mip" via a static web server.
 
 # Usage:
-# ./scripts/build.py --output /tmp/micropython-lib/v2 --lib-dir ~/github/micropython-lib
+# ./scripts/build.py --output /tmp/micropython-lib/v2 --lib-dir ~/gh/pydevices/micropython-lib
 
 # The output directory (--output) will have the following layout
 # /

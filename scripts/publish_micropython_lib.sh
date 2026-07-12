@@ -31,7 +31,7 @@ Options:
   --help, -h            Show this message.
 
 Environment:
-  MICROPYTHON_LIB_DIR   micropython-lib checkout (default: ~/github/micropython-lib)
+  MICROPYTHON_LIB_DIR   micropython-lib checkout (default: ~/gh/pydevices/micropython-lib)
   PYDISPLAY_VERSION     Release version (overrides git tag on current commit)
   TESTPYPI_API_TOKEN    TestPyPI token for twine (when not using --skip-pypi)
 
@@ -124,7 +124,7 @@ AUTHOR="Brad Barnett <contact@pydevices.com>"
 LICENSE="MIT"
 
 BASENAME=pydisplay
-DEST_REPO="${MICROPYTHON_LIB_DIR:-$HOME/github/micropython-lib}"
+DEST_REPO="${MICROPYTHON_LIB_DIR:-$HOME/gh/pydevices/micropython-lib}"
 export MICROPYTHON_LIB_DIR="$DEST_REPO"
 SOURCE_DIR=$SOURCE_REPO/src
 DEST_DIR=$DEST_REPO/micropython/$BASENAME

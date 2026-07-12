@@ -10,7 +10,7 @@ APK integration — demo project, build scripts, and p4a recipes for `pydisplay`
 
 ## Workspace
 
-Clone as siblings (e.g. under a [cmods](https://github.com/PyDevices/cmods) workspace):
+Clone as siblings (any parent directory — no special workspace repo required):
 
 ```bash
 git clone https://github.com/PyDevices/usdl2.git
@@ -21,13 +21,15 @@ git clone https://github.com/PyDevices/lv_cpython_mod.git   # optional, for LVGL
 
 ## Quick start
 
-Prerequisites: [Android SDK + NDK](https://python-for-android.readthedocs.io/en/latest/quickstart.html), `pip install buildozer`.
+Prerequisites: [Android SDK + NDK](https://python-for-android.readthedocs.io/en/latest/quickstart.html), Ubuntu/WSL build tools.
 
 ```bash
-cd pydisplay_android/android_demo
-./build_apk.sh
-adb install -r bin/*.apk
+cd pydisplay_android
+./build_android.sh
+adb install -r android_demo/bin/*.apk
 ```
+
+(`android_demo/build_apk.sh` is a thin wrapper around the same script.)
 
 Desktop smoke test (Xvfb, before building an APK):
 

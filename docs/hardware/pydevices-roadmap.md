@@ -1,19 +1,19 @@
-# pydevices / cmods roadmap
+# Native display cmod roadmap
 
-MicroPython hardware gaps surfaced by pydisplay board configs. See also [display interfaces](display-interfaces.md).
+MicroPython hardware gaps surfaced by pydisplay board configs. See also [display interfaces](display-interfaces.md). Native modules live in [displayif](https://github.com/PyDevices/displayif) unless noted.
 
 ## P0 — unblocks the most board configs
 
 | Module | Repo target | Unblocks |
 |--------|-------------|----------|
-| `i2cbus` | pydevices/cmods | **Done in pydisplay** (`drivers/bus/i2cbus.py`) — OLED MP configs |
-| `rgbframebuffer` | pydevices/cmods | `qualia_tl040hds20`, RGB parallel (RGB666) panels |
+| `i2cbus` | displayif / pydisplay | **Done in pydisplay** (`drivers/bus/i2cbus.py`) — OLED MP configs |
+| `rgbframebuffer` | displayif | `qualia_tl040hds20`, RGB parallel (RGB666) panels |
 
 ## P1 — LED matrix and fast parallel
 
 | Module | Repo target | Unblocks |
 |--------|-------------|----------|
-| `rgbmatrix` | pydevices/cmods | `cp_matrixportal_s3_64x64`, `cp_matrixportal_m4_64x32` MP pairs |
+| `rgbmatrix` | displayif | `cp_matrixportal_s3_64x64`, `cp_matrixportal_m4_64x32` MP pairs |
 | RP2040 PIO I80 | integrate `drivers/bus/_rp2_wip.py` | LilyGO I80 boards at speed |
 
 ## P2 — E-paper and addressable LEDs

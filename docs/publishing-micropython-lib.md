@@ -253,7 +253,7 @@ export TESTPYPI_API_TOKEN=...
   --commit-message "pydisplay: Sync and TestPyPI upload." --push
 
 # MIP index → gh-pages
-MICROPYTHON_LIB_DIR=~/github/micropython-lib ./scripts/publish_mip_ghpages.sh
+MICROPYTHON_LIB_DIR=~/gh/pydevices/micropython-lib ./scripts/publish_mip_ghpages.sh
 ```
 
 Local gh-pages push requires git credentials for micropython-lib.

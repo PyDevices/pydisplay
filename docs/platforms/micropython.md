@@ -57,14 +57,27 @@ On **CPython** desktop, the ctypes shim is published on TestPyPI as package **`u
 The repo-root `manifest.py` lists packages for frozen MicroPython builds and
 **freezes `asyncio` on unix and windows ports** (required for `multimer.AsyncTimer`).
 
-With [cmods](https://github.com/PyDevices/cmods) `build_mp.sh`, set
-`FROZEN_MANIFEST` to this file (or copy `packaging/cmods-my-manifest.py.example`
-from the multimer repo into `cmods/my-manifest.py`). Build Windows with
-`--variant dev` so `MICROPY_PY_ASYNCIO` and `select` are enabled::
+Clone this repo as a sibling of `micropython/` (and any native usermods such as
+[usdl2](https://github.com/PyDevices/usdl2) / [graphics](https://github.com/PyDevices/graphics)),
+then point `FROZEN_MANIFEST` at this file. On **Make** ports,
+`USER_C_MODULES` is the workspace parent; build Windows with a variant that
+enables `MICROPY_PY_ASYNCIO` and `select` (e.g. `dev`):
 
 ```bash
-./build_mp.sh --port windows --variant dev
-./build_mp.sh --port unix
+# workspace/
+#   micropython/
+#   pydisplay/     ← this repo
+#   usdl2/         ← optional
+#   graphics/      ← optional
+
+cd micropython/ports/unix
+make USER_C_MODULES=../../.. FROZEN_MANIFEST=../../../pydisplay/manifest.py
+
+cd micropython/ports/windows
+make USER_C_MODULES=../../.. FROZEN_MANIFEST=../../../pydisplay/manifest.py
+# use a board/variant that enables asyncio/select as needed
 ```
+
+([cmods](https://github.com/PyDevices/cmods) `./build_mp.sh` is an optional convenience wrapper for the same sibling layout — not required.)
 
 See [multimer building docs](https://github.com/PyDevices/multimer/blob/main/docs/building.md) and [tools/README.md](https://github.com/PyDevices/pydisplay/blob/main/tools/README.md).

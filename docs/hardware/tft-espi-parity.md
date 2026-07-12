@@ -37,7 +37,7 @@ This document states what is **implemented**, what uses **Python fallbacks**, an
 | MIPI DSI | **Done (P4)** — displayif `mipidsi`; Waveshare 4B, M5 Tab5 MP config |
 | HUB75 | **Done (S3)** — displayif `rgbmatrix` Protomatter |
 
-**PSRAM:** large `rgbframebuffer` / `mipidsi` framebuffers need `CONFIG_SPIRAM` in sdkconfig — `cmods/build_mp.sh` warns before esp32 builds when displayif is present.
+**PSRAM:** large `rgbframebuffer` / `mipidsi` framebuffers need `CONFIG_SPIRAM` in sdkconfig. Enable SPIRAM for the ESP32 board before linking [displayif](https://github.com/PyDevices/displayif).
 
 ## mimxrt (1062 / 1176)
 

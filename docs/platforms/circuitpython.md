@@ -42,18 +42,28 @@ Addressable LED grids (NeoPixel, DotStar) use `displaysys.pixeldisplay.PixelDisp
 
 CircuitPython on Unix can use **`SDLDisplay`** with the native **`usdl2`** module.
 
-Build from the [cmods](https://github.com/PyDevices/cmods) workspace (sibling trees: `circuitpython/`, `usdl2/`, `lv_circuitpython_mod/`):
+Clone as siblings:
+
+```
+workspace/
+  circuitpython/
+  usdl2/
+  lv_circuitpython_mod/   # optional LVGL; also drives CP unix builds via build_cp.sh
+  pydisplay/              # this repo
+```
 
 ```bash
-cd ~/github/cmods/usdl2
+cd usdl2
 ./apply_cp_unix_usdl_patches.sh --apply   # required before every CP unix compile
-cd ~/github/cmods/lv_circuitpython_mod
+cd ../lv_circuitpython_mod
 ./build_cp.sh --port unix --variant coverage
 ```
 
-`build_cp.sh` runs `apply_cp_unix_usdl_patches.sh --apply` automatically for the **unix** port. If you invoke `make` in `circuitpython/ports/unix` directly, run the patch script yourself first.
+`build_cp.sh` runs `apply_cp_unix_usdl_patches.sh --apply` automatically for the **unix** port when `usdl2/` is a sibling. If you invoke `make` in `circuitpython/ports/unix` directly, run the patch script yourself first.
 
 Install `libsdl2-dev`, then symlink or copy the built binary (e.g. `ports/unix/build-coverage/micropython`) to `~/bin/circuitpython`.
+
+([cmods](https://github.com/PyDevices/cmods) is an optional convenience workspace for the same sibling layout — not required.)
 
 ### Frozen asyncio (required for multimer.AsyncTimer)
 
@@ -61,20 +71,29 @@ CircuitPython unix pydisplay builds must **freeze** Adafruit's `asyncio` and
 `adafruit_ticks` libraries into the firmware — do not rely on
 `circup install asyncio` at runtime.
 
-From the [cmods](https://github.com/PyDevices/cmods) workspace:
+```
+workspace/
+  circuitpython/
+  usdl2/
+  lv_circuitpython_mod/
+  Adafruit_CircuitPython_asyncio/
+  Adafruit_CircuitPython_Ticks/
+  cp-user-config/user_post_mpconfigport.mk
+```
 
 ```bash
-mkdir -p cp-user-config
-cp cp-user-config/user_post_mpconfigport.mk.example cp-user-config/user_post_mpconfigport.mk
 git clone https://github.com/adafruit/Adafruit_CircuitPython_asyncio.git
 git clone https://github.com/adafruit/Adafruit_CircuitPython_Ticks.git
+mkdir -p cp-user-config
+# Create cp-user-config/user_post_mpconfigport.mk so FROZEN_MPY_DIRS points at
+# those clones and MICROPY_PY_ASYNCIO / select / traceback are enabled.
+# See [multimer building docs](https://github.com/PyDevices/multimer/blob/main/docs/building.md).
+cd lv_circuitpython_mod
 ./build_cp.sh --port unix --variant coverage
 ```
 
-`build_cp.sh` passes `-I cp-user-config/` so `user_post_mpconfigport.mk` sets
-`FROZEN_MPY_DIRS` and enables `MICROPY_PY_ASYNCIO` / `select` / `traceback`.
-See [multimer building docs](https://github.com/PyDevices/multimer/blob/main/docs/building.md)
-and [cmods README](https://github.com/PyDevices/cmods/blob/main/README.md).
+`build_cp.sh` passes `-I ../cp-user-config/` (workspace sibling) when that
+directory exists. See [lv_circuitpython_mod README](https://github.com/PyDevices/lv_circuitpython_mod).
 
 `multimer` supplies Adafruit-compatible `ticks_*` helpers for application code;
 frozen asyncio still uses `adafruit_ticks` internally unless the build is customized.

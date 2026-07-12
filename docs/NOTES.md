@@ -61,7 +61,7 @@ Private working notes for this repo. Not part of the published docs.
 - [ ] Remove redundant and consolidate overlapping tools under `tools/`; remove any unnecessary tools that are no longer needed or used
 - [ ] Add a GUI to the matrix test kit (`tools/example_test_kit.py`)
 - [ ] Fork [figma2lvgl](https://github.com/khiyamiftikhar/figma2lvgl) and add option to output Python
-- [ ] Change docs and scripts so cmods sub-repos don't mention or require cmods (personal workspace only — not required for other users); may need to move functionality out of cmods into sub-repos
+- [x] Change docs and scripts so owned cmod repos don't mention or require the personal cmods workspace (sibling-clone + raw `make` / per-repo build scripts are primary; cmods optional)
 
 ### Done
 
