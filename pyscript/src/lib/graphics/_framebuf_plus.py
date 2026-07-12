@@ -3,7 +3,7 @@ from ._area import Area
 from ._blit_hooks import clip_blit_bounds
 
 try:
-    # Local submodule: present in TestPyPI wheels and after tools/sync_framebuf.py runs.
+    # Local submodule: present in TestPyPI wheels and after scripts/install_sync_framebuf.py runs.
     from .framebuf import (
         GS2_HMSB,
         GS4_HMSB,
