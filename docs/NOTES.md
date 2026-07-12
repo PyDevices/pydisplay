@@ -61,7 +61,7 @@ Private working notes for this repo. Not part of the published docs.
 - [ ] Remove redundant and consolidate overlapping tools under `tools/`; remove any unnecessary tools that are no longer needed or used
 - [ ] Add a GUI to the matrix test kit (`tools/example_test_kit.py`)
 - [ ] Fork [figma2lvgl](https://github.com/khiyamiftikhar/figma2lvgl) and add option to output Python
-- [x] Change docs and scripts so owned cmod repos don't mention or require the personal cmods workspace (sibling-clone + raw `make` / per-repo build scripts are primary; cmods optional)
+- [x] Change docs and scripts so owned native-module repos don't require a personal multi-repo workspace wrapper (sibling-clone + raw `make` / per-repo build scripts are primary)
 
 ### Done
 
@@ -69,8 +69,8 @@ Private working notes for this repo. Not part of the published docs.
 - [x] Eliminate `src/lib/env_util.py` — moved `env_bool` / `env_set` into `displaysys`
 - [x] `pixel_sim_demos` fire effect — Doom-style heat rise with height-scaled cooling, gappy embers, black→white palette (was blurry average + cooling=3 that filled a short 16-row grid solid)
 - [x] Make sure all desktop backends exit gracefully in `displaysys`
-- [x] Fix cmods `manifest.py` / `build_mp.sh` frozen-manifest selection — `build_mp.sh` exports `FROZEN_MANIFEST_UPSTREAM` to the MicroPython freeze file for the build; static `cmods/manifest.py` includes cmod siblings then that path (no generated wrapper). Verified via `cmods/scripts/verify_frozen_manifest_parity.sh`: unix standard/coverage, windows dev, webassembly pyscript, esp32 ESP32_GENERIC_P4/C6_WIFI + M5STACK_ATOM, rp2 RPI_PICO
-- [x] Verify `manifest.py` selection order in `~/github/cmods` — **was incorrect;** fixed (see above)
+- [x] Fix MicroPython frozen-manifest selection for multi-usermod sibling workspaces — build wrapper exports `FROZEN_MANIFEST_UPSTREAM` to the port freeze file; workspace `manifest.py` includes sibling native modules then that path (no generated wrapper). Verified via frozen-manifest parity script: unix standard/coverage, windows dev, webassembly pyscript, esp32 ESP32_GENERIC_P4/C6_WIFI + M5STACK_ATOM, rp2 RPI_PICO
+- [x] Verify `manifest.py` selection order in the multi-repo workspace — **was incorrect;** fixed (see above)
 - [x] Remove redundant and consolidate overlapping scripts under `scripts/`; remove unused ones — deleted `migrate_*_to_runtime.py` and `generate_epaper_board_configs.py` (use `generate_board_configs.py` / `--kind epaper`); moved `tools/make_color_icons.py` → `scripts/assets_make_color_icons.py`; docs/tests updated
 - [x] List all `.py` files under `board_configs/`, `drivers/`, and `src/` that read environment variables; remove env access where unnecessary. Keep `src/lib/board_config` reading the env for the default `timer_async` value; prefer no other scripts in those directories access envars — inventory done; removed `PGDisplay.open_frame_recorder_from_env` (callers use `open_frame_recorder(path, fps=…)`). Example env use left for examples audit
 - [x] Check `display_driver.py`, `lv_utils.py`, and `multimer` for possible refactor / optimizations
@@ -89,10 +89,10 @@ Private working notes for this repo. Not part of the published docs.
 - [x] Combine all `pixel_sim_*` examples into a single file — `pixel_sim_demos.py` with `DEMO` selector; swap `pixel_sim` vs `board_config` import for sim vs hardware
 - [x] Compile MicroPython with `os.dupterm` enabled
 - [x] Make `--no-os-dupterm` the default for Windows MicroPython builds only (so we don't have to pass it manually)
-- [x] Make `AGENTS.md` in cmods look for `AGENTS.md` at the root of all sub-repos
-- [x] Port recent `src/lib/graphics` changes to `cmods/graphics` (`implementation()`, sentinels, `_framebuf_plus` default FrameBuffer)
-- [x] Rework `cmods/graphics` to be all C code, no Python wrappers — full `graphics.__all__` parity on MP, CPython, and CircuitPython (`036e9b4`). CP rebuild: `apply_cp_unix_graphics_patches.sh` then `build_cp.sh --port unix --variant coverage`. See `.cursor/graphics_cmod_parity_report.md`
-- [x] `cmods/graphics` publish to TestPyPI — v0.0.2 tagged and published (14 wheels on TestPyPI)
+- [x] Make workspace `AGENTS.md` look for `AGENTS.md` at the root of all sibling sub-repos
+- [x] Port recent `src/lib/graphics` changes to the [graphics](https://github.com/PyDevices/graphics) cmod (`implementation()`, sentinels, `_framebuf_plus` default FrameBuffer)
+- [x] Rework [graphics](https://github.com/PyDevices/graphics) to be all C code, no Python wrappers — full `graphics.__all__` parity on MP, CPython, and CircuitPython (`036e9b4`). CP rebuild: `apply_cp_unix_graphics_patches.sh` then `build_cp.sh --port unix --variant coverage`. See `.cursor/graphics_cmod_parity_report.md`
+- [x] Publish [graphics](https://github.com/PyDevices/graphics) to TestPyPI — v0.0.2 tagged and published (14 wheels on TestPyPI)
 - [x] Port RGB888 support from `graphics/_framebuf_plus.py` to the graphics cmod library — already in cmod (`GFX_RGB888` + rgb888 pixel ops in `gfx_framebuffer.c`); `_framebuf_plus` Python path kept for non-cmod fallbacks
 - [x] Verify which `mip` install methods install bare `.py` files vs precompiled `.mpy` files — see [mip-and-freeze-sources.md](../.cursor/mip-and-freeze-sources.md)
 - [x] Move `SDL_desktop_size()` out of `usdl2` into `sdldisplay.py`; expose `SDL_GetDisplayUsableBounds` / `SDL_GetDesktopDisplayMode` on usdl2 instead
