@@ -20,8 +20,6 @@ from displaysys import (
 )
 from eventsys import events
 
-_NATIVE_USDL2 = not hasattr(usdl2, "_USE_FFI")
-
 _JOYSTICK_API = (
     "SDL_InitSubSystem",
     "SDL_JoystickClose",
@@ -30,18 +28,6 @@ _JOYSTICK_API = (
     "SDL_NumJoysticks",
 )
 _HAS_JOYSTICK_API = all(hasattr(usdl2, name) for name in _JOYSTICK_API)
-
-if implementation.name == "cpython":
-    import ctypes
-
-    uses_native_event = True
-    uses_ctypes_blit = True
-elif implementation.name == "circuitpython":
-    uses_native_event = True
-    uses_ctypes_blit = False
-else:
-    uses_native_event = _NATIVE_USDL2
-    uses_ctypes_blit = False
 
 # Linux c_lflag bits (MicroPython termios has no ECHO/ICANON constants).
 _TTY_ICANON = 0x002
@@ -162,13 +148,8 @@ def poll_event():
     """
     global _event
     _flush_pending_displays()
-    if usdl2.SDL_PollEvent(_event):
-        if uses_native_event:
-            if _event.type in events.filter:
-                return _convert(usdl2.SDL_Event(_event))
-        else:
-            if int.from_bytes(_event[:4], "little") in events.filter:
-                return _convert(usdl2.SDL_Event(_event))
+    if usdl2.SDL_PollEvent(_event) and _event.type in events.filter:
+        return _convert(usdl2.SDL_Event(_event))
     return None
 
 
@@ -183,12 +164,8 @@ def get_events():
     _flush_pending_displays()
     eventlist = []
     while usdl2.SDL_PollEvent(_event):
-        if uses_native_event:
-            if _event.type in events.filter:
-                eventlist.append(_convert(usdl2.SDL_Event(_event)))
-        else:
-            if int.from_bytes(_event[:4], "little") in events.filter:
-                eventlist.append(_convert(usdl2.SDL_Event(_event)))
+        if _event.type in events.filter:
+            eventlist.append(_convert(usdl2.SDL_Event(_event)))
     return eventlist if len(eventlist) > 0 else None
 
 
@@ -284,35 +261,17 @@ def _desktop_size(display_index=0):
     except AttributeError:
         return 0, 0
 
-    use_ffi = getattr(usdl2, "_USE_FFI", False)
     try:
-        if use_ffi:
-            rect = bytearray(16)
-            if get_bounds(display_index, rect) == 0:
-                w, h = struct.unpack_from("<ii", rect, 8)
-                if w > 0 and h > 0:
-                    return w, h
-            mode = bytearray(32)
-            if get_mode(display_index, mode) == 0:
-                w, h = struct.unpack_from("<ii", mode, 4)
-                if w > 0 and h > 0:
-                    return w, h
-        else:
-            rect = usdl2.SDL_Rect()
-            if isinstance(rect, (bytes, bytearray, memoryview)):
-                buf = bytearray(rect) if len(rect) >= 16 else bytearray(16)
-                if get_bounds(display_index, buf) == 0:
-                    w, h = struct.unpack_from("<ii", buf, 8)
-                    if w > 0 and h > 0:
-                        return w, h
-            elif hasattr(rect, "w") and get_bounds(display_index, rect) == 0:
-                if rect.w > 0 and rect.h > 0:
-                    return rect.w, rect.h
-            mode_buf = bytearray(32)
-            if get_mode(display_index, mode_buf) == 0:
-                w, h = struct.unpack_from("<ii", mode_buf, 4)
-                if w > 0 and h > 0:
-                    return w, h
+        rect = bytearray(16)
+        if get_bounds(display_index, rect) == 0:
+            w, h = struct.unpack_from("<ii", rect, 8)
+            if w > 0 and h > 0:
+                return w, h
+        mode = bytearray(16)
+        if get_mode(display_index, mode) == 0:
+            w, h = struct.unpack_from("<ii", mode, 4)
+            if w > 0 and h > 0:
+                return w, h
     except Exception:
         pass
     return 0, 0
@@ -320,12 +279,6 @@ def _desktop_size(display_index=0):
 
 def _hard_process_exit(code: int = 0) -> None:
     """Terminate immediately without SDL teardown (kit subprocesses)."""
-    try:
-        import usdl2
-
-        usdl2.process_exit(code)
-    except Exception:
-        pass
     try:
         import ffi
 
@@ -484,17 +437,7 @@ class SDLDisplay(DisplayDriver):
         if len(buffer) != pitch * h:
             raise ValueError("Buffer size does not match dimensions")
         blitRect = usdl2.SDL_Rect(x, y, w, h)
-        if uses_ctypes_blit:
-            if isinstance(buffer, memoryview) or type(buffer) is bytearray:
-                buffer_array = (ctypes.c_ubyte * len(buffer)).from_buffer(buffer)
-            else:
-                raise ValueError(
-                    f"Buffer is of type {type(buffer)} instead of memoryview or bytearray"
-                )
-            buffer_ptr = ctypes.c_void_p(ctypes.addressof(buffer_array))
-            retcheck(usdl2.SDL_UpdateTexture(self._buffer, blitRect, buffer_ptr, pitch))
-        else:
-            retcheck(usdl2.SDL_UpdateTexture(self._buffer, blitRect, buffer, pitch))
+        retcheck(usdl2.SDL_UpdateTexture(self._buffer, blitRect, buffer, pitch))
         self._render_dirty = True
         return (x, y, w, h)
 
@@ -577,48 +520,33 @@ class SDLDisplay(DisplayDriver):
         """
 
         if (angle := (value % 360) - (self._rotation % 360)) != 0:
-            if uses_native_event:
-                tempBuffer = usdl2.SDL_CreateTexture(
-                    self._renderer,
-                    self._px_format,
-                    usdl2.SDL_TEXTUREACCESS_TARGET,
-                    self.height,
-                    self.width,
-                )
-                if not tempBuffer:
-                    raise RuntimeError(f"{usdl2.SDL_GetError()}")
+            tempBuffer = usdl2.SDL_CreateTexture(
+                self._renderer,
+                self._px_format,
+                usdl2.SDL_TEXTUREACCESS_TARGET,
+                self.height,
+                self.width,
+            )
+            if not tempBuffer:
+                raise RuntimeError(f"{usdl2.SDL_GetError()}")
 
-                retcheck(usdl2.SDL_SetTextureBlendMode(tempBuffer, usdl2.SDL_BLENDMODE_NONE))
-                retcheck(usdl2.SDL_SetRenderTarget(self._renderer, tempBuffer))
-                if abs(angle) != 180:
-                    dstrect = usdl2.SDL_Rect(
-                        (self.height - self.width) // 2,
-                        (self.width - self.height) // 2,
-                        self.width,
-                        self.height,
-                    )
-                else:
-                    dstrect = None
-                retcheck(
-                    usdl2.SDL_RenderCopyEx(
-                        self._renderer, self._buffer, None, dstrect, angle, None, 0
-                    )
-                )
-                retcheck(usdl2.SDL_SetRenderTarget(self._renderer, None))
-                retcheck(usdl2.SDL_DestroyTexture(self._buffer))
-                self._buffer = tempBuffer
-            else:
-                retcheck(usdl2.SDL_DestroyTexture(self._buffer))
-                self._buffer = usdl2.SDL_CreateTexture(
-                    self._renderer,
-                    self._px_format,
-                    usdl2.SDL_TEXTUREACCESS_TARGET,
-                    self.height,
+            retcheck(usdl2.SDL_SetTextureBlendMode(tempBuffer, usdl2.SDL_BLENDMODE_NONE))
+            retcheck(usdl2.SDL_SetRenderTarget(self._renderer, tempBuffer))
+            if abs(angle) != 180:
+                dstrect = usdl2.SDL_Rect(
+                    (self.height - self.width) // 2,
+                    (self.width - self.height) // 2,
                     self.width,
+                    self.height,
                 )
-                if not self._buffer:
-                    raise RuntimeError(f"{usdl2.SDL_GetError()}")
-                retcheck(usdl2.SDL_SetTextureBlendMode(self._buffer, usdl2.SDL_BLENDMODE_NONE))
+            else:
+                dstrect = None
+            retcheck(
+                usdl2.SDL_RenderCopyEx(self._renderer, self._buffer, None, dstrect, angle, None, 0)
+            )
+            retcheck(usdl2.SDL_SetRenderTarget(self._renderer, None))
+            retcheck(usdl2.SDL_DestroyTexture(self._buffer))
+            self._buffer = tempBuffer
 
     ############### Class Specific Methods ##############
 

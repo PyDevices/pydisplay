@@ -19,7 +19,7 @@ _sdl2_timer_inited = False
 def _backend_drain():
     import usdl2
 
-    usdl2.pump_scheduler(32)
+    usdl2.SDL_PumpEvents()
 
 
 def _ensure_sdl2_timer():
