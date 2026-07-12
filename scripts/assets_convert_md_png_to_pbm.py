@@ -7,11 +7,16 @@ from graphics import MONO_HLSB, FrameBuffer
 import lib.path  # noqa: E402, F401
 
 # Source path is in the format:
-#     /home/brad/github/material-design-icons/png/action/3d_rotation/materialicons/18dp/1x/baseline_3d_rotation_black_18dp.png
+#     <material-design-icons>/png/action/3d_rotation/materialicons/18dp/1x/baseline_3d_rotation_black_18dp.png
 # f"{source}/{category}/{short_name}/{family}/{size}/{scale}"
 
 ROOT = Path(__file__).resolve().parent.parent
-source = Path("/home/brad/github/material-design-icons/png")
+source = Path(
+    os.environ.get(
+        "MATERIAL_DESIGN_ICONS_PNG",
+        str(Path.home() / "material-design-icons" / "png"),
+    )
+)
 dest = ROOT / "assets" / "icons"
 scale = "1x"
 threshold = 160
