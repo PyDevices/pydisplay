@@ -7,7 +7,6 @@ docs_dir: docs
 site_dir: site
 
 exclude_docs: |
-  NOTES.md
   overrides/**
 
 theme:
