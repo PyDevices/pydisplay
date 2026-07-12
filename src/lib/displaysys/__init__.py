@@ -23,7 +23,9 @@ except ImportError:
 
     def byteswap(buf):
         """Swap 16-bit pixel bytes in place (portable fallback)."""
-        n = len(buf) & ~1
+        n = len(buf)
+        if n & 1:
+            raise ValueError("buffer size must be a multiple of 2")
         for i in range(0, n, 2):
             b0 = buf[i]
             buf[i] = buf[i + 1]

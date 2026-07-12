@@ -5,8 +5,8 @@
 
 ``displaysys`` imports a native ``byteswap`` if one is available and otherwise
 falls back to a pure-Python implementation defined in the package. Either way
-the contract is the same: swap each pair of bytes in place. These tests cover
-whichever implementation the host wired up.
+the contract is the same: swap each pair of bytes in place, and reject
+odd-length buffers. These tests cover whichever implementation the host wired up.
 """
 
 import unittest
@@ -26,10 +26,10 @@ class TestByteswap(unittest.TestCase):
         # in-place: the helper mutates the buffer rather than returning a copy
         self.assertIsNone(byteswap(bytearray(b"\x01\x02")))
 
-    def test_leaves_trailing_odd_byte_untouched(self):
-        buf = bytearray(b"\x01\x02\x03")
-        byteswap(buf)
-        self.assertEqual(bytes(buf), b"\x02\x01\x03")
+    def test_rejects_odd_length_buffer(self):
+        # 16-bit pairs only — odd length is an error on every backend
+        with self.assertRaises(ValueError):
+            byteswap(bytearray(b"\x01\x02\x03"))
 
     def test_empty_buffer_is_noop(self):
         buf = bytearray()
