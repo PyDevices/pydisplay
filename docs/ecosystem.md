@@ -37,4 +37,4 @@ PyDisplay also drops in under other GUI stacks:
 
 - [pydisplay](https://github.com/PyDevices/pydisplay) — this project.
 - [micropython-lib](https://github.com/PyDevices/micropython-lib) — precompiled MIP packages ([index](https://PyDevices.github.io/micropython-lib/mip/PyDevices)).
-- [pydisplay_cmods](https://github.com/PyDevices/pydisplay_cmods) — MicroPython User C Modules for PyDisplay.
+- [displayif](https://github.com/PyDevices/displayif) — native MicroPython display interface modules for PyDisplay.
