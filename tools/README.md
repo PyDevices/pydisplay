@@ -56,6 +56,10 @@ python tools/example_test_kit.py --curated-only
 python tools/example_test_kit.py --only-example calculator --only-runtime micropython
 ```
 
+Headless desktop default is `SDL_VIDEODRIVER=dummy` (see `AGENTS.md`). For a real
+X11/SDL window without a logged-in display, agents may wrap with `xvfb-run -a`
+— details in [AGENTS.md — Running examples headlessly](../AGENTS.md#running-examples-headlessly-gui-smoke-tests).
+
 ## MicroPython framebuf parity
 
 | Script | Purpose |

@@ -50,6 +50,12 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   example there (without the dummy SDL driver) opens a real pygame window titled
   `"<impl> on <platform>"`, which can be screenshotted/recorded with `ffmpeg`
   (`-f x11grab -i :1`).
+- **Xvfb (optional):** keep dummy SDL as the default for headless matrix/smoke.
+  Use `xvfb-run -a …` (no `SDL_VIDEODRIVER=dummy`) when you need a real X11/SDL
+  window path without `:1` — e.g. native screenshots/recording, or catching
+  “works on dummy, fails on real X” bugs. Do not change the tools scripts to
+  require it; wrap the command when useful. PyScript/Playwright tools do not
+  need Xvfb.
 - Known pre-existing example failures on CPython (not environment issues to
   "fix"): `nano_gui_simpletest` needs the matching Hinch `gui/` package and `png_test` needs
   `PYDISPLAY_PNG_DIR`.

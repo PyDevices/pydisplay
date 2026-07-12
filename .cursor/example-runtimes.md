@@ -68,6 +68,7 @@ Subprocess runs use `[tools/example_test_wrapper.py](../tools/example_test_wrapp
 
 ## Debugging
 
+- **Display / headless:** default is `SDL_VIDEODRIVER=dummy` for CPython matrix smoke. For a real X11/SDL window without `DISPLAY=:1`, optional `xvfb-run -a` — see [AGENTS.md — Running examples headlessly](../AGENTS.md#running-examples-headlessly-gui-smoke-tests). Do not change tools scripts to require Xvfb.
 - `PYDISPLAY_TEST_TRACE=1` — wrapper logs progress on stderr
 - `--verbose` — kit logs skipped runtimes
 - **`PYDISPLAY_TIMER_ASYNC`** — desktop sync (`0` / unset) vs asyncio (`1`) timers in `src/lib/board_config.py`. Set on the command line before launching the kit, or let `tools/lv_timer_test_kit.py` set it per mode (`sync` → `0`, `async` → `1`). Must be in the environment before `import board_config`.
