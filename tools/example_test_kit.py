@@ -388,7 +388,7 @@ HTML_DIR = REPO / "web" / "pyscript"
 
 
 def pyscript_embed_query(example_id: str, example_meta: dict) -> str:
-    """Build ``manifests=`` or ``modules=`` query fragment for embed.html."""
+    """Build ``manifests=`` / ``modules=`` (+ optional ``packages=``) for embed.html."""
     if (HTML_DIR / f"{example_id}.json").is_file():
         return f"manifests={example_id}"
     script = example_meta.get("script", f"examples/{example_id}.py")
@@ -397,7 +397,26 @@ def pyscript_embed_query(example_id: str, example_meta: dict) -> str:
         pkg = script_path.parent.name
         if (HTML_DIR / f"{pkg}.json").is_file():
             return f"manifests={pkg}"
-    return f"modules={example_id}"
+
+    query = f"modules={example_id}"
+    # Mirror gallery cards / ``# pyscript packages:`` so fetch_ph_gui runs before import.
+    packages: list[str] = []
+    if script_path.is_file():
+        try:
+            with open(script_path, encoding="utf-8") as fh:
+                for i, line in enumerate(fh):
+                    if i >= 10:
+                        break
+                    s = line.strip()
+                    if s.startswith("# pyscript packages:"):
+                        body = s.split(":", 1)[1].strip()
+                        packages = [p.strip() for p in body.split(",") if p.strip()]
+                        break
+        except OSError:
+            pass
+    if packages:
+        query += "&packages=" + ",".join(packages)
+    return query
 
 
 def _kill_pyscript_port(port: int = PYSCRIPT_PORT) -> None:
@@ -458,64 +477,15 @@ def run_pyscript_case(
     url = f"http://127.0.0.1:{port}/web/pyscript/embed.html?{query}&autotest=1&duration={int(duration)}"
 
     try:
-        from playwright.sync_api import sync_playwright
+        from pyscript_autotest import run_autotest
     except ImportError:
-        return {
-            "example": example_id,
-            "runtime": "pyscript",
-            "summary": "needs_playwright",
-            "returncode": -1,
-            "timed_out": False,
-            "duration_s": duration,
-            "timeout_s": timeout,
-            "result": {
-                "status": "skip",
-                "reason": "pip install playwright && playwright install chromium",
-            },
-            "stdout_tail": "",
-            "stderr_tail": "",
-        }
-
-    captured: list[str] = []
-    page_error: list[str] = []
+        tools = str(TOOLS)
+        if tools not in sys.path:
+            sys.path.insert(0, tools)
+        from pyscript_autotest import run_autotest
 
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-
-            def on_console(msg):
-                text = msg.text
-                if text.startswith("EXAMPLE_RESULT="):
-                    captured.append(text)
-
-            page.on("console", on_console)
-            page.on("pageerror", lambda exc: page_error.append(str(exc)))
-            page.goto(url, wait_until="load", timeout=int(timeout * 1000))
-            deadline = time.monotonic() + timeout + duration
-            while time.monotonic() < deadline:
-                for line in captured:
-                    if not line.startswith("EXAMPLE_RESULT="):
-                        continue
-                    result = json.loads(line.split("=", 1)[1])
-                    if result.get("smoke") == "js_timer":
-                        continue
-                    browser.close()
-                    summary = summarize(result, 0, False)
-                    return {
-                        "example": example_id,
-                        "runtime": "pyscript",
-                        "summary": summary,
-                        "returncode": 0 if result.get("status") == "ok" else 1,
-                        "timed_out": False,
-                        "duration_s": duration,
-                        "timeout_s": timeout,
-                        "result": result,
-                        "stdout_tail": line[-2000:],
-                        "stderr_tail": "\n".join(page_error)[-1000:],
-                    }
-                page.wait_for_timeout(200)
-            browser.close()
+        result = run_autotest(url, duration_s=duration, timeout_s=timeout)
     except Exception as exc:
         return {
             "example": example_id,
@@ -526,21 +496,39 @@ def run_pyscript_case(
             "duration_s": duration,
             "timeout_s": timeout,
             "result": {"status": "error", "error": str(exc)},
-            "stdout_tail": "\n".join(captured)[-2000:],
-            "stderr_tail": "\n".join(page_error)[-1000:],
+            "stdout_tail": "",
+            "stderr_tail": str(exc),
         }
 
+    if result.get("status") == "skip" or result.get("error", "").startswith(
+        "playwright not installed"
+    ):
+        return {
+            "example": example_id,
+            "runtime": "pyscript",
+            "summary": "needs_playwright",
+            "returncode": -1,
+            "timed_out": False,
+            "duration_s": duration,
+            "timeout_s": timeout,
+            "result": result,
+            "stdout_tail": "",
+            "stderr_tail": "",
+        }
+
+    summary = summarize(result, 0, False)
+    line = "EXAMPLE_RESULT=" + json.dumps(result, separators=(",", ":"))
     return {
         "example": example_id,
         "runtime": "pyscript",
-        "summary": "hang",
-        "returncode": -1,
-        "timed_out": True,
+        "summary": summary,
+        "returncode": 0 if result.get("status") == "ok" else 1,
+        "timed_out": result.get("smoke") == "js_timeout",
         "duration_s": duration,
         "timeout_s": timeout,
-        "result": None,
-        "stdout_tail": "\n".join(captured)[-2000:],
-        "stderr_tail": "\n".join(page_error)[-1000:],
+        "result": result,
+        "stdout_tail": line[-2000:],
+        "stderr_tail": "\n".join((result.get("console_errors") or [])[:5])[-1000:],
     }
 
 

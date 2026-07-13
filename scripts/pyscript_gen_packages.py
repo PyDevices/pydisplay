@@ -8,7 +8,11 @@ Default-includes every example **entry point** under ``src/examples/``:
   - ``examples/<name>/<name>.py`` — package (preferred over ``__init__.py``)
   - ``examples/<name>/__init__.py`` — package when no ``<name>.py`` entry
 
-Opt out with ``# pyscript skip: gallery`` in the first 10 lines.
+Opt out of the **public card grid** with ``# pyscript skip: gallery`` in the
+first 10 lines. Package examples still get a ``web/pyscript/<name>.json`` MIP
+manifest so local ``embed.html?manifests=…`` / kit runs work (e.g. demos with
+binary assets that are fine under ``serve.py`` but not for the published
+gallery).
 
 Optional headers (first 10 lines):
 
@@ -17,8 +21,8 @@ Optional headers (first 10 lines):
     multi-module loaders (e.g. ``calc_engine``)
   - ``# pyscript packages:`` — repo-root mip package stems (e.g.
     ``micropython-nano-gui``) pre-installed into ``/add_ons`` before import
-  - ``# pyscript skip: gallery`` — omit from the browser card grid
-
+  - ``# pyscript skip: gallery`` — omit from the browser card grid (manifest
+    JSON for packages is still written)
 Then:
 
   - Updates gallery cards in ``web/pyscript/index.html`` (``GEN:demos`` markers)
@@ -88,6 +92,8 @@ class Example:
         self.pyscript_files: list[str] = []
         self.pyscript_packages: list[str] = []
         self.featured = False
+        # False when ``# pyscript skip: gallery`` — still may emit MIP JSON.
+        self.in_gallery = True
 
     @property
     def title(self) -> str:
@@ -267,12 +273,11 @@ def parse_example(path: Path) -> Example | None:
 
     text = path.read_text(encoding="utf-8", errors="replace")
     lines = text.splitlines()
-    if skip_gallery(lines):
-        return None
 
     rel = path.relative_to(REPO_ROOT).as_posix()
     ex = Example(name, rel, kind)
-    ex.featured = header_has_featured(lines)
+    ex.in_gallery = not skip_gallery(lines)
+    ex.featured = header_has_featured(lines) if ex.in_gallery else False
     ex.docstring_blurb = extract_blurb(text, name)
     ex.pyscript_files = resolve_pyscript_paths(path, kind, name, lines, text)
     ex.pyscript_packages = parse_header_list(lines, "# pyscript packages:")
@@ -365,7 +370,7 @@ def render_card(ex: Example, base: str = LOADER_BASE) -> str:
 
 
 def render_cards(examples: list[Example]) -> str:
-    return "\n".join(render_card(ex) for ex in examples)
+    return "\n".join(render_card(ex) for ex in examples if ex.in_gallery)
 
 
 def replace_block(text: str, key: str, payload: str) -> str:
@@ -431,6 +436,8 @@ def remove_stale_demo_html(stale: list[str], check: bool) -> None:
 def gallery_example_files() -> list[str]:
     files: set[str] = set()
     for ex in discover():
+        if not ex.in_gallery:
+            continue
         files.update(ex.pyscript_files)
     return sorted(files)
 
@@ -489,12 +496,15 @@ def main(argv: list[str] | None = None) -> int:
     index_text = replace_block(index_text, "demos", render_cards(examples))
     write(INDEX, index_text)
 
-    n_module = sum(1 for ex in examples if ex.kind == "module")
-    n_manifest = sum(1 for ex in examples if ex.kind == "manifest")
-    n_featured = sum(1 for ex in examples if ex.featured)
+    n_module = sum(1 for ex in examples if ex.kind == "module" and ex.in_gallery)
+    n_manifest = sum(1 for ex in examples if ex.kind == "manifest" and ex.in_gallery)
+    n_featured = sum(1 for ex in examples if ex.featured and ex.in_gallery)
+    n_gallery = sum(1 for ex in examples if ex.in_gallery)
+    n_local_only = sum(1 for ex in examples if not ex.in_gallery)
     print(
-        f"\n{len(examples)} gallery demo(s) "
-        f"({n_module} module, {n_manifest} manifest; {n_featured} featured)."
+        f"\n{n_gallery} gallery demo(s) "
+        f"({n_module} module, {n_manifest} manifest; {n_featured} featured)"
+        f"; {n_local_only} local-only (skip: gallery)."
     )
     if args.check and stale:
         print("STALE:\n  " + "\n  ".join(stale))

@@ -660,13 +660,39 @@ class Runtime:
         # When QUIT is detected from inside the auto-service tick, defer the hard
         # teardown: stopping/deiniting the shared timer from within its own
         # callback is unsafe (the async timer would cancel its running task,
-        # wedging the loop). The teardown then runs from the keep-alive exit or
-        # the at-exit hook, outside any tick. A direct app poll() (legacy loops)
-        # is already outside a tick, so it tears down inline as before.
+        # wedging the loop). Sync keep-alive / ``run()`` exit finally tear down;
+        # async hosts without a keep-alive (PyScript) must schedule teardown.
         if self._in_service_poll:
             self._pending_teardown = True
+            self._schedule_deferred_teardown()
             return
         self._perform_teardown()
+
+    def _schedule_deferred_teardown(self):
+        """Run :meth:`_perform_teardown` after the current timer callback returns."""
+        if self._teardown_done:
+            return
+        if self._timer_async:
+            try:
+                from multimer import asyncio
+
+                async def _later():
+                    await asyncio.sleep(0)
+                    self._perform_teardown()
+
+                asyncio.create_task(_later())
+                return
+            except Exception:
+                pass
+            try:
+                from js import window
+                from pyscript.ffi import create_proxy
+
+                window.setTimeout(create_proxy(lambda *_args: self._perform_teardown()), 0)
+                return
+            except Exception:
+                pass
+        # Sync: ``run_forever`` / ``run`` finally or atexit will tear down.
 
     def _perform_teardown(self):
         """Stop the shared timer and release the display (idempotent)."""
@@ -679,6 +705,9 @@ class Runtime:
             import pydisplay_test_mode
 
             if pydisplay_test_mode.ENABLED:
+                # Still run before_quit (autotest / LVGL hooks); skip display.quit only.
+                if self._before_quit is not None:
+                    self._before_quit()
                 self.stop_timer()
                 return
         except ImportError:

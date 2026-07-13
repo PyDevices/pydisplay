@@ -28,6 +28,8 @@ MODE="" # manifest | module | "" (auto from gallery)
 OPEN=1
 DEBUG=0
 KILL_PORT=0
+AUTOTEST=0
+DURATION=5
 
 usage() {
   cat <<EOF
@@ -39,6 +41,10 @@ Usage: ./tools/pyscript.sh [DEMO] [options]
   -p, --port PORT   port (default: 8000)
   --kill-port       kill any existing listener on PORT, then start serve.py
   --debug           open embed.html with the same query + debug=1
+  --autotest        headless Playwright smoke (EXAMPLE_RESULT); implies --no-open.
+                    Streams the page #log panel to stdout in real time.
+  --auto-test       alias for --autotest
+  --duration SEC    autotest duration seconds (default: 5)
   --no-open         start/reuse server and print URL; do not open a browser
   -h, --help        this help
 
@@ -87,6 +93,15 @@ while [[ $# -gt 0 ]]; do
     --debug)
       DEBUG=1
       shift
+      ;;
+    --autotest|--auto-test)
+      AUTOTEST=1
+      OPEN=0
+      shift
+      ;;
+    --duration)
+      DURATION="${2:?--duration requires seconds}"
+      shift 2
       ;;
     --no-open)
       OPEN=0
@@ -242,23 +257,30 @@ REL_PATH="$(resolve_rel_path "$DEMO")" || exit 1
 BASE="http://127.0.0.1:${PORT}"
 PAGE_ROOT="${BASE}/web/pyscript"
 
-if [[ "$DEBUG" -eq 1 ]]; then
+if [[ "$DEBUG" -eq 1 ]] || [[ "$AUTOTEST" -eq 1 ]]; then
   case "$REL_PATH" in
     load.html\?*)
-      URL="${PAGE_ROOT}/embed.html?${REL_PATH#load.html?}&debug=1"
+      URL="${PAGE_ROOT}/embed.html?${REL_PATH#load.html?}"
       ;;
     *.html)
       URL="${PAGE_ROOT}/${REL_PATH}"
-      if [[ "$URL" == *"?"* ]]; then
-        URL="${URL}&debug=1"
-      else
-        URL="${URL}?debug=1"
-      fi
       ;;
     *)
       URL="${PAGE_ROOT}/${REL_PATH}"
       ;;
   esac
+  if [[ "$URL" == *"?"* ]]; then
+    SEP="&"
+  else
+    SEP="?"
+  fi
+  if [[ "$DEBUG" -eq 1 ]]; then
+    URL="${URL}${SEP}debug=1"
+    SEP="&"
+  fi
+  if [[ "$AUTOTEST" -eq 1 ]]; then
+    URL="${URL}${SEP}autotest=1&duration=${DURATION}"
+  fi
 else
   URL="${PAGE_ROOT}/${REL_PATH}"
 fi
@@ -366,6 +388,30 @@ else
 fi
 
 echo "pyscript.sh: ${URL}"
+
+if [[ "$AUTOTEST" -eq 1 ]]; then
+  if [[ -z "$DEMO" ]] || [[ "$DEMO" == "index" ]] || [[ "$DEMO" == "gallery" ]]; then
+    echo "pyscript.sh: --autotest requires a demo name" >&2
+    exit 1
+  fi
+  # Prefer repo venv Playwright; fall back to python3 on PATH.
+  PY="${PYDISPLAY_ROOT}/.venv/bin/python"
+  if [[ ! -x "$PY" ]]; then
+    PY="python3"
+  fi
+  TIMEOUT_MS=$(( (DURATION + 40) * 1000 ))
+  export PYSCRIPT_AUTOTEST_URL="$URL"
+  export PYSCRIPT_AUTOTEST_DURATION="$DURATION"
+  export PYSCRIPT_AUTOTEST_TIMEOUT_S="$(( DURATION + 40 ))"
+  set +e
+  "$PY" "${PYDISPLAY_ROOT}/tools/pyscript_autotest.py" "$URL" \
+    --duration "$DURATION" \
+    --timeout "$(( DURATION + 40 ))"
+  rc=$?
+  set -e
+  exit "$rc"
+fi
+
 open_url "$URL"
 
 if [[ -n "$SERVER_PID" ]]; then

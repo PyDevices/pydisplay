@@ -121,17 +121,25 @@
     window.__pydisplayAutotest = plan.autotest ? '1' : '';
     window.__pydisplayAutotestDuration = String(plan.autotestDuration);
 
+    // Safety-net only: if MicroPython never emits EXAMPLE_RESULT (import hang),
+    // report timeout — never status=ok (that masked missing-dep ImportErrors).
     if (plan.autotest && plan.entryName) {
+        var safetyMs = Math.max(plan.autotestDuration * 1000 + 45000, 60000);
         setTimeout(function () {
+            if (window.__pydisplayExampleResultSent) {
+                return;
+            }
+            window.__pydisplayExampleResultSent = true;
             var payload = {
                 example: plan.entryName,
-                status: 'ok',
+                status: 'error',
+                error: 'autotest timeout (no Python EXAMPLE_RESULT)',
                 runtime: 'pyscript',
                 duration_s: plan.autotestDuration,
-                smoke: 'js_timer'
+                smoke: 'js_timeout'
             };
             console.log('EXAMPLE_RESULT=' + JSON.stringify(payload));
-        }, plan.autotestDuration * 1000);
+        }, safetyMs);
     }
 })();
 </script>
@@ -178,6 +186,8 @@ def _autotest_enabled():
     return _from_window("__pydisplayAutotest") in ("1", "true", "yes")
 
 _autotest_sent = [False]
+_import_error = [None]
+
 
 def _autotest_duration_s():
     try:
@@ -185,23 +195,30 @@ def _autotest_duration_s():
     except ValueError:
         return 5
 
+
 def _post_debug(payload):
+    # Best-effort; Playwright / kit read console EXAMPLE_RESULT, not this POST.
     try:
         from js import JSON, fetch
 
         fetch(
             "/__debug/example_autotest",
-            {
-                "method": "POST",
-                "headers": {"Content-Type": "application/json"},
-                "body": JSON.stringify(payload),
-            },
+            method="POST",
+            body=JSON.stringify(payload),
         )
     except Exception:
         pass
 
+
 def _print_example_result(payload):
     import json
+
+    try:
+        from js import window
+
+        window.__pydisplayExampleResultSent = True
+    except Exception:
+        pass
 
     line = "EXAMPLE_RESULT=" + json.dumps(payload, separators=(",", ":"))
     print(line)
@@ -212,64 +229,70 @@ def _print_example_result(payload):
     except Exception:
         pass
 
-def _finish_autotest(entry):
+
+def _finish_autotest(entry, *, status="ok", error=None, quit_injected=False):
     if _autotest_sent[0]:
         return
     _autotest_sent[0] = True
 
     duration = _autotest_duration_s()
+    if status == "ok" and _import_error[0] is not None:
+        status = "error"
+        error = _import_error[0]
     try:
         from board_config import display_drv
 
         backend = type(display_drv).__name__
     except Exception as exc:
         backend = "error:{!r}".format(exc)
+        if status == "ok":
+            status = "error"
+            error = repr(exc)
     result = {
         "example": entry,
-        "status": "ok",
+        "status": status,
         "backend": backend,
         "duration_s": duration,
-        "quit_injected": False,
+        "quit_injected": bool(quit_injected),
         "runtime": "pyscript",
     }
+    if error:
+        result["error"] = error
     _print_example_result(result)
     _post_debug(result)
 
 
-async def _autotest_after_import(entry):
+def _arm_autotest_on_quit(entry):
+    """Emit EXAMPLE_RESULT when Runtime processes quit (e.g. Ctrl+Q chord)."""
     try:
-        import asyncio
-    except ImportError:
-        import uasyncio as asyncio
+        from board_config import runtime
+    except Exception:
+        return
+    if runtime is None:
+        return
+    prev = getattr(runtime, "before_quit", None)
 
-    await asyncio.sleep(_autotest_duration_s())
-    _finish_autotest(entry)
+    def _hook():
+        if callable(prev):
+            try:
+                prev()
+            except Exception:
+                pass
+        _finish_autotest(entry, quit_injected=True)
+
+    runtime.before_quit = _hook
+    try:
+        from js import console
+
+        console.log("AUTOTEST_READY=" + str(entry))
+    except Exception:
+        pass
 
 
 def _schedule_pyscript_autotest(entry):
-    """Arm quit injection before import — loop demos block the asyncio loop."""
-    duration = _autotest_duration_s()
-    try:
-        import multimer
-    except ImportError:
-        try:
-            import asyncio
-        except ImportError:
-            import uasyncio as asyncio
-        asyncio.create_task(_autotest_after_import(entry))
-        return
+    """After import: wait for external Ctrl+Q (or request_quit); do not auto-ok on a timer."""
+    _arm_autotest_on_quit(entry)
 
-    def on_quit(_timer):
-        _finish_autotest(entry)
-
-    Timer = getattr(multimer, "Timer", None)
-    if Timer is None:
-        from js import setTimeout
-
-        setTimeout(lambda: _finish_autotest(entry), int(duration * 1000))
-        return
-    quit_timer = Timer(-1)
-    quit_timer.init(mode=Timer.ONE_SHOT, period=int(duration * 1000), callback=on_quit)
 
 def _install_test_mode():
     if not _autotest_enabled():
@@ -280,46 +303,11 @@ def _install_test_mode():
 
     mode = _PyDisplayTestMode()
     mode.ENABLED = True
-    mode.DURATION_S = _autotest_duration_s()
+    # Soak is driven by Playwright; do not auto-quit via deadline hook.
+    mode.DURATION_S = 86400
     mode._start_s = None
     mode._deadline_fired = False
     sys.modules["pydisplay_test_mode"] = mode
-
-    def _deadline_hook():
-        if getattr(mode, "_deadline_fired", False):
-            return True
-        import time
-
-        now = time.time()
-        start = getattr(mode, "_start_s", None)
-        if start is None:
-            mode._start_s = now
-            return False
-        if now - start < float(mode.DURATION_S):
-            return False
-        mode._deadline_fired = True
-        try:
-            import board_config
-
-            rt = getattr(board_config, "runtime", None)
-            if rt is not None:
-                request = getattr(rt, "request_quit", None)
-                if callable(request):
-                    request()
-                elif not getattr(rt, "quit_requested", False):
-                    handle = getattr(rt, "_handle_quit", None)
-                    if callable(handle):
-                        handle()
-        except Exception:
-            pass
-        return True
-
-    try:
-        import multimer
-
-        multimer.set_deadline_hook(_deadline_hook)
-    except ImportError:
-        pass
 
 def _parse_comma(raw):
     names = []
@@ -433,20 +421,34 @@ def _run():
         # #endregion
     if _autotest_enabled():
         _install_test_mode()
-        _schedule_pyscript_autotest(entry)
+        # Preload board_config and arm before_quit *before* importing the demo.
+        # Many demos call runtime.run_forever() at import time and never return.
+        try:
+            import board_config  # noqa: F401
+        except Exception as exc:
+            _import_error[0] = "{}: {}".format(type(exc).__name__, exc)
+            _finish_autotest(entry, status="error", error=_import_error[0])
+            raise
+        _arm_autotest_on_quit(entry)
     # #region loader trace
     _mark("before_import_entry", entry=entry)
     # #endregion
-    __import__(entry)
+    try:
+        __import__(entry)
+    except Exception as exc:
+        _import_error[0] = "{}: {}".format(type(exc).__name__, exc)
+        # #region loader trace
+        _mark("import_entry_failed", entry=entry, error=_import_error[0])
+        # #endregion
+        if _autotest_enabled():
+            _finish_autotest(entry, status="error", error=_import_error[0])
+        raise
     # #region loader trace
     _mark("after_import_entry", entry=entry)
     # #endregion
     if _autotest_enabled() and not _autotest_sent[0]:
-        try:
-            import asyncio
-        except ImportError:
-            import uasyncio as asyncio
-        asyncio.create_task(_autotest_after_import(entry))
+        # Oneshot demos that return from import still need a quit path.
+        _arm_autotest_on_quit(entry)
 
 _run()
 </script>
