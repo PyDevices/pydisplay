@@ -30,6 +30,55 @@ def _validate_rotation_table(table):
         raise ValueError("touch_rotation_table must have exactly 4 items")
 
 
+def _main_file():
+    """Return ``__main__.__file__``, or ``None`` at a bare REPL.
+
+    MicroPython often leaves ``sys.modules['__main__']`` as ``None`` while a
+    file runs; ``import __main__`` still yields the real module.  ``None`` means
+    bare REPL; ``'<stdin>'`` means stdin-as-script (not a live REPL).
+    """
+    import sys
+
+    m = sys.modules.get("__main__")
+    if m is None:
+        try:
+            import __main__ as m
+        except Exception:
+            return None
+    return getattr(m, "__file__", None)
+
+
+def _cmdline_has_dash_i(cmdline_path="/proc/self/cmdline"):
+    """True if process cmdline contains a ``-i`` token (Linux unix ports).
+
+    MicroPython strips ``-i`` from ``sys.argv`` but leaves it on
+    ``/proc/self/cmdline``. Missing procfs (MCU, Windows) returns False.
+    """
+    try:
+        with open(cmdline_path, "rb") as f:
+            toks = [t for t in f.read().split(b"\0") if t]
+    except Exception:
+        return False
+    return b"-i" in toks
+
+
+def _is_interactive_session():
+    """True when a REPL prompt will remain after current top-level work.
+
+    CPython: ``sys.flags.interactive`` (``python -i …``) or bare REPL
+    (``__main__.__file__ is None``; bare ``python`` often has interactive=0).
+
+    MicroPython and similar: ``-i`` on ``/proc/self/cmdline``, or bare REPL
+    via ``__main__.__file__ is None``. No env vars; no reserved filenames.
+    """
+    import sys
+
+    if getattr(sys.implementation, "name", "") == "cpython":
+        flags = getattr(sys, "flags", None)
+        return bool(getattr(flags, "interactive", 0)) or (_main_file() is None)
+    return _cmdline_has_dash_i() or (_main_file() is None)
+
+
 class _RuntimeTimerSubscription:
     """Handle for a callback subscribed to the runtime's shared timer."""
 
@@ -220,9 +269,10 @@ class Runtime:
         * async, a loop already running (PyScript/Jupyter): arm the auto-service
           on that loop and return — the host loop keeps the app alive.
         * async, no running loop (desktop ``timer_async``): ``asyncio.run(self.run())``.
-        * sync, signal-delivered backend, interactive ``-i``: return immediately —
-          the REPL stays alive and the RT signal drives the auto-service, so a
-          keep-alive loop is optional here.
+        * sync, signal-delivered backend, interactive session (``-i`` or bare
+          REPL then ``import``): return immediately — the REPL stays alive and
+          the RT signal drives the auto-service, so a keep-alive loop is
+          optional here.
         * sync otherwise: block until quit, then tear down.
 
         The coroutine :meth:`run` stays public for ``await`` composition inside an
@@ -239,20 +289,9 @@ class Runtime:
             asyncio.run(self.run())
             return
 
-        import sys
-
-        # Detect interactive sessions on all runtimes:
-        #   CPython ``-i``:  sys.flags.interactive is set for the whole session.
-        #   MicroPython/CircuitPython REPL:  no sys.flags, but sys.argv[0] is
-        #     the bootstrap script (``lib/path.py``); its basename ``path.py``
-        #     is the pydisplay interactive-session convention.
-        # On signal-delivered backends the auto-service timer keeps the app live
-        # from the REPL prompt; blocking here would wedge it needlessly.
-        flags = getattr(sys, "flags", None)
-        argv0 = (sys.argv[0] if getattr(sys, "argv", None) else "").replace("\\", "/")
-        argv0 = argv0.rsplit("/", 1)[-1]
-        interactive = bool(getattr(flags, "interactive", 0)) or argv0 == "path.py"
-        if interactive and multimer.signal_delivered():
+        # Interactive + signal-delivered: timer keeps the app live at the REPL;
+        # blocking here would wedge the session needlessly.
+        if _is_interactive_session() and multimer.signal_delivered():
             return
         try:
             while not self._quit_requested:
