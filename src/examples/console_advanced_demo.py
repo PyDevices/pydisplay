@@ -68,21 +68,12 @@ display_drv.show()
 
 if _test_mode:
     from board_config import runtime
-    from multimer.loop import run_forever
 
     console.write("console_advanced_demo: smoke test\n", pal.GREEN)
     display_drv.show()
 
-    def _poll():
-        if runtime.quit_requested:
-            return True
-        if elist := runtime.poll():
-            for e in elist:
-                if e.type == runtime.events.QUIT:
-                    return True
-        return False
-
-    run_forever(_poll, delay_ms=20)
+    # Quit is already serviced by Runtime's auto-service; just block until then.
+    runtime.run_forever()
 
 #### Example commands
 # console.cls()                   # Clear the console screen

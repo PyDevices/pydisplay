@@ -8,8 +8,9 @@ Shares :class:`calc_engine.CalcEngine` with the graphics and LVGL front ends.
 Layout, font scales, radii, and padding are derived from display size so the
 UI scales from 320x480 through 640x960 and similar desktop sizes.
 
-Do not call ``pd.init_timer()`` — ``pd.run_forever()`` drives ticks from
-``multimer.loop.run_forever`` and follows ``runtime.timer_async`` automatically.
+Input and frame rendering are driven by the shared ``eventsys.Runtime``:
+``pd.Display`` wires them in at construction, so the example just builds the UI
+and hands control to ``runtime.run_forever()``.
 """
 
 import sys
@@ -192,4 +193,9 @@ screen.add_event_cb(pd.events.KEYDOWN, lambda sender, e: _on_key(getattr(e, "uni
 
 _refresh()
 screen.visible = True
-pd.run_forever()
+
+# Canonical entry: pdwidgets wires input + rendering into the shared runtime at
+# Display construction, so this just keeps the app alive. run_forever() blocks
+# when run as a program and returns immediately in an interactive REPL on
+# signal-driven backends, so the same call is always correct.
+board_config.runtime.run_forever()

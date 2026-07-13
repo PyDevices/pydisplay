@@ -30,7 +30,6 @@ import chango_16 as font_16
 import chango_32 as font_32
 import chango_64 as font_64
 from board_config import runtime
-from multimer import Timer
 import tft_config
 import tft_write
 
@@ -41,7 +40,6 @@ gc.collect()
 
 def main():
     """main"""
-    # enable display and clear screen
     tft = tft_config.config(tft_config.WIDE)
 
     row = 0
@@ -55,7 +53,7 @@ def main():
     row += font_64.HEIGHT
 
     tft.show()
-    runtime.poll()
+    runtime.run_forever()
 
 
 main()

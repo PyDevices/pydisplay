@@ -71,7 +71,12 @@ class TestRuntimeOwnedRefresh(unittest.TestCase):
             pydisplay_test_mode.ENABLED = True
             runtime = Runtime(display=display)
             self.addCleanup(runtime.stop_timer)
-            self.assertIsNone(runtime._timer)
+            # Test mode arms the auto-service (so the canonical no-loop idiom's
+            # input/QUIT works under the harness) but must not wire the periodic
+            # display.show() refresh — examples that show() themselves would
+            # otherwise get a competing refresh.
+            self.assertIsNotNone(runtime._service_subscription)
+            self.assertIsNone(runtime._refresh_subscription)
             sleep_ms(80)
             self.assertEqual(display.shows, 0)
         finally:

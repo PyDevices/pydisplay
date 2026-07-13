@@ -1,6 +1,5 @@
 from board_config import runtime
 from keypins import KeyPins, Keys
-from multimer.loop import run_forever
 
 
 buttons = KeyPins(
@@ -27,25 +26,19 @@ print(f"{buttons.fire.name=}")
 print(f"{buttons.fire.key=}")
 print(f"{buttons.fire.keyname=}\n")
 
-# Subscribe the to the display driver so _KeyPin states are updated
-# on KEYDOWN and KEYUP events when runtime.poll() is called.
+# KeyPins updates on KEYDOWN/KEYUP via the runtime auto-service (no app poll).
 runtime.on([runtime.events.KEYDOWN, runtime.events.KEYUP], buttons)
 
 print(f"Press any of these keys:  {[button.keyname for button in buttons]}")
 
 
-def poll():
-    elist = runtime.poll() if runtime else []
-    if runtime.quit_requested if runtime else False:
-        return True
-    if any(e.type == runtime.events.QUIT for e in elist):
-        return True
+def _on_key(e):
+    if runtime.quit_requested:
+        return
     for button in buttons:
         if button.value():
             print(f"{button.name} ({button.keyname}) pressed")
-    return False
 
 
-# run_forever blocks on desktop/MCU but yields to the event loop on PyScript
-# and Jupyter (runtime.timer_async), so the browser main thread stays live.
-run_forever(poll, delay_ms=20)
+runtime.on([runtime.events.KEYDOWN, runtime.events.KEYUP], _on_key)
+runtime.run_forever()

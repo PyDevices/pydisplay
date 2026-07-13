@@ -39,6 +39,10 @@ import sys
 #   * The sync path runs ``lv.task_handler()`` straight from the tick callback
 #     (guarded against re-entrancy) rather than via ``micropython.schedule``;
 #     the runtime timer already delivers the callback on the main thread.
+#   * Async mode arms the asyncio refresh task lazily on the first timer tick
+#     (inside the running loop) so ``import display_driver`` at module-top
+#     level is safe before any event loop exists.
+#   * No application loop helper: LVGL apps just call ``runtime.run_forever()``.
 from board_config import runtime
 import lvgl as lv
 
@@ -48,6 +52,20 @@ except ImportError:
     asyncio = None
 
 asyncio_available = asyncio is not None
+
+
+def _asyncio_loop_running():
+    """True when an asyncio loop is already running (host loop or inside a task)."""
+    if asyncio is None:
+        return False
+    if hasattr(asyncio, "get_running_loop"):
+        try:
+            asyncio.get_running_loop()
+            return True
+        except RuntimeError:
+            return False
+    return False
+
 
 ##############################################################################
 
@@ -78,22 +96,47 @@ class event_loop:
         self._in_task = False
 
         self.asynchronous = asynchronous
+        self.refresh_task = None
+        self._timer_sub = None
+        self._async_armed = False
+
+        if runtime is None:
+            raise RuntimeError("LVGL requires board_config.runtime")
+
         if self.asynchronous:
             if not asyncio_available:
                 raise RuntimeError("Cannot run asynchronous event loop. asyncio is not available!")
             self.refresh_event = asyncio.Event()
-            self.refresh_task = asyncio.create_task(self.async_refresh())
+            # The async refresh task and AsyncTimer both need a running asyncio
+            # loop. If one is already running (host loop on PyScript/Jupyter, or
+            # imported from within a task) arm immediately; otherwise defer until
+            # arm() is called once the loop starts (e.g. from lv_utils.run_forever
+            # or display_driver's at-exit auto-run). This lets ``import
+            # display_driver`` sit at module top level before any loop exists.
+            if _asyncio_loop_running():
+                self.arm()
+        else:
+            self._timer_sub = runtime.on_tick(self.timer_cb, period=self.delay, async_=False)
 
-        if runtime is None:
-            raise RuntimeError("LVGL requires board_config.runtime")
-        self._timer_sub = runtime.on_tick(self.timer_cb, period=self.delay, async_=asynchronous)
+    def arm(self):
+        """Create the async refresh task + shared timer once a loop is running.
+
+        No-op in sync mode or when already armed. Safe to call repeatedly.
+        """
+        if not self.asynchronous or self._async_armed:
+            return
+        self._async_armed = True
+        self.refresh_task = asyncio.create_task(self.async_refresh())
+        self._timer_sub = runtime.on_tick(self.timer_cb, period=self.delay, async_=True)
 
     def deinit(self):
         if getattr(self, "_timer_sub", None) is not None:
             self._timer_sub.deinit()
             self._timer_sub = None
-        if self.asynchronous:
+        if self.asynchronous and self.refresh_task is not None:
             self.refresh_task.cancel()
+            self.refresh_task = None
+        self._async_armed = False
         event_loop._current_instance = None
 
     def disable(self):
@@ -137,6 +180,11 @@ class event_loop:
 
     def timer_cb(self, t):
         # Called from the runtime's shared timer (on the main thread).
+        # In async mode the AsyncTimer fires from inside the running asyncio
+        # loop, so we can safely arm (create the refresh task) on the first
+        # tick — no need for an external coordinator.
+        if self.asynchronous and not self._async_armed:
+            self.arm()
         lv.tick_inc(self.delay)
         if self._pause > 0:
             return

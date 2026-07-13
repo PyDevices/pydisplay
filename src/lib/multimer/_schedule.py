@@ -61,15 +61,28 @@ if sys.implementation.name in ("cpython", "circuitpython"):
             return None
         return _pending.pop(0)
 
+    _draining = False
+
     def _run_pending():
-        if not _is_main_thread():
+        # Reentrancy guard: on the librt backend the periodic timer is delivered
+        # by an RT signal handler that runs on the main thread. If that fires
+        # while we already hold ``_pending_lock`` here, the handler's own
+        # schedule()/_run_pending() would re-acquire the non-reentrant lock and
+        # self-deadlock. Skip the reentrant drain — the outer loop keeps
+        # draining, and schedule() still invokes the delivered callback directly.
+        global _draining
+        if not _is_main_thread() or _draining:
             return
-        while True:
-            item = _pop_pending()
-            if item is None:
-                return
-            cb, arg = item
-            cb(arg)
+        _draining = True
+        try:
+            while True:
+                item = _pop_pending()
+                if item is None:
+                    return
+                cb, arg = item
+                cb(arg)
+        finally:
+            _draining = False
 
     def schedule(cb, arg):
         if not _is_main_thread():

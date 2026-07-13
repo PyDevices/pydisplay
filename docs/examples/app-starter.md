@@ -4,8 +4,7 @@ Copy one of the scripts below to start your first pydisplay app. Each is a singl
 
 | Use this | When you want… |
 |----------|----------------|
-| **App starter** (this page) | A minimal template: draw the UI, handle clicks, run the recommended main loop |
-| **Dual tab** | One file for desktop and PyScript (`dual_main` + `runtime.timer_async`) |
+| **App starter** (this page) | A minimal template: draw the UI, handle clicks, `runtime.run_forever()` |
 | [**pydisplay_demo**](pydisplay_demo.md) | A feature tour: rotation, hardware scrolling, buffered text, timers |
 
 ## Prerequisites
@@ -17,200 +16,51 @@ Save the boilerplate as `main.py` (or any name you prefer) and run it from the R
 
 ## Boilerplate
 
-=== "Sync (queued / sync)"
+One file for every host. Build the UI, subscribe callbacks, then `runtime.run_forever()`.
+The runtime auto-service dispatches input and QUIT — do **not** call `runtime.poll()`
+from an `on_tick` callback. Pass `async_=runtime.timer_async` to `on_tick` so async
+hosts do not arm a sync timer before the loop is running.
 
-    Blocking main loop via `multimer.run_forever()`. Use on MCU, desktop CPython, and any port where your app is not asyncio-native.
+```python
+"""
+my_app.py — starting point for a pydisplay app.
 
-    ```python
-    """
-    my_app.py — starting point for a pydisplay app.
+Copy and rename to build your own project. Uses board_config, graphics,
+and eventsys only.
+"""
 
-    Copy and rename to build your own project. Uses board_config, graphics,
-    multimer, and eventsys only.
-    """
+from board_config import display_drv, runtime
+from graphics import Area
 
-    import eventsys
-    from board_config import display_drv, runtime
-    from graphics import Area
-    from multimer import run_forever
+# --- customize: colors and layout ---
+BG = 0
+BTN = 0xF800       # red
+BTN_ON = 0x07E0    # green
 
-    # --- customize: colors and layout ---
-    BG = 0
-    BTN = 0xF800       # red
-    BTN_ON = 0x07E0    # green
-
-    button = None
-    pressed = False
-
-
-    def redraw():
-        global button
-        w, h = display_drv.width, display_drv.height
-        display_drv.fill(BG)
-        color = BTN_ON if pressed else BTN
-        button = Area(display_drv.fill_rect(w // 2 - 50, h // 2 - 25, 100, 50, color))
-        display_drv.show()
+button = None
+pressed = False
 
 
-    def handle_event(e):
-        global pressed
-        if e.type == eventsys.MOUSEBUTTONDOWN:
-            if button.contains(e.pos):
-                pressed = not pressed
-                redraw()
-        # elif e.type == eventsys.KEYDOWN:
-        #     ...
-        # elif e.type == eventsys.ENCODER:
-        #     ...
-        # elif e.type == eventsys.QUIT:
-        #     return True  # exit main loop if you add a break
+def redraw():
+    global button
+    w, h = display_drv.width, display_drv.height
+    display_drv.fill(BG)
+    color = BTN_ON if pressed else BTN
+    button = Area(display_drv.fill_rect(w // 2 - 50, h // 2 - 25, 100, 50, color))
+    display_drv.show()
 
 
-    def poll_events():
-        if elist := runtime.poll():
-            for e in elist:
-                handle_event(e)
-
-
-    def main():
+def on_click(e):
+    global pressed
+    if button is not None and button.contains(e.pos):
+        pressed = not pressed
         redraw()
-        run_forever(poll_events)
 
 
-    main()
-    ```
-
-=== "Async (asyncio)"
-
-    Asyncio main loop via `multimer.run_forever()`. Use on PyScript or any port where the app already runs under `asyncio` / `uasyncio`. Included in the browser gallery by default; add `# pyscript skip: gallery` to omit or `# pyscript featured` to pin.
-
-    ```python
-        """
-    my_app_async.py — asyncio starting point for a pydisplay app.
-
-    Copy and rename to build your own project. Uses board_config, graphics,
-    multimer, and eventsys only.
-    """
-
-    import eventsys
-    from board_config import display_drv, runtime
-    from graphics import Area
-    from multimer import run, run_forever
-
-    # --- customize: colors and layout ---
-    BG = 0
-    BTN = 0xF800       # red
-    BTN_ON = 0x07E0    # green
-
-    button = None
-    pressed = False
-
-
-    def redraw():
-        global button
-        w, h = display_drv.width, display_drv.height
-        display_drv.fill(BG)
-        color = BTN_ON if pressed else BTN
-        button = Area(display_drv.fill_rect(w // 2 - 50, h // 2 - 25, 100, 50, color))
-        display_drv.show()
-
-
-    def handle_event(e):
-        global pressed
-        if e.type == eventsys.MOUSEBUTTONDOWN:
-            if button.contains(e.pos):
-                pressed = not pressed
-                redraw()
-        # elif e.type == eventsys.KEYDOWN:
-        #     ...
-        # elif e.type == eventsys.ENCODER:
-        #     ...
-        # elif e.type == eventsys.QUIT:
-        #     return True
-
-
-    def poll_events():
-        if elist := runtime.poll():
-            for e in elist:
-                handle_event(e)
-
-
-    async def main():
-        redraw()
-        await run_forever(poll_events, delay_ms=10)
-
-
-    run(main)
-    ```
-
-=== "Dual (sync + async)"
-
-    One entry file for desktop **and** PyScript. `runtime.timer_async` selects the path; `dual_main()` calls `main_sync()` or schedules `main_async()`. Included in the browser gallery by default; add `# pyscript skip: gallery` to omit or `# pyscript featured` to pin. Pass `async_=runtime.timer_async` to `periodic()` when you add periodic timers.
-
-    ```python
-        """
-    my_app_dual.py — one file for sync desktop and async PyScript.
-
-    Copy and rename to build your own project. Uses board_config, graphics,
-    multimer, multimer, and eventsys only.
-    """
-
-    import eventsys
-    from board_config import display_drv, runtime
-    from graphics import Area
-    from multimer import run_forever
-    from multimer import dual_main, run_forever as aio_run_forever
-
-    # --- customize: colors and layout ---
-    BG = 0
-    BTN = 0xF800       # red
-    BTN_ON = 0x07E0    # green
-
-    button = None
-    pressed = False
-
-
-    def redraw():
-        global button
-        w, h = display_drv.width, display_drv.height
-        display_drv.fill(BG)
-        color = BTN_ON if pressed else BTN
-        button = Area(display_drv.fill_rect(w // 2 - 50, h // 2 - 25, 100, 50, color))
-        display_drv.show()
-
-
-    def handle_event(e):
-        global pressed
-        if e.type == eventsys.MOUSEBUTTONDOWN:
-            if button.contains(e.pos):
-                pressed = not pressed
-                redraw()
-        # elif e.type == eventsys.KEYDOWN:
-        #     ...
-        # elif e.type == eventsys.ENCODER:
-        #     ...
-        # elif e.type == eventsys.QUIT:
-        #     return True
-
-
-    def poll_events():
-        if elist := runtime.poll():
-            for e in elist:
-                handle_event(e)
-
-
-    def main_sync():
-        redraw()
-        run_forever(poll_events)
-
-
-    async def main_async():
-        redraw()
-        await aio_run_forever(poll_events, delay_ms=10)
-
-
-    dual_main(main_sync, main_async, async_mode=runtime.timer_async)
-    ```
+redraw()
+runtime.on(runtime.events.MOUSEBUTTONDOWN, on_click)
+runtime.run_forever()
+```
 
 ## Hit testing and `graphics.Area`
 
@@ -276,32 +126,25 @@ Clears the screen, draws one clickable rectangle, and calls `display_drv.show()`
 
 Recreate `Area` objects whenever you change layout (same pattern as real apps with moving widgets).
 
-### `handle_event(e)` and `poll_events()`
+### `on_click` / event callbacks
 
-Per-event handling stays in `handle_event()`. The main loop calls `poll_events()`, which drains `runtime.poll()` and dispatches each event. The starter handles `MOUSEBUTTONDOWN` only. Uncomment the stubs or add branches for keys, encoders, and quit — see [Events](../concepts/events.md).
+Per-event handling stays in callbacks registered with `runtime.on(...)`. The
+starter handles `MOUSEBUTTONDOWN` only. Add more `runtime.on` subscriptions for
+keys, encoders, and other devices — see [Events](../concepts/events.md).
 
 ### Main loop
 
-All three boilerplate tabs use the shared **`run_forever(poll)`** helpers instead of hand-rolled `while True` loops:
-
-| Tab | Helper | Each iteration |
-|-----|--------|----------------|
-| Sync | `multimer.run_forever(poll_events)` | `poll_events()` → short sleep |
-| Async | `await multimer.run_forever(poll_events, delay_ms=10)` | yield to asyncio → `poll_events()` → short sleep |
-| Dual | `dual_main(main_sync, main_async, async_mode=runtime.timer_async)` | picks sync or async path from [board config](../hardware/board-configs.md) |
-
-`run_forever` delivers timer callbacks on the active backend — see [multimer](../concepts/multimer.md).
-
-For the **dual** tab, PyScript and Jupyter board configs construct `runtime` with `timer_async=True`; desktop MCU/SDL configs use sync timers. Your app reads `runtime.timer_async` and passes it to `dual_main()` — multimer does not import `board_config`.
-
-To migrate between styles, compare the tabs above or see the sync/async table in [pydisplay_demo → Async variant](pydisplay_demo.md#async-variant).
+`runtime.run_forever()` keeps the app live on every host — see
+[Runtime](../concepts/runtime.md) and [multimer](../concepts/multimer.md).
+PyScript and Jupyter always construct `runtime` with `timer_async=True`; desktop
+defaults to sync unless `PYDISPLAY_TIMER_ASYNC=1` is set before `board_config` loads.
 
 ## Customize
 
-1. **Rename** the file and module docstring; keep the multimer first-line tag accurate if you add timers later.
+1. **Rename** the file and module docstring.
 2. **Layout** — add more `Area` regions, sprites, or shapes in `redraw()`.
 3. **Text** — for labels and lists, use `Font` + `FrameBuffer` + `blit_rect` ([Drawing and fonts](../concepts/drawing-and-fonts.md), [`font_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/font_simpletest.py)).
-4. **Timers** — call `periodic(callback, period=…, async_=runtime.timer_async)` when you need periodic updates (use the **dual** tab pattern); see [multimer](../concepts/multimer.md) and [**pydisplay_demo**](pydisplay_demo.md) for scrolling.
+4. **Timers** — use `runtime.on_tick(callback, period=…, async_=runtime.timer_async)`; see [multimer](../concepts/multimer.md) and [**pydisplay_demo**](pydisplay_demo.md).
 
 !!! tip "Next steps beyond this template"
     - **Rotation and hardware scroll** — [pydisplay_demo](pydisplay_demo.md)

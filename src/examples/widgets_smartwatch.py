@@ -19,7 +19,6 @@ import pdwidgets as pd
 
 pd.DEBUG = False
 pd.MARK_UPDATES = False
-pd.init_timer(10)
 
 display = pd.Display(board_config.display_drv, board_config.runtime)
 theme = display.color_theme
@@ -112,4 +111,4 @@ back.add_event_cb(pd.events.MOUSEBUTTONDOWN, lambda s, e: show(face))
 
 screen.visible = True
 
-pd.run_forever()
+board_config.runtime.run_forever()

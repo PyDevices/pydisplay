@@ -149,10 +149,6 @@
       "github:PyDevices/pydisplay/src/lib/multimer/_timer.py"
     ],
     [
-      "lib/multimer/loop.py",
-      "github:PyDevices/pydisplay/src/lib/multimer/loop.py"
-    ],
-    [
       "lib/multimer/py.typed",
       "github:PyDevices/pydisplay/src/lib/multimer/py.typed"
     ],

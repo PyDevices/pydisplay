@@ -6,7 +6,6 @@ import png
 from board_config import runtime
 from color_setup import ssd
 from displaybuf import alloc_buffer
-from multimer import sleep_ms
 
 png_image = namedtuple("png_image", ["width", "height", "pixels", "metadata"])
 
@@ -125,47 +124,60 @@ bg_color = 0x001F
 ssd.fill(bg_color)
 ssd.show()
 
-shown = 0
-while True:
-    for file_name in png_files(png_path):
-        p = png_image(*png.Reader(filename=file_name).read())
-        if not p.metadata["greyscale"] or p.metadata["bitdepth"] != 8:
-            print(f"Only 8-bit PNGs are supported {file_name}")
-            continue
-        pos_x, pos_y = (ssd.width - p.width) // 2, (ssd.height - p.height) // 2
-        offset = 1 if p.metadata["alpha"] else 0
-        planes = p.metadata["planes"]
-        buf = alloc_buffer(p.width * p.height * 2)
-        for y, row in enumerate(p.pixels):
-            for x in range(p.width):
-                if row[x * planes + offset] > 127:
-                    buf[(y * p.width + x) * 2 : (y * p.width + x) * 2 + 2] = fg_color.to_bytes(
-                        2, "little"
-                    )
-                else:
-                    buf[(y * p.width + x) * 2 : (y * p.width + x) * 2 + 2] = bg_color.to_bytes(
-                        2, "little"
-                    )
-        ssd.blit_rect(buf, pos_x, pos_y, p.width, p.height)
-        rel = _rel_path(file_name, png_path)
-        lines = rel.rpartition("/")
-        ssd.text16(lines[0] + "/", 0, 0, 0xFFFF)
-        ssd.text16("    " + lines[2], 0, 16, 0xFFFF)
-        ssd.show()
-        shown += 1
-        if runtime:
-            runtime.poll()
-        if runtime.quit_requested if runtime else False:
-            break
-        if _max_pngs is not None and shown >= _max_pngs:
-            break
-        sleep_ms(1000)
-        ssd.fill_rect(pos_x, pos_y, p.width, p.height, bg_color)
-        ssd.fill_rect(0, 0, ssd.width, 32, bg_color)
-        sleep_ms(0)
-    if runtime:
-        runtime.poll()
+st = {"shown": 0, "phase": "show", "pos": None, "files": iter(png_files(png_path))}
+
+
+def _show_next(_=None):
     if runtime.quit_requested if runtime else False:
-        break
-    if _max_pngs is not None and shown >= _max_pngs:
-        break
+        return
+    if _max_pngs is not None and st["shown"] >= _max_pngs:
+        return
+
+    if st["phase"] == "clear":
+        pos_x, pos_y, pw, ph = st["pos"]
+        ssd.fill_rect(pos_x, pos_y, pw, ph, bg_color)
+        ssd.fill_rect(0, 0, ssd.width, 32, bg_color)
+        ssd.show()
+        st["phase"] = "show"
+        return
+
+    try:
+        file_name = next(st["files"])
+    except StopIteration:
+        st["files"] = iter(png_files(png_path))
+        try:
+            file_name = next(st["files"])
+        except StopIteration:
+            return
+
+    p = png_image(*png.Reader(filename=file_name).read())
+    if not p.metadata["greyscale"] or p.metadata["bitdepth"] != 8:
+        print(f"Only 8-bit PNGs are supported {file_name}")
+        return
+    pos_x, pos_y = (ssd.width - p.width) // 2, (ssd.height - p.height) // 2
+    offset = 1 if p.metadata["alpha"] else 0
+    planes = p.metadata["planes"]
+    buf = alloc_buffer(p.width * p.height * 2)
+    for y, row in enumerate(p.pixels):
+        for x in range(p.width):
+            if row[x * planes + offset] > 127:
+                buf[(y * p.width + x) * 2 : (y * p.width + x) * 2 + 2] = fg_color.to_bytes(
+                    2, "little"
+                )
+            else:
+                buf[(y * p.width + x) * 2 : (y * p.width + x) * 2 + 2] = bg_color.to_bytes(
+                    2, "little"
+                )
+    ssd.blit_rect(buf, pos_x, pos_y, p.width, p.height)
+    rel = _rel_path(file_name, png_path)
+    lines = rel.rpartition("/")
+    ssd.text16(lines[0] + "/", 0, 0, 0xFFFF)
+    ssd.text16("    " + lines[2], 0, 16, 0xFFFF)
+    ssd.show()
+    st["shown"] += 1
+    st["pos"] = (pos_x, pos_y, p.width, p.height)
+    st["phase"] = "clear"
+
+
+runtime.on_tick(_show_next, period=1000, async_=runtime.timer_async)
+runtime.run_forever()

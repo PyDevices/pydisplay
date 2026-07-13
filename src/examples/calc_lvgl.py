@@ -14,16 +14,16 @@ so LVGL's display/input devices are wired before widgets are created.
 """
 
 import sys
-import time
 
 _EXAMPLES = __file__.replace("\\", "/").rsplit("/", 1)[0]
 if _EXAMPLES not in sys.path:
     sys.path.insert(0, _EXAMPLES)
 
+import display_driver  # noqa: F401 — wires LVGL display/input into the runtime
+import lv_utils
 import lvgl as lv
 from board_config import display_drv, runtime
 from calc_engine import CalcEngine
-from multimer.loop import dual_main
 
 # Button grid (last row: two wide buttons).
 _BUTTON_ROWS = (
@@ -236,44 +236,9 @@ def build_ui():
             inst.enable()
 
 
-def _setup():
-    import display_driver  # noqa: F401
+build_ui()
 
-    build_ui()
-
-
-def _poll_done():
-    if runtime.quit_requested:
-        return True
-    if getattr(display_drv, "_deinitialized", False):
-        return True
-    return False
-
-
-def main_sync():
-    _setup()
-    # Avoid multimer.sleep_ms with LVGL (librt signal-handler deadlock risk).
-    # Do not call runtime.poll() while LVGL owns input: VirtualDevices drain the
-    # host queue from indev read_cb; a parallel poll steals mouse events.
-    from multimer import run_deadline_hook
-
-    while True:
-        run_deadline_hook()
-        if _poll_done():
-            break
-        time.sleep(0.01)
-
-
-async def main_async():
-    _setup()
-    from multimer import asyncio
-
-    # See main_sync: do not runtime.poll() — LVGL indev reads the host device.
-    while True:
-        if _poll_done():
-            break
-        # sleep(0) starves the browser main thread on PyScript (same class as delay_ms=0).
-        await asyncio.sleep(0.01)
-
-
-dual_main(main_sync, main_async, async_mode=runtime.timer_async)
+# Canonical entry: display_driver wired LVGL into the shared runtime at import;
+# run_forever() keeps the app alive (or returns immediately in a signal-driven
+# interactive REPL).
+runtime.run_forever()

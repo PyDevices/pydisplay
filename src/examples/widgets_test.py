@@ -9,7 +9,6 @@ except ImportError:
 
 pd.DEBUG = False
 pd.MARK_UPDATES = False
-pd.init_timer(10)  # Remove this line to use polled mode in a while loop
 
 
 REVERSE = False  # for troubleshooting progressbar, sliders, scrollbars
@@ -141,4 +140,4 @@ clock = pd.DigitalClock(screen, align=pd.ALIGN.TOP_RIGHT)
 
 screen.visible = True
 
-pd.run_forever()
+board_config.runtime.run_forever()

@@ -597,7 +597,6 @@ def main(argv=None):
 
         pydisplay_test_mode.ENABLED = True
         pydisplay_test_mode.DURATION_S = args["duration"]
-        pydisplay_test_mode.install_deadline_hook()
     except Exception:
         pass
 
@@ -613,6 +612,16 @@ def main(argv=None):
         }
         _print_result(payload)
         return 1
+
+    # Install the deadline hook AFTER bootstrap: it imports multimer, which is
+    # only on sys.path once _setup_bootstrap has run. The hook drives quit for
+    # the canonical no-loop idiom (runtime auto-service / run_forever).
+    try:
+        import pydisplay_test_mode
+
+        pydisplay_test_mode.install_deadline_hook()
+    except Exception:
+        pass
 
     # Windows PE under WSL does not see Linux-exported env vars via getenv.
     # Apply PYDISPLAY_TIMER_ASYNC from argv before examples import board_config.

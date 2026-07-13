@@ -59,7 +59,8 @@ Use **`runtime.timer_async`** (set in `board_config.py` when constructing `Runti
 
 When **`runtime.timer_async` is true**, `display_driver` claims runtime-driven refresh and calls `display.show()` from the aio LVGL refresh loop instead — so presentation stays on the asyncio path even when a sync timer backend would otherwise be used.
 
-Full apps typically drive the loop with `dual_main` (see [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py)) or call **`display_driver.run()`** after UI setup: it returns immediately on MicroPython unix and CPython Linux (REPL stays live) and blocks only on Windows SDL or macOS.
+Full apps typically build the UI then call **`runtime.run_forever()`** (see
+[`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py)).
 
 `src/lib/board_config.py` reads **`PYDISPLAY_TIMER_ASYNC`** for the PG/SDL
 desktop branch (default `False`). PyScript and Jupyter always use
@@ -75,7 +76,7 @@ Or set `PYDISPLAY_TIMER_ASYNC=1` on the command line when launching the process.
 
 ## Timer test example
 
-[`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py) is a single smoke test that follows **`runtime.timer_async`** (via `dual_main`). It does **not** read or write environment variables — set `PYDISPLAY_TIMER_ASYNC` in the parent process / shell if you want a specific desktop mode before `board_config` loads.
+[`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py) is a single smoke test that follows **`runtime.timer_async`** via `runtime.run_forever()` (interactive and kit). It does **not** read or write environment variables — set `PYDISPLAY_TIMER_ASYNC` in the parent process / shell if you want a specific desktop mode before `board_config` loads.
 
 The UI shows autodetected **runtime**, **OS**, **display** driver class, **timer** backend, **mode** (`sync`/`async`), and **LVGL** version, plus a seconds counter, spinning arc, and tap button.
 

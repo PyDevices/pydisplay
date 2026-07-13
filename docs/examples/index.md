@@ -52,22 +52,16 @@ rg '^# pyscript packages:' src/examples/
 
 ### Canonical patterns
 
-**`run_forever` with poll** — [`hello.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/hello.py), [`scroll.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll.py), [`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py), [`calc_graphics.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/calc_graphics.py):
+**`runtime.run_forever()` with callbacks** — [`hello.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/hello.py), [`scroll.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll.py), [`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py), [`calc_graphics.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/calc_graphics.py):
 
 ```python
 from board_config import display_drv, runtime
-from multimer.loop import run_forever
-import eventsys
 
-def handle_events():
-    if elist := runtime.poll():
-        for e in elist:
-            if e.type == eventsys.QUIT:
-                return True
-            ...
-    return False
+def on_click(e):
+    ...
 
-run_forever(handle_events, delay_ms=20)
+runtime.on(runtime.events.MOUSEBUTTONDOWN, on_click)
+runtime.run_forever()
 ```
 
 **Event-driven poll** — [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_encoder_test.py):
@@ -81,7 +75,7 @@ while True:
             display_drv.show()
 ```
 
-**Forever LVGL / library-driven app** — [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py): follows `runtime.timer_async` via `dual_main` (no env vars). Sync path uses a cooperative deadline/`time.sleep` loop; async path uses `await asyncio.sleep(0)` plus `runtime.poll()`.
+**Forever LVGL / library-driven app** — [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py): build UI then `runtime.run_forever()`. Kit mode keeps a small sync/async wait for LVGL click injection.
 
 **`tft_config` animation / one-shot** — subdirectory demos [`alien/alien.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/alien/alien.py), [`tiny_toasters/tiny_toasters.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/tiny_toasters/tiny_toasters.py), [`chango/chango.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/chango/chango.py):
 
@@ -89,13 +83,10 @@ while True:
 from board_config import runtime
 
 tft.show()
-if runtime is not None:
-    runtime.poll()  # SDL message pump — required on MicroPython Windows
+runtime.run_forever()
 ```
 
-Without `runtime.poll()`, the SDL window can freeze after the first frame even when the Python loop keeps running.
-
-**LVGL apps** — [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py): import `display_driver` from sync/async entrypoints and drive the loop with `dual_main` (follows `runtime.timer_async`). See [LVGL guide](../guis/lvgl.md).
+**LVGL apps** — [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py): import `display_driver`, build UI, then `runtime.run_forever()`. See [LVGL guide](../guis/lvgl.md).
 
 **PyWidgets (pdwidgets)** — [`widgets_stub.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_stub.py): build UI, then:
 
@@ -139,7 +130,7 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | Resource | Description | Platforms | Packages |
 |----------|-------------|-----------|----------|
 | [**App starter**](app-starter.md) | Copy-paste app boilerplate (doc only) | CPython · MCU · PyScript | core |
-| [`pydisplay_demo.py`](pydisplay_demo.md) | Clicks, rotation, scroll (`dual_main` / `run_forever`) | CPython · MCU · PyScript | core |
+| [`pydisplay_demo.py`](pydisplay_demo.md) | Clicks, rotation, scroll (`runtime.run_forever`) | CPython · MCU · PyScript | core |
 | `hello.py` | Minimal text (`tft_config`) | CPython · MCU · Wokwi | core |
 | `color_test.py` | Color bars | CPython · MCU | core |
 | `logo.py` | Logo drawing | CPython · MCU | core |

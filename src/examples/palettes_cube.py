@@ -1,5 +1,4 @@
 from board_config import display_drv, runtime
-from multimer.loop import run_forever
 from palettes import get_palette
 from graphics import FrameBuffer, RGB565
 
@@ -26,10 +25,6 @@ def _setup():
     st = {"idx": 0, "y": 0, "scroll": 0}
 
     def poll():
-        if runtime:
-            runtime.poll()
-            if runtime.quit_requested:
-                return True
         index, color = entries[st["idx"]]
         if st["y"] - st["scroll"] - last_line > 0:
             st["scroll"] = (st["y"] - last_line) % display_drv.height
@@ -47,6 +42,12 @@ def _setup():
     return poll
 
 
-# run_forever blocks on desktop/MCU but yields to the event loop on PyScript
-# and Jupyter (runtime.timer_async), so the browser main thread stays live.
-run_forever(_setup(), delay_ms=100)
+poll = _setup()
+
+
+def _tick(_=None):
+    poll()
+
+
+runtime.on_tick(_tick, period=100, async_=runtime.timer_async)
+runtime.run_forever()

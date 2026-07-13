@@ -400,10 +400,31 @@ def pyscript_embed_query(example_id: str, example_meta: dict) -> str:
     return f"modules={example_id}"
 
 
+def _kill_pyscript_port(port: int = PYSCRIPT_PORT) -> None:
+    """Free ``port`` when a prior serve.py is wedged (listening but not HTTP-ready)."""
+    global _server_pid
+    if _server_pid is not None:
+        try:
+            os.kill(_server_pid, 9)
+        except OSError:
+            pass
+        _server_pid = None
+    # Best-effort: anything still bound to the port (stale kit / manual serve).
+    subprocess.run(
+        ["fuser", "-k", f"{port}/tcp"],
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    time.sleep(0.2)
+
+
 def ensure_pyscript_server(port: int = PYSCRIPT_PORT) -> None:
     global _server_pid
     if _server_ready(port):
         return
+    # Port may still be held by a dead/hung serve.py from an earlier case.
+    _kill_pyscript_port(port)
     print(f"Starting {SERVE} on port {port}...", file=sys.stderr)
     proc = subprocess.Popen(
         [sys.executable, str(SERVE), "-p", str(port)],
@@ -412,9 +433,15 @@ def ensure_pyscript_server(port: int = PYSCRIPT_PORT) -> None:
         stderr=subprocess.PIPE,
     )
     _server_pid = proc.pid
-    for _ in range(50):
+    for _ in range(100):
         if _server_ready(port):
             return
+        if proc.poll() is not None:
+            err = (proc.stderr.read() if proc.stderr else b"") or b""
+            raise RuntimeError(
+                f"PyScript server exited before ready on port {port}: "
+                f"{err.decode('utf-8', 'replace')[-500:]}"
+            )
         time.sleep(0.1)
     raise RuntimeError(f"PyScript server did not become ready on port {port}")
 
@@ -906,6 +933,18 @@ def main(argv: list[str] | None = None) -> int:
         metavar="PATH",
         help="Write full result rows to PATH (default: .cursor/example_test_results.json)",
     )
+    parser.add_argument(
+        "--duration-s",
+        type=float,
+        metavar="SEC",
+        help="Override per-example duration_s (quit inject / test-mode wall clock)",
+    )
+    parser.add_argument(
+        "--timeout-s",
+        type=float,
+        metavar="SEC",
+        help="Override per-example timeout_s (and oneshot_timeout_s)",
+    )
     args = parser.parse_args(argv)
 
     if not args.no_unit_tests:
@@ -916,8 +955,22 @@ def main(argv: list[str] | None = None) -> int:
 
     runtime_data = load_toml(RUNTIMES_TOML)
     runtime_defaults = runtime_data.get("defaults", {})
+    if args.duration_s is not None:
+        runtime_defaults["duration_s"] = args.duration_s
+    if args.timeout_s is not None:
+        runtime_defaults["timeout_s"] = args.timeout_s
+        runtime_defaults["oneshot_timeout_s"] = args.timeout_s
     runtimes = load_runtimes()
     manifest_defaults, all_examples = load_manifest()
+
+    # CLI timing overrides also win over per-example manifest values.
+    if args.duration_s is not None or args.timeout_s is not None:
+        for meta in all_examples.values():
+            if args.duration_s is not None:
+                meta["duration_s"] = args.duration_s
+            if args.timeout_s is not None:
+                meta["timeout_s"] = args.timeout_s
+                meta["oneshot_timeout_s"] = args.timeout_s
 
     if args.only_runtime:
         only_rt = _split_list(args.only_runtime)

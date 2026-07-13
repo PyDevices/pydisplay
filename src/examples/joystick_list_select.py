@@ -37,4 +37,4 @@ def joystick_callback(event):
 
 board_config.runtime.on_device(eventsys.JOYSTICK, joystick_callback)
 
-pd.run_forever()
+board_config.runtime.run_forever()

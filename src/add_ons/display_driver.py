@@ -8,7 +8,6 @@ board_config.py to be in a directory on the micropython path.
 """
 
 import gc
-import sys
 
 from board_config import display_drv, runtime
 import lv_utils
@@ -53,9 +52,18 @@ def main():
     if runtime is not None:
 
         def _lvgl_shutdown_before_quit():
+            # Runs from Runtime._handle_quit (device QUIT or at-exit) before the
+            # shared timer stops and the display is released. Tear LVGL down in
+            # order: stop the event loop, then lv.deinit() to release LVGL's C
+            # state so nothing dereferences it during interpreter finalization.
             inst = lv_utils.event_loop.current_instance()
             if inst is not None:
                 inst.deinit()
+            try:
+                if lv.is_initialized():
+                    lv.deinit()
+            except Exception:
+                pass
 
         runtime.before_quit = _lvgl_shutdown_before_quit
 
@@ -172,29 +180,6 @@ class DisplayDriver:
         display_drv.blit_rect(data, area.x1, area.y1, width, height)
         if self._blocking:
             self.lv_display.flush_ready()
-
-
-def run():
-    from multimer import sleep_ms
-
-    inst = lv_utils.event_loop.current_instance()
-    if inst is not None:
-        if sys.platform == "darwin":
-            inst.run()
-            return
-        if sys.platform != "win32":
-            return
-
-    loop_i = 0
-    while True:
-        sleep_ms(1)
-        loop_i += 1
-        if runtime is not None and (loop_i & 3) == 0:
-            runtime.poll()
-        if runtime is not None and runtime.quit_requested:
-            return
-        if getattr(display_drv, "_deinitialized", False):
-            return
 
 
 main()

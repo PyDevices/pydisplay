@@ -38,9 +38,7 @@ Classes:
     Dialog: A modal message box centered over the screen.
 
 Functions:
-    tick: Calls the tick method of all Display objects.
-    init_timer: Records the desired tick period (compatibility shim).
-    run_forever: Drives the cooperative widget loop until quit.
+    tick: Calls the tick method of all Display objects (manual frame pump).
 
 Optional add-on dependency:
     ``Label`` (and widgets built on it) gains proportional-font rendering when a
@@ -50,20 +48,20 @@ Optional add-on dependency:
     used. The default romfont path has no such dependency.
 
 Timer architecture:
-    pdwidgets owns **no** timer of its own. Frames are driven cooperatively from
-    a single poll function that ``multimer.loop.run_forever`` runs either in a
-    plain ``while`` loop (sync) or on the shared ``asyncio`` loop (async),
-    selected automatically from ``board_config.runtime.timer_async``. This is the
-    ``apollo.py`` pattern: own no timer, poll ``tick()`` from the loop callback.
+    pdwidgets owns **no** timer of its own. Each :class:`Display` wires itself
+    into the shared ``eventsys.Runtime`` at construction
+    (:meth:`Display._attach_to_runtime`): the runtime's auto-service tick polls
+    devices and dispatches input events to :meth:`Display.handle_event`, while a
+    single ``runtime.on_tick`` subscription drives :meth:`Display.tick`
+    (flush/redraw). The subscription's ``async_`` tracks ``runtime.timer_async``,
+    so a sync render timer never coexists with the async loop on any runtime
+    (desktop SDL/PG, MicroPython/CircuitPython unix, ``micropython.exe``,
+    PyScript, Jupyter).
 
-    An earlier design created a plain sync ``multimer.Timer`` inside
-    ``init_timer`` even when ``runtime.timer_async`` was ``True``, which raced the
-    asyncio loop with a background sync timer — exactly the "competing timer"
-    the repo forbids once ``timer_async`` is ``True``. Driving ticks from the
-    loop instead means ``Display.timer`` is always ``None`` and there is never a
-    sync timer running alongside the async loop, on any runtime (desktop SDL/PG,
-    MicroPython/CircuitPython unix, ``micropython.exe``, PyScript, Jupyter). It
-    also keeps ``multimer`` untouched — only its public loop helpers are used.
+    Apps therefore need no pdwidgets-specific loop: build the UI, then keep the
+    process alive with the canonical idiom
+    ``if __name__ == "__main__": runtime.run_forever()`` (optional in an
+    interactive REPL on signal-driven backends).
 """
 
 from random import getrandbits  # for MARK_UPDATES
@@ -102,56 +100,16 @@ def tick(_=None):
         display.tick()
 
 
-def init_timer(period=10):
-    """
-    Record the desired widget tick period (compatibility shim).
-
-    pdwidgets no longer owns a timer (see the module "Timer architecture"
-    note): frames are driven cooperatively by :func:`run_forever` / :func:`tick`.
-    This function is retained so existing examples that call
-    ``pd.init_timer(10)`` keep working; it only stores ``period`` as the poll
-    delay used by :func:`run_forever`.
-
-    Args:
-        period (int): The desired inter-frame period in milliseconds.
-    """
-    Display.tick_period = period
-
-
-def _poll_widgets():
-    """Poll all widget displays; return True when quit is requested."""
-    for display in list(Display.displays):
-        runtime = display.runtime
-        if runtime is not None and runtime.quit_requested:
-            return True
-        if runtime is None:
-            continue
-        if elist := runtime.poll():
-            for e in elist:
-                if e.type == events.QUIT:
-                    return True
-                if e.type in events.filter:
-                    display.handle_event(e)
-    return False
-
-
-def run_forever():
-    """
-    Drive the cooperative widget loop until quit is requested.
-
-    Uses ``multimer.loop.run_forever``, which selects a plain ``while`` loop
-    (sync) or the shared ``asyncio`` loop (async) based on
-    ``board_config.runtime.timer_async``. The poll callback calls :func:`tick`
-    (flush dirty regions, run tasks, redraw) then polls the runtime for events.
-    No timer is created, so an async loop never coexists with a sync timer.
-    """
-    from multimer.loop import run_forever as multimer_run_forever
-
-    def poll():
-        tick()
-        return _poll_widgets()
-
-    multimer_run_forever(poll, delay_ms=Display.tick_period)
+# Input event types delivered to the widget tree (QUIT is handled by the
+# runtime itself, so it is intentionally excluded).
+_WIDGET_EVENTS = (
+    events.KEYDOWN,
+    events.KEYUP,
+    events.MOUSEMOTION,
+    events.MOUSEBUTTONDOWN,
+    events.MOUSEBUTTONUP,
+    events.MOUSEWHEEL,
+)
 
 
 _POINTER_EVENTS = (events.MOUSEBUTTONDOWN, events.MOUSEBUTTONUP, events.MOUSEMOTION)
@@ -654,7 +612,7 @@ class Widget:
 class Display(Widget):
     displays = []
     timer = None  # pdwidgets owns no timer; kept as None for API/back-compat.
-    tick_period = 10  # Poll delay (ms) used by run_forever; set via init_timer.
+    tick_period = 10  # Render tick period (ms) for the runtime on_tick subscription.
 
     def __init__(self, display_drv, runtime, tfa=0, bfa=0, format=RGB565):
         """
@@ -694,7 +652,32 @@ class Display(Widget):
             "material_design", swapped=self.needs_swap, color_depth=display_drv.color_depth
         )
         self._color_theme = ColorTheme(self.pal)
+        self._tick_sub = None
         Display.displays.append(self)
+        self._attach_to_runtime()
+
+    def _attach_to_runtime(self):
+        """Wire input dispatch and frame rendering into the shared runtime.
+
+        The canonical idiom owns no loop: the runtime's auto-service tick polls
+        devices and dispatches events to :meth:`handle_event`, while a shared-
+        timer subscription drives :meth:`tick` (flush/redraw). ``async_`` tracks
+        ``runtime.timer_async`` so a sync render timer never coexists with the
+        async loop.
+        """
+        runtime = self.runtime
+        if runtime is None:
+            return
+        runtime.subscribe(self.handle_event, event_types=list(_WIDGET_EVENTS))
+        self._tick_sub = runtime.on_tick(
+            self._render_tick,
+            period=Display.tick_period,
+            async_=getattr(runtime, "timer_async", False),
+        )
+
+    def _render_tick(self, _=None):
+        """Shared-timer callback: render one widget frame."""
+        self.tick()
 
     @property
     def parent(self):
@@ -837,11 +820,12 @@ class Display(Widget):
 
     def tick(self):
         """
-        Run one frame of the widget event loop.
+        Render one widget frame.
 
-        Flushes dirty areas to the display, otherwise polls ``runtime`` for events,
-        runs scheduled tasks, and re-renders invalidated widgets. Call from a timer
-        (see ``init_timer``) or your main loop.
+        Flushes dirty areas to the display, otherwise runs scheduled tasks and
+        re-renders invalidated widgets. Driven automatically by the runtime's
+        shared timer (see :meth:`_attach_to_runtime`); may also be called
+        manually (e.g. :func:`tick`) to force a frame.
         """
         if self._tick_busy:
             return

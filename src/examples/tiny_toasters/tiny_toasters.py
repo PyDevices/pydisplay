@@ -34,8 +34,6 @@ from random import getrandbits
 import tft_bitmap
 import tft_config
 from board_config import runtime
-from multimer import Timer
-from multimer.loop import run_forever
 
 palette = tft_config.palette
 sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
@@ -213,24 +211,19 @@ def main():
 
     # move and draw sprites
 
-    def poll():
+    def _tick(_=None):
+        # Do not call runtime.poll() from on_tick: sync backends (librt/win32)
+        # re-enter the timer path and hang. Auto-service handles QUIT.
+        if runtime.quit_requested if runtime else False:
+            return
         for sprite in sprites:
             sprite.clear()
             sprite.move(sprites)
             sprite.draw()
 
         tft.show()
-        elist = runtime.poll() if runtime else []
-        if runtime.quit_requested if runtime else False:
-            return True
-        if any(e.type == runtime.events.QUIT for e in elist):
-            return True
         gc.collect()
-        return False
 
-    # run_forever blocks on desktop/MCU but yields to the event loop on
-    # PyScript/Jupyter (runtime.timer_async), keeping the browser responsive.
-    run_forever(poll, delay_ms=50)
-
-
+    runtime.on_tick(_tick, period=50, async_=runtime.timer_async)
+    runtime.run_forever()
 main()

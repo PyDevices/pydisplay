@@ -10,7 +10,7 @@ status log (a ``TextBox``); the Power Off button raises a modal confirmation
 ``Dialog`` before logging the (simulated) shutdown. No real hardware or network
 is touched.
 
-Runs under both ``timer_async`` modes; the UI is driven by ``pd.run_forever()``.
+Runs under both ``timer_async`` modes; the UI is driven by ``runtime.run_forever()``.
 """
 
 import board_config
@@ -18,7 +18,6 @@ import pdwidgets as pd
 
 pd.DEBUG = False
 pd.MARK_UPDATES = False
-pd.init_timer(10)
 
 display = pd.Display(board_config.display_drv, board_config.runtime)
 theme = display.color_theme
@@ -140,4 +139,4 @@ power_off.add_event_cb(pd.events.MOUSEBUTTONDOWN, lambda s, e: confirm.show())
 
 screen.visible = True
 
-pd.run_forever()
+board_config.runtime.run_forever()

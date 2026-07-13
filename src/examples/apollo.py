@@ -8,7 +8,6 @@ Written for 320×480 displays. Other resolutions may show or behave oddly
 import gc
 
 try:
-    # For CircuitPython and MicroPython
     from gc import mem_free
 except ImportError:
     try:
@@ -30,8 +29,7 @@ from board_config import display_drv, runtime
 import apollo_dsky as dsky
 import time
 
-from multimer import sleep_ms, ticks_add, ticks_diff, ticks_ms
-from multimer.loop import dual_main, run
+from multimer import ticks_add, ticks_diff, ticks_ms
 
 _last_time = (0, 0, 0, 0, 0, 0)
 _key_busy = False
@@ -112,7 +110,10 @@ def _handle_key(key):
     _key_release_at = ticks_add(ticks_ms(), 200)
 
 
-def _poll_apollo():
+def _tick(_=None):
+    if runtime.quit_requested if runtime else False:
+        return
+
     _update_time()
 
     if _key_release_at is not None and ticks_diff(_key_release_at, ticks_ms()) >= 0:
@@ -120,93 +121,17 @@ def _poll_apollo():
 
     if _scrolling:
         _scroll_step()
+        return
 
-    elist = runtime.poll() if runtime else []
-    if runtime.quit_requested if runtime else False:
-        return True
-    if any(e.type == runtime.events.QUIT for e in elist):
-        return True
-    if _key_busy or _scrolling:
-        return False
+    if _key_busy:
+        return
+
+    # Keypad is wired to runtime events; read() drains presses filled by auto-service.
     if keys := dsky.keypad.read():
         for key in keys:
             _handle_key(key)
-    return False
 
 
-def main_sync():
-    _init_apollo()
-    while True:
-        if _poll_apollo():
-            break
-        sleep_ms(1 if _scrolling else 20)
-
-
-async def main_async():
-    try:
-        import asyncio
-    except ImportError:
-        import uasyncio as asyncio
-
-    async def write_time():
-        last_time = (0, 0, 0, 0, 0, 0)
-        while True:
-            y, mo, d, h, m, s, *_ = time.localtime()
-            if s != last_time[5]:
-                dsky.write_string(f"{h:02}:{m:02}:{s:02}", dsky.data2_pos)
-                if (y, mo, d) != last_time[:3]:
-                    dsky.write_string(f"{y-2000:02}.{mo:02}.{d:02}", dsky.data1_pos)
-                last_time = (y, mo, d, h, m, s)
-                gc.collect()
-                dsky.write_string(f"{mem-mem_free():7}", dsky.data3_pos)
-                display_drv.show()
-            await asyncio.sleep(0.5)
-
-    async def scroll():
-        start = display_drv.vscsad()
-        if start is False:
-            return
-        for i in range(start, display_drv.height + 1):
-            display_drv.vscsad(i)
-            display_drv.show()
-            await asyncio.sleep(0.001)
-
-    async def main_loop():
-        while True:
-            elist = runtime.poll() if runtime else []
-            if runtime.quit_requested if runtime else False:
-                break
-            if any(e.type == runtime.events.QUIT for e in elist):
-                break
-            if keys := dsky.keypad.read():
-                for key in keys:
-                    dsky.set_acty(True)
-                    dsky.set_button(key, True)
-
-                    if key < len(dsky.light_status):
-                        dsky.set_light(key)
-                    else:
-                        await scroll()
-
-                    await asyncio.sleep(0.2)
-                    dsky.set_button(key, False)
-                    dsky.set_acty(False)
-                    display_drv.show()
-            await asyncio.sleep(0)
-
-    async def run():
-        _init_apollo()
-        write_task = asyncio.create_task(write_time())
-        try:
-            await main_loop()
-        finally:
-            write_task.cancel()
-            try:
-                await write_task
-            except asyncio.CancelledError:
-                pass
-
-    await run()
-
-
-dual_main(main_sync, main_async, async_mode=runtime.timer_async)
+_init_apollo()
+runtime.on_tick(_tick, period=20, async_=runtime.timer_async)
+runtime.run_forever()

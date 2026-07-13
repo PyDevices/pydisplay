@@ -23,9 +23,8 @@ from multimer import (
 
 Mode constants live on the timer class (`Timer.PERIODIC`, `Timer.ONE_SHOT`), not on the module.
 
-Lazy helpers (also importable as `multimer.run`, etc.): `run`, `run_forever`, `run_forever_async`, `dual_main`.
-
 There is **no** public queue-drain API; timer backends deliver callbacks without an app-level `pump` step.
+App keep-alive lives on `eventsys.Runtime` (`runtime.run_forever()`, `runtime.run()`, `runtime.run_async()`).
 
 ## Quick start — sync
 
@@ -43,12 +42,14 @@ while True:
     multimer.sleep_ms(1)
 ```
 
-On hosted pydisplay apps, prefer `runtime.poll()` (or `multimer.run_forever(poll=…)`) instead of a bare busy loop — see [Runtime](runtime.md).
+On hosted pydisplay apps, prefer `runtime.run_forever()` (or `runtime.poll()` in a custom loop) instead of a bare busy loop — see [Runtime](runtime.md).
 
 ## Quick start — async
 
 ```python
 import multimer
+from multimer import asyncio
+from board_config import runtime
 
 async def main():
     tim = multimer.AsyncTimer(-1)
@@ -57,31 +58,23 @@ async def main():
         handle_events()
         await multimer.sleep_ms(0)
 
-multimer.run(main)
+runtime.run_async(main)  # or: asyncio.run(main())
 ```
 
-No separate submodule and no `import asyncio` required for these patterns. `AsyncTimer.init()` must run while the event loop is already running (typically inside `async def main()`).
+No separate loop submodule is required. `AsyncTimer.init()` must run while the event loop is already running (typically inside `async def main()`).
 
-## Convenience / loop helpers
+## Convenience
 
 ```python
 # Context manager
 with multimer.Timer(-1) as t:
     t.init(mode=multimer.Timer.PERIODIC, period=100, callback=cb)
     ...
-
-# Blocking main loop (``poll()`` may return a truthy value to exit)
-multimer.run_forever(poll=runtime.poll, delay_ms=1)
-multimer.run_forever(poll=lambda: runtime.quit_requested)
-
-# Async main loop
-await multimer.run_forever_async(poll=runtime.poll, delay_ms=10)
-
-# Sync or async entry
-multimer.dual_main(sync_main, async_main, async_mode=False)
 ```
 
-`run(coro)` blocks until completion on desktop/MCU; on Jupyter/PyScript (loop already running) it schedules a background task and returns.
+Application keep-alive and async entry live on ``eventsys.Runtime``
+(``runtime.run_forever()``, ``runtime.run()``, ``runtime.run_async(coro)``) —
+see [Runtime](runtime.md).
 
 ## Time helpers
 
@@ -141,10 +134,9 @@ install a hook.
 | Function | Purpose |
 |----------|---------|
 | `AsyncTimer` | Software timer backed by asyncio/uasyncio |
-| `run(main)` | Run a coroutine — `asyncio.run` on desktop, background task in Jupyter/PyScript |
-| `run_forever` / `run_forever_async` | Poll until `poll()` is truthy |
-| `dual_main(…)` | Choose sync or async startup |
 | `asyncio` | Lazy-loaded event-loop module |
+
+Keep-alive / async app entry: `eventsys.Runtime.run_forever` / `run` / `run_async`.
 
 ## FAQ — callback did not fire
 

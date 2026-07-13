@@ -3,7 +3,6 @@ from collections import namedtuple
 
 from board_config import display_drv, runtime
 from graphics import BMP565
-from multimer import sleep_ms
 
 point = namedtuple("point", "x y")
 
@@ -48,57 +47,73 @@ def draw_sprite(
 
 
 def main():
-    i = 0
-    scroll = 0
-    char_y = display_drv.height - char_height
-    char_x = 200
-    shot_location = 0
-    sprites = run_sprites
-    while True:
+    st = {
+        "i": 0,
+        "scroll": 0,
+        "char_y": display_drv.height - char_height,
+        "char_x": 200,
+        "shot_location": 0,
+        "sprites": run_sprites,
+    }
+
+    def _on_motion(event):
+        if not event.buttons[0]:
+            st["sprites"] = run_sprites
+            return
+        touched_point = event.pos
+        if touched_point[1] < display_drv.height // 2:
+            st["sprites"] = jump_shoot_sprites
+            if not st["shot_location"]:
+                st["shot_location"] = 1
+        elif touched_point[0] < display_drv.width // 2:
+            st["sprites"] = jump_sprites
+        elif touched_point[0] > display_drv.width // 2:
+            st["sprites"] = shoot_sprites
+            if not st["shot_location"]:
+                st["shot_location"] = 1
+        else:
+            st["sprites"] = run_sprites
+
+    def _tick(_=None):
+        # Auto-service handles QUIT; never poll from on_tick.
+        if runtime.quit_requested:
+            return
+        i = st["i"]
         if i > display_drv.width:
-            scroll = i % display_drv.width
-            display_drv.vscsad(scroll)
+            st["scroll"] = i % display_drv.width
+            display_drv.vscsad(st["scroll"])
         draw_bg(i % display_drv.width, i % image.height, 1)
-        i += 1
+        st["i"] = i + 1
         if i < display_drv.width:
             display_drv.show()
-            sleep_ms(0)
-            sleep_ms(1)
-            continue
-        elist = runtime.poll() if runtime else []
-        if runtime and runtime.quit_requested:
             return
-        for event in elist:
-            if event.type == runtime.events.QUIT:
-                return
-            if event and event.type == runtime.events.MOUSEMOTION and event.buttons[0] == 1:
-                touched_point = event.pos
-                if touched_point[1] < display_drv.height // 2:
-                    sprites = jump_shoot_sprites
-                    if not shot_location:
-                        shot_location = 1
-                elif touched_point[0] < display_drv.width // 2:
-                    sprites = jump_sprites
-                elif touched_point[0] > display_drv.width // 2:
-                    sprites = shoot_sprites
-                    if not shot_location:
-                        shot_location = 1
-            else:
-                sprites = run_sprites
-        draw_x = scroll + char_x
-        sprite = sprites[i % len(sprites)]
-        draw_sprite(draw_x, char_y, sprite.x, sprite.y)
-        if shot_location:
-            draw_sprite(draw_x + char_width + shot_location, char_y, shot_sprite.x, shot_sprite.y)
-            shot_location += 8
-            if shot_location > (display_drv.width - char_width) // 2:
+
+        draw_x = st["scroll"] + st["char_x"]
+        sprite = st["sprites"][st["i"] % len(st["sprites"])]
+        draw_sprite(draw_x, st["char_y"], sprite.x, sprite.y)
+        if st["shot_location"]:
+            draw_sprite(
+                draw_x + char_width + st["shot_location"],
+                st["char_y"],
+                shot_sprite.x,
+                shot_sprite.y,
+            )
+            st["shot_location"] += 8
+            if st["shot_location"] > (display_drv.width - char_width) // 2:
                 display_drv.fill_rect(
-                    draw_x + char_width + shot_location, char_y, char_width, char_height, bg
+                    draw_x + char_width + st["shot_location"],
+                    st["char_y"],
+                    char_width,
+                    char_height,
+                    bg,
                 )
-                shot_location = 0
+                st["shot_location"] = 0
         display_drv.show()
-        sleep_ms(0)
-        sleep_ms(50)
+
+    runtime.on(runtime.events.MOUSEMOTION, _on_motion)
+    # ~20 fps once scrolling; first columns also tick so quit is always serviced.
+    runtime.on_tick(_tick, period=50, async_=runtime.timer_async)
+    runtime.run_forever()
 
 
 main()

@@ -27,7 +27,6 @@ import lib.path  # noqa: F401
 from board_config import display_drv, runtime
 import framebuf as native_fb
 import graphics as gfx_native
-from multimer.loop import run_forever
 
 _GRAPHICS_PY_FILES = (
     "__init__.py",
@@ -183,15 +182,9 @@ print("  bottom-right = lib/graphics (same APIs)")
 print("Close the window or press Ctrl+C here.")
 
 
-def poll():
-    if runtime:
-        runtime.poll()
-        if runtime.quit_requested:
-            return True
-    return False
-
-
-# The comparison image is static: draw once (above) then just service events.
-# run_forever blocks on desktop/MCU but yields to the event loop on PyScript
-# and Jupyter (runtime.timer_async), so the browser main thread stays live.
-run_forever(poll, delay_ms=50)
+# The comparison image is static: draw once (above) then just service events
+# via Runtime's auto-service. runtime.run_forever() blocks on desktop/MCU but
+# yields to the event loop on PyScript and Jupyter, so the browser main
+# thread stays live.
+if runtime:
+    runtime.run_forever()

@@ -1,5 +1,4 @@
 from board_config import display_drv, runtime
-from multimer.loop import run_forever
 from palettes import get_palette
 
 if display_drv.requires_byteswap:
@@ -20,10 +19,6 @@ def _setup():
     st = {"ci": 0, "i": 0}
 
     def poll():
-        if runtime:
-            runtime.poll()
-            if runtime.quit_requested:
-                return True
         if st["i"] >= display_drv.height:
             display_drv.vscsad((line_height + st["i"]) % display_drv.height)
         display_drv.fill_rect(
@@ -37,6 +32,12 @@ def _setup():
     return poll
 
 
-# run_forever blocks on desktop/MCU but yields to the event loop on PyScript
-# and Jupyter (runtime.timer_async), so the browser main thread stays live.
-run_forever(_setup(), delay_ms=1)
+poll = _setup()
+
+
+def _tick(_=None):
+    poll()
+
+
+runtime.on_tick(_tick, period=1, async_=runtime.timer_async)
+runtime.run_forever()

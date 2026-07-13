@@ -1,7 +1,6 @@
 # pyscript skip: gallery
 from board_config import display_drv, runtime
 from graphics import BMP565
-from multimer import sleep_ms
 
 display_drv.rotation = 0
 
@@ -19,20 +18,30 @@ def draw_bg(dest_x, dest_y, source_x, source_y, source_image=image, width=image.
     )
 
 
-for j in range(display_drv.height):
-    draw_bg(0, j, 0, j, height=1)
-display_drv.show()
-sleep_ms(3000)
+def main():
+    st = {"phase": "fill", "j": 0, "i": display_drv.height}
 
-i = display_drv.height
-while True:
-    display_drv.vscsad(i % display_drv.height)
-    draw_bg(0, i % display_drv.height, 0, i % image.height)
-    display_drv.show()
-    sleep_ms(0)
-    if runtime:
-        runtime.poll()
-    if runtime.quit_requested if runtime else False:
-        break
-    sleep_ms(1)
-    i += 1
+    def _tick(_=None):
+        if runtime.quit_requested:
+            return
+        if st["phase"] == "fill":
+            j = st["j"]
+            if j < display_drv.height:
+                draw_bg(0, j, 0, j, height=1)
+                st["j"] = j + 1
+                if st["j"] >= display_drv.height:
+                    display_drv.show()
+                    st["phase"] = "scroll"
+                return
+        # scroll phase
+        i = st["i"]
+        display_drv.vscsad(i % display_drv.height)
+        draw_bg(0, i % display_drv.height, 0, i % image.height)
+        display_drv.show()
+        st["i"] = i + 1
+
+    runtime.on_tick(_tick, period=1, async_=runtime.timer_async)
+    runtime.run_forever()
+
+
+main()

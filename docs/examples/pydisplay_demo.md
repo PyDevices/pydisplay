@@ -231,17 +231,19 @@ Also **pause the scroll timer** during redraw. If `on_tick` runs in the middle o
 
 ## multimer in this demo
 
-This script is intentionally **not** a multimer test, but it uses the default timer the way many real apps should:
+This script is intentionally **not** a multimer test, but it uses the shared
+runtime timer the way many real apps should:
 
 ```python
-run_forever(handle_events)  # poll input; timer callbacks run on the active backend
+runtime.run_forever()  # auto-service dispatches input; on_tick drives animation
 ```
 
 See [multimer](../concepts/multimer.md) for timer backends and `timer_async`.
 
 ## Async / PyScript
 
-`pydisplay_demo.py` uses `multimer.loop.dual_main` so the same file runs sync on desktop and async on PyScript/Jupyter (`runtime.timer_async`). There is no separate `_async` twin.
+`pydisplay_demo.py` ends with `runtime.run_forever()` — the same entry on
+desktop, PyScript, and Jupyter (`runtime.timer_async` is handled inside Runtime).
 
 ## Related docs
 

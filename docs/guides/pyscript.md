@@ -22,7 +22,8 @@ Examples in the [browser gallery](https://PyDevices.github.io/pydisplay/pyscript
 
 ## asyncio requirement
 
-PyScript runs on asyncio. Prefer `multimer.loop.run_forever` / `dual_main` so demos yield to the event loop in the browser. See [PyScript asyncio guide](pyscript-asyncio.md).
+PyScript runs on asyncio. Prefer `runtime.run_forever()` with `on` / `on_tick`
+callbacks so demos stay responsive. See [PyScript asyncio guide](pyscript-asyncio.md).
 
 ## Gallery examples
 

@@ -16,7 +16,6 @@ from graphics import Font
 from random import getrandbits
 from displaybuf import DisplayBuffer
 from palettes import get_palette
-from multimer.loop import run_forever
 
 
 def randint(a, b):
@@ -74,10 +73,6 @@ def _setup():
         st["rotation"] = (st["rotation"] + 1) % 4
 
     def poll():
-        if runtime:
-            runtime.poll()
-            if runtime.quit_requested:
-                return True
         if st["count"] >= iterations:
             start_rotation()
             return False
@@ -100,9 +95,12 @@ def main():
     """
     The big show!
     """
-    # run_forever blocks on desktop/MCU but yields to the event loop on PyScript
-    # and Jupyter (runtime.timer_async), so the browser main thread stays live.
-    run_forever(_setup(), delay_ms=1)
+    poll = _setup()
+    # Blocks on desktop/MCU but yields to the event loop on PyScript and
+    # Jupyter (runtime.timer_async), so the browser main thread stays live.
+    def _tick(_=None):
+        poll()
 
-
+    runtime.on_tick(_tick, period=1, async_=runtime.timer_async)
+    runtime.run_forever()
 main()

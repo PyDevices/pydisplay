@@ -1,4 +1,3 @@
-from board_config import runtime
 """
 feathers.py
 ===========
@@ -22,11 +21,12 @@ Smoothly scrolls mirrored rainbow colored random curves across the display.
 
 """
 
+from board_config import runtime
+
 import math
 from random import getrandbits
 
 import tft_config
-from multimer.loop import run_forever
 from palettes.wheel import WheelPalette
 
 
@@ -83,10 +83,6 @@ def _setup():
     }
 
     def poll():
-        if runtime:
-            runtime.poll()
-            if runtime.quit_requested:
-                return True
         if st["counter"] > st["interval"]:
             st["last_x"] = st["current_x"]
             st["current_x"] = randint(0, half)
@@ -117,7 +113,12 @@ def _setup():
     return poll
 
 
-# run_forever blocks on desktop/MCU but yields to the event loop on PyScript
-# and Jupyter (runtime.timer_async), so the browser main thread stays live.
-# delay_ms=0 starves the browser (asyncio.sleep(0) is not enough yield).
-run_forever(_setup(), delay_ms=1)
+poll = _setup()
+
+
+def _tick(_=None):
+    poll()
+
+
+runtime.on_tick(_tick, period=1, async_=runtime.timer_async)
+runtime.run_forever()

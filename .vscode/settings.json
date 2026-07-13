@@ -29,5 +29,20 @@
         "jsdelivr.com",
         "unpkg.com"
     ],
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "cursorpyright.analysis.diagnosticSeverityOverrides": {
+        "reportMissingModuleSource": "none"
+    },
+    "cursorpyright.analysis.extraPaths": [
+        "./src",
+        "./src/examples",
+        "./src/add_ons",
+        "./src/lib",
+        "./tools/typings"
+    ],
+    "cursorpyright.analysis.stubPath": "./tools/typings",
+    "cursorpyright.analysis.typeCheckingMode": "standard",
+    "cursorpyright.analysis.typeshedPaths": [
+        "tools/typings"
+    ]
 }

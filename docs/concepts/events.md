@@ -55,7 +55,12 @@ async def main():
 multimer.run(main)
 ```
 
-Or use `await multimer.run_forever_async(poll=runtime.poll, delay_ms=10)`.
+Or subscribe and let the runtime auto-service drive the app:
+
+```python
+runtime.on(runtime.events.MOUSEBUTTONDOWN, handle)
+runtime.run_forever()
+```
 
 ## Poll vs subscribe
 
@@ -110,23 +115,23 @@ runtime.before_quit = _lvgl_shutdown
 ```
 
 Use **`runtime.quit_requested`** in output-only loops that do not dispatch
-events:
+events (the auto-service still handles host QUIT when you call `poll` or run
+`run_forever`):
 
 ```python
 from board_config import display_drv, runtime
 
 while not runtime.quit_requested:
     draw_frame()
-    runtime.poll()  # process host quit + refresh timer
+    # Prefer runtime.run_forever() for interactive apps; poll only when you
+    # own a custom frame loop and need to drain events yourself.
 ```
 
-Interactive apps should drain events each frame:
+Canonical interactive apps subscribe callbacks and stay alive with:
 
 ```python
-while not runtime.quit_requested:
-    for event in runtime.poll():
-        handle(event)
-    draw_frame()
+runtime.on(runtime.events.MOUSEBUTTONDOWN, handle)
+runtime.run_forever()
 ```
 
 `display_drv.quit()` only releases resources (REPL-safe); your loop must still

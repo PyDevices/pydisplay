@@ -7,9 +7,9 @@ already has — does not read or write environment variables.
 Shows runtime, OS, display, timer backend, and LVGL version; a seconds counter
 and spinning arc prove LVGL timers fire; a tap button exercises input.
 
-Matrix / interactive: ``dual_main`` follows ``runtime.timer_async``.
-Automated kit: ``python examples/lv_test_timer.py kit`` (parent may set
-``PYDISPLAY_TIMER_ASYNC`` before launch; this script still only follows runtime).
+Interactive: ``runtime.run_forever()``. Kit mode (``kit`` argv) still uses a
+small sync/async wait for click injection because LVGL owns the host queue.
+Parent may set ``PYDISPLAY_TIMER_ASYNC`` before launch.
 """
 
 import sys
@@ -30,9 +30,9 @@ import lib.path  # noqa: F401 — must be first
 import json
 import time
 
+import lv_utils
 import lvgl as lv
 from board_config import display_drv, runtime
-from multimer.loop import dual_main
 
 _seconds = 0
 _taps = 0
@@ -105,11 +105,9 @@ def _timer_type():
     except AttributeError:
         pass
     try:
-        if getattr(runtime, "timer_async", False):
-            from multimer import AsyncTimer as Timer
-        else:
-            from multimer import Timer
-        return _format_timer_type(Timer)
+        from multimer import AsyncTimer, Timer
+
+        return _format_timer_type(AsyncTimer if runtime.timer_async else Timer)
     except ImportError:
         return "?"
 
@@ -220,42 +218,6 @@ def _setup():
     import display_driver  # noqa: F401
 
     return build_ui()
-
-
-def _poll_done():
-    if runtime.quit_requested:
-        return True
-    if getattr(display_drv, "_deinitialized", False):
-        return True
-    return False
-
-
-def main_sync():
-    _setup()
-    # Avoid multimer.sleep_ms here: on CPython/Linux the librt signal handler
-    # drives LVGL, and sleeping in the timer backend can deadlock the main thread.
-    # Do not call runtime.poll() while LVGL owns input: VirtualDevices drain the
-    # host queue from indev read_cb; a parallel poll steals mouse events.
-    # Quit comes from the test-mode deadline hook (or window close via force_quit).
-    from multimer import run_deadline_hook
-
-    while True:
-        run_deadline_hook()
-        if _poll_done():
-            break
-        time.sleep(0.01)
-
-
-async def main_async():
-    _setup()
-    from multimer import asyncio
-
-    # See main_sync: do not runtime.poll() — LVGL indev reads the host device.
-    while True:
-        if _poll_done():
-            break
-        # sleep(0) starves the browser main thread on PyScript (same class as delay_ms=0).
-        await asyncio.sleep(0.01)
 
 
 # --- kit / automated path (tools/lv_timer_test_kit.py) ---
@@ -370,7 +332,7 @@ def _run_kit_sync():
     deadline = time.time() + _DURATION_S
     clicked_taps = None
     while time.time() < deadline:
-        # See main_sync: do not use multimer.sleep_ms with LVGL + librt.
+        # Avoid multimer.sleep_ms with LVGL + librt (signal-handler deadlock risk).
         time.sleep(0.01)
         if clicked_taps is None and get_state()["seconds"] >= 2:
             cx, cy = _button_center(btn)
@@ -389,7 +351,7 @@ async def _run_kit_async():
     deadline = time.time() + _DURATION_S
     clicked_taps = None
     while time.time() < deadline:
-        # See main_sync: do not runtime.poll() while LVGL owns the host queue.
+        # Do not runtime.poll() while LVGL owns the host queue (indev reads it).
         await asyncio.sleep(0.01)
         if clicked_taps is None and get_state()["seconds"] >= 2:
             cx, cy = _button_center(btn)
@@ -401,12 +363,16 @@ async def _run_kit_async():
 
 
 def run_kit():
-    """Automated timer + click check; follows ``runtime.timer_async``."""
+    """Automated timer + click check.
+
+    Interactive apps use ``runtime.run_forever()`` only. The kit still needs a
+    small sync/async wait flavor because LVGL click injection must pump either
+    ``time.sleep`` (sync timer) or ``asyncio.sleep`` (async timer) — not
+    ``runtime.poll()`` while LVGL owns the host queue.
+    """
     try:
         if runtime.timer_async:
-            from multimer.loop import run
-
-            payload = run(_run_kit_async)
+            payload = runtime.run_async(_run_kit_async)
             if payload is not None and hasattr(payload, "done"):
                 _quit_and_exit(1)
             _quit_and_exit(0 if payload and payload.get("status") == "ok" else 1)
@@ -437,4 +403,7 @@ def _wants_kit():
 if _wants_kit():
     run_kit()
 else:
-    dual_main(main_sync, main_async, async_mode=runtime.timer_async)
+    import display_driver  # noqa: F401
+
+    build_ui()
+    runtime.run_forever()

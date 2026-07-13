@@ -1,14 +1,16 @@
 # pyscript skip: gallery
 from collections import namedtuple
+
 try:
     from random import choice
 except ImportError:
+
     def choice(seq):
         return seq[0]
 
+
 from board_config import display_drv, runtime
 from graphics import BMP565
-from multimer import sleep_ms
 
 image = BMP565("examples/assets/warrior.bmp", streamed=True)
 print(f"\n{image.width=}, {image.height=}, {image.bpp=}")
@@ -48,53 +50,55 @@ display_drv.fill(bg)
 display_drv.show()
 
 point = namedtuple("point", "x y")
-location = point(0, 0)
-sprite = (a, fwd)
-draw_sprite(*location, *sprite)
-
 step = 3
-dir = choice(directions)
-while True:
-    if runtime:
-        runtime.poll()
-    if runtime.quit_requested if runtime else False:
-        break
-    if choice((True, False, False, False, False)):
-        dir = choice(directions)
-    if dir == fwd and location.y + sprite_height > display_drv.height - step * 4:
-        continue
-    elif dir == back and location.y < step * 4:
-        continue
-    elif dir == left and location.x < step * 4:
-        continue
-    elif dir == right and location.x + sprite_width > display_drv.width - step * 4:
-        continue
+st = {
+    "location": point(0, 0),
+    "dir": choice(directions),
+    "pos_i": 0,
+}
 
-    for pos in positions:
-        if dir == fwd:
-            display_drv.fill_rect(location.x, location.y, sprite_width, step, bg)
-            location = point(location.x, location.y + step)
-        elif dir == back:
-            display_drv.fill_rect(
-                location.x, location.y + sprite_height - step, sprite_width, step, bg
-            )
-            location = point(location.x, location.y - step)
-        elif dir == left:
-            display_drv.fill_rect(
-                location.x + sprite_width - step, location.y, step, sprite_height, bg
-            )
-            location = point(location.x - step, location.y)
-        elif dir == right:
-            display_drv.fill_rect(location.x, location.y, step, sprite_height, bg)
-            location = point(location.x + step, location.y)
-        draw_sprite(*location, pos, dir)
-        display_drv.show()
-        sleep_ms(0)
-        if runtime:
-            runtime.poll()
-        if runtime.quit_requested if runtime else False:
-            break
-        sleep_ms(100)
-    else:
-        continue
-    break
+draw_sprite(*st["location"], a, fwd)
+
+
+def _tick(_=None):
+    if runtime.quit_requested if runtime else False:
+        return
+    location = st["location"]
+    direction = st["dir"]
+    if st["pos_i"] == 0 and choice((True, False, False, False, False)):
+        direction = choice(directions)
+        st["dir"] = direction
+    if direction == fwd and location.y + sprite_height > display_drv.height - step * 4:
+        return
+    if direction == back and location.y < step * 4:
+        return
+    if direction == left and location.x < step * 4:
+        return
+    if direction == right and location.x + sprite_width > display_drv.width - step * 4:
+        return
+
+    pos = positions[st["pos_i"]]
+    if direction == fwd:
+        display_drv.fill_rect(location.x, location.y, sprite_width, step, bg)
+        location = point(location.x, location.y + step)
+    elif direction == back:
+        display_drv.fill_rect(
+            location.x, location.y + sprite_height - step, sprite_width, step, bg
+        )
+        location = point(location.x, location.y - step)
+    elif direction == left:
+        display_drv.fill_rect(
+            location.x + sprite_width - step, location.y, step, sprite_height, bg
+        )
+        location = point(location.x - step, location.y)
+    elif direction == right:
+        display_drv.fill_rect(location.x, location.y, step, sprite_height, bg)
+        location = point(location.x + step, location.y)
+    st["location"] = location
+    draw_sprite(*location, pos, direction)
+    display_drv.show()
+    st["pos_i"] = (st["pos_i"] + 1) % len(positions)
+
+
+runtime.on_tick(_tick, period=100, async_=runtime.timer_async)
+runtime.run_forever()

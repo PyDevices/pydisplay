@@ -3,7 +3,6 @@ import pdwidgets as pd
 
 pd.DEBUG = False
 pd.MARK_UPDATES = False
-# pd.init_timer(10)  # Remove this line to use polled mode in a while loop
 
 
 display = pd.Display(board_config.display_drv, board_config.runtime, 40, 40)
@@ -141,4 +140,4 @@ screen.add_event_cb(pd.events.MOUSEWHEEL, lambda sender, e: scroll_by(-e.y))
 screen.visible = True
 
 
-pd.run_forever()
+board_config.runtime.run_forever()

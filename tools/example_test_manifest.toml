@@ -196,7 +196,7 @@ deps = ["core"]
 import = "tower_climb.tower_climb"
 script = "examples/tower_climb/tower_climb.py"
 kind = "loop"
-quit = "poll"
+quit = "inject"
 timeout_s = 15
 deps = ["core"]
 

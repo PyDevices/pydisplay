@@ -21,7 +21,6 @@ from calc_engine import CalcEngine
 from eventsys.keys import Keys
 from graphics import RGB565, FrameBuffer
 from multimer import Timer
-from multimer.loop import dual_main, run_forever
 from palettes import get_palette
 from touch_keypad import Keypad
 
@@ -113,7 +112,12 @@ class _Calculator:
         self.button_pos = {}
         self._label_for = {}
 
-        keypad_keys = [None] * self.COLS + list(_CODES)
+        # Grid cells map to _CODES (row 0 is the display band -> None). Keyboard
+        # aliases are appended past the grid so KEYDOWN dispatches them too; they
+        # have no grid cell so the touch mapping never indexes them.
+        keypad_keys = [None] * self.COLS + list(_CODES) + list(_KEY_ALIASES.keys())
+        self._pending_release = None
+        self._release_timer = Timer(-1)
         self.keypad = Keypad(
             runtime,
             0,
@@ -123,6 +127,7 @@ class _Calculator:
             self.COLS,
             self.ROWS,
             keypad_keys,
+            on_press=self._on_press,
         )
 
         # Scratch buffers sized for the largest button (double-wide on last row).
@@ -240,48 +245,40 @@ class _Calculator:
             self.line_h,
         )
 
-    def poll_quit(self):
-        import eventsys
-
-        if runtime is None:
-            return False
-        elist = runtime.poll()
-        if runtime.quit_requested:
-            return True
-        return elist and any(e.type == eventsys.QUIT for e in elist)
-
-    def read_presses(self):
-        presses = []
-        codes = self.keypad.read()
-        if not codes:
-            return presses
-        for code in codes:
-            if code is None:
-                continue
-            label = self._label_for.get(code)
-            if label is None:
-                label = _KEY_ALIASES.get(code)
-            if label is None and isinstance(code, int) and 48 <= code <= 57:
-                label = chr(code)
-            if label is None:
-                continue
-            info = self.button_pos.get(code)
-            if info is not None:
-                col, row, label = info
-            else:
-                # Keyboard alias without a grid cell — still feed the engine.
-                self.engine.press(label)
-                self._refresh_display()
-                display_drv.show()
-                continue
+    def _on_press(self, code):
+        """Push callback from Keypad (touch grid + keyboard). No app poll loop."""
+        if code is None:
+            return
+        info = self.button_pos.get(code)
+        if info is not None:
+            col, row, label = info
             # Map double-wide right-half taps to the left cell for drawing.
             if label == "sqrt" and col == 1:
                 col = 0
             if label == "%" and col == 3:
                 col = 2
             self._handle_press(col, row, label)
-            presses.append((col, row, label))
-        return presses
+            self._pending_release = (col, row, label)
+            self._release_timer.init(
+                mode=Timer.ONE_SHOT, period=150, callback=self._release
+            )
+            return
+        # Keyboard alias / digit without a grid cell — feed the engine only.
+        label = _KEY_ALIASES.get(code)
+        if label is None and isinstance(code, int) and 48 <= code <= 57:
+            label = chr(code)
+        if label is None:
+            return
+        self.engine.press(label)
+        self._refresh_display()
+        display_drv.show()
+
+    def _release(self, _=None):
+        if self._pending_release is None:
+            return
+        col, row, label = self._pending_release
+        self._pending_release = None
+        self.release_button(col, row, label)
 
     def _handle_press(self, col, row, label):
         self._draw_button(col, row, label, pressed=True)
@@ -294,46 +291,14 @@ class _Calculator:
         display_drv.show()
 
 
-def _sync_poll(calc):
-    pending_release = None
-    release_timer = Timer(-1)
+# Canonical idiom: build the UI (registers input callbacks), then hand control
+# to the runtime. Identical for sync and async, interactive or not — the input
+# arrives via the Keypad on_press callback dispatched by the shared-timer
+# auto-service; QUIT tears everything down.
+calc = _Calculator()
 
-    def release_button(_=None):
-        nonlocal pending_release
-        if pending_release is None:
-            return
-        col, row, label = pending_release
-        pending_release = None
-        calc.release_button(col, row, label)
-
-    def poll():
-        nonlocal pending_release
-        if calc.poll_quit():
-            return True
-        for release in calc.read_presses():
-            pending_release = release
-            release_timer.init(mode=Timer.ONE_SHOT, period=150, callback=release_button)
-        return False
-
-    return poll
-
-
-def main_sync():
-    calc = _Calculator()
-    run_forever(_sync_poll(calc), delay_ms=20)
-
-
-async def main_async():
-    from multimer import asyncio
-
-    calc = _Calculator()
-    while True:
-        if calc.poll_quit():
-            break
-        for press in calc.read_presses():
-            await asyncio.sleep(0.15)
-            calc.release_button(*press)
-        await asyncio.sleep(0.02)
-
-
-dual_main(main_sync, main_async, async_mode=runtime.timer_async)
+# Canonical entry: run_forever() blocks to keep the app alive when run as a
+# program, and returns immediately in an interactive REPL on signal-driven
+# backends (the interpreter keeps servicing the app) — so the same call is
+# always correct.
+runtime.run_forever()
