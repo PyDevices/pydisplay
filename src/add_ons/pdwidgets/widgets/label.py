@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-from ._constants import ALIGN, TEXT_SIZE, TEXT_WIDTH
-from .widget import Widget
+from .._constants import ALIGN, TEXT_SIZE, TEXT_WIDTH
+from ..widget import Widget
 
 
 class Label(Widget):

@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: MIT
 from eventsys import events
 
-from ._constants import ALIGN, ICON_SIZE, PAD
-from ._themes import icon_theme
+from .._constants import ALIGN, ICON_SIZE, PAD
+from .._themes import icon_theme
+from ..widget import Widget
 from .icon_button import IconButton
 from .text_box import TextBox
-from .widget import Widget
 
 
 class NumberStepper(Widget):

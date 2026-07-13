@@ -487,6 +487,62 @@ quit = "inject"
 deps = ["add_ons"]
 timeout_s = 45
 
+[examples.widgets_nav_tabs]
+import = "widgets_nav_tabs"
+script = "examples/widgets_nav_tabs.py"
+kind = "pdwidgets"
+quit = "inject"
+deps = ["add_ons"]
+timeout_s = 45
+
+[examples.widgets_form_kitchen]
+import = "widgets_form_kitchen"
+script = "examples/widgets_form_kitchen.py"
+kind = "pdwidgets"
+quit = "inject"
+deps = ["add_ons"]
+timeout_s = 45
+
+[examples.widgets_media_busy]
+import = "widgets_media_busy"
+script = "examples/widgets_media_busy.py"
+kind = "pdwidgets"
+quit = "inject"
+deps = ["add_ons"]
+timeout_s = 45
+
+[examples.widgets_gauge_dash]
+import = "widgets_gauge_dash"
+script = "examples/widgets_gauge_dash.py"
+kind = "pdwidgets"
+quit = "inject"
+deps = ["add_ons"]
+timeout_s = 45
+
+[examples.widgets_actions]
+import = "widgets_actions"
+script = "examples/widgets_actions.py"
+kind = "pdwidgets"
+quit = "inject"
+deps = ["add_ons"]
+timeout_s = 45
+
+[examples.widgets_sheets]
+import = "widgets_sheets"
+script = "examples/widgets_sheets.py"
+kind = "pdwidgets"
+quit = "inject"
+deps = ["add_ons"]
+timeout_s = 45
+
+[examples.widgets_pickers]
+import = "widgets_pickers"
+script = "examples/widgets_pickers.py"
+kind = "pdwidgets"
+quit = "inject"
+deps = ["add_ons"]
+timeout_s = 45
+
 [examples.alien]
 import = "alien.alien"
 script = "examples/alien/alien.py"

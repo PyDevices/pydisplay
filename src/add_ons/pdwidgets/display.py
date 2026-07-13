@@ -8,9 +8,11 @@ try:
 except ImportError:
     from multimer import ticks_ms
 
+from eventsys import events
 from graphics import RGB565, Area, FrameBuffer
 
 from ._constants import ALIGN
+from ._focus import FocusManager
 from ._themes import ColorTheme, get_palette
 from ._util import (
     _POINTER_EVENTS,
@@ -62,10 +64,13 @@ class Display(Widget):
             bytearray(display_drv.width * display_drv.height * display_drv.color_depth // 8)
         )
         self.framebuf = FrameBuffer(self._buffer, display_drv.width, display_drv.height, format)
+        self._framebuf_real = self.framebuf
+        self._clip_stack = []
         self._dirty_areas = []
         self._tasks = []
         self._tick_busy = False
         self._modals = []  # modal-capture stack (see Widget.set_modal)
+        self.focus_manager = FocusManager()
         if display_drv.requires_byteswap:
             self.needs_swap = display_drv.disable_auto_byteswap(True)
         else:
@@ -142,6 +147,27 @@ class Display(Widget):
     def visible(self, visible):
         raise ValueError("Cannot set visibility of Display object.")
 
+    def clip_push(self, area: Area):
+        """Push an integer clip rectangle for nested draw/render (MCU-safe, no alpha)."""
+        if self._clip_stack:
+            area = area.clip(self._clip_stack[-1])
+        self._clip_stack.append(area)
+        from graphics._clip import ClippedCanvas
+
+        self.framebuf = ClippedCanvas(self._framebuf_real, area)
+
+    def clip_pop(self):
+        """Pop the current clip rectangle and restore the previous draw target."""
+        if not self._clip_stack:
+            return
+        self._clip_stack.pop()
+        if self._clip_stack:
+            from graphics._clip import ClippedCanvas
+
+            self.framebuf = ClippedCanvas(self._framebuf_real, self._clip_stack[-1])
+        else:
+            self.framebuf = self._framebuf_real
+
     @property
     def _modal(self):
         """The widget currently holding modal pointer capture, or None."""
@@ -149,14 +175,15 @@ class Display(Widget):
 
     def handle_event(self, event, condition=None, point=None):
         """
-        Dispatch an event, honoring modal pointer capture.
+        Dispatch an event, honoring modal pointer capture and focus keys.
 
-        When a widget has grabbed modal capture (see :meth:`Widget.set_modal`)
-        and the event is a pointer event, it is routed only through that
-        widget's branch — everything else on screen is inert. All other events
-        (and the non-modal case) fall through to the normal
-        :meth:`Widget.handle_event` traversal.
+        Focus keys (Tab / Shift-Tab / arrows) are handled by
+        :attr:`focus_manager` before the widget tree walk. Pointer modality
+        (see :meth:`Widget.set_modal`) only affects mouse/touch — key focus is
+        independent so sheets/dialogs can still host TextInput fields.
         """
+        if event.type == events.KEYDOWN and self.focus_manager.handle_key(event):
+            return
         modal = self._modal
         if modal is not None and modal.visible and event.type in _POINTER_EVENTS:
             point = self.translate_point(event.pos)

@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-from ._constants import ALIGN
+from .._constants import ALIGN
+from ..widget import Widget
 from .scroll_bar import ScrollBar
-from .widget import Widget
 
 
 class ListView(Widget):
@@ -47,6 +47,7 @@ class ListView(Widget):
         super().__init__(
             parent, x, y, w, h, align, align_to, fg, bg, visible, value=0, padding=padding
         )
+        self.clip_content = True
         self.scrollbar = ScrollBar(
             parent,
             vertical=True,
@@ -118,12 +119,16 @@ class ListView(Widget):
         sb_visible = False
         if len(self.children):
             self.children[0].y = -sum([child.height for child in self.children[: self.value]])
+            pad = self.padded_area
             for child in self.children:
-                if self.area.contains_area(child.area):
+                # Partial overlap is OK — clip_content hides overflow when drawing.
+                if pad.intersects(child.area):
                     child.visible = True
                 else:
+                    child.visible = False
+                if not pad.contains_area(child.area):
                     sb_visible = True
         self.scrollbar.visible = sb_visible
-        if sb_visible:
+        if sb_visible and len(self.children) > 1:
             self.scrollbar.slider.value = self.value / (len(self.children) - 1)
         super().changed()

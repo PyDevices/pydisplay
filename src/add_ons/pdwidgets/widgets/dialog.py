@@ -3,12 +3,12 @@
 # SPDX-License-Identifier: MIT
 from eventsys import events
 
-from ._constants import ALIGN, ICON_SIZE, PAD
-from ._util import _root_screen
+from .._constants import ALIGN, ICON_SIZE, PAD
+from .._util import _root_screen
+from ..widget import Widget
 from .button import Button
 from .card import Card
 from .label import Label
-from .widget import Widget
 
 
 class Dialog(Widget):
@@ -61,8 +61,9 @@ class Dialog(Widget):
         display = parent.display
         bg = bg if bg is not None else parent.color_theme.surface
         fg = fg if fg is not None else parent.color_theme.on_surface
-        self.scrim = scrim if scrim is not None else parent.color_theme.shadow
+        self.scrim = scrim if scrim is not None else parent.color_theme.sheet_scrim
         self.on_result = on_result
+        # Pointer modal capture (FocusManager remains independent for key focus).
         super().__init__(
             screen, 0, 0, display.width, display.height, fg=fg, bg=None, visible=False
         )

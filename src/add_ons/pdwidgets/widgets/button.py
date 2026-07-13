@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: MIT
 from eventsys import events
 
-from ._constants import ALIGN, ICON_SIZE, PAD, TEXT_SIZE, TEXT_WIDTH
+from .._constants import ALIGN, ICON_SIZE, PAD, TEXT_SIZE, TEXT_WIDTH
+from ..widget import Widget
 from .icon import Icon
 from .label import Label
-from .widget import Widget
 
 
 class Button(Widget):

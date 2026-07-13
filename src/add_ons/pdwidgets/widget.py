@@ -63,6 +63,8 @@ class Widget:
         self._change_callback = None
 
         self._x = self._y = self._w = self._h = self._align = self._align_to = None
+        # When True, this widget's padded_area clips descendant drawing (ScrollView / ListView).
+        self.clip_content = False
         self.set_position(
             x,
             y,
@@ -393,11 +395,31 @@ class Widget:
         if self.parent:
             self.parent.add_dirty_descendant(self)
 
+    def _clip_from_ancestors(self):
+        """Intersect padded areas of ancestors with ``clip_content`` set."""
+        clip = None
+        node = self.parent
+        while node is not None:
+            if getattr(node, "clip_content", False):
+                area = node.padded_area
+                clip = area if clip is None else clip.clip(area)
+            node = node.parent
+        if clip is not None and (clip.w <= 0 or clip.h <= 0):
+            return None
+        return clip
+
     def render(self):
         """Redraw this widget if invalidated, then clear its dirty flags."""
         if self.invalidated:
             _log("Drawing", self, "on", self.parent, "at", self.area)
-            self.draw()
+            clip = self._clip_from_ancestors()
+            if clip is not None:
+                self.display.clip_push(clip)
+            try:
+                self.draw()
+            finally:
+                if clip is not None:
+                    self.display.clip_pop()
             self.invalidated = False
             if self.parent:
                 self.parent.remove_dirty_widget(self)

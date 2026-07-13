@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-from ._constants import ALIGN, PAD
+from .._constants import ALIGN, PAD
+from ..widget import Widget
 from .label import Label
-from .widget import Widget
 
 
 class Card(Widget):

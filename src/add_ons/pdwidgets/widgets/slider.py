@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: MIT
 from eventsys import events
 
-from ._constants import ALIGN, ICON_SIZE
+from .._constants import ALIGN, ICON_SIZE
+from ..widget import Widget
 from .progress_bar import ProgressBar
-from .widget import Widget
 
 
 class Slider(ProgressBar):

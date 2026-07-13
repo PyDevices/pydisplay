@@ -2,13 +2,14 @@
 #
 # SPDX-License-Identifier: MIT
 from eventsys import events
+from eventsys.keys import Keys
 
-from ._constants import PAD, TEXT_SIZE, TEXT_WIDTH
-from .widget import Widget
+from .._constants import PAD, TEXT_SIZE, TEXT_WIDTH
+from ..widget import Widget
 
 
 class TextInput(Widget):
-    _focused = None  # the TextInput currently receiving key events, if any
+    _focused = None  # back-compat alias; prefer display.focus_manager.focused
 
     def __init__(  # noqa: PLR0913
         self,
@@ -34,30 +35,8 @@ class TextInput(Widget):
 
         Tap the field to focus it (a text cursor appears and the border
         highlights); typing appends printable characters, Backspace deletes, and
-        Enter releases focus. Only the focused field consumes key events, so
-        several inputs can coexist on one screen.
-
-        Args:
-            parent (Widget): The parent widget or screen that contains this input.
-            x (int): The x-coordinate of the input.
-            y (int): The y-coordinate of the input.
-            w (int): The width of the input (defaults to the parent width).
-            h (int): The height of the input.
-            align (int): The alignment of the input.
-            align_to (Widget): The widget to align to.
-            fg (int): The text color; defaults to ``on_surface``.
-            bg (int): The field color; defaults to ``surface``.
-            visible (bool): The visibility of the input.
-            value (str): The initial text content.
-            padding (tuple): The padding on each side of the input.
-            hint (str): Placeholder text shown (dimmed) while empty.
-            text_height (int): The romfont text height (default TEXT_SIZE.LARGE).
-            radius (int): The corner radius of the field (default 6).
-            max_length (int): Maximum number of characters, or ``None``.
-
-        Usage:
-            name = TextInput(card, hint="Your name", max_length=16)
-            name.set_change_cb(lambda s: print(s.value))
+        Enter releases focus. Focus order is managed by
+        :class:`~pdwidgets._focus.FocusManager` (Tab / Shift-Tab / arrows).
         """
         if text_height not in TEXT_SIZE:
             raise ValueError("Text height must be 8, 14 or 16 pixels.")
@@ -72,32 +51,28 @@ class TextInput(Widget):
         self.max_length = max_length
         self.focused = False
         super().__init__(parent, x, y, w, h, align, align_to, fg, bg, visible, value, padding)
+        self.display.focus_manager.register(self)
 
     def _register_callbacks(self):
         self.add_event_cb(events.MOUSEBUTTONDOWN, self._focus)
         self.add_event_cb(events.KEYDOWN, self._key)
 
     def _focus(self, data=None, event=None):
-        """Take keyboard focus (releasing any previously focused input)."""
-        prev = TextInput._focused
-        if prev is not None and prev is not self:
-            prev.focused = False
-            prev.invalidate()
+        """Take keyboard focus via the display FocusManager."""
+        self.display.focus_manager.focus(self)
         TextInput._focused = self
-        if not self.focused:
-            self.focused = True
-            self.invalidate()
 
     def _key(self, data=None, event=None):
         """Edit the text on key press, but only when this input is focused."""
-        if not self.focused or TextInput._focused is not self:
+        fm = self.display.focus_manager
+        if not self.focused or fm.focused is not self:
             return
         key = event.key
-        if key == 8:  # Backspace
+        if key == Keys.K_BACKSPACE:
             if self._value:
                 self.value = self._value[:-1]
-        elif key == 13:  # Enter / Return releases focus
-            self.focused = False
+        elif key == Keys.K_RETURN:
+            self.display.focus_manager.blur()
             TextInput._focused = None
             self.invalidate()
         elif 32 <= key < 127 and (self.max_length is None or len(self._value) < self.max_length):
@@ -112,7 +87,7 @@ class TextInput(Widget):
         self.display.framebuf.round_rect(*pa, self.radius, border, f=False)
         tx = pa.x + PAD + self.radius
         ty = pa.y + (pa.h - self.text_height) // 2
-        text = self._value or ""
+        text = self._display_text()
         if text:
             self.display.framebuf.text(text, tx, ty, self.fg, height=self.text_height)
         elif self.hint:
@@ -122,3 +97,7 @@ class TextInput(Widget):
         if self.focused:
             cx = tx + len(text) * TEXT_WIDTH
             self.display.framebuf.fill_rect(cx, ty, 1, self.text_height, self.fg)
+
+    def _display_text(self):
+        """Text shown in the field (PasswordField overrides to mask)."""
+        return self._value or ""

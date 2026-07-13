@@ -1,10 +1,10 @@
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-from ._constants import ALIGN
+from .._constants import ALIGN
+from ..widget import Widget
 from .button import Button
 from .icon import Icon
-from .widget import Widget
 
 
 class IconButton(Button):

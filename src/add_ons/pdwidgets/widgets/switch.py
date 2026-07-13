@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: MIT
 from eventsys import events
 
-from ._constants import ICON_SIZE
-from .widget import Widget
+from .._constants import ICON_SIZE
+from ..widget import Widget
 
 
 class Switch(Widget):

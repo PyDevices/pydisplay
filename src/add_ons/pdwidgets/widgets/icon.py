@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: MIT
 from graphics import RGB565, FrameBuffer
 
-from ._constants import DEFAULT_PADDING
-from .widget import Widget
+from .._constants import DEFAULT_PADDING
+from ..widget import Widget
 
 
 class Icon(Widget):

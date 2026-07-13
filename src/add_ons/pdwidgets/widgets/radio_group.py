@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-from .widget import Widget
+from ..widget import Widget
 
 
 class RadioGroup(Widget):

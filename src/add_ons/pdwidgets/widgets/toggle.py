@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: MIT
 from eventsys import events
 
+from ..widget import Widget
 from .icon_button import IconButton
-from .widget import Widget
 
 
 class Toggle(IconButton):

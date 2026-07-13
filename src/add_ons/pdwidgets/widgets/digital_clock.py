@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: MIT
 from time import localtime
 
-from ._constants import TEXT_SIZE, TEXT_WIDTH
+from .._constants import TEXT_SIZE, TEXT_WIDTH
+from ..widget import Widget
 from .label import Label
-from .widget import Widget
 
 
 class DigitalClock(Label):

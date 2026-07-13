@@ -1,11 +1,11 @@
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-from ._constants import ICON_SIZE
-from ._themes import icon_theme
+from .._constants import ICON_SIZE
+from .._themes import icon_theme
+from ..widget import Widget
 from .radio_group import RadioGroup
 from .toggle import Toggle
-from .widget import Widget
 
 
 class RadioButton(Toggle):

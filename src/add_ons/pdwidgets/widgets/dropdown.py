@@ -3,14 +3,14 @@
 # SPDX-License-Identifier: MIT
 from eventsys import events
 
-from ._constants import ALIGN, ICON_SIZE, PAD
-from ._themes import icon_theme
-from ._util import _root_screen
+from .._constants import ALIGN, ICON_SIZE, PAD
+from .._themes import icon_theme
+from .._util import _root_screen
+from ..widget import Widget
 from .button import Button
 from .card import Card
 from .icon import Icon
 from .label import Label
-from .widget import Widget
 
 
 class Dropdown(Widget):

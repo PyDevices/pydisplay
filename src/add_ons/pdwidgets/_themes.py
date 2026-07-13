@@ -119,3 +119,18 @@ class ColorTheme:
         self.success = c(0x5E9E6E)  # muted green (status dots, badges)
         self.on_success = c(0xFFFFFF)
         self.transparent = False
+        # Priority B controls (map widgets to these; no hard-coded RGB)
+        # Chip / Tag compact filters
+        self.chip = self.surface_variant
+        self.chip_selected = self.primary
+        self.on_chip = self.on_surface
+        self.on_chip_selected = self.on_primary
+        # Modal sheets / drawers / menus (opaque scrims — no alpha on MCU FB)
+        self.sheet_scrim = self.shadow
+        self.menu_surface = self.surface
+        self.on_menu = self.on_surface
+        # SegmentedControl / Accordion chrome
+        self.segment = self.surface_variant
+        self.segment_selected = self.primary
+        self.on_segment = self.on_surface
+        self.on_segment_selected = self.on_primary

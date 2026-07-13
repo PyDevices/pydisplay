@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: MIT
 from eventsys import events
 
-from ._constants import ALIGN, ICON_SIZE
-from ._themes import icon_theme
+from .._constants import ALIGN, ICON_SIZE
+from .._themes import icon_theme
+from ..widget import Widget
 from .icon_button import IconButton
 from .slider import Slider
-from .widget import Widget
 
 
 class ScrollBar(Widget):
