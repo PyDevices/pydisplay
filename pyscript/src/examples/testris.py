@@ -26,7 +26,6 @@ except ImportError:
         return x
 
 from multimer import ticks_diff, ticks_ms
-from multimer.loop import dual_main, run_forever, run_forever_async
 
 if display_drv.width > display_drv.height:
     display_drv.rotation += 90
@@ -70,8 +69,9 @@ joystick_keypad = JoystickKeypad(
 
 
 def _quit_if_needed(_where):
-    if runtime:
-        runtime.poll()
+    # Do not call runtime.poll() from an on_tick callback: on sync librt
+    # backends that re-enters the timer path and deadlocks. Auto-service
+    # already dispatches input to Keypad/JoystickKeypad and handles QUIT.
     if not runtime.quit_requested if runtime else False:
         return False
     display_drv.quit()
@@ -747,19 +747,13 @@ def _start_play():
     return _get_game()(_Loop())
 
 
-def main_sync():
-    play = _start_play()
-    run_forever(lambda: _play_poll(play), delay_ms=20)
+play = _start_play()
 
 
-async def main_async():
-    from multimer import asyncio
-
-    await asyncio.sleep(0)
-    _get_game()
-    await asyncio.sleep(0)
-    play = _get_game()(_Loop())
-    await run_forever_async(lambda: _play_poll(play), delay_ms=20)
+def _tick(_=None):
+    if _play_poll(play):
+        runtime.request_quit()
 
 
-dual_main(main_sync, main_async, async_mode=runtime.timer_async if runtime else True)
+runtime.on_tick(_tick, period=20, async_=runtime.timer_async)
+runtime.run_forever()

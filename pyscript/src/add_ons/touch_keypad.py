@@ -12,12 +12,21 @@ Returns the key number of the associated cell pressed.
 
 Also passes through the key from any KEYDOWN events from the display.
 
-Usage:
+Callback idiom (canonical — no app poll loop; the runtime auto-service dispatches):
 from touch_keypad import Keypad
 from board_config import display_drv, runtime
 
 keys = [1, 2, 3, "A", "B", "C", "play", "pause", "esc"]
-keypad = Keypad(runtime.poll, 0, 0, display_drv.width, display_drv.height, cols=3, rows=3, keys=keys)
+keypad = Keypad(
+    runtime, 0, 0, display_drv.width, display_drv.height,
+    cols=3, rows=3, keys=keys,
+    on_press=lambda key: print("down", key),
+    on_release=lambda key: print("up", key),
+)
+runtime.run_forever()
+
+Poll idiom (legacy — still supported):
+keypad = Keypad(runtime, 0, 0, display_drv.width, display_drv.height, cols=3, rows=3, keys=keys)
 while True:
     runtime.poll()
     if keys := keypad.read():
@@ -37,9 +46,27 @@ except ImportError:
 
 
 class Keypad:
-    def __init__(self, runtime, x, y, w, h, cols=3, rows=3, keys=None, translate=None):
+    def __init__(
+        self,
+        runtime,
+        x,
+        y,
+        w,
+        h,
+        cols=3,
+        rows=3,
+        keys=None,
+        translate=None,
+        on_press=None,
+        on_release=None,
+    ):
         self._keys = keys if keys else list(range(cols * rows))
         self._runtime = runtime
+        # Optional push callbacks: fired directly from the event dispatch so the
+        # app never polls (the canonical callback idiom). ``read()`` still works
+        # for legacy poll loops.
+        self._on_press = on_press
+        self._on_release = on_release
         self.x = x
         self.y = y
         self.w = w
@@ -73,9 +100,11 @@ class Keypad:
             # Instead of doing a bounds check we just catch the exception.
             try:
                 key = self._keys[row * self.cols + col]
-                if event.type == events.MOUSEBUTTONDOWN:
+                pressed = event.type == events.MOUSEBUTTONDOWN
+                if pressed:
                     self._clicks.append(key)
-                self._state[key] = event.type == events.MOUSEBUTTONDOWN
+                self._state[key] = pressed
+                self._dispatch(key, pressed)
                 return
             except IndexError:
                 return
@@ -83,9 +112,16 @@ class Keypad:
         if event.type in [events.KEYDOWN, events.KEYUP]:
             key = event.key
             if key in self._keys:
-                if event.type == events.KEYDOWN:
+                pressed = event.type == events.KEYDOWN
+                if pressed:
                     self._clicks.append(key)
-                self._state[key] = event.type == events.KEYDOWN
+                self._state[key] = pressed
+                self._dispatch(key, pressed)
+
+    def _dispatch(self, key, pressed):
+        cb = self._on_press if pressed else self._on_release
+        if cb is not None:
+            cb(key)
 
     def read(self):
         """Return keys pressed since the last ``read()`` (edge triggered)."""

@@ -1,4 +1,3 @@
-from board_config import runtime
 """
 scroll.py
 =========
@@ -23,7 +22,8 @@ Only works with fonts with heights that are even multiples of the screen height,
 
 """
 
-from multimer.loop import run_forever
+from board_config import runtime
+
 import tft_text
 import tft_config
 
@@ -44,10 +44,6 @@ def _setup():
     st = {"scroll": 0, "character": 0}
 
     def poll():
-        if runtime:
-            runtime.poll()
-            if runtime.quit_requested:
-                return True
         scroll = st["scroll"]
         tft.draw.fill_rect(0, scroll, tft.width, 1, palette.BLUE)
 
@@ -74,6 +70,12 @@ def _setup():
     return poll
 
 
-# run_forever blocks on desktop/MCU but yields to the event loop on PyScript
-# and Jupyter (runtime.timer_async), so the browser main thread stays live.
-run_forever(_setup(), delay_ms=10)
+poll = _setup()
+
+
+def _tick(_=None):
+    poll()
+
+
+runtime.on_tick(_tick, period=10, async_=runtime.timer_async)
+runtime.run_forever()

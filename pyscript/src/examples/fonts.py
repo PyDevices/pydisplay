@@ -1,4 +1,3 @@
-from board_config import runtime
 """
 fonts.py
 ========
@@ -25,8 +24,9 @@ https://www.youtube.com/watch?v=2cnAhEucPD4
 
 """
 
+from board_config import runtime
+
 from multimer import ticks_add, ticks_diff, ticks_ms
-from multimer.loop import run_forever
 
 import tft_config
 import tft_text
@@ -58,10 +58,6 @@ def _setup():
     new_font()
 
     def poll():
-        if runtime:
-            runtime.poll()
-            if runtime.quit_requested:
-                return True
         now = ticks_ms()
         if st["resume_at"] is not None:
             if ticks_diff(now, st["resume_at"]) < 0:
@@ -100,9 +96,12 @@ def _setup():
 
 
 def main():
-    # run_forever blocks on desktop/MCU but yields to the event loop on PyScript
-    # and Jupyter (runtime.timer_async), so the browser main thread stays live.
-    run_forever(_setup(), delay_ms=1)
+    poll = _setup()
+    # Blocks on desktop/MCU but yields to the event loop on PyScript and
+    # Jupyter (runtime.timer_async), so the browser main thread stays live.
+    def _tick(_=None):
+        poll()
 
-
+    runtime.on_tick(_tick, period=1, async_=runtime.timer_async)
+    runtime.run_forever()
 main()

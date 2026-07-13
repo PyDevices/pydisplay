@@ -161,11 +161,23 @@ def run_deadline_hook():
     return hook()
 
 
-def sleep_ms(ms):
-    """Block for ``ms`` milliseconds.
+def _sleep_ms_signal(ms):
+    """Sleep for signal-delivered backends (librt).
 
-    Also runs any registered :func:`set_deadline_hook` callback (harness use
-    only) before and after the wait, and advances cooperative timer queues.
+    The periodic timer fires via an RT signal on the main thread during the
+    sleep, so the scheduler/event queue does not need pumping here (pumping
+    would only add avoidable work and reentrancy on the signal path).
+    """
+    run_deadline_hook()
+    _raw_sleep_ms(ms)
+    run_deadline_hook()
+
+
+def _sleep_ms_pump(ms):
+    """Sleep for pump-based backends (win32 APC, SDL2, threading fallback).
+
+    These deliver timer callbacks only while the main thread pumps, so drain
+    the cooperative scheduler and the backend event queue around the wait.
     """
     run_deadline_hook()
     from ._schedule import _run_pending
@@ -185,4 +197,24 @@ def sleep_ms(ms):
         _backend_drain()
 
 
-_sleep_ms = sleep_ms
+async def _sleep_ms_async(ms):
+    """Awaitable sleep for async-only runtimes (PyScript/Jupyter host loop).
+
+    Yields to the event loop so the async timer tasks run. ``asyncio.sleep_ms``
+    exists only on uasyncio; fall back to ``asyncio.sleep`` (CPython/PyScript).
+    """
+    from ._asyncio_loader import load_asyncio
+
+    aio = load_asyncio()
+    _sleep = getattr(aio, "sleep_ms", None)
+    if _sleep is not None:
+        await _sleep(ms)
+    else:
+        await aio.sleep(ms / 1000)
+    run_deadline_hook()
+
+
+# Default binding = the pumping variant (safe everywhere). ``multimer/__init__``
+# rebinds the public ``sleep_ms`` per active backend (signal / pump / async).
+sleep_ms = _sleep_ms_pump
+_sleep_ms = _sleep_ms_pump

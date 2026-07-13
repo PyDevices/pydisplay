@@ -70,9 +70,14 @@ class _TimerCore:
             _sleep_ms(1)
 
     def _invoke_callback(self, arg):
-        if self._callback is None:
-            raise TypeError("'NoneType' object isn't callable")
-        self._callback(arg)
+        cb = self._callback
+        # A soft (scheduled) delivery can outlive its timer: deinit() clears the
+        # callback while a schedule(_deliver_cb) is still queued (seen on the
+        # CircuitPython threading backend during teardown). Skip the stale
+        # delivery instead of crashing on the now-None callback.
+        if cb is None:
+            return
+        cb(arg)
 
     def _deliver(self):
         if self._busy:

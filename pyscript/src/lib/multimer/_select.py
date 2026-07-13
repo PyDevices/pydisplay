@@ -8,13 +8,19 @@ import sys
 Timer = None
 _sleep_ms = None
 _drain = None
+# True when the active backend delivers timer callbacks on its own (e.g. the
+# librt POSIX-timer signal fires on the main thread during a plain sleep). Such
+# backends do NOT need sleep_ms to pump the scheduler/event queue; pump-based
+# backends (win32 APC, SDL2, the threading fallback) do.
+_signal_delivered = False
 
 
 def _set_backend(module):
-    global Timer, _sleep_ms, _drain
+    global Timer, _sleep_ms, _drain, _signal_delivered
     Timer = module.Timer
     _sleep_ms = getattr(module, "_backend_sleep_ms", None)
     _drain = getattr(module, "_backend_drain", None)
+    _signal_delivered = getattr(module, "_signal_delivered", False)
 
 
 def _running_in_ipython_kernel():
@@ -34,7 +40,13 @@ def _async_only_runtime():
     return sys.platform in ("emscripten", "webassembly") or _running_in_ipython_kernel()
 
 
-if not _async_only_runtime():
+if _async_only_runtime():
+    # PyScript / Jupyter have no sync timer backend. Expose AsyncTimer as Timer so
+    # ``from multimer import Timer`` matches the canonical app idiom on every host.
+    from ._async_timer import AsyncTimer
+
+    Timer = AsyncTimer
+else:
     if sys.platform == "win32":
         try:
             from ._backends import win32

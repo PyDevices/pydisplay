@@ -3,16 +3,11 @@ eventsys_touch_test.py - Touch rotation test.
 Tests the touch driver and finds the correct rotation masks for the touch screen.
 Sets the rotation to each of 4 possible values and asks the user to touch the rectangle in each of the 4 corners.
 Then it prints the touch_rotation_table that should be set in board_config.py.
-
-On asyncio-native hosts (PyScript, Jupyter Notebook) the test runs an async main
-loop that yields to the event loop so input/widget events can be dispatched.  On
-MCU/desktop it runs the classic blocking loop with sleep_ms().
 """
 
 from board_config import display_drv, runtime
 import eventsys
 from graphics import round_rect, text16
-from multimer import sleep_ms
 
 demo = False
 
@@ -76,34 +71,6 @@ def _clear_target(x, y, half_width, half_height):
     display_drv.show()
 
 
-def _poll_touch():
-    if runtime.quit_requested:
-        raise SystemExit(0)
-    if elist := runtime.poll():
-        for event in elist:
-            if event.type == runtime.events.QUIT:
-                raise SystemExit(0)
-            if event.type == runtime.events.MOUSEBUTTONDOWN and event.button == 1:
-                return event.pos
-    return None
-
-
-def _record_zone(touched_point, touched_zones, half_width, half_height):
-    zone = (touched_point[1] // half_height) * 2 + (touched_point[0] // half_width)
-    touched_zones.append(zone)
-    print(f"{touched_point=} in {zone=}")
-
-
-def _finish_rotation(rotation, touched_zones, touch_rotation_table):
-    mask = _ZONE_MASKS.get(tuple(touched_zones))
-    if mask is None:
-        print("Invalid touch sequence. Starting over...\n")
-        return False
-    touch_rotation_table.append(mask)
-    print(f"{rotation=} {mask=} ({mask:#05b})\n")
-    return True
-
-
 def _report(touch_rotation_table):
     if not demo:
         set_rotation_table(touch_rotation_table)
@@ -119,106 +86,85 @@ def _report(touch_rotation_table):
         (display_drv.height - 8) // 2,
         FG_COLOR,
     )
+    display_drv.show()
 
 
-def loop():
+# Callback-driven state machine (one path for sync and async).
+_st = {
+    "rotation": 0,
+    "x": 0,
+    "y": 0,
+    "touched_zones": [],
+    "touch_rotation_table": [],
+    "half_width": 0,
+    "half_height": 0,
+    "done": False,
+}
+
+
+def _show_current_target():
+    _draw_target(_st["x"], _st["y"], _st["half_width"], _st["half_height"])
+
+
+def _advance_or_finish():
+    _st["x"] += 1
+    if _st["x"] > 1:
+        _st["x"] = 0
+        _st["y"] += 1
+    if _st["y"] > 1:
+        # finished one rotation
+        mask = _ZONE_MASKS.get(tuple(_st["touched_zones"]))
+        if mask is None:
+            print("Invalid touch sequence. Starting over...\n")
+            _start_over()
+            return
+        _st["touch_rotation_table"].append(mask)
+        print(f"rotation={_st['rotation']} {mask=} ({mask:#05b})\n")
+        _st["rotation"] += 90
+        if _st["rotation"] >= 360:
+            _report(_st["touch_rotation_table"])
+            _st["done"] = True
+            return
+        _st["touched_zones"] = []
+        _st["x"] = 0
+        _st["y"] = 0
+        display_drv.rotation = _st["rotation"]
+        _st["half_width"] = display_drv.width // 2
+        _st["half_height"] = display_drv.height // 2
+        display_drv.fill_rect(0, 0, display_drv.width - 1, display_drv.height - 1, BG_COLOR)
+    _show_current_target()
+
+
+def _start_over():
+    _st["rotation"] = 0
+    _st["x"] = 0
+    _st["y"] = 0
+    _st["touched_zones"] = []
+    _st["touch_rotation_table"] = []
+    display_drv.rotation = 0
+    _st["half_width"] = display_drv.width // 2
+    _st["half_height"] = display_drv.height // 2
     display_drv.fill_rect(0, 0, display_drv.width - 1, display_drv.height - 1, BG_COLOR)
-
     print("Touch the rectangle in each corner for 4 rotations.\n")
-
-    touch_rotation_table = []
-
-    for rotation in range(0, 360, 90):
-        touched_zones = []
-        display_drv.rotation = rotation
-
-        half_width = display_drv.width // 2
-        half_height = display_drv.height // 2
-
-        for y in range(2):
-            for x in range(2):
-                _draw_target(x, y, half_width, half_height)
-                touched_point = None
-                while not touched_point:
-                    touched_point = _poll_touch()
-                    sleep_ms(0)
-                    sleep_ms(1)
-                _record_zone(touched_point, touched_zones, half_width, half_height)
-                _clear_target(x, y, half_width, half_height)
-
-        if not _finish_rotation(rotation, touched_zones, touch_rotation_table):
-            return False
-
-    _report(touch_rotation_table)
-    return True
+    _show_current_target()
 
 
-async def loop_async():
-    try:
-        import asyncio
-    except ImportError:
-        import uasyncio as asyncio
-
-    display_drv.fill_rect(0, 0, display_drv.width - 1, display_drv.height - 1, BG_COLOR)
-
-    print("Touch the rectangle in each corner for 4 rotations.\n")
-
-    touch_rotation_table = []
-
-    for rotation in range(0, 360, 90):
-        touched_zones = []
-        display_drv.rotation = rotation
-
-        half_width = display_drv.width // 2
-        half_height = display_drv.height // 2
-
-        for y in range(2):
-            for x in range(2):
-                _draw_target(x, y, half_width, half_height)
-                touched_point = None
-                while not touched_point:
-                    touched_point = _poll_touch()
-                    await asyncio.sleep(0.02)
-                _record_zone(touched_point, touched_zones, half_width, half_height)
-                _clear_target(x, y, half_width, half_height)
-
-        if not _finish_rotation(rotation, touched_zones, touch_rotation_table):
-            return False
-
-    _report(touch_rotation_table)
-    return True
-
-
-async def main_async():
-    from multimer import sleep_ms
-
-    completed = False
-    while not completed:
-        display_drv.show()
-        completed = await loop_async()
-        await sleep_ms(0)
-
-
-def run_sync():
-    completed = False
-    try:
-        while not completed:
-            display_drv.show()
-            completed = loop()
-            sleep_ms(0)
-            sleep_ms(1)
-    except KeyboardInterrupt:
-        print("\nStopped.")
+def _on_click(e):
+    if _st["done"] or e.button != 1:
+        return
+    touched_point = e.pos
+    zone = (touched_point[1] // _st["half_height"]) * 2 + (
+        touched_point[0] // _st["half_width"]
+    )
+    _st["touched_zones"].append(zone)
+    print(f"{touched_point=} in {zone=}")
+    _clear_target(_st["x"], _st["y"], _st["half_width"], _st["half_height"])
+    _advance_or_finish()
 
 
 if not demo:
     set_rotation_table((0, 0, 0, 0))
 
-if runtime.timer_async:
-    # On a host with a running loop (Jupyter, PyScript) this schedules the test
-    # as a background task and returns; otherwise it runs to completion.
-    from multimer import run
-
-    run(main_async)
-else:
-    run_sync()
+_start_over()
+runtime.on(runtime.events.MOUSEBUTTONDOWN, _on_click)
+runtime.run_forever()

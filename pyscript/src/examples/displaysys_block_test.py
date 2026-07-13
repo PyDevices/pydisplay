@@ -5,12 +5,12 @@ from random import getrandbits
 try:
     from random import choice
 except ImportError:
+
     def choice(sequence):
         return sequence[0]
 
 
 from board_config import display_drv, runtime
-from multimer.loop import run_forever
 import gc
 import time
 
@@ -43,48 +43,38 @@ if display_drv.requires_byteswap:
 else:
     needs_swap = False
 
+block_size = 32
+blocks = []
+max_x = display_drv.width - block_size - 1
+max_y = display_drv.height - block_size - 1
 
-def _setup():
-    block_size = 32
-    blocks = []
+for pixel_color in [0x0000, 0xFFFF, 0xF800, 0x07E0, 0x001F, 0xFFE0, 0x07FF, 0xF81F]:
+    pixel_bytes = (
+        pixel_color.to_bytes(2, "big") if needs_swap else pixel_color.to_bytes(2, "little")
+    )
+    blocks.append(memoryview(bytearray(pixel_bytes * (block_size * block_size))))
 
-    max_x = display_drv.width - block_size - 1
-    max_y = display_drv.height - block_size - 1
-
-    for pixel_color in [0x0000, 0xFFFF, 0xF800, 0x07E0, 0x001F, 0xFFE0, 0x07FF, 0xF81F]:
-        pixel_bytes = (
-            pixel_color.to_bytes(2, "big") if needs_swap else pixel_color.to_bytes(2, "little")
-        )
-        blocks.append(memoryview(bytearray(pixel_bytes * (block_size * block_size))))
-
-    print("Drawing blocks on display")
-    st = {"count": 0, "start_time": time.time()}
-
-    def poll():
-        display_drv.blit_rect(
-            choice(blocks),
-            randint(0, max_x),
-            randint(0, max_y),
-            block_size,
-            block_size,
-        )
-        if getattr(runtime, "_timer", None) is None:
-            display_drv.show()
-        st["count"] += 1
-        if st["count"] % 2000 == 0:
-            rate = st["count"] / (time.time() - st["start_time"])
-            print(f"blocks/sec: {rate:5.2f}")
-        if runtime:
-            runtime.poll()
-        if runtime.quit_requested if runtime else False:
-            return True
-        if TEST_DURATION_S is not None and time.time() - st["start_time"] >= TEST_DURATION_S:
-            return True
-        return False
-
-    return poll
+print("Drawing blocks on display")
+_count = 0
+_start_time = time.time()
 
 
-# run_forever blocks on desktop/MCU but yields to the event loop on PyScript
-# and Jupyter (runtime.timer_async), so the browser main thread stays live.
-run_forever(_setup(), delay_ms=1)
+def _tick(_=None):
+    global _count
+    display_drv.blit_rect(
+        choice(blocks),
+        randint(0, max_x),
+        randint(0, max_y),
+        block_size,
+        block_size,
+    )
+    _count += 1
+    if _count % 2000 == 0:
+        rate = _count / (time.time() - _start_time)
+        print(f"blocks/sec: {rate:5.2f}")
+    if TEST_DURATION_S is not None and time.time() - _start_time >= TEST_DURATION_S:
+        runtime.request_quit()
+
+
+runtime.on_tick(_tick, period=1, async_=runtime.timer_async)
+runtime.run_forever()

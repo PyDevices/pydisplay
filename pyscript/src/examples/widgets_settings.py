@@ -7,7 +7,7 @@ and a modal ``Dialog``.
 
 Toggles and selections update a status line; the Reset button raises a modal
 confirmation ``Dialog``. Runs under both ``timer_async`` modes via
-``pd.run_forever()``.
+``runtime.run_forever()``.
 """
 
 import board_config
@@ -15,7 +15,6 @@ import pdwidgets as pd
 
 pd.DEBUG = False
 pd.MARK_UPDATES = False
-pd.init_timer(10)
 
 display = pd.Display(board_config.display_drv, board_config.runtime)
 theme = display.color_theme
@@ -126,4 +125,4 @@ reset.add_event_cb(pd.events.MOUSEBUTTONDOWN, lambda s, e: confirm.show())
 
 screen.visible = True
 
-pd.run_forever()
+board_config.runtime.run_forever()

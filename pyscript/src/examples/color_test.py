@@ -1,4 +1,3 @@
-from board_config import runtime
 """
 color_test.py
 =============
@@ -22,7 +21,8 @@ gradient.  Then repeatedly draws a borders around the display in the same colors
 
 """
 
-from multimer.loop import run_forever
+from board_config import runtime
+
 import tft_config
 import tft_text
 import vga2_bold_16x32 as font
@@ -79,10 +79,6 @@ def main():
     st = {"ci": 0}
 
     def poll():
-        if runtime:
-            runtime.poll()
-            if runtime.quit_requested:
-                return True
         color = border_colors[st["ci"]]
         for x in range(tft.width):
             tft.draw.pixel(x, 0, color)
@@ -94,9 +90,11 @@ def main():
         st["ci"] = (st["ci"] + 1) % len(border_colors)
         return False
 
-    # run_forever blocks on desktop/MCU but yields to the event loop on PyScript
-    # and Jupyter (runtime.timer_async), so the browser main thread stays live.
-    run_forever(poll, delay_ms=1000)
+    # Blocks on desktop/MCU but yields to the event loop on PyScript and
+    # Jupyter (runtime.timer_async), so the browser main thread stays live.
+    def _tick(_=None):
+        poll()
 
-
+    runtime.on_tick(_tick, period=1000, async_=runtime.timer_async)
+    runtime.run_forever()
 main()

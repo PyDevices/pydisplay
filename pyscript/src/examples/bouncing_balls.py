@@ -22,7 +22,6 @@ desktop (SDL/Pygame), MCU, and PyScript.
 from random import getrandbits
 
 from board_config import display_drv, runtime
-from multimer.loop import run_forever
 import graphics
 
 WIDTH = display_drv.width
@@ -89,24 +88,16 @@ def step(ball):
         ball.y = max(ymin, min(ymax, ball.y))
 
 
-def _setup():
-    balls = make_balls()
-
-    def poll():
-        if runtime:
-            runtime.poll()
-            if runtime.quit_requested:
-                return True
-        graphics.fill(display_drv, BG)
-        for ball in balls:
-            step(ball)
-            graphics.circle(display_drv, int(ball.x), int(ball.y), ball.r, ball.color, True)
-        display_drv.show()
-        return False
-
-    return poll
+balls = make_balls()
 
 
-# run_forever blocks on desktop/MCU but yields to the event loop on PyScript
-# and Jupyter (runtime.timer_async), so the browser main thread stays live.
-run_forever(_setup(), delay_ms=10)
+def _tick(_=None):
+    graphics.fill(display_drv, BG)
+    for ball in balls:
+        step(ball)
+        graphics.circle(display_drv, int(ball.x), int(ball.y), ball.r, ball.color, True)
+    display_drv.show()
+
+
+runtime.on_tick(_tick, period=10, async_=runtime.timer_async)
+runtime.run_forever()

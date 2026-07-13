@@ -3,7 +3,6 @@ A simple test of an encoder in eventsys.
 """
 
 from board_config import display_drv, runtime
-from multimer.loop import run_forever
 
 color_byte = 1
 bg_color = 0xFF00
@@ -26,39 +25,33 @@ display_drv.vscsad(y_pos)
 draw_line()
 
 
-def poll():
-    global color_byte, bg_color, y_pos, x_pos
-    if runtime.quit_requested:
-        return True
-    if not (elist := runtime.poll()):
-        return False
-    for e in elist:
-        if e.type == runtime.events.QUIT:
-            return True
-        if e.type == runtime.events.MOUSEWHEEL:
-            if e.y != 0:
-                direction = factor if e.y > 0 else -factor
-                delta = e.y * e.y * direction  # Quadratic acceleration
-                y_pos = (y_pos + delta) % h
-                display_drv.vscsad(y_pos)
-                display_drv.show()
-            if e.x != 0:
-                direction = factor if e.x > 0 else -factor
-                delta = e.x * e.x * direction
-                x_pos = (x_pos + delta) % w
-                draw_line()
-        elif e.type == runtime.events.MOUSEBUTTONDOWN:
-            if e.button == 2:
-                color_byte = color_byte << 1 & 0xFF
-                if color_byte == 0:
-                    color_byte = 1
-                draw_line()
-            elif e.button == 3:
-                bg_color = ~bg_color
-                draw_line()
-    return False
+def _on_wheel(e):
+    global y_pos, x_pos
+    if e.y != 0:
+        direction = factor if e.y > 0 else -factor
+        delta = e.y * e.y * direction  # Quadratic acceleration
+        y_pos = (y_pos + delta) % h
+        display_drv.vscsad(y_pos)
+        display_drv.show()
+    if e.x != 0:
+        direction = factor if e.x > 0 else -factor
+        delta = e.x * e.x * direction
+        x_pos = (x_pos + delta) % w
+        draw_line()
 
 
-# run_forever blocks on desktop/MCU but yields to the event loop on PyScript
-# and Jupyter (runtime.timer_async), so the browser main thread stays live.
-run_forever(poll, delay_ms=20)
+def _on_button(e):
+    global color_byte, bg_color
+    if e.button == 2:
+        color_byte = color_byte << 1 & 0xFF
+        if color_byte == 0:
+            color_byte = 1
+        draw_line()
+    elif e.button == 3:
+        bg_color = ~bg_color
+        draw_line()
+
+
+runtime.on(runtime.events.MOUSEWHEEL, _on_wheel)
+runtime.on(runtime.events.MOUSEBUTTONDOWN, _on_button)
+runtime.run_forever()

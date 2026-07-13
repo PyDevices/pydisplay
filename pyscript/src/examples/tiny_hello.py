@@ -1,4 +1,3 @@
-from board_config import runtime
 """
 tiny_hello.py
 =============
@@ -21,10 +20,11 @@ Writes "Hello!" in a tiny font in random colors at random locations on the Displ
 
 """
 
+from board_config import runtime
+
 from random import getrandbits
 
 from multimer import ticks_add, ticks_diff, ticks_ms
-from multimer.loop import run_forever
 import tft_text
 import tft_config
 
@@ -97,10 +97,6 @@ def _setup():
         st["rotation"] = (st["rotation"] + 1) % 4
 
     def poll():
-        if runtime:
-            runtime.poll()
-            if runtime.quit_requested:
-                return True
         now = ticks_ms()
         if st["phase"] == "intro":
             if st["resume_at"] is not None and ticks_diff(now, st["resume_at"]) < 0:
@@ -135,9 +131,12 @@ def main():
     """
     The big show!
     """
-    # run_forever blocks on desktop/MCU but yields to the event loop on PyScript
-    # and Jupyter (runtime.timer_async), so the browser main thread stays live.
-    run_forever(_setup(), delay_ms=1)
+    poll = _setup()
+    # Blocks on desktop/MCU but yields to the event loop on PyScript and
+    # Jupyter (runtime.timer_async), so the browser main thread stays live.
+    def _tick(_=None):
+        poll()
 
-
+    runtime.on_tick(_tick, period=1, async_=runtime.timer_async)
+    runtime.run_forever()
 main()

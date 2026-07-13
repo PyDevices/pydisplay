@@ -11,6 +11,7 @@ from ._keypad import KeypadDevice
 from ._touch import TouchDevice
 
 DEFAULT_REFRESH_MS = 33
+SERVICE_TICK_MS = 10
 
 
 def _validate_callable(value, name):
@@ -106,6 +107,16 @@ class Runtime:
         self._refresh_claim = None
         self._pending_async_refresh = None
         self._pending_sync_refresh = None
+        # Auto-service: the shared timer tick pumps/drains events and polls
+        # devices so the canonical idiom needs no user loop. Disabled the moment
+        # the app calls poll() itself (legacy loops) to avoid double-pumping.
+        self._service_subscription = None
+        self._pending_service = None
+        self._pending_timer_async = False
+        self._app_drives_poll = False
+        self._in_service_poll = False
+        self._pending_teardown = False
+        self._teardown_done = False
         self.host_dev = None
         self.touch_dev = None
         self.keypad_dev = None
@@ -134,6 +145,7 @@ class Runtime:
         if display is not None:
             self._wire_display_refresh(refresh_period)
             self._install_default_quit()
+            self._register_atexit()
 
         print(f"Runtime: timer_async={self._timer_async}.")
 
@@ -159,13 +171,119 @@ class Runtime:
         return False
 
     def arm_async_refresh(self):
-        """Wire deferred display refresh once the asyncio event loop is running."""
+        """Wire deferred display refresh + auto-service once the loop is running."""
         pending = self._pending_async_refresh
-        if pending is None:
+        if pending is not None:
+            self._pending_async_refresh = None
+            show_fn, period = pending
+            self._refresh_subscription = self.on_tick(show_fn, period=period, async_=True)
+        if self._pending_service:
+            self._pending_service = False
+            self._service_subscription = self.on_tick(
+                self._service_tick, period=SERVICE_TICK_MS, async_=True
+            )
+        # Safety net: if on_tick subscriptions were recorded before the loop was
+        # running (deferred async timer) but nothing above started the timer,
+        # start it now that a loop exists so those callbacks dispatch.
+        if self._pending_timer_async and self._timer is None:
+            self.start_timer(async_=True)
+
+    async def run(self, tick_ms=SERVICE_TICK_MS):
+        """Run the app until quit — asyncio-native entry for ``timer_async`` apps.
+
+        Arms the deferred async refresh + auto-service (an ``AsyncTimer`` needs a
+        running loop), then yields until a QUIT is handled. Use it as the async
+        idiom::
+
+            import asyncio  # or: from multimer import asyncio
+            # ... build UI, define callbacks ...
+            asyncio.run(runtime.run())      # or: await runtime.run()
+
+        Sync mode does not need this: the shared timer keeps servicing the app
+        after the script falls through to the interpreter.
+        """
+        from multimer import asyncio
+
+        self.arm_async_refresh()
+        while not self._quit_requested:
+            await asyncio.sleep(tick_ms / 1000)
+        # Teardown here runs outside the service tick (this coroutine is a
+        # separate task from the AsyncTimer), so stopping the timer is safe.
+        self._perform_teardown()
+
+    def run_forever(self, tick_ms=SERVICE_TICK_MS):
+        """Universal blocking entry — identical client code for every backend.
+
+        Apps always end with ``runtime.run_forever()``; the branch taken is
+        internal, so the same source runs sync or async, interactive or not:
+
+        * async, a loop already running (PyScript/Jupyter): arm the auto-service
+          on that loop and return — the host loop keeps the app alive.
+        * async, no running loop (desktop ``timer_async``): ``asyncio.run(self.run())``.
+        * sync, signal-delivered backend, interactive ``-i``: return immediately —
+          the REPL stays alive and the RT signal drives the auto-service, so a
+          keep-alive loop is optional here.
+        * sync otherwise: block until quit, then tear down.
+
+        The coroutine :meth:`run` stays public for ``await`` composition inside an
+        existing async app or PyScript top-level await.
+        """
+        import multimer
+
+        if self._timer_async:
+            if self._event_loop_running():
+                self.arm_async_refresh()
+                return
+            from multimer import asyncio
+
+            asyncio.run(self.run())
             return
-        self._pending_async_refresh = None
-        show_fn, period = pending
-        self._refresh_subscription = self.on_tick(show_fn, period=period, async_=True)
+
+        import sys
+
+        # Detect interactive sessions on all runtimes:
+        #   CPython ``-i``:  sys.flags.interactive is set for the whole session.
+        #   MicroPython/CircuitPython REPL:  no sys.flags, but sys.argv[0] is
+        #     the bootstrap script (``lib/path.py``); its basename ``path.py``
+        #     is the pydisplay interactive-session convention.
+        # On signal-delivered backends the auto-service timer keeps the app live
+        # from the REPL prompt; blocking here would wedge it needlessly.
+        flags = getattr(sys, "flags", None)
+        argv0 = (sys.argv[0] if getattr(sys, "argv", None) else "").replace("\\", "/")
+        argv0 = argv0.rsplit("/", 1)[-1]
+        interactive = bool(getattr(flags, "interactive", 0)) or argv0 == "path.py"
+        if interactive and multimer.signal_delivered():
+            return
+        try:
+            while not self._quit_requested:
+                multimer.sleep_ms(tick_ms)
+        finally:
+            self._perform_teardown()
+
+    def run_async(self, coro_or_fn):
+        """Run a bespoke async entry point, respecting an already-running loop.
+
+        Counterpart to :meth:`run_forever` for apps with their own async
+        ``main()`` (rather than the ``on_tick``/``poll`` idiom). Arms the
+        deferred async refresh, then:
+
+        * no loop running yet (desktop ``timer_async``): blocks until the
+          coroutine finishes via ``asyncio.run``.
+        * a loop already running (Jupyter, PyScript): schedules the coroutine
+          as a background task and returns immediately.
+
+        ``coro_or_fn`` may be a zero-arg async function or a coroutine object.
+        """
+        from multimer import asyncio
+
+        async def _runner():
+            self.arm_async_refresh()
+            coro = coro_or_fn() if callable(coro_or_fn) else coro_or_fn
+            return await coro
+
+        if self._event_loop_running():
+            return asyncio.create_task(_runner())
+        return asyncio.run(_runner())
 
     @property
     def quit_requested(self):
@@ -315,13 +433,35 @@ class Runtime:
         except ImportError:
             pass
 
+    def _service_tick(self, timer_obj):
+        """Shared-timer callback: pump/drain events and poll devices.
+
+        Lets the canonical idiom (build UI, define callbacks, fall through to
+        the interpreter) stay live with no user loop. Skips while a GUI layer
+        (e.g. LVGL) has claimed display refresh — that layer drives input via
+        its own device reads — and once the app polls itself (legacy loops).
+        """
+        if self._quit_requested or self._app_drives_poll or self._refresh_claim is not None:
+            return
+        self._in_service_poll = True
+        try:
+            self.poll()
+        finally:
+            self._in_service_poll = False
+
     def poll(self):
         """Poll all registered devices and return aggregated events.
 
         Also invokes ``multimer.run_deadline_hook()`` when present so test
         harnesses can enforce a wall-clock deadline on single-threaded hosts.
         Application code should not rely on that hook.
+
+        An external call (not from the runtime's own auto-service tick) hands
+        polling to the application: the auto-service stops pumping so events are
+        not drained twice.
         """
+        if not self._in_service_poll:
+            self._app_drives_poll = True
         try:
             from multimer import run_deadline_hook
 
@@ -345,15 +485,24 @@ class Runtime:
                             func(event)
         return eventlist
 
-    def start_timer(self, *, async_=False, tick_ms=10):
-        """Create the shared periodic timer. Returns the underlying timer."""
-        if self._timer is not None:
-            return self._timer
-        from multimer import AsyncTimer, Timer, ticks_add, ticks_diff, ticks_ms
+    def _ensure_ticks(self):
+        """Bind the ``multimer`` ticks helpers (needed even before the timer)."""
+        if self._ticks_ms is not None:
+            return
+        from multimer import ticks_add, ticks_diff, ticks_ms
 
         self._ticks_ms = ticks_ms
         self._ticks_add = ticks_add
         self._ticks_diff = ticks_diff
+
+    def start_timer(self, *, async_=False, tick_ms=10):
+        """Create the shared periodic timer. Returns the underlying timer."""
+        if self._timer is not None:
+            return self._timer
+        from multimer import AsyncTimer, Timer
+
+        self._ensure_ticks()
+        self._pending_timer_async = False
         timer_class = AsyncTimer if async_ else Timer
         timer = timer_class(-1)
         timer.init(
@@ -376,11 +525,22 @@ class Runtime:
             entry[0](timer_obj)
 
     def on_tick(self, callback, *, period, async_=False):
-        """Subscribe ``callback`` to the shared timer (about every ``period`` ms)."""
+        """Subscribe ``callback`` to the shared timer (about every ``period`` ms).
+
+        Safe to call before the event loop is running in ``timer_async`` apps
+        (the canonical idiom builds UI at import time): an ``AsyncTimer`` needs a
+        running loop, so timer creation is deferred to :meth:`arm_async_refresh`
+        while the callback is recorded now — it dispatches as soon as the timer
+        starts.
+        """
         if not callable(callback):
             raise ValueError("callback is not callable.")
+        self._ensure_ticks()
         if self._timer is None:
-            self.start_timer(async_=async_)
+            if async_ and not self._event_loop_running():
+                self._pending_timer_async = True
+            else:
+                self.start_timer(async_=async_)
         entry = [callback, int(period), self._ticks_add(self._ticks_ms(), int(period)), False]
         self._tick_callbacks.append(entry)
         return _RuntimeTimerSubscription(self, entry)
@@ -395,6 +555,8 @@ class Runtime:
         self._refresh_claim = None
         self._pending_async_refresh = None
         self._pending_sync_refresh = None
+        self._service_subscription = None
+        self._pending_service = None
         if timer is not None:
             timer.deinit()
 
@@ -422,9 +584,18 @@ class Runtime:
         display = self._display
         if display is None:
             return
+        # Auto-service the shared timer (poll/pump/drain + device dispatch) even
+        # when the display needs no periodic refresh, so input and QUIT work in
+        # the canonical no-loop idiom. Always armed — including under test mode,
+        # since the harness now relies on it too; apps that poll() themselves
+        # make it back off (``_app_drives_poll``) and GUI layers via
+        # ``_refresh_claim``.
+        self._arm_service()
         try:
             import pydisplay_test_mode
 
+            # Test mode still skips the periodic refresh show-timer so examples
+            # that call show() themselves avoid a competing refresh.
             if pydisplay_test_mode.ENABLED:
                 return
         except ImportError:
@@ -458,6 +629,23 @@ class Runtime:
             async_=self._timer_async,
         )
 
+    def _arm_service(self):
+        """Subscribe the auto-service tick to the shared timer.
+
+        Sync: arm now (starts the shared timer, so the canonical idiom self-
+        drives even when the display refresh is deferred). Async: defer until a
+        loop is running (``AsyncTimer`` requires it), armed by
+        :meth:`arm_async_refresh` / :meth:`run`.
+        """
+        if self._service_subscription is not None or self._pending_service:
+            return
+        if self._timer_async and not self._event_loop_running():
+            self._pending_service = True
+            return
+        self._service_subscription = self.on_tick(
+            self._service_tick, period=SERVICE_TICK_MS, async_=self._timer_async
+        )
+
     def _install_default_quit(self):
         display = self._display
         if display is None or not callable(getattr(display, "quit", None)):
@@ -469,6 +657,24 @@ class Runtime:
         if self._quit_requested:
             return
         self._quit_requested = True
+        # When QUIT is detected from inside the auto-service tick, defer the hard
+        # teardown: stopping/deiniting the shared timer from within its own
+        # callback is unsafe (the async timer would cancel its running task,
+        # wedging the loop). The teardown then runs from the keep-alive exit or
+        # the at-exit hook, outside any tick. A direct app poll() (legacy loops)
+        # is already outside a tick, so it tears down inline as before.
+        if self._in_service_poll:
+            self._pending_teardown = True
+            return
+        self._perform_teardown()
+
+    def _perform_teardown(self):
+        """Stop the shared timer and release the display (idempotent)."""
+        if self._teardown_done:
+            return
+        self._teardown_done = True
+        self._quit_requested = True
+        self._pending_teardown = False
         try:
             import pydisplay_test_mode
 
@@ -479,7 +685,36 @@ class Runtime:
             pass
         if self._before_quit is not None:
             self._before_quit()
+        # Stop the shared timer *before* releasing the display so no in-flight
+        # tick callback (refresh / device poll / GUI task handler) touches freed
+        # display resources during teardown.
+        self.stop_timer()
         display = self._display
         if display is not None and callable(getattr(display, "quit", None)):
             display.quit()
-        self.stop_timer()
+
+    def _register_atexit(self):
+        """Run a clean shutdown when the interpreter exits.
+
+        The canonical idiom keeps the app alive via a persistent interpreter
+        (an interactive ``-i`` session, the REPL, or a microcontroller) rather
+        than an explicit run loop; the shared timer keeps firing in the
+        background. When that interpreter finally exits, stop the timers and
+        quit the display so nothing is left running. Registered here (not in a
+        GUI add-on) so plain graphical apps get the same clean teardown.
+
+        CPython exposes ``atexit``; MicroPython / CircuitPython expose
+        ``sys.atexit`` (single callback). Both run at normal interpreter exit;
+        a hard ``os._exit`` (e.g. the test harness) intentionally bypasses it.
+        """
+        try:
+            import atexit
+
+            atexit.register(self._perform_teardown)
+            return
+        except ImportError:
+            pass
+        import sys
+
+        if hasattr(sys, "atexit"):
+            sys.atexit(self._perform_teardown)

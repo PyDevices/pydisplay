@@ -27,8 +27,6 @@ https://github.com/erikflowers/weather-icons and is licensed under SIL OFL 1.1
 """
 
 from board_config import runtime
-from multimer import Timer
-from multimer.loop import run_forever
 
 import tft_config
 import tft_bitmap
@@ -59,24 +57,19 @@ def main():
     }
     st["last_col"], st["old_row"] = st["col"], st["row"]
 
-    def poll():
+    def _tick(_=None):
+        # Do not call runtime.poll() from on_tick: sync backends (librt/win32)
+        # re-enter the timer path and hang. Auto-service handles QUIT.
+        if runtime.quit_requested if runtime else False:
+            return
         tft.draw.fill_rect(st["last_col"], st["old_row"], alien.WIDTH, alien.HEIGHT, 0)
         tft_bitmap.bitmap(tft, alien, st["col"], st["row"])
         tft.show()
-        elist = runtime.poll() if runtime else []
-        if runtime.quit_requested if runtime else False:
-            return True
-        if any(e.type == runtime.events.QUIT for e in elist):
-            return True
         st["last_col"], st["old_row"] = st["col"], st["row"]
         st["col"], st["row"] = st["col"] + st["xd"], st["row"] + st["yd"]
         st["xd"] = -st["xd"] if st["col"] <= 0 or st["col"] >= width - alien.WIDTH else st["xd"]
         st["yd"] = -st["yd"] if st["row"] <= 0 or st["row"] >= height - alien.HEIGHT else st["yd"]
-        return False
 
-    # run_forever blocks on desktop/MCU but yields to the event loop on
-    # PyScript/Jupyter (runtime.timer_async); delay_ms sets the frame pace.
-    run_forever(poll, delay_ms=TICKS)
-
-
+    runtime.on_tick(_tick, period=10, async_=runtime.timer_async)
+    runtime.run_forever()
 main()

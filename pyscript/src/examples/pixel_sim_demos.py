@@ -23,8 +23,7 @@ from random import getrandbits
 import graphics
 from displaysys import color565
 from graphics import RGB565, FrameBuffer, text8
-from multimer import sleep_ms, ticks_add, ticks_diff, ticks_ms
-from multimer.loop import dual_main
+from multimer import ticks_add, ticks_diff, ticks_ms
 from palettes import get_palette
 # Uncomment one and only one of the following two lines
 #from board_config import display_drv, runtime
@@ -389,38 +388,25 @@ def _demo_gen():
     return frame_main()
 
 
-def _drive_sync(gen):
+_gen = _demo_gen()
+_next_at = ticks_ms()
+
+
+def _tick(_=None):
+    global _gen, _next_at
+    if _stop():
+        runtime.request_quit()
+        return
+    now = ticks_ms()
+    if ticks_diff(_next_at, now) > 0:
+        return
     try:
-        while True:
-            if _stop():
-                return
-            ms = next(gen)
-            sleep_ms(ms)
+        ms = next(_gen)
+        _next_at = ticks_add(now, max(1, int(ms)))
     except StopIteration:
-        pass
+        _gen = _demo_gen()
+        _next_at = now
 
 
-async def _drive_async(gen):
-    from multimer import asyncio
-
-    try:
-        while True:
-            if _stop():
-                return
-            ms = next(gen)
-            await asyncio.sleep(ms / 1000)
-    except StopIteration:
-        pass
-
-
-def main_sync():
-    while not _stop():
-        _drive_sync(_demo_gen())
-
-
-async def main_async():
-    while not _stop():
-        await _drive_async(_demo_gen())
-
-
-dual_main(main_sync, main_async, async_mode=runtime.timer_async if runtime else False)
+runtime.on_tick(_tick, period=1, async_=runtime.timer_async)
+runtime.run_forever()

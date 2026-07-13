@@ -7,7 +7,7 @@ proverbs.py
 
     Test for TrueType write_font_converter.
 
-Displays what I hope are chinese proverbs in simplified chinese to test UTF-8 font support.
+    Displays what I hope are chinese proverbs in simplified chinese to test UTF-8 font support.
 The fonts were converted from True Type fonts using the
 :ref:`write_font_converter.py<write_font_converter>` utility.
 
@@ -31,8 +31,6 @@ import sys
 import tft_write
 import tft_config
 from board_config import runtime
-from multimer import Timer
-from multimer.loop import run_forever
 
 palette = tft_config.palette
 sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
@@ -78,7 +76,11 @@ def main():
     half_width = tft.width // 2
     st = {"index": 0, "wheel": 0}
 
-    def poll():
+    def _tick(_=None):
+        # Do not call runtime.poll() from on_tick: sync backends re-enter the
+        # timer path and hang. Auto-service handles QUIT.
+        if runtime.quit_requested if runtime else False:
+            return
         proverb = proverbs[st["index"]]
         proverb_lines = proverb.split("，")
         half_lines_height = len(proverb_lines) * line_height // 2
@@ -100,17 +102,10 @@ def main():
         st["wheel"] = (st["wheel"] + 5) % 256
 
         tft.show()
-        elist = runtime.poll() if runtime else []
-        if runtime.quit_requested if runtime else False:
-            return True
-        if any(e.type == runtime.events.QUIT for e in elist):
-            return True
         st["index"] = (st["index"] + 1) % len(proverbs)
-        return False
 
-    # run_forever blocks on desktop/MCU but yields to the event loop on
-    # PyScript/Jupyter (runtime.timer_async); delay_ms pauses between proverbs.
-    run_forever(poll, delay_ms=5000)
+    runtime.on_tick(_tick, period=5000, async_=runtime.timer_async)
+    runtime.run_forever()
 
 
 main()

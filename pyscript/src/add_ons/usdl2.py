@@ -2,13 +2,34 @@
 #
 # SPDX-License-Identifier: MIT
 """
-Pure-Python ``usdl2`` implementation when the native C module is unavailable.
+Pure-Python ``usdl2`` fallback: an **SDL2 subset for Python**.
 
-Shipped as ``add_ons/usdl2.py`` so MicroPython loads it via ``sys.path`` only when
-the built-in/frozen ``usdl2`` module is not present. Uses **ctypes** on CPython
-(unix and win32); **ffi/uctypes** on MicroPython unix.
+Used when the native C ``usdl2`` module is unavailable. Must stay in lockstep
+with ``cmods/usdl2`` (see ``include/usdl2_module_globals.inc`` and
+``src/usdl2_cpy.c``).
+
+Hard rule — **SDL2 symbols only**:
+  Export only names that exist in SDL2 (``SDL_*`` functions/constants/macros
+  and binding constructors for SDL types: ``SDL_Rect``, ``SDL_Point``,
+  ``SDL_Event``, ``SDL_TimerCallback``, ``SDL_DEFINE_PIXELFORMAT``, …).
+  Do **not** invent helpers such as ``process_exit``, ``pump_scheduler``, a
+  bare ``Event`` type, or other non-SDL module attributes. Past agents added
+  those for timing/shutdown; put such logic in the *consumer* (e.g.
+  ``sdldisplay``, ``multimer``) instead. MP cooperative timer delivery may
+  ride inside real SDL entry points (e.g. ``SDL_PumpEvents``) as a private
+  implementation detail — never as a new public name.
+
+Public surface matches native usdl2: same ``SDL_*`` API, 56-byte ``SDL_Event``
+with the same subviews, ``SDL_Rect``/``SDL_Point`` as packed bytes, timer API
+via ``SDL_TimerCallback`` / ``SDL_AddTimer`` / ``SDL_RemoveTimer``. Opaque
+handles are plain ints (falsy when 0/NULL).
+
+Shipped as ``add_ons/usdl2.py`` so MicroPython loads it via ``sys.path`` only
+when the built-in/frozen ``usdl2`` module is not present. Uses **ctypes** on
+CPython (unix and win32); **ffi** on MicroPython unix.
 """
 
+import struct
 import sys
 
 try:
@@ -273,223 +294,325 @@ SDL_PIXELFORMAT_ARGB2101010 = SDL_DEFINE_PIXELFORMAT(
     SDL_PIXELTYPE_PACKED32, SDL_PACKEDORDER_ARGB, SDL_PACKEDLAYOUT_2101010, 32, 4
 )
 
-_USE_FFI = False
+
+###############################################################################
+#                          SDL_Rect / SDL_Point                               #
+###############################################################################
+
+# Packed as bytes (not a ctypes.Structure / uctypes struct) so the same value
+# is usable, unmodified, on every backend -- matches py_SDL_Rect()/py_SDL_Point()
+# in usdl2_cpy.c, which pack a bytes object directly.
+
+
+def SDL_Rect(x=0, y=0, w=0, h=0):
+    return struct.pack("<iiii", x, y, w, h)
+
+
+def SDL_Point(x=0, y=0):
+    return struct.pack("<ii", x, y)
+
+
+###############################################################################
+#                          SDL_Event / subviews                               #
+###############################################################################
+
+_EVENT_SIZE = const(56)
+
+
+def _is_joystick_event(event_type):
+    return SDL_JOYAXISMOTION <= event_type <= SDL_JOYDEVICEREMOVED
+
+
+def _u32(data, off):
+    return struct.unpack_from("<I", data, off)[0]
+
+
+def _i32(data, off):
+    return struct.unpack_from("<i", data, off)[0]
+
+
+def _i16(data, off):
+    return struct.unpack_from("<h", data, off)[0]
+
+
+def _f32(data, off):
+    return struct.unpack_from("<f", data, off)[0]
+
+
+class _SubView:
+    """
+    A view into an SDL_Event's 8-byte-aligned union payload.
+
+    Mirrors the ``_SubView``/subview getters in usdl2_cpy.c: ``motion``,
+    ``key``, ``button``, ``wheel``, ``jaxis``, ``jball``, ``jhat`` and
+    ``jbutton`` all view the same union at offset 8 (immediately after
+    ``type``+``timestamp``), matching the real ``SDL_Event`` layout.
+    """
+
+    def __init__(self, event, base):
+        self._event = event
+        self._base = base
+
+    @property
+    def windowID(self):
+        return _u32(self._event._data, self._base + 0)
+
+    @property
+    def which(self):
+        data = self._event._data
+        event_type = _u32(data, 0)
+        if _is_joystick_event(event_type):
+            return _i32(data, self._base + 0)
+        return _u32(data, self._base + 4)
+
+    @property
+    def state(self):
+        data = self._event._data
+        event_type = _u32(data, 0)
+        if self._base == 8 and event_type == SDL_MOUSEMOTION:
+            return _u32(data, self._base + 8)
+        if event_type in (SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP):
+            return data[self._base + 5]
+        return data[self._base + 4]
+
+    @property
+    def x(self):
+        return _i32(self._event._data, self._base + 12)
+
+    @property
+    def y(self):
+        return _i32(self._event._data, self._base + 16)
+
+    @property
+    def xrel(self):
+        data = self._event._data
+        if _u32(data, 0) == SDL_JOYBALLMOTION:
+            return _i16(data, self._base + 8)
+        return _i32(data, self._base + 20)
+
+    @property
+    def yrel(self):
+        data = self._event._data
+        if _u32(data, 0) == SDL_JOYBALLMOTION:
+            return _i16(data, self._base + 10)
+        return _i32(data, self._base + 24)
+
+    @property
+    def button(self):
+        data = self._event._data
+        event_type = _u32(data, 0)
+        if event_type in (SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP):
+            return data[self._base + 4]
+        return data[self._base + 8]
+
+    @property
+    def clicks(self):
+        return self._event._data[self._base + 10]
+
+    @property
+    def direction(self):
+        return _u32(self._event._data, self._base + 16)
+
+    @property
+    def preciseX(self):
+        return _f32(self._event._data, self._base + 0)
+
+    @property
+    def preciseY(self):
+        return _f32(self._event._data, self._base + 4)
+
+    @property
+    def repeat(self):
+        return self._event._data[self._base + 5]
+
+    @property
+    def keysym(self):
+        return _SubView(self._event, self._base + 8)
+
+    @property
+    def scancode(self):
+        return _i32(self._event._data, self._base + 0)
+
+    @property
+    def sym(self):
+        return _i32(self._event._data, self._base + 4)
+
+    @property
+    def mod(self):
+        return _u32(self._event._data, self._base + 8) & 0xFFFF
+
+    @property
+    def axis(self):
+        return self._event._data[self._base + 4]
+
+    @property
+    def value(self):
+        data = self._event._data
+        event_type = _u32(data, 0)
+        if event_type == SDL_JOYAXISMOTION:
+            return _i16(data, self._base + 8)
+        if event_type == SDL_JOYHATMOTION:
+            return data[self._base + 5]
+        raise AttributeError("value")
+
+    @property
+    def ball(self):
+        return self._event._data[self._base + 4]
+
+    @property
+    def hat(self):
+        return self._event._data[self._base + 4]
+
+
+class SDL_Event:
+    """
+    56-byte SDL_Event buffer, mirroring ``usdl2.SDL_Event`` in the native module.
+
+    * ``SDL_Event()`` / ``SDL_Event(None)`` -> a new zero-filled event.
+    * ``SDL_Event(<bytes-like>)`` -> a new event, copied from the buffer.
+    * ``SDL_Event(<existing SDL_Event>)`` -> the same instance (identity).
+    """
+
+    def __new__(cls, event=None):
+        if isinstance(event, cls):
+            return event
+        self = super().__new__(cls)
+        if event is None:
+            self._data = bytearray(_EVENT_SIZE)
+        else:
+            buf = memoryview(event)
+            if len(buf) < _EVENT_SIZE:
+                raise ValueError("event buffer too small")
+            self._data = bytearray(buf[:_EVENT_SIZE])
+        return self
+
+    def __len__(self):
+        return _EVENT_SIZE
+
+    @property
+    def type(self):
+        return _u32(self._data, 0)
+
+    @type.setter
+    def type(self, value):
+        struct.pack_into("<I", self._data, 0, value)
+
+    @property
+    def timestamp(self):
+        return _u32(self._data, 4)
+
+    @property
+    def motion(self):
+        return _SubView(self, 8)
+
+    key = motion
+    button = motion
+    wheel = motion
+    jaxis = motion
+    jball = motion
+    jhat = motion
+    jbutton = motion
+
+
+###############################################################################
+#                          Backend loader                                     #
+###############################################################################
+
+_use_ffi = False
 if sys.implementation.name == "micropython" and sys.platform != "win32":
     try:
         import ffi  # noqa: F401
-        import uctypes  # noqa: F401
 
-        _USE_FFI = True
+        _use_ffi = True
     except ImportError:
         pass
 
+# (name, return type, arg types) using modffi's struct-like type codes; see
+# cmods/micropython/ports/unix/modffi.c. Buffer-taking functions (SDL_PollEvent,
+# SDL_UpdateTexture, SDL_GetDisplayUsableBounds, SDL_GetDesktopDisplayMode) are
+# bound under a private name and wrapped below so callers can pass an SDL_Event
+# or any bytes-like object directly, matching usdl2_cpy.c's PyObject_GetBuffer()
+# flexibility.
 _FFI_FUNCS = (
     ("SDL_Init", "i", "I"),
     ("SDL_InitSubSystem", "i", "I"),
     ("SDL_Quit", "v", ""),
-    ("SDL_GetError", "s", ""),
-    ("SDL_PollEvent", "i", "P"),
-    ("SDL_NumJoysticks", "i", ""),
-    ("SDL_JoystickOpen", "P", "i"),
-    ("SDL_JoystickClose", "v", "P"),
-    ("SDL_JoystickInstanceID", "i", "P"),
-    ("SDL_GetKeyName", "s", "i"),
-    ("SDL_GetKeyFromName", "i", "s"),
+    # _raw_* names: wrapped below for NULL/str encoding parity with usdl2_cpy.c
+    ("_raw_SDL_GetError", "s", ""),
     ("SDL_CreateWindow", "P", "siiiii"),
     ("SDL_DestroyWindow", "v", "P"),
     ("SDL_SetWindowSize", "v", "Pii"),
     ("SDL_CreateRenderer", "P", "PiI"),
     ("SDL_DestroyRenderer", "v", "P"),
-    ("SDL_SetRenderDrawColor", "i", "PPPP"),
-    ("SDL_SetRenderTarget", "i", "pP"),
+    ("SDL_SetRenderDrawColor", "i", "PIIII"),
+    ("SDL_SetRenderTarget", "i", "PP"),
     ("SDL_RenderClear", "v", "P"),
     ("SDL_RenderCopy", "v", "PPPP"),
-    ("SDL_RenderCopyEx", "v", "PPPPdPPi"),
+    ("SDL_RenderCopyEx", "v", "PPPPdPi"),
     ("SDL_RenderPresent", "v", "P"),
     ("SDL_RenderFillRect", "i", "PP"),
     ("SDL_RenderSetLogicalSize", "i", "Pii"),
-    ("SDL_CreateTexture", "P", "PIiiii"),
+    ("SDL_CreateTexture", "P", "PIiii"),
     ("SDL_DestroyTexture", "v", "P"),
-    ("SDL_SetTextureBlendMode", "i", "PI"),
-    ("SDL_UpdateTexture", "i", "PPPi"),
-    ("SDL_AddTimer", "P", "IPP"),
-    ("SDL_RemoveTimer", "i", "P"),
-    ("SDL_GetDisplayUsableBounds", "i", "iP"),
-    ("SDL_GetDesktopDisplayMode", "i", "iP"),
+    ("SDL_SetTextureBlendMode", "i", "Pi"),
+    ("SDL_NumJoysticks", "i", ""),
+    ("SDL_JoystickOpen", "P", "i"),
+    ("SDL_JoystickClose", "v", "P"),
+    ("SDL_JoystickInstanceID", "i", "P"),
+    ("_raw_SDL_GetKeyName", "s", "i"),
+    ("_lib_SDL_PumpEvents", "v", ""),
+    ("_lib_SDL_PollEvent", "i", "P"),
+    ("_lib_SDL_UpdateTexture", "i", "PPPi"),
+    ("_lib_SDL_GetDisplayUsableBounds", "i", "iP"),
+    ("_lib_SDL_GetDesktopDisplayMode", "i", "iP"),
+    # No real SDL_AddTimer/SDL_RemoveTimer binding here -- see the "Timer API"
+    # section: SDL's timer thread is never registered with the MicroPython
+    # runtime (mp_thread_init()), and calling back into the interpreter from
+    # it segfaults unconditionally (verified experimentally), so MicroPython
+    # timers are cooperative/software instead of real SDL ones.
 )
+
+
+def _libsym(name):
+    """C symbol name for a (possibly privately-named) binding, e.g.
+    "_lib_SDL_PollEvent" / "_raw_SDL_GetError" -> "SDL_PollEvent" / "SDL_GetError"."""
+    if name.startswith("_lib_") or name.startswith("_raw_"):
+        return name[5:]
+    return name
 
 
 def _bind_ffi(lib, specs):
     for name, ret, args in specs:
-        globals()[name] = lib.func(ret, name, args)
+        globals()[name] = lib.func(ret, _libsym(name), args)
 
 
 def _bind_ctypes(lib, specs):
     for name, restype, argtypes in specs:
-        fn = getattr(lib, name)
+        fn = getattr(lib, _libsym(name))
         fn.restype = restype
         fn.argtypes = list(argtypes)
         globals()[name] = fn
 
 
-if _USE_FFI:
-    import struct
-
-    import ffi
-    import uctypes
-
+if _use_ffi:
     _libSDL2 = ffi.open("libSDL2-2.0.so.0")
-
-    ###############################################################################
-    #                          SDL2 structs                                       #
-    ###############################################################################
-
-    def SDL_Rect(x=0, y=0, w=0, h=0):
-        return struct.pack("iiii", x, y, w, h)
-
-    def SDL_Point(x=0, y=0):
-        return struct.pack("ii", x, y)
-
-    SDL_CommonEvent = {
-        "type": uctypes.UINT32 | 0,
-        "timestamp": uctypes.UINT32 | 4,
-    }
-
-    SDL_KeyboardEvent = {
-        "type": uctypes.UINT32 | 0,
-        "timestamp": uctypes.UINT32 | 4,
-        "key": (
-            8,
-            {
-                "windowID": uctypes.UINT32 | 0,
-                "state": uctypes.UINT8 | 4,
-                "repeat": uctypes.UINT8 | 5,
-                "padding2": uctypes.UINT8 | 6,
-                "padding3": uctypes.UINT8 | 7,
-                "keysym": (
-                    8,
-                    {
-                        "scancode": 0 | uctypes.UINT32,
-                        "sym": 4 | uctypes.UINT32,
-                        "mod": 8 | uctypes.UINT16,
-                        "unused": 10 | uctypes.UINT32,
-                    },
-                ),
-            },
-        ),
-    }
-
-    SDL_MouseMotionEvent = {
-        "type": uctypes.UINT32 | 0,
-        "timestamp": uctypes.UINT32 | 4,
-        "motion": (
-            8,
-            {
-                "windowID": uctypes.UINT32 | 0,
-                "which": uctypes.UINT32 | 4,
-                "state": uctypes.UINT32 | 8,
-                "x": uctypes.INT32 | 12,
-                "y": uctypes.INT32 | 16,
-                "xrel": uctypes.INT32 | 20,
-                "yrel": uctypes.INT32 | 8,
-            },
-        ),
-    }
-
-    SDL_MouseButtonEvent = {
-        "type": uctypes.UINT32 | 0,
-        "timestamp": uctypes.UINT32 | 4,
-        "button": (
-            8,
-            {
-                "windowID": uctypes.UINT32 | 0,
-                "which": uctypes.UINT32 | 4,
-                "button": uctypes.UINT8 | 8,
-                "state": uctypes.UINT8 | 9,
-                "clicks": uctypes.UINT8 | 10,
-                "padding1": uctypes.UINT8 | 11,
-                "x": uctypes.INT32 | 12,
-                "y": uctypes.INT32 | 16,
-            },
-        ),
-    }
-
-    SDL_MouseWheelEvent = {
-        "type": uctypes.UINT32 | 0,
-        "timestamp": uctypes.UINT32 | 4,
-        "wheel": (
-            8,
-            {
-                "windowID": uctypes.UINT32 | 0,
-                "which": uctypes.UINT32 | 4,
-                "x": uctypes.INT32 | 8,
-                "y": uctypes.INT32 | 12,
-                "direction": uctypes.UINT32 | 16,
-                "preciseX": uctypes.FLOAT32 | 20,
-                "preciseY": uctypes.FLOAT32 | 24,
-            },
-        ),
-    }
-
-    SDL_JoyAxisEvent = {
-        "type": uctypes.UINT32 | 0,
-        "timestamp": uctypes.UINT32 | 4,
-        "jaxis": (
-            8,
-            {
-                "which": uctypes.INT32 | 0,
-                "axis": uctypes.UINT8 | 4,
-                "value": uctypes.INT16 | 8,
-            },
-        ),
-    }
-
-    SDL_JoyBallEvent = {
-        "type": uctypes.UINT32 | 0,
-        "timestamp": uctypes.UINT32 | 4,
-        "jball": (
-            8,
-            {
-                "which": uctypes.INT32 | 0,
-                "ball": uctypes.UINT8 | 4,
-                "xrel": uctypes.INT16 | 8,
-                "yrel": uctypes.INT16 | 10,
-            },
-        ),
-    }
-
-    SDL_JoyHatEvent = {
-        "type": uctypes.UINT32 | 0,
-        "timestamp": uctypes.UINT32 | 4,
-        "jhat": (
-            8,
-            {
-                "which": uctypes.INT32 | 0,
-                "hat": uctypes.UINT8 | 4,
-                "value": uctypes.UINT8 | 5,
-            },
-        ),
-    }
-
-    SDL_JoyButtonEvent = {
-        "type": uctypes.UINT32 | 0,
-        "timestamp": uctypes.UINT32 | 4,
-        "jbutton": (
-            8,
-            {
-                "which": uctypes.INT32 | 0,
-                "button": uctypes.UINT8 | 4,
-                "state": uctypes.UINT8 | 5,
-            },
-        ),
-    }
-
-    ###############################################################################
-
     _bind_ffi(_libSDL2, _FFI_FUNCS)
+    _raw_SDL_GetError = globals()["_raw_SDL_GetError"]
+    _raw_SDL_GetKeyName = globals()["_raw_SDL_GetKeyName"]
 
-    def SDL_TimerCallback(tcb):
-        return ffi.callback("I", tcb, "IP")
+    def _wrap_buf(buf):
+        return buf
+
+    # modffi's "s" return type yields None for a NULL C string; SDL never
+    # actually returns NULL for either of these, but fall back to "" to
+    # match usdl2_cpy.c's PyUnicode_FromString(err ? err : "") exactly.
+    def SDL_GetError():
+        err = _raw_SDL_GetError()
+        return err if err is not None else ""
+
+    def SDL_GetKeyName(sym):
+        name = _raw_SDL_GetKeyName(sym)
+        return name if name is not None else ""
 
 else:
     import ctypes
@@ -499,191 +622,23 @@ else:
     else:
         _libSDL2 = ctypes.CDLL("libSDL2-2.0.so.0")
 
-    ###############################################################################
-    #                          SDL2 structs                                       #
-    ###############################################################################
-
-    class SDL_Rect(ctypes.Structure):
-        _fields_ = [
-            ("x", ctypes.c_int),
-            ("y", ctypes.c_int),
-            ("w", ctypes.c_int),
-            ("h", ctypes.c_int),
-        ]
-
-    class SDL_Point(ctypes.Structure):
-        _fields_ = [("x", ctypes.c_int), ("y", ctypes.c_int)]
-
-    class SDL_DisplayMode(ctypes.Structure):
-        _fields_ = [
-            ("format", ctypes.c_uint32),
-            ("w", ctypes.c_int),
-            ("h", ctypes.c_int),
-            ("refresh_rate", ctypes.c_int),
-            ("driverdata", ctypes.c_void_p),
-        ]
-
-    class SDL_CommonEvent(ctypes.Structure):
-        _fields_ = [
-            ("type", ctypes.c_uint),
-            ("timestamp", ctypes.c_uint),
-            ("unused", ctypes.c_uint * 12),
-        ]
-
-    class SDL_KeyboardEvent(ctypes.Structure):
-        class Key(ctypes.Structure):
-            class SDL_Keysym(ctypes.Structure):
-                _fields_ = [
-                    ("scancode", ctypes.c_int),
-                    ("sym", ctypes.c_int),
-                    ("mod", ctypes.c_uint16),
-                    ("unused", ctypes.c_uint),
-                ]
-
-            _fields_ = [
-                ("windowID", ctypes.c_uint),
-                ("state", ctypes.c_uint8),
-                ("repeat", ctypes.c_uint8),
-                ("padding2", ctypes.c_uint8),
-                ("padding3", ctypes.c_uint8),
-                ("keysym", SDL_Keysym),
-            ]
-
-        _fields_ = [("type", ctypes.c_uint), ("timestamp", ctypes.c_uint), ("key", Key)]
-
-    class SDL_MouseMotionEvent(ctypes.Structure):
-        class Motion(ctypes.Structure):
-            _fields_ = [
-                ("windowID", ctypes.c_uint),
-                ("which", ctypes.c_uint),
-                ("state", ctypes.c_uint),
-                ("x", ctypes.c_int),
-                ("y", ctypes.c_int),
-                ("xrel", ctypes.c_int),
-                ("yrel", ctypes.c_int),
-            ]
-
-        _fields_ = [
-            ("type", ctypes.c_uint),
-            ("timestamp", ctypes.c_uint),
-            ("motion", Motion),
-        ]
-
-    class SDL_MouseButtonEvent(ctypes.Structure):
-        class Button(ctypes.Structure):
-            _fields_ = [
-                ("windowID", ctypes.c_uint),
-                ("which", ctypes.c_uint),
-                ("button", ctypes.c_uint8),
-                ("state", ctypes.c_uint8),
-                ("clicks", ctypes.c_uint8),
-                ("padding", ctypes.c_uint8),
-                ("x", ctypes.c_int),
-                ("y", ctypes.c_int),
-            ]
-
-        _fields_ = [
-            ("type", ctypes.c_uint),
-            ("timestamp", ctypes.c_uint),
-            ("button", Button),
-        ]
-
-    class SDL_MouseWheelEvent(ctypes.Structure):
-        class Wheel(ctypes.Structure):
-            _fields_ = [
-                ("windowID", ctypes.c_uint),
-                ("which", ctypes.c_uint),
-                ("x", ctypes.c_int),
-                ("y", ctypes.c_int),
-                ("direction", ctypes.c_uint),
-                ("preciseX", ctypes.c_float),
-                ("preciseY", ctypes.c_float),
-            ]
-
-        _fields_ = [("type", ctypes.c_uint), ("timestamp", ctypes.c_uint), ("wheel", Wheel)]
-
-    class SDL_JoyAxisEvent(ctypes.Structure):
-        class JAxis(ctypes.Structure):
-            _fields_ = [
-                ("which", ctypes.c_int),
-                ("axis", ctypes.c_uint8),
-                ("padding1", ctypes.c_uint8),
-                ("padding2", ctypes.c_uint8),
-                ("padding3", ctypes.c_uint8),
-                ("value", ctypes.c_int16),
-                ("padding4", ctypes.c_uint16),
-            ]
-
-        _fields_ = [("type", ctypes.c_uint), ("timestamp", ctypes.c_uint), ("jaxis", JAxis)]
-
-    class SDL_JoyBallEvent(ctypes.Structure):
-        class JBall(ctypes.Structure):
-            _fields_ = [
-                ("which", ctypes.c_int),
-                ("ball", ctypes.c_uint8),
-                ("padding1", ctypes.c_uint8),
-                ("padding2", ctypes.c_uint8),
-                ("padding3", ctypes.c_uint8),
-                ("xrel", ctypes.c_int16),
-                ("yrel", ctypes.c_int16),
-            ]
-
-        _fields_ = [("type", ctypes.c_uint), ("timestamp", ctypes.c_uint), ("jball", JBall)]
-
-    class SDL_JoyHatEvent(ctypes.Structure):
-        class JHat(ctypes.Structure):
-            _fields_ = [
-                ("which", ctypes.c_int),
-                ("hat", ctypes.c_uint8),
-                ("value", ctypes.c_uint8),
-                ("padding1", ctypes.c_uint8),
-                ("padding2", ctypes.c_uint8),
-            ]
-
-        _fields_ = [("type", ctypes.c_uint), ("timestamp", ctypes.c_uint), ("jhat", JHat)]
-
-    class SDL_JoyButtonEvent(ctypes.Structure):
-        class JButton(ctypes.Structure):
-            _fields_ = [
-                ("which", ctypes.c_int),
-                ("button", ctypes.c_uint8),
-                ("state", ctypes.c_uint8),
-                ("padding1", ctypes.c_uint8),
-                ("padding2", ctypes.c_uint8),
-            ]
-
-        _fields_ = [("type", ctypes.c_uint), ("timestamp", ctypes.c_uint), ("jbutton", JButton)]
-
-    ###############################################################################
-
     _c = ctypes
     _v = _c.c_void_p
     _i = _c.c_int
     _u = _c.c_uint
-    _u8 = _c.c_uint8
-    _u16 = _c.c_uint16
-    _u32 = _c.c_uint32
     _d = _c.c_double
-    _f = _c.c_float
-    _p = _c.c_char_p
-    _r = _c.POINTER(SDL_Rect)
-    _dm = _c.POINTER(SDL_DisplayMode)
-    _pt = _c.POINTER(SDL_Point)
-    _ce = _c.POINTER(SDL_CommonEvent)
 
+    # Rect/Point/Event/DisplayMode arguments are all c_void_p: SDL_Rect()/
+    # SDL_Point() return plain bytes (accepted directly by ctypes for a
+    # c_void_p argument), and _wrap_buf() below adapts writable bytearrays
+    # (SDL_Event, out-params) the same way usdl2_cpy.c's PyObject_GetBuffer()
+    # accepts any bytes-like object.
     _CTYPES_FUNCS = (
         ("SDL_Init", _i, (_u,)),
         ("SDL_InitSubSystem", _i, (_u,)),
         ("SDL_Quit", None, ()),
-        ("SDL_GetError", _p, ()),
-        ("SDL_PollEvent", _i, (_ce,)),
-        ("SDL_NumJoysticks", _i, ()),
-        ("SDL_JoystickOpen", _v, (_i,)),
-        ("SDL_JoystickClose", None, (_v,)),
-        ("SDL_JoystickInstanceID", _i, (_v,)),
-        ("SDL_GetKeyName", _p, (_i,)),
-        ("SDL_GetKeyFromName", _i, (_p,)),
-        ("SDL_CreateWindow", _v, (_p, _i, _i, _i, _i, _u)),
+        ("_raw_SDL_GetError", _c.c_char_p, ()),
+        ("_raw_SDL_CreateWindow", _v, (_c.c_char_p, _i, _i, _i, _i, _u)),
         ("SDL_DestroyWindow", None, (_v,)),
         ("SDL_SetWindowSize", None, (_v, _i, _i)),
         ("SDL_CreateRenderer", _v, (_v, _i, _u)),
@@ -691,54 +646,234 @@ else:
         ("SDL_SetRenderDrawColor", _i, (_v, _u, _u, _u, _u)),
         ("SDL_SetRenderTarget", _i, (_v, _v)),
         ("SDL_RenderClear", _i, (_v,)),
-        ("SDL_RenderCopy", _i, (_v, _v, _r, _r)),
-        ("SDL_RenderCopyEx", _i, (_v, _v, _r, _r, _d, _pt, _i)),
+        ("SDL_RenderCopy", _i, (_v, _v, _v, _v)),
+        ("SDL_RenderCopyEx", _i, (_v, _v, _v, _v, _d, _v, _i)),
         ("SDL_RenderPresent", None, (_v,)),
-        ("SDL_RenderFillRect", _i, (_v, _r)),
+        ("SDL_RenderFillRect", _i, (_v, _v)),
         ("SDL_RenderSetLogicalSize", _i, (_v, _i, _i)),
         ("SDL_CreateTexture", _v, (_v, _u, _i, _i, _i)),
         ("SDL_DestroyTexture", None, (_v,)),
         ("SDL_SetTextureBlendMode", _i, (_v, _i)),
-        ("SDL_UpdateTexture", _i, (_v, _r, _v, _i)),
-        ("SDL_AddTimer", _v, (_u32, _v, _v)),
-        ("SDL_RemoveTimer", _i, (_v,)),
-        ("SDL_GetDisplayUsableBounds", _i, (_i, _r)),
-        ("SDL_GetDesktopDisplayMode", _i, (_i, _dm)),
+        ("SDL_NumJoysticks", _i, ()),
+        ("SDL_JoystickOpen", _v, (_i,)),
+        ("SDL_JoystickClose", None, (_v,)),
+        ("SDL_JoystickInstanceID", _i, (_v,)),
+        ("_raw_SDL_GetKeyName", _c.c_char_p, (_i,)),
+        ("_lib_SDL_PumpEvents", None, ()),
+        ("_lib_SDL_PollEvent", _i, (_v,)),
+        ("_lib_SDL_UpdateTexture", _i, (_v, _v, _v, _i)),
+        ("_lib_SDL_GetDisplayUsableBounds", _i, (_i, _v)),
+        ("_lib_SDL_GetDesktopDisplayMode", _i, (_i, _v)),
+        # SDL_AddTimer/SDL_RemoveTimer are bound separately below (need the
+        # timer trampoline's CFUNCTYPE to exist first).
     )
     _bind_ctypes(_libSDL2, _CTYPES_FUNCS)
+    _raw_SDL_GetError = globals()["_raw_SDL_GetError"]
+    _raw_SDL_GetKeyName = globals()["_raw_SDL_GetKeyName"]
+    _raw_SDL_CreateWindow = globals()["_raw_SDL_CreateWindow"]
 
-    SDL_TimerCallback = ctypes.CFUNCTYPE(_u32, _u32, _v)
+    def _wrap_buf(buf):
+        """Adapt a bytes-like object for a ctypes c_void_p argument.
 
-_EVENT_SIZE = 56
+        Immutable ``bytes`` (e.g. from SDL_Rect()) already convert directly;
+        anything else supporting the buffer protocol (bytearray, memoryview,
+        array.array, ...) is wrapped with from_buffer() so the callee can
+        read/write through the same memory in place, matching usdl2_cpy.c's
+        PyObject_GetBuffer() flexibility.
+        """
+        if buf is None or isinstance(buf, (bytes, int, ctypes.Array)):
+            return buf
+        return (ctypes.c_char * len(buf)).from_buffer(buf)
 
-_event_struct_map = {
-    SDL_KEYDOWN: SDL_KeyboardEvent,
-    SDL_KEYUP: SDL_KeyboardEvent,
-    SDL_MOUSEMOTION: SDL_MouseMotionEvent,
-    SDL_MOUSEBUTTONDOWN: SDL_MouseButtonEvent,
-    SDL_MOUSEBUTTONUP: SDL_MouseButtonEvent,
-    SDL_MOUSEWHEEL: SDL_MouseWheelEvent,
-    SDL_JOYAXISMOTION: SDL_JoyAxisEvent,
-    SDL_JOYBALLMOTION: SDL_JoyBallEvent,
-    SDL_JOYHATMOTION: SDL_JoyHatEvent,
-    SDL_JOYBUTTONDOWN: SDL_JoyButtonEvent,
-    SDL_JOYBUTTONUP: SDL_JoyButtonEvent,
-    SDL_POLLSENTINEL: SDL_CommonEvent,
-}
+    # SDL_GetError()/SDL_GetKeyName() use c_char_p (not modelled as "P" in the
+    # ffi table above) so ctypes decodes the returned C string for us; wrap
+    # them to fall back to "" for NULL, matching usdl2_cpy.c.
+    def SDL_GetError():
+        err = _raw_SDL_GetError()
+        return err.decode("utf-8") if err else ""
+
+    def SDL_GetKeyName(sym):
+        name = _raw_SDL_GetKeyName(sym)
+        return name.decode("utf-8") if name else ""
+
+    def SDL_CreateWindow(title, x, y, w, h, flags):
+        if isinstance(title, str):
+            title = title.encode("utf-8")
+        return _raw_SDL_CreateWindow(title, x, y, w, h, flags)
 
 
-def SDL_Event(event=None):
-    """Return an SDL_Event buffer or decode *event* to a typed struct."""
-    if event is None:
-        if _USE_FFI:
-            return bytearray(_EVENT_SIZE)
-        return SDL_CommonEvent.from_buffer(ctypes.create_string_buffer(_EVENT_SIZE))
+# _bind_ffi / _bind_ctypes assign these via globals()[name]; materialize so
+# static analysis and the buffer wrappers below see real module bindings.
+_lib_SDL_PumpEvents = globals()["_lib_SDL_PumpEvents"]
+_lib_SDL_PollEvent = globals()["_lib_SDL_PollEvent"]
+_lib_SDL_UpdateTexture = globals()["_lib_SDL_UpdateTexture"]
+_lib_SDL_GetDisplayUsableBounds = globals()["_lib_SDL_GetDisplayUsableBounds"]
+_lib_SDL_GetDesktopDisplayMode = globals()["_lib_SDL_GetDesktopDisplayMode"]
 
-    if _USE_FFI:
-        event_type = int.from_bytes(event[:4], "little")
-        desc = _event_struct_map.get(event_type, SDL_CommonEvent)
-        return uctypes.struct(uctypes.addressof(event), desc)
 
-    event_type = event.type
-    struct_cls = _event_struct_map.get(event_type, SDL_CommonEvent)
-    return struct_cls.from_buffer(event)
+###############################################################################
+#                          Timer API                                          #
+###############################################################################
+
+
+class _TimerCallback:
+    """Opaque token returned by SDL_TimerCallback(); only usable via SDL_AddTimer()."""
+
+    __slots__ = ("callback",)
+
+    def __init__(self, callback):
+        if not callable(callback):
+            raise TypeError("callback must be callable")
+        self.callback = callback
+
+
+def SDL_TimerCallback(callback):
+    return _TimerCallback(callback)
+
+
+if _use_ffi:
+    # Real SDL timers fire on an SDL-owned pthread that MicroPython's runtime
+    # never registered (mp_thread_init() was never called for it); invoking
+    # any Python callback from that thread segfaults unconditionally --
+    # verified experimentally, even a trivial ffi.callback(..., lock=True)
+    # trampoline crashes the moment SDL's timer thread calls it. So on
+    # MicroPython, timers are cooperative/software instead of real SDL ones:
+    # SDL_AddTimer() just records a deadline, and SDL_PumpEvents()/
+    # SDL_PollEvent() -- already polled regularly by pydisplay's event loop,
+    # on a safe/registered thread -- fire any due callbacks in-line.
+    import time
+
+    _sw_timers = {}
+    _sw_timer_next_id = [1]
+
+    def _sw_timers_poll():
+        if not _sw_timers:
+            return
+        now = time.ticks_ms()
+        for timer_id, entry in list(_sw_timers.items()):
+            deadline, interval, callback, user_param = entry
+            if time.ticks_diff(now, deadline) < 0:
+                continue
+            if timer_id not in _sw_timers:
+                continue
+            _sw_timers[timer_id] = (
+                time.ticks_add(deadline, interval),
+                interval,
+                callback,
+                user_param,
+            )
+            try:
+                callback(interval, user_param)
+            except Exception:
+                pass
+
+    def SDL_AddTimer(interval, tcb, user_param):
+        if not isinstance(tcb, _TimerCallback):
+            raise TypeError("callback must be from SDL_TimerCallback()")
+        timer_id = _sw_timer_next_id[0]
+        _sw_timer_next_id[0] += 1
+        _sw_timers[timer_id] = (
+            time.ticks_add(time.ticks_ms(), interval),
+            interval,
+            tcb.callback,
+            user_param,
+        )
+        return timer_id
+
+    def SDL_RemoveTimer(timer):
+        return 1 if _sw_timers.pop(timer, None) is not None else 0
+
+else:
+    _TIMER_MAX = const(8)
+    _timer_slots = [None] * _TIMER_MAX  # (callback, user_param, ret_interval) or None
+    _timer_id_to_slot = {}
+
+    def _sw_timers_poll():
+        pass  # ctypes timers run for real via SDL's own thread; nothing to poll.
+
+    def _timer_trampoline(interval, slot):
+        """
+        Runs on an SDL-owned thread, but ctypes callbacks always re-acquire the
+        GIL for us (PyGILState_Ensure()/Release() around every callback
+        invocation), so this is safe unlike the MicroPython ffi case above.
+        Looks the entry up through the slot table (not a raw pointer) so a
+        concurrent SDL_RemoveTimer() cannot use freed state; mirrors
+        timer_trampoline() in usdl2_cpy.c. The next interval is always the one
+        the timer was created with (not the callback's return value).
+        """
+        entry = _timer_slots[slot] if 0 <= slot < _TIMER_MAX else None
+        if entry is None:
+            return 0
+        callback, user_param, ret_interval = entry
+        try:
+            callback(interval, user_param)
+        except Exception:
+            pass
+        return ret_interval
+
+    _sdl_timer_functype = ctypes.CFUNCTYPE(ctypes.c_uint32, ctypes.c_uint32, ctypes.c_size_t)
+    _sdl_timer_cfunc = _sdl_timer_functype(_timer_trampoline)
+    _lib_SDL_AddTimer = _libSDL2.SDL_AddTimer
+    _lib_SDL_AddTimer.restype = ctypes.c_int
+    _lib_SDL_AddTimer.argtypes = (ctypes.c_uint32, _sdl_timer_functype, ctypes.c_size_t)
+    _lib_SDL_RemoveTimer = _libSDL2.SDL_RemoveTimer
+    _lib_SDL_RemoveTimer.restype = ctypes.c_int
+    _lib_SDL_RemoveTimer.argtypes = (ctypes.c_int,)
+
+    def SDL_AddTimer(interval, tcb, user_param):
+        if not isinstance(tcb, _TimerCallback):
+            raise TypeError("callback must be from SDL_TimerCallback()")
+        slot = -1
+        for i in range(_TIMER_MAX):
+            if _timer_slots[i] is None:
+                slot = i
+                break
+        if slot < 0:
+            raise RuntimeError("too many SDL timers")
+        _timer_slots[slot] = (tcb.callback, user_param, interval)
+        timer_id = _lib_SDL_AddTimer(interval, _sdl_timer_cfunc, slot)
+        if not timer_id:
+            _timer_slots[slot] = None
+            return 0
+        _timer_id_to_slot[timer_id] = slot
+        return timer_id
+
+    def SDL_RemoveTimer(timer):
+        slot = _timer_id_to_slot.pop(timer, None)
+        if slot is not None:
+            _timer_slots[slot] = None
+        return 1 if _lib_SDL_RemoveTimer(timer) else 0
+
+
+###############################################################################
+#                          Buffer-taking wrappers                             #
+###############################################################################
+
+# Defined once, backend-independent: _wrap_buf() and the private _lib_SDL_*
+# names above are already backend-specific; the logic here mirrors
+# usdl2_cpy.c's Python-facing signatures exactly. SDL_PumpEvents()/
+# SDL_PollEvent() also drive the MicroPython software-timer poll above (a
+# no-op on the ctypes backend, where real SDL timers do the work).
+
+
+def SDL_PumpEvents():
+    _lib_SDL_PumpEvents()
+    _sw_timers_poll()
+
+
+def SDL_PollEvent(event):
+    _sw_timers_poll()
+    data = event._data if isinstance(event, SDL_Event) else event
+    return bool(_lib_SDL_PollEvent(_wrap_buf(data)))
+
+
+def SDL_UpdateTexture(texture, rect, pixels, pitch):
+    return _lib_SDL_UpdateTexture(texture, _wrap_buf(rect), _wrap_buf(pixels), pitch)
+
+
+def SDL_GetDisplayUsableBounds(display_index, rect=None):
+    return _lib_SDL_GetDisplayUsableBounds(display_index, _wrap_buf(rect))
+
+
+def SDL_GetDesktopDisplayMode(display_index, mode=None):
+    return _lib_SDL_GetDesktopDisplayMode(display_index, _wrap_buf(mode))

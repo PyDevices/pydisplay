@@ -28,7 +28,6 @@ import sys
 
 import tft_config
 from board_config import runtime
-from multimer import Timer
 
 palette = tft_config.palette
 sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
@@ -42,42 +41,25 @@ def main():
     """main"""
 
     def center(font, string, row, color=palette.WHITE):
-        """
-        Centers the given string horizontally on the screen at the specified row.
-
-        Args:
-            font: The font to use for rendering the string.
-            string: The string to be centered.
-            row: The row where the string will be displayed.
-            color: The color of the string (default: palette.WHITE).
-
-        Returns:
-            None
-        """
-
-        screen = tft.width  # get screen width
-        width = tft_write.write_width(font, string)  # get the width of the string
+        screen = tft.width
+        width = tft_write.write_width(font, string)
         col = tft.width // 2 - width // 2 if width and width < screen else 0
-        tft_write.write(tft, font, string, col, row, color)  # and write the string
+        tft_write.write(tft, font, string, col, row, color)
 
-    # initialize the display
     tft = tft_config.config(tft_config.WIDE)
     row = 16
 
-    # center the name of the first font, using the font
     center(noto_sans, "NotoSans", row, palette.RED)
     row += noto_sans.HEIGHT
 
-    # center the name of the second font, using the font
     center(noto_serif, "NotoSerif", row, palette.GREEN)
     row += noto_serif.HEIGHT
 
-    # center the name of the third font, using the font
     center(noto_mono, "NotoSansMono", row, palette.BLUE)
     row += noto_mono.HEIGHT
 
     tft.show()
-    runtime.poll()
+    runtime.run_forever()
 
 
 main()
