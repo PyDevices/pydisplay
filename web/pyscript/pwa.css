@@ -1,0 +1,60 @@
+/* PWA install button + offline toast — matches site.css tokens */
+
+.pwa-install-btn {
+  display: none;
+  background: var(--good, #3ecf95);
+  color: #0b1a12;
+  border: none;
+  padding: 8px 14px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm, 10px);
+  cursor: pointer;
+  box-shadow: var(--shadow-soft, 0 6px 18px rgba(0, 0, 0, 0.3));
+  font-family: var(--font, system-ui, sans-serif);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.pwa-install-btn:hover {
+  filter: brightness(1.05);
+}
+
+.header-tools .pwa-install-btn {
+  margin-right: 4px;
+}
+
+#pwa-toast {
+  position: fixed;
+  bottom: -120px;
+  right: 20px;
+  background: var(--panel, #1c1712);
+  color: var(--ink, #f3ecdf);
+  padding: 14px 18px;
+  border-radius: var(--radius-sm, 10px);
+  border: 1px solid var(--border, #342a1d);
+  box-shadow: var(--shadow, 0 18px 44px rgba(0, 0, 0, 0.45));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 10000;
+  font-family: var(--font, system-ui, sans-serif);
+  font-size: 0.92rem;
+  max-width: min(360px, calc(100vw - 40px));
+  transition: bottom 0.35s ease;
+}
+
+#pwa-toast.is-visible {
+  bottom: 20px;
+}
+
+#pwa-toast button {
+  background: transparent;
+  border: none;
+  color: var(--good, #3ecf95);
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.88rem;
+  padding: 0;
+  flex-shrink: 0;
+}
