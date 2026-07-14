@@ -45,6 +45,7 @@ __all__ = [
     "default_quit_chord",
     "env_bool",
     "env_get",
+    "env_int",
     "env_set",
 ]
 
@@ -101,6 +102,17 @@ def env_get(name, default=None):
     if raw is None:
         return default
     return raw
+
+
+def env_int(name, default=0):
+    """Read an integer environment variable portably (honors ``env_set`` overrides)."""
+    raw = _env_raw(name)
+    if raw is None:
+        return int(default)
+    try:
+        return int(str(raw).strip())
+    except (TypeError, ValueError):
+        return int(default)
 
 
 def _env_raw(name):

@@ -44,6 +44,15 @@ quit = "inject"
 deps = ["lvgl"]
 timeout_s = 45
 
+[examples.p4a_spec_lvgl]
+import = "p4a_spec_lvgl"
+script = "examples/p4a_spec_lvgl.py"
+kind = "lvgl"
+quit = "inject"
+deps = ["lvgl"]
+runtimes = ["cpython-venv", "python.exe"]
+timeout_s = 60
+
 [examples.paint]
 import = "paint"
 script = "examples/paint.py"

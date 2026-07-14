@@ -27,14 +27,34 @@ cd pydisplay_android
 # or: adb install -r p4a_app/bin/*.apk
 ```
 
-(`p4a_app/build_apk.sh` is a thin wrapper around the same script.) Package id: `org.pydevices.p4a_app`.
+Package id: `org.pydevices.p4a_app`.
 
 Desktop smoke test (Xvfb, before building an APK):
 
 ```bash
-cd pydisplay_android/p4a_app
-./test_desktop.sh
+cd pydisplay_android
+./scripts/test_desktop.sh
 ```
+
+## Customize buildozer.spec (LVGL editor)
+
+From a pydisplay checkout (CPython + `lvgl-cpython`), run the landscape desktop
+editor which emits a comment-free `src/examples/buildozer.spec` (gitignored)
+for you to copy into `pydisplay_android/p4a_app/buildozer.spec`:
+
+```bash
+cd pydisplay
+# optional size; defaults to 1280x720 landscape window
+PYDISPLAY_WIDTH=1280 PYDISPLAY_HEIGHT=720 \
+  .venv/bin/python -c "import runpy; runpy.run_path('src/examples/p4a_spec_lvgl.py')"
+# or from src/:
+# cd src && PYDISPLAY_WIDTH=1280 PYDISPLAY_HEIGHT=720 ../.venv/bin/python examples/p4a_spec_lvgl.py
+```
+
+Defaults load from a sibling `pydisplay_android/p4a_app/buildozer.spec` when
+present. Desktop size can also be set with `PYDISPLAY_SCALE`. Generated
+`orientation` follows the template (portrait for the paint defaults) and is
+independent of the landscape desktop window.
 
 ## LVGL on Android
 
