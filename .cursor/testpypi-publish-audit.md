@@ -30,7 +30,7 @@ Audited **2026-07-08** from local clones under `~/github/cmods` and `~/github/py
 | `multimer` | `multimer-0.0.7-py2.py3-none-any.whl` | universal |
 | `pydisplay-graphics` | `pydisplay_graphics-0.0.7-py2.py3-none-any.whl` | universal (PyPI name mapped from `graphics`) |
 
-**Layout:** `displaysys` is core-only (`__init__.py` + `board_config.py`); each backend is a separate `displaysys-*` package. Published packages do not include `examples/` trees.
+**Layout:** `displaysys` is the full package (all modules under `src/lib/displaysys/` plus `board_config.py`). Optional `displaysys-*` backend wheels remain for small MIP installs only — do not stack them on top of the full `displaysys` wheel on CPython. Published packages do not include `examples/` trees.
 
 **Not on TestPyPI yet (until next pydisplay tag release):** ~~`displaysys-*` backend subpackages~~ — published from v0.0.8+; see [naming convention](testpypi-naming-convention.md).
 

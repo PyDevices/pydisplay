@@ -295,49 +295,53 @@ EOF
     fi
 done
 
-# Copy the children of displaysys to $DEST_DIR/displaysys/$package/displaysys
+# Main displaysys package: full tree (all backends). CPython/Android need only this
+# wheel for ``from displaysys.sdldisplay import SDLDisplay`` etc.
+echo
+echo "Processing displaysys (full package)"
+mkdir -p "$DEST_DIR/displaysys/displaysys"
+copy_source_tree "$SOURCE_DIR/lib/displaysys" "$DEST_DIR/displaysys/displaysys/displaysys"
+rm -f "$DEST_DIR/displaysys/displaysys/displaysys/boarddisplay.py"
+cp "$SOURCE_DIR/lib/board_config.py" "$DEST_DIR/displaysys/displaysys/board_config.py"
+cat <<EOF > $DEST_DIR/displaysys/displaysys/manifest.py
+metadata(
+    description="$DESCRIPTION_PREFIX displaysys",
+    version="$VERSION",
+    author="$AUTHOR",
+    license="$LICENSE",
+    pypi_publish="$(pypi_publish_name "displaysys")",
+)
+package("displaysys")
+module("board_config.py")
+EOF
+echo "require(\"displaysys\")" >> $BUNDLE_MANIFEST
+cp $README_FULL_PATH $DEST_DIR/displaysys/displaysys/README.md
+if [[ "$SKIP_PYPI" -eq 0 ]]; then
+    ./scripts/publish_make_pyproject.py --output $PYPI_DIR/displaysys $DEST_DIR/displaysys/displaysys/manifest.py
+    pushd $PYPI_DIR/displaysys
+    build_and_upload_pypi
+    popd
+fi
+
+# Optional per-backend displaysys-* packages for small MIP installs (MicroPython).
+# Each ships one module under displaysys/; do not install these on top of the
+# full displaysys wheel on CPython (overlapping files / clobber).
 for module in "$SOURCE_DIR/lib/displaysys"/*; do
     base="$(basename "$module")"
     if should_skip_name "$base" || [[ "$base" == *.pyc ]] || [[ "$base" == *.pyo ]]; then
         continue
     fi
-    if [[ "$base" == boarddisplay.py ]]; then
+    if [[ "$base" == boarddisplay.py || "$base" == __init__.py ]]; then
         continue
     fi
-    if [[ "$base" == __init__.py ]]; then
-        package=displaysys
-    else
-        package_dir=$(basename $module .py)
-        package=displaysys-$package_dir
-    fi
+    package_dir=$(basename "$module" .py)
+    package=displaysys-$package_dir
     echo
     echo "Processing $package"
     mkdir -p "$DEST_DIR/displaysys/$package/displaysys"
     copy_displaysys_module "$module" "$DEST_DIR/displaysys/$package/displaysys"
-    if [[ $package == displaysys ]]; then
-        cp "$SOURCE_DIR/lib/board_config.py" "$DEST_DIR/displaysys/$package/board_config.py"
-        cat <<EOF > $DEST_DIR/displaysys/$package/manifest.py
-metadata(
-    description="$DESCRIPTION_PREFIX $package",
-    version="$VERSION",
-    author="$AUTHOR",
-    license="$LICENSE",
-    pypi_publish="$(pypi_publish_name "$package")",
-)
-package("displaysys")
-module("board_config.py")
-EOF
-        echo "require(\"$package\")" >> $BUNDLE_MANIFEST
-        cp $README_FULL_PATH $DEST_DIR/displaysys/$package/README.md
-        if [[ "$SKIP_PYPI" -eq 0 ]]; then
-            ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package $DEST_DIR/displaysys/$package/manifest.py
-            pushd $PYPI_DIR/$package
-            build_and_upload_pypi
-            popd
-        fi
-    else
-        extra_requires="$(displaysys_manifest_requires "$package")"
-        cat <<EOF > $DEST_DIR/displaysys/$package/manifest.py
+    extra_requires="$(displaysys_manifest_requires "$package")"
+    cat <<EOF > $DEST_DIR/displaysys/$package/manifest.py
 metadata(
     description="$DESCRIPTION_PREFIX $package",
     version="$VERSION",
@@ -349,14 +353,13 @@ require("displaysys")
 ${extra_requires}
 package("displaysys")
 EOF
-        echo "require(\"$package\")" >> $BUNDLE_MANIFEST
-        cp $README_FULL_PATH $DEST_DIR/displaysys/$package/README.md
-        if [[ "$SKIP_PYPI" -eq 0 ]]; then
-            ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package $DEST_DIR/displaysys/$package/manifest.py
-            pushd $PYPI_DIR/$package
-            build_and_upload_pypi
-            popd
-        fi
+    echo "require(\"$package\")" >> $BUNDLE_MANIFEST
+    cp $README_FULL_PATH $DEST_DIR/displaysys/$package/README.md
+    if [[ "$SKIP_PYPI" -eq 0 ]]; then
+        ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package $DEST_DIR/displaysys/$package/manifest.py
+        pushd $PYPI_DIR/$package
+        build_and_upload_pypi
+        popd
     fi
 done
 

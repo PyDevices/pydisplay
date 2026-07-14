@@ -19,10 +19,10 @@ MIP names stay short. pip project names must **not collide with [pypi.org](https
 When [pypi.org](https://pypi.org/project/<name>/) returns **404**, use the same string for TestPyPI and MIP:
 
 - `displaysys`, `eventsys`, `multimer`
-- `displaysys-sdldisplay`, `displaysys-pgdisplay`, …
+- Optional MIP-oriented `displaysys-sdldisplay`, `displaysys-pgdisplay`, … (prefer full `displaysys` on CPython/Android)
 - `usdl2` (separate repo; no collision today)
 
-Import paths follow the wheel layout (`import displaysys`, `import displaysys.sdldisplay`, …).
+Import paths follow the wheel layout (`import displaysys`, `import displaysys.sdldisplay`, …). The full `displaysys` wheel includes every module under `src/lib/displaysys/`.
 
 ### 2. pydisplay pure-Python libs: `pydisplay-<mip-name>`
 
@@ -49,13 +49,14 @@ Do **not** publish as bare `lvgl` — [pypi.org/project/lvgl](https://pypi.org/p
 
 ### 4. displaysys backends: `displaysys-<backend>`
 
-Backend subpackages use the MIP folder name as the pip project name:
+The main **`displaysys`** wheel is the full package (every module under `src/lib/displaysys/`) plus `board_config.py` at wheel root. Prefer that alone on CPython/Android.
+
+Optional MIP-oriented backend wheels still use the folder name as the pip project name:
 
 - `displaysys-sdldisplay`, `displaysys-pgdisplay`, `displaysys-busdisplay`, …
-- Wheel installs modules under `displaysys/` (e.g. `displaysys/sdldisplay.py`).
+- Each ships one module under `displaysys/` and declares `require("displaysys")`.
+- Do **not** install these on top of the full `displaysys` wheel on CPython (overlapping package path).
 - No pypi.org collisions as of 2026-07-09.
-
-Core **`displaysys`** ships `board_config.py` at wheel root; backends declare `require("displaysys")` in manifests.
 
 ### 5. Third-party dependencies: production PyPI only
 
