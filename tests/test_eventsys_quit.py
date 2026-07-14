@@ -84,6 +84,44 @@ class TestHostEventsDeviceQuitChord(unittest.TestCase):
         dev = HostEventsDevice(host_read=scripted([ev]), display=Data())
         self.assertEqual(dev.poll(), [])
 
+    def test_ac_back_keydown_becomes_quit(self):
+        """Android system Back (SDLK_AC_BACK) maps to QUIT without a chord."""
+
+        class Data:
+            quit_chord = (Keys.K_q, Keys.KMOD_CTRL)
+
+        ev = events.Key(events.KEYDOWN, "AC Back", Keys.K_AC_BACK, 0, 0, None)
+        dev = HostEventsDevice(host_read=scripted([ev]), display=Data())
+        out = dev.poll()
+        self.assertEqual(len(out), 1)
+        self.assertEqual(out[0].type, events.QUIT)
+
+    def test_ac_back_works_without_quit_chord(self):
+        class Data:
+            pass
+
+        ev = events.Key(events.KEYDOWN, "AC Back", Keys.K_AC_BACK, 0, 0, None)
+        dev = HostEventsDevice(host_read=scripted([ev]), display=Data())
+        out = dev.poll()
+        self.assertEqual(len(out), 1)
+        self.assertEqual(out[0].type, events.QUIT)
+
+    def test_ac_back_keyup_filtered(self):
+        class Data:
+            pass
+
+        ev = events.Key(events.KEYUP, "AC Back", Keys.K_AC_BACK, 0, 0, None)
+        dev = HostEventsDevice(host_read=scripted([ev]), display=Data())
+        self.assertEqual(dev.poll(), [])
+
+
+class TestKeyTriggersQuitAcBack(unittest.TestCase):
+    def test_ac_back_triggers(self):
+        self.assertTrue(key_triggers_quit(events.KEYDOWN, Keys.K_AC_BACK, 0, None))
+
+    def test_ac_back_keyup_does_not(self):
+        self.assertFalse(key_triggers_quit(events.KEYUP, Keys.K_AC_BACK, 0, None))
+
 
 if __name__ == "__main__":
     unittest.main()

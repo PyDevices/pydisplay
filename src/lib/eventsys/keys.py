@@ -715,11 +715,16 @@ def chord_matches(chord, keycode, mod):
 
 
 def key_triggers_quit(event_type, key, mod, quit_chord):
-    """Return True when ``event_type`` is KEYDOWN and ``quit_chord`` matches."""
+    """Return True when ``event_type`` is KEYDOWN and quit should fire.
+
+    Matches ``quit_chord`` (e.g. Ctrl+Q) or Android system Back (``K_AC_BACK``).
+    """
     from ._events import events
 
     if event_type != events.KEYDOWN:
         return False
+    if key == Keys.K_AC_BACK:
+        return True
     return chord_matches(quit_chord, key, mod)
 
 

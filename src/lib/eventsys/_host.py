@@ -5,7 +5,7 @@
 
 from ._device import Device, register_device_class, types
 from ._events import events
-from .keys import chord_matches
+from .keys import Keys, chord_matches
 
 
 class HostEventsDevice(Device):
@@ -42,12 +42,16 @@ class HostEventsDevice(Device):
             quit_chord = self._data.quit_chord if self._quit_chord_ok else None
             chord_key = quit_chord[0] if quit_chord else None
             for event in dev_events:
-                if quit_chord:
-                    if event.type == events.KEYDOWN and chord_matches(
-                        quit_chord, event.key, event.mod
+                if event.type == events.KEYDOWN:
+                    # Android system Back (SDLK_AC_BACK) → quit, same as quit_chord.
+                    if event.key == Keys.K_AC_BACK or (
+                        quit_chord and chord_matches(quit_chord, event.key, event.mod)
                     ):
                         event = events.Quit(events.QUIT)
-                    elif event.type == events.KEYUP and event.key == chord_key:
+                elif event.type == events.KEYUP:
+                    if event.key == Keys.K_AC_BACK:
+                        continue
+                    if quit_chord and event.key == chord_key:
                         continue
                 if event.type in self._data2:
                     if (
