@@ -4,6 +4,6 @@ This content moved to **[Try pydisplay](../try/index.md)** — PyScript links, W
 
 Quick links:
 
-- [PyScript demo hub](https://PyDevices.github.io/pydisplay/pyscript/)
+- [PyScript demo hub](https://PyDevices.github.io/pydisplay/pyscript/) — installable PWA ([how to build your own](../guides/pyscript-pwa.md))
 - [Wokwi project](../guides/wokwi.md) (`sim/wokwi/`)
 - [Screenshot gallery](../try/index.md#screenshot-gallery)

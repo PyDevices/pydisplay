@@ -47,6 +47,7 @@ Featured starters: `pydisplay_demo`, `testris`. See `scripts/pyscript_gen_packag
 
 ## Next
 
+- [Make your PyScript app a PWA](pyscript-pwa.md)
 - [PyScript asyncio porting](pyscript-asyncio.md)
 - [Try pydisplay](../try/index.md)
 - [Platform notes](../platforms/pyscript.md)

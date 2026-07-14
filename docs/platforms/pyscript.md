@@ -4,6 +4,8 @@ Experimental browser support via [PyScript](https://pyscript.net/) and `displays
 
 **Quick start:** [PyScript guide](../guides/pyscript.md) and [Try pydisplay](../try/index.md).
 
+**Installable / offline:** [PyScript PWA guide](../guides/pyscript-pwa.md) — manifest, service worker, and GitHub Pages deploy.
+
 **Asyncio porting:** [PyScript asyncio guide](../guides/pyscript-asyncio.md).
 
 !!! warning "Work in progress"

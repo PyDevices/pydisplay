@@ -80,6 +80,7 @@ nav:
     - Wokwi simulator: guides/wokwi.md
     - PyScript: guides/pyscript.md
     - PyScript asyncio: guides/pyscript-asyncio.md
+    - PyScript PWA: guides/pyscript-pwa.md
   - Installation:
     - Choose a method: installation/index.md
     - Full clone: installation/full-clone.md
