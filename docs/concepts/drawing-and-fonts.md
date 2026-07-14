@@ -28,9 +28,9 @@ Use `Draw(canvas)` when you prefer a separate drawer object over subclassing.
 | `graphics.text8` / `text14` / `text16` | Embedded romfont in `graphics` (`_font_8x*.py`) | Default; transparent; per-pixel on canvas — [patterns](graphics.md#choosing-a-font-rendering-pattern) |
 | `graphics.Font(path, height)` | Romfont [`.bin` on disk](graphics.md#loading-romfont-bin-files-from-the-filesystem) | Optional; use with any pattern below |
 | `graphics.Font(height=8)` | Embedded romfont for that height | Same bytes as `text8` / `text14` / `text16` |
-| String FB + `blit_rect` | [`font_simpletest.py`](../examples/font_simpletest.py) | Opaque bg; low RAM; one blit per string — good desktop + tight MCU RAM |
-| `Font.text(display_drv, …)` | [`font_simpletest2.py`](../examples/font_simpletest2.py) | Transparent; lowest RAM; slowest on SPI |
-| `DisplayBuffer` + `show(dirty)` | [`font_simpletest3.py`](../examples/font_simpletest3.py) | Transparent; full-screen RAM; fastest repeated text on MCU |
+| String FB + `blit_rect` | [`font_simpletest.py`](../examples/font_simpletest.py) (`string_blit` phase) | Opaque bg; low RAM; one blit per string — good desktop + tight MCU RAM |
+| `Font.text(display_drv, …)` | [`font_simpletest.py`](../examples/font_simpletest.py) (`per_pixel` phase) | Transparent; lowest RAM; slowest on SPI |
+| `DisplayBuffer` + `show(dirty)` | [`font_simpletest.py`](../examples/font_simpletest.py) (`displaybuf` phase) | Transparent; full-screen RAM; fastest repeated text on MCU |
 | `tft_text.text()` | @russhughes text_font_converter | Width 8 or 16, height multiples of 8 |
 | `tft_write.write()` | @russhughes write_font_converter | Proportional fonts |
 | `framebuf.text()` | Damien `font_petme128_8x8` | MP framebuf API only; not romfont — see [Fonts in graphics](graphics.md#not-the-same-as-framebuftext) |

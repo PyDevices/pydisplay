@@ -57,8 +57,8 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   require it; wrap the command when useful. PyScript/Playwright tools do not
   need Xvfb.
 - Known pre-existing example failures on CPython (not environment issues to
-  "fix"): `nano_gui_simpletest` needs the matching Hinch `gui/` package and `png_test` needs
-  `PYDISPLAY_PNG_DIR`.
+  "fix"): `nano_gui_simpletest` needs the matching Hinch `gui/` package.
+  `tools/png_test.py` (PNG probe) needs `PYDISPLAY_PNG_DIR` / material-design-icons.
 - **PyScript hangs / multimer / WASM:** read
   [`.cursor/pyscript-troubleshooting.md`](.cursor/pyscript-troubleshooting.md)
   before poking the IDE browser. Prefer Playwright helpers

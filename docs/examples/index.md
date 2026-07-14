@@ -88,7 +88,7 @@ runtime.run_forever()
 
 **LVGL apps** — [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py): import `display_driver`, build UI, then `runtime.run_forever()`. See [LVGL guide](../guis/lvgl.md).
 
-**PyWidgets (pdwidgets)** — [`widgets_stub.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_stub.py): build UI, then:
+**PyWidgets (pdwidgets)** — [`widgets_percent.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_percent.py): build UI, then:
 
 ```python
 import pdwidgets as pd
@@ -102,9 +102,7 @@ pd.run_forever()
 
 ### Notes
 
-- `font_simpletest.py` — string-sized `FrameBuffer`, opaque background, one `blit_rect` per draw (see [Font rendering patterns](../concepts/graphics.md#choosing-a-font-rendering-pattern)).
-- `font_simpletest2.py` — `Font.text(display_drv, …)`; transparent, per-pixel (slowest bus pattern).
-- `font_simpletest3.py` — `DisplayBuffer` + `show(dirty)`; transparent, best when RAM allows a full-screen buffer.
+- `font_simpletest.py` — cycles `string_blit` → `per_pixel` → `displaybuf` in one run (see [Font rendering patterns](../concepts/graphics.md#choosing-a-font-rendering-pattern)).
 - `nano_gui_simpletest.py` / `micro_gui_simpletest.py` / `touch_gui_simpletest.py` need the matching Peter Hinch `gui/` in `add_ons/` (via `fetch_ph_gui` / mip).
 **Legend:** Platforms = CPython · MCU · PyScript · Wokwi · Packages = core · add_ons · LVGL
 
@@ -144,8 +142,7 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `eventsys_simpletest.py` | Event loop basics | CPython · MCU · PyScript | core |
 | `eventsys_touch_test.py` | Touch events | CPython · MCU | core |
 | `eventsys_encoder_test.py` | Rotary encoder | MCU | core |
-| `scroll_touch_test.py` | Touch scrolling | CPython · MCU | core |
-| `scroll_touch_test_displaybuf.py` | Scroll with DisplayBuffer | MCU | add_ons |
+| `scroll_touch_test.py` | Touch scrolling (cycles `display_drv` ↔ DisplayBuffer) | CPython · MCU | add_ons |
 | `joystick_list_select.py` | Joystick + list | CPython · MCU | core |
 | `keypins_simpletest.py` | Keypad pins | MCU | add_ons |
 
@@ -155,9 +152,7 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 |--------|-------------|-----------|----------|
 | `framebuf_simpletest.py` | framebuf API | CPython · MCU | core |
 | `graphics_simpletest.py` | graphics module | CPython · MCU | core |
-| `font_simpletest.py` | Font: string FB + one `blit_rect` (opaque bg) | CPython · MCU | core |
-| `font_simpletest2.py` | Font: direct on `display_drv` (transparent, per-pixel) | CPython · MCU | core |
-| `font_simpletest3.py` | Font: `DisplayBuffer` + dirty blit (transparent, lowest bus cost) | CPython · MCU | core |
+| `font_simpletest.py` | Font: cycles `string_blit` / `per_pixel` / `displaybuf` | CPython · MCU | add_ons |
 | `font_list.py` | List / preview `.bin` fonts from a directory | CPython · MCU | core |
 | `fonts.py` | Page through fonts | CPython · MCU | core |
 | `boxlines.py` | Lines and boxes | CPython · MCU | core |
@@ -167,17 +162,13 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 
 | Script | Description | Platforms | Packages |
 |--------|-------------|-----------|----------|
-| `bmp565_simpletest.py` | BMP565 load/draw | CPython · MCU | graphics |
-| `bmp565_blit.py` | Blit operations | CPython · MCU | graphics |
+| `bmp565_simpletest.py` | BMP565 load/draw (slice + full blit) | CPython · MCU | graphics |
 | `bmp565_sprite.py` | Sprite animation | CPython · MCU | graphics |
 | `bmp565_sprite_transparent.py` | Transparency | CPython · MCU | graphics |
 | `bmp565_scroll.py` | Scrolling bitmap | CPython · MCU | graphics |
 | `bmp565_scroll_sprite.py` | Scrolling sprite | CPython · MCU | graphics |
-| `palettes_material.py` | Material palette | CPython · MCU | add_ons |
-| `palettes_wheel.py` | Color wheel | CPython · MCU | add_ons |
-| `palettes_cube.py` | RGB cube | CPython · MCU | add_ons |
+| `palettes_demo.py` | Palettes: cycles `wheel` / `cube` / `material` | CPython · MCU | core |
 | `pbm_simpletest.py` | PBM images | CPython · MCU | core |
-| `png_test.py` | PNG (experimental) | CPython | add_ons |
 
 ## Widgets and apps
 
@@ -216,7 +207,7 @@ Runnable demos in subfolders use the same entry rules (`<name>/<name>.py` or `__
 | `noto_fonts/` | `noto_fonts.py` | MP · MCU · PyScript | One-shot Noto font demo; same tail as `chango` |
 | `proverbs/` | `proverbs.py` | CPython · MP · MCU | Chinese proverb slideshow; quit via `runtime.poll()` |
 | `tiny_toasters/` | `tiny_toasters.py` | CPython · MP · MCU | Sprite animation; quit via `runtime.poll()` |
-| `apollo_dsky/` | — | — | Support module for top-level `apollo.py` |
+| `apollo/` | `apollo.py` | CPython · PyScript | DSKY emulator (`dsky.py` + BMP assets) |
 | `assets/` | — | — | Shared fonts and images |
 
 ## Screenshots and live demos

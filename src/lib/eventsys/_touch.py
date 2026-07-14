@@ -24,7 +24,7 @@ REVERSE_Y = const(0b100)
 class TouchDevice(Device):
     """Touchscreen mapped to mouse button and motion events."""
 
-    type = types.TOUCH
+    type = types.POINTER
     responses = (events.MOUSEMOTION, events.MOUSEBUTTONDOWN, events.MOUSEBUTTONUP)
 
     def __init__(
@@ -91,4 +91,4 @@ class TouchDevice(Device):
         return None
 
 
-register_device_class(types.TOUCH, TouchDevice)
+register_device_class(types.POINTER, TouchDevice)

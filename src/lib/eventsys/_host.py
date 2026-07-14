@@ -84,7 +84,7 @@ class HostEventsDevice(Device):
 
 
 class VirtualDevices:
-    """Fan-out host events into virtual touch/encoder/keypad devices for LVGL."""
+    """Fan-out host events into virtual pointer/encoder/keypad devices for LVGL."""
 
     class VirtualDevice:
         def __init__(self, virtual_devices, device_type):
@@ -108,10 +108,10 @@ class VirtualDevices:
 
     def __init__(self, host_device):
         self._host_device = host_device
-        self._vd_touch = self.VirtualDevice(self, types.TOUCH)
+        self._vd_pointer = self.VirtualDevice(self, types.POINTER)
         self._vd_encoder = self.VirtualDevice(self, types.ENCODER)
         self._vd_keypad = self.VirtualDevice(self, types.KEYPAD)
-        self.devices = [self._vd_touch, self._vd_encoder, self._vd_keypad]
+        self.devices = [self._vd_pointer, self._vd_encoder, self._vd_keypad]
 
     def poll_host_device(self):
         for e in self._host_device.poll():
@@ -120,7 +120,7 @@ class VirtualDevices:
                 or e.type == events.MOUSEBUTTONUP
                 or (e.type == events.MOUSEMOTION and e.buttons[0])
             ):
-                self._vd_touch.add_event(e)
+                self._vd_pointer.add_event(e)
             elif e.type == events.MOUSEWHEEL:
                 self._vd_encoder.add_event(e)
             elif e.type == events.KEYDOWN or e.type == events.KEYUP:

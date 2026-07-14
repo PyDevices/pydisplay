@@ -1,14 +1,6 @@
 {
   "urls": [
     [
-      "apollo.py",
-      "github:PyDevices/pydisplay/src/examples/apollo.py"
-    ],
-    [
-      "bmp565_blit.py",
-      "github:PyDevices/pydisplay/src/examples/bmp565_blit.py"
-    ],
-    [
       "bmp565_scroll.py",
       "github:PyDevices/pydisplay/src/examples/bmp565_scroll.py"
     ],
@@ -101,14 +93,6 @@
       "github:PyDevices/pydisplay/src/examples/font_simpletest.py"
     ],
     [
-      "font_simpletest2.py",
-      "github:PyDevices/pydisplay/src/examples/font_simpletest2.py"
-    ],
-    [
-      "font_simpletest3.py",
-      "github:PyDevices/pydisplay/src/examples/font_simpletest3.py"
-    ],
-    [
       "fonts.py",
       "github:PyDevices/pydisplay/src/examples/fonts.py"
     ],
@@ -157,16 +141,8 @@
       "github:PyDevices/pydisplay/src/examples/paint.py"
     ],
     [
-      "palettes_cube.py",
-      "github:PyDevices/pydisplay/src/examples/palettes_cube.py"
-    ],
-    [
-      "palettes_material.py",
-      "github:PyDevices/pydisplay/src/examples/palettes_material.py"
-    ],
-    [
-      "palettes_wheel.py",
-      "github:PyDevices/pydisplay/src/examples/palettes_wheel.py"
+      "palettes_demo.py",
+      "github:PyDevices/pydisplay/src/examples/palettes_demo.py"
     ],
     [
       "pbm_create_new.py",
@@ -179,10 +155,6 @@
     [
       "pixel_sim_demos.py",
       "github:PyDevices/pydisplay/src/examples/pixel_sim_demos.py"
-    ],
-    [
-      "png_test.py",
-      "github:PyDevices/pydisplay/src/examples/png_test.py"
     ],
     [
       "pydisplay_demo.py",
@@ -201,10 +173,6 @@
       "github:PyDevices/pydisplay/src/examples/scroll_touch_test.py"
     ],
     [
-      "scroll_touch_test_displaybuf.py",
-      "github:PyDevices/pydisplay/src/examples/scroll_touch_test_displaybuf.py"
-    ],
-    [
       "testris.py",
       "github:PyDevices/pydisplay/src/examples/testris.py"
     ],
@@ -219,10 +187,6 @@
     [
       "widgets_actions.py",
       "github:PyDevices/pydisplay/src/examples/widgets_actions.py"
-    ],
-    [
-      "widgets_console.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_console.py"
     ],
     [
       "widgets_demo.py",
@@ -241,10 +205,6 @@
       "github:PyDevices/pydisplay/src/examples/widgets_gauge_dash.py"
     ],
     [
-      "widgets_list.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_list.py"
-    ],
-    [
       "widgets_media_busy.py",
       "github:PyDevices/pydisplay/src/examples/widgets_media_busy.py"
     ],
@@ -261,10 +221,6 @@
       "github:PyDevices/pydisplay/src/examples/widgets_pickers.py"
     ],
     [
-      "widgets_scrollbar.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_scrollbar.py"
-    ],
-    [
       "widgets_settings.py",
       "github:PyDevices/pydisplay/src/examples/widgets_settings.py"
     ],
@@ -275,14 +231,6 @@
     [
       "widgets_smartwatch.py",
       "github:PyDevices/pydisplay/src/examples/widgets_smartwatch.py"
-    ],
-    [
-      "widgets_stub.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_stub.py"
-    ],
-    [
-      "widgets_test.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_test.py"
     ],
     [
       "alien/__init__.py",
@@ -305,16 +253,20 @@
       "github:PyDevices/pydisplay/src/examples/alien/make_alien_bitmap.sh"
     ],
     [
-      "apollo_dsky/Apollo_DSKY_interface.bmp",
-      "github:PyDevices/pydisplay/src/examples/apollo_dsky/Apollo_DSKY_interface.bmp"
+      "apollo/Apollo_DSKY_interface.bmp",
+      "github:PyDevices/pydisplay/src/examples/apollo/Apollo_DSKY_interface.bmp"
     ],
     [
-      "apollo_dsky/Apollo_DSKY_interface.svg",
-      "github:PyDevices/pydisplay/src/examples/apollo_dsky/Apollo_DSKY_interface.svg"
+      "apollo/Apollo_DSKY_interface.svg",
+      "github:PyDevices/pydisplay/src/examples/apollo/Apollo_DSKY_interface.svg"
     ],
     [
-      "apollo_dsky/__init__.py",
-      "github:PyDevices/pydisplay/src/examples/apollo_dsky/__init__.py"
+      "apollo/apollo.py",
+      "github:PyDevices/pydisplay/src/examples/apollo/apollo.py"
+    ],
+    [
+      "apollo/dsky.py",
+      "github:PyDevices/pydisplay/src/examples/apollo/dsky.py"
     ],
     [
       "assets/font_8x14.bin",

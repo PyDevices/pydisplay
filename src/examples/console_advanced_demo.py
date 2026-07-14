@@ -15,7 +15,7 @@ pal = get_palette()
 
 # Default Console char path: render each glyph into an 8x8 FrameBuffer, then
 # blit_rect once per character (fast). Custom text8/text16 writers draw with
-# Font.fill_rect per pixel directly on the display (slow — see font_simpletest2).
+# Font.fill_rect per pixel directly on the display (slow — see font_simpletest per_pixel mode).
 console = Console(display_drv, cwidth=8, lheight=8)
 
 maj, min, *_ = implementation.version

@@ -94,9 +94,9 @@ Set `cached=False` to keep the file open and read glyphs on demand (lower RAM, m
 Missing or unreadable paths raise `FileNotFoundError`. A file whose size does not match the
 expected glyph count raises `RuntimeError`.
 
-Examples that load `.bin` fonts from disk: `font_simpletest.py`, `font_simpletest2.py`,
-`font_simpletest3.py` (PyScript copies ship under `src/examples/assets/` via
-`packages/examples.json`).
+Examples that load `.bin` fonts from disk: `font_simpletest.py` (cycles
+`string_blit` → `per_pixel` → `displaybuf`; PyScript copies ship under
+`src/examples/assets/` via `packages/examples.json`).
 
 ### Romfont `.bin` format
 
@@ -124,16 +124,16 @@ and heights 8/14/16, use `graphics.text8` / `text14` / `text16` or `graphics.Fon
 `fill_rect` (scaled squares). **Where** you draw — and whether you composite in RAM first —
 controls transparency, RAM use, and how much data hits the panel bus.
 
-The three `font_simpletest*.py` examples use the same `Font` + romfont `.bin` files but
-different targets. [`pydisplay_demo`](../examples/pydisplay_demo.md) follows the
-**string framebuffer + one blit** pattern from `font_simpletest.py`.
+The multipath `font_simpletest.py` example uses the same `Font` + romfont `.bin` files but
+cycles different targets in one run. [`pydisplay_demo`](../examples/pydisplay_demo.md) follows the
+**string framebuffer + one blit** pattern (`string_blit`).
 
 | Pattern | Example | Background | Extra RAM | What hits the display | Typical sweet spot |
 |---------|---------|------------|-----------|----------------------|-------------------|
 | **Module helpers on canvas** | `graphics.text8(display_drv, …)` | Transparent (foreground pixels only) | None | One small `fill_rect` per lit pixel | Short labels, minimum RAM |
-| **String FB → one blit** | [`font_simpletest.py`](../examples/font_simpletest.py) | **Opaque** — `fb.fill(bg)` before `font.text` | One buffer sized to the string (reusable slice is better; see pydisplay_demo) | **One** `blit_rect` per string | Desktop/SDL (batch then `show()`), SPI panels when RAM is tight |
-| **Draw on `display_drv`** | [`font_simpletest2.py`](../examples/font_simpletest2.py) | Transparent | None | One `fill_rect` per lit pixel on the live driver | Simplest code path; **slowest** on MCU and desktop |
-| **Full-screen `DisplayBuffer` + dirty blit** | [`font_simpletest3.py`](../examples/font_simpletest3.py) | Transparent over existing buffer contents | **Full panel** `DisplayBuffer` | `display.show(dirty)` — one row `blit_rect` per dirty scanline | MCUs with enough RAM; many text updates; fastest of the three `font_simpletest` variants |
+| **String FB → one blit** | [`font_simpletest.py`](../examples/font_simpletest.py) (`string_blit`) | **Opaque** — `fb.fill(bg)` before `font.text` | One buffer sized to the string (reusable slice is better; see pydisplay_demo) | **One** `blit_rect` per string | Desktop/SDL (batch then `show()`), SPI panels when RAM is tight |
+| **Draw on `display_drv`** | [`font_simpletest.py`](../examples/font_simpletest.py) (`per_pixel`) | Transparent | None | One `fill_rect` per lit pixel on the live driver | Simplest code path; **slowest** on MCU and desktop |
+| **Full-screen `DisplayBuffer` + dirty blit** | [`font_simpletest.py`](../examples/font_simpletest.py) (`displaybuf`) | Transparent over existing buffer contents | **Full panel** `DisplayBuffer` | `display.show(dirty)` — one row `blit_rect` per dirty scanline | MCUs with enough RAM; many text updates; fastest of the three modes |
 | **Catalog / inspect fonts** | [`font_list.py`](../examples/font_list.py) | Opaque row buffer | One strip `width × height` per font | One `blit_rect` per font row | Browsing `.bin` files on disk |
 
 #### Module helpers (`text8`, `text14`, `text16`)
@@ -147,9 +147,9 @@ area = graphics.text16(display_drv, "Status", 4, 4, 0xFFFF)  # returns Area boun
 ```
 
 Lowest memory overhead; fine for a few characters. On SPI TFTs without a compositing layer,
-each lit pixel can become a separate bus transaction (same cost class as `font_simpletest2`).
+each lit pixel can become a separate bus transaction (same cost class as `per_pixel` mode).
 
-#### String framebuffer + one blit (`font_simpletest.py`)
+#### String framebuffer + one blit (`string_blit`)
 
 Compose the whole string in a small off-screen `FrameBuffer`, then upload it once:
 
@@ -173,7 +173,7 @@ display_drv.show()         # SDL/pygame: present the frame
   [pydisplay_demo](../examples/pydisplay_demo.md)) instead of allocating every frame like the
   simpletest does.
 
-#### Direct draw on `display_drv` (`font_simpletest2.py`)
+#### Direct draw on `display_drv` (`per_pixel`)
 
 ```python
 font.text(display_drv, s, x, y, fg_color, scale)
@@ -185,7 +185,7 @@ display_drv.show()
 - **Slowest** upload pattern: every lit pixel is its own `fill_rect` on the driver. Avoid for
   long strings on hardware; acceptable for occasional tiny overlays.
 
-#### `DisplayBuffer` + dirty rectangle (`font_simpletest3.py`)
+#### `DisplayBuffer` + dirty rectangle (`displaybuf`)
 
 Keep a logical full-screen buffer in RAM; upload only what changed:
 
@@ -200,7 +200,7 @@ display_drv.show()          # present on SDL; on raw SPI may follow panel habits
 
 - **Transparent** over whatever is already in the `DisplayBuffer`.
 - **Highest RAM** (full panel buffer) — trade memory for speed when the UI redraws text often.
-- **Fastest** of the `font_simpletest` trio: glyph work stays in RAM; the panel receives only
+- **Fastest** of the three `font_simpletest` modes: glyph work stays in RAM; the panel receives only
   the dirty region (scanline `blit_rect`s), not per-pixel fills.
 - Requires `add_ons/displaybuf.py` on the import path (`import lib.path` from `src/`).
 - Partial `area=` updates apply to **RGB565** `DisplayBuffer`; GS8/GS4 paths currently refresh
@@ -218,8 +218,6 @@ Run the examples side by side from `src/`:
 
 ```bash
 micropython examples/font_simpletest.py
-micropython examples/font_simpletest2.py
-micropython examples/font_simpletest3.py
 ```
 
 PyScript and the gallery load the same `.bin` assets from `src/examples/assets/` (see

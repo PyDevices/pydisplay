@@ -35,7 +35,7 @@ _ZONE_MASKS = {
 
 def set_rotation_table(table):
     if display_drv.touch_device is not None:
-        if display_drv.touch_device.type == eventsys.TOUCH:
+        if display_drv.touch_device.type == eventsys.POINTER:
             display_drv.touch_device.rotation_table = table
 
 

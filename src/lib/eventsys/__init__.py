@@ -38,7 +38,7 @@ Keys = keys.Keys
 
 # Device type constants (also available as eventsys.types.*)
 HOST = types.HOST
-TOUCH = types.TOUCH
+POINTER = types.POINTER
 ENCODER = types.ENCODER
 KEYPAD = types.KEYPAD
 JOYSTICK = types.JOYSTICK
@@ -74,8 +74,8 @@ __all__ = [
     "MOUSEBUTTONUP",
     "MOUSEMOTION",
     "MOUSEWHEEL",
+    "POINTER",
     "QUIT",
-    "TOUCH",
     "Device",
     "EncoderDevice",
     "HostEventsDevice",

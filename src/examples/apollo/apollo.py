@@ -6,6 +6,7 @@ Written for 320×480 displays. Other resolutions may show or behave oddly
 (scrolling, touch mapping, and layout assume that viewport size).
 """
 import gc
+import sys
 
 try:
     from gc import mem_free
@@ -21,12 +22,21 @@ except ImportError:
             return 0
 
 
+def _pkg_dir(file):
+    path = str(file).replace("\\", "/")
+    return path.rsplit("/", 1)[0] if "/" in path else "."
+
+
+_PKG_DIR = _pkg_dir(__file__)
+if _PKG_DIR not in sys.path:
+    sys.path.insert(0, _PKG_DIR)
+
 gc.collect()
 mem = mem_free()
 print(f"Free memory at start: {mem:,}")
 
 from board_config import display_drv, runtime
-import apollo_dsky as dsky
+import dsky
 import time
 
 from multimer import ticks_add, ticks_diff, ticks_ms

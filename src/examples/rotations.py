@@ -2,79 +2,51 @@
 rotations.py
 ============
 
-.. figure:: ../_static/rotations.jpg
-    :align: center
-
-    Test for rotations and colors.
-
 Rotates the display 0, 90, 180, and 270 degrees and displays the rotation
 number and the color of the display background.
-
-.. note:: This example requires the following modules:
-
-  .. hlist::
-    :columns: 3
-
-    - `st7789py`
-    - `tft_config`
-    - vga1_16x16
-
 """
 
-from board_config import runtime
+from board_config import display_drv, runtime
+from graphics import Draw
+from palettes import get_palette
 
-import tft_config
-import tft_text
-import vga1_16x16 as font
+pal = get_palette()
+draw = Draw(display_drv)
 
-palette = tft_config.palette
-
-
-def center_on(display, using_font, text, y, fg, bg):
-    """
-    Center the text on the display
-    """
-    x = (display.width - len(text) * font.WIDTH) // 2
-    tft_text.text(display, using_font, text, x, y, fg, bg)
+FONT_W = 8
+FONT_H = 16
 
 
-def clear_screen(display, color):
-    """
-    Clear the screen by drawing rectangles starting from the center of the display
-    and working towards the edges.
+def center_text(text, y, fg, bg):
+    x = (display_drv.width - len(text) * FONT_W) // 2
+    # Opaque label: fill bg strip then draw glyphs.
+    draw.fill_rect(x, y, len(text) * FONT_W, FONT_H, bg)
+    draw.text16(text, x, y, fg)
 
-    Args:
-        display (tft): The display object to clear.
-        color (int): The color to use for the rectangles.
-    """
-    width = display.width
-    height = display.height
+
+def clear_screen(color):
+    """Expand rectangles from the center toward the edges."""
+    width = display_drv.width
+    height = display_drv.height
     x_center = width // 2
     y_center = height // 2
 
     for i in range(min(x_center, y_center)):
         x = x_center - i
         y = y_center - i
-        rect_width = 2 * i + 1
-        rect_height = 2 * i + 1
-        display.rect(x, y, rect_width, rect_height, color)
+        draw.rect(x, y, 2 * i + 1, 2 * i + 1, color)
 
 
 def main():
-    """
-    The big show!
-    """
-    tft = tft_config.config(tft_config.WIDE)
-
     colors = (
-        ("Red", palette.RED, palette.WHITE),
-        ("Green", palette.GREEN, palette.BLACK),
-        ("Blue", palette.BLUE, palette.WHITE),
-        ("Black", palette.BLACK, palette.WHITE),
-        ("White", palette.WHITE, palette.BLACK),
-        ("Yellow", palette.YELLOW, palette.BLACK),
-        ("Cyan", palette.CYAN, palette.BLACK),
-        ("Magenta", palette.MAGENTA, palette.BLACK),
+        ("Red", pal.RED, pal.WHITE),
+        ("Green", pal.GREEN, pal.BLACK),
+        ("Blue", pal.BLUE, pal.WHITE),
+        ("Black", pal.BLACK, pal.WHITE),
+        ("White", pal.WHITE, pal.BLACK),
+        ("Yellow", pal.YELLOW, pal.BLACK),
+        ("Cyan", pal.CYAN, pal.BLACK),
+        ("Magenta", pal.MAGENTA, pal.BLACK),
     )
 
     st = {"rotation": 0, "color_idx": 0}
@@ -82,27 +54,27 @@ def main():
     def poll():
         rotation = st["rotation"]
         color_idx = st["color_idx"]
-        tft.rotation = rotation
-        height = tft.height
-        width = tft.width
+        display_drv.rotation = rotation * 90
+        height = display_drv.height
         fg = colors[color_idx][2]
         bg = colors[color_idx][1]
 
-        tft.draw.fill(bg)
-        tft.draw.rect(0, 0, width, height, palette.WHITE)
-        center_on(tft, font, "Rotation", height // 3 - font.HEIGHT // 2, fg, bg)
-        center_on(tft, font, str(rotation), height // 2 - font.HEIGHT // 2, fg, bg)
-        center_on(tft, font, colors[color_idx][0], height // 3 * 2 - font.HEIGHT // 2, fg, bg)
-        tft.show()
+        draw.fill(bg)
+        draw.rect(0, 0, display_drv.width, height, pal.WHITE)
+        clear_screen(bg)
+        center_text("Rotation", height // 3 - FONT_H // 2, fg, bg)
+        center_text(str(rotation * 90), height // 2 - FONT_H // 2, fg, bg)
+        center_text(colors[color_idx][0], height // 3 * 2 - FONT_H // 2, fg, bg)
+        display_drv.show()
         st["color_idx"] = (color_idx + 1) % len(colors)
         st["rotation"] = (rotation + 1) % 4
         return False
 
-    # Blocks on desktop/MCU but yields to the event loop on PyScript and
-    # Jupyter (runtime.timer_async), so the browser main thread stays live.
     def _tick(_=None):
         poll()
 
     runtime.on_tick(_tick, period=2000, async_=runtime.timer_async)
     runtime.run_forever()
+
+
 main()

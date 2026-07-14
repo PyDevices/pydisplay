@@ -11,6 +11,7 @@ eventsys unifies input from touchscreens, mice, keypads, keyboards, encoders, an
 - `Runtime` — aggregates devices; `poll()` always returns a list
 - `quit_requested` — sticky flag set after quit is processed (display-only loops)
 - `TouchDevice`, `KeypadDevice`, `EncoderDevice`, `HostEventsDevice`, `JoystickDevice`
+- Device type constants: `HOST`, `POINTER` (was `TOUCH`; matches LVGL `INDEV_TYPE.POINTER`), `ENCODER`, `KEYPAD`, `JOYSTICK`
 - Optional mappers (import explicitly — not loaded by `import eventsys`): `eventsys.touch_keypad.TouchKeypad`, `eventsys.joystick_keys.JoystickKeys`
 - `events` — event type constants and namedtuple event classes
 - `Keys` — SDL key code table

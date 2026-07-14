@@ -77,7 +77,7 @@ runtime.run_forever()
 | Device | Input contract |
 |--------|----------------|
 | `HostEventsDevice` | `read()` returns ready-made events (desktop SDL/PyGame bridge). |
-| `TouchDevice` | `read()` returns `(x, y, pressed)`; maps to mouse events. |
+| `TouchDevice` | `read()` returns `(x, y, pressed)`; maps to mouse events. Device type `eventsys.POINTER` (LVGL `INDEV_TYPE.POINTER`). |
 | `KeypadDevice` | `read()` returns a `set` of pressed key codes. |
 | `EncoderDevice` | `read()` returns scroll delta / button state. |
 | `JoystickDevice` | `joystick_driver` with PyGame-style `get_axis`, `get_button`, `get_hat`, … |

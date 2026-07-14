@@ -1,13 +1,30 @@
-# pyscript skip: gallery
-import os
+"""PNG decoder smoke tool (add_ons/png + DisplayBuffer).
+
+Requires ``pypng`` and a material-design-icons ``png/`` tree (or
+``PYDISPLAY_PNG_DIR``). Run from the repo root::
+
+    SDL_VIDEODRIVER=dummy .venv/bin/python tools/png_test.py
+"""
+
+from __future__ import annotations
+
 from collections import namedtuple
+import os
+from pathlib import Path
+import sys
 
-import png
-from board_config import runtime
-from color_setup import ssd
-from displaybuf import alloc_buffer
+_ROOT = Path(__file__).resolve().parents[1]
+_lib = str(_ROOT / "src" / "lib")
+if _lib not in sys.path:
+    sys.path.insert(0, _lib)
 
-png_image = namedtuple("png_image", ["width", "height", "pixels", "metadata"])
+import lib.path  # noqa: E402, F401, I001
+from board_config import runtime  # noqa: E402
+from color_setup import ssd  # noqa: E402
+from displaybuf import alloc_buffer  # noqa: E402
+import png  # noqa: E402
+
+png_image = namedtuple("png_image", ["width", "height", "pixels", "metadata"])  # noqa: PYI024
 
 PNG_DIR = "~/material-design-icons/png"
 PNG_REL = "material-design-icons/png"

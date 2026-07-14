@@ -52,16 +52,13 @@ pd.run_forever()
 
 | Script | Description |
 |--------|-------------|
-| `widgets_demo.py` | Widget showcase |
+| `widgets_demo.py` | Align enum smoke |
 | `calc_widgets.py` | Calculator UI |
-| `widgets_list.py` | List widget |
-| `widgets_scrollbar.py` | Scrollbar |
-| `widgets_console.py` | Console widget |
 | `widgets_percent.py` | Progress/percent |
-| `widgets_test.py` | Widget regression demo |
-| `widgets_stub.py` | Minimal widget shell |
+| `widgets_smartwatch.py` | Showcase: watch face / pages |
+| `widgets_settings.py` | Showcase: settings form |
 | `joystick_list_select.py` | List + joystick navigation |
-| `console_advanced_demo.py` | Advanced console (mpconsole, not pdwidgets) |
+| `console_simpletest.py` / `console_advanced_demo.py` | Console demos (`mpconsole`; `pdwidgets.Console` also exists) |
 
 ## Icons
 

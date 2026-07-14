@@ -44,6 +44,7 @@ __all__ = [
     "color_rgb",
     "default_quit_chord",
     "env_bool",
+    "env_get",
     "env_set",
 ]
 
@@ -92,6 +93,14 @@ def env_bool(name, default=False):
     if text in ("0", "false", "no", "off"):
         return False
     return bool(default)
+
+
+def env_get(name, default=None):
+    """Read a string environment variable portably (honors ``env_set`` overrides)."""
+    raw = _env_raw(name)
+    if raw is None:
+        return default
+    return raw
 
 
 def _env_raw(name):

@@ -1,45 +1,82 @@
+# pyscript skip: gallery
+# Vertical scroll + touch/click. Cycles display_drv ↔ DisplayBuffer on a timer
+# (no env vars). Chrome labels show which path is active (drv / dbuf).
 from board_config import display_drv, runtime
 from graphics import Draw
 from palettes import get_palette
 from random import getrandbits
 
-canvas = display_drv
 line_height = 16
-canvas.set_vscroll(16, 16)  # Does not have to == line_height
+# Switch canvas backends every N ticks of the mode timer (~5s at period=100).
+MODE_SWITCH_TICKS = 50
 
 pal = get_palette()
-draw = Draw(canvas)
+st = {
+    "use_displaybuf": False,
+    "canvas": display_drv,
+    "draw": Draw(display_drv),
+    "ticks": 0,
+}
 
-if canvas.tfa > 0:
-    draw.fill_rect(0, 0, canvas.width, canvas.tfa, pal.RED)
-    if canvas.tfa > 15:
-        draw.text14("0 TFA", 1, 1, pal.WHITE)
-        draw.round_rect(canvas.width - 44, 1, 40, 12, 4, pal.GREEN, True)
-        draw.text("Up", canvas.width - 32, 4, pal.WHITE)
-if canvas.bfa > 0:
-    draw.fill_rect(0, canvas.height - canvas.bfa, canvas.width, canvas.bfa, pal.BLUE)
-    if canvas.bfa > 15:
-        draw.text14(
-            f"{canvas.height - canvas.bfa} BFA", 1, canvas.height - canvas.bfa + 1, pal.WHITE
-        )
-        draw.round_rect(
-            canvas.width - 44, canvas.height - canvas.bfa + 1, 40, 12, 4, pal.GREEN, True
-        )
-        draw.text("Down", canvas.width - 40, canvas.height - canvas.bfa + 5, pal.WHITE)
 
-for i, y in enumerate(range(canvas.tfa, canvas.vsa + canvas.tfa, line_height)):
-    fg, bg = pal.WHITE, pal.BLACK
-    if i % 2:
-        fg, bg = bg, fg
-    draw.fill_rect(0, y, canvas.width, line_height, bg)
-    txt = f"vssa: {y}, vscroll: {y - canvas.tfa}"
-    draw.text14(txt, 1, y + 1, fg)
-    draw.rect(canvas.width - 20, y + 2, 12, 12, fg)
+def _present():
+    st["canvas"].show()
+    if st["use_displaybuf"]:
+        display_drv.show()
 
-canvas.show()
+
+def _label():
+    return "dbuf" if st["use_displaybuf"] else "drv"
+
+
+def _rebuild():
+    if st["use_displaybuf"]:
+        from displaybuf import DisplayBuffer
+
+        canvas = DisplayBuffer(display_drv)
+    else:
+        canvas = display_drv
+    st["canvas"] = canvas
+    st["draw"] = Draw(canvas)
+    draw = st["draw"]
+
+    canvas.set_vscroll(16, 16)
+    tag = _label()
+
+    if canvas.tfa > 0:
+        draw.fill_rect(0, 0, canvas.width, canvas.tfa, pal.RED)
+        if canvas.tfa > 15:
+            draw.text14(f"0 TFA {tag}", 1, 1, pal.WHITE)
+            draw.round_rect(canvas.width - 44, 1, 40, 12, 4, pal.GREEN, True)
+            draw.text("Up", canvas.width - 32, 4, pal.WHITE)
+    if canvas.bfa > 0:
+        draw.fill_rect(0, canvas.height - canvas.bfa, canvas.width, canvas.bfa, pal.BLUE)
+        if canvas.bfa > 15:
+            draw.text14(
+                f"{canvas.height - canvas.bfa} BFA {tag}",
+                1,
+                canvas.height - canvas.bfa + 1,
+                pal.WHITE,
+            )
+            draw.round_rect(
+                canvas.width - 44, canvas.height - canvas.bfa + 1, 40, 12, 4, pal.GREEN, True
+            )
+            draw.text("Down", canvas.width - 40, canvas.height - canvas.bfa + 5, pal.WHITE)
+
+    for i, y in enumerate(range(canvas.tfa, canvas.vsa + canvas.tfa, line_height)):
+        fg, bg = pal.WHITE, pal.BLACK
+        if i % 2:
+            fg, bg = bg, fg
+        draw.fill_rect(0, y, canvas.width, line_height, bg)
+        txt = f"vssa: {y}, vscroll: {y - canvas.tfa}"
+        draw.text14(txt, 1, y + 1, fg)
+        draw.rect(canvas.width - 20, y + 2, 12, 12, fg)
+
+    _present()
 
 
 def _on_click(e):
+    canvas = st["canvas"]
     x, y = canvas.translate_point(e.pos)
     if y < canvas.tfa:
         canvas.vscroll -= line_height
@@ -50,8 +87,19 @@ def _on_click(e):
         canvas.fill_rect(
             canvas.width - 20, y_pos + 2, 12, 12, getrandbits(canvas.color_depth)
         )
-    canvas.show()
+    _present()
 
 
+def _on_mode_tick(_=None):
+    st["ticks"] += 1
+    if st["ticks"] < MODE_SWITCH_TICKS:
+        return
+    st["ticks"] = 0
+    st["use_displaybuf"] = not st["use_displaybuf"]
+    _rebuild()
+
+
+_rebuild()
 runtime.on(runtime.events.MOUSEBUTTONDOWN, _on_click)
+runtime.on_tick(_on_mode_tick, period=100, async_=runtime.timer_async)
 runtime.run_forever()

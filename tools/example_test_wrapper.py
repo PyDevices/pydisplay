@@ -480,6 +480,7 @@ def _parse_args(argv):
         "duration": 5.0,
         "timeout": 30.0,
         "timer_async": None,
+        "env": [],
     }
     i = 2
     while i < len(argv):
@@ -504,6 +505,9 @@ def _parse_args(argv):
             i += 2
         elif arg == "--timer-async" and i + 1 < len(argv):
             out["timer_async"] = argv[i + 1]
+            i += 2
+        elif arg == "--env" and i + 1 < len(argv):
+            out["env"].append(argv[i + 1])
             i += 2
         else:
             raise ValueError("unknown argument: {}".format(arg))
@@ -624,14 +628,19 @@ def main(argv=None):
         pass
 
     # Windows PE under WSL does not see Linux-exported env vars via getenv.
-    # Apply PYDISPLAY_TIMER_ASYNC from argv before examples import board_config.
-    if args.get("timer_async") is not None:
-        try:
-            from displaysys import env_set
+    # Apply kit/timer env from argv before examples import board_config.
+    try:
+        from displaysys import env_set
 
+        if args.get("timer_async") is not None:
             env_set("PYDISPLAY_TIMER_ASYNC", args["timer_async"])
-        except Exception:
-            pass
+        for pair in args.get("env") or []:
+            if "=" not in pair:
+                continue
+            key, value = pair.split("=", 1)
+            env_set(key, value)
+    except Exception:
+        pass
 
     backend = "headless" if headless else "?"
     quit_injected = False

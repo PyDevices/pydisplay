@@ -17,11 +17,14 @@ _mapping = {}
 
 
 class types:
-    """Built-in device type identifiers."""
+    """Built-in device type identifiers.
+
+    ``POINTER`` matches LVGL ``INDEV_TYPE.POINTER`` (touchscreens, mice, pens).
+    """
 
     UNDEFINED = const(-1)
     HOST = const(0x01)
-    TOUCH = const(0x02)
+    POINTER = const(0x02)
     ENCODER = const(0x03)
     KEYPAD = const(0x04)
     JOYSTICK = const(0x05)
