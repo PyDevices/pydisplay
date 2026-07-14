@@ -3,7 +3,6 @@ const CACHE_NAME = 'pydisplay-pwa-v1';
 
 const STATIC_ASSETS = [
   './index.html',
-  './load.html',
   './micropython.html',
   './pyodide.html',
   './simple.html',

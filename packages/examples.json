@@ -137,6 +137,14 @@
       "github:PyDevices/pydisplay/src/examples/nano_gui_simpletest.py"
     ],
     [
+      "p4a_spec_engine.py",
+      "github:PyDevices/pydisplay/src/examples/p4a_spec_engine.py"
+    ],
+    [
+      "p4a_spec_lvgl.py",
+      "github:PyDevices/pydisplay/src/examples/p4a_spec_lvgl.py"
+    ],
+    [
       "paint.py",
       "github:PyDevices/pydisplay/src/examples/paint.py"
     ],
