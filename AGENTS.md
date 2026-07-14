@@ -9,6 +9,14 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 
 ### Environment
 
+- **Cursor Cloud (multi-repo workspace):** do not use a local
+  `.cursor/environment.json` in this repo. The canonical cloud environment lives
+  in [PyDevices/.github](https://github.com/PyDevices/.github) — start Cloud
+  Agents from that repo (or `cmods`) with the saved **Pydevices Cloud
+  Workspace** environment. Its install command is
+  `bash scripts/cloud-workspace-install.sh` (relative to the `.github` checkout),
+  which symlinks `/agent/repos/*` into `~/gh/pydevices/`. See
+  [AGENTS.md there](https://github.com/PyDevices/.github/blob/main/AGENTS.md).
 - Use the repo-root virtualenv at `.venv` for all Python tooling
   (`.venv/bin/python`, `.venv/bin/ruff`). The system `python3` has no project
   dependencies installed.

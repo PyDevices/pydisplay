@@ -8,7 +8,6 @@ web/pyscript/wheels
 
 # Cursor IDE / local debug
 .cursor/*
-!.cursor/environment.json
 
 # Local examples (symlinks to sibling repos — see scripts/personal_examples.py)
 src/examples/spotapi
