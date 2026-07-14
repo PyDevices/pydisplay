@@ -176,7 +176,7 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `palettes_material.py` | Material palette | CPython · MCU | add_ons |
 | `palettes_wheel.py` | Color wheel | CPython · MCU | add_ons |
 | `palettes_cube.py` | RGB cube | CPython · MCU | add_ons |
-| `pbm_simpletest.py` | PBM images | CPython · MCU | add_ons |
+| `pbm_simpletest.py` | PBM images | CPython · MCU | core |
 | `png_test.py` | PNG (experimental) | CPython | add_ons |
 
 ## Widgets and apps

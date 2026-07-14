@@ -346,14 +346,14 @@ script = "examples/pbm_create_new.py"
 kind = "oneshot"
 quit = "native_exit"
 oneshot_timeout_s = 45
-deps = ["add_ons"]
+deps = ["core"]
 
 [examples.pbm_simpletest]
 import = "pbm_simpletest"
 script = "examples/pbm_simpletest.py"
 kind = "oneshot"
 quit = "native_exit"
-deps = ["add_ons"]
+deps = ["core"]
 
 [examples.png_test]
 import = "png_test"
