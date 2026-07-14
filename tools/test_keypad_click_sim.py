@@ -1,21 +1,21 @@
-"""Simulate Keypad level-read behavior for quick clicks (no SDL)."""
+"""Simulate TouchKeypad level-read behavior for quick clicks (no SDL)."""
 
 import sys
 
-sys.path[:0] = ["src/lib", "src/add_ons"]
-
-from touch_keypad import Keypad  # noqa: E402
+sys.path[:0] = ["src/lib"]
 
 from eventsys import events  # noqa: E402
+from eventsys.touch_keypad import TouchKeypad  # noqa: E402
 
 
 class MockBroker:
     def __init__(self):
         self._subs = {}
 
-    def subscribe(self, cb, event_types=None):
-        for et in event_types or []:
-            self._subs.setdefault(et, set()).add(cb)
+    def on(self, event_type, callback):
+        types = event_type if isinstance(event_type, (list, tuple)) else (event_type,)
+        for et in types:
+            self._subs.setdefault(et, set()).add(callback)
 
     def inject(self, event):
         for cb in self._subs.get(event.type, ()):
@@ -34,7 +34,7 @@ def evt(etype, pos):
 
 
 runtime = MockBroker()
-keypad = Keypad(runtime, 2, 233, 7 * 45, 3 * 45, cols=7, rows=3)
+keypad = TouchKeypad(runtime, 2, 233, 7 * 45, 3 * 45, cols=7, rows=3)
 pos = (50, 250)
 
 runtime.inject(evt(events.MOUSEBUTTONDOWN, pos))

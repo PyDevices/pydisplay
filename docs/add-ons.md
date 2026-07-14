@@ -30,7 +30,6 @@ Or copy the add-on modules into `lib/` on your device.
 | `palettes/` | Color palettes (`cube`, `material_design`, `wheel`, `get_palette()`) |
 | `tft_text.py`, `tft_write.py` | russhughes font rendering |
 | `png.py` | PNG support (experimental) |
-| `touch_keypad.py` | On-screen keypad |
 
 Third-party trees copied locally (not in `add_ons.json`):
 

@@ -1,21 +1,21 @@
-"""Keypad must apply translate() so scrolled displays map touch correctly."""
+"""TouchKeypad must apply translate() so scrolled displays map touch correctly."""
 
 import sys
 
-sys.path[:0] = ["src/lib", "src/add_ons"]
-
-from touch_keypad import Keypad  # noqa: E402
+sys.path[:0] = ["src/lib"]
 
 from eventsys import events  # noqa: E402
+from eventsys.touch_keypad import TouchKeypad  # noqa: E402
 
 
 class MockBroker:
     def __init__(self):
         self._subs = {}
 
-    def subscribe(self, cb, event_types=None):
-        for et in event_types or []:
-            self._subs.setdefault(et, set()).add(cb)
+    def on(self, event_type, callback):
+        types = event_type if isinstance(event_type, (list, tuple)) else (event_type,)
+        for et in types:
+            self._subs.setdefault(et, set()).add(callback)
 
     def inject(self, event):
         for cb in self._subs.get(event.type, ()):
@@ -40,7 +40,7 @@ def translate_scrolled(point):
 
 
 runtime = MockBroker()
-keypad = Keypad(runtime, 2, 233, 7 * 45, 3 * 45, cols=7, rows=3, translate=translate_scrolled)
+keypad = TouchKeypad(runtime, 2, 233, 7 * 45, 3 * 45, cols=7, rows=3, translate=translate_scrolled)
 # Window click on visible key row; logical y must be ~250 after translate
 window_pos = (50, 200)
 

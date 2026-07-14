@@ -83,9 +83,9 @@ mip.install("github:PyDevices/pydisplay/board_configs/sdldisplay")  # desktop SD
 
 **Fix:** Use files from [`wokwi/`](../sim/wokwi/). Confirm `main.py` installs the pydisplay bundle and Wokwi board config before `import testris`.
 
-### `IndexError` on last keypad row (touch_keypad example)
+### `IndexError` on last keypad row (`TouchKeypad`)
 
-Known Wokwi simulator quirk — may not reproduce on real hardware.
+Known Wokwi simulator quirk with `eventsys.touch_keypad.TouchKeypad` — may not reproduce on real hardware.
 
 ## Documentation / API reference
 

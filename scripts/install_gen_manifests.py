@@ -61,9 +61,7 @@ WOKWI_BUNDLE_EXCLUDE_DESTS = {
 }
 WOKWI_BUNDLE_EXCLUDE_PREFIXES = ()
 # Dest paths added only to sim/wokwi/pydisplay-bundle.json (not in pydisplay-bundle).
-WOKWI_BUNDLE_EXTRA_DESTS = [
-    "add_ons/touch_keypad.py",
-]
+WOKWI_BUNDLE_EXTRA_DESTS = []
 
 
 def should_include_file(filename):

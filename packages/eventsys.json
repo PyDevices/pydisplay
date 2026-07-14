@@ -41,8 +41,16 @@
       "github:PyDevices/pydisplay/src/lib/eventsys/_touch.py"
     ],
     [
+      "eventsys/joystick_keys.py",
+      "github:PyDevices/pydisplay/src/lib/eventsys/joystick_keys.py"
+    ],
+    [
       "eventsys/keys.py",
       "github:PyDevices/pydisplay/src/lib/eventsys/keys.py"
+    ],
+    [
+      "eventsys/touch_keypad.py",
+      "github:PyDevices/pydisplay/src/lib/eventsys/touch_keypad.py"
     ]
   ],
   "deps": [],

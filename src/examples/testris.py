@@ -6,8 +6,8 @@ Testris game implemented in MicroPython by Brad Barnett.
 # For the display & optional touch drivers
 from board_config import display_drv, runtime
 from displaysys import alloc_buffer
-from touch_keypad import Keypad
-from joystick_keypad import JoystickKeypad
+from eventsys.touch_keypad import TouchKeypad
+from eventsys.joystick_keys import JoystickKeys
 from eventsys.keys import Keys
 try:
     from random import choice  # For random piece selection
@@ -32,7 +32,7 @@ if display_drv.width > display_drv.height:
 
 
 # Setup the keypad
-# Touch keypad uses read_held() for continuous movement; joystick_keypad uses read().
+# TouchKeypad uses read_held() for continuous movement; JoystickKeys uses read().
 START = Keys.K_RETURN  # RETURN
 UNUSED = 0  # Not used
 PAUSE = Keys.K_ESCAPE  # ESCAPE
@@ -42,7 +42,7 @@ CW = Keys.K_f  # F
 LEFT = Keys.K_LEFT  # LEFT
 DOWN = Keys.K_DOWN  # DOWN
 RIGHT = Keys.K_RIGHT  # RIGHT
-keypad = Keypad(
+keypad = TouchKeypad(
     runtime,
     0,
     0,
@@ -51,7 +51,7 @@ keypad = Keypad(
     keys=[START, UNUSED, PAUSE, CW, DROP, CCW, LEFT, DOWN, RIGHT],
 )
 
-joystick_keypad = JoystickKeypad(
+joystick_keys = JoystickKeys(
     runtime,
     joymap={
         1: {
@@ -71,7 +71,7 @@ joystick_keypad = JoystickKeypad(
 def _quit_if_needed(_where):
     # Do not call runtime.poll() from an on_tick callback: on sync librt
     # backends that re-enters the timer path and deadlocks. Auto-service
-    # already dispatches input to Keypad/JoystickKeypad and handles QUIT.
+    # already dispatches input to TouchKeypad/JoystickKeys and handles QUIT.
     if not runtime.quit_requested if runtime else False:
         return False
     display_drv.quit()
@@ -98,7 +98,7 @@ def _test_key_for_test_mode(key=None):
 
 def _gather_keys():
     """Edge + held keys from joystick and touch keypad."""
-    keys = list(joystick_keypad.read())
+    keys = list(joystick_keys.read())
     edge = keypad.read()
     if edge:
         keys.extend(edge)

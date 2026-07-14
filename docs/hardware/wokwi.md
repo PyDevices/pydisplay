@@ -91,7 +91,7 @@ Use a display-only `diagram.json` (no touch I2C wires) with that config.
 
 | Issue | Notes |
 |-------|-------|
-| `touch_keypad.py` IndexError on last row | Wokwi simulator quirk; may not reproduce on hardware |
+| `TouchKeypad` IndexError on last row | Wokwi simulator quirk; may not reproduce on hardware |
 | Old hosted wokwi.com project IDs | May be stale; use in-repo [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/sim/wokwi) |
 
 See also [Troubleshooting](../troubleshooting.md).

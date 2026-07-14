@@ -61,8 +61,16 @@
       "github:PyDevices/pydisplay/src/lib/eventsys/_touch.py"
     ],
     [
+      "lib/eventsys/joystick_keys.py",
+      "github:PyDevices/pydisplay/src/lib/eventsys/joystick_keys.py"
+    ],
+    [
       "lib/eventsys/keys.py",
       "github:PyDevices/pydisplay/src/lib/eventsys/keys.py"
+    ],
+    [
+      "lib/eventsys/touch_keypad.py",
+      "github:PyDevices/pydisplay/src/lib/eventsys/touch_keypad.py"
     ],
     [
       "lib/graphics/__init__.py",
@@ -159,10 +167,6 @@
     [
       "lib/multimer/_backends/sdl2.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_backends/sdl2.py"
-    ],
-    [
-      "add_ons/touch_keypad.py",
-      "github:PyDevices/pydisplay/src/add_ons/touch_keypad.py"
     ]
   ],
   "version": "0.0.1"

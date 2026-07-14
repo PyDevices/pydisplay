@@ -41,10 +41,6 @@
       "github:PyDevices/pydisplay/src/add_ons/itertools.py"
     ],
     [
-      "joystick_keypad.py",
-      "github:PyDevices/pydisplay/src/add_ons/joystick_keypad.py"
-    ],
-    [
       "keypins.py",
       "github:PyDevices/pydisplay/src/add_ons/keypins.py"
     ],
@@ -75,10 +71,6 @@
     [
       "tft_write.py",
       "github:PyDevices/pydisplay/src/add_ons/tft_write.py"
-    ],
-    [
-      "touch_keypad.py",
-      "github:PyDevices/pydisplay/src/add_ons/touch_keypad.py"
     ],
     [
       "touch_setup.py",
@@ -193,6 +185,10 @@
       "github:PyDevices/pydisplay/src/add_ons/palettes/wheel.py"
     ],
     [
+      "pdwidgets/WIDGET_DEPS.md",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/WIDGET_DEPS.md"
+    ],
+    [
       "pdwidgets/__init__.py",
       "github:PyDevices/pydisplay/src/add_ons/pdwidgets/__init__.py"
     ],
@@ -201,16 +197,40 @@
       "github:PyDevices/pydisplay/src/add_ons/pdwidgets/_constants.py"
     ],
     [
+      "pdwidgets/_focus.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/_focus.py"
+    ],
+    [
       "pdwidgets/_themes.py",
       "github:PyDevices/pydisplay/src/add_ons/pdwidgets/_themes.py"
+    ],
+    [
+      "pdwidgets/_util.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/_util.py"
     ],
     [
       "pdwidgets/console.py",
       "github:PyDevices/pydisplay/src/add_ons/pdwidgets/console.py"
     ],
     [
+      "pdwidgets/display.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/display.py"
+    ],
+    [
       "pdwidgets/pct.py",
       "github:PyDevices/pydisplay/src/add_ons/pdwidgets/pct.py"
+    ],
+    [
+      "pdwidgets/screen.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/screen.py"
+    ],
+    [
+      "pdwidgets/task.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/task.py"
+    ],
+    [
+      "pdwidgets/widget.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widget.py"
     ],
     [
       "pdwidgets/icons/LICENSE",
@@ -535,6 +555,210 @@
     [
       "pdwidgets/icons/warning_48dp.pbm",
       "github:PyDevices/pydisplay/src/add_ons/pdwidgets/icons/warning_48dp.pbm"
+    ],
+    [
+      "pdwidgets/widgets/__init__.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/__init__.py"
+    ],
+    [
+      "pdwidgets/widgets/_layout.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/_layout.py"
+    ],
+    [
+      "pdwidgets/widgets/accordion.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/accordion.py"
+    ],
+    [
+      "pdwidgets/widgets/app_bar.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/app_bar.py"
+    ],
+    [
+      "pdwidgets/widgets/badge.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/badge.py"
+    ],
+    [
+      "pdwidgets/widgets/bottom_sheet.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/bottom_sheet.py"
+    ],
+    [
+      "pdwidgets/widgets/button.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/button.py"
+    ],
+    [
+      "pdwidgets/widgets/card.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/card.py"
+    ],
+    [
+      "pdwidgets/widgets/chart.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/chart.py"
+    ],
+    [
+      "pdwidgets/widgets/check_box.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/check_box.py"
+    ],
+    [
+      "pdwidgets/widgets/chip.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/chip.py"
+    ],
+    [
+      "pdwidgets/widgets/color_picker.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/color_picker.py"
+    ],
+    [
+      "pdwidgets/widgets/column.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/column.py"
+    ],
+    [
+      "pdwidgets/widgets/date_picker.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/date_picker.py"
+    ],
+    [
+      "pdwidgets/widgets/dialog.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/dialog.py"
+    ],
+    [
+      "pdwidgets/widgets/digital_clock.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/digital_clock.py"
+    ],
+    [
+      "pdwidgets/widgets/divider.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/divider.py"
+    ],
+    [
+      "pdwidgets/widgets/drawer.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/drawer.py"
+    ],
+    [
+      "pdwidgets/widgets/dropdown.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/dropdown.py"
+    ],
+    [
+      "pdwidgets/widgets/form.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/form.py"
+    ],
+    [
+      "pdwidgets/widgets/form_row.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/form_row.py"
+    ],
+    [
+      "pdwidgets/widgets/gauge.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/gauge.py"
+    ],
+    [
+      "pdwidgets/widgets/grid.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/grid.py"
+    ],
+    [
+      "pdwidgets/widgets/icon.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/icon.py"
+    ],
+    [
+      "pdwidgets/widgets/icon_button.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/icon_button.py"
+    ],
+    [
+      "pdwidgets/widgets/image.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/image.py"
+    ],
+    [
+      "pdwidgets/widgets/keyboard.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/keyboard.py"
+    ],
+    [
+      "pdwidgets/widgets/label.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/label.py"
+    ],
+    [
+      "pdwidgets/widgets/list_view.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/list_view.py"
+    ],
+    [
+      "pdwidgets/widgets/menu.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/menu.py"
+    ],
+    [
+      "pdwidgets/widgets/navigator.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/navigator.py"
+    ],
+    [
+      "pdwidgets/widgets/number_stepper.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/number_stepper.py"
+    ],
+    [
+      "pdwidgets/widgets/page.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/page.py"
+    ],
+    [
+      "pdwidgets/widgets/password_field.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/password_field.py"
+    ],
+    [
+      "pdwidgets/widgets/pin_pad.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/pin_pad.py"
+    ],
+    [
+      "pdwidgets/widgets/progress_bar.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/progress_bar.py"
+    ],
+    [
+      "pdwidgets/widgets/radio_button.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/radio_button.py"
+    ],
+    [
+      "pdwidgets/widgets/radio_group.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/radio_group.py"
+    ],
+    [
+      "pdwidgets/widgets/row.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/row.py"
+    ],
+    [
+      "pdwidgets/widgets/scroll_bar.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/scroll_bar.py"
+    ],
+    [
+      "pdwidgets/widgets/scroll_view.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/scroll_view.py"
+    ],
+    [
+      "pdwidgets/widgets/segmented_control.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/segmented_control.py"
+    ],
+    [
+      "pdwidgets/widgets/slider.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/slider.py"
+    ],
+    [
+      "pdwidgets/widgets/spinner.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/spinner.py"
+    ],
+    [
+      "pdwidgets/widgets/switch.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/switch.py"
+    ],
+    [
+      "pdwidgets/widgets/tab_view.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/tab_view.py"
+    ],
+    [
+      "pdwidgets/widgets/text_box.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/text_box.py"
+    ],
+    [
+      "pdwidgets/widgets/text_input.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/text_input.py"
+    ],
+    [
+      "pdwidgets/widgets/toast.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/toast.py"
+    ],
+    [
+      "pdwidgets/widgets/toggle.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/toggle.py"
+    ],
+    [
+      "pdwidgets/widgets/toggle_button.py",
+      "github:PyDevices/pydisplay/src/add_ons/pdwidgets/widgets/toggle_button.py"
     ],
     [
       "pixel_sim/__init__.py",

@@ -2,50 +2,61 @@
 #
 # SPDX-License-Identifier: MIT
 """
-`touch_keypad`
-====================================================
+Optional eventsys mapper: on-screen cell-grid keypad over pointer events.
 
-Matrix keypad helper for touch displays on displaysys.
+``TouchKeypad`` is **not** a :class:`~eventsys.KeypadDevice`.  It does not poll
+hardware or enqueue events.  It subscribes to a :class:`~eventsys.Runtime` and
+maps primary-button pointer presses inside a rectangle into a grid of app key
+ids.  Matching ``KEYDOWN`` / ``KEYUP`` values that appear in ``keys`` are
+tracked the same way.
 
-Divides the display into a grid of rows and columns.
-Returns the key number of the associated cell pressed.
+Import explicitly (not loaded by ``import eventsys``)::
 
-Also passes through the key from any KEYDOWN events from the display.
+    from eventsys.touch_keypad import TouchKeypad
 
-Callback idiom (canonical — no app poll loop; the runtime auto-service dispatches):
-from touch_keypad import Keypad
-from board_config import display_drv, runtime
+Callback idiom (canonical — runtime auto-service dispatches)::
 
-keys = [1, 2, 3, "A", "B", "C", "play", "pause", "esc"]
-keypad = Keypad(
-    runtime, 0, 0, display_drv.width, display_drv.height,
-    cols=3, rows=3, keys=keys,
-    on_press=lambda key: print("down", key),
-    on_release=lambda key: print("up", key),
-)
-runtime.run_forever()
+    from board_config import display_drv, runtime
+    from eventsys.touch_keypad import TouchKeypad
 
-Poll idiom (legacy — still supported):
-keypad = Keypad(runtime, 0, 0, display_drv.width, display_drv.height, cols=3, rows=3, keys=keys)
-while True:
-    runtime.poll()
-    if keys := keypad.read():
-        print(keys)
-    # For held-key polling (e.g. continuous movement), use keypad.read_held()
+    keys = [1, 2, 3, "A", "B", "C", "play", "pause", "esc"]
+    pad = TouchKeypad(
+        runtime, 0, 0, display_drv.width, display_drv.height,
+        cols=3, rows=3, keys=keys,
+        on_press=lambda key: print("down", key),
+        on_release=lambda key: print("up", key),
+    )
+    runtime.run_forever()
+
+Poll idiom (legacy)::
+
+    pad = TouchKeypad(runtime, 0, 0, display_drv.width, display_drv.height,
+                      cols=3, rows=3, keys=keys)
+    while True:
+        runtime.poll()
+        if pressed := pad.read():
+            print(pressed)
+        # Continuous movement: pad.read_held()
 """
 
-from eventsys import events
+from ._events import events
 
 try:
     from graphics import Area
 except ImportError:
-    print(
-        "touch_keypad:  graphics module not found.  Keypad.areas attribute will not be available."
-    )
+    print("eventsys.touch_keypad: graphics not found; TouchKeypad.areas unavailable.")
     Area = None
 
 
-class Keypad:
+class TouchKeypad:
+    """Map a screen rectangle into a grid of app keys (pointer + optional keys).
+
+    Subscribes to ``MOUSEBUTTONDOWN`` / ``MOUSEBUTTONUP`` (button 1) and
+    ``KEYDOWN`` / ``KEYUP`` on ``runtime``.  Grid cells use ``keys`` (default
+    ``0 .. cols*rows-1``).  Optional ``on_press`` / ``on_release`` fire from
+    dispatch; ``read()`` / ``read_held()`` support poll loops.
+    """
+
     def __init__(
         self,
         runtime,
@@ -62,9 +73,8 @@ class Keypad:
     ):
         self._keys = keys if keys else list(range(cols * rows))
         self._runtime = runtime
-        # Optional push callbacks: fired directly from the event dispatch so the
-        # app never polls (the canonical callback idiom). ``read()`` still works
-        # for legacy poll loops.
+        # Optional push callbacks: fired from event dispatch so the app need
+        # not poll.  ``read()`` still works for legacy poll loops.
         self._on_press = on_press
         self._on_release = on_release
         self.x = x
@@ -96,8 +106,8 @@ class Keypad:
                 return
             col = int((x - self.x) / self.key_width)
             row = int((y - self.y) / self.key_height)
-            # BUG:  Sometimes throws an IndexError in Wokwi if the touch is on the last line
-            # Instead of doing a bounds check we just catch the exception.
+            # BUG: Sometimes IndexError on Wokwi if touch is on the last line;
+            # catch instead of a bounds check.
             try:
                 key = self._keys[row * self.cols + col]
                 pressed = event.type == events.MOUSEBUTTONDOWN
