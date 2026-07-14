@@ -5,6 +5,10 @@
       "./src/examples/tower_climb/__init__.py"
     ],
     [
+      "tower_climb/_cfg.py",
+      "./src/examples/tower_climb/_cfg.py"
+    ],
+    [
       "tower_climb/_paths.py",
       "./src/examples/tower_climb/_paths.py"
     ],
