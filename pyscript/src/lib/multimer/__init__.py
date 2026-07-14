@@ -26,14 +26,14 @@ def _select_sleep_ms():
     """Bind ``sleep_ms`` to the variant matching the active timer backend.
 
     * async-only runtimes (PyScript/Jupyter): the awaitable async sleep;
-    * signal-delivered sync backends (librt): the no-pump sleep;
+    * signal-based sync backends (librt): the no-pump sleep;
     * pump-based sync backends (win32 APC, SDL2, threading): the pumping sleep.
     """
     from . import _select
 
     if _select._async_only_runtime():
         return _sleep_ms_async
-    if _select._signal_delivered:
+    if _select._uses_signals:
         return _sleep_ms_signal
     return _sleep_ms_pump
 
@@ -41,10 +41,10 @@ def _select_sleep_ms():
 sleep_ms = _select_sleep_ms()
 
 
-def signal_delivered():
-    """True when the active sync backend delivers timer callbacks on its own.
+def uses_signals():
+    """True when the active sync backend fires timers via OS signals.
 
-    Signal-delivered backends (librt POSIX-timer signal) fire on the main thread
+    Signal backends (librt POSIX-timer signal) run callbacks on the main thread
     during a plain sleep, so at an interactive prompt the timer keeps ticking
     with no pump loop. Pump-based backends (win32 APC, SDL2, threading) and the
     async-only runtimes return False. Public accessor so callers (e.g.
@@ -52,7 +52,7 @@ def signal_delivered():
     """
     from . import _select
 
-    return bool(_select._signal_delivered)
+    return bool(_select._uses_signals)
 
 
 __all__ = [
@@ -63,12 +63,12 @@ __all__ = [
     "run_deadline_hook",
     "schedule",
     "set_deadline_hook",
-    "signal_delivered",
     "sleep_ms",
     "ticks_add",
     "ticks_diff",
     "ticks_less",
     "ticks_ms",
+    "uses_signals",
 ]
 
 

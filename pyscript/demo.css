@@ -1,11 +1,11 @@
 /*
  * pydisplay PyScript demo — runtime/stage stylesheet
  *
- * Loaded *in addition to* site.css (shared PyDevices chrome) by load.html
- * only. Everything here is specific to the parametric loader's interactive
- * UI (device bezel, canvas, console, run controls) so it stays independent
- * of org-wide chrome updates. index.html (the gallery) does not need this
- * file — it has no stage/console UI.
+ * Loaded *in addition to* site.css (shared PyDevices chrome) by micropython.html
+ * and pyodide.html. Everything here is specific to the parametric loader's
+ * interactive UI (device bezel, canvas, console, run controls) so it stays
+ * independent of org-wide chrome updates. index.html (the gallery) does not
+ * need this file — it has no stage/console UI.
  */
 
 html {
@@ -75,7 +75,7 @@ html {
   margin-bottom: 26px;
 }
 
-.play-area > .loading {
+.play-area > .stage-controls {
   grid-column: 1;
   grid-row: 1;
 }
@@ -88,6 +88,22 @@ html {
 .play-area > .console-panel {
   grid-column: 2;
   grid-row: 2;
+}
+
+.stage-controls {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.run-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: none;
 }
 
 .display-column {
@@ -113,13 +129,13 @@ html {
     grid-template-rows: auto auto auto;
   }
 
-  .play-area > .loading,
+  .play-area > .stage-controls,
   .play-area > .display-column,
   .play-area > .console-panel {
     grid-column: 1;
   }
 
-  .play-area > .loading {
+  .play-area > .stage-controls {
     grid-row: 1;
   }
 
@@ -149,6 +165,7 @@ html {
   display: flex;
   gap: 10px;
   align-items: center;
+  flex: none;
 }
 
 .device {

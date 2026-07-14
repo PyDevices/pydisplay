@@ -7,6 +7,10 @@
     <title>pydisplay — PyScript demos</title>
     <meta name="description" content="Experimental browser demos of pydisplay, running MicroPython in the browser with PyScript.">
     <link rel="icon" type="image/svg+xml" href="https://pydevices.github.io/assets/img/logo.svg">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#f54e00">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <link rel="stylesheet" href="./pwa.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap">
@@ -26,10 +30,14 @@
                 <a href="https://pydisplay.readthedocs.io">Docs</a>
                 <a href="https://github.com/PyDevices/pydisplay">GitHub</a>
             </nav>
-            <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Toggle color theme">
-                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            </button>
+            <div class="header-tools">
+                <button type="button" class="pwa-install-btn" id="pwa-install-btn">Install app</button>
+                <button type="button" class="runtime-toggle" id="runtime-toggle" aria-label="Demo links use MicroPython" title="Click to open demos in Python (Pyodide)">MP</button>
+                <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Toggle color theme">
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -57,7 +65,7 @@
             </div>
             <div class="grid">
                 <!-- GEN:demos:start -->
-                <a class="card" href="load.html?modules=pydisplay_demo" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=pydisplay_demo" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                         <span class="tag featured">featured</span>
@@ -66,7 +74,7 @@
                     <p>pydisplay_demo.py — flagship board_config demo: clicks, rotation, scrolling.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=testris" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=testris" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                         <span class="tag featured">featured</span>
@@ -75,7 +83,7 @@
                     <p>Testris game implemented in MicroPython by Brad Barnett.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?manifests=alien" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?manifests=alien" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -83,7 +91,7 @@
                     <p>Bounce a bitmap of an alien around the display.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=bouncing_balls" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=bouncing_balls" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -91,7 +99,7 @@
                     <p>Animate colored balls bouncing inside the display.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=boxlines" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=boxlines" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -99,7 +107,7 @@
                     <p>Test for lines and rectangles.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=calc_graphics,calc_engine" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=calc_graphics,calc_engine" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -107,7 +115,7 @@
                     <p>Dark-theme pocket calculator drawn with ``graphics.FrameBuffer``.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=calc_lvgl,calc_engine" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=calc_lvgl,calc_engine" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -115,7 +123,7 @@
                     <p>Dark-theme pocket calculator built with LVGL.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=calc_widgets,calc_engine" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=calc_widgets,calc_engine" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -123,7 +131,7 @@
                     <p>Dark-theme pocket calculator built with ``pdwidgets``.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?manifests=chango" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?manifests=chango" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -131,7 +139,7 @@
                     <p>Test for TrueType write_font_converter.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=color_test" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=color_test" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -139,7 +147,7 @@
                     <p>Test color with gradients.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=console_advanced_demo" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=console_advanced_demo" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -147,7 +155,7 @@
                     <p>console_advanced_demo.py - Advanced demo of the mpconsole module</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=console_simpletest" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=console_simpletest" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -155,7 +163,7 @@
                     <p>Call `console.hide()` to use the display for something else.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=displaybuf_simpletest" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=displaybuf_simpletest" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -163,7 +171,7 @@
                     <p>displaybuf_simpletest.py - Simple test program for displaybuf.py</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=displaysys_block_test" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=displaysys_block_test" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -171,7 +179,7 @@
                     <p>The <code>displaysys_block_test</code> demo running in the browser via PyScript.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=displaysys_fill_rect_test" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=displaysys_fill_rect_test" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -179,7 +187,7 @@
                     <p>The <code>displaysys_fill_rect_test</code> demo running in the browser via PyScript.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=eventsys_encoder_test" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=eventsys_encoder_test" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -187,7 +195,7 @@
                     <p>A simple test of an encoder in eventsys.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=eventsys_simpletest" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=eventsys_simpletest" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -195,7 +203,7 @@
                     <p>The <code>eventsys_simpletest</code> demo running in the browser via PyScript.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=eventsys_touch_test" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=eventsys_touch_test" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -203,7 +211,7 @@
                     <p>eventsys_touch_test.py - Touch rotation test.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=feathers" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=feathers" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -211,7 +219,7 @@
                     <p>Modified by Brad Barnett from Russ Hughes's original to scroll vertically instead of horizontally</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=fonts" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=fonts" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -219,7 +227,7 @@
                     <p>Test text_font_converter.py</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=framebuf_simpletest" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=framebuf_simpletest" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -227,7 +235,7 @@
                     <p>Simple test example to demonstrate the use of framebuf.FrameBuffer.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=framebuf_text_compare" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=framebuf_text_compare" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -235,7 +243,7 @@
                     <p>Visual text compare: framebuf and graphics, native C vs Python.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=graphics_simpletest" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=graphics_simpletest" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -243,7 +251,7 @@
                     <p>Simple test example to demonstrate the use of graphics.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=hello" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=hello" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -251,7 +259,7 @@
                     <p>Test for text_font_converter.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=joystick_list_select" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=joystick_list_select" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -259,7 +267,7 @@
                     <p>The <code>joystick_list_select</code> demo running in the browser via PyScript.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=keypins_simpletest" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=keypins_simpletest" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -267,7 +275,7 @@
                     <p>The <code>keypins_simpletest</code> demo running in the browser via PyScript.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=logo" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=logo" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -275,7 +283,7 @@
                     <p>Draws the PyDevices logo using only pydisplay's own graphics primitives -- no SVG import or renderer needed.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=lv_test_timer" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=lv_test_timer" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -283,7 +291,7 @@
                     <p>LVGL timer smoke test. Uses whatever timer mode ``board_config`` / ``runtime``</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=micro_gui_simpletest&packages=micropython-micro-gui" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=micro_gui_simpletest&packages=micropython-micro-gui" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -291,7 +299,7 @@
                     <p>micro_gui_simpletest.py - Smoke test for micropython-micro-gui on pydisplay.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=nano_gui_simpletest&packages=micropython-nano-gui" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=nano_gui_simpletest&packages=micropython-nano-gui" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -299,7 +307,7 @@
                     <p>nano_gui_simpletest.py - Copied from:</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?manifests=noto_fonts" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?manifests=noto_fonts" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -307,7 +315,7 @@
                     <p>Test for TrueType write_font_converter.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=paint" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=paint" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -315,31 +323,7 @@
                     <p>A simple paint application demonstrating the use of displaysys.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=palettes_cube" target="_blank" rel="noopener noreferrer">
-                    <div class="card-top">
-                        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-                    </div>
-                    <h3>Palettes Cube</h3>
-                    <p>The <code>palettes_cube</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="load.html?modules=palettes_material" target="_blank" rel="noopener noreferrer">
-                    <div class="card-top">
-                        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-                    </div>
-                    <h3>Palettes Material</h3>
-                    <p>The <code>palettes_material</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="load.html?modules=palettes_wheel" target="_blank" rel="noopener noreferrer">
-                    <div class="card-top">
-                        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-                    </div>
-                    <h3>Palettes Wheel</h3>
-                    <p>The <code>palettes_wheel</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="load.html?modules=pbm_create_new" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=pbm_create_new" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -347,7 +331,7 @@
                     <p>The <code>pbm_create_new</code> demo running in the browser via PyScript.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=pixel_sim_demos" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=pixel_sim_demos" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -355,7 +339,7 @@
                     <p>pixel_sim_demos.py — NeoPixel simulator effects in one file.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?manifests=proverbs" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?manifests=proverbs" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -363,15 +347,15 @@
                     <p>Test for TrueType write_font_converter.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=rotations" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=rotations" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Rotations</h3>
-                    <p>Test for rotations and colors.</p>
+                    <p>Rotates the display 0, 90, 180, and 270 degrees and displays the rotation</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=scroll" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=scroll" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -379,23 +363,7 @@
                     <p>Test for hardware scrolling.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=scroll_touch_test" target="_blank" rel="noopener noreferrer">
-                    <div class="card-top">
-                        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-                    </div>
-                    <h3>Scroll Touch Test</h3>
-                    <p>The <code>scroll_touch_test</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="load.html?modules=scroll_touch_test_displaybuf" target="_blank" rel="noopener noreferrer">
-                    <div class="card-top">
-                        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-                    </div>
-                    <h3>Scroll Touch Test Displaybuf</h3>
-                    <p>The <code>scroll_touch_test_displaybuf</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="load.html?modules=tiny_hello" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=tiny_hello" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -403,7 +371,7 @@
                     <p>Test text_font_converter on small displays.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?manifests=tiny_toasters" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?manifests=tiny_toasters" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -411,7 +379,7 @@
                     <p>Test sprites_converter.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=touch_gui_simpletest&packages=micropython-touch" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=touch_gui_simpletest&packages=micropython-touch" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -419,7 +387,7 @@
                     <p>touch_gui_simpletest.py - Smoke test for micropython-touch on pydisplay.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=widgets_actions" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=widgets_actions" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -427,15 +395,7 @@
                     <p>Showcase :class:`~pdwidgets.Menu` / :class:`~pdwidgets.ContextMenu`,</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=widgets_console" target="_blank" rel="noopener noreferrer">
-                    <div class="card-top">
-                        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-                    </div>
-                    <h3>Widgets Console</h3>
-                    <p>The <code>widgets_console</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="load.html?modules=widgets_demo" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=widgets_demo" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -443,7 +403,7 @@
                     <p>The <code>widgets_demo</code> demo running in the browser via PyScript.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=widgets_device_panel" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=widgets_device_panel" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -451,7 +411,7 @@
                     <p>A fictional "Aurora Synth" control panel built entirely from pdwidgets.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=widgets_form_kitchen" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=widgets_form_kitchen" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -459,7 +419,7 @@
                     <p>Showcase :class:`~pdwidgets.FormRow`, :class:`~pdwidgets.Divider`,</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=widgets_gauge_dash" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=widgets_gauge_dash" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -467,15 +427,7 @@
                     <p>Showcase :class:`~pdwidgets.Gauge` / :class:`~pdwidgets.Arc`,</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=widgets_list" target="_blank" rel="noopener noreferrer">
-                    <div class="card-top">
-                        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-                    </div>
-                    <h3>Widgets List</h3>
-                    <p>Test ListView widget</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="load.html?modules=widgets_media_busy" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=widgets_media_busy" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -483,7 +435,7 @@
                     <p>Showcase :class:`~pdwidgets.Image`, :class:`~pdwidgets.Spinner`,</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=widgets_nav_tabs" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=widgets_nav_tabs" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -491,7 +443,7 @@
                     <p>Showcase :class:`~pdwidgets.AppBar`, :class:`~pdwidgets.Page`,</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=widgets_percent" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=widgets_percent" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -499,7 +451,7 @@
                     <p>The <code>widgets_percent</code> demo running in the browser via PyScript.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=widgets_pickers" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=widgets_pickers" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -507,15 +459,7 @@
                     <p>Showcase :class:`~pdwidgets.ColorPicker` and :class:`~pdwidgets.DatePicker`.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=widgets_scrollbar" target="_blank" rel="noopener noreferrer">
-                    <div class="card-top">
-                        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-                    </div>
-                    <h3>Widgets Scrollbar</h3>
-                    <p>The <code>widgets_scrollbar</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="load.html?modules=widgets_settings" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=widgets_settings" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -523,7 +467,7 @@
                     <p>A settings / preferences screen that exercises pdwidgets controls together:</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=widgets_sheets" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=widgets_sheets" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
@@ -531,28 +475,12 @@
                     <p>Showcase :class:`~pdwidgets.Drawer`, :class:`~pdwidgets.BottomSheet`,</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
-                <a class="card" href="load.html?modules=widgets_smartwatch" target="_blank" rel="noopener noreferrer">
+                <a class="card" href="micropython.html?modules=widgets_smartwatch" target="_blank" rel="noopener noreferrer">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Widgets Smartwatch</h3>
                     <p>A smartwatch-style interface built with pdwidgets.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="load.html?modules=widgets_stub" target="_blank" rel="noopener noreferrer">
-                    <div class="card-top">
-                        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-                    </div>
-                    <h3>Widgets Stub</h3>
-                    <p>The <code>widgets_stub</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="load.html?modules=widgets_test" target="_blank" rel="noopener noreferrer">
-                    <div class="card-top">
-                        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-                    </div>
-                    <h3>Widgets Test</h3>
-                    <p>The <code>widgets_test</code> demo running in the browser via PyScript.</p>
                     <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
             <!-- GEN:demos:end -->
@@ -584,6 +512,16 @@
                     <p>An interactive MicroPython prompt with <code>mip</code> ready for installing examples.</p>
                     <span class="go">Open tool <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                 </a>
+
+                <a class="card" href="pyodide.html?modules=calc_graphics,calc_engine">
+                    <div class="card-top">
+                        <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3"/></svg></span>
+                        <span class="tag tool">pyodide</span>
+                    </div>
+                    <h3>Pyodide</h3>
+                    <p>Dev loader for one or more top-level example modules under CPython WASM. Gallery cards can target this via the header <strong>Py</strong> / <strong>MP</strong> toggle.</p>
+                    <span class="go">Open tool <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                </a>
             </div>
         </section>
 
@@ -606,5 +544,85 @@
             <span><a href="https://github.com/PyDevices/pydisplay">PyDevices/pydisplay</a></span>
         </div>
     </footer>
+
+    <script src="./pwa.js"></script>
+    <script>
+        (function () {
+            var STORAGE_KEY = 'pydevices-gallery-loader';
+            var LOADERS = {
+                micropython: {
+                    file: 'micropython.html',
+                    label: 'MP',
+                    aria: 'Demo links use MicroPython; click to switch to Python',
+                    title: 'Demos open in MicroPython — click for Python (Pyodide)',
+                },
+                pyodide: {
+                    file: 'pyodide.html',
+                    label: 'Py',
+                    aria: 'Demo links use Python; click to switch to MicroPython',
+                    title: 'Demos open in Python (Pyodide) — click for MicroPython',
+                },
+            };
+
+            function readChoice() {
+                try {
+                    var v = localStorage.getItem(STORAGE_KEY);
+                    if (v === 'load') return 'micropython'; // pre-rename preference
+                    if (v === 'pyodide' || v === 'micropython') return v;
+                } catch (e) {}
+                return 'micropython';
+            }
+
+            function writeChoice(key) {
+                try {
+                    localStorage.setItem(STORAGE_KEY, key);
+                } catch (e) {}
+            }
+
+            function rewriteDemoLinks(file) {
+                var cards = document.querySelectorAll('#demos a.card[href]');
+                for (var i = 0; i < cards.length; i++) {
+                    var a = cards[i];
+                    var href = a.getAttribute('href') || '';
+                    var next = href
+                        .replace(/(^|\/)(?:load|micropython)\.html(?=\?|$)/, '$1' + file)
+                        .replace(/(^|\/)pyodide\.html(?=\?|$)/, '$1' + file);
+                    if (next !== href) {
+                        a.setAttribute('href', next);
+                    }
+                }
+            }
+
+            function apply(key) {
+                var cfg = LOADERS[key] || LOADERS.micropython;
+                rewriteDemoLinks(cfg.file);
+                var btn = document.getElementById('runtime-toggle');
+                if (btn) {
+                    btn.textContent = cfg.label;
+                    btn.setAttribute('aria-label', cfg.aria);
+                    btn.title = cfg.title;
+                    btn.setAttribute('data-loader', key);
+                }
+                var eyebrow = document.querySelector('.hero .eyebrow');
+                if (eyebrow) {
+                    eyebrow.textContent = key === 'pyodide'
+                        ? 'PyScript · Python (Pyodide) in the browser'
+                        : 'PyScript · MicroPython in the browser';
+                }
+            }
+
+            var current = readChoice();
+            apply(current);
+
+            var btn = document.getElementById('runtime-toggle');
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    current = current === 'micropython' ? 'pyodide' : 'micropython';
+                    writeChoice(current);
+                    apply(current);
+                });
+            }
+        })();
+    </script>
 </body>
 </html>

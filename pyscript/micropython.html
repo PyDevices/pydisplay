@@ -4,16 +4,20 @@
     <meta charset="utf-8">
     <script>try{if(localStorage.getItem('pydevices-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}</script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Loader — pydisplay demo</title>
+    <title>Loader — pydisplay MicroPython</title>
     <meta name="description" content="Run pydisplay demos by name via the parametric PyScript loader.">
     <link rel="icon" type="image/svg+xml" href="https://pydevices.github.io/assets/img/logo.svg">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#f54e00">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <link rel="stylesheet" href="./pwa.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap">
     <link rel="stylesheet" href="./site.css">
     <link rel="stylesheet" href="./demo.css">
     <link rel="stylesheet" href="./vendor/core.css">
-    <script src="./mini-coi-fd.js"></script>
+    <script src="./pwa.js"></script>
     <script type="module" src="./vendor/core.js"></script>
     <script src="https://pydevices.github.io/assets/js/theme-toggle.js" defer></script>
 </head>
@@ -29,12 +33,33 @@
                 <a href="https://pydisplay.readthedocs.io">Docs</a>
                 <a href="https://github.com/PyDevices/pydisplay">GitHub</a>
             </nav>
-            <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Toggle color theme">
-                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            </button>
+            <div class="header-tools">
+                <button type="button" class="pwa-install-btn" id="pwa-install-btn">Install app</button>
+                <a class="runtime-toggle" id="runtime-toggle" href="./pyodide.html" aria-label="Switch to Pyodide" title="Open this demo in Pyodide">Py</a>
+                <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Toggle color theme">
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+            </div>
         </div>
     </header>
+
+    <script>
+        (function () {
+            var a = document.getElementById('runtime-toggle');
+            if (!a) return;
+            var path = window.location.pathname;
+            var next;
+            if (/micropython\.html$/i.test(path) || /load\.html$/i.test(path)) {
+                next = path.replace(/(?:micropython|load)\.html$/i, 'pyodide.html');
+            } else if (/pyodide\.html$/i.test(path)) {
+                next = path.replace(/pyodide\.html$/i, 'micropython.html');
+            } else {
+                return;
+            }
+            a.href = next + window.location.search + window.location.hash;
+        })();
+    </script>
 
     <main class="wrap loader-main">
         <nav class="crumbs">
@@ -56,15 +81,17 @@
         <p id="loader-param" hidden aria-hidden="true"></p>
 
         <div class="play-area" id="play-area">
-            <div class="loading" id="loading">
-                <span class="spinner"></span> <span id="status">Loading PyScript runtime…</span>
+            <div class="stage-controls">
+                <div class="run-bar">
+                    <button id="run-btn" class="btn primary" disabled>Run</button>
+                </div>
+                <div class="loading" id="loading">
+                    <span class="spinner"></span> <span id="status">Loading MicroPython runtime…</span>
+                </div>
             </div>
             <div class="display-column">
                 <div class="device">
                     <canvas id="display_canvas" width="320" height="480" tabindex="0"></canvas>
-                </div>
-                <div class="run-bar">
-                    <button id="run-btn" class="btn primary" disabled>Run</button>
                 </div>
             </div>
 
@@ -193,7 +220,7 @@
             function abortLoader(bad) {
                 var main = document.querySelector('main.loader-main');
                 var names = bad.map(function (n) { return JSON.stringify(n); }).join(', ');
-                document.title = 'Invalid query — pydisplay demo';
+                document.title = 'Invalid query — pydisplay MicroPython';
                 var meta = document.querySelector('meta[name="description"]');
                 if (meta) {
                     meta.content = 'Invalid parametric loader query.';
@@ -237,7 +264,7 @@
                     return;
                 }
                 const label = titleCaseStem(entry);
-                document.title = label + ' — pydisplay demo';
+                document.title = label + ' — pydisplay MicroPython';
                 const meta = document.querySelector('meta[name="description"]');
                 if (meta) {
                     meta.content = label + ': a pydisplay demo running in the browser via PyScript.';
@@ -264,7 +291,7 @@
                     installParts.push(plan.manifests.length + ' manifest(s)');
                 }
                 if (lede) {
-                    lede.textContent = 'Parametric loader: ' + installParts.join(', ') +
+                    lede.textContent = 'MicroPython loader: ' + installParts.join(', ') +
                         '. Entry: import ' + entry + '.';
                 }
                 if (metaSource) {
@@ -288,7 +315,7 @@
         })();
     </script>
 
-    <script type="mpy" config="./pyscript.toml" output="log">
+    <script type="mpy" config="./micropython.toml" output="log">
         import builtins
         from js import document
         from pyscript.ffi import create_proxy
@@ -414,7 +441,7 @@
                 _install_packages(packages)
                 _set("Importing " + entry + "…")
                 __import__(entry)
-                _set("Running.")
+                _set("")
             except Exception as e:
                 _log_print("Run failed:", e)
                 _set("Error — see console.")
@@ -427,7 +454,7 @@
             _btn.addEventListener("click", create_proxy(_start))
             _btn.disabled = False
             _set("Runtime ready — click Run.")
-            print("PyScript runtime ready. Click Run to start the demo.")
+            print("MicroPython runtime ready. Click Run to start the demo.")
     </script>
 
     <script>

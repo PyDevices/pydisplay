@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <script>try{if(localStorage.getItem('pydevices-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pyodide — pydisplay</title>
+    <meta name="description" content="Run pydisplay example modules and MIP manifests under Pyodide (CPython WASM).">
+    <link rel="icon" type="image/svg+xml" href="https://pydevices.github.io/assets/img/logo.svg">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#f54e00">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <link rel="stylesheet" href="./pwa.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap">
+    <link rel="stylesheet" href="./site.css">
+    <link rel="stylesheet" href="./demo.css">
+    <link rel="stylesheet" href="./vendor/core.css">
+    <script src="./pwa.js"></script>
+    <script type="module" src="./vendor/core.js"></script>
+    <script src="https://pydevices.github.io/assets/js/theme-toggle.js" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="brand" href="./index.html">
+                <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+                py<span class="accent">display</span>
+            </a>
+            <nav class="nav">
+                <a href="./index.html">Demos</a>
+                <a href="https://pydisplay.readthedocs.io">Docs</a>
+                <a href="https://github.com/PyDevices/pydisplay">GitHub</a>
+            </nav>
+            <div class="header-tools">
+                <button type="button" class="pwa-install-btn" id="pwa-install-btn">Install app</button>
+                <a class="runtime-toggle" id="runtime-toggle" href="./micropython.html" aria-label="Switch to MicroPython" title="Open this demo in MicroPython">MP</a>
+                <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Toggle color theme">
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <script>
+        (function () {
+            var a = document.getElementById('runtime-toggle');
+            if (!a) return;
+            var path = window.location.pathname;
+            var next;
+            if (/micropython\.html$/i.test(path) || /load\.html$/i.test(path)) {
+                next = path.replace(/(?:micropython|load)\.html$/i, 'pyodide.html');
+            } else if (/pyodide\.html$/i.test(path)) {
+                next = path.replace(/pyodide\.html$/i, 'micropython.html');
+            } else {
+                return;
+            }
+            a.href = next + window.location.search + window.location.hash;
+        })();
+    </script>
+
+    <main class="wrap loader-main">
+        <nav class="crumbs">
+            <a href="./index.html">Demos</a>
+            <span class="sep">/</span>
+            <span id="crumb-name">Pyodide</span>
+        </nav>
+
+        <div class="loader-head">
+            <h1 id="loader-title">Pyodide</h1>
+        </div>
+        <p class="loader-lede" id="loader-lede">
+            Dev tool: run examples under Pyodide with
+            <code>?modules=<em>name</em></code> and/or
+            <code>?manifests=<em>name</em></code>
+            (same MIP JSON as <a href="./micropython.html">micropython.html</a>).
+            LVGL demos micropip-install the
+            <code>pyemscripten_2026_0</code> wheel (local
+            <code>./wheels/</code> or lv_cpython_mod Pages).
+            Whichever of modules/manifests comes first supplies the import entry.
+        </p>
+
+        <p id="loader-param" hidden aria-hidden="true"></p>
+
+        <div class="play-area" id="play-area">
+            <div class="stage-controls">
+                <div class="run-bar">
+                    <button id="run-btn" class="btn primary" disabled>Run</button>
+                </div>
+                <div class="loading" id="loading">
+                    <span class="spinner"></span> <span id="status">Loading Python runtime…</span>
+                </div>
+            </div>
+            <div class="display-column">
+                <div class="device">
+                    <canvas id="display_canvas" width="320" height="480" tabindex="0"></canvas>
+                </div>
+            </div>
+
+            <section class="console-panel" aria-label="Console output">
+                <h2 class="console-label">Console output</h2>
+                <div id="log" class="log"></div>
+            </section>
+        </div>
+
+        <div class="meta-layout">
+            <aside class="aside">
+                <div class="panel">
+                    <h2>How to use</h2>
+                    <ul>
+                        <li><code>?modules=</code> — comma-separated top-level module stems (no <code>.py</code>).</li>
+                        <li><code>?manifests=</code> — comma-separated MIP manifest names; each installs <code>&lt;name&gt;.json</code> from this directory (same files as the MicroPython gallery).</li>
+                        <li>Both may appear; whichever param comes <em>first</em> in the URL supplies the import entry point.</li>
+                        <li><code>?packages=</code> is not supported — use <a href="./micropython.html">micropython.html</a> for that.</li>
+                        <li><code># pyodide wheels: lvgl</code> in the entry example → micropip-install
+                            via <code>wheels/lvgl.json</code> (lv_cpython_mod Pages or local
+                            <code>serve.py</code>); override with <code>?lvgl_wheel=</code>.</li>
+                        <li>Click <strong>Run</strong> to install, then import the entry.</li>
+                    </ul>
+                </div>
+                <div class="panel">
+                    <h2>Details</h2>
+                    <div class="meta-row"><span class="k">Runtime</span><span class="v">Pyodide</span></div>
+                    <div class="meta-row"><span class="k">Entry</span><span class="v" id="meta-entry">—</span></div>
+                    <div class="meta-row"><span class="k">Install</span><span class="v" id="meta-install">—</span></div>
+                    <div class="meta-row"><span class="k">Source</span><span class="v" id="meta-source">—</span></div>
+                </div>
+                <div class="actions">
+                    <a class="btn" id="source-link" href="https://github.com/PyDevices/pydisplay/tree/main/src/examples" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> View source</a>
+                    <a class="btn" href="./index.html">Back to demos</a>
+                </div>
+            </aside>
+        </div>
+
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <span>pydisplay — cross-platform display &amp; event drivers</span>
+            <span><a href="https://github.com/PyDevices/pydisplay">PyDevices/pydisplay</a></span>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var SAFE_LOADER_NAME = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+
+            function parseCommaList(raw) {
+                return raw.split(',').map(function (s) {
+                    s = s.trim();
+                    if (s.toLowerCase().endsWith('.py')) {
+                        s = s.slice(0, -3);
+                    }
+                    return s;
+                }).filter(Boolean);
+            }
+
+            function titleCaseStem(stem) {
+                return stem.replace(/_/g, ' ').replace(/\b\w/g, function (c) {
+                    return c.toUpperCase();
+                });
+            }
+
+            function parseLoaderQuery(search) {
+                var modules = [];
+                var manifests = [];
+                var lvglWheel = '';
+                var entryKind = null;
+                var entryName = null;
+                var raw = search.startsWith('?') ? search.slice(1) : search;
+                for (var part of raw.split('&')) {
+                    if (!part) continue;
+                    var eq = part.indexOf('=');
+                    var key = eq === -1 ? part : decodeURIComponent(part.slice(0, eq));
+                    var val = eq === -1 ? '' : decodeURIComponent(part.slice(eq + 1).replace(/\+/g, ' '));
+                    if (key === 'modules') {
+                        var mlist = parseCommaList(val);
+                        if (entryKind === null && mlist.length) {
+                            entryKind = 'module';
+                            entryName = mlist[0];
+                        }
+                        modules.push.apply(modules, mlist);
+                    } else if (key === 'manifests') {
+                        var flist = parseCommaList(val);
+                        if (entryKind === null && flist.length) {
+                            entryKind = 'manifest';
+                            entryName = flist[0];
+                        }
+                        manifests.push.apply(manifests, flist);
+                    } else if (key === 'lvgl_wheel') {
+                        lvglWheel = val.trim();
+                    } else if (key === 'packages') {
+                        return { error: 'unsupported', key: key, modules: modules, manifests: manifests };
+                    }
+                }
+                return {
+                    modules: modules,
+                    manifests: manifests,
+                    lvglWheel: lvglWheel,
+                    entryKind: entryKind,
+                    entryName: entryName,
+                };
+            }
+
+            function abortLoader(messageHtml) {
+                var main = document.querySelector('main.loader-main');
+                document.title = 'Invalid query — pydisplay Pyodide';
+                var meta = document.querySelector('meta[name="description"]');
+                if (meta) {
+                    meta.content = 'Invalid Pyodide loader query.';
+                }
+                if (main) {
+                    main.innerHTML =
+                        '<div class="loader-head"><h1>Invalid query</h1></div>' +
+                        '<div class="panel">' + messageHtml +
+                        '<p><a class="btn" href="./index.html">Back to demos</a></p>' +
+                        '</div>';
+                }
+                window.__pydisplayLoaderDisabled = true;
+            }
+
+            var plan = parseLoaderQuery(window.location.search);
+            if (plan.error === 'unsupported') {
+                abortLoader(
+                    '<p><code>?' + plan.key + '=</code> is not supported on <code>pyodide.html</code>. ' +
+                    'Use <a href="./micropython.html">micropython.html</a> (MicroPython) for packages, or drop that query param.</p>'
+                );
+                return;
+            }
+            var badNames = [];
+            plan.modules.forEach(function (name) {
+                if (!SAFE_LOADER_NAME.test(name)) badNames.push(name);
+            });
+            plan.manifests.forEach(function (name) {
+                if (!SAFE_LOADER_NAME.test(name)) badNames.push(name);
+            });
+            if (badNames.length) {
+                abortLoader(
+                    '<p>Unsafe <code>?modules=</code> or <code>?manifests=</code> value(s): ' +
+                    badNames.map(function (n) { return JSON.stringify(n); }).join(', ') +
+                    '.</p>' +
+                    '<p>Names must be simple identifiers (letters, digits, underscore; ' +
+                    'no slashes or dots).</p>'
+                );
+                return;
+            }
+
+            window.__pydisplayLoaderReady = true;
+            window.__pydisplayModules = plan.modules.join(',');
+            window.__pydisplayManifests = plan.manifests.join(',');
+            window.__pydisplayLvglWheel = plan.lvglWheel || '';
+            window.__pydisplayEntryKind = plan.entryKind || '';
+            window.__pydisplayEntry = plan.entryName || '';
+
+            var paramEl = document.getElementById('loader-param');
+            if (paramEl) {
+                paramEl.textContent = window.location.search;
+            }
+
+            var entry = plan.entryName;
+            if (entry) {
+                var label = titleCaseStem(entry);
+                document.title = label + ' — pydisplay Pyodide';
+                var meta = document.querySelector('meta[name="description"]');
+                if (meta) {
+                    meta.content = label + ': example under Pyodide.';
+                }
+                var crumb = document.getElementById('crumb-name');
+                var title = document.getElementById('loader-title');
+                var lede = document.getElementById('loader-lede');
+                var metaEntry = document.getElementById('meta-entry');
+                var metaInstall = document.getElementById('meta-install');
+                var metaSource = document.getElementById('meta-source');
+                var sourceLink = document.getElementById('source-link');
+                if (crumb) crumb.textContent = label;
+                if (title) title.textContent = label;
+                var installParts = [];
+                if (plan.modules.length) {
+                    installParts.push(plan.modules.length + ' module(s)');
+                }
+                if (plan.manifests.length) {
+                    installParts.push(plan.manifests.length + ' manifest(s)');
+                }
+                if (lede) {
+                    lede.textContent = 'Pyodide loader: ' + installParts.join(', ') +
+                        '. Entry: import ' + entry + '.';
+                }
+                if (metaEntry) {
+                    metaEntry.textContent = plan.entryKind === 'manifest'
+                        ? 'import ' + entry
+                        : 'import ' + entry + ' (module)';
+                }
+                if (metaInstall) {
+                    metaInstall.textContent = installParts.length ? installParts.join(' + ') : '—';
+                }
+                if (metaSource) {
+                    metaSource.textContent = plan.entryKind === 'manifest'
+                        ? entry + '/'
+                        : entry + '.py';
+                }
+                if (sourceLink) {
+                    sourceLink.href = plan.entryKind === 'manifest'
+                        ? 'https://github.com/PyDevices/pydisplay/tree/main/src/examples/' + entry
+                        : 'https://github.com/PyDevices/pydisplay/blob/main/src/examples/' + entry + '.py';
+                }
+            }
+        })();
+    </script>
+
+    <script type="py" config="./pyodide.toml" output="log">
+        import builtins
+        import json
+        import os
+        import sys
+        from js import document
+        from pyscript.ffi import create_proxy
+
+        MANIFEST_MIP_TARGET = "examples"
+        LVGL_WHEELS_DIR_PAGES = "https://pydevices.github.io/lv_cpython_mod/wheels/"
+
+        def _log_print(*args, **kwargs):
+            el = document.getElementById("log")
+            if el is not None:
+                sep = kwargs.get("sep", " ")
+                end = kwargs.get("end", "\n")
+                el.textContent += sep.join(str(a) for a in args) + end
+                el.scrollTop = el.scrollHeight
+
+        builtins.print = _log_print
+
+        _status = document.getElementById("status")
+        _btn = document.getElementById("run-btn")
+        _started = False
+
+        def _set(msg):
+            if _status:
+                _status.textContent = msg
+
+        def _from_window(name, default=""):
+            from js import window
+            val = getattr(window, name, default)
+            return str(val or default).strip()
+
+        def _loader_disabled():
+            return bool(_from_window("__pydisplayLoaderDisabled"))
+
+        def _site_root():
+            path = document.location.pathname
+            return path[: path.rfind("/") + 1] if "/" in path else "/"
+
+        def _abs_url(rel_or_abs):
+            """Resolve a mip url relative to the pyscript page directory."""
+            s = str(rel_or_abs).strip()
+            if s.startswith("github:"):
+                raise RuntimeError(
+                    "github: mip URLs are not supported on pyodide.html; "
+                    "use same-origin ./… paths (gallery manifests already do)."
+                )
+            if s.startswith("http://") or s.startswith("https://"):
+                return s
+            if s.startswith("./"):
+                s = s[2:]
+            elif s.startswith("/"):
+                return document.location.origin + s
+            return document.location.origin + _site_root() + s
+
+        def _parse_comma(raw):
+            names = []
+            for part in str(raw).split(","):
+                name = part.strip()
+                if name.lower().endswith(".py"):
+                    name = name[:-3]
+                if name:
+                    names.append(name)
+            return names
+
+        async def _fetch_text(url):
+            from pyodide.http import pyfetch
+
+            _log_print("Fetching", url)
+            resp = await pyfetch(url)
+            if not resp.ok:
+                raise RuntimeError("HTTP " + str(resp.status) + " fetching " + url)
+            return await resp.string()
+
+        def _ensure_parent_dirs(path):
+            parent = os.path.dirname(path)
+            if parent and parent not in (".", "/"):
+                os.makedirs(parent, exist_ok=True)
+
+        async def _install_module(name):
+            url = _abs_url("src/examples/" + name + ".py")
+            code = await _fetch_text(url)
+            dest = name + ".py"
+            with open(dest, "w", encoding="utf-8") as f:
+                f.write(code)
+
+        async def _install_manifest(name):
+            """Install the same web/pyscript/<name>.json MIP file micropython.html uses."""
+            manifest_url = _abs_url(name + ".json")
+            raw = await _fetch_text(manifest_url)
+            try:
+                data = json.loads(raw)
+            except json.JSONDecodeError as e:
+                raise RuntimeError("Invalid MIP JSON " + name + ".json: " + str(e)) from e
+            urls = data.get("urls")
+            if not isinstance(urls, list) or not urls:
+                raise RuntimeError("MIP manifest " + name + ".json has no urls")
+            target = MANIFEST_MIP_TARGET
+            os.makedirs(target, exist_ok=True)
+            for entry in urls:
+                if not (isinstance(entry, (list, tuple)) and len(entry) >= 2):
+                    raise RuntimeError("Bad mip urls entry in " + name + ".json: " + repr(entry))
+                dest_rel, src = entry[0], entry[1]
+                dest = os.path.join(target, dest_rel)
+                _ensure_parent_dirs(dest)
+                code = await _fetch_text(_abs_url(src))
+                with open(dest, "w", encoding="utf-8") as f:
+                    f.write(code)
+                _log_print("Installed", dest)
+
+        def _prepare_vfs():
+            # Match MicroPython VFS: mounts at /lib and /add_ons; lib.path expects cwd /.
+            os.chdir("/")
+            if "/" not in sys.path:
+                sys.path.insert(0, "/")
+
+        def _wheels_from_path(path):
+            """Read ``# pyodide wheels:`` from an installed example (first 10 lines)."""
+            try:
+                with open(path, encoding="utf-8") as f:
+                    for i, line in enumerate(f):
+                        if i >= 10:
+                            break
+                        s = line.strip()
+                        if s.startswith("# pyodide wheels:"):
+                            body = s.split(":", 1)[1].strip()
+                            return [p.strip() for p in body.split(",") if p.strip()]
+            except OSError:
+                pass
+            return []
+
+        def _wheels_for_entry(entry, modules):
+            for path in (
+                "examples/" + entry + ".py",
+                entry + ".py",
+            ):
+                found = _wheels_from_path(path)
+                if found:
+                    return found
+            for name in modules:
+                found = _wheels_from_path(name + ".py")
+                if found:
+                    return found
+            return []
+
+        def _lvgl_wheels_base():
+            host = str(document.location.hostname)
+            if host in ("127.0.0.1", "localhost"):
+                # serve.py links sibling lv_cpython_mod/web/wheels → ./wheels/
+                return _abs_url("wheels/")
+            return LVGL_WHEELS_DIR_PAGES
+
+        async def _resolve_lvgl_wheel_url(override=""):
+            if override:
+                return override
+            base = _lvgl_wheels_base()
+            if not base.endswith("/"):
+                base += "/"
+            index_url = base + "lvgl.json"
+            raw = await _fetch_text(index_url)
+            try:
+                data = json.loads(raw)
+            except json.JSONDecodeError as e:
+                raise RuntimeError("Invalid " + index_url + ": " + str(e)) from e
+            name = data.get("wheel")
+            if not isinstance(name, str) or not name.endswith(".whl"):
+                raise RuntimeError(
+                    index_url + " must contain a string \"wheel\" filename ending in .whl"
+                )
+            if "/" in name or name.startswith("."):
+                raise RuntimeError("Unsafe wheel filename in " + index_url + ": " + name)
+            return base + name
+
+        async def _ensure_micropip():
+            try:
+                import micropip
+
+                return micropip
+            except ImportError:
+                pass
+            from pyodide_js import loadPackage
+
+            _set("Loading micropip…")
+            await loadPackage("micropip")
+            import micropip
+
+            return micropip
+
+        async def _install_pyodide_wheels(wheels, lvgl_wheel_override=""):
+            if not wheels:
+                return
+            micropip = await _ensure_micropip()
+            for which in wheels:
+                key = which.lower().replace("_", "-")
+                if key in ("lvgl", "lvgl-cpython", "lvglcpython"):
+                    url = await _resolve_lvgl_wheel_url(lvgl_wheel_override)
+                    _set("Installing lvgl…")
+                    _log_print("micropip.install", url)
+                    await micropip.install(url)
+                else:
+                    raise RuntimeError(
+                        "Unknown # pyodide wheels: entry " + repr(which) + " (only lvgl today)"
+                    )
+
+        async def _start(*_):
+            global _started
+            if _started or _loader_disabled():
+                return
+            modules = _parse_comma(_from_window("__pydisplayModules"))
+            manifests = _parse_comma(_from_window("__pydisplayManifests"))
+            lvgl_wheel = _from_window("__pydisplayLvglWheel")
+            entry_kind = _from_window("__pydisplayEntryKind")
+            entry = _from_window("__pydisplayEntry")
+            if not entry and modules:
+                entry_kind = entry_kind or "module"
+                entry = modules[0]
+            elif not entry and manifests:
+                entry_kind = entry_kind or "manifest"
+                entry = manifests[0]
+            if not entry:
+                _log_print("Missing ?modules= and/or ?manifests= in the URL.")
+                _set("Error — add ?modules= and/or ?manifests=.")
+                return
+            _started = True
+            _btn.disabled = True
+            _btn.textContent = "Running…"
+            try:
+                _prepare_vfs()
+                for name in manifests:
+                    _set("Installing manifest " + name + "…")
+                    await _install_manifest(name)
+                for name in modules:
+                    _set("Fetching " + name + "…")
+                    await _install_module(name)
+                import lib.path  # noqa: F401 — adds lib/add_ons/examples to path
+                wheels = _wheels_for_entry(entry, modules)
+                await _install_pyodide_wheels(wheels, lvgl_wheel)
+                _set("Importing " + entry + "…")
+                __import__(entry)
+                _set("")
+            except Exception as e:
+                _log_print("Run failed:", e)
+                _set("Error — see console.")
+                _started = False
+                _btn.disabled = False
+                _btn.textContent = "Run"
+                raise
+
+        if not _loader_disabled():
+            _btn.addEventListener("click", create_proxy(_start))
+            _btn.disabled = False
+            _set("Runtime ready — click Run.")
+            print("Python runtime ready. Click Run to start the demo.")
+    </script>
+
+    <script>
+        (function () {
+            const _btn = document.getElementById('run-btn');
+            const _spin = document.querySelector('#loading .spinner');
+            const _t = setInterval(() => {
+                if (_btn && !_btn.disabled) {
+                    if (_spin) _spin.style.display = 'none';
+                    clearInterval(_t);
+                }
+            }, 150);
+        })();
+    </script>
+
+    <script>
+        (function () {
+            const device = document.querySelector('.play-area .device');
+            const panel = document.querySelector('.play-area .console-panel');
+            const log = document.getElementById('log');
+            if (!device || !panel || !log) return;
+            function syncConsoleHeight() {
+                if (window.innerWidth <= 880) {
+                    panel.style.height = '';
+                    return;
+                }
+                const h = device.getBoundingClientRect().height;
+                if (h > 0) {
+                    panel.style.height = h + 'px';
+                }
+            }
+            syncConsoleHeight();
+            window.addEventListener('resize', syncConsoleHeight);
+            if (typeof ResizeObserver !== 'undefined') {
+                new ResizeObserver(syncConsoleHeight).observe(device);
+            }
+        })();
+    </script>
+</body>
+</html>

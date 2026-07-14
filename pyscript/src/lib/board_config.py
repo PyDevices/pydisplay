@@ -4,9 +4,14 @@ If you are running pydisplay on a microcontroller, you will need to get or creat
 board_config.py file that is specific to your hardware from:
 
 https://github.com/PyDevices/pydisplay/tree/main/board_configs
+
+Desktop size / timer overrides (process env or ``displaysys.env_set`` before import)::
+
+    PYDISPLAY_WIDTH / PYDISPLAY_HEIGHT / PYDISPLAY_SCALE — integer panel size / scale
+    PYDISPLAY_TIMER_ASYNC — truthy/falsey timer mode on PG/SDL desktop
 """
 
-from displaysys import env_bool
+from displaysys import env_bool, env_int
 
 # Default timer mode for PG/SDL desktop when PYDISPLAY_TIMER_ASYNC is unset.
 # PyScript and Jupyter always use asyncio timers (see branches below).
@@ -18,6 +23,10 @@ width = 320
 height = 480
 rotation = 0
 scale = 2
+
+width = env_int("PYDISPLAY_WIDTH", width)
+height = env_int("PYDISPLAY_HEIGHT", height)
+scale = env_int("PYDISPLAY_SCALE", scale)
 
 _DESKTOP_PLATFORMS = frozenset(("linux", "darwin", "win32", "unix", "webassembly", "emscripten"))
 

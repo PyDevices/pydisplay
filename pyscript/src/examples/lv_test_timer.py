@@ -1,3 +1,4 @@
+# pyodide wheels: lvgl
 """
 lv_test_timer.py
 

@@ -251,4 +251,3 @@ interpreter = "./vendor/micropython/micropython.mjs"
 "./src/lib/multimer/_backends/threading.py" = "/lib/multimer/_backends/"
 "./src/lib/multimer/_backends/win32.py" = "/lib/multimer/_backends/"
 
-"./src/jupyter_notebook.ipynb" = "/"

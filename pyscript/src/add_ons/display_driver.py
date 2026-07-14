@@ -112,11 +112,11 @@ def _keypad_cb(event, indev, data):
 
 def create_devices(devs, lv_display):
     for device in devs:
-        if device.type in (eventsys.TOUCH, eventsys.ENCODER, eventsys.KEYPAD):
+        if device.type in (eventsys.POINTER, eventsys.ENCODER, eventsys.KEYPAD):
             indev = lv.indev_create()
             indev.set_display(lv_display)
             device.user_data = indev
-            if device.type == eventsys.TOUCH:
+            if device.type == eventsys.POINTER:
                 device.subscribe(_touch_cb)
                 indev.set_type(lv.INDEV_TYPE.POINTER)
             elif device.type == eventsys.ENCODER:

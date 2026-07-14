@@ -2,12 +2,14 @@
 <html>
     <head>
         <title>PyDisplay Demo</title>
-        <script src="./mini-coi-fd.js"></script>
+        <link rel="manifest" href="./manifest.json">
+        <meta name="theme-color" content="#f54e00">
+        <script src="./pwa.js"></script>
         <script type="module" src="./vendor/core.js"></script>
     </head>
     <body>
         <canvas id="display_canvas" width="1" height="1" style="background-color: black; border:2px solid black;"></canvas>
-        <script type="mpy-editor" config="./pyscript.toml">
+        <script type="mpy-editor" config="./micropython.toml">
             import mip
             mip.install("github:PyDevices/pydisplay/src/examples/pydisplay_demo.py")
 
