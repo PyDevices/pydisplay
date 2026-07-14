@@ -22,7 +22,7 @@ from eventsys.keys import Keys
 from graphics import RGB565, FrameBuffer
 from multimer import Timer
 from palettes import get_palette
-from touch_keypad import Keypad
+from eventsys.touch_keypad import TouchKeypad
 
 
 # Button grid: 1 display row + 6 keypad rows, 4 columns.
@@ -118,7 +118,7 @@ class _Calculator:
         keypad_keys = [None] * self.COLS + list(_CODES) + list(_KEY_ALIASES.keys())
         self._pending_release = None
         self._release_timer = Timer(-1)
-        self.keypad = Keypad(
+        self.keypad = TouchKeypad(
             runtime,
             0,
             0,
@@ -246,7 +246,7 @@ class _Calculator:
         )
 
     def _on_press(self, code):
-        """Push callback from Keypad (touch grid + keyboard). No app poll loop."""
+        """Push callback from TouchKeypad (touch grid + keyboard). No app poll loop."""
         if code is None:
             return
         info = self.button_pos.get(code)
@@ -293,7 +293,7 @@ class _Calculator:
 
 # Canonical idiom: build the UI (registers input callbacks), then hand control
 # to the runtime. Identical for sync and async, interactive or not — the input
-# arrives via the Keypad on_press callback dispatched by the shared-timer
+# arrives via the TouchKeypad on_press callback dispatched by the shared-timer
 # auto-service; QUIT tears everything down.
 calc = _Calculator()
 

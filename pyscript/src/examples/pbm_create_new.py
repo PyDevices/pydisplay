@@ -1,6 +1,5 @@
 from board_config import display_drv
-from graphics import Draw, FrameBuffer, RGB565
-from pbm import PBM
+from graphics import Draw, FrameBuffer, MONO_HLSB, RGB565
 
 
 def draw_logo(logo):
@@ -40,30 +39,34 @@ def draw_logo(logo):
 
 
 display_drv.fill(0xF800)
-logo = PBM(width=64, height=64)
+
+w = h = 64
+logo = FrameBuffer(bytearray((w + 7) // 8 * h), w, h, MONO_HLSB)
 draw_logo(logo)
 
-logo.render(display_drv, 0, 0, 0xFFFF, 0x0000)
-logo.render(display_drv, 0, display_drv.height // 2, 0xFFFF)
+buf = bytearray(w * h * 2)
+fb = FrameBuffer(buf, w, h, RGB565)
+palette = FrameBuffer(memoryview(bytearray(2 * 2)), 2, 1, RGB565)
 
-buf = bytearray(logo.width * logo.height * 2)
-fb = FrameBuffer(buf, logo.width, logo.height, RGB565)
-logo.render(fb, 0, 0, 0xFFFF)
-
-display_drv.blit_rect(buf, display_drv.width // 3, 0, logo.width, logo.height)
+# White on black — left and middle columns (opaque top, chromakey bottom).
+palette.pixel(0, 0, 0x0000)
+palette.pixel(1, 0, 0xFFFF)
+fb.blit(logo, 0, 0, -1, palette)
+display_drv.blit_rect(buf, 0, 0, w, h)
+display_drv.blit_transparent(buf, 0, display_drv.height // 2, w, h, 0x0)
+display_drv.blit_rect(buf, display_drv.width // 3, 0, w, h)
 display_drv.blit_transparent(
-    buf, display_drv.width // 3, display_drv.height // 2, logo.width, logo.height, 0x0
+    buf, display_drv.width // 3, display_drv.height // 2, w, h, 0x0
 )
 
-palette = FrameBuffer(memoryview(bytearray(2 * 2)), 2, 1, RGB565)
+# Green / white on blue staging — right column.
 palette.pixel(0, 0, 0x0FF0)
 palette.pixel(1, 0, 0xFFFF)
 fb.fill(0x000F)
-logo.render(fb, 0, 0, palette.pixel(1, 0), palette.pixel(0, 0))
-
-display_drv.blit_rect(buf, display_drv.width * 2 // 3, 0, logo.width, logo.height)
+fb.blit(logo, 0, 0, -1, palette)
+display_drv.blit_rect(buf, display_drv.width * 2 // 3, 0, w, h)
 display_drv.blit_transparent(
-    buf, display_drv.width * 2 // 3, display_drv.height // 2, logo.width, logo.height, 0x000F
+    buf, display_drv.width * 2 // 3, display_drv.height // 2, w, h, 0x000F
 )
 
 display_drv.show()

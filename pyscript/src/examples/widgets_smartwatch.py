@@ -3,12 +3,12 @@ widgets_smartwatch
 ====================================================
 A smartwatch-style interface built with pdwidgets.
 
-Two "pages" share one ``Screen`` and are swapped by toggling visibility (no
-blocking loops, so it behaves under both ``timer_async`` modes):
+Two :class:`~pdwidgets.Page` children share a :class:`~pdwidgets.Navigator`
+(no blocking loops, so it behaves under both ``timer_async`` modes):
 
 * **Watch face** — a large ``DigitalClock`` with a date ``Label`` and a row of
   status ``Badge`` dots (battery / Bluetooth) plus an unread-count ``Badge``.
-* **Notifications** — a scrollable ``ListView`` of messages with a Back button.
+* **Notifications** — a scrollable ``ListView`` of messages with AppBar back.
 
 All geometry derives from ``display.width`` / ``display.height`` so the same
 example scales from a 240x240 round panel up to 720x720 square displays.
@@ -29,16 +29,17 @@ unit = min(W, H)
 clock_scale = max(2, unit // 90)
 body_scale = max(1, unit // 200)
 
-# ----- Watch face page -----------------------------------------------------
-face = pd.Widget(screen, 0, 0, W, H, bg=theme.on_background)
+nav = pd.Navigator(screen)
 
-# Status dots along the top, with an unread-count badge.
+# ----- Watch face page -----------------------------------------------------
+face = pd.Page(nav, title="Face", bg=theme.on_background)
+
 dot = max(8, unit // 22)
 battery = pd.Badge(face, x=unit // 12, y=unit // 12, size=dot, bg=theme.success)  # noqa: F841
 bt = pd.Badge(  # noqa: F841
     face, x=unit // 12 + dot + 6, y=unit // 12, size=dot, bg=theme.primary
 )
-unread = pd.Badge(
+unread = pd.Badge(  # noqa: F841
     face,
     x=-unit // 12,
     y=unit // 12,
@@ -76,20 +77,21 @@ open_notes = pd.Button(
 )
 
 # ----- Notifications page ---------------------------------------------------
-notes = pd.Widget(screen, 0, 0, W, H, bg=theme.background, visible=False)
-pd.Label(
-    notes,
-    value="Notifications",
-    align=pd.ALIGN.TOP,
-    y=unit // 16,
-    fg=theme.on_background,
-    bg=theme.background,
-    scale=body_scale + 1,
-)
-back = pd.Button(notes, label="Back", align=pd.ALIGN.TOP_LEFT, x=6, y=6, radius=6)
+notes = pd.Page(nav, title="Notifications", bg=theme.background, visible=False)
+
+
+def go_face(_=None):
+    nav.pop()
+
+
+notes_bar = pd.AppBar(notes, title="Notifications", on_back=go_face)
 
 note_list = pd.ListView(
-    notes, w=W - unit // 8, h=H - unit // 4, align=pd.ALIGN.BOTTOM, y=-unit // 16
+    notes,
+    w=W - unit // 8,
+    h=H - unit // 4 - notes_bar.height,
+    align=pd.ALIGN.BOTTOM,
+    y=-unit // 16,
 )
 for subject in (
     "Alex: Lunch?",
@@ -98,17 +100,16 @@ for subject in (
     "Sam: Sent files",
     "Gym: Class 6pm",
 ):
-    item = pd.Button(note_list, label=subject, icon_file=pd.icon_theme.info(pd.ICON_SIZE.SMALL))
+    pd.Button(note_list, label=subject, icon_file=pd.icon_theme.info(pd.ICON_SIZE.SMALL))
 
 
-def show(page):
-    face.visible = page is face
-    notes.visible = page is notes
+def open_notes_page(_s=None, _e=None):
+    nav.push(notes)
 
 
-open_notes.add_event_cb(pd.events.MOUSEBUTTONDOWN, lambda s, e: show(notes))
-back.add_event_cb(pd.events.MOUSEBUTTONDOWN, lambda s, e: show(face))
+open_notes.add_event_cb(pd.events.MOUSEBUTTONDOWN, open_notes_page)
 
+nav.push(face)
 screen.visible = True
 
 board_config.runtime.run_forever()

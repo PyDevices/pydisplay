@@ -90,14 +90,15 @@ panel = pd.Card(
 pad = margin + 4
 inner_w = panel.width - 2 * pad
 
-# Every row is anchored to the card with an explicit y offset (robust across
-# display sizes; avoids the sideways shift of the OUTER_*_LEFT/RIGHT aligns).
 y = 26
-pd.Label(panel, value="Power", x=pad, y=y, align=pd.ALIGN.TOP_LEFT)
-power_sw = pd.Switch(panel, x=-pad, y=y - 4, align=pd.ALIGN.TOP_RIGHT, value=True)
+row = pd.FormRow(panel, label="Power", x=pad, y=y, w=inner_w)
+power_sw = pd.Switch(row, value=True)
 power_sw.set_change_cb(lambda s: log("Power %s" % ("on" if s.value else "off")))
 
-y += 24
+y += row.height + 4
+pd.Divider(panel, x=pad, y=y, w=inner_w)
+
+y += 12
 pd.Label(panel, value="Volume", x=pad, y=y, align=pd.ALIGN.TOP_LEFT)
 y += 18
 volume = pd.Slider(panel, x=pad, y=y, w=inner_w, align=pd.ALIGN.TOP_LEFT, value=0.6, step=0.05)

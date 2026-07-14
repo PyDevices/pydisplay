@@ -16,6 +16,11 @@ Quick start::
         for event in runtime.poll():
             if event.type == eventsys.QUIT:
                 break
+
+Optional mappers (import explicitly; not loaded by ``import eventsys``)::
+
+    from eventsys.touch_keypad import TouchKeypad
+    from eventsys.joystick_keys import JoystickKeys
 """
 
 from . import keys

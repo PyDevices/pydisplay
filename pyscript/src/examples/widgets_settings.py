@@ -1,9 +1,9 @@
 """
 widgets_settings
 ====================================================
-A settings / preferences screen that exercises the new pdwidgets controls
-together: ``Card``, ``Switch``, ``Dropdown``, ``NumberStepper``, ``TextInput``
-and a modal ``Dialog``.
+A settings / preferences screen that exercises pdwidgets controls together:
+``AppBar``, ``Card``, ``FormRow``, ``Divider``, ``Switch``, ``Dropdown``,
+``NumberStepper``, ``TextInput`` and a modal ``Dialog``.
 
 Toggles and selections update a status line; the Reset button raises a modal
 confirmation ``Dialog``. Runs under both ``timer_async`` modes via
@@ -23,18 +23,7 @@ screen = pd.Screen(display, bg=theme.background, visible=False)
 W = screen.width
 margin = max(6, W // 40)
 
-header = pd.Widget(
-    screen, w=W, h=max(34, screen.height // 12), align=pd.ALIGN.TOP, bg=theme.primary
-)
-pd.Label(
-    header,
-    value="Settings",
-    align=pd.ALIGN.LEFT,
-    x=margin,
-    fg=theme.on_primary,
-    bg=theme.primary,
-    scale=2,
-)
+header = pd.AppBar(screen, title="Settings")
 
 status = pd.TextBox(
     screen,
@@ -61,23 +50,26 @@ card = pd.Card(
 pad = margin + 4
 
 y = margin
-pd.Label(card, value="Wi-Fi", x=pad, y=y, align=pd.ALIGN.TOP_LEFT)
-wifi = pd.Switch(card, x=-pad, y=y - 4, align=pd.ALIGN.TOP_RIGHT, value=True)
+row = pd.FormRow(card, label="Wi-Fi", x=pad, y=y, w=card.width - 2 * pad)
+wifi = pd.Switch(row, value=True)
 wifi.set_change_cb(lambda s: log("Wi-Fi %s" % ("on" if s.value else "off")))
 
-y += 30
-pd.Label(card, value="Bluetooth", x=pad, y=y, align=pd.ALIGN.TOP_LEFT)
-bt = pd.Switch(card, x=-pad, y=y - 4, align=pd.ALIGN.TOP_RIGHT, value=False)
+y += row.height + 2
+pd.Divider(card, x=pad, y=y, w=card.width - 2 * pad)
+
+y += 10
+row = pd.FormRow(card, label="Bluetooth", x=pad, y=y, w=card.width - 2 * pad)
+bt = pd.Switch(row, value=False)
 bt.set_change_cb(lambda s: log("Bluetooth %s" % ("on" if s.value else "off")))
 
-y += 30
-pd.Label(card, value="Brightness", x=pad, y=y, align=pd.ALIGN.TOP_LEFT)
+y += row.height + 2
+pd.Divider(card, x=pad, y=y, w=card.width - 2 * pad)
+
+y += 10
+row = pd.FormRow(card, label="Brightness", x=pad, y=y, w=card.width - 2 * pad)
 bright = pd.NumberStepper(
-    card,
-    x=-pad,
-    y=y - 6,
+    row,
     w=card.width // 2,
-    align=pd.ALIGN.TOP_RIGHT,
     value=70,
     minimum=10,
     maximum=100,
@@ -86,20 +78,20 @@ bright = pd.NumberStepper(
 )
 bright.set_change_cb(lambda s: log("Brightness %s" % s.value))
 
-y += 44
-name = pd.Label(card, value="Device name", x=pad, y=y, align=pd.ALIGN.TOP_LEFT)  # noqa: F841
+y += row.height + 2
+pd.Divider(card, x=pad, y=y, w=card.width - 2 * pad)
+
+y += 10
+pd.Label(card, value="Device name", x=pad, y=y, align=pd.ALIGN.TOP_LEFT)
 y += 18
 device = pd.TextInput(card, x=pad, y=y, w=card.width - 2 * pad, value="pixel-watch", max_length=16)
 device.set_change_cb(lambda s: log("Name: %s" % s.value))
 
 y += 40
-pd.Label(card, value="Theme", x=pad, y=y, align=pd.ALIGN.TOP_LEFT)
+row = pd.FormRow(card, label="Theme", x=pad, y=y, w=card.width - 2 * pad)
 theme_dd = pd.Dropdown(
-    card,
-    x=-pad,
-    y=y - 6,
+    row,
     w=card.width // 2,
-    align=pd.ALIGN.TOP_RIGHT,
     options=["Light", "Dark", "Auto"],
 )
 theme_dd.set_change_cb(lambda s: log("Theme: %s" % s.value))
