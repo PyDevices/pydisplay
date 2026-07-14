@@ -8,19 +8,19 @@ import sys
 Timer = None
 _sleep_ms = None
 _drain = None
-# True when the active backend delivers timer callbacks on its own (e.g. the
-# librt POSIX-timer signal fires on the main thread during a plain sleep). Such
-# backends do NOT need sleep_ms to pump the scheduler/event queue; pump-based
-# backends (win32 APC, SDL2, the threading fallback) do.
-_signal_delivered = False
+# True when the active backend uses OS signals to fire timer callbacks (e.g.
+# librt POSIX timers). Those backends do NOT need sleep_ms to pump the
+# scheduler/event queue; pump-based backends (win32 APC, SDL2, the threading
+# fallback) do.
+_uses_signals = False
 
 
 def _set_backend(module):
-    global Timer, _sleep_ms, _drain, _signal_delivered
+    global Timer, _sleep_ms, _drain, _uses_signals
     Timer = module.Timer
     _sleep_ms = getattr(module, "_backend_sleep_ms", None)
     _drain = getattr(module, "_backend_drain", None)
-    _signal_delivered = getattr(module, "_signal_delivered", False)
+    _uses_signals = getattr(module, "_uses_signals", False)
 
 
 def _running_in_ipython_kernel():

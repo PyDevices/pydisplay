@@ -4,9 +4,9 @@ Platform notes for building pydisplay APKs with **python-for-android** and **bui
 
 ## Overview
 
-On Android there is no MicroPython port. pydisplay runs under **CPython** in a **python-for-android** APK with the **SDL2 bootstrap**. The `import usdl2` API comes from the ctypes FFI package in [usdl2](https://github.com/PyDevices/usdl2) (`python/usdl2/`). pydisplay's existing `SDLDisplay` backend works unchanged once `usdl2` is installed.
+On Android there is no MicroPython port. pydisplay runs under **CPython** in a **python-for-android** APK with the **SDL2 bootstrap**. The `import usdl2` API comes from the [usdl2](https://github.com/PyDevices/usdl2) package on TestPyPI. pydisplay's existing `SDLDisplay` backend works unchanged once `usdl2` is installed.
 
-APK integration — demo project, build scripts, and p4a recipes for `pydisplay` and `lvgl-cpython` — lives in [**pydisplay_android**](https://github.com/PyDevices/pydisplay_android). usdl2 keeps only the ctypes package and `p4a_recipes/usdl2/`.
+APK integration — demo project, build scripts, and p4a recipes (including TestPyPI `usdl2`) — lives in [**pydisplay_android**](https://github.com/PyDevices/pydisplay_android).
 
 ## Workspace
 
@@ -50,4 +50,4 @@ On Android, **multimer** selects the **`_sdl2`** backend (SDL timers on the UI t
 
 ## Your own app
 
-Copy `pydisplay_android/android_demo/board_config.py`, add `pydisplay` and `usdl2` to your `buildozer.spec`, point `p4a.local_recipes` at pydisplay_android's `p4a_recipes/` (run `build_apk.sh` once to link the `usdl2` recipe from a sibling clone), and write your main loop with `display_drv` / `runtime` as usual.
+Copy `pydisplay_android/android_demo/board_config.py`, add the TestPyPI packages to your `buildozer.spec` (see pydisplay_android README), point `p4a.local_recipes` at pydisplay_android's `p4a_recipes/`, and write your main loop with `display_drv` / `runtime` as usual.

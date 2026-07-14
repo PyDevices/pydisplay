@@ -53,7 +53,7 @@ class TestApiSurface(unittest.TestCase):
                 "run_deadline_hook",
                 "schedule",
                 "set_deadline_hook",
-                "signal_delivered",
+                "uses_signals",
                 "sleep_ms",
                 "ticks_ms",
                 "ticks_add",

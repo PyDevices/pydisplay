@@ -162,7 +162,7 @@ def run_deadline_hook():
 
 
 def _sleep_ms_signal(ms):
-    """Sleep for signal-delivered backends (librt).
+    """Sleep for signal-based backends (librt; ``uses_signals``).
 
     The periodic timer fires via an RT signal on the main thread during the
     sleep, so the scheduler/event queue does not need pumping here (pumping

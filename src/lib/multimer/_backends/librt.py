@@ -17,9 +17,9 @@ if sys.platform != "linux":
 
 from .._core import _TimerCore
 
-# librt delivers timer callbacks via an RT signal on the main thread, so they
-# fire during a plain sleep without any application-side pumping.
-_signal_delivered = True
+# librt fires timer callbacks via an RT signal on the main thread, so they run
+# during a plain sleep without any application-side pumping.
+_uses_signals = True
 
 _USE_CTYPES = sys.implementation.name == "cpython"
 _CLOCK_MONOTONIC = 1

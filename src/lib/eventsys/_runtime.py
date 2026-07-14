@@ -269,10 +269,10 @@ class Runtime:
         * async, a loop already running (PyScript/Jupyter): arm the auto-service
           on that loop and return — the host loop keeps the app alive.
         * async, no running loop (desktop ``timer_async``): ``asyncio.run(self.run())``.
-        * sync, signal-delivered backend, interactive session (``-i`` or bare
-          REPL then ``import``): return immediately — the REPL stays alive and
-          the RT signal drives the auto-service, so a keep-alive loop is
-          optional here.
+        * sync, signal-based backend (``multimer.uses_signals()``), interactive
+          session (``-i`` or bare REPL then ``import``): return immediately —
+          the REPL stays alive and the RT signal drives the auto-service, so a
+          keep-alive loop is optional here.
         * sync otherwise: block until quit, then tear down.
 
         The coroutine :meth:`run` stays public for ``await`` composition inside an
@@ -289,9 +289,9 @@ class Runtime:
             asyncio.run(self.run())
             return
 
-        # Interactive + signal-delivered: timer keeps the app live at the REPL;
+        # Interactive + signal backend: timer keeps the app live at the REPL;
         # blocking here would wedge the session needlessly.
-        if _is_interactive_session() and multimer.signal_delivered():
+        if _is_interactive_session() and multimer.uses_signals():
             return
         try:
             while not self._quit_requested:
