@@ -160,6 +160,7 @@
                 const modules = [];
                 const manifests = [];
                 const packages = [];
+                const mip = [];
                 let entryKind = null;
                 let entryName = null;
                 const raw = search.startsWith('?') ? search.slice(1) : search;
@@ -186,12 +187,15 @@
                         manifests.push.apply(manifests, list);
                     } else if (key === 'packages') {
                         packages.push.apply(packages, parseCommaList(val));
+                    } else if (key === 'mip') {
+                        mip.push.apply(mip, parseCommaList(val));
                     }
                 }
                 return {
                     modules: modules,
                     manifests: manifests,
                     packages: packages,
+                    mip: mip,
                     entryKind: entryKind,
                     entryName: entryName,
                 };
@@ -210,6 +214,11 @@
                     }
                 });
                 plan.packages.forEach(function (name) {
+                    if (!SAFE_PACKAGE_NAME.test(name)) {
+                        bad.push(name);
+                    }
+                });
+                plan.mip.forEach(function (name) {
                     if (!SAFE_PACKAGE_NAME.test(name)) {
                         bad.push(name);
                     }
@@ -250,6 +259,7 @@
             window.__pydisplayModules = plan.modules.join(',');
             window.__pydisplayManifests = plan.manifests.join(',');
             window.__pydisplayPackages = plan.packages.join(',');
+            window.__pydisplayMip = plan.mip.join(',');
             window.__pydisplayEntryKind = plan.entryKind || '';
             window.__pydisplayEntry = plan.entryName || '';
 
@@ -359,6 +369,7 @@
             modules = _parse_comma(_from_window("__pydisplayModules"))
             manifests = _parse_comma(_from_window("__pydisplayManifests"))
             packages = _parse_comma(_from_window("__pydisplayPackages"))
+            mip_names = _parse_comma(_from_window("__pydisplayMip"))
             entry_kind = _from_window("__pydisplayEntryKind")
             entry = _from_window("__pydisplayEntry")
             if not entry and modules:
@@ -367,7 +378,9 @@
             elif not entry and manifests:
                 entry_kind = entry_kind or "manifest"
                 entry = manifests[0]
-            return modules, manifests, packages, entry_kind, entry
+            return modules, manifests, packages, mip_names, entry_kind, entry
+
+        MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
 
         def _mip_base():
             _host = document.location.hostname
@@ -393,6 +406,32 @@
                     continue
             return []
 
+        def _mip_from_entry(entry):
+            """Read ``# pyscript mip:`` from the installed example (first 10 lines)."""
+            for path in ("examples/" + entry + ".py", entry + ".py"):
+                try:
+                    with open(path) as f:
+                        for i, line in enumerate(f):
+                            if i >= 10:
+                                break
+                            s = line.strip()
+                            if s.startswith("# pyscript mip:"):
+                                body = s.split(":", 1)[1].strip()
+                                return [p.strip() for p in body.split(",") if p.strip()]
+                except OSError:
+                    continue
+            return []
+
+        def _install_mip_packages(names):
+            if not names:
+                return
+            import mip
+
+            for which in names:
+                _set("Installing " + which + "…")
+                _log_print("MIP install:", which, "index=", MIP_LIB_INDEX)
+                mip.install(which, index=MIP_LIB_INDEX)
+
         def _install_packages(packages):
             if not packages:
                 return
@@ -416,7 +455,7 @@
             global _started
             if _started or _loader_disabled():
                 return
-            modules, manifests, packages, entry_kind, entry = _loader_plan()
+            modules, manifests, packages, mip_names, entry_kind, entry = _loader_plan()
             if not entry:
                 _log_print("Missing ?modules= and/or ?manifests= in the URL.")
                 _set("Error — add ?modules= and/or ?manifests=.")
@@ -436,6 +475,9 @@
                 for name in modules:
                     mip.install(mip_base + "src/examples/" + name + ".py")
                 import lib.path  # add_ons on path before fetch_ph_gui / packages
+                if not mip_names:
+                    mip_names = _mip_from_entry(entry)
+                _install_mip_packages(mip_names)
                 if not packages:
                     packages = _packages_from_entry(entry)
                 _install_packages(packages)

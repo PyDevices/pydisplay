@@ -26,7 +26,7 @@ Or copy the add-on modules into `lib/` on your device.
 | `framebuf.py` | framebuf API on CPython/CircuitPython |
 | `displaybuf.py` | Peter Hinch DisplayBuffer API |
 | `console.py` | Terminal-style console widget |
-| `pdwidgets/` | Cross-platform widget toolkit — [PyWidgets](guis/pywidgets.md) |
+| `pdwidgets/` | Moved to [pdwidgets](https://github.com/PyDevices/pdwidgets) — [user guide](guis/pywidgets.md) |
 | `palettes/` | Color palettes (`cube`, `material_design`, `wheel`, `get_palette()`) |
 | `tft_text.py`, `tft_write.py` | russhughes font rendering |
 | `png.py` | PNG support (experimental) |

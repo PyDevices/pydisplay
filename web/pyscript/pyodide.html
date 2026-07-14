@@ -510,9 +510,18 @@
                     _set("Installing lvgl…")
                     _log_print("micropip.install", url)
                     await micropip.install(url)
+                elif key in ("pdwidgets",):
+                    _set("Installing pdwidgets…")
+                    _log_print("micropip.install pdwidgets from TestPyPI")
+                    await micropip.install(
+                        "pdwidgets",
+                        index_urls="https://test.pypi.org/simple/",
+                    )
                 else:
                     raise RuntimeError(
-                        "Unknown # pyodide wheels: entry " + repr(which) + " (only lvgl today)"
+                        "Unknown # pyodide wheels: entry "
+                        + repr(which)
+                        + " (supported: lvgl, pdwidgets)"
                     )
 
         async def _start(*_):
