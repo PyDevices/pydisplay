@@ -18,9 +18,10 @@ Evaluate pydisplay without installing anything on your machine.
 
 | Link | Description |
 |------|-------------|
-| [Calculator](https://PyDevices.github.io/pydisplay/pyscript/load.html?modules=calc_graphics,calc_engine) | Pocket calculator (graphics) |
+| [Calculator](https://PyDevices.github.io/pydisplay/pyscript/micropython.html?modules=calc_graphics,calc_engine) | Pocket calculator (graphics) |
 | [REPL](https://PyDevices.github.io/pydisplay/pyscript/repl.html) | Interactive REPL + canvas |
 | [Simple](https://PyDevices.github.io/pydisplay/pyscript/simple.html) | Minimal PyScript HTML shell |
+| [Pyodide](https://PyDevices.github.io/pydisplay/pyscript/pyodide.html?manifests=chango) | Modules / MIP manifests under Pyodide (dev tool) |
 
 ### Run locally
 

@@ -10,15 +10,16 @@
 
 | Page | URL |
 |------|-----|
-| Calculator | [pyscript/load.html?modules=calc_graphics,calc_engine](https://PyDevices.github.io/pydisplay/pyscript/load.html?modules=calc_graphics,calc_engine) |
+| Calculator | [pyscript/micropython.html?modules=calc_graphics,calc_engine](https://PyDevices.github.io/pydisplay/pyscript/micropython.html?modules=calc_graphics,calc_engine) |
 | Simple | [pyscript/simple.html](https://PyDevices.github.io/pydisplay/pyscript/simple.html) |
 | REPL | [pyscript/repl.html](https://PyDevices.github.io/pydisplay/pyscript/repl.html) |
+| Pyodide (modules / manifests) | [pyscript/pyodide.html?modules=calc_graphics,calc_engine](https://PyDevices.github.io/pydisplay/pyscript/pyodide.html?modules=calc_graphics,calc_engine) · [manifests=chango](https://PyDevices.github.io/pydisplay/pyscript/pyodide.html?manifests=chango) |
 
 ## Run locally
 
 --8<-- "_snippets/pyscript-local.md"
 
-Examples in the [browser gallery](https://PyDevices.github.io/pydisplay/pyscript/) are copied to the deploy site and installed from the same origin on GitHub Pages. Locally, `tools/serve.py` serves your working tree — gallery pages load `src/examples/` via `web/pyscript/load.html?modules=…`. Non-gallery pages (`repl.html`, `simple.html`) may still use `github:` installs.
+Examples in the [browser gallery](https://PyDevices.github.io/pydisplay/pyscript/) are copied to the deploy site and installed from the same origin on GitHub Pages. Locally, `tools/serve.py` serves your working tree — gallery pages load `src/examples/` via `web/pyscript/micropython.html?modules=…` / `?manifests=…` (MicroPython). Use `web/pyscript/pyodide.html` with the same query shape for Pyodide smoke tests (same MIP JSON under `web/pyscript/*.json`; no `?packages=`); it is not wired into the gallery. Non-gallery pages (`repl.html`, `simple.html`) may still use `github:` installs.
 
 ## asyncio requirement
 

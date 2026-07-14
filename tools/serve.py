@@ -9,7 +9,7 @@ and refresh:
     python tools/serve.py
     # then open:
     #   http://127.0.0.1:8000/web/pyscript/index.html       (gallery)
-    #   http://127.0.0.1:8000/web/pyscript/load.html?modules=calc_graphics,calc_engine
+    #   http://127.0.0.1:8000/web/pyscript/micropython.html?modules=calc_graphics,calc_engine
     #   http://127.0.0.1:8000/web/landing/index.html      (marketing landing)
 
 Why a custom server instead of `python -m http.server`?
@@ -50,12 +50,42 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # as a log sink so Cursor Debug mode tooling can pick its own sub-paths.
 DEBUG_PREFIX = "/__debug"
 
-# Legacy paths from before the web/pyscript/ layout (redirect for bookmarks).
-REDIRECTS = {
-    "/index.html": "/web/pyscript/index.html",
-    "/html/": "/web/pyscript/load.html",
-    "/demo-pages/index.html": "/web/landing/index.html",
-}
+# Same-origin path for micropip LVGL wheels (pyodide.html). When the tree does
+# not yet contain wheels/, link a sibling lv_cpython_mod build if present.
+WHEELS_DIR = REPO_ROOT / "web" / "pyscript" / "wheels"
+SIBLING_WHEEL_DIRS = (
+    REPO_ROOT.parent / "lv_cpython_mod" / "web" / "wheels",
+    REPO_ROOT.parent / "cmods" / "lv_cpython_mod" / "web" / "wheels",
+)
+
+
+def ensure_wheels_dir() -> Path | None:
+    """Prefer an in-tree wheels/ dir; otherwise symlink a sibling lv_cpython_mod build."""
+    if WHEELS_DIR.is_dir() and any(WHEELS_DIR.glob("*.whl")):
+        return WHEELS_DIR
+    if WHEELS_DIR.is_symlink():
+        try:
+            WHEELS_DIR.unlink()
+        except OSError:
+            return None
+    elif WHEELS_DIR.is_dir():
+        # Empty or non-wheel dir — leave alone so we never clobber content.
+        if any(WHEELS_DIR.iterdir()):
+            return WHEELS_DIR if any(WHEELS_DIR.glob("*.whl")) else None
+        try:
+            WHEELS_DIR.rmdir()
+        except OSError:
+            return None
+    for src in SIBLING_WHEEL_DIRS:
+        if src.is_dir() and any(src.glob("*.whl")):
+            try:
+                WHEELS_DIR.symlink_to(src.resolve(), target_is_directory=True)
+            except OSError as exc:
+                print(f"warning: could not link {WHEELS_DIR} → {src}: {exc}", file=sys.stderr)
+                return None
+            print(f"  wheels:                  {WHEELS_DIR} → {src}")
+            return WHEELS_DIR
+    return None
 
 
 def _stamp() -> str:
@@ -109,21 +139,6 @@ class DemoRequestHandler(SimpleHTTPRequestHandler):
         if self._is_debug():
             self._send_cors(200)
             return
-        path_only = self.path.split("?", 1)[0]
-        for prefix, target in REDIRECTS.items():
-            if path_only == prefix or path_only.startswith(prefix.rstrip("/") + "/"):
-                query = self.path[len(path_only) :]
-                if prefix == "/html/" and path_only == "/html/":
-                    query = query or ""
-                    if query.startswith("?"):
-                        self.send_response(302)
-                        self.send_header("Location", "/web/pyscript/load.html" + query)
-                        self.end_headers()
-                        return
-                self.send_response(302)
-                self.send_header("Location", target + query)
-                self.end_headers()
-                return
         super().do_GET()
 
     def do_HEAD(self) -> None:  # noqa: N802 - http.server hook
@@ -193,10 +208,13 @@ def main(argv: list[str] | None = None) -> int:
     print(f"pydisplay PyScript server — serving {root}")
     print(f"  cross-origin isolation: {'on' if DemoRequestHandler.coi_enabled else 'off'}")
     print(f"  debug log sink:         POST {base}{DEBUG_PREFIX}")
+    if root == REPO_ROOT:
+        ensure_wheels_dir()
     print("")
     print("Open one of:")
     print(f"  {base}/web/pyscript/index.html")
-    print(f"  {base}/web/pyscript/load.html?modules=calc_graphics,calc_engine")
+    print(f"  {base}/web/pyscript/micropython.html?modules=calc_graphics,calc_engine")
+    print(f"  {base}/web/pyscript/pyodide.html?modules=calc_lvgl,calc_engine")
     print(f"  {base}/web/pyscript/embed.html?modules=calc_graphics,calc_engine")
     print(f"  {base}/web/landing/index.html")
     print("")

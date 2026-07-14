@@ -278,6 +278,47 @@ pre code {
   display: block;
 }
 
+/* Runtime selector / swap (gallery + loaders) */
+.header-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 6px;
+  flex: none;
+}
+
+.header-tools .theme-toggle {
+  margin-left: 0;
+}
+
+.runtime-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.runtime-toggle:hover {
+  border-color: var(--accent-strong);
+  color: var(--accent-strong);
+  box-shadow: var(--shadow-soft);
+  text-decoration: none;
+}
+
 /* ---------- Hero ---------- */
 
 .hero {

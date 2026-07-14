@@ -3,6 +3,9 @@ src/add_ons/gui
 # Generated from src/add_ons/framebuf.py (scripts/install_sync_framebuf.py; publish + tests)
 src/lib/graphics/framebuf.py
 
+# Local symlink created by tools/serve.py → sibling lv_cpython_mod/web/wheels
+web/pyscript/wheels
+
 # Cursor IDE / local debug
 .cursor/
 

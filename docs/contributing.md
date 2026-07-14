@@ -17,7 +17,7 @@ python3 -m venv .venv-docs
 After editing files under `src/`:
 
 ```bash
-./scripts/install_refresh_manifests.sh    # refresh packages/*.json and web/pyscript/pyscript.toml
+./scripts/install_refresh_manifests.sh    # refresh packages/*.json and web/pyscript/micropython.toml
 ```
 
 ## Pull request workflow

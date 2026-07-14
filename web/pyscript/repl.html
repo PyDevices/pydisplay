@@ -6,7 +6,7 @@
         <script type="module" src="./vendor/core.js"></script>
     </head>
     <body>
-        <script type="mpy" config="./pyscript.toml" terminal worker>
+        <script type="mpy" config="./micropython.toml" terminal worker>
             from pyscript import document
             term = document.querySelector('script[terminal]').terminal
             term.resize(99, 24)

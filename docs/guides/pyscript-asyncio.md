@@ -51,7 +51,7 @@ For periodic callbacks, use `multimer.AsyncTimer` inside `async def main()` afte
 | `eventsys_simpletest.py` | Minimal poll + await |
 | `paint.py` | Touch drawing with asyncio |
 
-Try via: `web/pyscript/load.html?modules=eventsys_simpletest`
+Try via: `web/pyscript/micropython.html?modules=eventsys_simpletest`
 
 ## Common failures
 
@@ -59,7 +59,7 @@ Try via: `web/pyscript/load.html?modules=eventsys_simpletest`
 |---------|-------|
 | Frozen tab | Blocking loop, no `await` |
 | No touch response | Poll loop never yields |
-| Import error | Example needs packages not in `pyscript.toml` manifest |
+| Import error | Example needs packages not in `micropython.toml` manifest |
 
 Regenerate manifest after adding examples: `./scripts/install_refresh_manifests.sh`.
 

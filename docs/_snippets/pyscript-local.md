@@ -16,6 +16,7 @@ The script runs [`tools/serve.py`](https://github.com/PyDevices/pydisplay/blob/m
 | Gallery | `./tools/pyscript.sh` | Example card grid |
 | REPL | open `http://127.0.0.1:8000/web/pyscript/repl.html` | REPL + canvas |
 | Simple | open `http://127.0.0.1:8000/web/pyscript/simple.html` | Minimal PyScript HTML shell |
+| Pyodide | open `http://127.0.0.1:8000/web/pyscript/pyodide.html?modules=calc_graphics,calc_engine` or `…/pyodide.html?manifests=chango` | Modules / same MIP manifests as `micropython.html`, under vendored Pyodide (not the gallery) |
 
 Manual URLs (when the server is already running):
 
@@ -29,7 +30,7 @@ After editing files under `src/`, refresh the PyScript file manifest:
 ./scripts/install_refresh_manifests.sh
 ```
 
-That updates `web/pyscript/pyscript.toml`, which mounts `lib/` and `add_ons/` into the browser.
+That updates `web/pyscript/micropython.toml` and `web/pyscript/pyodide.toml`, which mount `lib/` and `add_ons/` into the browser.
 
 !!! tip "Port 8000"
     `mkdocs serve` also defaults to port 8000. Stop one server before starting the other, or pass a different port: `./tools/pyscript.sh calculator -p 8080`.

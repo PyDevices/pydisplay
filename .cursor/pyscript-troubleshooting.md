@@ -15,7 +15,7 @@ Related: [PyScript local development](../docs/guides/pyscript.md),
 | Page | Role |
 |------|------|
 | `web/pyscript/embed.html` | **Dev / automation** — auto-imports entry; supports `?autotest=1&duration=N` |
-| `web/pyscript/load.html` | **Production gallery** — Run-gated; no autotest harness |
+| `web/pyscript/micropython.html` | **Production gallery** — Run-gated; no autotest harness |
 | `tools/serve.py` | Local server with COI headers (`COOP`/`COEP`) on port **8000** |
 
 Always serve from repo root (`python tools/serve.py`). Confirm
@@ -106,7 +106,7 @@ Patterns that work well in ad-hoc scripts:
 | Sync `sleep_ms` → `time.sleep_ms` | Blocks JS; setTimeout / Playwright evaluate may not run until Python returns |
 | `await asyncio.sleep` / async multimer sleep | **Does** yield; JS timers and Playwright stay responsive |
 | `multimer.Timer` may be `None` | Sync hardware-style timers are not the WASM path; use `AsyncTimer` / asyncio |
-| `set_deadline_hook` | **Harness/debug only** — not for production `load.html` demos |
+| `set_deadline_hook` | **Harness/debug only** — not for production `micropython.html` demos |
 
 When debugging timer or loop behaviour:
 

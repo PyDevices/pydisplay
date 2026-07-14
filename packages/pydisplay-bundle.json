@@ -211,10 +211,6 @@
     [
       "lib/multimer/_backends/win32.py",
       "github:PyDevices/pydisplay/src/lib/multimer/_backends/win32.py"
-    ],
-    [
-      "jupyter_notebook.ipynb",
-      "github:PyDevices/pydisplay/src/jupyter_notebook.ipynb"
     ]
   ],
   "version": "0.0.1"

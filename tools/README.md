@@ -19,7 +19,7 @@ python3 -m venv .venv
 
 python tools/serve.py
 # http://127.0.0.1:8000/web/pyscript/index.html
-# http://127.0.0.1:8000/web/pyscript/load.html?modules=calc_graphics,calc_engine
+# http://127.0.0.1:8000/web/pyscript/micropython.html?modules=calc_graphics,calc_engine
 
 ./tools/pyscript.sh calculator
 ./tools/jupyter.sh calculator --cursor

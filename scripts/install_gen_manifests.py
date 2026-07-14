@@ -18,7 +18,8 @@ repo_dir = os.getcwd() + "/"
 src_dir = "src/"
 output_dir = repo_dir
 packages_dir = "packages/"
-toml_full_path = output_dir + "web/pyscript/pyscript.toml"
+toml_full_path = output_dir + "web/pyscript/micropython.toml"
+pyodide_toml_path = output_dir + "web/pyscript/pyodide.toml"
 master_package_name = "pydisplay-bundle"
 
 # list of package directories, dependencies and extra files in that package
@@ -33,7 +34,7 @@ packages = [
 
 # Packages omitted from pydisplay-bundle.json (still get their own packages/*.json).
 bundle_exclude = ["examples", "add_ons"]
-# Packages omitted from web/pyscript/pyscript.toml (PyScript mounts add_ons for browser examples).
+# Packages omitted from web/pyscript/micropython.toml (PyScript mounts add_ons for browser examples).
 toml_exclude = ["examples"]
 
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
@@ -46,7 +47,6 @@ PACKAGE_SKIP_DIRS = {
 
 # Dest paths omitted from sim/wokwi/pydisplay-bundle.json (derived from packages/pydisplay-bundle.json).
 WOKWI_BUNDLE_EXCLUDE_DESTS = {
-    "jupyter_notebook.ipynb",
     "lib/board_config.py",
     "lib/displaysys/fbdisplay.py",
     "lib/displaysys/jndisplay.py",
@@ -97,10 +97,11 @@ def wokwi_bundle_from_master(master):
     return {"urls": urls, "version": master["version"]}
 
 
-# Paths in pyscript.toml [files] — relative to web/pyscript/ (browser URL ./src/...).
+# Paths in micropython.toml / pyodide.toml [files] — relative to web/pyscript/ (browser URL ./src/...).
 PYSCRIPT_TOML_SRC_PREFIX = "./"
-# Local MicroPython WASM (vendor/); PyScript config key to use it instead of the CDN build.
+# Local interpreters under vendor/; PyScript config key replaces the CDN build.
 PYSCRIPT_INTERPRETER = "./vendor/micropython/micropython.mjs"
+PYODIDE_INTERPRETER = "./vendor/pyodide/pyodide.mjs"
 
 
 def pyscript_toml_file_entry(repo_relative_path: str, mount: str) -> str:
@@ -115,8 +116,8 @@ master_toml = [
     "",
     "[files]",
 ]
-# Standalone files included in the bundle but not discovered by package walks.
-extra_files_added_to_master = [os.path.join(src_dir, "jupyter_notebook.ipynb")]
+# Standalone files included in the bundle / tomls but not discovered by package walks.
+extra_files_added_to_master = []
 
 # Iterate over the packages and create the package files
 for package_path, deps, extra_files in packages:
@@ -209,10 +210,17 @@ for package_name, contents in package_dicts.items():
     with open(package_file, "w") as f:
         json.dump(contents, f, indent=2)
 
-# Write the master toml file
+# Write the master toml files (same [files]; MicroPython vs Pyodide interpreter).
 with open(toml_full_path, "w") as f:
     for line in master_toml:
         f.write(line + "\n")
+
+with open(pyodide_toml_path, "w") as f:
+    for line in master_toml:
+        if line.startswith("interpreter ="):
+            f.write(f'interpreter = "{PYODIDE_INTERPRETER}"\n')
+        else:
+            f.write(line + "\n")
 
 # Wokwi browser sim: slim copy of pydisplay-bundle (not a packages/ entry).
 wokwi_bundle_path = os.path.join(output_dir, "sim", "wokwi", "pydisplay-bundle.json")

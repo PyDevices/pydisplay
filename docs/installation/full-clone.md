@@ -47,4 +47,4 @@ If you edit files under `src/`, maintainers should run from the repo root:
 ./scripts/install_refresh_manifests.sh
 ```
 
-This updates `packages/*.json` and `web/pyscript/pyscript.toml`. See [tools/README.md](https://github.com/PyDevices/pydisplay/blob/main/tools/README.md).
+This updates `packages/*.json` and `web/pyscript/micropython.toml`. See [tools/README.md](https://github.com/PyDevices/pydisplay/blob/main/tools/README.md).

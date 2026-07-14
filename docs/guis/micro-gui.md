@@ -38,7 +38,7 @@ Or rely on `import hardware_setup` (needs `mip` on the target when `gui/` is mis
 
 [`src/examples/micro_gui_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/micro_gui_simpletest.py) — framebuffer smoke test. Full demos: `import hardware_setup` then `import gui.demos.simple`.
 
-Browser: `# pyscript packages: micropython-micro-gui` — [gallery loader](https://PyDevices.github.io/pydisplay/pyscript/load.html?modules=micro_gui_simpletest&packages=micropython-micro-gui).
+Browser: `# pyscript packages: micropython-micro-gui` — [gallery loader](https://PyDevices.github.io/pydisplay/pyscript/micropython.html?modules=micro_gui_simpletest&packages=micropython-micro-gui).
 
 ## See also
 

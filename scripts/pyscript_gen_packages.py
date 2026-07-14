@@ -21,6 +21,8 @@ Optional headers (first 10 lines):
     multi-module loaders (e.g. ``calc_engine``)
   - ``# pyscript packages:`` — repo-root mip package stems (e.g.
     ``micropython-nano-gui``) pre-installed into ``/add_ons`` before import
+  - ``# pyodide wheels:`` — micropip wheels for ``pyodide.html`` (e.g. ``lvgl``
+    → ``lv_cpython_mod`` ``pyemscripten_2026_0`` wheel)
   - ``# pyscript skip: gallery`` — omit from the browser card grid (manifest
     JSON for packages is still written)
 Then:
@@ -29,8 +31,8 @@ Then:
   - Writes ``web/pyscript/<name>.json`` MIP manifests for package examples
   - Deletes stale ``web/pyscript/*.html`` from the old per-demo page generator
 
-Every gallery example opens the parametric loader at ``load.html?modules=…`` or
-``load.html?manifests=…``.
+Every gallery example opens the parametric loader at ``micropython.html?modules=…`` or
+``micropython.html?manifests=…``.
 
     python scripts/pyscript_gen_packages.py
     python scripts/pyscript_gen_packages.py --check
@@ -59,8 +61,8 @@ INDEX = PYSCRIPT_DIR / "index.html"
 
 MIP_MANIFEST_VERSION = "0.0.5"
 
-KEEP_HTML = frozenset({"index", "load", "repl", "simple", "embed"})
-LOADER_BASE = "load.html"
+KEEP_HTML = frozenset({"index", "micropython", "repl", "simple", "embed", "pyodide"})
+LOADER_BASE = "micropython.html"
 
 ARROW = (
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
