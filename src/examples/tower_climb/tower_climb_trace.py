@@ -1,13 +1,14 @@
 """
 Text trace hooks for tower_climb debugging.
 
-Enable by setting ``TOWER_CLIMB_TRACE`` to an output path (JSON Lines).
-Each line is one JSON object with a ``kind`` field.
+Enable with ``--trace PATH`` (JSON Lines). Each line is one JSON object with a
+``kind`` field.
 """
 
 import json
 
-from _paths import ensure_parent_dir, env_get
+from _paths import ensure_parent_dir
+import _cfg as cfg
 
 _KIND_NAMES = (
     "bark",
@@ -148,7 +149,7 @@ class TraceRecorder:
 
 
 def open_trace():
-    path = env_get("TOWER_CLIMB_TRACE", "").strip()
+    path = (cfg.trace or "").strip()
     if not path:
         return None
     return TraceRecorder(path)

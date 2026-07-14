@@ -27,19 +27,6 @@ def _join(*parts):
     return out
 
 
-def env_get(name, default=""):
-    """Cross-runtime getenv (MicroPython/CircuitPython lack ``os.environ``)."""
-    getenv = getattr(os, "getenv", None)
-    if getenv is None:
-        return default
-    val = getenv(name)
-    return val if val is not None else default
-
-
-def env_truthy(name):
-    return env_get(name, "").strip().lower() in ("1", "true", "yes")
-
-
 def ensure_parent_dir(path):
     parent = _dirname(path)
     if not parent:

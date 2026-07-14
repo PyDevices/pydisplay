@@ -20,7 +20,7 @@ SESSION="tower-vid-win"
 tmux -f /exec-daemon/tmux.portal.conf kill-session -t "$SESSION" 2>/dev/null || true
 tmux -f /exec-daemon/tmux.portal.conf new-session -d -s "$SESSION" -c "$SRC_DIR" -- "${SHELL:-zsh}" -l
 tmux -f /exec-daemon/tmux.portal.conf send-keys -t "$SESSION:0.0" \
-  "TOWER_CLIMB_BOT=1 TOWER_CLIMB_HOLD_WIN=1 PYDISPLAY_VIDEO=$OUT PYDISPLAY_VIDEO_FPS=$VIDEO_FPS TOWER_CLIMB_TRACE=$TRACE DISPLAY=:1 PYTHONPATH=lib $PYTHON $GAME_SCRIPT" C-m
+  "DISPLAY=:1 PYTHONPATH=lib $PYTHON $GAME_SCRIPT --bot --hold-win --video $OUT --video-fps $VIDEO_FPS --trace $TRACE" C-m
 
 GAME_PATTERN="examples/tower_climb/tower_climb.py"
 DEADLINE=$((SECONDS + MAX_WAIT))

@@ -29,7 +29,7 @@ SESSION="tower-vid"
 tmux -f /exec-daemon/tmux.portal.conf kill-session -t "$SESSION" 2>/dev/null || true
 tmux -f /exec-daemon/tmux.portal.conf new-session -d -s "$SESSION" -c "$SRC_DIR" -- "${SHELL:-zsh}" -l
 tmux -f /exec-daemon/tmux.portal.conf send-keys -t "$SESSION:0.0" \
-  "TOWER_CLIMB_RECORD=1 TOWER_CLIMB_TRACE=$TRACE DISPLAY=:1 PYTHONPATH=lib $PYTHON $GAME_SCRIPT" C-m
+  "DISPLAY=:1 PYTHONPATH=lib $PYTHON $GAME_SCRIPT --record --trace $TRACE" C-m
 
 WIN=""
 for _ in $(seq 1 50); do

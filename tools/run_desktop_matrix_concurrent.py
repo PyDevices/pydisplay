@@ -121,7 +121,7 @@ def run_one(
     ):
         cmd.insert(1, "-u")
     env = os.environ.copy()
-    env["PYDISPLAY_TIMER_ASYNC"] = str(timer_async)
+    # Timer mode is applied via --timer-async → wrapper env_set (not OS environ).
     env.setdefault("SDL_VIDEODRIVER", "dummy")
     env.setdefault("SDL_AUDIODRIVER", "dummy")
     env.setdefault("PYTHONUNBUFFERED", "1")

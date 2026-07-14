@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Run tower_climb with the built-in bot; watch the trace stream in real time."""
 
+import argparse
 import json
 import os
 import subprocess
@@ -12,12 +13,7 @@ PKG_DIR = os.path.dirname(TOOLS_DIR)
 SRC_DIR = os.path.dirname(os.path.dirname(PKG_DIR))
 REPO_ROOT = os.path.dirname(SRC_DIR)
 GAME_SCRIPT = os.path.join(PKG_DIR, "tower_climb.py")
-TRACE = os.environ.get(
-    "TOWER_CLIMB_TRACE", os.path.join(PKG_DIR, "trace", "playtest.jsonl")
-)
-HARD_TIMEOUT_S = int(os.environ.get("TOWER_CLIMB_PLAYTEST_TIMEOUT", "120"))
-STALL_SECONDS = float(os.environ.get("TOWER_CLIMB_PLAYTEST_STALL_S", "15"))
-STALL_IMPROVE_Y = float(os.environ.get("TOWER_CLIMB_PLAYTEST_STALL_DY", "4"))
+DEFAULT_TRACE = os.path.join(PKG_DIR, "trace", "playtest.jsonl")
 
 
 def analyze(path):
@@ -49,7 +45,7 @@ def analyze(path):
     }
 
 
-def watch_trace(path, proc):
+def watch_trace(path, proc, *, hard_timeout_s, stall_seconds, stall_improve_y):
     """Tail the JSONL trace; report progress and detect stalls early."""
     offset = 0
     best_y = 9999.0
@@ -62,7 +58,7 @@ def watch_trace(path, proc):
 
     while proc.poll() is None:
         now = time.time()
-        if now - started > HARD_TIMEOUT_S:
+        if now - started > hard_timeout_s:
             return "timeout", {"best_y": best_y, "frames": frames, "last": last_line}
 
         if os.path.exists(path):
@@ -92,7 +88,7 @@ def watch_trace(path, proc):
                 elif kind == "frame":
                     frames += 1
                     y = float(d["player"]["y"])
-                    if y < best_y - STALL_IMPROVE_Y:
+                    if y < best_y - stall_improve_y:
                         best_y = y
                         last_improve = now
                     if now - last_report >= 1.0:
@@ -107,7 +103,7 @@ def watch_trace(path, proc):
                             f"lives={d['player']['lives']} score={d['player']['score']:4d}"
                         )
 
-        if frames > 0 and now - last_improve > STALL_SECONDS:
+        if frames > 0 and now - last_improve > stall_seconds:
             return "stall", {
                 "best_y": best_y,
                 "frames": frames,
@@ -120,25 +116,59 @@ def watch_trace(path, proc):
 
 
 def main():
-    os.makedirs(os.path.dirname(TRACE), exist_ok=True)
-    if os.path.exists(TRACE):
-        os.remove(TRACE)
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument(
+        "--trace",
+        default=DEFAULT_TRACE,
+        help="JSONL trace path (also passed to the game as --trace)",
+    )
+    ap.add_argument("--timeout", type=float, default=120, help="Hard wall-clock limit (s)")
+    ap.add_argument("--stall-s", type=float, default=15, help="Stall detection window (s)")
+    ap.add_argument(
+        "--stall-dy",
+        type=float,
+        default=4,
+        help="Minimum Y improvement to reset stall timer",
+    )
+    ap.add_argument("--seed", type=int, default=None, help="Optional RNG seed for the game")
+    args = ap.parse_args()
+
+    trace = args.trace
+    os.makedirs(os.path.dirname(trace) or ".", exist_ok=True)
+    if os.path.exists(trace):
+        os.remove(trace)
+
     env = os.environ.copy()
     env["SDL_VIDEODRIVER"] = "dummy"
     env["SDL_AUDIODRIVER"] = "dummy"
-    env["PYTHONPATH"] = os.path.join(SRC_DIR, "lib")
-    env["TOWER_CLIMB_BOT"] = "1"
-    env["TOWER_CLIMB_TRACE"] = TRACE
+    # Match lib.path: board_config in lib/, usdl2 in add_ons/.
+    env["PYTHONPATH"] = os.pathsep.join(
+        [
+            os.path.join(SRC_DIR, "lib"),
+            os.path.join(SRC_DIR, "add_ons"),
+            os.path.join(SRC_DIR, "examples"),
+        ]
+    )
+    # Do not set TOWER_CLIMB_*; the game reads argv only.
     python = os.path.join(REPO_ROOT, ".venv", "bin", "python")
+    cmd = [python, GAME_SCRIPT, "--bot", "--trace", trace]
+    if args.seed is not None:
+        cmd.extend(["--seed", str(args.seed)])
     proc = subprocess.Popen(
-        [python, GAME_SCRIPT],
+        cmd,
         cwd=SRC_DIR,
         env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
     )
-    status, detail = watch_trace(TRACE, proc)
+    status, detail = watch_trace(
+        trace,
+        proc,
+        hard_timeout_s=args.timeout,
+        stall_seconds=args.stall_s,
+        stall_improve_y=args.stall_dy,
+    )
     if proc.poll() is None:
         proc.terminate()
         try:
@@ -146,25 +176,25 @@ def main():
         except subprocess.TimeoutExpired:
             proc.kill()
     out = proc.stdout.read() if proc.stdout else ""
-    if not os.path.exists(TRACE):
+    if not os.path.exists(trace):
         print("FAIL: no trace written", file=sys.stderr)
         if out:
             print(out[-2000:], file=sys.stderr)
         return 1
 
-    result = analyze(TRACE)
+    result = analyze(trace)
     print(json.dumps(result, indent=2))
-    print(f"trace: {TRACE}")
+    print(f"trace: {trace}")
 
     if status == "stall":
         print(
-            f"FAIL: stalled for {STALL_SECONDS:.0f}s without climbing "
-            f"{STALL_IMPROVE_Y:.0f}px (best_y={detail.get('best_y')})",
+            f"FAIL: stalled for {args.stall_s:.0f}s without climbing "
+            f"{args.stall_dy:.0f}px (best_y={detail.get('best_y')})",
             file=sys.stderr,
         )
         return 1
     if status == "timeout":
-        print(f"FAIL: hard timeout after {HARD_TIMEOUT_S}s", file=sys.stderr)
+        print(f"FAIL: hard timeout after {args.timeout}s", file=sys.stderr)
         return 1
     if not result["won"]:
         print("FAIL: bot did not reach tree top", file=sys.stderr)

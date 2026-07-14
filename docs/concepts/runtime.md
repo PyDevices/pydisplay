@@ -95,9 +95,11 @@ The shipped default config sets `timer_async` per host:
 | Jupyter | `True` |
 | PG/SDL desktop | `False`, or `env_bool("PYDISPLAY_TIMER_ASYNC", False)` |
 
-Set **`PYDISPLAY_TIMER_ASYNC`** in the process environment before
-`board_config` is imported to run desktop examples with asyncio timers (LVGL
-async path, cross-runtime matrix columns). See
+**Library / host only** — examples do not read `PYDISPLAY_TIMER_ASYNC`. Set it
+in the process environment before `board_config` is imported on desktop hosts
+that have `getenv`, or prefer test-kit / matrix `--timer-async` (wrapper
+`env_set`) so Windows PE under WSL works. MCU board configs and PyScript /
+Jupyter use their platform defaults without shell env. See
 [`displaysys.env_bool`](../../src/lib/displaysys/__init__.py) and [Board configs — default](../hardware/board-configs.md#default-config).
 
 On SDL2 / Win32 sync timer hosts (`micropython.exe`, and similar), display

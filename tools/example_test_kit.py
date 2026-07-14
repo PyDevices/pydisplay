@@ -329,11 +329,6 @@ def run_subprocess_case(
         str(timeout),
     ]
     env = os.environ.copy()
-    example_env = example_meta.get("env") or {}
-    for key, value in example_env.items():
-        env[str(key)] = str(value)
-        # Windows PE under WSL may not see Linux-exported env; also pass via argv.
-        cmd.extend(["--env", f"{key}={value}"])
     # micropython.exe (Windows PE) cannot read WSL-exported env; pass via argv.
     timer_async = env.get("PYDISPLAY_TIMER_ASYNC")
     if timer_async is not None:
@@ -638,8 +633,6 @@ def run_jupyter_case(
     ]
     env = os.environ.copy()
     env["PYTHONPATH"] = str(SRC)
-    for key, value in (example_meta.get("env") or {}).items():
-        env[str(key)] = str(value)
 
     try:
         try:

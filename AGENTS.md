@@ -68,29 +68,35 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 ### `PYDISPLAY_TIMER_ASYNC` (default `board_config`)
 
 `src/lib/board_config.py` sets `runtime.timer_async` when constructing
-`eventsys.Runtime`:
+`eventsys.Runtime`. **Examples never read this variable** — only the library
+board_config (and test harnesses that call `displaysys.env_set`).
 
 | Host branch | `timer_async` |
 |-------------|---------------|
 | PyScript (`PSDisplay`) | always `True` |
 | Jupyter (`JNDisplay`) | always `True` |
-| PG/SDL desktop | `False` by default; override with env |
+| PG/SDL desktop | `False` by default; host override below |
+| MCU board_configs | whatever that board sets (no shell env needed) |
 
-Desktop override: set **`PYDISPLAY_TIMER_ASYNC`** before `board_config` is
-imported. Truthy: `1`, `true`, `yes`, `on`. Falsey: `0`, `false`, `no`, `off`.
-Helper: `displaysys.env_bool`. Per-board configs under
-`board_configs/` are unchanged unless they opt in.
+**Desktop host override** (where `getenv` exists): set **`PYDISPLAY_TIMER_ASYNC`**
+before `board_config` is imported. Truthy: `1`, `true`, `yes`, `on`. Falsey:
+`0`, `false`, `no`, `off`. Helper: `displaysys.env_bool`.
 
-Matrix / local runs:
+**Preferred for agents / matrix:** pass wrapper `--timer-async` (the kit and
+`run_desktop_matrix_concurrent.py` do this). That uses `env_set` and works for
+Windows PE under WSL without relying on OS environ. Shell export remains a
+valid host shortcut:
 
 ```bash
+# kit inherits host env and forwards --timer-async for PE/WSL
 PYDISPLAY_TIMER_ASYNC=1 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
   .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv
 ```
 
 `lv_test_timer.py` follows `runtime.timer_async` and does not set env vars.
 To force async on desktop for that example (or the LVGL kit), set
-`PYDISPLAY_TIMER_ASYNC=1` on the command line before launch.
+`PYDISPLAY_TIMER_ASYNC=1` on the parent process before launch, or use a kit that
+passes `--timer-async`.
 
 **`micropython.exe` matrix:** no `threading` / `_thread`. `example_test_wrapper.py` uses a
 `Runtime.poll` deadline quit (not a multimer SDL quit timer). With

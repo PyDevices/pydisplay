@@ -27,7 +27,8 @@ from board_config import display_drv, runtime
 from displaysys import color565
 from eventsys.keys import Keys
 from graphics import BMP565, FrameBuffer, RGB565, rect, text8
-from _paths import asset_path, env_get, env_truthy
+import _cfg as cfg
+from _paths import asset_path
 from tower_climb_trace import open_trace
 
 try:
@@ -142,12 +143,8 @@ def _rng(lo, hi):
 
 
 def _seed_rng():
-    raw = env_get("TOWER_CLIMB_SEED", "").strip()
-    if raw:
-        try:
-            seed(int(raw, 0))
-        except ValueError:
-            pass
+    if cfg.seed is not None:
+        seed(cfg.seed)
         return
     try:
         seed(ticks_ms())
@@ -269,23 +266,20 @@ def _build_level():
     return plats, gems, hazards, decos
 
 _trace = open_trace()
-_bot = env_truthy("TOWER_CLIMB_BOT")
-_record = env_truthy("TOWER_CLIMB_RECORD")
-_hold_win = env_truthy("TOWER_CLIMB_HOLD_WIN")
+_bot = cfg.bot
+_record = cfg.record
+_hold_win = cfg.hold_win
 if _record:
     _bot = True
 
 
 def _open_video_recorder():
-    path = env_get("TOWER_CLIMB_VIDEO", "").strip()
-    if not path:
-        path = env_get("PYDISPLAY_VIDEO", "").strip()
+    path = (cfg.video or "").strip()
     if not path:
         return
     if not hasattr(display_drv, "open_frame_recorder"):
         return
-    fps = int(env_get("TOWER_CLIMB_VIDEO_FPS") or env_get("PYDISPLAY_VIDEO_FPS", "12"))
-    display_drv.open_frame_recorder(path, fps=fps)
+    display_drv.open_frame_recorder(path, fps=cfg.video_fps)
 
 
 def _present():
@@ -542,7 +536,7 @@ _bot_last_x = None
 
 
 def _bot_tick(player, plats, hazards):
-    """Simple climb AI for playtesting (``TOWER_CLIMB_BOT=1``)."""
+    """Simple climb AI for playtesting (``--bot``)."""
     global _bot_stuck, _bot_last_x
     _keys["left"] = _keys["right"] = _keys["up"] = _keys["down"] = False
     _keys["smash"] = False
@@ -931,14 +925,12 @@ def _on_round_over():
         return
     if _bot:
         if _hold_win and _won:
-            _hold_left = int(
-                env_get(
-                    "TOWER_CLIMB_HOLD_FRAMES",
-                    "48"
-                    if getattr(display_drv, "frame_recording", False)
-                    else "150",
+            if cfg.hold_frames is not None:
+                _hold_left = int(cfg.hold_frames)
+            else:
+                _hold_left = (
+                    48 if getattr(display_drv, "frame_recording", False) else 150
                 )
-            )
             _phase = PHASE_HOLD_WIN
             _wait_draw = _draw_end
             return

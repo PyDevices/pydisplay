@@ -24,10 +24,9 @@ Gameplay bugs (flicker, respawn deaths, camera clamp at the crown, bot pathing)
 were fixed iteratively using the trace stream and bot playtests below rather than
 manual play alone.
 
-Levels are randomized each round (`_build_level()`). Set `TOWER_CLIMB_SEED` for
+Levels are randomized each round (`_build_level()`). Pass `--seed N` for
 a reproducible RNG state when bisecting a layout. Developer hazard pacing is
-controlled by the `DIFFICULTY` constant at the top of `tower_climb.py` (not an
-environment variable).
+controlled by the `DIFFICULTY` constant at the top of `tower_climb.py`.
 
 ## Package layout
 
@@ -35,6 +34,7 @@ environment variable).
 tower_climb/
   tower_climb.py          # main game loop
   tower_climb_trace.py    # JSONL trace recorder
+  _cfg.py                 # argv flags (--bot, --trace, …)
   _paths.py               # package/asset path helpers
   assets/                 # BMPs + gen_tower_assets.py
   tools/
@@ -73,17 +73,17 @@ Uses **ffmpeg x11grab** on the pygame window after locating it with `xwininfo`:
   much longer.
 - Fragile: depends on finding the correct X11 window title and geometry.
 
-This script remains as a reference for the old workflow. It sets
-`TOWER_CLIMB_RECORD=1` (enables the built-in bot) and writes an optional trace
-to `trace/record.jsonl`.
+This script remains as a reference for the old workflow. It launches the game
+with `--record --trace …` (enables the built-in bot) and writes an optional
+trace to `trace/record.jsonl`.
 
 ### New method — logical framebuffer export (`tools/record_win.sh`)
 
 Implemented in pydisplay’s **PGDisplay** backend, driven from the game via
-`PYDISPLAY_VIDEO` / `TOWER_CLIMB_VIDEO`:
+`--video PATH`:
 
 1. `tower_climb.py` calls `display_drv.open_frame_recorder(path, fps=…)` when
-   a video path env var is set.
+   `--video` is set.
 2. On every `PGDisplay.show()`, the driver exports the **logical** RGB24
    framebuffer (`_buffer`, 320×480 for this game) through
    `FFmpegFrameRecorder` in `src/lib/displaysys/pgdisplay.py`.
@@ -99,35 +99,23 @@ Properties:
 Typical invocation (what `record_win.sh` runs):
 
 ```bash
-TOWER_CLIMB_BOT=1 \
-TOWER_CLIMB_HOLD_WIN=1 \
-PYDISPLAY_VIDEO=/path/to/out.mp4 \
-PYDISPLAY_VIDEO_FPS=12 \
-TOWER_CLIMB_TRACE=trace/record-win.jsonl \
-DISPLAY=:1 \
-PYTHONPATH=lib \
-.venv/bin/python examples/tower_climb/tower_climb.py
+cd src
+DISPLAY=:1 PYTHONPATH=lib \
+  ../.venv/bin/python examples/tower_climb/tower_climb.py \
+  --bot --hold-win \
+  --video /path/to/out.mp4 --video-fps 12 \
+  --trace examples/tower_climb/trace/record-win.jsonl
 ```
 
-`TOWER_CLIMB_HOLD_WIN=1` keeps the win screen visible for extra frames so the
-recording does not end on the first victory frame.
-
-Environment variables:
-
-| Variable | Purpose |
-|----------|---------|
-| `PYDISPLAY_VIDEO` | Output `.mp4` path (frame recorder) |
-| `PYDISPLAY_VIDEO_FPS` | Encode frame rate (default 12) |
-| `TOWER_CLIMB_VIDEO` | Alias for `PYDISPLAY_VIDEO` |
-| `TOWER_CLIMB_VIDEO_FPS` | Alias for `PYDISPLAY_VIDEO_FPS` |
-| `TOWER_CLIMB_HOLD_WIN` | Hold win/game-over screen for recording |
-| `TOWER_CLIMB_HOLD_FRAMES` | Override hold length (default higher when recording) |
+`--hold-win` keeps the win screen visible for extra frames so the
+recording does not end on the first victory frame. Optional `--hold-frames N`
+overrides the default hold length (48 when recording, else 150).
 
 ## Debug tooling
 
 ### JSONL trace (`tower_climb_trace.py`)
 
-Set `TOWER_CLIMB_TRACE` to a file path. Each line is one JSON object with a
+Pass `--trace PATH`. Each line is one JSON object with a
 `kind` field. Default playtest output:
 `trace/playtest.jsonl` (directory is gitignored except `.gitkeep`).
 
@@ -158,21 +146,18 @@ the camera stopped at `CAM_MIN`.
 
 ### Bot playtest (`tools/playtest.py`)
 
-Runs the game headlessly (`SDL_VIDEODRIVER=dummy`) with `TOWER_CLIMB_BOT=1`,
+Runs the game headlessly (`SDL_VIDEODRIVER=dummy`) with `--bot --trace …`,
 tails the trace file in real time, prints climb progress every second, and
 **fails fast** if the bot stalls (no vertical improvement for 15s by default).
 
-Tunable env vars:
-
-| Variable | Default | Meaning |
-|----------|---------|---------|
-| `TOWER_CLIMB_PLAYTEST_TIMEOUT` | 120 | Hard wall-clock limit (seconds) |
-| `TOWER_CLIMB_PLAYTEST_STALL_S` | 15 | Stall detection window |
-| `TOWER_CLIMB_PLAYTEST_STALL_DY` | 4 | Minimum Y improvement to reset stall timer |
+```bash
+.venv/bin/python src/examples/tower_climb/tools/playtest.py
+.venv/bin/python src/examples/tower_climb/tools/playtest.py --timeout 120 --stall-s 15
+```
 
 Exit code 0 prints `OK: tree top reached` and a JSON summary.
 
-### Built-in bot (`TOWER_CLIMB_BOT=1`)
+### Built-in bot (`--bot`)
 
 Simple climb AI in `_bot_tick()`: dodge falling spikes, smash ice when standing
 on it, jump toward the nearest branch above, aim for the crown when close. Not
@@ -202,13 +187,19 @@ SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
   --only-runtime cpython-venv --only-example tower_climb
 ```
 
-## Quick reference — environment variables
+## Quick reference — game argv (`_cfg.py`)
 
-| Variable | Effect |
-|----------|--------|
-| `TOWER_CLIMB_BOT` | Enable built-in climb bot |
-| `TOWER_CLIMB_TRACE` | Write JSONL trace to path |
-| `TOWER_CLIMB_SEED` | Fix RNG seed for level generation |
-| `TOWER_CLIMB_RECORD` | Bot mode for legacy `record.sh` |
-| `TOWER_CLIMB_RECORD_SECONDS` | x11grab duration (default 18) |
-| `PYDISPLAY_VIDEO` | PGDisplay frame recorder output path |
+| Flag | Effect |
+|------|--------|
+| `--bot` | Enable built-in climb bot |
+| `--record` | Implies `--bot` (legacy x11grab workflow) |
+| `--hold-win` | Hold win screen for recording |
+| `--hold-frames N` | Override hold length |
+| `--trace PATH` | Write JSONL trace to path |
+| `--seed N` | Fix RNG seed for level generation |
+| `--video PATH` | PGDisplay frame recorder output path |
+| `--video-fps N` | Encode frame rate (default 12) |
+
+Host shell scripts may still use env vars for *their own* defaults (output
+paths, ffmpeg duration); they pass argv into the game. The game itself does
+not call getenv.
