@@ -43,6 +43,8 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
 import sys
+import urllib.error
+import urllib.request
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -52,11 +54,39 @@ DEBUG_PREFIX = "/__debug"
 
 # Same-origin path for micropip LVGL wheels (pyodide.html). When the tree does
 # not yet contain wheels/, link a sibling lv_cpython_mod build if present.
+# Last resort: mirror the published Pages index + wheel (needs CORP via this
+# server — cross-origin Pages lacks Cross-Origin-Resource-Policy under COEP).
 WHEELS_DIR = REPO_ROOT / "web" / "pyscript" / "wheels"
 SIBLING_WHEEL_DIRS = (
     REPO_ROOT.parent / "lv_cpython_mod" / "web" / "wheels",
     REPO_ROOT.parent / "cmods" / "lv_cpython_mod" / "web" / "wheels",
 )
+PAGES_WHEELS_BASE = "https://pydevices.github.io/lv_cpython_mod/wheels/"
+
+
+def _mirror_pages_wheels() -> Path | None:
+    """Download lvgl.json + wheel from lv_cpython_mod Pages into web/pyscript/wheels/."""
+    try:
+        WHEELS_DIR.mkdir(parents=True, exist_ok=True)
+        index_url = PAGES_WHEELS_BASE + "lvgl.json"
+        with urllib.request.urlopen(index_url, timeout=60) as resp:
+            raw = resp.read()
+        data = json.loads(raw)
+        wheel_name = data.get("wheel")
+        if not isinstance(wheel_name, str) or not wheel_name.endswith(".whl"):
+            raise ValueError(f"invalid wheel entry in {index_url}: {wheel_name!r}")
+        if "/" in wheel_name or wheel_name.startswith("."):
+            raise ValueError(f"unsafe wheel filename: {wheel_name!r}")
+        (WHEELS_DIR / "lvgl.json").write_bytes(raw)
+        wheel_path = WHEELS_DIR / wheel_name
+        if not wheel_path.is_file():
+            print(f"  wheels: downloading {wheel_name} from Pages…")
+            urllib.request.urlretrieve(PAGES_WHEELS_BASE + wheel_name, wheel_path)
+        print(f"  wheels:                  {WHEELS_DIR} (mirrored from Pages)")
+        return WHEELS_DIR
+    except (OSError, urllib.error.URLError, json.JSONDecodeError, ValueError) as exc:
+        print(f"warning: could not mirror LVGL wheels from Pages: {exc}", file=sys.stderr)
+        return None
 
 
 def ensure_wheels_dir() -> Path | None:
@@ -85,7 +115,7 @@ def ensure_wheels_dir() -> Path | None:
                 return None
             print(f"  wheels:                  {WHEELS_DIR} → {src}")
             return WHEELS_DIR
-    return None
+    return _mirror_pages_wheels()
 
 
 def _stamp() -> str:

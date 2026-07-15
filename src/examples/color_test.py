@@ -1,4 +1,5 @@
 # pyscript mip: palettes
+# pyodide wheels: palettes
 """
 color_test.py
 =============

@@ -59,9 +59,12 @@ if not _test_mode:
     try:
         import os
 
-        os.dupterm(console)
-        help()
-    except ImportError:
+        if hasattr(os, "dupterm"):
+            os.dupterm(console)
+            help()
+        else:
+            console.write("REPL not available (no os.dupterm).\n", pal.YELLOW)
+    except (ImportError, AttributeError):
         console.write("REPL not available.\n", pal.YELLOW)
 
 console.label(Console.LEFT, platform, pal.RED)

@@ -1,4 +1,5 @@
 # pyscript mip: palettes
+# pyodide wheels: palettes
 """
 tiny_hello.py
 =============
