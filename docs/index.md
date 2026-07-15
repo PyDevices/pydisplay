@@ -4,7 +4,7 @@
 
 PyDisplay is the portable foundation layer for Python graphics — **display drivers, unified input events, drawing primitives, fonts, palettes, and cross-platform timers** behind a single API. The same drawing code runs unchanged on a microcontroller, on your desktop, in a web browser, and inside a Jupyter Notebook.
 
-PyDisplay is a *foundation*, not a GUI toolkit. Use it directly for simple UIs, or as the backend for [LVGL](guis/lvgl.md), [Nano-GUI](guis/nano-gui.md), [Micro-GUI](guis/micro-gui.md), [MicroPython-Touch](guis/micropython-touch.md), [PyWidgets](guis/pywidgets.md), or your own widget library.
+PyDisplay is a *foundation*, not a GUI toolkit. Use it directly for simple UIs, or as the backend for [LVGL](guis/lvgl.md), [Nano-GUI](guis/nano-gui.md), [Micro-GUI](guis/micro-gui.md), [MicroPython-Touch](guis/micropython-touch.md), [pdwidgets](guis/pywidgets.md), or your own widget library.
 
 !!! warning "Alpha quality"
     PyDisplay is under active development. APIs and documentation are still evolving. [Feedback and pull requests](contributing.md) are welcome.

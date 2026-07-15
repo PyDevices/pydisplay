@@ -88,7 +88,7 @@ Install SDL2/PyGame for your OS first; MicroPython Unix builds vary in bundled m
 
 ## Input
 
-Mouse events map to touch events. Keyboard and encoder brokers work on desktop the same as on embedded targets.
+Mouse events map to touch events. Keyboard and encoder devices work on desktop the same as on embedded targets.
 
 ## Linux KMS (no window manager)
 

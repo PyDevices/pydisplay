@@ -52,7 +52,7 @@ async def main():
             handle(event)
         await multimer.sleep_ms(0)
 
-multimer.run(main)
+runtime.run_async(main)  # Jupyter / PyScript; or asyncio.run(main()) on desktop
 ```
 
 Or subscribe and let the runtime auto-service drive the app:

@@ -88,17 +88,19 @@ runtime.run_forever()
 
 **LVGL apps** — [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py): import `display_driver`, build UI, then `runtime.run_forever()`. See [LVGL guide](../guis/lvgl.md).
 
-**PyWidgets (pdwidgets)** — [`widgets_percent.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_percent.py): build UI, then:
+**pdwidgets** — [`widgets_percent.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_percent.py) / [`widgets_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_demo.py): build UI, then:
 
 ```python
+import board_config
 import pdwidgets as pd
 
-pd.init_timer(10)  # optional; sets poll delay for run_forever
+display = pd.Display(board_config.display_drv, board_config.runtime)
 # ... widgets ...
-pd.run_forever()
+board_config.runtime.run_forever()
 ```
 
-`run_forever()` calls `pd.tick()` each frame then polls the runtime. During setup bursts before `run_forever()`, call `pd.tick()` to flush draws. See [PyWidgets](../guis/pywidgets.md#event-loop).
+`Display` wires into the runtime at construction. During setup bursts before
+`run_forever()`, call `pd.tick()` to flush draws. See [pdwidgets](../guis/pywidgets.md#event-loop).
 
 ### Notes
 
@@ -119,7 +121,7 @@ pd.run_forever()
 | 6 | `eventsys_touch_test.py` | CPython · MCU | core | — |
 | 7 | `calc_graphics.py` | CPython · PyScript | core | — |
 | 8 | `paint.py` | CPython · PyScript | core | [paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/paint.png) |
-| 9 | `widgets_simpletest.py` | CPython · MCU | add_ons | — |
+| 9 | `widgets_demo.py` | CPython · MCU | add_ons | — |
 
 PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-asyncio.md).
 
@@ -180,7 +182,7 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `paint.py` | Paint app | CPython · PyScript | core |
 | `testris.py` | Tetris-like game | CPython · MCU | core |
 | `apollo.py` | Apollo DSKY | CPython · PyScript | core |
-| `widgets_*.py` | PyWidgets demos | CPython · MCU | add_ons |
+| `widgets_*.py` | pdwidgets demos | CPython · MCU | add_ons |
 | `console_simpletest.py` | Console add-on | CPython · MCU | add_ons |
 | `console_advanced_demo.py` | Advanced console | CPython · MCU | add_ons |
 

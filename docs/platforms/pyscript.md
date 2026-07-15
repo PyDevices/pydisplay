@@ -13,7 +13,7 @@ Experimental browser support via [PyScript](https://pyscript.net/) and `displays
 
 ## Board config
 
-`board_configs/psdisplay/board_config.py` — 320×480 canvas with touch broker.
+`board_configs/psdisplay/board_config.py` — 320×480 canvas with `eventsys.Runtime` and PSDevices input.
 
 ## Apple mobile (iOS / iPadOS)
 

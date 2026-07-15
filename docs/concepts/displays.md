@@ -126,7 +126,7 @@ Each captures:
 - **Gamepad** (PyScript only) — `JOYAXISMOTION` / `JOYBUTTONDOWN` /
   `JOYBUTTONUP`, polled from the Gamepad API on each `read()`.
 - **Quit** — an assignable key chord emits `events.QUIT` (the equivalent of
-  clicking an SDL window's close button; the broker then deinitializes the
+  clicking an SDL window's close button; the runtime then deinitializes the
   display and exits). The default is **CTRL+Q** from
   `eventsys.default_quit_chord()`; Android Back (`K_AC_BACK`) also quits.
   Reassign if the host intercepts Ctrl+Q:

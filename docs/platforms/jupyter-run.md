@@ -56,7 +56,7 @@ You can run the same notebook in the editor instead of a browser tab:
 
 ## Stopping background examples
 
-Cells that import **async** examples schedule work with `multimer.run()` and return immediately. The square **Stop** button often does not cancel them. Use **Kernel → Restart** to stop.
+Cells that import **async** examples schedule work with `runtime.run_forever()` / `runtime.run_async(...)` and often return immediately (kernel loop already running). The square **Stop** button often does not cancel them. Use **Kernel → Restart** to stop.
 
 One-shot example cells block until the drawing finishes; **Stop** works there.
 

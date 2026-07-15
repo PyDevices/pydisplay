@@ -15,26 +15,32 @@ PyScript widget demos install `pdwidgets` at runtime via `# pyscript mip: pdwidg
 
 ## Event loop
 
-Widget apps need a periodic `tick()` to poll events, run tasks, and flush dirty regions to the display.
-
-**Timer mode** (default in most examples) — call before creating the display:
+`Display` wires into `eventsys.Runtime` at construction (input dispatch and
+periodic render ticks). Build the UI, then keep the app alive with
+`runtime.run_forever()`:
 
 ```python
+import board_config
 import pdwidgets as pd
 
-pd.init_timer(10)  # tick every 10 ms via multimer
-display = pd.Display(board_config.display_drv, board_config.broker)
+display = pd.Display(board_config.display_drv, board_config.runtime)
+screen = pd.Screen(display)
 # ... build UI ...
-pd.run_forever()
+board_config.runtime.run_forever()
 ```
 
-**Poll mode** — omit `init_timer()`; `run_forever()` calls `tick()` in a loop.
+pdwidgets owns no timer of its own — frames are driven from the shared runtime
+selected by `runtime.timer_async`. During setup bursts before `run_forever()`,
+call `pd.tick()` to flush draws if needed.
 
 See [pdwidgets docs](https://pdwidgets.readthedocs.io) for full API reference.
 
 ## Examples
 
-Widget demos remain in `src/examples/widgets_*.py` and `calc_widgets.py` in this repo.
+Widget demos live in pydisplay's `src/examples/` — for example
+[`widgets_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_demo.py),
+[`widgets_percent.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_percent.py),
+and `calc_widgets.py`.
 
 ## Icons
 

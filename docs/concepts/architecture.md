@@ -19,7 +19,7 @@ flowchart TB
   end
   subgraph app [Your code]
     EX[examples / your app]
-    GUI[LVGL Nano-GUI PyWidgets etc]
+    GUI[LVGL Nano-GUI pdwidgets etc]
   end
   BC --> DS
   BC --> ES

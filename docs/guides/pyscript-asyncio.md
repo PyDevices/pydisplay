@@ -23,7 +23,6 @@ This blocks the browser event loop. PyScript needs `async def`, `await`, and yie
 ## Port pattern
 
 ```python
-import board_config
 from board_config import display_drv, runtime
 import multimer
 
@@ -31,10 +30,17 @@ async def main():
     while True:
         for event in runtime.poll():
             ...  # handle event
-        display.show()
+        display_drv.show()
         await multimer.sleep_ms(0)  # yield to the event loop
 
-multimer.run(main)
+runtime.run_async(main)
+```
+
+Prefer subscribe + keep-alive when you do not need a custom async main:
+
+```python
+runtime.on(runtime.events.MOUSEBUTTONDOWN, handle)
+runtime.run_forever()
 ```
 
 ## Runtime polling

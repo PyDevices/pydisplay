@@ -35,9 +35,9 @@ Touch examples (e.g. [`eventsys_touch_test.py`](https://github.com/PyDevices/pyd
 
 The Jupyter board config constructs `runtime` with `timer_async=True`. Touch-driven examples use `runtime.timer_async` to run an `asyncio` main loop instead of a blocking one, because the notebook kernel already drives an event loop and `ipyevents` callbacks (mouse events) are only delivered when control returns to it.
 
-Examples launch their async main coroutine with **`multimer.run(main)`** rather than `asyncio.run(main())`. The helper detects the kernel's already-running loop and schedules `main` with `loop.create_task(...)` (so the cell returns immediately and the coroutine runs in the background), while still blocking to completion on desktop/MCU. This is why calling `asyncio.run(main())` directly in a notebook raises `RuntimeError: asyncio.run() cannot be called from a running event loop`.
+Examples keep the app alive with **`runtime.run_forever()`** (subscribe callbacks, then run). For a custom async `main()`, use **`runtime.run_async(main)`** rather than `asyncio.run(main())`. On Jupyter the kernel already has a running loop, so `run_async` schedules `main` as a background task and returns immediately (the cell finishes while the coroutine continues). On desktop/MCU with no loop running yet, it blocks via `asyncio.run`. Calling `asyncio.run(main())` directly in a notebook raises `RuntimeError: asyncio.run() cannot be called from a running event loop`.
 
-The wait-for-touch loop yields with `await multimer.sleep_ms(0)` each iteration so the kernel can dispatch widget events between polls. See [multimer](../concepts/multimer.md) for details on `run()` and `AsyncTimer`.
+Custom wait-for-touch loops yield with `await multimer.sleep_ms(0)` each iteration so the kernel can dispatch widget events between polls. See [Runtime](../concepts/runtime.md) and [multimer](../concepts/multimer.md) (`AsyncTimer`, `sleep_ms`).
 
 ## Cursor / VS Code widget rendering
 

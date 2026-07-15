@@ -4,7 +4,7 @@ Templates for GUI libraries and ported examples live in [`src/add_ons/`](https:/
 
 | File | Location | Required for |
 |------|----------|--------------|
-| `board_config.py` | `board_configs/` or `src/lib/` | **Always** — display, touch, brokers, setup |
+| `board_config.py` | `board_configs/` or `src/lib/` | **Always** — display, touch, runtime, setup |
 | `path.py` | `src/lib/` | Development layout — adds `lib/`, `add_ons/`, `examples/` to path |
 | `color_setup.py` | `src/add_ons/` | [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui) — fetch + `ssd` |
 | `hardware_setup.py` | `src/add_ons/` | [Micro-GUI](https://github.com/peterhinch/micropython-micro-gui) — fetch + button/encoder `Display` |
@@ -33,4 +33,4 @@ Not needed if all packages are installed into `/lib` on the device.
 
 ## LVGL
 
-Wire pydisplay through upstream [LVGL micropython](https://github.com/lvgl/lv_micropython) using your `board_config.py` display and touch brokers. See [GUI: LVGL](../guis/lvgl.md) and the [Wokwi project](../guides/wokwi.md) (`wokwi/`).
+Wire pydisplay through upstream [LVGL micropython](https://github.com/lvgl/lv_micropython) using your `board_config.py` display and runtime/touch wiring. See [GUI: LVGL](../guis/lvgl.md) and the [Wokwi project](../guides/wokwi.md) (`wokwi/`).
