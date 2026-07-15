@@ -389,19 +389,23 @@ def _server_ready(port: int = PYSCRIPT_PORT) -> bool:
 PACKAGES_DIR = REPO / "packages"
 
 
-def _pyscript_header_lists(script_path: Path) -> tuple[list[str], list[str]]:
-    """Read ``# pyscript packages:`` / ``# pyscript mip:`` from an example (first 10 lines)."""
+def _pyscript_header_lists(script_path: Path) -> tuple[list[str], list[str], list[str]]:
+    """Read ``# pyscript modules:`` / ``packages:`` / ``mip:`` from an example (first 10 lines)."""
+    modules: list[str] = []
     packages: list[str] = []
     mip: list[str] = []
     if not script_path.is_file():
-        return packages, mip
+        return modules, packages, mip
     try:
         with open(script_path, encoding="utf-8") as fh:
             for i, line in enumerate(fh):
                 if i >= 10:
                     break
                 s = line.strip()
-                if s.startswith("# pyscript packages:"):
+                if s.startswith("# pyscript modules:"):
+                    body = s.split(":", 1)[1].strip()
+                    modules = [p.strip() for p in body.split(",") if p.strip()]
+                elif s.startswith("# pyscript packages:"):
                     body = s.split(":", 1)[1].strip()
                     packages = [p.strip() for p in body.split(",") if p.strip()]
                 elif s.startswith("# pyscript mip:"):
@@ -409,13 +413,15 @@ def _pyscript_header_lists(script_path: Path) -> tuple[list[str], list[str]]:
                     mip = [p.strip() for p in body.split(",") if p.strip()]
     except OSError:
         pass
-    return packages, mip
+    return modules, packages, mip
 
 
 def pyscript_embed_query(example_id: str, example_meta: dict) -> str:
     """Build ``manifests=`` / ``modules=`` (+ optional ``packages=`` / ``mip=``) for embed.html."""
     script = example_meta.get("script", f"examples/{example_id}.py")
     script_path = SRC / script
+
+    extra_modules, packages, mip = _pyscript_header_lists(script_path)
 
     if (PACKAGES_DIR / f"{example_id}.json").is_file() and (
         SRC / "examples" / example_id
@@ -428,10 +434,11 @@ def pyscript_embed_query(example_id: str, example_meta: dict) -> str:
         else:
             query = f"modules={example_id}"
     else:
-        query = f"modules={example_id}"
+        # Mirror gallery: entry first, then ``# pyscript modules:`` extras (e.g. calc_engine).
+        module_list = [example_id] + [m for m in extra_modules if m != example_id]
+        query = f"modules={','.join(module_list)}"
 
     # Mirror gallery cards / ``scripts/pyscript_gen_packages.py`` loader hrefs.
-    packages, mip = _pyscript_header_lists(script_path)
     if packages:
         query += "&packages=" + ",".join(packages)
     if mip:
