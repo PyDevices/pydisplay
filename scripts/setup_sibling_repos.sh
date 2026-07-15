@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Clone palettes / pdwidgets siblings and apply pydisplay patches for local dev/tests.
+# Clone palettes / pdwidgets siblings for local dev and example tests.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -20,19 +20,8 @@ clone_or_update() {
   echo "$dir"
 }
 
-apply_patch() {
-  local repo="$1"
-  local patch="$2"
-  if [[ -f "$patch" ]]; then
-    patch -p1 -d "$repo" -N <"$patch" || true
-  fi
-}
-
 PALETTES="$(clone_or_update palettes)"
 PDWIDGETS="$(clone_or_update pdwidgets)"
-
-apply_patch "$PALETTES" "$ROOT/patches/palettes/micropython-zip-strict.patch"
-apply_patch "$PDWIDGETS" "$ROOT/patches/pdwidgets/pdwidgets-fixes.patch"
 
 SITE="$("$ROOT/.venv/bin/python" -c 'import site; print(site.getsitepackages()[0])')"
 echo "$PALETTES/src" >"$SITE/palettes.pth"
