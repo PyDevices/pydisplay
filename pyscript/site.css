@@ -327,15 +327,15 @@ pre code {
 }
 
 .logo-badge {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 22px;
-  border-radius: 18px;
+  width: 112px;
+  height: 112px;
+  margin: 0 auto 26px;
+  border-radius: 28px;
   overflow: hidden;
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, var(--accent-soft), var(--accent));
-  box-shadow: 0 12px 28px rgba(245, 78, 0, 0.28);
+  box-shadow: 0 16px 36px rgba(245, 78, 0, 0.32);
 }
 
 .logo-badge img,
@@ -365,9 +365,15 @@ pre code {
 
 .hero p {
   margin: 0 auto;
-  max-width: 620px;
+  max-width: 680px;
   color: var(--ink-soft);
   font-size: 1.12rem;
+  line-height: 1.55;
+  text-align: left;
+}
+
+.hero p + p {
+  margin-top: 1em;
 }
 
 .callout {

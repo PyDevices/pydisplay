@@ -20,9 +20,9 @@
 <body>
     <header class="site-header">
         <div class="wrap">
-            <a class="brand" href="index.html">
-                <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-                py<span class="accent">display</span>
+            <a class="brand" href="https://pydevices.github.io/">
+                <span class="logo"><img src="https://pydevices.github.io/assets/img/logo.svg" alt="" width="30" height="30"></span>
+                PyDevices
             </a>
             <nav class="nav">
                 <a href="#demos">Demos</a>
@@ -42,19 +42,20 @@
     </header>
 
     <section class="hero wrap">
-        <span class="eyebrow">PyScript · MicroPython in the browser</span>
+        <div class="logo-badge"><img src="https://pydevices.github.io/assets/img/logo.svg" alt="PyDevices logo" width="112" height="112"></div>
+        <span class="eyebrow">PyDevices / pydisplay · PyScript</span>
         <h1>pydisplay demos</h1>
         <p>
-            Cross-platform display and event drivers for MicroPython, CircuitPython and CPython —
-            running right here in your browser with <a href="https://pyscript.net/">PyScript</a>.
+            These gallery demos run the same pydisplay examples you would load on MicroPython,
+            CircuitPython, or CPython — here inside the browser with
+            <a href="https://pyscript.net/">PyScript</a>. Use them to explore drawing, input,
+            widgets, and LVGL without flashing a board first.
         </p>
-        <div class="callout">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-            <span>
-                Open a demo and click <strong>Run</strong>. First load may take a few seconds while
-                the PyScript runtime downloads. Featured demos are pinned at the top.
-            </span>
-        </div>
+        <p>
+            Open a card and click <strong>Run</strong>. The first load may take a few seconds while
+            the runtime downloads; featured demos stay pinned at the top. Toggle <strong>MP</strong>
+            / <strong>Py</strong> in the header to switch MicroPython vs Pyodide loaders.
+        </p>
     </section>
 
     <main class="wrap">
@@ -540,8 +541,8 @@
 
     <footer class="site-footer">
         <div class="wrap">
-            <span>pydisplay — cross-platform display &amp; event drivers</span>
-            <span><a href="https://github.com/PyDevices/pydisplay">PyDevices/pydisplay</a></span>
+            <span>pydisplay &middot; <a href="https://github.com/PyDevices/pydisplay">PyDevices/pydisplay</a></span>
+            <span><a href="https://pydevices.github.io/">PyDevices</a></span>
         </div>
     </footer>
 
@@ -606,8 +607,8 @@
                 var eyebrow = document.querySelector('.hero .eyebrow');
                 if (eyebrow) {
                     eyebrow.textContent = key === 'pyodide'
-                        ? 'PyScript · Python (Pyodide) in the browser'
-                        : 'PyScript · MicroPython in the browser';
+                        ? 'PyDevices / pydisplay · PyScript · Python (Pyodide)'
+                        : 'PyDevices / pydisplay · PyScript · MicroPython';
                 }
             }
 
