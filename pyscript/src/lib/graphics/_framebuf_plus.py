@@ -590,6 +590,14 @@ class FrameBuffer(_FrameBuffer):
         """
         return _files.save_image(self, filename)
 
+    def export(self, filename):
+        """Export this framebuffer as an importable ``.py`` bitmap module.
+
+        See :func:`graphics._files.export_framebuffer`. Ships ``BITMAP`` as a
+        ``bytearray`` for zero-copy :meth:`from_bitmap` on MicroPython.
+        """
+        return _files.export_framebuffer(self, filename)
+
     @staticmethod
     def from_file(filename):
         """
@@ -599,3 +607,38 @@ class FrameBuffer(_FrameBuffer):
             filename (str): Filename to load from
         """
         return _files.load_image(filename)
+
+    @staticmethod
+    def from_bitmap(buffer, width, height, format):
+        """Build a ``FrameBuffer`` from a bitmap buffer (export-module style).
+
+        If ``buffer`` is already a writable ``bytearray`` (or a writable
+        ``memoryview``), it is used without copying. Legacy ``bytes`` /
+        ``memoryview(bytes)`` modules get one ``bytearray`` copy so MicroPython
+        can own a writable pixel buffer.
+        """
+        if isinstance(buffer, bytearray):
+            buf = buffer
+        elif isinstance(buffer, memoryview):
+            writable = False
+            try:
+                underlying = buffer.obj  # CPython
+                writable = isinstance(underlying, bytearray)
+            except AttributeError:
+                # MicroPython: probe whether the view accepts assignment.
+                try:
+                    if len(buffer):
+                        tmp = buffer[0]
+                        buffer[0] = tmp
+                    writable = True
+                except (TypeError, AttributeError):
+                    writable = False
+            buf = buffer if writable else bytearray(buffer)
+        else:
+            buf = bytearray(buffer)
+        return FrameBuffer(buf, width, height, format)
+
+    @staticmethod
+    def from_module(mod):
+        """Load from a module with ``WIDTH``, ``HEIGHT``, ``FORMAT``, ``BITMAP``."""
+        return FrameBuffer.from_bitmap(mod.BITMAP, mod.WIDTH, mod.HEIGHT, mod.FORMAT)

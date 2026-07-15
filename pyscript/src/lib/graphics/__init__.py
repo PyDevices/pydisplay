@@ -21,6 +21,7 @@ from ._clip import ClipContext, ClippedCanvas
 from ._draw import Draw
 from ._files import (
     bmp_to_framebuffer,
+    export_framebuffer,
     load_image,
     pbm_to_framebuffer,
     pgm_to_framebuffer,
@@ -87,6 +88,7 @@ __all__ = [
     "bmp_to_framebuffer",
     "circle",
     "ellipse",
+    "export_framebuffer",
     "fill",
     "fill_rect",
     "gradient_rect",
