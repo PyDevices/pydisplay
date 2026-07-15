@@ -85,6 +85,9 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   `~/bin` → committed `repo:bin/` (see `bin/README.md`), so the matrix runs those
   two even when they are not on the system `PATH`. `micropython.exe` / `python.exe`
   are Windows binaries and cannot run in the Linux cloud sandbox.
+  After usermod changes that affect these binaries (or PyScript vendor wasm),
+  refresh with sibling `cmods/build_pydisplay_runtimes.sh` when that workspace
+  is available.
 - **PyScript hangs / multimer / WASM:** read
   [`.cursor/pyscript-troubleshooting.md`](.cursor/pyscript-troubleshooting.md)
   before poking the IDE browser. Prefer Playwright helpers

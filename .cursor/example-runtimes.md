@@ -22,7 +22,7 @@ Automated **smoke tests** that run `[src/examples/](../src/examples/)` scripts o
     ```bash
      python -m unittest discover -s tests -v
     ```
-  2. **Subprocess runtimes** on `PATH` or `~/bin/` as documented in `example_runtimes.toml`.
+  2. **Subprocess runtimes** on `PATH` or `~/bin/` as documented in `example_runtimes.toml`. After usermod changes that affect them, refresh via `~/gh/pydevices/cmods/build_pydisplay_runtimes.sh` (installs into `bin/` and `web/pyscript/vendor/micropython/`).
   3. **CPython venv** at repo-root `.venv` for `cpython-venv` and Jupyter.
   4. **PyScript** (optional): `pip install playwright && playwright install chromium` for headless kit runs.
   ## Running the matrix
