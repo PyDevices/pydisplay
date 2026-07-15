@@ -1,0 +1,476 @@
+diff --git a/src/pdwidgets/__init__.py b/src/pdwidgets/__init__.py
+index 8bea6bd..49103ed 100644
+--- a/src/pdwidgets/__init__.py
++++ b/src/pdwidgets/__init__.py
+@@ -47,6 +47,7 @@ from ._themes import ColorTheme, IconTheme, get_palette, icon_theme
+ from .display import Display, tick
+ from .screen import Screen
+ from .task import Task
++from . import pct
+ from .widget import Widget
+ 
+ DEBUG = False  #: When ``True``, enable extra debug logging in pdwidgets.
+@@ -118,6 +119,7 @@ __all__ = [
+     "DEFAULT_PADDING",
+     "ICON_SIZE",
+     "MARK_UPDATES",
++    "pct",
+     "PAD",
+     "POSITION",
+     "TEXT_SIZE",
+diff --git a/src/pdwidgets/display.py b/src/pdwidgets/display.py
+index 10a5e73..b6f7742 100644
+--- a/src/pdwidgets/display.py
++++ b/src/pdwidgets/display.py
+@@ -63,7 +63,18 @@ class Display(Widget):
+         """
+         self.display_drv = display_drv
+         super().__init__(
+-            None, 0, 0, display_drv.width, display_drv.height, fg=-1, bg=0, padding=(0, 0, 0, 0)
++            None,
++            0,
++            0,
++            display_drv.width,
++            display_drv.height,
++            None,
++            None,
++            -1,
++            0,
++            True,
++            None,
++            (0, 0, 0, 0),
+         )
+         display_drv.set_vscroll(tfa, bfa)
+         display_drv.vscroll = 0
+@@ -170,7 +181,10 @@ class Display(Widget):
+         if self._clip_stack:
+             area = area.clip(self._clip_stack[-1])
+         self._clip_stack.append(area)
+-        from graphics._clip import ClippedCanvas
++        try:
++            from graphics import ClippedCanvas
++        except ImportError:
++            from graphics._clip import ClippedCanvas
+ 
+         self.framebuf = ClippedCanvas(self._framebuf_real, area)
+ 
+@@ -180,7 +194,10 @@ class Display(Widget):
+             return
+         self._clip_stack.pop()
+         if self._clip_stack:
+-            from graphics._clip import ClippedCanvas
++            try:
++                from graphics import ClippedCanvas
++            except ImportError:
++                from graphics._clip import ClippedCanvas
+ 
+             self.framebuf = ClippedCanvas(self._framebuf_real, self._clip_stack[-1])
+         else:
+diff --git a/src/pdwidgets/screen.py b/src/pdwidgets/screen.py
+index 7feaff1..3009a8b 100644
+--- a/src/pdwidgets/screen.py
++++ b/src/pdwidgets/screen.py
+@@ -30,24 +30,40 @@ class Screen(Widget):
+             0,
+             parent.width,
+             parent.height,
+-            fg=fg,
+-            bg=bg,
+-            visible=visible,
+-            padding=(0, 0, 0, 0),
++            None,
++            None,
++            fg,
++            bg,
++            visible,
++            None,
++            (0, 0, 0, 0),
+         )
+         self.partitioned = self.display.tfa > 0 or self.display.bfa > 0
+ 
+         if self.partitioned:
++            tfa = Area(self.display.tfa_area)
+             self.top = Widget(
+                 self,
+-                *Area(self.display.tfa_area),
+-                fg=parent.color_theme.on_primary,
+-                bg=parent.color_theme.primary,
++                tfa.x,
++                tfa.y,
++                tfa.w,
++                tfa.h,
++                None,
++                None,
++                parent.color_theme.on_primary,
++                parent.color_theme.primary,
+             )
+-            self.main = Widget(self, *Area(self.display.vsa_area))
++            vsa = Area(self.display.vsa_area)
++            self.main = Widget(self, vsa.x, vsa.y, vsa.w, vsa.h)
++            bfa = Area(self.display.bfa_area)
+             self.bottom = Widget(
+                 self,
+-                *Area(self.display.bfa_area),
+-                fg=parent.color_theme.on_primary,
+-                bg=parent.color_theme.primary,
++                bfa.x,
++                bfa.y,
++                bfa.w,
++                bfa.h,
++                None,
++                None,
++                parent.color_theme.on_primary,
++                parent.color_theme.primary,
+             )
+diff --git a/src/pdwidgets/widget.py b/src/pdwidgets/widget.py
+index 45f5498..7cf8427 100644
+--- a/src/pdwidgets/widget.py
++++ b/src/pdwidgets/widget.py
+@@ -97,7 +97,7 @@ class Widget:
+         Register event callbacks for the widget.  Subclasses should override this method to register event callbacks.
+         """
+ 
+-    def add_event_cb(self, event_type: int, callback: callable, data: Widget | None = None):
++    def add_event_cb(self, event_type, callback, data=None):
+         """
+         Register a callback for an event type on this widget.
+ 
+diff --git a/src/pdwidgets/widgets/bottom_sheet.py b/src/pdwidgets/widgets/bottom_sheet.py
+index 745fbfb..642c71c 100644
+--- a/src/pdwidgets/widgets/bottom_sheet.py
++++ b/src/pdwidgets/widgets/bottom_sheet.py
+@@ -31,7 +31,7 @@ class BottomSheet(Widget):
+         bg = bg if bg is not None else parent.color_theme.surface
+         fg = fg if fg is not None else parent.color_theme.on_surface
+         super().__init__(
+-            screen, 0, 0, display.width, display.height, fg=fg, bg=None, visible=False
++            screen, 0, 0, display.width, display.height, None, None, fg, None, False
+         )
+         sheet_h = h or display.height // 2
+         self.panel = Card(
+diff --git a/src/pdwidgets/widgets/button.py b/src/pdwidgets/widgets/button.py
+index 82942c9..7afb0c6 100644
+--- a/src/pdwidgets/widgets/button.py
++++ b/src/pdwidgets/widgets/button.py
+@@ -78,7 +78,9 @@ class Button(Widget):
+         if icon_file:
+             icon_align = ALIGN.CENTER if not label else ALIGN.LEFT
+             icon_color = icon_color if icon_color is not None else parent.color_theme.on_primary
+-            self.icon = Icon(self, align=icon_align, fg=icon_color, bg=self.bg, value=icon_file)
++            self.icon = Icon(
++                self, 0, 0, None, None, icon_align, None, icon_color, self.bg, True, icon_file
++            )
+         if label:
+             if text_height not in TEXT_SIZE:
+                 raise ValueError("Text height must be 8, 14 or 16 pixels.")
+@@ -87,12 +89,18 @@ class Button(Widget):
+             text_color = text_color if text_color is not None else parent.color_theme.on_primary
+             self.label = Label(
+                 self,
+-                value=label,
+-                align=label_align,
+-                align_to=label_align_to,
+-                fg=text_color,
+-                bg=self.bg,
+-                text_height=text_height,
++                0,
++                0,
++                None,
++                None,
++                label_align,
++                label_align_to,
++                text_color,
++                self.bg,
++                True,
++                label,
++                None,
++                text_height,
+             )
+         else:
+             self.label = None
+diff --git a/src/pdwidgets/widgets/dialog.py b/src/pdwidgets/widgets/dialog.py
+index bfdee16..3fe30bd 100644
+--- a/src/pdwidgets/widgets/dialog.py
++++ b/src/pdwidgets/widgets/dialog.py
+@@ -68,7 +68,7 @@ class Dialog(Widget):
+         self.on_result = on_result
+         # Pointer modal capture (FocusManager remains independent for key focus).
+         super().__init__(
+-            screen, 0, 0, display.width, display.height, fg=fg, bg=None, visible=False
++            screen, 0, 0, display.width, display.height, None, None, fg, None, False
+         )
+         w = w or min(display.width - 2 * ICON_SIZE.LARGE, ICON_SIZE.LARGE * 8)
+         h = h or min(display.height - 2 * ICON_SIZE.LARGE, ICON_SIZE.LARGE * 5)
+diff --git a/src/pdwidgets/widgets/drawer.py b/src/pdwidgets/widgets/drawer.py
+index e04f9e8..97c7018 100644
+--- a/src/pdwidgets/widgets/drawer.py
++++ b/src/pdwidgets/widgets/drawer.py
+@@ -33,7 +33,7 @@ class Drawer(Widget):
+         bg = bg if bg is not None else parent.color_theme.surface
+         fg = fg if fg is not None else parent.color_theme.on_surface
+         super().__init__(
+-            screen, 0, 0, display.width, display.height, fg=fg, bg=None, visible=False
++            screen, 0, 0, display.width, display.height, None, None, fg, None, False
+         )
+         panel_w = w or display.width // 2
+         align = ALIGN.LEFT if side != "right" else ALIGN.RIGHT
+diff --git a/src/pdwidgets/widgets/dropdown.py b/src/pdwidgets/widgets/dropdown.py
+index 0f3a718..a38f465 100644
+--- a/src/pdwidgets/widgets/dropdown.py
++++ b/src/pdwidgets/widgets/dropdown.py
+@@ -76,19 +76,25 @@ class Dropdown(Widget):
+         self._open_event = None
+         self._arrow = Icon(
+             self,
+-            align=ALIGN.RIGHT,
+-            fg=fg,
+-            bg=bg,
+-            value=icon_theme.dropdown(ICON_SIZE.SMALL),
++            0,
++            0,
++            None,
++            None,
++            ALIGN.RIGHT,
++            None,
++            fg,
++            bg,
++            True,
++            icon_theme.dropdown(ICON_SIZE.SMALL),
+         )
+         self._sel_label = Label(
+-            self, value=str(value or ""), x=PAD + radius, align=ALIGN.LEFT, fg=fg, bg=bg
++            self, PAD + radius, 0, None, None, ALIGN.LEFT, None, fg, bg, True, str(value or "")
+         )
+         # A full-screen, transparent overlay on the root screen grabs modal
+         # pointer capture while open; the option Card lives inside it.
+         screen = _root_screen(self)
+         self._overlay = Widget(
+-            screen, 0, 0, self.display.width, self.display.height, visible=False
++            screen, 0, 0, self.display.width, self.display.height, None, None, None, None, False
+         )
+         # A None bg makes the overlay's draw a no-op (Widget.__init__ would
+         # otherwise inherit the parent's bg and repaint the whole screen); the
+diff --git a/src/pdwidgets/widgets/icon_button.py b/src/pdwidgets/widgets/icon_button.py
+index b4b9d58..a9c73f6 100644
+--- a/src/pdwidgets/widgets/icon_button.py
++++ b/src/pdwidgets/widgets/icon_button.py
+@@ -50,7 +50,7 @@ class IconButton(Button):
+         """
+         fg = fg if fg is not None else parent.fg
+         bg = bg if bg is not None else parent.bg
+-        self.icon = Icon(None, align=ALIGN.CENTER, fg=fg, bg=bg, value=icon_file)
++        self.icon = Icon(None, 0, 0, None, None, ALIGN.CENTER, None, fg, bg, True, icon_file)
+         w = w or self.icon.width
+         h = h or self.icon.height
+         super().__init__(parent, x, y, w, h, align, align_to, fg, bg, visible, value, padding)
+diff --git a/src/pdwidgets/widgets/list_view.py b/src/pdwidgets/widgets/list_view.py
+index 024e1eb..67a290d 100644
+--- a/src/pdwidgets/widgets/list_view.py
++++ b/src/pdwidgets/widgets/list_view.py
+@@ -48,7 +48,7 @@ class ListView(Widget):
+         fg = fg if fg is not None else parent.color_theme.on_primary
+         bg = bg if bg is not None else parent.color_theme.primary
+         super().__init__(
+-            parent, x, y, w, h, align, align_to, fg, bg, visible, value=0, padding=padding
++            parent, x, y, w, h, align, align_to, fg, bg, visible, 0, padding
+         )
+         self.clip_content = True
+         self.scrollbar = ScrollBar(
+diff --git a/src/pdwidgets/widgets/menu.py b/src/pdwidgets/widgets/menu.py
+index e0bf37b..a09ae9f 100644
+--- a/src/pdwidgets/widgets/menu.py
++++ b/src/pdwidgets/widgets/menu.py
+@@ -39,7 +39,7 @@ class Menu(Widget):
+         fg = fg if fg is not None else parent.color_theme.on_menu
+         self._items = list(items or [])
+         super().__init__(
+-            screen, 0, 0, display.width, display.height, fg=fg, bg=None, visible=False
++            screen, 0, 0, display.width, display.height, None, None, fg, None, False
+         )
+         row_h = TEXT_SIZE.LARGE + 2 * PAD
+         n = max(1, len(self._items))
+diff --git a/src/pdwidgets/widgets/password_field.py b/src/pdwidgets/widgets/password_field.py
+index 67c11d9..cc77018 100644
+--- a/src/pdwidgets/widgets/password_field.py
++++ b/src/pdwidgets/widgets/password_field.py
+@@ -3,15 +3,53 @@
+ # SPDX-License-Identifier: MIT
+ """PasswordField — TextInput that masks glyphs."""
+ 
++from .._constants import TEXT_SIZE
++from ..widget import Widget
+ from .text_input import TextInput
+ 
+ 
+ class PasswordField(TextInput):
+     """Single-line password entry; drawn text is replaced with ``*`` masks."""
+ 
+-    def __init__(self, *args, mask="*", **kwargs):
++    def __init__(
++        self,
++        parent: Widget,
++        x=0,
++        y=0,
++        w=None,
++        h=None,
++        align=None,
++        align_to=None,
++        fg=None,
++        bg=None,
++        visible=True,
++        value=None,
++        padding=None,
++        hint="",
++        text_height=TEXT_SIZE.LARGE,
++        radius=6,
++        max_length=None,
++        mask="*",
++    ):
+         self.mask = mask
+-        super().__init__(*args, **kwargs)
++        super().__init__(
++            parent,
++            x,
++            y,
++            w,
++            h,
++            align,
++            align_to,
++            fg,
++            bg,
++            visible,
++            value,
++            padding,
++            hint,
++            text_height,
++            radius,
++            max_length,
++        )
+ 
+     def _display_text(self):
+         n = len(self._value or "")
+diff --git a/src/pdwidgets/widgets/radio_group.py b/src/pdwidgets/widgets/radio_group.py
+index e91ab86..5bf4fd4 100644
+--- a/src/pdwidgets/widgets/radio_group.py
++++ b/src/pdwidgets/widgets/radio_group.py
+@@ -26,7 +26,7 @@ class RadioGroup(Widget):
+             RadioButton
+         """
+         self.radio_buttons = []
+-        super().__init__(parent, x=0, y=0, w=0, h=0, visible=False)
++        super().__init__(parent, 0, 0, 0, 0, None, None, None, None, False)
+         self._w = self._h = 0
+ 
+     def invalidate(self):
+diff --git a/src/pdwidgets/widgets/scroll_view.py b/src/pdwidgets/widgets/scroll_view.py
+index 7cb4b71..6f3a277 100644
+--- a/src/pdwidgets/widgets/scroll_view.py
++++ b/src/pdwidgets/widgets/scroll_view.py
+@@ -34,7 +34,7 @@ class ScrollView(Widget):
+         fg = fg if fg is not None else parent.color_theme.on_surface
+         bg = bg if bg is not None else parent.color_theme.surface
+         super().__init__(
+-            parent, x, y, w, h, align, align_to, fg, bg, visible, value=0, padding=padding
++            parent, x, y, w, h, align, align_to, fg, bg, visible, 0, padding
+         )
+         self.clip_content = True
+         self._scroll_y = 0
+diff --git a/src/pdwidgets/widgets/spinner.py b/src/pdwidgets/widgets/spinner.py
+index 39ec432..94cb5a9 100644
+--- a/src/pdwidgets/widgets/spinner.py
++++ b/src/pdwidgets/widgets/spinner.py
+@@ -3,8 +3,6 @@
+ # SPDX-License-Identifier: MIT
+ """Busy spinner widget."""
+ 
+-import contextlib
+-
+ from .._constants import ICON_SIZE
+ from ..widget import Widget
+ 
+@@ -55,8 +53,10 @@ class Spinner(Widget):
+         self._running = False
+         self.visible = False
+         if self._task is not None:
+-            with contextlib.suppress(ValueError):
++            try:
+                 self.display.remove_task(self._task)
++            except ValueError:
++                pass
+             self._task = None
+ 
+     def _tick(self):
+diff --git a/src/pdwidgets/widgets/tab_view.py b/src/pdwidgets/widgets/tab_view.py
+index 1354fc9..a2a0872 100644
+--- a/src/pdwidgets/widgets/tab_view.py
++++ b/src/pdwidgets/widgets/tab_view.py
+@@ -65,22 +65,31 @@ class TabView(Widget):
+         self._buttons = []
+         self.tab_bar = Widget(
+             self,
+-            w=w,
+-            h=self.bar_height,
+-            align=ALIGN.TOP,
+-            bg=self.color_theme.surface_variant,
+-            fg=fg,
+-            padding=(0, 0, 0, 0),
++            0,
++            0,
++            w,
++            self.bar_height,
++            ALIGN.TOP,
++            None,
++            fg,
++            self.color_theme.surface_variant,
++            True,
++            None,
++            (0, 0, 0, 0),
+         )
+         self.content = Widget(
+             self,
+-            y=self.bar_height,
+-            w=w,
+-            h=h - self.bar_height,
+-            align=ALIGN.TOP_LEFT,
+-            bg=bg,
+-            fg=fg,
+-            padding=(0, 0, 0, 0),
++            0,
++            self.bar_height,
++            w,
++            h - self.bar_height,
++            ALIGN.TOP_LEFT,
++            None,
++            fg,
++            bg,
++            True,
++            None,
++            (0, 0, 0, 0),
+         )
+         self._build_tabs(tabs or [])
+         self.set_index(int(value) if value else 0)
+diff --git a/src/pdwidgets/widgets/toast.py b/src/pdwidgets/widgets/toast.py
+index 1886ec2..bf971d6 100644
+--- a/src/pdwidgets/widgets/toast.py
++++ b/src/pdwidgets/widgets/toast.py
+@@ -3,8 +3,6 @@
+ # SPDX-License-Identifier: MIT
+ """Transient toast notification."""
+ 
+-import contextlib
+-
+ from .._constants import ALIGN, ICON_SIZE, PAD, TEXT_SIZE
+ from .._util import _root_screen
+ from ..widget import Widget
+@@ -95,8 +93,10 @@ class Toast(Widget):
+         if ticks_ms() >= self._hide_at:
+             self.visible = False
+             if self._task is not None:
+-                with contextlib.suppress(ValueError):
++                try:
+                     self.display.remove_task(self._task)
++                except ValueError:
++                    pass
+                 self._task = None
+ 
+     def draw(self, area=None):

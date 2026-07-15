@@ -40,6 +40,7 @@ from example_test_kit import (  # noqa: E402
     runtime_available,
     summarize,
 )
+from sibling_repos import apply_sibling_env  # noqa: E402
 
 DESKTOP_RUNTIMES = (
     "micropython",
@@ -121,6 +122,7 @@ def run_one(
     ):
         cmd.insert(1, "-u")
     env = os.environ.copy()
+    apply_sibling_env(env, repo_root=str(REPO))
     # Timer mode is applied via --timer-async → wrapper env_set (not OS environ).
     env.setdefault("SDL_VIDEODRIVER", "dummy")
     env.setdefault("SDL_AUDIODRIVER", "dummy")

@@ -202,13 +202,13 @@ class _Calculator:
         th = self.FONT_H * scale
         tx = max(0, (w - tw) // 2)
         ty = max(0, (h - th) // 2)
-        self.btn_fb.text16(text, tx, ty, fg, scale=scale)
+        self.btn_fb.text16(text, tx, ty, fg, scale) if scale != 1 else self.btn_fb.text16(text, tx, ty, fg)
         display_drv.blit_rect(self.btn_ba[: w * h * self.bpp], x, y, w, h)
 
     def _right_text(self, fb, text, scale, color, y_off):
         tw = len(text) * self.FONT_W * scale
         x = max(self.pad, self.disp_w - tw - self.pad)
-        fb.text16(text, x, y_off, color, scale=scale)
+        fb.text16(text, x, y_off, color, scale) if scale != 1 else fb.text16(text, x, y_off, color)
 
     def _refresh_display(self):
         expr = self.engine.expression

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Generate/complete the curated icon set used by `pdwidgets.icon_theme`
-(`src/add_ons/pdwidgets/icons/`) from a local checkout of
+(`src/pdwidgets/icons/` in the pdwidgets repo) from a local checkout of
 https://github.com/google/material-design-icons (png/ tree), at
 ``~/material-design-icons`` by default.
 
@@ -12,15 +12,17 @@ that `pdwidgets._themes.IconTheme` actually expects, at every `ICON_SIZE`
 (18/24/36/48dp), using the "materialicons" (baseline/filled) family.
 For color BMP565 status icons, see `assets_make_color_icons.py`.
 
-Run from the repo root:
+Run from the pydisplay repo root (with a sibling or local pdwidgets checkout):
 
     .venv/bin/python scripts/assets_generate_pdwidgets_icons.py
+    .venv/bin/python scripts/assets_generate_pdwidgets_icons.py --pdwidgets-root ../pdwidgets
 
 By default this only fills in *missing* files, leaving any existing curated
 icon untouched. Pass --force to regenerate everything.
 """
 
 import argparse
+import os
 from pathlib import Path
 import sys
 
@@ -35,12 +37,10 @@ SIZES = (18, 24, 36, 48)
 THRESHOLD = 160
 FAMILY = "materialicons"  # baseline/filled style, matches the existing curated set
 
-DEST = REPO_ROOT / "src" / "add_ons" / "pdwidgets" / "icons"
-
 # pdwidgets filename prefix -> (material-design-icons category, short_name)
 # Filename on disk is f"{prefix}{size}dp.pbm" (see IconTheme._icon()).
 ICON_MAP = {
-    # Existing IconTheme methods (src/add_ons/pdwidgets/_themes.py)
+    # Existing IconTheme methods (pdwidgets/src/pdwidgets/_themes.py)
     "home_filled_": ("action", "home"),
     "keyboard_arrow_up_": ("hardware", "keyboard_arrow_up"),
     "keyboard_arrow_down_": ("hardware", "keyboard_arrow_down"),
@@ -62,6 +62,31 @@ ICON_MAP = {
     "expand_more_": ("navigation", "expand_more"),
     "menu_": ("navigation", "menu"),
 }
+
+
+def resolve_pdwidgets_root(explicit: str | None) -> Path:
+    """Return a local checkout of https://github.com/PyDevices/pdwidgets."""
+    candidates: list[Path] = []
+    if explicit:
+        candidates.append(Path(explicit))
+    env_root = os.environ.get("PDWIDGETS_ROOT")
+    if env_root:
+        candidates.append(Path(env_root))
+    candidates.extend(
+        (
+            REPO_ROOT.parent / "pdwidgets",
+            Path("/agent/repos/pdwidgets"),
+            Path.home() / "gh" / "pydevices" / "pdwidgets",
+        )
+    )
+    for root in candidates:
+        if (root / "src" / "pdwidgets").is_dir():
+            return root.resolve()
+    tried = ", ".join(str(p) for p in candidates)
+    raise SystemExit(
+        "pdwidgets checkout not found. Clone https://github.com/PyDevices/pdwidgets "
+        f"or pass --pdwidgets-root. Tried: {tried}"
+    )
 
 
 def find_source_png(md_root: Path, category: str, short_name: str, size: int) -> Path:
@@ -100,8 +125,16 @@ def main() -> int:
         default=str(Path.home() / "material-design-icons"),
         help="Local checkout of google/material-design-icons (default: ~/material-design-icons)",
     )
+    parser.add_argument(
+        "--pdwidgets-root",
+        default=None,
+        help="Local checkout of PyDevices/pdwidgets (default: PDWIDGETS_ROOT, ../pdwidgets, …)",
+    )
     parser.add_argument("--force", action="store_true", help="Regenerate files that already exist")
     args = parser.parse_args()
+
+    pdwidgets_root = resolve_pdwidgets_root(args.pdwidgets_root)
+    dest = pdwidgets_root / "src" / "pdwidgets" / "icons"
 
     md_root = Path(args.material_icons_root)
     if not (md_root / "png").is_dir():
@@ -112,7 +145,7 @@ def main() -> int:
     skipped = 0
     for prefix, (category, short_name) in sorted(ICON_MAP.items()):
         for size in SIZES:
-            dest_file = DEST / f"{prefix}{size}dp.pbm"
+            dest_file = dest / f"{prefix}{size}dp.pbm"
             if dest_file.exists() and not args.force:
                 skipped += 1
                 continue
@@ -122,7 +155,7 @@ def main() -> int:
                 print(f"  skip {dest_file.name}: {e}", file=sys.stderr)
                 continue
             png_to_pbm(src, dest_file)
-            print(f"  wrote {dest_file.relative_to(REPO_ROOT)}")
+            print(f"  wrote {dest_file}")
             generated += 1
 
     print(f"\nGenerated {generated} icon(s), skipped {skipped} existing file(s).")

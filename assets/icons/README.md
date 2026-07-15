@@ -2,7 +2,7 @@ Material Design icons converted to `.pbm` for development and conversion tooling
 
 Source PNGs: https://github.com/google/material-design-icons/tree/master/png
 
-This tree is **not** bundled for PyWidgets at runtime — see `src/add_ons/pdwidgets/icons/` for the small icon set shipped with `add_ons`.
+This tree is **not** bundled for PyWidgets at runtime — see [pdwidgets/src/pdwidgets/icons](https://github.com/PyDevices/pdwidgets/tree/main/src/pdwidgets/icons) for the small icon set shipped with the `pdwidgets` package.
 
 ## License
 
