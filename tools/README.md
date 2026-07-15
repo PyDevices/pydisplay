@@ -68,12 +68,10 @@ X11/SDL window without a logged-in display, agents may wrap with `xvfb-run -a`
 | [`compare_graphics.py`](compare_graphics.py) | Shared compare engine (native ``graphics`` cmod vs staged ``src/lib/graphics``) |
 | [`compare_graphics_run.py`](compare_graphics_run.py) | Single-runtime subprocess entry (prints ``GRAPHICS_COMPARE_RESULT=`` JSON) |
 | [`compare_graphics_matrix.py`](compare_graphics_matrix.py) | Cross-runtime matrix (MP, CP, CPython; installs ``graphics-cmod`` from TestPyPI for CPython) |
-| [`compare_graphics_mp.py`](compare_graphics_mp.py) | Backward-compatible alias for ``compare_graphics_run.py`` |
 
 ```bash
 # One runtime
 micropython tools/compare_graphics_run.py
-micropython tools/compare_graphics_mp.py   # same as above
 
 # Full desktop matrix (from repo root)
 python tools/compare_graphics_matrix.py
