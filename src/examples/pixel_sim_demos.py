@@ -1,5 +1,5 @@
 # pyscript mip: palettes
-# pyodide wheels: pydevices-palettes
+# pyodide wheels: palettes
 """
 pixel_sim_demos.py — NeoPixel simulator effects in one file.
 

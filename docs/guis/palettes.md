@@ -11,7 +11,7 @@ mip.install("palettes", index="https://PyDevices.github.io/micropython-lib/mip/P
 
 Documentation: [palettes.readthedocs.io](https://palettes.readthedocs.io)
 
-PyScript demos install `palettes` at runtime via `# pyscript mip: palettes` (micropython-lib MIP) or `# pyodide wheels: pydevices-palettes` (TestPyPI on the Pyodide loader).
+PyScript demos install `palettes` at runtime via `# pyscript mip: palettes` (micropython-lib MIP) or `# pyodide wheels: palettes` (TestPyPI on the Pyodide loader).
 
 ## Usage
 
