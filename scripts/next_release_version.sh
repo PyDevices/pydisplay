@@ -2,7 +2,7 @@
 # Compute the next release version for this repo.
 #
 #   With existing vX.Y.Z tags — highest tag + 1 patch (e.g. v0.0.1 -> 0.0.2).
-#     Non-semver / pre-release tags (e.g. v0.1.0-alpha) are ignored.
+#     Non-semver / pre-release tags (e.g. v1.2.3-rc1) are ignored.
 #   With no vX.Y.Z tags — base version from the first match of setup.py
 #     RELEASE_VERSION, pyproject.toml [project] version, a VERSION file, else 0.0.1.
 #

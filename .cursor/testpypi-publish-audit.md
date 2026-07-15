@@ -115,8 +115,7 @@ After a pydisplay tag publish, run the desktop stack smoke test (headless in CI 
 
 **Universal gap:** every publisher uploads to TestPyPI only. Release tags exist on each repo but:
 
-- `gh release list` shows **no releases** for usdl2, graphics, lv_cpython_mod
-- pydisplay `v0.1.0-alpha` release exists with **zero assets**
+- `gh release list` shows **no releases** (or empty asset lists) for usdl2, graphics, lv_cpython_mod, and typical pydisplay tags
 
 **Suggested implementation pattern** (not done yet):
 
