@@ -8,8 +8,10 @@ Default-includes every example **entry point** under ``src/examples/``:
   - ``examples/<name>/<name>.py`` — package (preferred over ``__init__.py``)
   - ``examples/<name>/__init__.py`` — package when no ``<name>.py`` entry
 
-Opt out of the **public card grid** with ``# pyscript skip: gallery`` in the
-first 10 lines.
+Opt out of the **public card grid** with ``# pyscript skip: gallery`` and/or
+``# pyscript skip: binaries`` in the first 10 lines (comma-separated tags on one
+line are fine). ``binaries`` is required for demos that mip-install ``.bmp`` /
+``.bin`` / ``.pbm`` — browser MicroPython mip cannot fetch those intact.
 
 MIP manifests for package examples live in ``packages/<name>.json`` (generated
 by ``scripts/install_gen_manifests.py``). PyScript loads them via the
@@ -27,6 +29,8 @@ Optional headers (first 10 lines):
   - ``# pyodide wheels:`` — micropip wheels for ``pyodide.html`` (e.g. ``lvgl``
     → ``lv_cpython_mod`` ``pyemscripten_2026_0`` wheel)
   - ``# pyscript skip: gallery`` — omit from the browser card grid
+  - ``# pyscript skip: binaries`` — omit from the grid (mip cannot install
+    binary assets in the browser); typically combined with ``gallery``
 
 Then:
 
@@ -95,7 +99,7 @@ class Example:
         self.pyscript_packages: list[str] = []
         self.pyscript_mip: list[str] = []
         self.featured = False
-        # False when ``# pyscript skip: gallery``.
+        # False when ``# pyscript skip:`` includes ``gallery`` or ``binaries``.
         self.in_gallery = True
 
     @property
@@ -141,7 +145,9 @@ def header_has_featured(lines: list[str]) -> bool:
 
 
 def skip_gallery(lines: list[str]) -> bool:
-    return "gallery" in parse_header_list(lines, "# pyscript skip:")
+    """True when the example must not appear on the browser index card grid."""
+    tags = parse_header_list(lines, "# pyscript skip:")
+    return "gallery" in tags or "binaries" in tags
 
 
 def _py_sort_key(rel: str) -> tuple:
@@ -491,8 +497,9 @@ def main(argv: list[str] | None = None) -> int:
     print(
         f"\n{n_gallery} gallery demo(s) "
         f"({n_module} module, {n_manifest} manifest; {n_featured} featured)"
-        f"; {n_local_only} local-only (skip: gallery)."
+        f"; {n_local_only} local-only (skip: gallery/binaries)."
     )
+
     if args.check and stale:
         print("STALE:\n  " + "\n  ".join(stale))
         return 1

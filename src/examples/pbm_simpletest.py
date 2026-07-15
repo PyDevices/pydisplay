@@ -1,4 +1,4 @@
-# pyscript skip: gallery
+# pyscript skip: gallery, binaries
 from board_config import display_drv
 from graphics import FrameBuffer, RGB565, pbm_to_framebuffer
 

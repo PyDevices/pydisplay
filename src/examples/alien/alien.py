@@ -64,12 +64,28 @@ def main():
         if runtime.quit_requested if runtime else False:
             return
         tft.draw.fill_rect(st["last_col"], st["old_row"], alien.WIDTH, alien.HEIGHT, 0)
-        tft_bitmap.bitmap(tft, alien, st["col"], st["row"])
+        # Move and clamp *before* blit — PSDisplay blit_rect rejects OOB (and
+        # reversing after the step can leave col/row negative for one frame).
+        col = st["col"] + st["xd"]
+        row = st["row"] + st["yd"]
+        max_col = width - alien.WIDTH
+        max_row = height - alien.HEIGHT
+        if col <= 0:
+            col = 0
+            st["xd"] = abs(st["xd"])
+        elif col >= max_col:
+            col = max_col
+            st["xd"] = -abs(st["xd"])
+        if row <= 0:
+            row = 0
+            st["yd"] = abs(st["yd"])
+        elif row >= max_row:
+            row = max_row
+            st["yd"] = -abs(st["yd"])
+        st["col"], st["row"] = col, row
+        tft_bitmap.bitmap(tft, alien, col, row)
         tft.show()
-        st["last_col"], st["old_row"] = st["col"], st["row"]
-        st["col"], st["row"] = st["col"] + st["xd"], st["row"] + st["yd"]
-        st["xd"] = -st["xd"] if st["col"] <= 0 or st["col"] >= width - alien.WIDTH else st["xd"]
-        st["yd"] = -st["yd"] if st["row"] <= 0 or st["row"] >= height - alien.HEIGHT else st["yd"]
+        st["last_col"], st["old_row"] = col, row
 
     runtime.on_tick(_tick, period=10, async_=runtime.timer_async)
     runtime.run_forever()

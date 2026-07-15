@@ -51,7 +51,7 @@ def bitmap(canvas, bitmap, x, y, index=0):
     height = bitmap.HEIGHT
     to_col = x + width - 1
     to_row = y + height - 1
-    if canvas.width <= to_col or canvas.height <= to_row:
+    if x < 0 or y < 0 or canvas.width <= to_col or canvas.height <= to_row:
         return
 
     bitmap_size = height * width

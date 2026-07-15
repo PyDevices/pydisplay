@@ -136,6 +136,8 @@ quit = "native_exit"
 bootstrap = "headless"
 deps = ["core"]
 oneshot_timeout_s = 30
+# Not under src/examples/; loader cannot mip-install this path in the browser.
+skip_runtimes = ["pyscript"]
 
 # --- expanded runnable set ---
 

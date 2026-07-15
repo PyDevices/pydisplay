@@ -416,6 +416,30 @@ def _pyscript_header_lists(script_path: Path) -> tuple[list[str], list[str], lis
     return modules, packages, mip
 
 
+def _pyscript_skip_tags(script_path: Path) -> list[str]:
+    """Return tags from ``# pyscript skip:`` (first 10 lines)."""
+    if not script_path.is_file():
+        return []
+    try:
+        with open(script_path, encoding="utf-8") as fh:
+            for i, line in enumerate(fh):
+                if i >= 10:
+                    break
+                s = line.strip()
+                if s.startswith("# pyscript skip:"):
+                    body = s.split(":", 1)[1].strip()
+                    return [p.strip() for p in body.split(",") if p.strip()]
+    except OSError:
+        pass
+    return []
+
+
+def pyscript_skips_binaries(example_id: str, example_meta: dict) -> bool:
+    """True when the example opts out of PyScript because mip cannot install binaries."""
+    script = example_meta.get("script", f"examples/{example_id}.py")
+    return "binaries" in _pyscript_skip_tags(SRC / script)
+
+
 def pyscript_embed_query(example_id: str, example_meta: dict) -> str:
     """Build ``manifests=`` / ``modules=`` (+ optional ``packages=`` / ``mip=``) for embed.html."""
     script = example_meta.get("script", f"examples/{example_id}.py")
@@ -506,6 +530,26 @@ def run_pyscript_case(
     timeout: float,
     port: int = PYSCRIPT_PORT,
 ) -> dict:
+    if pyscript_skips_binaries(example_id, example_meta):
+        result = {
+            "runtime": "pyscript",
+            "status": "skip",
+            "example": example_id,
+            "error": "skip: binaries (browser mip cannot install binary assets)",
+        }
+        return {
+            "example": example_id,
+            "runtime": "pyscript",
+            "summary": "skip",
+            "returncode": 0,
+            "timed_out": False,
+            "duration_s": duration,
+            "timeout_s": timeout,
+            "result": result,
+            "stdout_tail": "EXAMPLE_RESULT=" + json.dumps(result, separators=(",", ":")),
+            "stderr_tail": "",
+        }
+
     ensure_pyscript_server(port)
     query = pyscript_embed_query(example_id, example_meta)
     url = f"http://127.0.0.1:{port}/web/pyscript/embed.html?{query}&autotest=1&duration={int(duration)}"
