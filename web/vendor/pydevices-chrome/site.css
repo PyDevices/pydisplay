@@ -304,6 +304,52 @@ pre code {
   display: block;
 }
 
+/* Product hero mark — same orange badge as the org logo, but the card icon
+ * (stroke SVG under assets/img/products/) instead of the shared PyDevices mark.
+ * Keeps header branding org-wide while each product page gets its own face. */
+.logo-badge.product-mark {
+  padding: 0;
+}
+
+.logo-badge.product-mark img,
+.logo-badge.product-mark > svg {
+  width: 54%;
+  height: 54%;
+}
+
+/* Short API / install excerpts under section heads */
+.snippet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.snippet-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+  padding: 18px 20px;
+  text-align: left;
+}
+
+.snippet-card h3 {
+  margin: 0 0 6px;
+  font-size: 1.02rem;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.snippet-card p {
+  margin: 0 0 12px;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.snippet-card pre {
+  margin: 0;
+}
+
 .hero .eyebrow {
   display: inline-block;
   text-transform: uppercase;
