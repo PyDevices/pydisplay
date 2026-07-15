@@ -137,34 +137,77 @@
     });
   }
 
+  function isIosDevice() {
+    var ua = navigator.userAgent || '';
+    if (/iPhone|iPad|iPod/i.test(ua)) {
+      return true;
+    }
+    // iPadOS 13+ often reports as MacIntel with touch.
+    return (
+      navigator.platform === 'MacIntel' &&
+      typeof navigator.maxTouchPoints === 'number' &&
+      navigator.maxTouchPoints > 1
+    );
+  }
+
+  function showInstallButton(installBtn) {
+    installBtn.style.display = 'inline-block';
+  }
+
+  function hideInstallButton(installBtn) {
+    installBtn.style.display = 'none';
+  }
+
   function wireInstallPrompt() {
     var installBtn = document.getElementById('pwa-install-btn');
     if (!installBtn) {
       return;
     }
     var deferredPrompt = null;
+    var iosInstallHint = false;
 
+    // Already launched from home screen — nothing to install.
+    if (isStandaloneDisplay()) {
+      hideInstallButton(installBtn);
+      return;
+    }
+
+    // Chromium (desktop / Android): native install prompt.
     window.addEventListener('beforeinstallprompt', function (e) {
       e.preventDefault();
       deferredPrompt = e;
-      installBtn.style.display = 'inline-block';
+      iosInstallHint = false;
+      showInstallButton(installBtn);
     });
 
+    // Safari / any iOS browser: no beforeinstallprompt — guide Share → Add to Home Screen.
+    if (isIosDevice()) {
+      iosInstallHint = true;
+      showInstallButton(installBtn);
+    }
+
     installBtn.addEventListener('click', function () {
-      if (!deferredPrompt) {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function (choice) {
+          console.log('PWA install choice:', choice.outcome);
+          deferredPrompt = null;
+          hideInstallButton(installBtn);
+        });
         return;
       }
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(function (choice) {
-        console.log('PWA install choice:', choice.outcome);
-        deferredPrompt = null;
-        installBtn.style.display = 'none';
-      });
+      if (iosInstallHint) {
+        showToast(
+          'To install: tap Share, then “Add to Home Screen”.',
+          { dismissLabel: 'Got it' }
+        );
+      }
     });
 
     window.addEventListener('appinstalled', function () {
       deferredPrompt = null;
-      installBtn.style.display = 'none';
+      iosInstallHint = false;
+      hideInstallButton(installBtn);
       showToast('pydisplay installed — launch it from your home screen.');
     });
   }
@@ -176,6 +219,74 @@
     window.addEventListener('offline', function () {
       showToast('You are offline. Cached demos may still run.');
     });
+  }
+
+  function isStandaloneDisplay() {
+    try {
+      return (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.matchMedia('(display-mode: fullscreen)').matches ||
+        window.matchMedia('(display-mode: minimal-ui)').matches ||
+        // iOS Safari "Add to Home Screen"
+        window.navigator.standalone === true
+      );
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function isSameOriginHref(href) {
+    try {
+      return new URL(href, location.href).origin === location.origin;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // Gallery cards keep target=_blank for normal browser tabs. In an installed
+  // PWA that opens a second app window — navigate in-place instead. External
+  // _blank links (Docs, GitHub, …) still leave the app.
+  function wireInAppSameOriginLinks() {
+    if (!isStandaloneDisplay()) {
+      return;
+    }
+    document.addEventListener(
+      'click',
+      function (e) {
+        if (
+          e.defaultPrevented ||
+          e.button !== 0 ||
+          e.metaKey ||
+          e.ctrlKey ||
+          e.shiftKey ||
+          e.altKey
+        ) {
+          return;
+        }
+        var a =
+          e.target && e.target.closest
+            ? e.target.closest('a[href][target="_blank"]')
+            : null;
+        if (!a || a.getAttribute('download') != null) {
+          return;
+        }
+        var href = a.getAttribute('href');
+        if (
+          !href ||
+          href.charAt(0) === '#' ||
+          href.indexOf('mailto:') === 0 ||
+          href.indexOf('tel:') === 0
+        ) {
+          return;
+        }
+        if (!isSameOriginHref(href)) {
+          return;
+        }
+        e.preventDefault();
+        location.assign(a.href);
+      },
+      true
+    );
   }
 
   function wireActivationToast(reg) {
@@ -211,6 +322,7 @@
       });
     wireInstallPrompt();
     wireConnectivity();
+    wireInAppSameOriginLinks();
   }
 
   if (document.readyState === 'loading') {

@@ -26,8 +26,10 @@
 
 #pwa-toast {
   position: fixed;
-  bottom: -120px;
+  bottom: -160px;
   right: 20px;
+  left: 20px;
+  margin-left: auto;
   background: var(--panel, #1c1712);
   color: var(--ink, #f3ecdf);
   padding: 14px 18px;
@@ -42,6 +44,11 @@
   font-size: 0.92rem;
   max-width: min(360px, calc(100vw - 40px));
   transition: bottom 0.35s ease;
+}
+
+#pwa-message {
+  flex: 1 1 auto;
+  line-height: 1.35;
 }
 
 #pwa-toast.is-visible {

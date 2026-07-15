@@ -243,6 +243,8 @@ In every HTML page that should participate in the PWA, add to `<head>`:
 
 `pwa.js` registers `./sw.js` immediately (required for COI) and wires optional UI when elements exist.
 
+Gallery cards keep `target="_blank"` so demos open in a new browser tab. When the page is shown as an installed app (`display-mode: standalone`, etc.), `pwa.js` intercepts same-origin `_blank` clicks and navigates in-place so demos do not spawn a second PWA window. External links still leave the app.
+
 ### Install button (optional)
 
 Add a button anywhere in your layout (the gallery puts it in the header):
@@ -251,7 +253,7 @@ Add a button anywhere in your layout (the gallery puts it in the header):
 <button type="button" class="pwa-install-btn" id="pwa-install-btn">Install app</button>
 ```
 
-`pwa.js` listens for `beforeinstallprompt`, shows the button, and calls `prompt()` when clicked. Browsers only fire that event when installability criteria are met.
+`pwa.js` shows the button when Chromium fires `beforeinstallprompt`, or on iOS (Safari and other WebKit browsers) when the page is not already running as a home-screen app. Chromium then calls `prompt()`; on iOS the button opens a short **Share → Add to Home Screen** tip (Safari has no programmatic install API).
 
 ### Offline toast (optional)
 
@@ -296,7 +298,7 @@ Any static host works if:
 
 ## Step 5 — Test installability and offline use
 
-Use Chrome or Edge on desktop, or Chrome on Android. Safari on iOS supports **Add to Home Screen** but not `beforeinstallprompt` (no custom install button).
+Use Chrome or Edge on desktop, Chrome on Android, or Safari on iOS. On iOS the **Install app** button explains **Share → Add to Home Screen** (Safari never fires `beforeinstallprompt`).
 
 ### Checklist
 
@@ -382,7 +384,7 @@ Users who install get that module every time. To ship multiple installable apps 
 | Offline reload fails immediately | Demo never run online | Visit once online; click **Run** to pull runtime + packages |
 | Storage quota errors | Precache list too aggressive | Shrink `STATIC_ASSETS`; rely on fetch-time caching for WASM |
 | Stale content after deploy | Old cache | Bump `CACHE_NAME` in `sw.js` |
-| iOS: no custom install button | Safari limitation | Document **Share → Add to Home Screen** for users |
+| iOS: Install tip but no native prompt | Safari has no `beforeinstallprompt` | Follow **Share → Add to Home Screen**; tip is expected |
 | `micropython.html` 404 on old links | Renamed from `load.html` | Update bookmarks to `micropython.html?modules=…` |
 
 ---
