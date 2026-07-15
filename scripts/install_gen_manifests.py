@@ -163,9 +163,10 @@ for package_name, contents in package_dicts.items():
         json.dump(contents, f, indent=2)
 
 # One MIP manifest per examples/<subdir>/ (for PyScript ?manifests= and GitHub mip).
-# Source URLs are relative to packages/<name>.json so both work:
-#   - same-origin: web/pyscript/packages → ../../packages (symlink)
-#   - github:PyDevices/pydisplay/packages/<name>.json
+# Package JSON lives in packages/<name>.json and is served via web/pyscript/packages
+# (symlink → ../../packages). MicroPython mip resolves *file* URLs in the package
+# against the loader page base (…/web/pyscript/), not against packages/<name>.json —
+# same as the old web/pyscript/<name>.json layouts: use ./src/examples/….
 examples_root = os.path.join(repo_dir, src_dir, "examples")
 example_package_names = []
 for entry in sorted(os.listdir(examples_root)):
@@ -187,8 +188,9 @@ for entry in sorted(os.listdir(examples_root)):
             if is_gitignored(full_file_path):
                 continue
             rel_from_examples = os.path.relpath(full_file_path, examples_root).replace("\\", "/")
-            # Relative to packages/<name>.json → ../src/examples/...
-            src_file = "../src/examples/" + rel_from_examples
+            # Loader page base is web/pyscript/ (see mip resolution); packages/ is only
+            # where the manifest JSON is fetched from (via the symlink).
+            src_file = "./src/examples/" + rel_from_examples
             urls.append([rel_from_examples, src_file])
     if not urls:
         continue

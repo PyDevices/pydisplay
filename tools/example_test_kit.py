@@ -465,21 +465,28 @@ def ensure_pyscript_server(port: int = PYSCRIPT_PORT) -> None:
     # Port may still be held by a dead/hung serve.py from an earlier case.
     _kill_pyscript_port(port)
     print(f"Starting {SERVE} on port {port}...", file=sys.stderr)
-    proc = subprocess.Popen(
-        [sys.executable, str(SERVE), "-p", str(port)],
-        cwd=str(REPO),
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.PIPE,
-    )
+    # Access logs go to stderr; an unread PIPE fills (~64KiB) and deadlocks
+    # ThreadingHTTPServer mid-matrix (HTML loads, MicroPython never starts).
+    serve_log = REPO / ".cursor" / "pyscript_serve_kit.log"
+    serve_log.parent.mkdir(parents=True, exist_ok=True)
+    with open(serve_log, "ab") as log_fh:
+        proc = subprocess.Popen(
+            [sys.executable, str(SERVE), "-p", str(port)],
+            cwd=str(REPO),
+            stdout=subprocess.DEVNULL,
+            stderr=log_fh,
+        )
     _server_pid = proc.pid
     for _ in range(100):
         if _server_ready(port):
             return
         if proc.poll() is not None:
-            err = (proc.stderr.read() if proc.stderr else b"") or b""
+            try:
+                err_tail = serve_log.read_bytes()[-500:].decode("utf-8", "replace")
+            except OSError:
+                err_tail = ""
             raise RuntimeError(
-                f"PyScript server exited before ready on port {port}: "
-                f"{err.decode('utf-8', 'replace')[-500:]}"
+                f"PyScript server exited before ready on port {port}: {err_tail[-500:]}"
             )
         time.sleep(0.1)
     raise RuntimeError(f"PyScript server did not become ready on port {port}")

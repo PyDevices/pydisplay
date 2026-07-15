@@ -2,35 +2,35 @@
   "urls": [
     [
       "assets/font_8x14.bin",
-      "../src/examples/assets/font_8x14.bin"
+      "./src/examples/assets/font_8x14.bin"
     ],
     [
       "assets/font_8x16.bin",
-      "../src/examples/assets/font_8x16.bin"
+      "./src/examples/assets/font_8x16.bin"
     ],
     [
       "assets/font_8x8.bin",
-      "../src/examples/assets/font_8x8.bin"
+      "./src/examples/assets/font_8x8.bin"
     ],
     [
       "assets/longstreet.bmp",
-      "../src/examples/assets/longstreet.bmp"
+      "./src/examples/assets/longstreet.bmp"
     ],
     [
       "assets/micropython-ascii.pbm",
-      "../src/examples/assets/micropython-ascii.pbm"
+      "./src/examples/assets/micropython-ascii.pbm"
     ],
     [
       "assets/micropython.pbm",
-      "../src/examples/assets/micropython.pbm"
+      "./src/examples/assets/micropython.pbm"
     ],
     [
       "assets/runner.bmp",
-      "../src/examples/assets/runner.bmp"
+      "./src/examples/assets/runner.bmp"
     ],
     [
       "assets/warrior.bmp",
-      "../src/examples/assets/warrior.bmp"
+      "./src/examples/assets/warrior.bmp"
     ]
   ],
   "version": "0.0.1"

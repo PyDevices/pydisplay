@@ -1,3 +1,4 @@
+# pyscript mip: palettes
 """
 alien.py
 =========

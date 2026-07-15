@@ -1,3 +1,4 @@
+# pyscript mip: palettes
 """
 noto_fonts.py
 =============
