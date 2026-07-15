@@ -113,6 +113,7 @@ nav:
     - CircuitPython: platforms/circuitpython.md
     - CPython desktop: platforms/cpython-desktop.md
     - Android: platforms/android.md
+    - Progressive Web Apps: platforms/pwa.md
     - Jupyter: platforms/jupyter.md
     - Run interactively: platforms/jupyter-run.md
     - Jupyter notebook: platforms/jupyter-notebook.ipynb

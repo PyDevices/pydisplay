@@ -4,11 +4,13 @@ Portability is PyDisplay's defining feature. Write your display, input, and timi
 
 ## Where PyDisplay runs
 
-| Runtime | Microcontrollers | Unix / Linux | Windows | Android | Browser | Jupyter Notebook |
-|---------|:----------------:|:------------:|:-------:|:-------:|:-------:|:----------------:|
-| **[MicroPython](micropython.md)** | ✅ | ✅ | ✅ | — | ✅ [PyScript](pyscript.md) · [Wokwi](../guides/wokwi.md) | — |
+| Runtime | Microcontrollers | Unix / Linux | Windows | Android | Browser / PWA | Jupyter Notebook |
+|---------|:----------------:|:------------:|:-------:|:-------:|:-------------:|:----------------:|
+| **[MicroPython](micropython.md)** | ✅ | ✅ | ✅ | — | ✅ [PyScript](pyscript.md) · [PWA](pwa.md) · [Wokwi](../guides/wokwi.md) | — |
 | **[CircuitPython](circuitpython.md)** | ✅ | ✅ | — | — | — | — |
-| **[CPython](cpython-desktop.md)** | — | ✅ | ✅ | ✅ [Android](android.md) | — | ✅ [Jupyter](jupyter.md) |
+| **[CPython](cpython-desktop.md)** | — | ✅ | ✅ | ✅ [Android APK](android.md) | — | ✅ [Jupyter](jupyter.md) |
+
+**Installable browser apps:** the [PyScript gallery](https://pydevices.github.io/pydisplay/pyscript/) ships as a [Progressive Web App](pwa.md) — install it on desktop Chromium, Android Chrome, or iOS home screen. That is a major distribution path, not a demo-only trick. See [where PWAs run](pwa.md#where-pwas-run).
 
 ## How portability works
 
@@ -24,9 +26,9 @@ What changes is which **display backend** `board_config` selects — automatical
 |---------|---------|-------------|
 | `BusDisplay` | MicroPython / CircuitPython MCUs (SPI / I80) | [board config](../hardware/board-configs.md) |
 | `FBDisplay` | CircuitPython framebuffer displays (RGB, USB video) | board config |
-| `SDLDisplay` | CPython, MicroPython Unix, CircuitPython Unix (SDL2) | auto / `board_configs/sdldisplay/` |
+| `SDLDisplay` | CPython, MicroPython Unix, CircuitPython Unix (SDL2); Android APK | auto / `board_configs/sdldisplay/` |
 | `PGDisplay` | CPython desktop (PyGame — easy on Windows) | auto / `board_configs/pgdisplay/` |
-| `PSDisplay` | [PyScript](pyscript.md) browser canvas | auto |
+| `PSDisplay` | [PyScript](pyscript.md) browser canvas and [PWAs](pwa.md) | auto |
 | `JNDisplay` | [Jupyter Notebook](jupyter.md) | auto |
 
 Input is just as portable: a mouse on the desktop, a finger on a touchscreen, and a tap in the browser all arrive as the same [events](../concepts/events.md). Timers come from [`multimer`](../concepts/multimer.md), which picks a backend (`machine.Timer`, librt, threads, polling, SDL, or `asyncio`) to suit the host.
@@ -39,9 +41,10 @@ See [Displays](../concepts/displays.md) for backend details and [Architecture](.
 - [CircuitPython](circuitpython.md) — MCUs and Unix; `framebufferio` and the `framebuf` shim.
 - [CPython desktop](cpython-desktop.md) — SDL2 / PyGame setup for Linux, macOS, and Windows.
 - [Android](android.md) — CPython APK builds with python-for-android and buildozer.
+- [Progressive Web Apps (PWA)](pwa.md) — **where** installable PyScript apps run (desktop, Android Chrome, iOS, TVs).
 - [Jupyter Notebook](jupyter.md) — interactive display widget and async execution model.
 - [Run the notebook interactively](jupyter-run.md) — JupyterLab / VS Code setup (the RTD notebook page is static).
-- [PyScript](pyscript.md) — running in the browser.
+- [PyScript](pyscript.md) — running in the browser (`PSDisplay`).
 
 ## Build GUIs across platforms
 

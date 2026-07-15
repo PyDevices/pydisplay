@@ -4,7 +4,7 @@ Experimental browser support via [PyScript](https://pyscript.net/) and `displays
 
 **Quick start:** [PyScript guide](../guides/pyscript.md) and [Try pydisplay](../try/index.md).
 
-**Installable / offline:** [PyScript PWA guide](../guides/pyscript-pwa.md) — manifest, service worker, and GitHub Pages deploy.
+**Installable / offline (major feature):** The live gallery is a [Progressive Web App](pwa.md). Read [where PWAs run](pwa.md#where-pwas-run) for the host matrix (desktop Chromium, Android Chrome, iOS home screen, TV web). Build your own with the [PyScript PWA guide](../guides/pyscript-pwa.md).
 
 **Asyncio porting:** [PyScript asyncio guide](../guides/pyscript-asyncio.md).
 

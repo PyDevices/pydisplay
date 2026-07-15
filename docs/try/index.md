@@ -7,6 +7,7 @@ Evaluate pydisplay without installing anything on your machine.
 | Path | Best for | Start here |
 |------|----------|------------|
 | **Browser (PyScript)** | Quick look, touch UI in the tab | [Live demo hub](https://PyDevices.github.io/pydisplay/pyscript/) |
+| **Installable PWA** | Home-screen / standalone app on phone or desktop | [Where PWAs run](../platforms/pwa.md) · [Install the gallery](https://PyDevices.github.io/pydisplay/pyscript/) |
 | **Wokwi simulator** | ESP32 + ILI9341 without hardware | [Wokwi guide](../guides/wokwi.md) · [`wokwi/`](../sim/wokwi/) |
 | **Screenshot gallery** | See what examples look like | [Gallery below](#screenshot-gallery) |
 
@@ -14,7 +15,7 @@ Evaluate pydisplay without installing anything on your machine.
 
 ### Live demo (online)
 
-**Hub:** [PyDevices.github.io/pydisplay/pyscript/](https://PyDevices.github.io/pydisplay/pyscript/)
+**Hub:** [PyDevices.github.io/pydisplay/pyscript/](https://PyDevices.github.io/pydisplay/pyscript/) — also an installable [PWA](../platforms/pwa.md) (**Install app** in the header on Chromium; on iOS use Share → Add to Home Screen).
 
 | Link | Description |
 |------|-------------|

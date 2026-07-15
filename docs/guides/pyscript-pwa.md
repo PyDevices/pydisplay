@@ -2,6 +2,8 @@
 
 **Who:** You host a pydisplay (or other PyScript) demo on GitHub Pages — or any HTTPS origin — and want users to install it like a native app and run it offline after the first visit.
 
+**Where PWAs run:** Platform notes — host matrix, install UX, PWA vs Android APK — live in [Progressive Web Apps](../platforms/pwa.md). This guide is the **how-to** (manifest, service worker, deploy).
+
 **Prerequisites:** A working PyScript HTML shell (see [PyScript guide](pyscript.md)). Basic familiarity with browser DevTools.
 
 **Live reference:** The [pydisplay PyScript gallery](https://pydevices.github.io/pydisplay/pyscript/) is a PWA. Open DevTools → **Application** to inspect its manifest and service worker, or click **Install app** in the header.
@@ -397,6 +399,7 @@ Users who install get that module every time. To ship multiple installable apps 
 
 ## Related docs
 
+- [Where PWAs run](../platforms/pwa.md) — host matrix and install UX (platform story)
 - [PyScript local development](pyscript.md) — run the gallery locally, gallery markers, deploy overview
 - [PyScript asyncio porting](pyscript-asyncio.md) — make examples work under PyScript's event loop
 - [PyScript platform notes](../platforms/pyscript.md) — board config and contribution pointers
