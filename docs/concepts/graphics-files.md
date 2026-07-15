@@ -15,6 +15,14 @@ Built into [`graphics`](graphics.md):
 | `graphics.save_image(fb, path)` | Write PBM/PGM/BMP for supported formats |
 | `graphics.FrameBuffer.from_file(path)` | Same as `load_image` |
 | `graphics.FrameBuffer.save(path)` | Same as `save_image` |
+| `graphics.FrameBuffer.export(path)` / `export_framebuffer` | Write importable `.py` module (`BITMAP = bytearray(...)`) |
+| `graphics.FrameBuffer.from_bitmap(buf, w, h, fmt)` | Wrap buffer; zero-copy when `buf` is a writable `bytearray` |
+| `graphics.FrameBuffer.from_module(mod)` | Same using `mod.WIDTH` / `HEIGHT` / `FORMAT` / `BITMAP` |
+
+### Memory notes
+
+- **Files:** PBM/PGM parsers allocate one pixel `bytearray` and fill it with `readinto` (peak ≈ one framebuffer). BMP already fills a single destination buffer row-by-row.
+- **`.py` bitmaps:** Prefer `BITMAP = bytearray(...)` so `from_bitmap` does not copy. Legacy `memoryview(bytes)` modules get one copy. This is separate from `Font.export`, which keeps a read-only `memoryview` for glyph indexing.
 
 ### Save/load matrix
 
