@@ -1,4 +1,4 @@
-/*! pydisplay PWA bootstrap — COI service worker registration + install UI */
+/*! pydisplay PWA bootstrap — COI service worker registration + install/update UI */
 (function () {
   var SW_URL = './sw.js';
   var SW_SCOPE = './';
@@ -52,21 +52,89 @@
     toast.setAttribute('aria-live', 'polite');
     toast.innerHTML =
       '<span id="pwa-message"></span>' +
-      '<button type="button" id="pwa-toast-dismiss">OK</button>';
+      '<span class="pwa-toast-actions">' +
+      '<button type="button" id="pwa-toast-action" hidden></button>' +
+      '<button type="button" id="pwa-toast-dismiss">OK</button>' +
+      '</span>';
     document.body.appendChild(toast);
     toast.querySelector('#pwa-toast-dismiss').addEventListener('click', function () {
       toast.classList.remove('is-visible');
+      toast.classList.remove('is-update');
     });
     return toast;
   }
 
-  function showToast(message) {
+  function showToast(message, options) {
+    options = options || {};
     var toast = ensureToast();
     var msg = document.getElementById('pwa-message');
+    var action = document.getElementById('pwa-toast-action');
+    var dismiss = document.getElementById('pwa-toast-dismiss');
     if (msg) {
       msg.textContent = message;
     }
+    if (action) {
+      if (options.actionLabel && typeof options.onAction === 'function') {
+        action.hidden = false;
+        action.textContent = options.actionLabel;
+        action.onclick = function () {
+          options.onAction();
+        };
+        toast.classList.add('is-update');
+      } else {
+        action.hidden = true;
+        action.onclick = null;
+        toast.classList.remove('is-update');
+      }
+    }
+    if (dismiss) {
+      dismiss.textContent = options.dismissLabel || 'OK';
+    }
     toast.classList.add('is-visible');
+  }
+
+  function showUpdateToast() {
+    showToast('A new version of the app shell is ready.', {
+      actionLabel: 'Reload',
+      dismissLabel: 'Later',
+      onAction: function () {
+        location.reload();
+      },
+    });
+  }
+
+  function watchWorkerForUpdate(worker) {
+    if (!worker) {
+      return;
+    }
+    worker.addEventListener('statechange', function () {
+      // With skipWaiting(), a waiting phase is brief; "installed" while we
+      // already have a controller means a new shell revision is ready.
+      if (
+        (worker.state === 'installed' || worker.state === 'activated') &&
+        navigator.serviceWorker.controller
+      ) {
+        showUpdateToast();
+      }
+    });
+  }
+
+  function wireUpdatePrompt(reg) {
+    if (!reg || needsCoiReload()) {
+      return;
+    }
+    if (reg.waiting && navigator.serviceWorker.controller) {
+      showUpdateToast();
+    }
+    reg.addEventListener('updatefound', function () {
+      watchWorkerForUpdate(reg.installing);
+    });
+    // Check when the PWA becomes visible again (browsers also check periodically).
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible') {
+        reg.update().catch(function () {});
+      }
+    });
   }
 
   function wireInstallPrompt() {
@@ -136,6 +204,7 @@
     registration
       .then(function (reg) {
         wireActivationToast(reg);
+        wireUpdatePrompt(reg);
       })
       .catch(function (err) {
         console.log('Service worker registration failed:', err);

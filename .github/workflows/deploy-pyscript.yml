@@ -11,6 +11,7 @@ on:
       - 'scripts/install_gen_manifests.py'
       - 'scripts/install_refresh_manifests.sh'
       - 'scripts/pyscript_gen_packages.py'
+      - 'scripts/pyscript_stamp_pwa_cache.py'
       - '.github/workflows/deploy-pyscript.yml'
   workflow_dispatch:
 
@@ -49,6 +50,10 @@ jobs:
           cp web/landing/index.html _site/index.html
           cp web/landing/site.css _site/site.css
           cp .nojekyll _site/
+          # Stamp CACHE_NAME from a hash of the PWA shell (STATIC_ASSETS + sw.js).
+          # Example/src churn alone does not change the id — installed apps are
+          # only prompted when the offline shell actually changes.
+          python scripts/pyscript_stamp_pwa_cache.py _site/pyscript
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
