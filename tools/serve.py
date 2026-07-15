@@ -32,6 +32,9 @@ Why a custom server instead of `python -m http.server`?
    page-side snippet printed at startup, or wire your own beacon to it.
 
 Everything here is CPython standard library only — no third-party deps.
+
+LVGL for Pyodide is installed from TestPyPI (`lvgl-cpython` pyemscripten
+wheel) via micropip in `pyodide.html` — this server does not provide wheels/.
 """
 
 from __future__ import annotations
@@ -43,80 +46,12 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
 import sys
-import urllib.error
-import urllib.request
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # Path prefix the page-side debug beacon POSTs to. Anything under it is treated
 # as a log sink so Cursor Debug mode tooling can pick its own sub-paths.
 DEBUG_PREFIX = "/__debug"
-
-# Same-origin path for micropip LVGL wheels (pyodide.html). When the tree does
-# not yet contain wheels/, link a sibling lv_cpython_mod build if present.
-# Last resort: mirror the published Pages index + wheel (needs CORP via this
-# server — cross-origin Pages lacks Cross-Origin-Resource-Policy under COEP).
-WHEELS_DIR = REPO_ROOT / "web" / "pyscript" / "wheels"
-SIBLING_WHEEL_DIRS = (
-    REPO_ROOT.parent / "lv_cpython_mod" / "web" / "wheels",
-    REPO_ROOT.parent / "cmods" / "lv_cpython_mod" / "web" / "wheels",
-)
-PAGES_WHEELS_BASE = "https://pydevices.github.io/lv_cpython_mod/wheels/"
-
-
-def _mirror_pages_wheels() -> Path | None:
-    """Download lvgl.json + wheel from lv_cpython_mod Pages into web/pyscript/wheels/."""
-    try:
-        WHEELS_DIR.mkdir(parents=True, exist_ok=True)
-        index_url = PAGES_WHEELS_BASE + "lvgl.json"
-        with urllib.request.urlopen(index_url, timeout=60) as resp:
-            raw = resp.read()
-        data = json.loads(raw)
-        wheel_name = data.get("wheel")
-        if not isinstance(wheel_name, str) or not wheel_name.endswith(".whl"):
-            raise ValueError(f"invalid wheel entry in {index_url}: {wheel_name!r}")
-        if "/" in wheel_name or wheel_name.startswith("."):
-            raise ValueError(f"unsafe wheel filename: {wheel_name!r}")
-        (WHEELS_DIR / "lvgl.json").write_bytes(raw)
-        wheel_path = WHEELS_DIR / wheel_name
-        if not wheel_path.is_file():
-            print(f"  wheels: downloading {wheel_name} from Pages…")
-            urllib.request.urlretrieve(PAGES_WHEELS_BASE + wheel_name, wheel_path)
-        print(f"  wheels:                  {WHEELS_DIR} (mirrored from Pages)")
-        return WHEELS_DIR
-    except (OSError, urllib.error.URLError, json.JSONDecodeError, ValueError) as exc:
-        print(f"warning: could not mirror LVGL wheels from Pages: {exc}", file=sys.stderr)
-        return None
-
-
-def ensure_wheels_dir() -> Path | None:
-    """Prefer an in-tree wheels/ dir; otherwise symlink a sibling lv_cpython_mod build."""
-    if WHEELS_DIR.is_dir() and any(WHEELS_DIR.glob("*.whl")):
-        return WHEELS_DIR
-    if WHEELS_DIR.is_symlink():
-        try:
-            WHEELS_DIR.unlink()
-        except OSError:
-            return None
-    elif WHEELS_DIR.is_dir():
-        # Empty or non-wheel dir — leave alone so we never clobber content.
-        if any(WHEELS_DIR.iterdir()):
-            return WHEELS_DIR if any(WHEELS_DIR.glob("*.whl")) else None
-        try:
-            WHEELS_DIR.rmdir()
-        except OSError:
-            return None
-    for src in SIBLING_WHEEL_DIRS:
-        if src.is_dir() and any(src.glob("*.whl")):
-            try:
-                WHEELS_DIR.symlink_to(src.resolve(), target_is_directory=True)
-            except OSError as exc:
-                print(f"warning: could not link {WHEELS_DIR} → {src}: {exc}", file=sys.stderr)
-                return None
-            print(f"  wheels:                  {WHEELS_DIR} → {src}")
-            return WHEELS_DIR
-    return _mirror_pages_wheels()
-
 
 def _stamp() -> str:
     now = datetime.datetime.now(datetime.UTC)
@@ -238,8 +173,6 @@ def main(argv: list[str] | None = None) -> int:
     print(f"pydisplay PyScript server — serving {root}")
     print(f"  cross-origin isolation: {'on' if DemoRequestHandler.coi_enabled else 'off'}")
     print(f"  debug log sink:         POST {base}{DEBUG_PREFIX}")
-    if root == REPO_ROOT:
-        ensure_wheels_dir()
     print("")
     print("Open one of:")
     print(f"  {base}/web/pyscript/index.html")

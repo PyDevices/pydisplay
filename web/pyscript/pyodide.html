@@ -78,9 +78,8 @@
             (same MIP JSON as <a href="./micropython.html">micropython.html</a>).
             Also supports <code>?mip=</code> (TestPyPI wheels) and
             <code>?packages=</code> (Hinch GUIs via <code>packages/*.json</code>).
-            LVGL demos micropip-install the
-            <code>pyemscripten_2026_0</code> wheel (local
-            <code>./wheels/</code> or lv_cpython_mod Pages).
+            LVGL demos micropip-install <code>lvgl-cpython</code> from TestPyPI
+            (<code>pyemscripten_2026_0</code> wasm wheel).
             Whichever of modules/manifests comes first supplies the import entry.
         </p>
 
@@ -117,9 +116,9 @@
                         <li>Both may appear; whichever param comes <em>first</em> in the URL supplies the import entry point.</li>
                         <li><code>?mip=</code> — <code>palettes</code> / <code>pdwidgets</code> via micropip (TestPyPI); same as <code># pyodide wheels:</code> / <code># pyscript mip:</code>.</li>
                         <li><code>?packages=</code> — Hinch GUI names (<code>micropython-nano-gui</code>, <code>micropython-micro-gui</code>, <code>micropython-touch</code>); installs into <code>/add_ons</code> from <code>packages/*.json</code> (resolves <code>github:</code> via raw.githubusercontent.com).</li>
-                        <li><code># pyodide wheels: lvgl</code> in the entry example → micropip-install
-                            via <code>wheels/lvgl.json</code> (lv_cpython_mod Pages or local
-                            <code>serve.py</code>); override with <code>?lvgl_wheel=</code>.</li>
+                        <li><code># pyodide wheels: lvgl</code> (or <code>lvgl-cpython</code>) →
+                            micropip-install from TestPyPI; override with a wheel URL via
+                            <code>?lvgl_wheel=</code>.</li>
                         <li>Click <strong>Run</strong> to install, then import the entry.</li>
                     </ul>
                 </div>
@@ -336,7 +335,7 @@
 
         MANIFEST_MIP_TARGET = "examples"
         PACKAGE_MIP_TARGET = "add_ons"
-        LVGL_WHEELS_DIR_PAGES = "https://pydevices.github.io/lv_cpython_mod/wheels/"
+        TESTPYPI_SIMPLE = "https://test.pypi.org/simple/"
         PH_GUI_PACKAGES = (
             "micropython-nano-gui",
             "micropython-micro-gui",
@@ -567,48 +566,6 @@
                     return found
             return []
 
-        def _lvgl_wheels_base():
-            host = str(document.location.hostname)
-            if host in ("127.0.0.1", "localhost"):
-                # serve.py links sibling build or mirrors Pages → ./wheels/
-                return _abs_url("wheels/")
-            return LVGL_WHEELS_DIR_PAGES
-
-        async def _resolve_lvgl_wheel_url(override=""):
-            if override:
-                return override
-            bases = [_lvgl_wheels_base()]
-            # Local COEP pages need same-origin wheels/; if missing, try Pages
-            # (may fail under require-corp when Pages omits CORP — serve.py mirrors).
-            if bases[0].rstrip("/") != LVGL_WHEELS_DIR_PAGES.rstrip("/"):
-                bases.append(LVGL_WHEELS_DIR_PAGES)
-            last_err = None
-            for base in bases:
-                if not base.endswith("/"):
-                    base += "/"
-                index_url = base + "lvgl.json"
-                try:
-                    raw = await _fetch_text(index_url)
-                except Exception as e:
-                    last_err = e
-                    continue
-                try:
-                    data = json.loads(raw)
-                except json.JSONDecodeError as e:
-                    raise RuntimeError("Invalid " + index_url + ": " + str(e)) from e
-                name = data.get("wheel")
-                if not isinstance(name, str) or not name.endswith(".whl"):
-                    raise RuntimeError(
-                        index_url + " must contain a string \"wheel\" filename ending in .whl"
-                    )
-                if "/" in name or name.startswith("."):
-                    raise RuntimeError("Unsafe wheel filename in " + index_url + ": " + name)
-                return base + name
-            raise RuntimeError(
-                "Could not resolve LVGL wheel index (tried local wheels/ and Pages): "
-                + str(last_err)
-            )
-
         async def _ensure_micropip():
             try:
                 import micropip
@@ -631,23 +588,29 @@
             for which in wheels:
                 key = which.lower().replace("_", "-")
                 if key in ("lvgl", "lvgl-cpython", "lvglcpython"):
-                    url = await _resolve_lvgl_wheel_url(lvgl_wheel_override)
-                    _set("Installing lvgl…")
-                    _log_print("micropip.install", url)
-                    await micropip.install(url)
+                    _set("Installing lvgl-cpython…")
+                    if lvgl_wheel_override:
+                        _log_print("micropip.install", lvgl_wheel_override)
+                        await micropip.install(lvgl_wheel_override)
+                    else:
+                        _log_print("micropip.install lvgl-cpython from TestPyPI")
+                        await micropip.install(
+                            "lvgl-cpython",
+                            index_urls=TESTPYPI_SIMPLE,
+                        )
                 elif key in ("pdwidgets",):
                     _set("Installing pdwidgets…")
                     _log_print("micropip.install pdwidgets from TestPyPI")
                     await micropip.install(
                         "pdwidgets",
-                        index_urls="https://test.pypi.org/simple/",
+                        index_urls=TESTPYPI_SIMPLE,
                     )
                 elif key in ("palettes",):
                     _set("Installing palettes…")
                     _log_print("micropip.install palettes from TestPyPI")
                     await micropip.install(
                         "palettes",
-                        index_urls="https://test.pypi.org/simple/",
+                        index_urls=TESTPYPI_SIMPLE,
                     )
                 else:
                     raise RuntimeError(
