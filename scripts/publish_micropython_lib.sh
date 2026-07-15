@@ -129,7 +129,6 @@ DEST_REPO="$(cd "$DEST_REPO" 2>/dev/null && pwd || echo "$DEST_REPO")"
 export MICROPYTHON_LIB_DIR="$DEST_REPO"
 SOURCE_DIR=$SOURCE_REPO/src
 DEST_DIR=$DEST_REPO/micropython/$BASENAME
-BUNDLE_MANIFEST=$DEST_DIR/$BASENAME-bundle/manifest.py
 PYPI_DIR=$SOURCE_REPO/wheels
 README_FULL_PATH=$SOURCE_REPO/README.md
 
@@ -238,6 +237,70 @@ prune_skipped_artifacts() {
     \) -print0 | xargs -0 rm -rf
 }
 
+# Drop packages that are no longer produced from src/ (rsync does not --delete).
+prune_stale_packages() {
+    local expected_top=()
+    local package_dir package name keep existing module base package_dir_name
+    local expected_displaysys=("displaysys")
+
+    for package_dir in "$SOURCE_DIR/lib"/*; do
+        [[ -d "$package_dir" ]] || continue
+        package=$(basename "$package_dir")
+        should_skip_name "$package" && continue
+        expected_top+=("$package")
+    done
+
+    if [[ -d "$DEST_DIR" ]]; then
+        for existing in "$DEST_DIR"/*; do
+            [[ -e "$existing" ]] || continue
+            name=$(basename "$existing")
+            keep=0
+            for package in "${expected_top[@]}"; do
+                if [[ "$name" == "$package" ]]; then
+                    keep=1
+                    break
+                fi
+            done
+            if [[ "$keep" -eq 0 ]]; then
+                echo "Removing stale package tree: $existing"
+                rm -rf "$existing"
+            fi
+        done
+    fi
+
+    for module in "$SOURCE_DIR/lib/displaysys"/*; do
+        base="$(basename "$module")"
+        if should_skip_name "$base" || [[ "$base" == *.pyc ]] || [[ "$base" == *.pyo ]]; then
+            continue
+        fi
+        if [[ "$base" == boarddisplay.py || "$base" == __init__.py ]]; then
+            continue
+        fi
+        if [[ -f "$module" && "$base" == *.py ]]; then
+            package_dir_name=$(basename "$module" .py)
+            expected_displaysys+=("displaysys-$package_dir_name")
+        fi
+    done
+
+    if [[ -d "$DEST_DIR/displaysys" ]]; then
+        for existing in "$DEST_DIR/displaysys"/*; do
+            [[ -e "$existing" ]] || continue
+            name=$(basename "$existing")
+            keep=0
+            for package in "${expected_displaysys[@]}"; do
+                if [[ "$name" == "$package" ]]; then
+                    keep=1
+                    break
+                fi
+            done
+            if [[ "$keep" -eq 0 ]]; then
+                echo "Removing stale displaysys package: $existing"
+                rm -rf "$existing"
+            fi
+        done
+    fi
+}
+
 build_and_upload_pypi() {
     if [[ "$SKIP_PYPI" -eq 1 ]]; then
         return 0
@@ -279,18 +342,6 @@ push_micropython_lib() {
     done
 }
 
-# Create the bundle manifest
-mkdir -p $DEST_DIR/$BASENAME-bundle
-cat <<EOF > $BUNDLE_MANIFEST
-metadata(
-    description="$DESCRIPTION_PREFIX bundle",
-    version="$VERSION",
-    author="$AUTHOR",
-    license="$LICENSE",
-    pypi_publish="$BASENAME-bundle",
-)
-EOF
-
 # Copy all the directories in $SOURCE_DIR/lib except displaysys to $DEST_DIR/$package
 for package_dir in "$SOURCE_DIR/lib"/*; do
     package=$(basename $package_dir)
@@ -311,7 +362,6 @@ metadata(
 ${extra_requires}
 package("$package")
 EOF
-        echo "require(\"$package\")" >> $BUNDLE_MANIFEST
         cp $README_FULL_PATH $DEST_DIR/$package/README.md
         if [[ "$SKIP_PYPI" -eq 0 ]]; then
             ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package $DEST_DIR/$package/manifest.py
@@ -341,7 +391,6 @@ metadata(
 package("displaysys")
 module("board_config.py")
 EOF
-echo "require(\"displaysys\")" >> $BUNDLE_MANIFEST
 cp $README_FULL_PATH $DEST_DIR/displaysys/displaysys/README.md
 if [[ "$SKIP_PYPI" -eq 0 ]]; then
     ./scripts/publish_make_pyproject.py --output $PYPI_DIR/displaysys $DEST_DIR/displaysys/displaysys/manifest.py
@@ -380,7 +429,6 @@ require("displaysys")
 ${extra_requires}
 package("displaysys")
 EOF
-    echo "require(\"$package\")" >> $BUNDLE_MANIFEST
     cp $README_FULL_PATH $DEST_DIR/displaysys/$package/README.md
     if [[ "$SKIP_PYPI" -eq 0 ]]; then
         ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package $DEST_DIR/displaysys/$package/manifest.py
@@ -390,18 +438,7 @@ EOF
     fi
 done
 
-## Create the bundle file
-## TODO:  Leave this commented out until the individual packages are on PyPi
-# echo
-# echo "Processing $BASENAME-bundle"
-# cp $README_FULL_PATH $DEST_DIR/$BASENAME-bundle/README.md
-# ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$BASENAME-bundle $BUNDLE_MANIFEST
-# pushd $PYPI_DIR/$BASENAME-bundle
-# rm -rf dist
-# hatch build
-# twine upload --repository testpypi dist/*
-# popd
-
+prune_stale_packages
 prune_skipped_artifacts
 
 if [[ "$INTERACTIVE_COMMIT" -eq 1 ]] || [[ -n "$COMMIT_MESSAGE" ]]; then

@@ -23,17 +23,13 @@ mpremote mip install --index "https://PyDevices.github.io/micropython-lib/mip/Py
 
 ## Available packages
 
-**Bundle:**
-
-- `pydisplay-bundle` — core libs + display extensions (not add_ons or examples)
-
 **Core:**
 
 - `displaysys`, `eventsys`, `graphics`, `multimer`
 
 **Display extensions** (pull in `displaysys` automatically):
 
-- `displaysys-busdisplay`, `displaysys-fbdisplay`, `displaysys-jndisplay`, `displaysys-pgdisplay`, `displaysys-psdisplay`
+- `displaysys-busdisplay`, `displaysys-epaperdisplay`, `displaysys-fbdisplay`, `displaysys-jndisplay`, `displaysys-pgdisplay`, `displaysys-pixeldisplay`, `displaysys-psdisplay`, `displaysys-sdldisplay`
 
 **Drivers** (examples):
 
@@ -49,8 +45,9 @@ These must come from GitHub:
 - `add_ons`, `examples`
 - `spibus`, `i80bus` (viper not supported in micropython-lib packaging)
 - Board config packages (use GitHub `board_configs/.../package.json`)
+- Composite install manifests such as `packages/pydisplay-bundle.json` (see [GitHub MIP](mip-github.md))
 
-The [installer.py](installer.md) script installs the micropython-lib bundle plus GitHub add_ons, examples, and `board_config.py` in one step.
+The [installer.py](installer.md) script installs micropython-lib packages plus GitHub add_ons, examples, and `board_config.py` in one step.
 
 ## Verify install
 
