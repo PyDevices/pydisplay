@@ -1,3 +1,4 @@
+# pyscript mip: palettes
 """
 color_test.py
 =============

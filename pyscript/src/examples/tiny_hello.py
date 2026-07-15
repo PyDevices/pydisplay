@@ -1,3 +1,4 @@
+# pyscript mip: palettes
 """
 tiny_hello.py
 =============
