@@ -1,0 +1,9 @@
+{
+    "urls": [
+        [
+            "spibus.py",
+            "github:PyDevices/pydisplay/drivers/bus/spibus.py"
+        ]
+    ],
+    "version": "0.1"
+}

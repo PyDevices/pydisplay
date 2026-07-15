@@ -1,0 +1,50 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/src/lib/board_config.py"
+    ],
+    [
+      "path.py",
+      "github:PyDevices/pydisplay/src/lib/path.py"
+    ],
+    [
+      "displaysys/__init__.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/__init__.py"
+    ],
+    [
+      "displaysys/busdisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/busdisplay.py"
+    ],
+    [
+      "displaysys/epaperdisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/epaperdisplay.py"
+    ],
+    [
+      "displaysys/fbdisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/fbdisplay.py"
+    ],
+    [
+      "displaysys/jndisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/jndisplay.py"
+    ],
+    [
+      "displaysys/pgdisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/pgdisplay.py"
+    ],
+    [
+      "displaysys/pixeldisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/pixeldisplay.py"
+    ],
+    [
+      "displaysys/psdisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/psdisplay.py"
+    ],
+    [
+      "displaysys/sdldisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/sdldisplay.py"
+    ]
+  ],
+  "deps": [],
+  "version": "0.0.1"
+}

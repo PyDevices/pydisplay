@@ -1,0 +1,10 @@
+{
+  "urls": [
+    ["digitalio.py", "github:PyDevices/pydisplay/drivers/bus/digitalio.py"],
+    ["epaperdisplay_chip.py", "github:PyDevices/pydisplay/drivers/display/epaperdisplay_chip.py"]
+  ],
+  "deps": [
+    ["github:PyDevices/pydisplay/packages/spibus.json", "main"]
+  ],
+  "version": "0.1"
+}

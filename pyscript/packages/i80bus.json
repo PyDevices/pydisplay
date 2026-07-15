@@ -1,0 +1,13 @@
+{
+    "urls": [
+        [
+            "i80bus.py",
+            "github:PyDevices/pydisplay/drivers/bus/i80bus.py"
+        ],
+        [
+            "gpio_pin.py",
+            "github:PyDevices/pydisplay/drivers/bus/gpio_pin.py"
+        ]
+    ],
+    "version": "0.1"
+}

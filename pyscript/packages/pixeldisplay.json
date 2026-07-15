@@ -1,0 +1,17 @@
+{
+  "urls": [
+    [
+      "displaysys/__init__.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/__init__.py"
+    ],
+    [
+      "displaysys/pixeldisplay.py",
+      "github:PyDevices/pydisplay/src/lib/displaysys/pixeldisplay.py"
+    ]
+  ],
+  "deps": [
+    ["github:PyDevices/pydisplay/packages/displaysys.json", "main"],
+    ["github:PyDevices/pydisplay/packages/graphics.json", "main"]
+  ],
+  "version": "0.1"
+}
