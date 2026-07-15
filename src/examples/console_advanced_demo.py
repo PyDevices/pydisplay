@@ -1,5 +1,5 @@
 # pyscript mip: palettes
-# pyodide wheels: palettes
+# pyodide wheels: pydevices-palettes
 """
 console_advanced_demo.py - Advanced demo of the mpconsole module
 """

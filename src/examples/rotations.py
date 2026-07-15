@@ -1,5 +1,5 @@
 # pyscript mip: palettes
-# pyodide wheels: palettes
+# pyodide wheels: pydevices-palettes
 """
 rotations.py
 ============
