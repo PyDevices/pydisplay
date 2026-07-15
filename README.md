@@ -31,7 +31,7 @@ Develop and debug on your laptop with a mouse, then deploy the *same* code to a 
 
 PyDisplay is the graphics, input, and timing backend for a growing family of projects. The sister projects **[lv_micropython_cmod](https://github.com/PyDevices/lv_micropython_cmod)**, **[lv_circuitpython_mod](https://github.com/PyDevices/lv_circuitpython_mod)**, and **[lv_cpython_mod](https://github.com/PyDevices/lv_cpython_mod)** wire PyDisplay into [LVGL](https://lvgl.io/) for MicroPython, CircuitPython, and CPython respectively. That means you can build a polished LVGL application in pure Python — and **you can even develop your LVGL apps interactively in a Jupyter Notebook**, then run the identical code on a microcontroller.
 
-It also drops straight in under [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui), [MicroPython-Touch](https://github.com/peterhinch/micropython-touch), russhughes-style TFT/`st7789py` apps, the bundled **PyWidgets** toolkit, or your own widget library.
+It also drops straight in under [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui), [MicroPython-Touch](https://github.com/peterhinch/micropython-touch), russhughes-style TFT/`st7789py` apps, the sister **[PyWidgets](https://github.com/PyDevices/pdwidgets)** toolkit, or your own widget library.
 
 ### Why you'll like it
 
@@ -79,7 +79,7 @@ Use it directly for simple UIs, or as the backend for a full widget library.
 
 ### 1.2 What PyDisplay is not
 
-- **Not a widget toolkit** — no built-in buttons, sliders, or layout managers (use [LVGL](#6-ecosystem--sister-projects), Nano-GUI, or the bundled PyWidgets add-on).
+- **Not a widget toolkit** — no built-in buttons, sliders, or layout managers (use [LVGL](#6-ecosystem--sister-projects), Nano-GUI, or [PyWidgets](https://github.com/PyDevices/pdwidgets)).
 - **Not a task scheduler** — use [`multimer`](https://pydisplay.readthedocs.io/en/latest/concepts/multimer/) or `asyncio` for timing.
 
 See the [Architecture guide](https://pydisplay.readthedocs.io/en/latest/concepts/architecture/) for the full mental model.
@@ -181,7 +181,7 @@ PyDisplay also integrates with:
 
 - [Nano-GUI](https://pydisplay.readthedocs.io/en/latest/guis/nano-gui/) and [MicroPython-Touch](https://pydisplay.readthedocs.io/en/latest/guis/micropython-touch/) by @peterhinch
 - [russhughes TFT / st7789py](https://pydisplay.readthedocs.io/en/latest/guis/tft-gui/) ports
-- the bundled [PyWidgets](https://pydisplay.readthedocs.io/en/latest/guis/pywidgets/) toolkit (`add_ons/pdwidgets`)
+- the [PyWidgets](https://pydisplay.readthedocs.io/en/latest/guis/pywidgets/) toolkit ([PyDevices/pdwidgets](https://github.com/PyDevices/pdwidgets))
 
 ## 7. 📚 Documentation map
 

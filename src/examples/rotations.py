@@ -9,7 +9,7 @@ number and the color of the display background.
 """
 
 from board_config import display_drv, runtime
-from graphics import Draw
+from graphics import Draw, text16
 from palettes import get_palette
 
 pal = get_palette()
@@ -23,7 +23,7 @@ def center_text(text, y, fg, bg):
     x = (display_drv.width - len(text) * FONT_W) // 2
     # Opaque label: fill bg strip then draw glyphs.
     draw.fill_rect(x, y, len(text) * FONT_W, FONT_H, bg)
-    draw.text16(text, x, y, fg)
+    text16(display_drv, text, x, y, fg)
 
 
 def clear_screen(color):

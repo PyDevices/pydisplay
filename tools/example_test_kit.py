@@ -22,6 +22,7 @@ import time
 import urllib.error
 import urllib.request
 
+from sibling_repos import apply_sibling_env
 import tomllib
 
 REPO = Path(__file__).resolve().parent.parent
@@ -329,6 +330,7 @@ def run_subprocess_case(
         str(timeout),
     ]
     env = os.environ.copy()
+    apply_sibling_env(env, repo_root=str(REPO))
     # micropython.exe (Windows PE) cannot read WSL-exported env; pass via argv.
     timer_async = env.get("PYDISPLAY_TIMER_ASYNC")
     if timer_async is not None:
@@ -632,7 +634,7 @@ def run_jupyter_case(
         str(nb_path),
     ]
     env = os.environ.copy()
-    env["PYTHONPATH"] = str(SRC)
+    apply_sibling_env(env, repo_root=str(REPO), prepend_paths=[str(SRC)])
 
     try:
         try:

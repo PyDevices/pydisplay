@@ -56,12 +56,20 @@ def _isfile(path):
 
 def _env_get(key):
     environ = getattr(os, "environ", None)
-    if environ is None:
-        return None
-    try:
-        return environ.get(key)
-    except Exception:
-        return None
+    if environ is not None:
+        try:
+            value = environ.get(key)
+            if value:
+                return value
+        except Exception:
+            pass
+    getenv = getattr(os, "getenv", None)
+    if getenv is not None:
+        try:
+            return getenv(key)
+        except Exception:
+            pass
+    return None
 
 
 _TOOLS = _dir_of(__file__)
@@ -157,8 +165,27 @@ def _backend_name():
         return "?"
 
 
+def _setup_sibling_paths(src):
+    """Ensure top-level palettes/pdwidgets resolve (PYTHONPATH or local discovery)."""
+    try:
+        import sibling_repos
+    except ImportError:
+        sibling_repos = None
+
+    if sibling_repos is not None:
+        repo_root = _dir_of(_join(src, ".."))
+        sibling_repos.prepend_sibling_sys_path(repo_root=repo_root)
+        return
+
+    for key in ("PYDISPLAY_PALETTES_SRC", "PYDISPLAY_PDWIDGETS_SRC"):
+        path = _env_get(key)
+        if path and _isdir(path) and path not in sys.path:
+            sys.path.insert(0, path)
+
+
 def _setup_bootstrap(src, mode):
     """Put pydisplay packages on sys.path; headless skips display-oriented lib.path."""
+    _setup_sibling_paths(src)
     if mode == "headless":
         lib = _join(src, "lib")
         if lib not in sys.path:
