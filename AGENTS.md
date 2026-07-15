@@ -77,9 +77,9 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   `github.com/PyDevices/{palettes,pdwidgets}` into a writable dir and put their
   `src` dirs on the venv path (e.g. a `*.pth` in `.venv/lib/*/site-packages`
   listing `<repo>/palettes/src` and `<repo>/pdwidgets/src`, or `PYTHONPATH`).
-  Quick setup: `bash scripts/setup_sibling_repos.sh` (clones, applies
-  `patches/{palettes,pdwidgets}/`, writes `.pth` files). The example harness
-  (`tools/sibling_repos.py`) auto-discovers the same paths for matrix runs.
+  Quick setup: `bash scripts/setup_sibling_repos.sh` (clones current `main` and
+  writes `.pth` files). The example harness (`tools/sibling_repos.py`) auto-discovers
+  the same paths for matrix runs.
   `pdwidgets` also needs pydisplay's `src/lib` on path (the example harness adds it).
 - Cross-runtime binaries: `micropython`/`circuitpython` resolve via `PATH` →
   `~/bin` → committed `repo:bin/` (see `bin/README.md`), so the matrix runs those
