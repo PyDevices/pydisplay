@@ -10,8 +10,9 @@ Default-includes every example **entry point** under ``src/examples/``:
 
 Opt out of the **public card grid** with ``# pyscript skip: gallery`` and/or
 ``# pyscript skip: binaries`` in the first 10 lines (comma-separated tags on one
-line are fine). ``binaries`` is required for demos that mip-install ``.bmp`` /
-``.bin`` / ``.pbm`` — browser MicroPython mip cannot fetch those intact.
+line are fine). ``binaries`` marks demos that need non-mip files (``.bmp`` /
+``.bin`` / ``.png``, etc.); those demos do not ship via mip — manifests only
+list ``.py`` / ``.mpy`` / ``.json``.
 
 MIP manifests for package examples live in ``packages/<name>.json`` (generated
 by ``scripts/install_gen_manifests.py``). PyScript loads them via the
@@ -29,8 +30,8 @@ Optional headers (first 10 lines):
   - ``# pyodide wheels:`` — micropip wheels for ``pyodide.html`` (e.g. ``lvgl``
     → ``lv_cpython_mod`` ``pyemscripten_2026_0`` wheel)
   - ``# pyscript skip: gallery`` — omit from the browser card grid
-  - ``# pyscript skip: binaries`` — omit from the grid (mip cannot install
-    binary assets in the browser); typically combined with ``gallery``
+  - ``# pyscript skip: binaries`` — omit from the grid (needs assets mip cannot
+    install; those demos do not ship); typically combined with ``gallery``
 
 Then:
 
@@ -365,7 +366,9 @@ def render_card(ex: Example, base: str = LOADER_BASE) -> str:
         if ex.featured
         else ""
     )
-    return f'''                <a class="card" href="{ex.loader_href(base)}" target="_blank" rel="noopener noreferrer">
+    # No target=_blank: in an installed PWA Chromium treats same-scope _blank as a
+    # new app window; same-tab navigation keeps demos in one window (browser or PWA).
+    return f'''                <a class="card" href="{ex.loader_href(base)}">
                     <div class="card-top">
                         <span class="card-icon">{GENERIC_ICON}</span>{tag}
                     </div>

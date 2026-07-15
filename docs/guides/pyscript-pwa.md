@@ -105,6 +105,9 @@ Use when users install the **whole demo hub** and pick a demo from the grid:
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "background_color": "#100e0b",
   "theme_color": "#f54e00",
   "icons": [
@@ -142,6 +145,9 @@ Use when the installed app should **always** launch the same demo, including que
   "start_url": "./micropython.html?modules=pydisplay_demo",
   "scope": "./",
   "display": "standalone",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "background_color": "#100e0b",
   "theme_color": "#f54e00",
   "icons": [
@@ -243,7 +249,7 @@ In every HTML page that should participate in the PWA, add to `<head>`:
 
 `pwa.js` registers `./sw.js` immediately (required for COI) and wires optional UI when elements exist.
 
-Gallery cards keep `target="_blank"` so demos open in a new browser tab. When the page is shown as an installed app (`display-mode: standalone`, etc.), `pwa.js` intercepts same-origin `_blank` clicks and navigates in-place so demos do not spawn a second PWA window. External links still leave the app.
+Gallery demo cards intentionally omit `target="_blank"`. Chromium treats same-scope `_blank` navigations from an installed PWA as a **new app window**; same-tab links keep demos in one window (browser or installed app). The manifest also sets `launch_handler.client_mode` to `navigate-existing` so captured launches reuse the recent PWA window. `pwa.js` still rewrites any leftover same-origin `_blank` clicks to in-place navigation. External links (Docs, GitHub, …) may keep `_blank`.
 
 ### Install button (optional)
 

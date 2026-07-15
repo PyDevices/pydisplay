@@ -35,7 +35,8 @@ packages = [
 toml_exclude = ["examples"]
 
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
-SKIP_FILE_SUFFIXES = {".pyc", ".pyo"}
+# MicroPython mip only fetches .py / .mpy / .json (see micropython-lib mip).
+MIP_FILE_SUFFIXES = {".py", ".mpy", ".json"}
 # Local upstream checkouts (gitignored) — never list in mip manifests.
 PACKAGE_SKIP_DIRS = {
     "add_ons": {"gui"},
@@ -44,7 +45,8 @@ PACKAGE_SKIP_DIRS = {
 
 
 def should_include_file(filename):
-    return not any(filename.endswith(suffix) for suffix in SKIP_FILE_SUFFIXES)
+    """Keep only mip-safe source extensions (skip .bmp/.png/.sh/… uniformly)."""
+    return Path(filename).suffix.lower() in MIP_FILE_SUFFIXES
 
 
 def is_gitignored(path):
@@ -167,6 +169,7 @@ for package_name, contents in package_dicts.items():
 # (symlink → ../../packages). MicroPython mip resolves *file* URLs in the package
 # against the loader page base (…/web/pyscript/), not against packages/<name>.json —
 # same as the old web/pyscript/<name>.json layouts: use ./src/examples/….
+# Only .py/.mpy/.json are listed (mip cannot install binary assets).
 examples_root = os.path.join(repo_dir, src_dir, "examples")
 example_package_names = []
 for entry in sorted(os.listdir(examples_root)):
@@ -192,9 +195,13 @@ for entry in sorted(os.listdir(examples_root)):
             # where the manifest JSON is fetched from (via the symlink).
             src_file = "./src/examples/" + rel_from_examples
             urls.append([rel_from_examples, src_file])
-    if not urls:
-        continue
     package_file = output_dir + packages_dir + entry + ".json"
+    if not urls:
+        # Drop a prior manifest that was only binary assets (e.g. assets/).
+        if os.path.isfile(package_file) and entry not in reserved_package_names:
+            os.remove(package_file)
+            print(f"removed packages/{entry}.json (no mip-safe files)")
+        continue
     with open(package_file, "w") as f:
         json.dump({"urls": urls, "version": package_ver}, f, indent=2)
     example_package_names.append(entry)

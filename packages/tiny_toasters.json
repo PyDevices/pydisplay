@@ -5,14 +5,6 @@
       "./src/examples/tiny_toasters/__init__.py"
     ],
     [
-      "tiny_toasters/make_tiny_toast_bitmaps.sh",
-      "./src/examples/tiny_toasters/make_tiny_toast_bitmaps.sh"
-    ],
-    [
-      "tiny_toasters/tiny_toasters.bmp",
-      "./src/examples/tiny_toasters/tiny_toasters.bmp"
-    ],
-    [
       "tiny_toasters/tiny_toasters.py",
       "./src/examples/tiny_toasters/tiny_toasters.py"
     ],

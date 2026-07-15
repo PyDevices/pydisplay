@@ -5,20 +5,12 @@
       "./src/examples/alien/__init__.py"
     ],
     [
-      "alien/alien.png",
-      "./src/examples/alien/alien.png"
-    ],
-    [
       "alien/alien.py",
       "./src/examples/alien/alien.py"
     ],
     [
       "alien/alien_bitmap.py",
       "./src/examples/alien/alien_bitmap.py"
-    ],
-    [
-      "alien/make_alien_bitmap.sh",
-      "./src/examples/alien/make_alien_bitmap.sh"
     ]
   ],
   "version": "0.0.1"

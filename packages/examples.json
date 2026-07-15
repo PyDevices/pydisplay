@@ -245,10 +245,6 @@
       "github:PyDevices/pydisplay/src/examples/alien/__init__.py"
     ],
     [
-      "alien/alien.png",
-      "github:PyDevices/pydisplay/src/examples/alien/alien.png"
-    ],
-    [
       "alien/alien.py",
       "github:PyDevices/pydisplay/src/examples/alien/alien.py"
     ],
@@ -257,56 +253,12 @@
       "github:PyDevices/pydisplay/src/examples/alien/alien_bitmap.py"
     ],
     [
-      "alien/make_alien_bitmap.sh",
-      "github:PyDevices/pydisplay/src/examples/alien/make_alien_bitmap.sh"
-    ],
-    [
-      "apollo/Apollo_DSKY_interface.bmp",
-      "github:PyDevices/pydisplay/src/examples/apollo/Apollo_DSKY_interface.bmp"
-    ],
-    [
-      "apollo/Apollo_DSKY_interface.svg",
-      "github:PyDevices/pydisplay/src/examples/apollo/Apollo_DSKY_interface.svg"
-    ],
-    [
       "apollo/apollo.py",
       "github:PyDevices/pydisplay/src/examples/apollo/apollo.py"
     ],
     [
       "apollo/dsky.py",
       "github:PyDevices/pydisplay/src/examples/apollo/dsky.py"
-    ],
-    [
-      "assets/font_8x14.bin",
-      "github:PyDevices/pydisplay/src/examples/assets/font_8x14.bin"
-    ],
-    [
-      "assets/font_8x16.bin",
-      "github:PyDevices/pydisplay/src/examples/assets/font_8x16.bin"
-    ],
-    [
-      "assets/font_8x8.bin",
-      "github:PyDevices/pydisplay/src/examples/assets/font_8x8.bin"
-    ],
-    [
-      "assets/longstreet.bmp",
-      "github:PyDevices/pydisplay/src/examples/assets/longstreet.bmp"
-    ],
-    [
-      "assets/micropython-ascii.pbm",
-      "github:PyDevices/pydisplay/src/examples/assets/micropython-ascii.pbm"
-    ],
-    [
-      "assets/micropython.pbm",
-      "github:PyDevices/pydisplay/src/examples/assets/micropython.pbm"
-    ],
-    [
-      "assets/runner.bmp",
-      "github:PyDevices/pydisplay/src/examples/assets/runner.bmp"
-    ],
-    [
-      "assets/warrior.bmp",
-      "github:PyDevices/pydisplay/src/examples/assets/warrior.bmp"
     ],
     [
       "chango/__init__.py",
@@ -353,10 +305,6 @@
       "github:PyDevices/pydisplay/src/examples/proverbs/__init__.py"
     ],
     [
-      "proverbs/make_proverbs_fonts.sh",
-      "github:PyDevices/pydisplay/src/examples/proverbs/make_proverbs_fonts.sh"
-    ],
-    [
       "proverbs/proverbs.py",
       "github:PyDevices/pydisplay/src/examples/proverbs/proverbs.py"
     ],
@@ -373,24 +321,12 @@
       "github:PyDevices/pydisplay/src/examples/tiny_toasters/__init__.py"
     ],
     [
-      "tiny_toasters/make_tiny_toast_bitmaps.sh",
-      "github:PyDevices/pydisplay/src/examples/tiny_toasters/make_tiny_toast_bitmaps.sh"
-    ],
-    [
-      "tiny_toasters/tiny_toasters.bmp",
-      "github:PyDevices/pydisplay/src/examples/tiny_toasters/tiny_toasters.bmp"
-    ],
-    [
       "tiny_toasters/tiny_toasters.py",
       "github:PyDevices/pydisplay/src/examples/tiny_toasters/tiny_toasters.py"
     ],
     [
       "tiny_toasters/tiny_toasters_bitmaps.py",
       "github:PyDevices/pydisplay/src/examples/tiny_toasters/tiny_toasters_bitmaps.py"
-    ],
-    [
-      "tower_climb/README.md",
-      "github:PyDevices/pydisplay/src/examples/tower_climb/README.md"
     ],
     [
       "tower_climb/__init__.py",
@@ -413,40 +349,12 @@
       "github:PyDevices/pydisplay/src/examples/tower_climb/tower_climb_trace.py"
     ],
     [
-      "tower_climb/assets/climber.bmp",
-      "github:PyDevices/pydisplay/src/examples/tower_climb/assets/climber.bmp"
-    ],
-    [
       "tower_climb/assets/gen_tower_assets.py",
       "github:PyDevices/pydisplay/src/examples/tower_climb/assets/gen_tower_assets.py"
     ],
     [
-      "tower_climb/assets/tower_bg.bmp",
-      "github:PyDevices/pydisplay/src/examples/tower_climb/assets/tower_bg.bmp"
-    ],
-    [
-      "tower_climb/assets/tower_tiles.bmp",
-      "github:PyDevices/pydisplay/src/examples/tower_climb/assets/tower_tiles.bmp"
-    ],
-    [
       "tower_climb/tools/playtest.py",
       "github:PyDevices/pydisplay/src/examples/tower_climb/tools/playtest.py"
-    ],
-    [
-      "tower_climb/tools/record.sh",
-      "github:PyDevices/pydisplay/src/examples/tower_climb/tools/record.sh"
-    ],
-    [
-      "tower_climb/tools/record_win.sh",
-      "github:PyDevices/pydisplay/src/examples/tower_climb/tools/record_win.sh"
-    ],
-    [
-      "tower_climb/trace/.gitignore",
-      "github:PyDevices/pydisplay/src/examples/tower_climb/trace/.gitignore"
-    ],
-    [
-      "tower_climb/trace/.gitkeep",
-      "github:PyDevices/pydisplay/src/examples/tower_climb/trace/.gitkeep"
     ]
   ],
   "deps": [],

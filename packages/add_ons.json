@@ -1,10 +1,6 @@
 {
   "urls": [
     [
-      "README.md",
-      "github:PyDevices/pydisplay/src/add_ons/README.md"
-    ],
-    [
       "byteswap.py",
       "github:PyDevices/pydisplay/src/add_ons/byteswap.py"
     ],
@@ -95,10 +91,6 @@
     [
       "fonts/__init__.py",
       "github:PyDevices/pydisplay/src/add_ons/fonts/__init__.py"
-    ],
-    [
-      "fonts/compile_upload.sh",
-      "github:PyDevices/pydisplay/src/add_ons/fonts/compile_upload.sh"
     ],
     [
       "fonts/vga1_16x16.py",
