@@ -26,7 +26,7 @@ What changes is which **display backend** `board_config` selects — automatical
 |---------|---------|-------------|
 | `BusDisplay` | MicroPython / CircuitPython MCUs (SPI / I80) | [board config](../hardware/board-configs.md) |
 | `FBDisplay` | CircuitPython framebuffer displays (RGB, USB video) | board config |
-| `SDLDisplay` | CPython, MicroPython Unix, CircuitPython Unix (SDL2); Android APK | auto / `board_configs/sdldisplay/` |
+| `SDLDisplay` | CPython, MicroPython Unix, CircuitPython Unix (SDL2); Android APK; [Linux KMS](cpython-desktop.md#linux-kms-no-window-manager) | auto / `board_configs/sdldisplay/` · `sdldisplay/linux_kms/` |
 | `PGDisplay` | CPython desktop (PyGame — easy on Windows) | auto / `board_configs/pgdisplay/` |
 | `PSDisplay` | [PyScript](pyscript.md) browser canvas and [PWAs](pwa.md) | auto |
 | `JNDisplay` | [Jupyter Notebook](jupyter.md) | auto |

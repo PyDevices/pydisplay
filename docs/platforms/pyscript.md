@@ -15,6 +15,14 @@ Experimental browser support via [PyScript](https://pyscript.net/) and `displays
 
 `board_configs/psdisplay/board_config.py` — 320×480 canvas with touch broker.
 
+## Apple mobile (iOS / iPadOS)
+
+There is no native iOS app on the foreseeable roadmap. Use **Mobile Safari** (or another WebKit browser) with the [PyScript gallery](https://PyDevices.github.io/pydisplay/pyscript/), optionally **Add to Home Screen** as a [PWA](pwa.md#apple-mobile-ios--ipados).
+
+## Smart TVs (webOS / Tizen)
+
+Browser / PyScript only — see [PWA — Smart TVs](pwa.md#smart-tvs-webos--tizen) and the [`tv_remote_menu`](https://PyDevices.github.io/pydisplay/pyscript/micropython.html?modules=tv_remote_menu) example. Do not expect `SDLDisplay` on those OS shells.
+
 ## Contributing
 
 Pull requests welcome for `displaysys/psdisplay.py`, asyncio example ports, and files under `web/pyscript/`.

@@ -597,6 +597,12 @@ _DOM_NAMED_KEYS = {
     "ArrowDown": Keys.K_DOWN,
     "ArrowLeft": Keys.K_LEFT,
     "ArrowRight": Keys.K_RIGHT,
+    # Why BrowserBack/GoBack/Back → K_AC_BACK: webOS / Tizen / some Chromium TV
+    # remotes emit these DOM key names for the Back button; match Android SDL
+    # Back so HostEventsDevice can turn them into QUIT.
+    "BrowserBack": Keys.K_AC_BACK,
+    "GoBack": Keys.K_AC_BACK,
+    "Back": Keys.K_AC_BACK,
     "Home": Keys.K_HOME,
     "End": Keys.K_END,
     "PageUp": Keys.K_PAGEUP,

@@ -90,6 +90,37 @@ Install SDL2/PyGame for your OS first; MicroPython Unix builds vary in bundled m
 
 Mouse events map to touch events. Keyboard and encoder brokers work on desktop the same as on embedded targets.
 
+## Linux KMS (no window manager)
+
+For embedded Linux **without** X11/Wayland (Pi console, kiosk, headless HDMI), use SDL’s **kmsdrm** video driver with the existing `SDLDisplay` + `usdl2` stack — not a native `/dev/fb0` path.
+
+**Board config:** `board_configs/sdldisplay/linux_kms/` sets `SDL_VIDEODRIVER=kmsdrm` before `SDLDisplay` initializes and opens a fullscreen window.
+
+```bash
+# Install the KMS config (clone or MIP), then run as usual from src/
+cp ../board_configs/sdldisplay/linux_kms/board_config.py lib/board_config.py
+# or: mip.install("github:PyDevices/pydisplay/board_configs/sdldisplay/linux_kms")
+cd pydisplay/src
+python3 -i path.py
+```
+
+**Prerequisites**
+
+- `libsdl2` built with the **kmsdrm** backend (stock Debian/Raspberry Pi OS packages usually are)
+- Access to `/dev/dri/*` (user in `video` / `render` group, or root)
+- A free VT / no competing DRM master (stop the desktop session first)
+- Input via SDL (evdev keyboards, mice, gamepads)
+
+**Contrast**
+
+| Path | Env / config | Use when |
+|------|----------------|----------|
+| Desktop Linux (this page above) | default SDL (x11/wayland) | Normal desktop session |
+| **KMS** | `SDL_VIDEODRIVER=kmsdrm` + `sdldisplay/linux_kms` | No WM; direct scanout |
+| Headless CI | `SDL_VIDEODRIVER=dummy` | No display hardware |
+
+Native Linux fbdev/DRM modules are **out of scope** until this SDL KMS path is insufficient.
+
 ## Single-board computers
 
-CircuitPython with Blinka on Raspberry Pi and similar boards is planned but not fully tested. Track progress on the [roadmap](https://github.com/PyDevices/pydisplay#roadmap).
+CircuitPython with Blinka on Raspberry Pi and similar boards is planned but not fully tested. For **CPython + HDMI without a desktop**, prefer [Linux KMS](#linux-kms-no-window-manager) above. Track other SBC work on the [roadmap](https://github.com/PyDevices/pydisplay#roadmap).

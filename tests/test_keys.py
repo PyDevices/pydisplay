@@ -7,7 +7,7 @@ import unittest
 
 import _env  # noqa: F401
 
-from eventsys.keys import Keys
+from eventsys.keys import Keys, key_to_keycode
 
 
 class TestKeyTables(unittest.TestCase):
@@ -40,6 +40,17 @@ class TestKeyTables(unittest.TestCase):
     def test_constants_are_ints(self):
         for name in ("K_a", "K_SPACE", "K_F12", "KMOD_LALT"):
             self.assertIsInstance(getattr(Keys, name), int)
+
+
+class TestDomNamedKeys(unittest.TestCase):
+    def test_arrows_and_enter(self):
+        self.assertEqual(key_to_keycode("ArrowUp"), Keys.K_UP)
+        self.assertEqual(key_to_keycode("Enter"), Keys.K_RETURN)
+
+    def test_tv_back_aliases_map_to_ac_back(self):
+        # Why: webOS / Tizen / Chromium TV remotes — see platforms/pwa.md.
+        for name in ("BrowserBack", "GoBack", "Back"):
+            self.assertEqual(key_to_keycode(name), Keys.K_AC_BACK, name)
 
 
 if __name__ == "__main__":

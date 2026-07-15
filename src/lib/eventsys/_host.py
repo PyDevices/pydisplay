@@ -43,7 +43,9 @@ class HostEventsDevice(Device):
             chord_key = quit_chord[0] if quit_chord else None
             for event in dev_events:
                 if event.type == events.KEYDOWN:
-                    # Quit chord (default Ctrl+Q) and Android Back → QUIT.
+                    # Quit chord (default Ctrl+Q) and Android / TV Back → QUIT.
+                    # Why K_AC_BACK: Android SDL maps KEYCODE_BACK here; PyScript
+                    # TV browsers map BrowserBack/GoBack/Back to the same code.
                     if key_triggers_quit(
                         event.type, event.key, event.mod, quit_chord
                     ):
