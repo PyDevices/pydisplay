@@ -27,7 +27,7 @@ Or copy the add-on modules into `lib/` on your device.
 | `displaybuf.py` | Peter Hinch DisplayBuffer API |
 | `console.py` | Terminal-style console widget |
 | `pdwidgets/` | Moved to [pdwidgets](https://github.com/PyDevices/pdwidgets) — [user guide](guis/pywidgets.md) |
-| `palettes/` | Color palettes (`cube`, `material_design`, `wheel`, `get_palette()`) |
+| `palettes/` | Moved to [palettes](https://github.com/PyDevices/palettes) — [user guide](guis/palettes.md) |
 | `tft_text.py`, `tft_write.py` | russhughes font rendering |
 | `png.py` | PNG support (experimental) |
 

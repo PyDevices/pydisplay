@@ -32,10 +32,12 @@ PyDisplay also drops in under other GUI stacks:
 | [MicroPython-Touch](guis/micropython-touch.md) | @peterhinch's touch GUI. |
 | [TFT / st7789py ports](guis/tft-gui.md) | russhughes-style font and bitmap rendering. |
 | [pdwidgets](https://github.com/PyDevices/pdwidgets) | Cross-platform widget toolkit for pydisplay. |
+| [palettes](https://github.com/PyDevices/palettes) | Color palettes (`wheel`, `cube`, `material_design`). |
 
 ## Related PyDevices repositories
 
 - [pydisplay](https://github.com/PyDevices/pydisplay) — this project.
+- [palettes](https://github.com/PyDevices/palettes) — color palette toolkit.
 - [pdwidgets](https://github.com/PyDevices/pdwidgets) — widget toolkit for pydisplay.
 - [micropython-lib](https://github.com/PyDevices/micropython-lib) — precompiled MIP packages ([index](https://PyDevices.github.io/micropython-lib/mip/PyDevices)).
 - [displayif](https://github.com/PyDevices/displayif) — native MicroPython display interface modules for PyDisplay.

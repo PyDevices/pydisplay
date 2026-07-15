@@ -1,3 +1,5 @@
+# pyscript mip: palettes
+# pyodide wheels: pydevices-palettes
 """
 Simple test example to demonstrate the use of graphics.
 """
