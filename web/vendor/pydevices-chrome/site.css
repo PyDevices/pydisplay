@@ -7,12 +7,47 @@
  * cards, footer, typography. Project-specific / demo-runtime styles belong
  * in a local stylesheet loaded after this one.
  *
+ * Theme: dark by default; `<html data-theme="light">` switches to the light
+ * palette. Pair with assets/js/theme-toggle.js, which flips the attribute
+ * and persists the choice in localStorage. Pages that render the toggle
+ * button should apply the visitor's stored preference in an inline <head>
+ * script (before this stylesheet paints) to avoid a flash of the wrong
+ * theme — see any page's <head> for the one-line snippet.
+ *
  * Canonical copy: https://pydevices.github.io/assets/css/site.css
  * Repos vendor a copy under web/vendor/pydevices-chrome/site.css for
  * offline dev + CI; keep vendored copies in sync with this file.
  */
 
 :root {
+  --bg: #100e0b;
+  --bg-soft: #17130f;
+  --panel: #1c1712;
+  --panel-2: #241e17;
+  --border: #342a1d;
+  --border-soft: #2a2117;
+  --ink: #f3ecdf;
+  --ink-soft: #c9bfae;
+  --muted: #8f8474;
+  --accent: #f54e00;
+  --accent-soft: #ff7a3d;
+  --accent-strong: #ff8a52;
+  --accent-ink: #1a0d05;
+  --indigo: #8b93ff;
+  --good: #3ecf95;
+  --warn: #e8b34e;
+  --bad: #ef5c4e;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+  --shadow-soft: 0 6px 18px rgba(0, 0, 0, 0.3);
+  --hover-border: #4a3c28;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, Menlo, Consolas, monospace;
+}
+
+:root[data-theme="light"] {
   --bg: #fbf9f5;
   --bg-soft: #f3eee6;
   --panel: #ffffff;
@@ -22,21 +57,15 @@
   --ink: #201c16;
   --ink-soft: #5b5347;
   --muted: #8a8172;
-  --accent: #f54e00;
-  --accent-soft: #ff7a3d;
   --accent-strong: #c33f00;
   --accent-ink: #fff7f1;
   --indigo: #5a4fd6;
   --good: #1f8f6b;
   --warn: #b5790a;
   --bad: #d1382b;
-  --radius: 16px;
-  --radius-sm: 10px;
   --shadow: 0 18px 44px rgba(32, 24, 12, 0.1);
   --shadow-soft: 0 6px 18px rgba(32, 24, 12, 0.06);
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --mono: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, Menlo, Consolas, monospace;
+  --hover-border: #d9cfba;
 }
 
 * {
@@ -54,12 +83,20 @@ body {
   color: var(--ink);
   line-height: 1.6;
   background:
-    radial-gradient(1100px 560px at 14% -12%, rgba(245, 78, 0, 0.09), transparent 60%),
-    radial-gradient(900px 520px at 100% 0%, rgba(90, 79, 214, 0.06), transparent 55%),
+    radial-gradient(1100px 560px at 14% -12%, rgba(245, 78, 0, 0.16), transparent 60%),
+    radial-gradient(900px 520px at 100% 0%, rgba(139, 147, 255, 0.1), transparent 55%),
     var(--bg);
   background-attachment: fixed;
   display: flex;
   flex-direction: column;
+}
+
+:root[data-theme="light"] body {
+  background:
+    radial-gradient(1100px 560px at 14% -12%, rgba(245, 78, 0, 0.09), transparent 60%),
+    radial-gradient(900px 520px at 100% 0%, rgba(90, 79, 214, 0.06), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
 }
 
 h1, h2, h3, h4 {
@@ -126,8 +163,12 @@ pre code {
   top: 0;
   z-index: 20;
   backdrop-filter: blur(10px);
-  background: rgba(251, 249, 245, 0.82);
+  background: rgba(16, 14, 11, 0.82);
   border-bottom: 1px solid var(--border-soft);
+}
+
+:root[data-theme="light"] .site-header {
+  background: rgba(251, 249, 245, 0.82);
 }
 
 .site-header .wrap {
@@ -191,6 +232,52 @@ pre code {
   text-decoration: none;
 }
 
+/* ---------- Theme toggle ---------- */
+
+.theme-toggle {
+  flex: none;
+  margin-left: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent-strong);
+  color: var(--accent-strong);
+  box-shadow: var(--shadow-soft);
+}
+
+.theme-toggle svg {
+  width: 17px;
+  height: 17px;
+}
+
+.theme-toggle .icon-moon {
+  display: none;
+}
+
+.theme-toggle .icon-sun {
+  display: block;
+}
+
+:root[data-theme="light"] .theme-toggle .icon-sun {
+  display: none;
+}
+
+:root[data-theme="light"] .theme-toggle .icon-moon {
+  display: block;
+}
+
 /* ---------- Hero ---------- */
 
 .hero {
@@ -199,15 +286,15 @@ pre code {
 }
 
 .logo-badge {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 22px;
-  border-radius: 18px;
+  width: 112px;
+  height: 112px;
+  margin: 0 auto 26px;
+  border-radius: 28px;
   overflow: hidden;
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, var(--accent-soft), var(--accent));
-  box-shadow: 0 12px 28px rgba(245, 78, 0, 0.28);
+  box-shadow: 0 16px 36px rgba(245, 78, 0, 0.32);
 }
 
 .logo-badge img,
@@ -237,9 +324,15 @@ pre code {
 
 .hero p {
   margin: 0 auto;
-  max-width: 620px;
+  max-width: 680px;
   color: var(--ink-soft);
   font-size: 1.12rem;
+  line-height: 1.55;
+  text-align: left;
+}
+
+.hero p + p {
+  margin-top: 1em;
 }
 
 .callout {
@@ -292,7 +385,7 @@ pre code {
 }
 
 .btn:hover {
-  border-color: #d9cfba;
+  border-color: var(--hover-border);
   box-shadow: var(--shadow-soft);
   text-decoration: none;
 }
@@ -385,7 +478,7 @@ pre code {
 
 .card:hover {
   transform: translateY(-3px);
-  border-color: #d9cfba;
+  border-color: var(--hover-border);
   box-shadow: var(--shadow);
   text-decoration: none;
 }
@@ -462,18 +555,36 @@ pre code {
 
 .tag.async, .tag.featured {
   color: var(--indigo);
+  border-color: rgba(139, 147, 255, 0.3);
+  background: rgba(139, 147, 255, 0.1);
+}
+
+:root[data-theme="light"] .tag.async,
+:root[data-theme="light"] .tag.featured {
   border-color: rgba(90, 79, 214, 0.3);
   background: rgba(90, 79, 214, 0.08);
 }
 
 .tag.all, .tag.tool {
   color: var(--good);
+  border-color: rgba(62, 207, 149, 0.3);
+  background: rgba(62, 207, 149, 0.1);
+}
+
+:root[data-theme="light"] .tag.all,
+:root[data-theme="light"] .tag.tool {
   border-color: rgba(31, 143, 107, 0.3);
   background: rgba(31, 143, 107, 0.08);
 }
 
 .tag.loops, .tag.warn {
   color: var(--warn);
+  border-color: rgba(232, 179, 78, 0.3);
+  background: rgba(232, 179, 78, 0.1);
+}
+
+:root[data-theme="light"] .tag.loops,
+:root[data-theme="light"] .tag.warn {
   border-color: rgba(181, 121, 10, 0.3);
   background: rgba(181, 121, 10, 0.08);
 }
@@ -509,7 +620,7 @@ pre code {
 }
 
 .linklist a:hover {
-  border-color: #d9cfba;
+  border-color: var(--hover-border);
   color: var(--ink);
   text-decoration: none;
 }
