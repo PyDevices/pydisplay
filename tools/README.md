@@ -60,20 +60,29 @@ Headless desktop default is `SDL_VIDEODRIVER=dummy` (see `AGENTS.md`). For a rea
 X11/SDL window without a logged-in display, agents may wrap with `xvfb-run -a`
 — details in [AGENTS.md — Running examples headlessly](../AGENTS.md#running-examples-headlessly-gui-smoke-tests).
 
-## MicroPython framebuf parity
+## Graphics / framebuf parity
 
 | Script | Purpose |
 |--------|---------|
 | [`compare_framebuf_mp.py`](compare_framebuf_mp.py) | Compare built-in C ``framebuf`` vs ``src/add_ons/framebuf.py`` on-device |
-| [`compare_graphics_mp.py`](compare_graphics_mp.py) | Compare native ``graphics`` cmod vs ``src/lib/graphics`` on-device |
+| [`compare_graphics.py`](compare_graphics.py) | Shared compare engine (native ``graphics`` cmod vs staged ``src/lib/graphics``) |
+| [`compare_graphics_run.py`](compare_graphics_run.py) | Single-runtime subprocess entry (prints ``GRAPHICS_COMPARE_RESULT=`` JSON) |
+| [`compare_graphics_matrix.py`](compare_graphics_matrix.py) | Cross-runtime matrix (MP, CP, CPython; installs ``graphics-cmod`` from TestPyPI for CPython) |
+| [`compare_graphics_mp.py`](compare_graphics_mp.py) | Backward-compatible alias for ``compare_graphics_run.py`` |
 
 ```bash
-micropython tools/compare_framebuf_mp.py
-micropython tools/compare_graphics_mp.py
-micropython.exe tools/compare_framebuf_mp.py
+# One runtime
+micropython tools/compare_graphics_run.py
+micropython tools/compare_graphics_mp.py   # same as above
+
+# Full desktop matrix (from repo root)
+python tools/compare_graphics_matrix.py
+python tools/compare_graphics_matrix.py --only-runtime micropython,cpython-venv
 ```
 
-Exit 0 when buffers and constants match; prints each check and exits 1 on mismatch.
+Expanded coverage includes ``FrameBuffer`` shape ops, module-level helpers, ``Draw`` (clip, text8), and per-glyph font probes (ASCII 32–126) to catch romfont mapping bugs in ``graphics-cmod``.
+
+Results JSON: ``.cursor/compare_graphics_results.json``. Exit 0 when all runtimes pass; exit 1 on any mismatch or setup failure.
 
 ## LVGL / timer harnesses
 

@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Backward-compatible wrapper — use ``compare_graphics_run.py`` or the matrix."""
+"""Subprocess entry point for one graphics cmod vs python parity run."""
 
 import sys
 
