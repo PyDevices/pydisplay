@@ -517,11 +517,18 @@
                         "pdwidgets",
                         index_urls="https://test.pypi.org/simple/",
                     )
+                elif key in ("palettes", "pydevices-palettes"):
+                    _set("Installing palettes…")
+                    _log_print("micropip.install pydevices-palettes from TestPyPI")
+                    await micropip.install(
+                        "pydevices-palettes",
+                        index_urls="https://test.pypi.org/simple/",
+                    )
                 else:
                     raise RuntimeError(
                         "Unknown # pyodide wheels: entry "
                         + repr(which)
-                        + " (supported: lvgl, pdwidgets)"
+                        + " (supported: lvgl, pdwidgets, pydevices-palettes)"
                     )
 
         async def _start(*_):

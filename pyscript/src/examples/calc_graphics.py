@@ -1,4 +1,6 @@
 # pyscript modules: calc_engine
+# pyscript mip: palettes
+# pyodide wheels: pydevices-palettes
 """
 calc_graphics
 ====================================================
