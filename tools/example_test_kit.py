@@ -386,38 +386,56 @@ def _server_ready(port: int = PYSCRIPT_PORT) -> bool:
         return False
 
 
-HTML_DIR = REPO / "web" / "pyscript"
+PACKAGES_DIR = REPO / "packages"
+
+
+def _pyscript_header_lists(script_path: Path) -> tuple[list[str], list[str]]:
+    """Read ``# pyscript packages:`` / ``# pyscript mip:`` from an example (first 10 lines)."""
+    packages: list[str] = []
+    mip: list[str] = []
+    if not script_path.is_file():
+        return packages, mip
+    try:
+        with open(script_path, encoding="utf-8") as fh:
+            for i, line in enumerate(fh):
+                if i >= 10:
+                    break
+                s = line.strip()
+                if s.startswith("# pyscript packages:"):
+                    body = s.split(":", 1)[1].strip()
+                    packages = [p.strip() for p in body.split(",") if p.strip()]
+                elif s.startswith("# pyscript mip:"):
+                    body = s.split(":", 1)[1].strip()
+                    mip = [p.strip() for p in body.split(",") if p.strip()]
+    except OSError:
+        pass
+    return packages, mip
 
 
 def pyscript_embed_query(example_id: str, example_meta: dict) -> str:
-    """Build ``manifests=`` / ``modules=`` (+ optional ``packages=``) for embed.html."""
-    if (HTML_DIR / f"{example_id}.json").is_file():
-        return f"manifests={example_id}"
+    """Build ``manifests=`` / ``modules=`` (+ optional ``packages=`` / ``mip=``) for embed.html."""
     script = example_meta.get("script", f"examples/{example_id}.py")
     script_path = SRC / script
-    if script_path.is_file() and script_path.parent != SRC / "examples":
-        pkg = script_path.parent.name
-        if (HTML_DIR / f"{pkg}.json").is_file():
-            return f"manifests={pkg}"
 
-    query = f"modules={example_id}"
-    # Mirror gallery cards / ``# pyscript packages:`` so fetch_ph_gui runs before import.
-    packages: list[str] = []
-    if script_path.is_file():
-        try:
-            with open(script_path, encoding="utf-8") as fh:
-                for i, line in enumerate(fh):
-                    if i >= 10:
-                        break
-                    s = line.strip()
-                    if s.startswith("# pyscript packages:"):
-                        body = s.split(":", 1)[1].strip()
-                        packages = [p.strip() for p in body.split(",") if p.strip()]
-                        break
-        except OSError:
-            pass
+    if (PACKAGES_DIR / f"{example_id}.json").is_file() and (
+        SRC / "examples" / example_id
+    ).is_dir():
+        query = f"manifests={example_id}"
+    elif script_path.is_file() and script_path.parent != SRC / "examples":
+        pkg = script_path.parent.name
+        if (PACKAGES_DIR / f"{pkg}.json").is_file() and (SRC / "examples" / pkg).is_dir():
+            query = f"manifests={pkg}"
+        else:
+            query = f"modules={example_id}"
+    else:
+        query = f"modules={example_id}"
+
+    # Mirror gallery cards / ``scripts/pyscript_gen_packages.py`` loader hrefs.
+    packages, mip = _pyscript_header_lists(script_path)
     if packages:
         query += "&packages=" + ",".join(packages)
+    if mip:
+        query += "&mip=" + ",".join(mip)
     return query
 
 

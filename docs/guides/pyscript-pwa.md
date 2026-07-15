@@ -282,7 +282,7 @@ Before pushing PWA changes, refresh gallery metadata locally:
 python scripts/pyscript_gen_packages.py
 ```
 
-Commit any updated `packages/*.json` or `web/pyscript/*.json` files the scripts produce.
+Commit any updated `packages/*.json` files the scripts produce.
 
 ### Other hosts
 
@@ -361,7 +361,7 @@ Point `start_url` at that page (or at a parametric loader URL with your module q
 The gallery loader accepts:
 
 - `?modules=stem1,stem2` — install `.py` files from `src/examples/`
-- `?manifests=name` — install a MIP JSON manifest from `web/pyscript/`
+- `?manifests=name` — install a MIP JSON manifest from `packages/` (via `web/pyscript/packages`)
 
 For a dedicated PWA around one module, set:
 

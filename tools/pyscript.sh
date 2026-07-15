@@ -225,7 +225,8 @@ resolve_rel_path() {
 
   # Forced --module / --manifest without a gallery card: build a minimal URL.
   if [[ "$MODE" == "manifest" ]]; then
-    if [[ -f "$PYSCRIPT_DIR/${demo}.json" ]]; then
+    if [[ -f "$PYDISPLAY_ROOT/packages/${demo}.json" ]] \
+      && [[ -d "$PYDISPLAY_ROOT/src/examples/${demo}" ]]; then
       printf '%s\n' "micropython.html?manifests=${demo}"
       return 0
     fi

@@ -24,7 +24,7 @@ Always serve from repo root (`python tools/serve.py`). Confirm
 Query params:
 
 - `?modules=name` — single-file example under `src/examples/name.py`
-- `?manifests=name` — package / MIP manifest (`web/pyscript/name.json`)
+- `?manifests=name` — package / MIP manifest (`packages/name.json` via `web/pyscript/packages`)
 - `?autotest=1&duration=5` — matrix harness (embed only)
 - `?debug=1` — show the `#log` console panel on embed
 

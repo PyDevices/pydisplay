@@ -9,10 +9,11 @@ Default-includes every example **entry point** under ``src/examples/``:
   - ``examples/<name>/__init__.py`` — package when no ``<name>.py`` entry
 
 Opt out of the **public card grid** with ``# pyscript skip: gallery`` in the
-first 10 lines. Package examples still get a ``web/pyscript/<name>.json`` MIP
-manifest so local ``embed.html?manifests=…`` / kit runs work (e.g. demos with
-binary assets that are fine under ``serve.py`` but not for the published
-gallery).
+first 10 lines.
+
+MIP manifests for package examples live in ``packages/<name>.json`` (generated
+by ``scripts/install_gen_manifests.py``). PyScript loads them via the
+``web/pyscript/packages`` symlink as ``?manifests=<name>``.
 
 Optional headers (first 10 lines):
 
@@ -25,12 +26,11 @@ Optional headers (first 10 lines):
     from ``https://PyDevices.github.io/micropython-lib/mip/PyDevices``
   - ``# pyodide wheels:`` — micropip wheels for ``pyodide.html`` (e.g. ``lvgl``
     → ``lv_cpython_mod`` ``pyemscripten_2026_0`` wheel)
-  - ``# pyscript skip: gallery`` — omit from the browser card grid (manifest
-    JSON for packages is still written)
+  - ``# pyscript skip: gallery`` — omit from the browser card grid
+
 Then:
 
   - Updates gallery cards in ``web/pyscript/index.html`` (``GEN:demos`` markers)
-  - Writes ``web/pyscript/<name>.json`` MIP manifests for package examples
   - Deletes stale ``web/pyscript/*.html`` from the old per-demo page generator
 
 Every gallery example opens the parametric loader at ``micropython.html?modules=…`` or
@@ -60,8 +60,6 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES_DIR = REPO_ROOT / "src" / "examples"
 PYSCRIPT_DIR = REPO_ROOT / "web" / "pyscript"
 INDEX = PYSCRIPT_DIR / "index.html"
-
-MIP_MANIFEST_VERSION = "0.0.5"
 
 KEEP_HTML = frozenset({"index", "micropython", "repl", "simple", "embed", "pyodide"})
 LOADER_BASE = "micropython.html"
@@ -97,7 +95,7 @@ class Example:
         self.pyscript_packages: list[str] = []
         self.pyscript_mip: list[str] = []
         self.featured = False
-        # False when ``# pyscript skip: gallery`` — still may emit MIP JSON.
+        # False when ``# pyscript skip: gallery``.
         self.in_gallery = True
 
     @property
@@ -116,6 +114,7 @@ class Example:
             stems = ",".join(Path(path).stem for path in self.pyscript_files)
             href = f"{base}?modules={stems}"
         else:
+            # Manifest JSON comes from packages/<name>.json (install_gen_manifests).
             href = f"{base}?manifests={self.name}"
         if self.pyscript_packages:
             href += f"&packages={','.join(self.pyscript_packages)}"
@@ -354,13 +353,6 @@ def discover() -> list[Example]:
     return found
 
 
-def example_mip_manifest(ex: Example) -> dict:
-    return {
-        "urls": [[path, f"./src/examples/{path}"] for path in ex.pyscript_files],
-        "version": MIP_MANIFEST_VERSION,
-    }
-
-
 def render_card(ex: Example, base: str = LOADER_BASE) -> str:
     tag = (
         '\n                        <span class="tag featured">featured</span>'
@@ -391,35 +383,9 @@ def replace_block(text: str, key: str, payload: str) -> str:
     return text[: si + len(start)] + "\n" + payload + "\n            " + text[ei:]
 
 
-def write_html_mip_manifests(
-    examples: list[Example], write: Callable[[Path, str], None], stale: list[str], check: bool
-) -> None:
-    keep = {ex.name for ex in examples if ex.kind == "manifest"}
-    for ex in examples:
-        if ex.kind != "manifest":
-            continue
-        write(
-            PYSCRIPT_DIR / f"{ex.name}.json", json.dumps(example_mip_manifest(ex), indent=2) + "\n"
-        )
-    for path in PYSCRIPT_DIR.glob("*.json"):
-        if path.stem in keep:
-            continue
-        # Leave non-gallery JSON alone (e.g. vendor locks) — only remove known
-        # stale *example* manifests that we previously wrote. Heuristic: only
-        # delete if the stem looks like an example package we no longer emit.
-        # Safer: only delete JSON that were in keep's previous set by checking
-        # they are simple MIP manifests with urls pointing at src/examples.
-        try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            continue
-        urls = data.get("urls")
-        if not isinstance(urls, list) or not urls:
-            continue
-        first = urls[0]
-        if not (
-            isinstance(first, list) and len(first) >= 2 and "./src/examples/" in str(first[1])
-        ):
+def remove_stale_demo_html(stale: list[str], check: bool) -> None:
+    for path in PYSCRIPT_DIR.glob("*.html"):
+        if path.stem in KEEP_HTML:
             continue
         rel = str(path.relative_to(REPO_ROOT))
         if check:
@@ -429,9 +395,22 @@ def write_html_mip_manifests(
         print(f"removed {rel}")
 
 
-def remove_stale_demo_html(stale: list[str], check: bool) -> None:
-    for path in PYSCRIPT_DIR.glob("*.html"):
-        if path.stem in KEEP_HTML:
+def remove_stale_example_json(stale: list[str], check: bool) -> None:
+    """Remove leftover web/pyscript/<example>.json (now generated under packages/)."""
+    keep = {"manifest"}  # PWA web app manifest
+    for path in PYSCRIPT_DIR.glob("*.json"):
+        if path.stem in keep:
+            continue
+        # Only remove MIP-style example manifests (urls → src/examples).
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        urls = data.get("urls")
+        if not isinstance(urls, list) or not urls:
+            continue
+        first = urls[0]
+        if not (isinstance(first, list) and len(first) >= 2 and "src/examples/" in str(first[1])):
             continue
         rel = str(path.relative_to(REPO_ROOT))
         if check:
@@ -491,7 +470,7 @@ def main(argv: list[str] | None = None) -> int:
         path.write_text(content, encoding="utf-8")
         print(f"wrote {path.relative_to(REPO_ROOT)}")
 
-    write_html_mip_manifests(examples, write, stale, args.check)
+    remove_stale_example_json(stale, args.check)
     remove_stale_demo_html(stale, args.check)
 
     index_text = INDEX.read_text(encoding="utf-8")

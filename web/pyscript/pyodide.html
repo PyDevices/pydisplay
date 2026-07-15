@@ -111,7 +111,7 @@
                     <h2>How to use</h2>
                     <ul>
                         <li><code>?modules=</code> — comma-separated top-level module stems (no <code>.py</code>).</li>
-                        <li><code>?manifests=</code> — comma-separated MIP manifest names; each installs <code>&lt;name&gt;.json</code> from this directory (same files as the MicroPython gallery).</li>
+                        <li><code>?manifests=</code> — comma-separated MIP manifest names; each installs <code>packages/&lt;name&gt;.json</code> (same files as the MicroPython gallery).</li>
                         <li>Both may appear; whichever param comes <em>first</em> in the URL supplies the import entry point.</li>
                         <li><code>?packages=</code> is not supported — use <a href="./micropython.html">micropython.html</a> for that.</li>
                         <li><code># pyodide wheels: lvgl</code> in the entry example → micropip-install
@@ -350,21 +350,24 @@
             path = document.location.pathname
             return path[: path.rfind("/") + 1] if "/" in path else "/"
 
-        def _abs_url(rel_or_abs):
-            """Resolve a mip url relative to the pyscript page directory."""
+        def _abs_url(rel_or_abs, base_url=None):
+            """Resolve a path relative to the pyscript page (or an explicit base URL)."""
+            from urllib.parse import urljoin
+
             s = str(rel_or_abs).strip()
             if s.startswith("github:"):
                 raise RuntimeError(
                     "github: mip URLs are not supported on pyodide.html; "
-                    "use same-origin ./… paths (gallery manifests already do)."
+                    "use same-origin paths (packages/*.json relative urls)."
                 )
             if s.startswith("http://") or s.startswith("https://"):
                 return s
-            if s.startswith("./"):
-                s = s[2:]
-            elif s.startswith("/"):
+            if base_url:
+                return urljoin(base_url, s)
+            if s.startswith("/"):
                 return document.location.origin + s
-            return document.location.origin + _site_root() + s
+            page_base = document.location.origin + _site_root()
+            return urljoin(page_base, s)
 
         def _parse_comma(raw):
             names = []
@@ -398,25 +401,27 @@
                 f.write(code)
 
         async def _install_manifest(name):
-            """Install the same web/pyscript/<name>.json MIP file micropython.html uses."""
-            manifest_url = _abs_url(name + ".json")
+            """Install packages/<name>.json (same MIP files micropython.html uses)."""
+            manifest_url = _abs_url("packages/" + name + ".json")
             raw = await _fetch_text(manifest_url)
             try:
                 data = json.loads(raw)
             except json.JSONDecodeError as e:
-                raise RuntimeError("Invalid MIP JSON " + name + ".json: " + str(e)) from e
+                raise RuntimeError("Invalid MIP JSON packages/" + name + ".json: " + str(e)) from e
             urls = data.get("urls")
             if not isinstance(urls, list) or not urls:
-                raise RuntimeError("MIP manifest " + name + ".json has no urls")
+                raise RuntimeError("MIP manifest packages/" + name + ".json has no urls")
             target = MANIFEST_MIP_TARGET
             os.makedirs(target, exist_ok=True)
             for entry in urls:
                 if not (isinstance(entry, (list, tuple)) and len(entry) >= 2):
-                    raise RuntimeError("Bad mip urls entry in " + name + ".json: " + repr(entry))
+                    raise RuntimeError(
+                        "Bad mip urls entry in packages/" + name + ".json: " + repr(entry)
+                    )
                 dest_rel, src = entry[0], entry[1]
                 dest = os.path.join(target, dest_rel)
                 _ensure_parent_dirs(dest)
-                code = await _fetch_text(_abs_url(src))
+                code = await _fetch_text(_abs_url(src, base_url=manifest_url))
                 with open(dest, "w", encoding="utf-8") as f:
                     f.write(code)
                 _log_print("Installed", dest)

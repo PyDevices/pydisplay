@@ -112,7 +112,7 @@ python scripts/install_sync_framebuf.py --check    # CI freshness (also run via 
 | Prefix | Scripts | When to run |
 |--------|---------|-------------|
 | `install_` | `install_gen_manifests.py`, `install_refresh_manifests.sh`, `install_sync_framebuf.py` | `src/` tree changes → updates `packages/*.json`, `web/pyscript/micropython.toml`; `src/add_ons/framebuf.py` changes → regenerates gitignored `src/lib/graphics/framebuf.py` |
-| `pyscript_` | `pyscript_gen_packages.py` | Gallery cards + `web/pyscript/*.json` manifests |
+| `pyscript_` | `pyscript_gen_packages.py` | Gallery cards in `web/pyscript/index.html` |
 | `mkdocs_` | `mkdocs_gen_ref_pages.py`, `mkdocs_gen_notebook_pages.py` | Automatically on `mkdocs build` |
 | `publish_` | `publish_micropython_lib.sh`, `publish_release_tag.sh`, `build.py`, `publish_mip_ghpages.sh`, `publish_make_pyproject.py` | Tag push → CI release; or local / manual workflow |
 | `assets_` | `assets_convert_md_png_to_pbm.py`, `assets_generate_pdwidgets_icons.py`, `assets_make_color_icons.py` | Icon authoring: bulk MD → PBM; curated pdwidgets mono icons; color BMP565 status icons |

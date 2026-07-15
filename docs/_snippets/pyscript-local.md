@@ -12,7 +12,7 @@ The script runs [`tools/serve.py`](https://github.com/PyDevices/pydisplay/blob/m
 | Page | Command | Purpose |
 |------|---------|---------|
 | Calculator | `./tools/pyscript.sh calculator` | Run one example by module name |
-| Chango | `./tools/pyscript.sh chango` | Manifest demo (`web/pyscript/chango.json`) |
+| Chango | `./tools/pyscript.sh chango` | Manifest demo (`packages/chango.json`) |
 | Gallery | `./tools/pyscript.sh` | Example card grid |
 | REPL | open `http://127.0.0.1:8000/web/pyscript/repl.html` | REPL + canvas |
 | Simple | open `http://127.0.0.1:8000/web/pyscript/simple.html` | Minimal PyScript HTML shell |

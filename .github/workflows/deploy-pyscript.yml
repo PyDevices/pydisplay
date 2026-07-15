@@ -7,6 +7,9 @@ on:
     paths:
       - 'web/**'
       - 'src/**'
+      - 'packages/**'
+      - 'scripts/install_gen_manifests.py'
+      - 'scripts/install_refresh_manifests.sh'
       - 'scripts/pyscript_gen_packages.py'
       - '.github/workflows/deploy-pyscript.yml'
   workflow_dispatch:
@@ -34,12 +37,15 @@ jobs:
         run: |
           mkdir -p _site/pyscript
           cp -r web/pyscript/* _site/pyscript/
-          # web/pyscript/src is a symlink for local dev; replace with real files for deploy.
-          rm -rf _site/pyscript/src
-          mkdir -p _site/pyscript/src
+          # web/pyscript/src and web/pyscript/packages are symlinks for local
+          # dev; replace with real trees for GitHub Pages.
+          rm -rf _site/pyscript/src _site/pyscript/packages
+          mkdir -p _site/pyscript/src _site/pyscript/packages
           cp -r src/lib src/add_ons _site/pyscript/src/
           cp src/jupyter_notebook.ipynb _site/pyscript/src/
           python scripts/pyscript_gen_packages.py --copy-examples _site/pyscript/src/examples
+          # Example + lib MIP manifests; relative urls resolve via packages/ → ../src/
+          cp packages/*.json _site/pyscript/packages/
           cp web/landing/index.html _site/index.html
           cp web/landing/site.css _site/site.css
           cp .nojekyll _site/

@@ -1,0 +1,21 @@
+{
+  "urls": [
+    [
+      "apollo/Apollo_DSKY_interface.bmp",
+      "../src/examples/apollo/Apollo_DSKY_interface.bmp"
+    ],
+    [
+      "apollo/Apollo_DSKY_interface.svg",
+      "../src/examples/apollo/Apollo_DSKY_interface.svg"
+    ],
+    [
+      "apollo/apollo.py",
+      "../src/examples/apollo/apollo.py"
+    ],
+    [
+      "apollo/dsky.py",
+      "../src/examples/apollo/dsky.py"
+    ]
+  ],
+  "version": "0.0.1"
+}

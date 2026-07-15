@@ -107,7 +107,7 @@
                     <h2>How to use</h2>
                     <ul>
                         <li><code>?modules=</code> — comma-separated top-level module stems (no <code>.py</code>).</li>
-                        <li><code>?manifests=</code> — comma-separated MIP manifest names; each installs <code>&lt;name&gt;.json</code> from this directory.</li>
+                        <li><code>?manifests=</code> — comma-separated MIP manifest names; each installs <code>packages/&lt;name&gt;.json</code>.</li>
                         <li>Both may appear; whichever param comes <em>first</em> in the URL supplies the import entry point.</li>
                         <li>Click <strong>Run</strong> to install everything, then import the entry.</li>
                     </ul>
@@ -382,13 +382,25 @@
 
         MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
 
-        def _mip_base():
-            _host = document.location.hostname
+        def _same_origin_base():
             _path = document.location.pathname
-            _site_root = _path[: _path.rfind("/") + 1] if "/" in _path else "/"
-            if _host in ("127.0.0.1", "localhost") or _host.endswith(".github.io"):
-                return document.location.origin + _site_root
-            return "github:PyDevices/pydisplay/web/pyscript/"
+            return document.location.origin + (
+                _path[: _path.rfind("/") + 1] if "/" in _path else "/"
+            )
+
+        def _use_same_origin():
+            _host = document.location.hostname
+            return _host in ("127.0.0.1", "localhost") or _host.endswith(".github.io")
+
+        def _manifest_url(name):
+            if _use_same_origin():
+                return _same_origin_base() + "packages/" + name + ".json"
+            return "github:PyDevices/pydisplay/packages/" + name + ".json"
+
+        def _module_url(name):
+            if _use_same_origin():
+                return _same_origin_base() + "src/examples/" + name + ".py"
+            return "github:PyDevices/pydisplay/src/examples/" + name + ".py"
 
         def _packages_from_entry(entry):
             """Read ``# pyscript packages:`` from the installed example (first 10 lines)."""
@@ -466,14 +478,13 @@
             try:
                 _set("Installing…")
                 import mip
-                mip_base = _mip_base()
                 for name in manifests:
                     mip.install(
-                        mip_base + name + ".json",
+                        _manifest_url(name),
                         target=MANIFEST_MIP_TARGET,
                     )
                 for name in modules:
-                    mip.install(mip_base + "src/examples/" + name + ".py")
+                    mip.install(_module_url(name))
                 import lib.path  # add_ons on path before fetch_ph_gui / packages
                 if not mip_names:
                     mip_names = _mip_from_entry(entry)

@@ -139,10 +139,75 @@ for package_path, deps, extra_files in packages:
         master_toml.append("")
 
 # Write the package .json files
+manual_package_stems = {
+    "i80bus",
+    "spibus",
+    "i2cbus",
+    "epaper_chip",
+    "pixeldisplay",
+    "epaperdisplay",
+    "rgbframebuffer",
+    "mipidsi",
+    "picodvi",
+    "tt21100",
+    "stmpe610",
+    "keypad_shift",
+    "micropython-micro-gui",
+    "micropython-nano-gui",
+    "micropython-touch",
+}
+reserved_package_names = set(package_dicts) | manual_package_stems
 for package_name, contents in package_dicts.items():
     package_file = output_dir + packages_dir + package_name + ".json"
     with open(package_file, "w") as f:
         json.dump(contents, f, indent=2)
+
+# One MIP manifest per examples/<subdir>/ (for PyScript ?manifests= and GitHub mip).
+# Source URLs are relative to packages/<name>.json so both work:
+#   - same-origin: web/pyscript/packages → ../../packages (symlink)
+#   - github:PyDevices/pydisplay/packages/<name>.json
+examples_root = os.path.join(repo_dir, src_dir, "examples")
+example_package_names = []
+for entry in sorted(os.listdir(examples_root)):
+    example_dir = os.path.join(examples_root, entry)
+    if not os.path.isdir(example_dir):
+        continue
+    if entry in SKIP_DIR_NAMES or entry in PERSONAL_EXAMPLE_DIRS:
+        continue
+    if entry in reserved_package_names:
+        print(f"skip examples/{entry}: name conflicts with packages/{entry}.json")
+        continue
+    urls = []
+    for root, dirs, files in os.walk(example_dir):
+        dirs[:] = sorted(d for d in dirs if d not in SKIP_DIR_NAMES)
+        for f in sorted(files):
+            if not should_include_file(f):
+                continue
+            full_file_path = os.path.join(root, f)
+            if is_gitignored(full_file_path):
+                continue
+            rel_from_examples = os.path.relpath(full_file_path, examples_root).replace("\\", "/")
+            # Relative to packages/<name>.json → ../src/examples/...
+            src_file = "../src/examples/" + rel_from_examples
+            urls.append([rel_from_examples, src_file])
+    if not urls:
+        continue
+    package_file = output_dir + packages_dir + entry + ".json"
+    with open(package_file, "w") as f:
+        json.dump({"urls": urls, "version": package_ver}, f, indent=2)
+    example_package_names.append(entry)
+
+# web/pyscript/packages → ../../packages (same layout as web/pyscript/src).
+pyscript_packages_link = os.path.join(output_dir, "web", "pyscript", "packages")
+packages_abs = os.path.join(output_dir, packages_dir.rstrip("/"))
+if os.path.islink(pyscript_packages_link) or os.path.exists(pyscript_packages_link):
+    if not os.path.islink(pyscript_packages_link):
+        raise SystemExit(f"{pyscript_packages_link} exists and is not a symlink")
+    if os.readlink(pyscript_packages_link) not in ("../../packages", packages_abs):
+        os.remove(pyscript_packages_link)
+        os.symlink("../../packages", pyscript_packages_link)
+else:
+    os.symlink("../../packages", pyscript_packages_link)
 
 # Write the master toml files (same [files]; MicroPython vs Pyodide interpreter).
 with open(toml_full_path, "w") as f:
@@ -156,4 +221,7 @@ with open(pyodide_toml_path, "w") as f:
         else:
             f.write(line + "\n")
 
-print(f"{__file__.split('/')[-1]} finished\n")
+print(
+    f"{__file__.split('/')[-1]} finished "
+    f"({len(package_dicts)} lib packages, {len(example_package_names)} example packages)\n"
+)
