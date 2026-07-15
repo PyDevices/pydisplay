@@ -27,8 +27,9 @@ Optional headers (first 10 lines):
     ``micropython-nano-gui``) pre-installed into ``/add_ons`` before import
   - ``# pyscript mip:`` — micropython-lib MIP names (e.g. ``pdwidgets``) installed
     from ``https://PyDevices.github.io/micropython-lib/mip/PyDevices``
-  - ``# pyodide wheels:`` — micropip wheels for ``pyodide.html`` (e.g. ``lvgl``
-    → ``lv_cpython_mod`` ``pyemscripten_2026_0`` wheel)
+  - ``# pyodide wheels:`` — PyPI / TestPyPI project names for ``pyodide.html``
+    micropip (e.g. ``palettes``, ``pdwidgets``, ``lvgl-cpython``). Emitted as
+    ``&wheels=…`` on the card URL so the Pyodide loader does not re-read headers.
   - ``# pyscript skip: gallery`` — omit from the browser card grid
   - ``# pyscript skip: binaries`` — omit from the grid (needs assets mip cannot
     install; those demos do not ship); typically combined with ``gallery``
@@ -39,7 +40,9 @@ Then:
   - Deletes stale ``web/pyscript/*.html`` from the old per-demo page generator
 
 Every gallery example opens the parametric loader at ``micropython.html?modules=…`` or
-``micropython.html?manifests=…``.
+``micropython.html?manifests=…``, plus ``&mip=`` / ``&packages=`` / ``&wheels=``
+when the corresponding headers are set. The MP↔Pyodide toggle keeps the query
+string; MicroPython ignores ``wheels=``, Pyodide ignores ``mip=``.
 
     python scripts/pyscript_gen_packages.py
     python scripts/pyscript_gen_packages.py --check
@@ -82,6 +85,13 @@ GENERIC_ICON = (
 
 HEADER_SCAN_LINES = 10
 
+# Short names sometimes used in older ``# pyodide wheels:`` lines → TestPyPI /
+# PyPI project names. Prefer writing the real project name in the header.
+WHEEL_ALIASES = {
+    "lvgl": "lvgl-cpython",
+    "lvglcpython": "lvgl-cpython",
+}
+
 LOCAL_IMPORT_RE = re.compile(
     r"^\s*(?:from\s+([\w.]+)\s+import|import\s+([\w.]+))",
     re.MULTILINE,
@@ -99,6 +109,7 @@ class Example:
         self.pyscript_files: list[str] = []
         self.pyscript_packages: list[str] = []
         self.pyscript_mip: list[str] = []
+        self.pyodide_wheels: list[str] = []
         self.featured = False
         # False when ``# pyscript skip:`` includes ``gallery`` or ``binaries``.
         self.in_gallery = True
@@ -125,7 +136,25 @@ class Example:
             href += f"&packages={','.join(self.pyscript_packages)}"
         if self.pyscript_mip:
             href += f"&mip={','.join(self.pyscript_mip)}"
+        if self.pyodide_wheels:
+            href += f"&wheels={','.join(self.pyodide_wheels)}"
         return href
+
+
+def normalize_wheel_names(names: list[str]) -> list[str]:
+    """Dedupe and map short aliases to real PyPI / TestPyPI project names."""
+    out: list[str] = []
+    seen: set[str] = set()
+    for raw in names:
+        name = raw.strip()
+        if not name:
+            continue
+        key = name.lower().replace("_", "-")
+        name = WHEEL_ALIASES.get(key, name)
+        if name not in seen:
+            seen.add(name)
+            out.append(name)
+    return out
 
 
 def parse_header_list(lines: list[str], prefix: str) -> list[str]:
@@ -295,6 +324,12 @@ def parse_example(path: Path) -> Example | None:
     ex.pyscript_files = resolve_pyscript_paths(path, kind, name, lines, text)
     ex.pyscript_packages = parse_header_list(lines, "# pyscript packages:")
     ex.pyscript_mip = parse_header_list(lines, "# pyscript mip:")
+    wheels = parse_header_list(lines, "# pyodide wheels:")
+    # Same project names are often published both as MIP and TestPyPI wheels
+    # (palettes, pdwidgets). Prefer an explicit wheels header; otherwise reuse mip.
+    if not wheels and ex.pyscript_mip:
+        wheels = list(ex.pyscript_mip)
+    ex.pyodide_wheels = normalize_wheel_names(wheels)
     for entry in ex.pyscript_files:
         if not (EXAMPLES_DIR / entry).is_file():
             raise SystemExit(f"{rel}: missing pyscript file {entry}")

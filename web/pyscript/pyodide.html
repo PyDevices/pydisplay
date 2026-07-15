@@ -76,10 +76,9 @@
             <code>?modules=<em>name</em></code> and/or
             <code>?manifests=<em>name</em></code>
             (same MIP JSON as <a href="./micropython.html">micropython.html</a>).
-            Also supports <code>?mip=</code> (TestPyPI wheels) and
-            <code>?packages=</code> (Hinch GUIs via <code>packages/*.json</code>).
-            LVGL demos micropip-install <code>lvgl-cpython</code> from TestPyPI
-            (<code>pyemscripten_2026_0</code> wasm wheel).
+            Also supports <code>?mip=</code> (MicroPython MIP),
+            <code>?packages=</code> (Hinch GUIs), and
+            <code>?wheels=</code> (micropip from TestPyPI / PyPI).
             Whichever of modules/manifests comes first supplies the import entry.
         </p>
 
@@ -114,11 +113,9 @@
                         <li><code>?modules=</code> — comma-separated top-level module stems (no <code>.py</code>).</li>
                         <li><code>?manifests=</code> — comma-separated MIP manifest names; each installs <code>packages/&lt;name&gt;.json</code> (same files as the MicroPython gallery).</li>
                         <li>Both may appear; whichever param comes <em>first</em> in the URL supplies the import entry point.</li>
-                        <li><code>?mip=</code> — <code>palettes</code> / <code>pdwidgets</code> via micropip (TestPyPI); same as <code># pyodide wheels:</code> / <code># pyscript mip:</code>.</li>
+                        <li><code>?mip=</code> — MicroPython MIP names (ignored here; used by <code>micropython.html</code>).</li>
                         <li><code>?packages=</code> — Hinch GUI names (<code>micropython-nano-gui</code>, <code>micropython-micro-gui</code>, <code>micropython-touch</code>); installs into <code>/add_ons</code> from <code>packages/*.json</code> (resolves <code>github:</code> via raw.githubusercontent.com).</li>
-                        <li><code># pyodide wheels: lvgl</code> (or <code>lvgl-cpython</code>) →
-                            micropip-install from TestPyPI; override with a wheel URL via
-                            <code>?lvgl_wheel=</code>.</li>
+                        <li><code>?wheels=</code> — comma-separated PyPI / TestPyPI project names (or direct <code>.whl</code> URLs) installed via micropip. Gallery cards emit this from <code># pyodide wheels:</code>.</li>
                         <li>Click <strong>Run</strong> to install, then import the entry.</li>
                     </ul>
                 </div>
@@ -172,7 +169,7 @@
                 var manifests = [];
                 var packages = [];
                 var mip = [];
-                var lvglWheel = '';
+                var wheels = [];
                 var entryKind = null;
                 var entryName = null;
                 var raw = search.startsWith('?') ? search.slice(1) : search;
@@ -199,8 +196,8 @@
                         packages.push.apply(packages, parseCommaList(val));
                     } else if (key === 'mip') {
                         mip.push.apply(mip, parseCommaList(val));
-                    } else if (key === 'lvgl_wheel') {
-                        lvglWheel = val.trim();
+                    } else if (key === 'wheels') {
+                        wheels.push.apply(wheels, parseCommaList(val));
                     }
                 }
                 return {
@@ -208,7 +205,7 @@
                     manifests: manifests,
                     packages: packages,
                     mip: mip,
-                    lvglWheel: lvglWheel,
+                    wheels: wheels,
                     entryKind: entryKind,
                     entryName: entryName,
                 };
@@ -245,12 +242,20 @@
             plan.mip.forEach(function (name) {
                 if (!SAFE_PACKAGE_NAME.test(name)) badNames.push(name);
             });
+            plan.wheels.forEach(function (name) {
+                // Direct .whl URLs are allowed; otherwise same rules as package names.
+                if (/^https?:\/\//i.test(name)) {
+                    if (!/\.whl(\?|#|$)/i.test(name)) badNames.push(name);
+                } else if (!SAFE_PACKAGE_NAME.test(name)) {
+                    badNames.push(name);
+                }
+            });
             if (badNames.length) {
                 abortLoader(
                     '<p>Unsafe loader query value(s): ' +
                     badNames.map(function (n) { return JSON.stringify(n); }).join(', ') +
                     '.</p>' +
-                    '<p>Module/manifest names must be identifiers; package/mip names may include hyphens.</p>'
+                    '<p>Module/manifest names must be identifiers; package/mip/wheels names may include hyphens; wheel URLs must end in <code>.whl</code>.</p>'
                 );
                 return;
             }
@@ -260,7 +265,7 @@
             window.__pydisplayManifests = plan.manifests.join(',');
             window.__pydisplayPackages = plan.packages.join(',');
             window.__pydisplayMip = plan.mip.join(',');
-            window.__pydisplayLvglWheel = plan.lvglWheel || '';
+            window.__pydisplayWheels = plan.wheels.join(',');
             window.__pydisplayEntryKind = plan.entryKind || '';
             window.__pydisplayEntry = plan.entryName || '';
 
@@ -299,6 +304,9 @@
                 if (plan.mip.length) {
                     installParts.push('mip: ' + plan.mip.join(', '));
                 }
+                if (plan.wheels.length) {
+                    installParts.push('wheels: ' + plan.wheels.join(', '));
+                }
                 if (lede) {
                     lede.textContent = 'Pyodide loader: ' + installParts.join(', ') +
                         '. Entry: import ' + entry + '.';
@@ -335,16 +343,17 @@
 
         MANIFEST_MIP_TARGET = "examples"
         PACKAGE_MIP_TARGET = "add_ons"
-        TESTPYPI_SIMPLE = "https://test.pypi.org/simple/"
+        # Prefer TestPyPI (PyDevices publishes here) then PyPI so third-party
+        # pure/wasm wheels resolve too. micropip tries each index in order.
+        WHEEL_INDEX_URLS = [
+            "https://test.pypi.org/simple/",
+            "https://pypi.org/simple/",
+        ]
         PH_GUI_PACKAGES = (
             "micropython-nano-gui",
             "micropython-micro-gui",
             "micropython-touch",
         )
-        MIP_TO_WHEEL = {
-            "palettes": "palettes",
-            "pdwidgets": "pdwidgets",
-        }
 
         def _log_print(*args, **kwargs):
             el = document.getElementById("log")
@@ -520,13 +529,6 @@
                 pass
             return []
 
-        def _wheels_from_path(path):
-            """Read ``# pyodide wheels:`` from an installed example (first 10 lines)."""
-            return _header_list(path, "# pyodide wheels:")
-
-        def _mip_from_path(path):
-            return _header_list(path, "# pyscript mip:")
-
         def _packages_from_path(path):
             return _header_list(path, "# pyscript packages:")
 
@@ -535,27 +537,6 @@
             for name in modules:
                 paths.append(name + ".py")
             return paths
-
-        def _wheels_for_entry(entry, modules, mip_names):
-            found = []
-            for path in _entry_paths(entry, modules):
-                found = _wheels_from_path(path)
-                if found:
-                    break
-            if not found:
-                # Fall back to # pyscript mip: palettes|pdwidgets → micropip wheels
-                for path in _entry_paths(entry, modules):
-                    for name in _mip_from_path(path):
-                        wheel = MIP_TO_WHEEL.get(name.lower().replace("_", "-"))
-                        if wheel and wheel not in found:
-                            found.append(wheel)
-                    if found:
-                        break
-            for name in mip_names:
-                wheel = MIP_TO_WHEEL.get(name.lower().replace("_", "-"))
-                if wheel and wheel not in found:
-                    found.append(wheel)
-            return found
 
         def _packages_for_entry(entry, modules, packages):
             if packages:
@@ -581,43 +562,22 @@
 
             return micropip
 
-        async def _install_pyodide_wheels(wheels, lvgl_wheel_override=""):
+        async def _install_pyodide_wheels(wheels):
+            """micropip-install each ``?wheels=`` entry (project name or .whl URL)."""
             if not wheels:
                 return
             micropip = await _ensure_micropip()
             for which in wheels:
-                key = which.lower().replace("_", "-")
-                if key in ("lvgl", "lvgl-cpython", "lvglcpython"):
-                    _set("Installing lvgl-cpython…")
-                    if lvgl_wheel_override:
-                        _log_print("micropip.install", lvgl_wheel_override)
-                        await micropip.install(lvgl_wheel_override)
-                    else:
-                        _log_print("micropip.install lvgl-cpython from TestPyPI")
-                        await micropip.install(
-                            "lvgl-cpython",
-                            index_urls=TESTPYPI_SIMPLE,
-                        )
-                elif key in ("pdwidgets",):
-                    _set("Installing pdwidgets…")
-                    _log_print("micropip.install pdwidgets from TestPyPI")
-                    await micropip.install(
-                        "pdwidgets",
-                        index_urls=TESTPYPI_SIMPLE,
-                    )
-                elif key in ("palettes",):
-                    _set("Installing palettes…")
-                    _log_print("micropip.install palettes from TestPyPI")
-                    await micropip.install(
-                        "palettes",
-                        index_urls=TESTPYPI_SIMPLE,
-                    )
+                spec = str(which).strip()
+                if not spec:
+                    continue
+                _set("Installing " + spec + "…")
+                if spec.startswith("http://") or spec.startswith("https://"):
+                    _log_print("micropip.install", spec)
+                    await micropip.install(spec)
                 else:
-                    raise RuntimeError(
-                        "Unknown # pyodide wheels: entry "
-                        + repr(which)
-                        + " (supported: lvgl, pdwidgets, palettes)"
-                    )
+                    _log_print("micropip.install", spec, "indexes=", WHEEL_INDEX_URLS)
+                    await micropip.install(spec, index_urls=WHEEL_INDEX_URLS)
 
         async def _start(*_):
             global _started
@@ -626,8 +586,7 @@
             modules = _parse_comma(_from_window("__pydisplayModules"))
             manifests = _parse_comma(_from_window("__pydisplayManifests"))
             packages = _parse_comma(_from_window("__pydisplayPackages"))
-            mip_names = _parse_comma(_from_window("__pydisplayMip"))
-            lvgl_wheel = _from_window("__pydisplayLvglWheel")
+            wheels = _parse_comma(_from_window("__pydisplayWheels"))
             entry_kind = _from_window("__pydisplayEntryKind")
             entry = _from_window("__pydisplayEntry")
             if not entry and modules:
@@ -656,8 +615,7 @@
                 for which in packages:
                     _set("Installing package " + which + "…")
                     await _install_ph_package(which)
-                wheels = _wheels_for_entry(entry, modules, mip_names)
-                await _install_pyodide_wheels(wheels, lvgl_wheel)
+                await _install_pyodide_wheels(wheels)
                 _set("Importing " + entry + "…")
                 __import__(entry)
                 _set("")

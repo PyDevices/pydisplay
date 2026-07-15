@@ -33,8 +33,8 @@ Why a custom server instead of `python -m http.server`?
 
 Everything here is CPython standard library only — no third-party deps.
 
-LVGL for Pyodide is installed from TestPyPI (`lvgl-cpython` pyemscripten
-wheel) via micropip in `pyodide.html` — this server does not provide wheels/.
+Pyodide gallery demos install third-party packages via ``?wheels=`` on
+``pyodide.html`` (micropip / TestPyPI+PyPI). This server only serves static files.
 """
 
 from __future__ import annotations
