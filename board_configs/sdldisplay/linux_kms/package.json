@@ -1,0 +1,20 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/sdldisplay/linux_kms/board_config.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
+    ]
+  ],
+  "version": "0.1",
+  "notes": "Linux KMS/DRM via SDL_VIDEODRIVER=kmsdrm (no X11/Wayland). Requires libsdl2 built with kmsdrm and access to /dev/dri."
+}

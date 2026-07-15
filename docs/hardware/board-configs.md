@@ -154,6 +154,7 @@ Tri-color / 4-gray configs use `color_depth=2` (0=white, 1=black, 2=accent). ACe
 | Directory | Platform |
 |-----------|----------|
 | `sdldisplay` | CPython / MicroPython Unix — SDL2 (`SDLDisplay`) |
+| `sdldisplay/linux_kms` | Linux KMS/DRM (no X11/Wayland) — `SDL_VIDEODRIVER=kmsdrm` |
 | `pgdisplay` | CPython — PyGame (`PGDisplay`) |
 | `jndisplay` | Jupyter Notebook |
 | `psdisplay` | PyScript browser |

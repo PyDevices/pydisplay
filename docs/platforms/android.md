@@ -2,6 +2,8 @@
 
 Platform notes for building pydisplay APKs with **python-for-android** and **buildozer**.
 
+For an **installable browser app** on Android phones (Chrome home screen, no APK), see [Progressive Web Apps](pwa.md) — that path uses PyScript/`PSDisplay`, not this APK stack.
+
 ## Overview
 
 On Android there is no MicroPython port. pydisplay runs under **CPython** in a **python-for-android** APK with the **SDL2 bootstrap**. The `import usdl2` API comes from the [usdl2](https://github.com/PyDevices/usdl2) package on TestPyPI (native `android_21_*` wheels). pydisplay's existing `SDLDisplay` backend works unchanged once `usdl2` is installed.
@@ -65,6 +67,32 @@ See [pydisplay_android README](https://github.com/PyDevices/pydisplay_android/bl
 ## Timers
 
 On Android, **multimer** selects the **`_sdl2`** backend (SDL timers on the UI thread) when `usdl2` is available — not `_threading`. See [multimer](../concepts/multimer.md#sdl2-bindings-usdl2).
+
+## Android TV / Fire OS
+
+Same CPython + SDL2 APK stack as phones, with **leanback** packaging and a landscape board config for 10-foot UI.
+
+**Packaging** ([pydisplay_android](https://github.com/PyDevices/pydisplay_android)):
+
+- `p4a_app/intent_filters_tv.xml` — `LEANBACK_LAUNCHER` so the app appears on the TV launcher (phone `LAUNCHER` remains).
+- `p4a_app/tv_features.xml` — `android.software.leanback` and `android.hardware.touchscreen` with `required="false"` so non-touch sticks can install.
+- `scripts/emulator_tv.sh` — install/launch helper for android-tv AVDs.
+
+**Board config:** `p4a_app/board_config_tv.py` — 1280×720 landscape, fullscreen on device. Copy over `board_config.py` (or import it from `main.py`) before a TV-oriented build. Phone paint stays on the portrait config by default.
+
+**Remote → eventsys** (SDL Android keyboard map; no extra remap required today):
+
+| TV remote | eventsys |
+|-----------|----------|
+| D-pad | `K_UP` / `K_DOWN` / `K_LEFT` / `K_RIGHT` |
+| Center / Enter | `K_RETURN` |
+| Back | `K_AC_BACK` → `QUIT` via `HostEventsDevice` |
+
+Why Back → quit: matches phone Android Back and the shared `eventsys.key_triggers_quit` path.
+
+**Fire Stick / sideload:** build the APK, `adb connect <stick-ip>`, then `./scripts/emulator_tv.sh` or `adb install -r …` and launch from the Apps row.
+
+TV **web** browsers (webOS / Tizen) are a different path — PyScript / [PWA](pwa.md), not this APK.
 
 ## Your own app
 

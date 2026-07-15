@@ -32,6 +32,7 @@ Develop on your laptop with a mouse, then deploy the *same* code to a touchscree
 | I want to… | Start here |
 |------------|------------|
 | Try it with no install | [Try PyDisplay](try/index.md) |
+| Install the browser gallery as an app | [Where PWAs run](platforms/pwa.md) |
 | Run on an ESP32 / MicroPython board | [ESP32 board guide](guides/esp32-board.md) |
 | Develop on desktop (CPython) | [Desktop CPython guide](guides/desktop-cpython.md) |
 | See every starting path | [Getting started](getting-started.md) |
@@ -42,6 +43,7 @@ Develop on your laptop with a mouse, then deploy the *same* code to a touchscree
 - **One API, every platform** — `framebuf`-compatible drawing on MicroPython, CircuitPython, and CPython.
 - **Unified input** — touch, mouse, keyboard, keypad, rotary encoder, and joystick all arrive as the same PyGame/SDL2-style [events](concepts/events.md).
 - **Cross-platform timers** — [`multimer`](concepts/multimer.md) gives you `machine.Timer`-style and `asyncio` timers even on hosts that have neither.
+- **Installable browser apps** — the [PyScript gallery](https://PyDevices.github.io/pydisplay/pyscript/) is a [Progressive Web App](platforms/pwa.md) (desktop, Android Chrome, iOS home screen).
 - **Batteries included** — 30 board configs, 60+ [examples](examples/index.md), a [browser demo](https://PyDevices.github.io/pydisplay/pyscript/), and a [Wokwi](guides/wokwi.md) project.
 - **Flexible install** — [full clone](installation/full-clone.md), one-line [MIP packages](installation/mip-github.md), or precompiled `.mpy` bytecode.
 

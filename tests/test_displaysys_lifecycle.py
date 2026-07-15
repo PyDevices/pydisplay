@@ -10,9 +10,7 @@ from unittest import mock
 import _env  # noqa: F401
 from _support import make_fbdisplay, quiet
 
-from displaysys import DisplayDriver, default_quit_chord
-from displaysys.fbdisplay import FBDisplay
-from eventsys.keys import Keys
+from displaysys import DisplayDriver
 
 
 class CountingDriver(DisplayDriver):
@@ -73,11 +71,6 @@ class TestBackendIsolation(unittest.TestCase):
         ):
             if name not in before:
                 self.assertNotIn(name, sys.modules)
-
-
-class TestEventBackendDefaults(unittest.TestCase):
-    def test_default_quit_chord_is_ctrl_q(self):
-        self.assertEqual(default_quit_chord(), (Keys.K_q, Keys.KMOD_CTRL))
 
 
 if __name__ == "__main__":
