@@ -6,8 +6,28 @@ src/lib/graphics/framebuf.py
 # Local symlink created by tools/serve.py → sibling lv_cpython_mod/web/wheels
 web/pyscript/wheels
 
-# Cursor IDE / local debug
-.cursor/*
+# Cursor IDE throwaways (do not ignore the whole .cursor/ tree)
+.cursor/debug*
+.cursor/plans/
+
+# Never ignore Cursor rules (trackable agent guidance)
+!.cursor/rules/
+!.cursor/rules/**
+
+# Local kit/agent scratch under .cursor
+.cursor/*.json
+.cursor/*.log
+.cursor/*.rc
+.cursor/*.out
+.cursor/*.err
+.cursor/*.stdout
+.cursor/*.txt
+.cursor/*_report.md
+.cursor/*_plan.md
+.cursor/*-plan.md
+.cursor/*-migration.md
+.cursor/compare_graphics_py/
+.cursor/hinch_pkg_discovery/
 
 # Local examples (symlinks to sibling repos — see scripts/personal_examples.py)
 src/examples/spotapi

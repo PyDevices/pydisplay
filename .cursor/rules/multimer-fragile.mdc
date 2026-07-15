@@ -1,0 +1,49 @@
+---
+description: multimer is fragile — thinking model, small diffs, revert failures
+globs: src/lib/multimer/**
+alwaysApply: false
+---
+
+# multimer — handle with care
+
+`src/lib/multimer/` is **very fragile**. Timer backends differ per OS/runtime
+(SDL2, Win32 APC, librt signals, threading, asyncio). A small change can break
+`micropython.exe`, CPython desktop, LVGL, or the example matrix.
+
+## Before any edit under `src/lib/multimer/`
+
+1. **Switch to a thinking/reasoning model** before proposing or applying changes
+   (do not edit multimer on a fast/non-thinking model). If you cannot switch,
+   stop and ask Brad to enable a thinking model for this task.
+2. **State hypotheses in plain language** — what fails, on which runtime, and
+   what evidence you have (matrix row, kit log, minimal repro).
+3. **Prefer fixes outside multimer** when possible (`eventsys.Runtime`,
+   `board_config`, example loop patterns, harness env) — see
+   `.cursor/micropython_exe_pydisplay_demo_handoff.md`.
+
+## While editing
+
+- **Small, deliberate diffs only** — one hypothesis per change; no drive-by
+  refactors, registries, or cross-package imports (e.g. do not import
+  `board_config` from multimer).
+- **Do not accumulate speculative guards** from rejected theories.
+- Touch **one backend at a time** unless the bug is proven shared.
+
+## After editing
+
+- **Revert immediately** if runtime evidence does not improve the target failure.
+  Do not layer a second fix on an unproven first fix.
+- Re-run targeted proof: affected example on **both** the failing runtime and a
+  control (e.g. `micropython` unix vs `micropython.exe`), plus
+  `tests/test_auto_refresh.py` when refresh/timer wiring changed.
+- LVGL timer coverage: `tools/lv_timer_test_kit.py` (not only the generic matrix).
+
+## Known landmines (do not re-learn the hard way)
+
+- SDL2 backend: `schedule queue full` on MP win32 when sync timers fire without
+  a drain loop — fixing REPL import belongs in `eventsys` (defer refresh until
+  `poll()`), not broad `sdl2.py` experiments without proof.
+- CPython librt + `hard=False`: see the multimer section of Brad's personal
+  todo list (`PyDevices.github.io/docs/NOTES.md`).
+- Example matrix quit injection + native SDL timers: see
+  `.cursor/micropython_exe_pydisplay_demo_handoff.md`.

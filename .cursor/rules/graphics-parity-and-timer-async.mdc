@@ -1,0 +1,37 @@
+---
+description: Graphics-cmod parity and timer_async matrix goals for pydisplay (no workarounds)
+alwaysApply: true
+---
+
+# Graphics parity and cross-runtime examples
+
+Active objectives for pydisplay + `cmods/graphics` work. Complements global `fix-not-workaround` rule.
+
+## Graphics-cmod ↔ `src/lib/graphics`
+
+- **Goal:** 100% behavioral parity with `src/lib/graphics` (API, kwargs, duck typing, BMP565, Draw, Font, file I/O).
+- When a difference is found (matrix failure, code review, or side-by-side with Python), **fix it in the cmod immediately** — do not defer or patch callers in pydisplay examples.
+- Reference implementation is Python under `src/lib/graphics/`; cmod must match the contract, not a subset.
+- MP and CP share bindings (`gfx_bindings_mp.c`, `gfx_module_mp.c`); fix both runtimes when the gap is in shared code.
+- Rebuild MP/CP after cmod changes; re-run affected examples before moving on.
+
+## `timer_async` True and False
+
+- **Goal:** Every matrix example must pass with **`timer_async=False` and `timer_async=True`** on desktop (and async-native platforms: PyScript, Jupyter).
+- No sync-timer fallbacks when `timer_async=True` is set — use `multimer.run()`, `run_forever`, `dual_main`, and `runtime.arm_async_refresh()` as designed.
+- If an example uses a raw `while` loop, migrate it to the supported async entry pattern; do not special-case the harness.
+- Matrix both configs (`board_config.py` desktop branch) and save artifacts as `_sync.json` / `_async.json`.
+
+## Testing
+
+- Use `tools/example_test_kit.py` across **all subprocess runtimes** in `tools/example_runtimes.toml` when validating parity or timer changes.
+- A smoke pass on one runtime is not sufficient for “done” — at minimum MP + cpython-venv; full matrix before claiming parity.
+
+## Failed fixes
+
+- If an attempted fix does not work, **revert or remove it** before trying the next approach. Do not accumulate dead code, commented experiments, or layered guards from rejected hypotheses.
+
+## Repos
+
+- **graphics fixes:** `~/github/cmods/graphics` (commit; push when Brad asks).
+- **pydisplay runtime/examples:** `~/github/pydisplay` (`multimer`, `eventsys`, `board_config`, example loop patterns).

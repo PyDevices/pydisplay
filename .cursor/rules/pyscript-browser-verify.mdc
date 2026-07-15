@@ -1,0 +1,76 @@
+---
+description: Hands-on verify pydisplay PyScript site in Cursor browser — don't just describe steps
+globs: tools/serve.py,scripts/pyscript_gen_packages.py,web/**
+alwaysApply: false
+---
+
+# PyScript browser verification
+
+When working on the PyScript site (`web/pyscript/`), `tools/serve.py`, or `scripts/pyscript_gen_packages.py`, **run and verify yourself** — do not only tell Brad what to run.
+
+## Default workflow
+
+1. **Start or reload the dev server** (background) — see [Reload serve.py](#reload-servepy) below.
+2. **Open Cursor's browser** (`browser_navigate` with `position: "active"` when Brad should see it).
+3. **Navigate** to the relevant page:
+   - `http://127.0.0.1:8000/web/pyscript/index.html` — gallery
+   - `http://127.0.0.1:8000/web/pyscript/micropython.html?modules=calculator` — parametric loader
+   - `http://127.0.0.1:8000/web/pyscript/embed.html?modules=calculator` — embed
+   - `http://127.0.0.1:8000/web/landing/index.html` — marketing landing
+4. **Verify** with snapshot/screenshot and/or `curl`:
+   - Page loads (200), COI headers present (`COOP`, `COEP`, `CORP`)
+   - `GET` and `HEAD` on `/__debug` return 200; `POST` returns 204 and logs to the server terminal
+   - PyScript runtime loads; **Run** enables on example pages when appropriate
+5. **Read the server terminal** for access logs and `[debug …]` output.
+6. **Fix issues found** in the same session (minimal diff), then re-verify.
+
+## After changing generated pages
+
+```bash
+python scripts/pyscript_gen_packages.py
+python scripts/pyscript_gen_packages.py --check   # when validating CI freshness
+```
+
+Regenerate before browser-testing if example metadata or `CURATED` changed.
+
+## When testing a demo end-to-end
+
+Click **Run** in the browser when the task is to confirm an example actually runs, not just that the shell page loads. For async demos, wait for the canvas/UI; for `all`-mode demos, confirm Run does not freeze the tab on load.
+
+## Hangs, timers, and headless probes
+
+For **stuck tabs**, missing timers, or multimer/WASM behaviour, do **not** rely
+only on Cursor Browser screenshots — sync Python on the main thread often
+blocks `page.evaluate` / screenshot tools.
+
+Read and follow:
+[`.cursor/pyscript-troubleshooting.md`](../pyscript-troubleshooting.md)
+
+Prefer Playwright helpers:
+
+```bash
+.venv/bin/python tools/ps_debug.py 'http://127.0.0.1:8000/web/pyscript/embed.html?modules=NAME&autotest=1&duration=5' 20
+.venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime pyscript --only-example NAME
+```
+
+Listen to the console/CDP; avoid `page.evaluate` while sync `sleep_ms` may be running.
+
+## Reload serve.py
+
+**Restart the server yourself** whenever it needs a fresh process — do not ask Brad to Ctrl+C or restart manually.
+
+Reload when:
+- `tools/serve.py` was edited
+- The server is not responding or returns stale behaviour
+- Port 8000 is held by an old instance from a prior session
+- You are about to re-verify after a serve.py fix
+
+Steps:
+1. Stop any existing server on the bind port (default 8000), e.g. `fuser -k 8000/tcp` or kill the background shell PID.
+2. Start fresh in background: `python tools/serve.py` from repo root (add `-p` / `--no-coi` only when needed).
+3. Confirm it is up (`curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/web/pyscript/index.html` → `200`) before browser-testing.
+
+## Server notes
+
+- Use `--no-coi` only when a cross-origin asset is blocked during debugging.
+- See `scripts/pyscript_gen_packages.py` (`CURATED`, `BINARY_SUFFIXES`, `# pyscript skip: gallery`) for gallery inclusion rules.

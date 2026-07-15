@@ -100,7 +100,8 @@ class _LogStreamer:
                 continue
             new_lines.append(line)
             self.lines.append(line)
-            print(f"{self._prefix}{line}", flush=True)
+            if self._prefix:
+                print(f"{self._prefix}{line}", flush=True)
         return new_lines
 
 
@@ -141,7 +142,8 @@ def run_autotest(
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
-        log = _LogStreamer(page, enabled=stream_log)
+        # Always collect #log for diagnostics; only mirror to stdout when requested.
+        log = _LogStreamer(page, enabled=True, prefix="[#log] " if stream_log else "")
 
         def on_console(msg) -> None:
             nonlocal ready
@@ -233,6 +235,21 @@ def run_autotest(
             page.wait_for_timeout(100)
 
         if soak_errors:
+            # Coalesce trailing traceback / exception lines before declaring failure.
+            coalesce_end = time.monotonic() + 0.8
+            while time.monotonic() < coalesce_end:
+                for line in log.poll():
+                    if line not in soak_errors:
+                        soak_errors.append(line)
+                for m in console_msgs:
+                    text = m["text"]
+                    if (
+                        text
+                        and text not in soak_errors
+                        and (m["type"] == "error" or _looks_like_py_error(text))
+                    ):
+                        soak_errors.append(text)
+                page.wait_for_timeout(50)
             browser.close()
             return {
                 "example": example,
@@ -240,7 +257,7 @@ def run_autotest(
                 "error": soak_errors[0][:300],
                 "runtime": "pyscript",
                 "phase": "soak",
-                "console_errors": soak_errors[:5],
+                "console_errors": soak_errors[:20],
             }
 
         # --- quit chord: Ctrl+Q (displaysys.default_quit_chord) ---

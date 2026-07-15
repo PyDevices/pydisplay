@@ -1,0 +1,56 @@
+---
+description: Cross-runtime example smoke tests — runtimes, kit commands, agent workflow
+globs:
+  - tools/example_test_kit.py
+  - tools/example_test_wrapper.py
+  - tools/example_runtimes.toml
+  - tools/example_test_manifest.toml
+---
+
+# Cross-runtime example tests
+
+When Brad says to **test on platforms**, **test on runtimes**, or **run the example matrix**:
+
+## 1. Read the registry
+
+Canonical runtime list: [`tools/example_runtimes.toml`](../../tools/example_runtimes.toml)
+
+Per-example metadata: [`tools/example_test_manifest.toml`](../../tools/example_test_manifest.toml)
+
+Full guide: [`.cursor/example-runtimes.md`](../example-runtimes.md)
+
+## 2. Run unit tests first (default gate)
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+## 3. Run the example matrix
+
+From repo root:
+
+```bash
+python tools/example_test_kit.py --curated-only
+```
+
+- `--order examples` (default): each example on all runtimes before the next example
+- `--order runtimes`: each runtime runs all examples before the next runtime
+- `--all-except-harness`: run all manifest examples except `kind=harness` (includes `matrix=false` and `legacy/pending`)
+- `--only-example NAME` / `--only-runtime ID` for subsets
+- `--no-unit-tests` only for fast local iteration
+
+## 4. Read results
+
+- Summary table on stderr
+- Full JSON: `.cursor/example_test_results.json`
+
+## 5. PyScript failures
+
+Start or reuse `python tools/serve.py`, then re-run with `--only-runtime pyscript`. Headless runs need `playwright` (`pip install playwright && playwright install chromium`). Without playwright, pyscript cells report `needs_playwright` (not a hard failure).
+
+## Terminology
+
+- **Runtime** = concrete launcher (`micropython`, `cpython-venv`, `pyscript`, …)
+- **Platform** = docs category (MicroPython, PyScript, Jupyter)
+
+Do not confuse with unit tests in `tests/` — the example matrix is smoke/integration coverage across runtimes.

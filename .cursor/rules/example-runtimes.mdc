@@ -1,0 +1,19 @@
+---
+description: Canonical cross-runtime example test runtimes for pydisplay
+alwaysApply: true
+---
+
+# Runtimes
+
+Before running the cross-runtime example matrix, read
+[`.cursor/example-runtimes.md`](../example-runtimes.md)
+(runtimes, prerequisites, example contract, matrix commands, debugging).
+
+The canonical runtime list is
+[`tools/example_runtimes.toml`](../../tools/example_runtimes.toml) — read it
+before running the matrix. Runtimes span MicroPython, CircuitPython, CPython
+(incl. repo-root `.venv/bin/python` = `cpython-venv`), PyScript, and Jupyter.
+
+**Platform** is the product category (see
+[Portability & platforms](../../docs/platforms/index.md)); **runtime** is the
+concrete executable or launcher used in automation.
