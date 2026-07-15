@@ -517,7 +517,7 @@
                         "pdwidgets",
                         index_urls="https://test.pypi.org/simple/",
                     )
-                elif key in ("palettes", "pydevices-palettes"):
+                elif key in ("palettes",):
                     _set("Installing palettes…")
                     _log_print("micropip.install palettes from TestPyPI")
                     await micropip.install(
