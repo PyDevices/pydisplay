@@ -243,13 +243,11 @@
     }
   }
 
-  // Gallery cards keep target=_blank for normal browser tabs. In an installed
-  // PWA that opens a second app window — navigate in-place instead. External
-  // _blank links (Docs, GitHub, …) still leave the app.
+  // Same-origin target=_blank opens a second PWA window (Chromium). Gallery
+  // cards no longer use _blank; this still rewrites any leftover same-origin
+  // _blank clicks to in-place navigation (browser tab or installed app).
+  // External _blank links (Docs, GitHub, …) are left alone.
   function wireInAppSameOriginLinks() {
-    if (!isStandaloneDisplay()) {
-      return;
-    }
     document.addEventListener(
       'click',
       function (e) {

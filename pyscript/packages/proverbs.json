@@ -5,10 +5,6 @@
       "./src/examples/proverbs/__init__.py"
     ],
     [
-      "proverbs/make_proverbs_fonts.sh",
-      "./src/examples/proverbs/make_proverbs_fonts.sh"
-    ],
-    [
       "proverbs/proverbs.py",
       "./src/examples/proverbs/proverbs.py"
     ],
