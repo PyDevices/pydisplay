@@ -40,20 +40,21 @@ Includes 2 functions that install from different sources:
 - `lib_install`: Installs from the PyDevices fork of the micropython-lib library.
     - By default, installs all modules as precompiled bytecode (.mpy) files.
     - Includes:
-        - pydisplay-bundle - Bundle package including 2 core packages, 2 utility packages and 6 extensions.
-        - 2 core packages:
+        - Core packages:
             - displaysys
             - eventsys
-        - 2 utility packages:
             - graphics
             - multimer
-        - 6 display extensions for the displaysys package.
+        - Display extensions for the displaysys package.
           Installing any of these will automatically install the displaysys core package:
             - displaysys-busdisplay
+            - displaysys-epaperdisplay
             - displaysys-fbdisplay
             - displaysys-jndisplay
             - displaysys-pgdisplay
+            - displaysys-pixeldisplay
             - displaysys-psdisplay
+            - displaysys-sdldisplay
         - Display drivers, for example:
             - gc9a01
             - ili9341
@@ -69,15 +70,12 @@ Includes 2 functions that install from different sources:
     - Can retrieve any file from the repository, not just packages.
     - Retrieves files as is, without precompilation (no .mpy files).
     - Includes:
-        - /packages/pydisplay-bundle.json - Bundle package including 2 core packages, 2 utility packages,
-            6 extensions and default board_config.py (not add_ons or examples).
-        - 2 core packages:
-            - /packages/displaysys.json (includes all 6 display extensions and default board_config.py)
+        - Core packages:
+            - /packages/displaysys.json (includes display backends and default board_config.py)
             - /packages/eventsys.json
-        - 2 utility packages:
             - /packages/graphics.json
             - /packages/multimer.json
-        - 4 additional packages:
+        - Additional packages:
             - /packages/add_ons.json
             - /packages/examples.json
             - /packages/spibus.json
@@ -162,23 +160,20 @@ def install(package, **kwargs):
 # Library packages - install as precompiled bytecode (.mpy) files
 ####################################################################################################
 """
-## The bundle of all 6 core packages and 6 display extensions:
-install("pydisplay-bundle")
-
-## The 2 core packages:
+## Core packages:
 install("displaysys")
 install("eventsys")
-
-## The 2 utility packages:
 install("graphics")
 install("multimer")
 
-## The 6 display extensions:
+## Display extensions:
 ##### Installing any of these will automatically install the `displaysys` core package
 install("displaysys-busdisplay")
+install("displaysys-epaperdisplay")
 install("displaysys-fbdisplay")
 install("displaysys-jndisplay")
 install("displaysys-pgdisplay")
+install("displaysys-pixeldisplay")
 install("displaysys-psdisplay")
 install("displaysys-sdldisplay")
 
@@ -197,21 +192,14 @@ install("xpt2046")
 # Repository packages - contains no precompiled bytecode (.mpy) files
 ####################################################################################################
 """
-## The bundle of 2 core packages, 2 utility packages, 6 display extensions and default board_config.py
-## (not add_ons or examples — install those separately below):
-install("/packages/pydisplay-bundle.json")
-install("/packages/add_ons.json", target="./add_ons")
-
-## The 2 core packages:
-install("/packages/displaysys.json")  # Includes all 6 display extensions
+## Core packages (source .py; displaysys includes backends and default board_config.py):
+install("/packages/displaysys.json")
 install("/packages/eventsys.json")
-
-## The 2 utility packages:
 install("/packages/graphics.json")
 install("/packages/multimer.json")
-
-## 4 additional packages:
 install("/packages/add_ons.json", target="./add_ons")
+
+## Additional packages:
 install("/packages/examples.json", target="./examples")
 install("/packages/spibus.json")
 install("/packages/i80bus.json")
@@ -231,7 +219,10 @@ install("/src/lib/board_config.py", target="./")
 ##### The default is the recommended "full" installation
 ####################################################################################################
 
-install("pydisplay-bundle")
+install("displaysys")
+install("eventsys")
+install("graphics")
+install("multimer")
 install("/packages/add_ons.json", target="./add_ons")
 install("/packages/examples.json", target="./examples")
 

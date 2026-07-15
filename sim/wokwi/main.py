@@ -1,4 +1,4 @@
-"""Wokwi pydisplay — bundle + testris (optional add_ons + examples)."""
+"""Wokwi pydisplay — MCU lib + testris (optional add_ons + examples)."""
 
 import network
 import time
@@ -14,7 +14,7 @@ print(" Connected!")
 
 import mip  # noqa: E402
 
-mip.install("github:PyDevices/pydisplay/sim/wokwi/pydisplay-bundle.json", target=".")
+mip.install("github:PyDevices/pydisplay/sim/wokwi/mcu-lib.json", target=".")
 # mip.install("github:PyDevices/pydisplay/packages/add_ons.json", target="./add_ons")
 # mip.install("github:PyDevices/pydisplay/packages/examples.json", target="./examples")
 mip.install(

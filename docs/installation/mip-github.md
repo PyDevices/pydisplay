@@ -2,19 +2,22 @@
 
 Install source `.py` files directly from the pydisplay GitHub repository using MicroPython's `mip` module.
 
-## Bundle install (recommended)
+## Core install (recommended)
 
-Installs core libraries and default `board_config.py` (not examples or add_ons):
+Install the four core libraries (and default `board_config.py` / `path.py` from the displaysys package):
 
 ```python
 import mip
-mip.install("github:PyDevices/pydisplay/packages/pydisplay-bundle.json", target=".")
+for pkg in ("displaysys", "eventsys", "graphics", "multimer"):
+    mip.install(f"github:PyDevices/pydisplay/packages/{pkg}.json", target=".")
 ```
 
 With `mpremote`:
 
 ```bash
-mpremote mip install --target "." "github:PyDevices/pydisplay/packages/pydisplay-bundle.json"
+for pkg in displaysys eventsys graphics multimer; do
+  mpremote mip install --target "." "github:PyDevices/pydisplay/packages/${pkg}.json"
+done
 ```
 
 Add examples and add_ons separately:

@@ -24,11 +24,14 @@ wget https://raw.githubusercontent.com/PyDevices/pydisplay/main/installer.py
 ```python
 from installer import install
 
-install("pydisplay-bundle")                              # micropython-lib
-install("/packages/add_ons.json", target="./add_ons")      # GitHub
-install("/packages/examples.json", target="./examples")    # GitHub
-install("/board_configs/busdisplay/i80/wt32sc01-plus")     # GitHub board package
-install("/src/lib/board_config.py", target="./")           # default desktop config
+install("displaysys")                                  # micropython-lib
+install("eventsys")
+install("graphics")
+install("multimer")
+install("/packages/add_ons.json", target="./add_ons")  # GitHub
+install("/packages/examples.json", target="./examples")
+install("/board_configs/busdisplay/i80/wt32sc01-plus")  # GitHub board package
+install("/src/lib/board_config.py", target="./")       # default desktop config
 install("/src/lib/path.py", target="./")
 ```
 

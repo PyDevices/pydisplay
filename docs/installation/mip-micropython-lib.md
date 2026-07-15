@@ -45,7 +45,6 @@ These must come from GitHub:
 - `add_ons`, `examples`
 - `spibus`, `i80bus` (viper not supported in micropython-lib packaging)
 - Board config packages (use GitHub `board_configs/.../package.json`)
-- Composite install manifests such as `packages/pydisplay-bundle.json` (see [GitHub MIP](mip-github.md))
 
 The [installer.py](installer.md) script installs micropython-lib packages plus GitHub add_ons, examples, and `board_config.py` in one step.
 

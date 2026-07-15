@@ -19,7 +19,7 @@ Private reference (not for RTD). Verified 2026-07-08 against pydisplay, PyDevice
 
 | Function | Package name pattern | Default format |
 |----------|---------------------|----------------|
-| `lib_install()` | no `/` (e.g. `displaysys`, `pydisplay-bundle`) | `.mpy` via micropython-lib index |
+| `lib_install()` | no `/` (e.g. `displaysys`, `eventsys`) | `.mpy` via micropython-lib index |
 | `repo_install()` | contains `/` (e.g. `/packages/examples.json`) | `.py` from GitHub |
 | `install()` | dispatches on `/` in name | same as above |
 

@@ -20,7 +20,6 @@ output_dir = repo_dir
 packages_dir = "packages/"
 toml_full_path = output_dir + "web/pyscript/micropython.toml"
 pyodide_toml_path = output_dir + "web/pyscript/pyodide.toml"
-master_package_name = "pydisplay-bundle"
 
 # list of package directories, dependencies and extra files in that package
 packages = [
@@ -32,10 +31,10 @@ packages = [
     ["lib/multimer", [], []],
 ]
 
-# Packages omitted from pydisplay-bundle.json (still get their own packages/*.json).
-bundle_exclude = ["examples", "add_ons"]
 # Packages omitted from web/pyscript/micropython.toml (PyScript mounts add_ons for browser examples).
 toml_exclude = ["examples"]
+# Packages omitted from the Wokwi MCU lib manifest (add_ons/examples install separately).
+mcu_lib_exclude = ["examples", "add_ons"]
 
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
 SKIP_FILE_SUFFIXES = {".pyc", ".pyo"}
@@ -45,8 +44,8 @@ PACKAGE_SKIP_DIRS = {
     "examples": set(PERSONAL_EXAMPLE_DIRS),
 }
 
-# Dest paths omitted from sim/wokwi/pydisplay-bundle.json (derived from packages/pydisplay-bundle.json).
-WOKWI_BUNDLE_EXCLUDE_DESTS = {
+# Dest paths omitted from sim/wokwi/mcu-lib.json (desktop / non-ESP backends).
+MCU_LIB_EXCLUDE_DESTS = {
     "lib/board_config.py",
     "lib/displaysys/fbdisplay.py",
     "lib/displaysys/jndisplay.py",
@@ -59,9 +58,8 @@ WOKWI_BUNDLE_EXCLUDE_DESTS = {
     "lib/multimer/_mpasyncio.py",
     "lib/displaysys/sdldisplay.py",
 }
-WOKWI_BUNDLE_EXCLUDE_PREFIXES = ()
-# Dest paths added only to sim/wokwi/pydisplay-bundle.json (not in pydisplay-bundle).
-WOKWI_BUNDLE_EXTRA_DESTS = []
+MCU_LIB_EXCLUDE_PREFIXES = ()
+MCU_LIB_EXTRA_DESTS = []
 
 
 def should_include_file(filename):
@@ -84,17 +82,10 @@ def is_gitignored(path):
         return False
 
 
-def exclude_from_wokwi_bundle(dest):
-    if dest in WOKWI_BUNDLE_EXCLUDE_DESTS:
+def exclude_from_mcu_lib(dest):
+    if dest in MCU_LIB_EXCLUDE_DESTS:
         return True
-    return any(dest.startswith(prefix) for prefix in WOKWI_BUNDLE_EXCLUDE_PREFIXES)
-
-
-def wokwi_bundle_from_master(master):
-    urls = [entry for entry in master["urls"] if not exclude_from_wokwi_bundle(entry[0])]
-    for dest in WOKWI_BUNDLE_EXTRA_DESTS:
-        urls.append([dest, repo_url + os.path.join(src_dir, dest)])
-    return {"urls": urls, "version": master["version"]}
+    return any(dest.startswith(prefix) for prefix in MCU_LIB_EXCLUDE_PREFIXES)
 
 
 # Paths in micropython.toml / pyodide.toml [files] — relative to web/pyscript/ (browser URL ./src/...).
@@ -110,14 +101,12 @@ def pyscript_toml_file_entry(repo_relative_path: str, mount: str) -> str:
 
 
 package_dicts = {}
-master_package = {"urls": [], "version": package_ver}
+mcu_lib_package = {"urls": [], "version": package_ver}
 master_toml = [
     f'interpreter = "{PYSCRIPT_INTERPRETER}"',
     "",
     "[files]",
 ]
-# Standalone files included in the bundle / tomls but not discovered by package walks.
-extra_files_added_to_master = []
 
 # Iterate over the packages and create the package files
 for package_path, deps, extra_files in packages:
@@ -141,9 +130,10 @@ for package_path, deps, extra_files in packages:
         src_file = repo_url + os.path.relpath(full_file_path, repo_dir)
         package_dicts[package_name]["urls"].append([extra_file, src_file])
 
-        if package_name not in bundle_exclude:
+        if package_name not in mcu_lib_exclude:
             master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
-            master_package["urls"].append([master_dest_file, src_file])
+            if not exclude_from_mcu_lib(master_dest_file):
+                mcu_lib_package["urls"].append([master_dest_file, src_file])
 
         if package_name not in toml_exclude:
             master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
@@ -174,9 +164,10 @@ for package_path, deps, extra_files in packages:
             src_file = repo_url + os.path.relpath(full_file_path, repo_dir)
             package_dicts[package_name]["urls"].append([dest_file, src_file])
 
-            if package_name not in bundle_exclude:
+            if package_name not in mcu_lib_exclude:
                 master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
-                master_package["urls"].append([master_dest_file, src_file])
+                if not exclude_from_mcu_lib(master_dest_file):
+                    mcu_lib_package["urls"].append([master_dest_file, src_file])
 
             if package_name not in toml_exclude:
                 master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
@@ -188,21 +179,6 @@ for package_path, deps, extra_files in packages:
 
     if package_name not in toml_exclude:
         master_toml.append("")
-
-# Add standalone bundle files not discovered by package walks.
-for rel_path in extra_files_added_to_master:
-    src_file = repo_url + rel_path
-    master_dest_file = os.path.relpath(rel_path, src_dir)
-    master_package["urls"].append([master_dest_file, src_file])
-
-    toml_dest_dir = "/" + "/".join(master_dest_file.split("/")[:-1]) + "/"
-    if toml_dest_dir == "//":
-        toml_dest_dir = "/"
-    master_toml.append(pyscript_toml_file_entry(rel_path, toml_dest_dir))
-
-# Add the master package to the package dictionaries
-package_dicts[master_package_name] = master_package
-
 
 # Write the package .json files
 for package_name, contents in package_dicts.items():
@@ -222,10 +198,13 @@ with open(pyodide_toml_path, "w") as f:
         else:
             f.write(line + "\n")
 
-# Wokwi browser sim: slim copy of pydisplay-bundle (not a packages/ entry).
-wokwi_bundle_path = os.path.join(output_dir, "sim", "wokwi", "pydisplay-bundle.json")
-os.makedirs(os.path.dirname(wokwi_bundle_path), exist_ok=True)
-with open(wokwi_bundle_path, "w") as f:
-    json.dump(wokwi_bundle_from_master(master_package), f, indent=2)
+# Wokwi / MCU browser sim: slim core-lib file list (not a packages/ entry).
+for dest in MCU_LIB_EXTRA_DESTS:
+    mcu_lib_package["urls"].append([dest, repo_url + os.path.join(src_dir, dest)])
+
+wokwi_mcu_lib_path = os.path.join(output_dir, "sim", "wokwi", "mcu-lib.json")
+os.makedirs(os.path.dirname(wokwi_mcu_lib_path), exist_ok=True)
+with open(wokwi_mcu_lib_path, "w") as f:
+    json.dump(mcu_lib_package, f, indent=2)
 
 print(f"{__file__.split('/')[-1]} finished\n")

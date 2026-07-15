@@ -6,7 +6,7 @@ Technical reference for the in-repo Wokwi project. For setup steps, see **[Wokwi
 
 | Path | Role |
 |------|------|
-| [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/sim/wokwi) | `main.py`, `diagram.json` — bundle + `testris` |
+| [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/sim/wokwi) | `main.py`, `diagram.json` — MCU lib + `testris` |
 
 ---
 
@@ -59,7 +59,7 @@ Matches [`wokwi/main.py`](https://github.com/PyDevices/pydisplay/blob/main/sim/w
 ```python
 import mip
 
-mip.install("github:PyDevices/pydisplay/sim/wokwi/pydisplay-bundle.json", target=".")
+mip.install("github:PyDevices/pydisplay/sim/wokwi/mcu-lib.json", target=".")
 mip.install(
     "github:PyDevices/pydisplay/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3",
     target=".",

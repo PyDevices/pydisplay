@@ -39,7 +39,7 @@ mip.install("github:PyDevices/pydisplay/board_configs/sdldisplay")  # desktop SD
 
 ### Wrong or outdated packages after editing the repo
 
-**Fix (maintainers):** run `./scripts/install_refresh_manifests.sh` and reinstall. Users should reinstall the board config and bundle packages after upstream updates.
+**Fix (maintainers):** run `./scripts/install_refresh_manifests.sh` and reinstall. Users should reinstall the board config and core packages after upstream updates.
 
 ## Display issues
 
@@ -81,7 +81,7 @@ mip.install("github:PyDevices/pydisplay/board_configs/sdldisplay")  # desktop SD
 
 ### Simulation starts but display stays blank
 
-**Fix:** Use files from [`wokwi/`](../sim/wokwi/). Confirm `main.py` installs the pydisplay bundle and Wokwi board config before `import testris`.
+**Fix:** Use files from [`wokwi/`](../sim/wokwi/). Confirm `main.py` installs `mcu-lib.json` and the Wokwi board config before `import testris`.
 
 ### `IndexError` on last keypad row (`TouchKeypad`)
 
