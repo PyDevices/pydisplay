@@ -85,9 +85,11 @@ runtime = eventsys.Runtime(display=display_drv, host_read=get_events)
 Use `poll_event()` only for optional manual single-event checks — not as the
 `host_read=` callback (it returns one event, not a list).
 
-Default quit chord on event backends is **CTRL+Q** (`display_drv.quit_chord`);
-`HostEventsDevice` applies it when constructed with `display=`. Window-close still
-emits `events.QUIT` from SDL/PyGame.
+Default quit chord on event backends is **CTRL+Q**
+(`eventsys.default_quit_chord()`, stored as `display_drv.quit_chord`);
+`HostEventsDevice` applies it when constructed with `display=`, along with
+Android system Back (`K_AC_BACK`). Window-close still emits `events.QUIT` from
+SDL/PyGame.
 
 Pointer coordinates use `display_drv.touch_scale` (see `capabilities()` per
 backend); `HostEventsDevice` divides mouse events by that scale.
@@ -125,13 +127,14 @@ Each captures:
   `JOYBUTTONUP`, polled from the Gamepad API on each `read()`.
 - **Quit** — an assignable key chord emits `events.QUIT` (the equivalent of
   clicking an SDL window's close button; the broker then deinitializes the
-  display and exits). It defaults to **CTRL+C**; reassign if the host intercepts
-  it:
+  display and exits). The default is **CTRL+Q** from
+  `eventsys.default_quit_chord()`; Android Back (`K_AC_BACK`) also quits.
+  Reassign if the host intercepts Ctrl+Q:
 
 ```python
 from eventsys.keys import Keys
 
-devices_drv.quit_chord = (Keys.K_q, Keys.KMOD_CTRL)  # use CTRL+Q instead
+display_drv.quit_chord = (Keys.K_c, Keys.KMOD_CTRL)  # e.g. CTRL+C on Jupyter
 ```
 
 > **Caveat:** key events require the canvas/widget to be focused (click it

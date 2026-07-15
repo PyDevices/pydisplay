@@ -11,11 +11,11 @@ import pygame as pg
 from displaysys import (
     DisplayDriver,
     color_rgb,
-    default_quit_chord,
     fit_scale_to_desktop,
     notify_board_config_scale_override,
 )
 from eventsys import events
+from eventsys.keys import default_quit_chord
 
 __all__ = ["FFmpegFrameRecorder", "PGDisplay", "get_events", "poll_event"]
 

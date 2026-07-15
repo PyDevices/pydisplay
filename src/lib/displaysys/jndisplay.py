@@ -11,7 +11,8 @@ from io import BytesIO
 from IPython.display import display, update_display
 from PIL import Image, ImageDraw
 
-from displaysys import DisplayDriver, color_rgb, default_quit_chord
+from displaysys import DisplayDriver, color_rgb
+from eventsys.keys import default_quit_chord
 from eventsys import events
 from eventsys.keys import Keys, key_to_keycode, mod_mask
 
@@ -82,8 +83,9 @@ class JNDevices:
       modifier masks (left/right modifier variants via key location).
 
     Quit chord handling is configured on :class:`JNDisplay` via ``quit_chord``
-    (default CTRL+Q); :class:`eventsys.QueueDevice` applies it when ``data=``
-    is the display driver.
+    (default from :func:`eventsys.keys.default_quit_chord`, CTRL+Q).
+    :class:`~eventsys.HostEventsDevice` applies the chord and Android Back
+    (``K_AC_BACK``) when constructed with ``display=``.
 
     This class also owns the display widget: ``JNDisplay`` pushes frames to it
     via :meth:`update_buffer`.

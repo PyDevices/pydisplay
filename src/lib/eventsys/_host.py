@@ -5,7 +5,7 @@
 
 from ._device import Device, register_device_class, types
 from ._events import events
-from .keys import Keys, chord_matches
+from .keys import Keys, key_triggers_quit
 
 
 class HostEventsDevice(Device):
@@ -43,12 +43,14 @@ class HostEventsDevice(Device):
             chord_key = quit_chord[0] if quit_chord else None
             for event in dev_events:
                 if event.type == events.KEYDOWN:
-                    # Android system Back (SDLK_AC_BACK) → quit, same as quit_chord.
-                    if event.key == Keys.K_AC_BACK or (
-                        quit_chord and chord_matches(quit_chord, event.key, event.mod)
+                    # Quit chord (default Ctrl+Q) and Android Back → QUIT.
+                    if key_triggers_quit(
+                        event.type, event.key, event.mod, quit_chord
                     ):
                         event = events.Quit(events.QUIT)
                 elif event.type == events.KEYUP:
+                    # Swallow key-up for quit keys so apps do not see a dangling
+                    # KEYUP after the KEYDOWN was converted to QUIT.
                     if event.key == Keys.K_AC_BACK:
                         continue
                     if quit_chord and event.key == chord_key:

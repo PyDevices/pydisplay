@@ -10,16 +10,24 @@ from _support import scripted
 
 import eventsys
 from eventsys import HostEventsDevice, Runtime, events
-from eventsys.keys import Keys, key_triggers_quit
+from eventsys.keys import Keys, default_quit_chord, key_triggers_quit
+
+
+class TestDefaultQuitChord(unittest.TestCase):
+    def test_default_quit_chord_is_ctrl_q(self):
+        self.assertEqual(default_quit_chord(), (Keys.K_q, Keys.KMOD_CTRL))
+
+    def test_exported_from_eventsys(self):
+        self.assertEqual(eventsys.default_quit_chord(), (Keys.K_q, Keys.KMOD_CTRL))
 
 
 class TestKeyTriggersQuit(unittest.TestCase):
     def test_keydown_matching_chord(self):
-        chord = (Keys.K_q, Keys.KMOD_CTRL)
+        chord = default_quit_chord()
         self.assertTrue(key_triggers_quit(events.KEYDOWN, Keys.K_q, Keys.KMOD_CTRL, chord))
 
     def test_keyup_never_triggers(self):
-        chord = (Keys.K_q, Keys.KMOD_CTRL)
+        chord = default_quit_chord()
         self.assertFalse(key_triggers_quit(events.KEYUP, Keys.K_q, Keys.KMOD_CTRL, chord))
 
     def test_none_chord_disabled(self):
@@ -68,7 +76,7 @@ class TestRuntimeQuitLifecycle(unittest.TestCase):
 class TestHostEventsDeviceQuitChord(unittest.TestCase):
     def test_chord_keydown_becomes_quit(self):
         class Data:
-            quit_chord = (Keys.K_q, Keys.KMOD_CTRL)
+            quit_chord = default_quit_chord()
 
         ev = events.Key(events.KEYDOWN, "q", Keys.K_q, Keys.KMOD_CTRL, 0, None)
         dev = HostEventsDevice(host_read=scripted([ev]), display=Data())
@@ -78,7 +86,7 @@ class TestHostEventsDeviceQuitChord(unittest.TestCase):
 
     def test_chord_keyup_filtered(self):
         class Data:
-            quit_chord = (Keys.K_q, Keys.KMOD_CTRL)
+            quit_chord = default_quit_chord()
 
         ev = events.Key(events.KEYUP, "q", Keys.K_q, Keys.KMOD_CTRL, 0, None)
         dev = HostEventsDevice(host_read=scripted([ev]), display=Data())
@@ -88,7 +96,7 @@ class TestHostEventsDeviceQuitChord(unittest.TestCase):
         """Android system Back (SDLK_AC_BACK) maps to QUIT without a chord."""
 
         class Data:
-            quit_chord = (Keys.K_q, Keys.KMOD_CTRL)
+            quit_chord = default_quit_chord()
 
         ev = events.Key(events.KEYDOWN, "AC Back", Keys.K_AC_BACK, 0, 0, None)
         dev = HostEventsDevice(host_read=scripted([ev]), display=Data())

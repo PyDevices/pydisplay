@@ -14,11 +14,11 @@ import usdl2
 from displaysys import (
     DisplayDriver,
     color_rgb,
-    default_quit_chord,
     fit_scale_to_desktop,
     notify_board_config_scale_override,
 )
 from eventsys import events
+from eventsys.keys import default_quit_chord
 
 _JOYSTICK_API = (
     "SDL_InitSubSystem",

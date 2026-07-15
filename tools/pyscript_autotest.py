@@ -260,7 +260,7 @@ def run_autotest(
                 "console_errors": soak_errors[:20],
             }
 
-        # --- quit chord: Ctrl+Q (displaysys.default_quit_chord) ---
+        # --- quit chord: Ctrl+Q (eventsys.default_quit_chord) ---
         try:
             canvas = page.locator("#display_canvas")
             canvas.click(timeout=5000)
