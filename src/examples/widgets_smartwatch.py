@@ -1,6 +1,5 @@
 # pyscript mip: pdwidgets
 # pyodide wheels: pdwidgets
-# pyscript skip: binaries
 """
 widgets_smartwatch
 ====================================================

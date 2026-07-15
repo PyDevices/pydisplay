@@ -108,7 +108,7 @@ After a version is on TestPyPI, **do not rename** the project (TestPyPI rejects 
 | `lvgl-cpython` | `lvgl` | free (`lvgl` taken) | cibuildwheel; LVGL version in tag (e.g. 9.5.6) |
 | `usdl2` | `usdl2` | free | pure-Python ctypes SDL2 shim |
 | `pdwidgets` | `pdwidgets` | `pdwidgets` | free | separate repo |
-| `palettes` | `pydevices-palettes` | `palettes` | taken | separate repo |
+| `palettes` | `palettes` | free on TestPyPI (`palettes` taken on pypi.org) | separate repo |
 
 ### Firmware-only (never published)
 
@@ -122,8 +122,7 @@ See [PyDevices/displayif](https://github.com/PyDevices/displayif) and board conf
 
 | Name | Notes |
 |------|--------|
-| `pdwidgets` | `pdwidgets` | `pdwidgets` | free | separate repo |
-| `palettes` | `pydevices-palettes` | `palettes` | taken | separate repo |
+| *(none currently)* | |
 
 ---
 

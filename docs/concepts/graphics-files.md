@@ -51,4 +51,4 @@ From @russhughes st7789py_mpy:
 
 ## PNG
 
-Experimental support in add_ons — probe with [`tools/png_test.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/png_test.py) (CPython only; requires `pypng` and a local checkout of [material-design-icons](https://github.com/google/material-design-icons) with its `png/` tree, or `PYDISPLAY_PNG_DIR`).
+Experimental support in add_ons — probe with [`tools/png_test.py`](https://github.com/PyDevices/pdwidgets/blob/main/tools/png_test.py) in the pdwidgets repo (CPython only; requires sibling pydisplay, `pypng`, and a local checkout of [material-design-icons](https://github.com/google/material-design-icons) with its `png/` tree, or `PDWIDGETS_PNG_DIR`).

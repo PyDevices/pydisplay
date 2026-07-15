@@ -66,7 +66,7 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   need Xvfb.
 - Known pre-existing example failures on CPython (not environment issues to
   "fix"): `nano_gui_simpletest` needs the matching Hinch `gui/` package.
-  `tools/png_test.py` (PNG probe) needs `PYDISPLAY_PNG_DIR` / material-design-icons.
+  `tools/png_test.py` in **pdwidgets** (PNG probe) needs `PDWIDGETS_PNG_DIR` / material-design-icons and a sibling pydisplay checkout.
 - **`palettes` / `pdwidgets` sibling repos** (`hello`, `color_test`, `feathers`,
   `graphics_simpletest`, `palettes_demo`, `widgets_*`, … import `palettes` and/or
   `pdwidgets`). These are source-only PyDevices repos, **not** pip packages — the

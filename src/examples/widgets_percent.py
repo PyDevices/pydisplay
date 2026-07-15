@@ -1,6 +1,5 @@
 # pyscript mip: pdwidgets
 # pyodide wheels: pdwidgets
-# pyscript skip: binaries
 import board_config
 import pdwidgets as pd
 from pdwidgets import pct
