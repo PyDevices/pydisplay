@@ -78,6 +78,18 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   `src` dirs on the venv path (e.g. a `*.pth` in `.venv/lib/*/site-packages`
   listing `<repo>/palettes/src` and `<repo>/pdwidgets/src`, or `PYTHONPATH`).
   `pdwidgets` also needs pydisplay's `src/lib` on path (the example harness adds it).
+  **Why they are usually missing (recurring gotcha):** they are listed in the
+  committed `.github` / `cmods` `.cursor/environment.json` `repositoryDependencies`,
+  but the cloud VM materializes `/agent/repos/*` from the **saved "Pydevices Cloud
+  Workspace" environment snapshot's repo list**, which is stale (12 repos, no
+  `palettes`/`pdwidgets`). Editing/committing `repositoryDependencies` alone does
+  **not** fix this. Durable fix: re-record the saved environment (dashboard →
+  Cloud Agents → Environments → *Pydevices Cloud Workspace* → **New Setup Run**)
+  selecting all repos incl. `palettes`+`pdwidgets` and **save** the new snapshot;
+  first confirm the Cursor GitHub App installation actually has access to both
+  repos (they are public but must be in the App's repo scope to appear in the
+  picker). Until then the update-script fallback clones them into
+  `~/gh/pd-extra` and adds their `src` to the venv via a `.pth`.
 - Cross-runtime binaries: `micropython`/`circuitpython` resolve via `PATH` →
   `~/bin` → committed `repo:bin/` (see `bin/README.md`), so the matrix runs those
   two even when they are not on the system `PATH`. `micropython.exe` / `python.exe`
