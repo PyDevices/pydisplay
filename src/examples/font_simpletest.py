@@ -1,4 +1,6 @@
 # pyscript skip: gallery
+# pyscript mip: palettes
+# pyodide wheels: palettes
 """
 font_simpletest.py -- Simple test of the Font class.
 inspired by Russ Hughes's hello.py
