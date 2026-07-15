@@ -17,6 +17,7 @@ Quick start::
 
 from ._area import Area
 from ._bmp565 import BMP565
+from ._clip import ClipContext, ClippedCanvas
 from ._draw import Draw
 from ._files import (
     bmp_to_framebuffer,
@@ -74,6 +75,8 @@ __all__ = [
     "MONO_VLSB",
     "RGB565",
     "Area",
+    "ClipContext",
+    "ClippedCanvas",
     "Draw",
     "Font",
     "FrameBuffer",
