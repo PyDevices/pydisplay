@@ -31,10 +31,11 @@ PyDisplay also drops in under other GUI stacks:
 | [Micro-GUI](guis/micro-gui.md) | @peterhinch's button / encoder GUI. |
 | [MicroPython-Touch](guis/micropython-touch.md) | @peterhinch's touch GUI. |
 | [TFT / st7789py ports](guis/tft-gui.md) | russhughes-style font and bitmap rendering. |
-| [PyWidgets](guis/pywidgets.md) | The bundled `add_ons/pdwidgets` toolkit. |
+| [pdwidgets](https://github.com/PyDevices/pdwidgets) | Cross-platform widget toolkit for pydisplay. |
 
 ## Related PyDevices repositories
 
 - [pydisplay](https://github.com/PyDevices/pydisplay) — this project.
+- [pdwidgets](https://github.com/PyDevices/pdwidgets) — widget toolkit for pydisplay.
 - [micropython-lib](https://github.com/PyDevices/micropython-lib) — precompiled MIP packages ([index](https://PyDevices.github.io/micropython-lib/mip/PyDevices)).
 - [displayif](https://github.com/PyDevices/displayif) — native MicroPython display interface modules for PyDisplay.

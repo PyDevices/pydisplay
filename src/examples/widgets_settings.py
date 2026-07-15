@@ -1,3 +1,5 @@
+# pyscript mip: pdwidgets
+# pyodide wheels: pdwidgets
 """
 widgets_settings
 ====================================================

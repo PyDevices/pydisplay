@@ -1,4 +1,6 @@
 # Align enum smoke for pdwidgets — labels at every ALIGN around a center button.
+# pyscript mip: pdwidgets
+# pyodide wheels: pdwidgets
 import board_config
 import pdwidgets as pd
 

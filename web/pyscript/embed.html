@@ -31,6 +31,7 @@
         var modules = [];
         var manifests = [];
         var packages = [];
+        var mip = [];
         var entryKind = null;
         var entryName = null;
         var debug = false;
@@ -60,6 +61,8 @@
                 manifests.push.apply(manifests, list);
             } else if (key === 'packages') {
                 packages.push.apply(packages, parseList(val));
+            } else if (key === 'mip') {
+                mip.push.apply(mip, parseList(val));
             } else if (key === 'debug') {
                 debug = val === '' || /^(1|true|yes)$/i.test(val);
             } else if (key === 'autotest') {
@@ -75,6 +78,7 @@
             modules: modules,
             manifests: manifests,
             packages: packages,
+            mip: mip,
             entryKind: entryKind,
             entryName: entryName,
             debug: debug,
@@ -100,6 +104,11 @@
                 bad.push(name);
             }
         });
+        plan.mip.forEach(function (name) {
+            if (!SAFE_PACKAGE.test(name)) {
+                bad.push(name);
+            }
+        });
         return bad;
     }
 
@@ -117,6 +126,7 @@
     window.__pydisplayModules = plan.modules.join(',');
     window.__pydisplayManifests = plan.manifests.join(',');
     window.__pydisplayPackages = plan.packages.join(',');
+    window.__pydisplayMip = plan.mip.join(',');
     window.__pydisplayEntryKind = plan.entryKind || '';
     window.__pydisplayEntry = plan.entryName || '';
     window.__pydisplayDebug = plan.debug ? '1' : '';
@@ -325,12 +335,15 @@ def _loader_plan():
     modules = _parse_comma(_from_window("__pydisplayModules"))
     manifests = _parse_comma(_from_window("__pydisplayManifests"))
     packages = _parse_comma(_from_window("__pydisplayPackages"))
+    mip_names = _parse_comma(_from_window("__pydisplayMip"))
     entry = _from_window("__pydisplayEntry")
     if not entry and modules:
         entry = modules[0]
     elif not entry and manifests:
         entry = manifests[0]
-    return modules, manifests, packages, entry
+    return modules, manifests, packages, mip_names, entry
+
+MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
 
 def _mip_base():
     host = document.location.hostname
@@ -355,6 +368,30 @@ def _packages_from_entry(entry):
             continue
     return []
 
+def _mip_from_entry(entry):
+    for path in ("examples/" + entry + ".py", entry + ".py"):
+        try:
+            with open(path) as f:
+                for i, line in enumerate(f):
+                    if i >= 10:
+                        break
+                    s = line.strip()
+                    if s.startswith("# pyscript mip:"):
+                        body = s.split(":", 1)[1].strip()
+                        return [p.strip() for p in body.split(",") if p.strip()]
+        except OSError:
+            continue
+    return []
+
+def _install_mip_packages(names):
+    if not names:
+        return
+    import mip
+
+    for which in names:
+        print("MIP install:", which)
+        mip.install(which, index=MIP_LIB_INDEX)
+
 def _install_packages(packages):
     if not packages:
         return
@@ -376,7 +413,7 @@ def _run():
     # #endregion
     if _from_window("__pydisplayLoaderDisabled"):
         return
-    modules, manifests, packages, entry = _loader_plan()
+    modules, manifests, packages, mip_names, entry = _loader_plan()
     if not entry:
         return
     # #region loader trace
@@ -411,6 +448,10 @@ def _run():
     # #region loader trace
     _mark("after_import_lib_path")
     # #endregion
+    if not mip_names:
+        mip_names = _mip_from_entry(entry)
+    if mip_names:
+        _install_mip_packages(mip_names)
     if not packages:
         packages = _packages_from_entry(entry)
     if packages:

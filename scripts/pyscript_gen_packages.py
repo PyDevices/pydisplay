@@ -21,6 +21,8 @@ Optional headers (first 10 lines):
     multi-module loaders (e.g. ``calc_engine``)
   - ``# pyscript packages:`` — repo-root mip package stems (e.g.
     ``micropython-nano-gui``) pre-installed into ``/add_ons`` before import
+  - ``# pyscript mip:`` — micropython-lib MIP names (e.g. ``pdwidgets``) installed
+    from ``https://PyDevices.github.io/micropython-lib/mip/PyDevices``
   - ``# pyodide wheels:`` — micropip wheels for ``pyodide.html`` (e.g. ``lvgl``
     → ``lv_cpython_mod`` ``pyemscripten_2026_0`` wheel)
   - ``# pyscript skip: gallery`` — omit from the browser card grid (manifest
@@ -93,6 +95,7 @@ class Example:
         self.docstring_blurb = ""
         self.pyscript_files: list[str] = []
         self.pyscript_packages: list[str] = []
+        self.pyscript_mip: list[str] = []
         self.featured = False
         # False when ``# pyscript skip: gallery`` — still may emit MIP JSON.
         self.in_gallery = True
@@ -116,6 +119,8 @@ class Example:
             href = f"{base}?manifests={self.name}"
         if self.pyscript_packages:
             href += f"&packages={','.join(self.pyscript_packages)}"
+        if self.pyscript_mip:
+            href += f"&mip={','.join(self.pyscript_mip)}"
         return href
 
 
@@ -283,6 +288,7 @@ def parse_example(path: Path) -> Example | None:
     ex.docstring_blurb = extract_blurb(text, name)
     ex.pyscript_files = resolve_pyscript_paths(path, kind, name, lines, text)
     ex.pyscript_packages = parse_header_list(lines, "# pyscript packages:")
+    ex.pyscript_mip = parse_header_list(lines, "# pyscript mip:")
     for entry in ex.pyscript_files:
         if not (EXAMPLES_DIR / entry).is_file():
             raise SystemExit(f"{rel}: missing pyscript file {entry}")

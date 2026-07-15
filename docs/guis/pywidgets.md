@@ -1,18 +1,17 @@
-# PyWidgets (pdwidgets)
+# pdwidgets
 
-Cross-platform widget toolkit in `add_ons/pdwidgets/` — buttons, lists, scrollbars, themes, and more.
+Cross-platform widget toolkit for pydisplay — now a separate package.
 
-## Setup
-
-```python
-import lib.path   # dev clone: puts lib/, add_ons/, examples/ on sys.path
-```
-
-Install add_ons:
+Install from [PyDevices/pdwidgets](https://github.com/PyDevices/pdwidgets):
 
 ```python
-mip.install("github:PyDevices/pydisplay/packages/add_ons.json", target="./add_ons")
+import mip
+mip.install("pdwidgets", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
 ```
+
+Documentation: [pdwidgets.readthedocs.io](https://pdwidgets.readthedocs.io)
+
+PyScript widget demos install `pdwidgets` at runtime via `# pyscript mip: pdwidgets` (micropython-lib MIP) or `# pyodide wheels: pdwidgets` (TestPyPI on the Pyodide loader).
 
 ## Event loop
 
@@ -29,41 +28,14 @@ display = pd.Display(board_config.display_drv, board_config.broker)
 pd.run_forever()
 ```
 
-**Poll mode** — omit `init_timer()`; `run_forever()` calls `tick()` in a loop:
+**Poll mode** — omit `init_timer()`; `run_forever()` calls `tick()` in a loop.
 
-```python
-# pd.init_timer(10)  # commented out
-display = pd.Display(...)
-pd.run_forever()
-```
-
-**Setup bursts** — during initialization writes before `run_forever()`, call `pd.tick()` each iteration so draws flush to the display:
-
-```python
-while i < 60:
-    console.write(f"{i}\n")
-    pd.tick()
-pd.run_forever()
-```
-
-`run_forever()` already calls `tick()` each frame. pdwidgets owns no timer of its own — frames are driven cooperatively from the multimer loop selected by `runtime.timer_async`.
+See [pdwidgets docs](https://pdwidgets.readthedocs.io) for full API reference.
 
 ## Examples
 
-| Script | Description |
-|--------|-------------|
-| `widgets_demo.py` | Align enum smoke |
-| `calc_widgets.py` | Calculator UI |
-| `widgets_percent.py` | Progress/percent |
-| `widgets_smartwatch.py` | Showcase: watch face / pages |
-| `widgets_settings.py` | Showcase: settings form |
-| `joystick_list_select.py` | List + joystick navigation |
-| `console_simpletest.py` / `console_advanced_demo.py` | Console demos (`mpconsole`; `pdwidgets.Console` also exists) |
+Widget demos remain in `src/examples/widgets_*.py` and `calc_widgets.py` in this repo.
 
 ## Icons
 
-Material Design icons converted to `.pbm` in [`assets/icons/`](https://github.com/PyDevices/pydisplay/tree/main/assets/icons) — see [`assets/icons/README.md`](https://github.com/PyDevices/pydisplay/blob/main/assets/icons/README.md) for attribution. Runtime widget icons live under `src/add_ons/pdwidgets/icons/`.
-
-## PyScript note
-
-Themes module has a PyScript workaround (`os.sep` unavailable).
+Material Design icons ship inside the `pdwidgets` package. See [pdwidgets/icons](https://github.com/PyDevices/pdwidgets/tree/main/src/pdwidgets/icons).
