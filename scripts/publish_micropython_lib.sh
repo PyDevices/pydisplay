@@ -252,6 +252,33 @@ build_and_upload_pypi() {
     fi
 }
 
+# Concurrent tag publishes from sibling repos share micropython-lib PyDevices.
+push_micropython_lib() {
+    local repo="$1"
+    local branch
+    branch="$(git -C "$repo" rev-parse --abbrev-ref HEAD)"
+    local max_attempts=8
+    local attempt=1
+    while true; do
+        if git -C "$repo" push origin "HEAD:${branch}"; then
+            return 0
+        fi
+        if (( attempt >= max_attempts )); then
+            echo "Error: push to micropython-lib ${branch} failed after ${max_attempts} attempts" >&2
+            return 1
+        fi
+        echo "Push rejected (likely concurrent publish); rebase onto origin/${branch} and retry (${attempt}/${max_attempts})..."
+        git -C "$repo" fetch origin "${branch}"
+        if ! git -C "$repo" rebase "origin/${branch}"; then
+            git -C "$repo" rebase --abort 2>/dev/null || true
+            git -C "$repo" fetch --deepen=100 origin "${branch}" || git -C "$repo" fetch --unshallow origin || true
+            git -C "$repo" rebase "origin/${branch}"
+        fi
+        attempt=$((attempt + 1))
+        sleep "$attempt"
+    done
+}
+
 # Create the bundle manifest
 mkdir -p $DEST_DIR/$BASENAME-bundle
 cat <<EOF > $BUNDLE_MANIFEST
@@ -392,7 +419,7 @@ if [[ "$INTERACTIVE_COMMIT" -eq 1 ]] || [[ -n "$COMMIT_MESSAGE" ]]; then
             git -C "$DEST_REPO" add .
             git -C "$DEST_REPO" commit -s -m "$COMMIT_MESSAGE"
             if [[ "$DO_PUSH" -eq 1 ]]; then
-                git -C "$DEST_REPO" push
+                push_micropython_lib "$DEST_REPO"
             fi
         fi
     fi
