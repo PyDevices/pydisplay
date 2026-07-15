@@ -33,8 +33,6 @@ packages = [
 
 # Packages omitted from web/pyscript/micropython.toml (PyScript mounts add_ons for browser examples).
 toml_exclude = ["examples"]
-# Packages omitted from the Wokwi MCU lib manifest (add_ons/examples install separately).
-mcu_lib_exclude = ["examples", "add_ons"]
 
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
 SKIP_FILE_SUFFIXES = {".pyc", ".pyo"}
@@ -43,23 +41,6 @@ PACKAGE_SKIP_DIRS = {
     "add_ons": {"gui"},
     "examples": set(PERSONAL_EXAMPLE_DIRS),
 }
-
-# Dest paths omitted from sim/wokwi/mcu-lib.json (desktop / non-ESP backends).
-MCU_LIB_EXCLUDE_DESTS = {
-    "lib/board_config.py",
-    "lib/displaysys/fbdisplay.py",
-    "lib/displaysys/jndisplay.py",
-    "lib/displaysys/pgdisplay.py",
-    "lib/displaysys/psdisplay.py",
-    "lib/multimer/_backends/librt.py",
-    "lib/multimer/_backends/win32.py",
-    "lib/multimer/_backends/polling.py",
-    "lib/multimer/_backends/threading.py",
-    "lib/multimer/_mpasyncio.py",
-    "lib/displaysys/sdldisplay.py",
-}
-MCU_LIB_EXCLUDE_PREFIXES = ()
-MCU_LIB_EXTRA_DESTS = []
 
 
 def should_include_file(filename):
@@ -82,12 +63,6 @@ def is_gitignored(path):
         return False
 
 
-def exclude_from_mcu_lib(dest):
-    if dest in MCU_LIB_EXCLUDE_DESTS:
-        return True
-    return any(dest.startswith(prefix) for prefix in MCU_LIB_EXCLUDE_PREFIXES)
-
-
 # Paths in micropython.toml / pyodide.toml [files] — relative to web/pyscript/ (browser URL ./src/...).
 PYSCRIPT_TOML_SRC_PREFIX = "./"
 # Local interpreters under vendor/; PyScript config key replaces the CDN build.
@@ -101,7 +76,6 @@ def pyscript_toml_file_entry(repo_relative_path: str, mount: str) -> str:
 
 
 package_dicts = {}
-mcu_lib_package = {"urls": [], "version": package_ver}
 master_toml = [
     f'interpreter = "{PYSCRIPT_INTERPRETER}"',
     "",
@@ -113,13 +87,7 @@ for package_path, deps, extra_files in packages:
     # Define the package variables
     package_name = package_path.split("/")[-1]
     full_path = os.path.join(repo_dir, src_dir, package_path)
-    parent_path = os.path.join("/".join(full_path.split("/")[:-1]))
-    if package_name == package_path:
-        trim_path = full_path.split(package_name)[0]
-        package_sub_dir = ""
-    else:
-        trim_path = full_path
-        package_sub_dir = package_name + "/"
+    package_sub_dir = "" if package_name == package_path else package_name + "/"
     # Add a dictionary for the package
     package_dicts[package_name] = {"urls": [], "deps": deps, "version": package_ver}
 
@@ -129,11 +97,6 @@ for package_path, deps, extra_files in packages:
         full_file_path = os.path.join(full_path.split(package_name)[0], extra_file)
         src_file = repo_url + os.path.relpath(full_file_path, repo_dir)
         package_dicts[package_name]["urls"].append([extra_file, src_file])
-
-        if package_name not in mcu_lib_exclude:
-            master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
-            if not exclude_from_mcu_lib(master_dest_file):
-                mcu_lib_package["urls"].append([master_dest_file, src_file])
 
         if package_name not in toml_exclude:
             master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
@@ -164,11 +127,6 @@ for package_path, deps, extra_files in packages:
             src_file = repo_url + os.path.relpath(full_file_path, repo_dir)
             package_dicts[package_name]["urls"].append([dest_file, src_file])
 
-            if package_name not in mcu_lib_exclude:
-                master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
-                if not exclude_from_mcu_lib(master_dest_file):
-                    mcu_lib_package["urls"].append([master_dest_file, src_file])
-
             if package_name not in toml_exclude:
                 master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
                 toml_dest_dir = "/".join(master_dest_file.split("/")[:-1])
@@ -197,14 +155,5 @@ with open(pyodide_toml_path, "w") as f:
             f.write(f'interpreter = "{PYODIDE_INTERPRETER}"\n')
         else:
             f.write(line + "\n")
-
-# Wokwi / MCU browser sim: slim core-lib file list (not a packages/ entry).
-for dest in MCU_LIB_EXTRA_DESTS:
-    mcu_lib_package["urls"].append([dest, repo_url + os.path.join(src_dir, dest)])
-
-wokwi_mcu_lib_path = os.path.join(output_dir, "sim", "wokwi", "mcu-lib.json")
-os.makedirs(os.path.dirname(wokwi_mcu_lib_path), exist_ok=True)
-with open(wokwi_mcu_lib_path, "w") as f:
-    json.dump(mcu_lib_package, f, indent=2)
 
 print(f"{__file__.split('/')[-1]} finished\n")

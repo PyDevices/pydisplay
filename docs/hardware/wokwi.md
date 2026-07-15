@@ -6,7 +6,7 @@ Technical reference for the in-repo Wokwi project. For setup steps, see **[Wokwi
 
 | Path | Role |
 |------|------|
-| [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/sim/wokwi) | `main.py`, `diagram.json` — MCU lib + `testris` |
+| [`wokwi/`](https://github.com/PyDevices/pydisplay/tree/main/sim/wokwi) | `main.py`, `diagram.json` — core packages + `testris` |
 
 ---
 
@@ -54,12 +54,13 @@ If you need a specific MicroPython build, copy the current `env` value from the 
 
 ## MIP install pattern
 
-Matches [`wokwi/main.py`](https://github.com/PyDevices/pydisplay/blob/main/sim/wokwi/main.py):
+mip.install pattern in [`wokwi/main.py`](https://github.com/PyDevices/pydisplay/blob/main/sim/wokwi/main.py):
 
 ```python
 import mip
 
-mip.install("github:PyDevices/pydisplay/sim/wokwi/mcu-lib.json", target=".")
+for pkg in ("displaysys", "eventsys", "graphics", "multimer"):
+    mip.install(f"github:PyDevices/pydisplay/packages/{pkg}.json", target=".")
 mip.install(
     "github:PyDevices/pydisplay/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3",
     target=".",

@@ -1,6 +1,6 @@
 # pydisplay on Wokwi (ESP32-S3 + ILI9341 touch)
 
-Browser project for [wokwi.com](https://wokwi.com): MCU lib + Wokwi board config + [`testris`](../src/examples/testris.py) (a touch + joystick Tetris demo).
+Browser project for [wokwi.com](https://wokwi.com): core packages + Wokwi board config + [`testris`](../src/examples/testris.py) (a touch + joystick Tetris demo).
 
 **Guide:** [Wokwi simulator](../docs/guides/wokwi.md) · **Hardware:** [Wokwi reference](../docs/hardware/wokwi.md)
 
@@ -12,7 +12,6 @@ Board config: [`wokwi_ili9341_ft6x36_esp32s3`](../board_configs/busdisplay/spi/w
 |------|---------|
 | `main.py` | WiFi + `mip.install` (with `target="."`) + `testris` |
 | `diagram.json` | ESP32-S3 + `board-ili9341-cap-touch` wiring |
-| `mcu-lib.json` | Slim MCU core-lib manifest (generated; desktop backends omitted) |
 
 ## Run in the browser
 
