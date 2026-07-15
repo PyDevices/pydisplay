@@ -48,6 +48,13 @@
   bottom: 20px;
 }
 
+.pwa-toast-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
 #pwa-toast button {
   background: transparent;
   border: none;
@@ -57,4 +64,12 @@
   font-size: 0.88rem;
   padding: 0;
   flex-shrink: 0;
+}
+
+#pwa-toast.is-update #pwa-toast-action {
+  color: var(--accent-soft, #ff7a3d);
+}
+
+#pwa-toast.is-update #pwa-toast-dismiss {
+  color: var(--muted, #8f8474);
 }
