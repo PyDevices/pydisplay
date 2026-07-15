@@ -67,6 +67,21 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 - Known pre-existing example failures on CPython (not environment issues to
   "fix"): `nano_gui_simpletest` needs the matching Hinch `gui/` package.
   `tools/png_test.py` (PNG probe) needs `PYDISPLAY_PNG_DIR` / material-design-icons.
+- **`palettes` / `pdwidgets` sibling repos** (`hello`, `color_test`, `feathers`,
+  `graphics_simpletest`, `palettes_demo`, `widgets_*`, … import `palettes` and/or
+  `pdwidgets`). These are source-only PyDevices repos, **not** pip packages — the
+  PyPI project literally named `palettes` is an unrelated "random hex color"
+  library, so do **not** `pip install palettes`. They normally arrive as
+  repositoryDependencies under `/agent/repos/{palettes,pdwidgets}` (symlinked into
+  `~/gh/pydevices/`); if that clone is missing, clone
+  `github.com/PyDevices/{palettes,pdwidgets}` into a writable dir and put their
+  `src` dirs on the venv path (e.g. a `*.pth` in `.venv/lib/*/site-packages`
+  listing `<repo>/palettes/src` and `<repo>/pdwidgets/src`, or `PYTHONPATH`).
+  `pdwidgets` also needs pydisplay's `src/lib` on path (the example harness adds it).
+- Cross-runtime binaries: `micropython`/`circuitpython` resolve via `PATH` →
+  `~/bin` → committed `repo:bin/` (see `bin/README.md`), so the matrix runs those
+  two even when they are not on the system `PATH`. `micropython.exe` / `python.exe`
+  are Windows binaries and cannot run in the Linux cloud sandbox.
 - **PyScript hangs / multimer / WASM:** read
   [`.cursor/pyscript-troubleshooting.md`](.cursor/pyscript-troubleshooting.md)
   before poking the IDE browser. Prefer Playwright helpers
