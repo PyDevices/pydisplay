@@ -14,14 +14,14 @@ theme:
   custom_dir: docs/overrides
   palette:
     - scheme: default
-      primary: indigo
-      accent: amber
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
-      primary: indigo
-      accent: amber
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -33,6 +33,9 @@ theme:
     - search.suggest
     - content.code.copy
     - toc.integrate
+
+extra_css:
+  - stylesheets/extra.css
 
 plugins:
 - search
