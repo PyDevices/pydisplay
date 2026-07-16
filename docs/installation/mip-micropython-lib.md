@@ -15,6 +15,11 @@ import mip
 mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
 ```
 
+On **PyScript MicroPython** (`micropython.html`, `run.html`), `?deps=` / `?mip=` installs
+use the **bytecode** channel (`package/6/…` when `sys.implementation._mpy` is absent)
+so gallery deps such as `pdwidgets` and `palettes` pull precompiled `.mpy` blobs, not
+the `package/py/` source tree.
+
 With `mpremote`:
 
 ```bash

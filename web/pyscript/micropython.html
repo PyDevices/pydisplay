@@ -395,15 +395,34 @@
                 return _same_origin_base() + "src/examples/" + name + ".py"
             return "github:PyDevices/pydisplay/src/examples/" + name + ".py"
 
+        def _mip_lib_channel():
+            import sys
+
+            mpy_byte = getattr(sys.implementation, "_mpy", 0) & 0xFF
+            if mpy_byte:
+                return str(mpy_byte)
+            # PyScript WASM often omits sys.implementation._mpy; micropython-lib
+            # index for this runtime is built with mpy-cross channel 6.
+            return "6"
+
         def _install_deps(names):
             if not names:
                 return
             import mip
 
+            channel = _mip_lib_channel()
             for which in names:
                 _set("Installing " + which + "…")
-                _log_print("MIP install:", which, "index=", MIP_LIB_INDEX)
-                mip.install(which, index=MIP_LIB_INDEX)
+                pkg_url = (
+                    MIP_LIB_INDEX.rstrip("/")
+                    + "/package/"
+                    + channel
+                    + "/"
+                    + which
+                    + "/latest.json"
+                )
+                _log_print("MIP install:", which, "channel=", channel)
+                mip.install(pkg_url, index=MIP_LIB_INDEX)
 
 
         def _loader_disabled():
