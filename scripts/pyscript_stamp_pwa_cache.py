@@ -33,6 +33,7 @@ STATIC_ASSETS_RE = re.compile(
 )
 ASSET_STRING_RE = re.compile(r"""['"](\./[^'"]+)['"]""")
 PLACEHOLDER_CACHE = "pydisplay-pwa-__SHELL_HASH__"
+MIGRATION_MARKER = "MIGRATION: cache-purge"
 # Gallery cards churn on many pushes; strip generated demos so they don't force
 # installed PWAs to prompt. Stale-while-revalidate still refreshes index.html.
 GEN_DEMOS_RE = re.compile(
@@ -99,9 +100,16 @@ def shell_hash(pyscript_dir: Path) -> str:
     return h.hexdigest()[:12]
 
 
+def is_migration_sw(sw_text: str) -> bool:
+    return MIGRATION_MARKER in sw_text
+
+
 def stamp(pyscript_dir: Path, *, check: bool) -> str:
     sw_path = pyscript_dir / "sw.js"
     sw_text = sw_path.read_text(encoding="utf-8")
+    if is_migration_sw(sw_text):
+        print("migration sw.js — skipping CACHE_NAME stamp")
+        return "migration"
     digest = shell_hash(pyscript_dir)
     cache_name = f"pydisplay-pwa-{digest}"
     new_text, n = CACHE_NAME_RE.subn(
