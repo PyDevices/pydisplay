@@ -72,6 +72,9 @@
 <script type="mpy" config="./micropython.toml" output="log">
 import builtins
 from js import document
+import sys
+if "/add_ons" not in sys.path:
+    sys.path.insert(0, "/add_ons")
 import ps_loader
 
 def _log_print(*args, **kwargs):
