@@ -1,4 +1,4 @@
-# pyscript skip: gallery, binaries
+# gallery: binaries
 from collections import namedtuple
 
 from board_config import display_drv, runtime

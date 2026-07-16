@@ -32,6 +32,9 @@ Why a custom server instead of `python -m http.server`?
    page-side snippet printed at startup, or wire your own beacon to it.
 
 Everything here is CPython standard library only — no third-party deps.
+
+Pyodide gallery demos install third-party packages via ``?wheels=`` on
+``pyodide.html`` (micropip / TestPyPI+PyPI). This server only serves static files.
 """
 
 from __future__ import annotations
@@ -49,44 +52,6 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # Path prefix the page-side debug beacon POSTs to. Anything under it is treated
 # as a log sink so Cursor Debug mode tooling can pick its own sub-paths.
 DEBUG_PREFIX = "/__debug"
-
-# Same-origin path for micropip LVGL wheels (pyodide.html). When the tree does
-# not yet contain wheels/, link a sibling lv_cpython_mod build if present.
-WHEELS_DIR = REPO_ROOT / "web" / "pyscript" / "wheels"
-SIBLING_WHEEL_DIRS = (
-    REPO_ROOT.parent / "lv_cpython_mod" / "web" / "wheels",
-    REPO_ROOT.parent / "cmods" / "lv_cpython_mod" / "web" / "wheels",
-)
-
-
-def ensure_wheels_dir() -> Path | None:
-    """Prefer an in-tree wheels/ dir; otherwise symlink a sibling lv_cpython_mod build."""
-    if WHEELS_DIR.is_dir() and any(WHEELS_DIR.glob("*.whl")):
-        return WHEELS_DIR
-    if WHEELS_DIR.is_symlink():
-        try:
-            WHEELS_DIR.unlink()
-        except OSError:
-            return None
-    elif WHEELS_DIR.is_dir():
-        # Empty or non-wheel dir — leave alone so we never clobber content.
-        if any(WHEELS_DIR.iterdir()):
-            return WHEELS_DIR if any(WHEELS_DIR.glob("*.whl")) else None
-        try:
-            WHEELS_DIR.rmdir()
-        except OSError:
-            return None
-    for src in SIBLING_WHEEL_DIRS:
-        if src.is_dir() and any(src.glob("*.whl")):
-            try:
-                WHEELS_DIR.symlink_to(src.resolve(), target_is_directory=True)
-            except OSError as exc:
-                print(f"warning: could not link {WHEELS_DIR} → {src}: {exc}", file=sys.stderr)
-                return None
-            print(f"  wheels:                  {WHEELS_DIR} → {src}")
-            return WHEELS_DIR
-    return None
-
 
 def _stamp() -> str:
     now = datetime.datetime.now(datetime.UTC)
@@ -208,8 +173,6 @@ def main(argv: list[str] | None = None) -> int:
     print(f"pydisplay PyScript server — serving {root}")
     print(f"  cross-origin isolation: {'on' if DemoRequestHandler.coi_enabled else 'off'}")
     print(f"  debug log sink:         POST {base}{DEBUG_PREFIX}")
-    if root == REPO_ROOT:
-        ensure_wheels_dir()
     print("")
     print("Open one of:")
     print(f"  {base}/web/pyscript/index.html")

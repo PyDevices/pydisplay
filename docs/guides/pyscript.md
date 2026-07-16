@@ -28,18 +28,20 @@ callbacks so demos stay responsive. See [PyScript asyncio guide](pyscript-asynci
 
 ## Gallery examples
 
-Regenerate the card list with `python scripts/pyscript_gen_packages.py`. Every example entry under `src/examples/` is included by default.
+Regenerate the card list with `python scripts/gallery_generator.py`. Every example entry under `src/examples/` is included by default.
 
 | Marker | Effect |
 |--------|--------|
-| `# pyscript skip: gallery` | Omit from the card grid |
-| `# pyscript featured` | Pin to the top (badge) |
-| `# pyscript modules: …` | Extra modules to install with the entry |
-| `# pyscript packages: …` | Pre-install repo-root mip packages (e.g. `micropython-nano-gui`) into `/add_ons` before import |
+| `# deps: …` | Logical packages → `mip` / `wheels` via `url_maker` |
+| `# modules: …` | Extra example `.py` stems |
+| `# manifests: …` | Extra site-served demo bundles (`packages/<name>.json`) |
+| `# gallery: featured` | Pin to the top (badge) |
+| `# gallery: skip` | Omit from the card grid |
+| `# gallery: binaries` | Omit (needs non-mip assets) |
 
-Hinch GUI smokes (`nano_gui_simpletest`, `micro_gui_simpletest`, `touch_gui_simpletest`) use `# pyscript packages:` so the loader downloads one `gui/` tree via `github:PyDevices/pydisplay/packages/…` before the example imports. First open needs network; later loads in the same session reuse the VFS until reload.
+Hinch GUI smokes (`nano_gui_simpletest`, `micro_gui_simpletest`, `touch_gui_simpletest`) rely on `fetch_ph_gui` from the matching setup module — no gallery package header. First open needs network; later loads in the same session reuse the VFS until reload.
 
-Featured starters: `pydisplay_demo`, `testris`. See `scripts/pyscript_gen_packages.py` and [examples catalog](../examples/index.md#pyscript-gallery-markers).
+Featured starters: `pydisplay_demo`, `testris`. See `scripts/gallery_generator.py` and [examples catalog](../examples/index.md#pyscript-gallery-markers).
 
 ## Board config
 

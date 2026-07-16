@@ -3,7 +3,7 @@ src/add_ons/gui
 # Generated from src/add_ons/framebuf.py (scripts/install_sync_framebuf.py; publish + tests)
 src/lib/graphics/framebuf.py
 
-# Local symlink created by tools/serve.py → sibling lv_cpython_mod/web/wheels
+# Optional local/dev copy of LVGL wasm wheels (not required; pyodide uses TestPyPI)
 web/pyscript/wheels
 
 # Cursor IDE throwaways (do not ignore the whole .cursor/ tree)

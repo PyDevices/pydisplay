@@ -280,7 +280,7 @@ Styles are in [`pwa.css`](https://github.com/PyDevices/pydisplay/blob/main/web/p
 
 Pushes to `main` that touch `web/**` or `src/**` run [Deploy PyScript site to GitHub Pages](https://github.com/PyDevices/pydisplay/blob/main/.github/workflows/deploy-pyscript.yml). The workflow:
 
-1. Verifies generated manifests are fresh (`install_refresh_manifests.sh --audit`, `pyscript_gen_packages.py --check`).
+1. Verifies generated manifests are fresh (`install_refresh_manifests.sh --audit`, `gallery_generator.py --check`).
 2. Copies `web/pyscript/*` into `_site/pyscript/`.
 3. Copies `src/lib`, `src/add_ons`, and examples into `_site/pyscript/src/`.
 4. Publishes to the `gh-pages` branch.
@@ -289,7 +289,7 @@ Before pushing PWA changes, refresh gallery metadata locally:
 
 ```bash
 ./scripts/install_refresh_manifests.sh
-python scripts/pyscript_gen_packages.py
+python scripts/gallery_generator.py
 ```
 
 Commit any updated `packages/*.json` files the scripts produce.
@@ -413,4 +413,4 @@ Users who install get that module every time. To ship multiple installable apps 
 | Service worker | `web/pyscript/sw.js` |
 | Client bootstrap + UI | `web/pyscript/pwa.js`, `web/pyscript/pwa.css` |
 | Deploy workflow | `.github/workflows/deploy-pyscript.yml` |
-| Gallery generator | `scripts/pyscript_gen_packages.py` |
+| Gallery generator | `scripts/gallery_generator.py` |

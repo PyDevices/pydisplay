@@ -1,4 +1,4 @@
-# pyscript skip: gallery, binaries
+# gallery: binaries
 from board_config import display_drv, runtime
 from graphics import BMP565
 

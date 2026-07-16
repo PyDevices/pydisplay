@@ -11,7 +11,7 @@ mip.install("pdwidgets", index="https://PyDevices.github.io/micropython-lib/mip/
 
 Documentation: [pdwidgets.readthedocs.io](https://pdwidgets.readthedocs.io)
 
-PyScript widget demos install `pdwidgets` at runtime via `# pyscript mip: pdwidgets` (micropython-lib MIP) or `# pyodide wheels: pdwidgets` (TestPyPI on the Pyodide loader).
+PyScript widget demos install `pdwidgets` at runtime via `# deps: pdwidgets` (`mip` on MicroPython / `wheels` on Pyodide).
 
 ## Event loop
 

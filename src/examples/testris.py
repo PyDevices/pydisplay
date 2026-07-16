@@ -1,4 +1,4 @@
-# pyscript featured
+# gallery: featured
 """
 Testris game implemented in MicroPython by Brad Barnett.
 """

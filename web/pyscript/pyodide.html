@@ -76,9 +76,8 @@
             <code>?modules=<em>name</em></code> and/or
             <code>?manifests=<em>name</em></code>
             (same MIP JSON as <a href="./micropython.html">micropython.html</a>).
-            LVGL demos micropip-install the
-            <code>pyemscripten_2026_0</code> wheel (local
-            <code>./wheels/</code> or lv_cpython_mod Pages).
+            Also supports <code>?mip=</code> (MicroPython MIP),
+            <code>?wheels=</code> (micropip from TestPyPI / PyPI).
             Whichever of modules/manifests comes first supplies the import entry.
         </p>
 
@@ -113,10 +112,8 @@
                         <li><code>?modules=</code> — comma-separated top-level module stems (no <code>.py</code>).</li>
                         <li><code>?manifests=</code> — comma-separated MIP manifest names; each installs <code>packages/&lt;name&gt;.json</code> (same files as the MicroPython gallery).</li>
                         <li>Both may appear; whichever param comes <em>first</em> in the URL supplies the import entry point.</li>
-                        <li><code>?packages=</code> is not supported — use <a href="./micropython.html">micropython.html</a> for that.</li>
-                        <li><code># pyodide wheels: lvgl</code> in the entry example → micropip-install
-                            via <code>wheels/lvgl.json</code> (lv_cpython_mod Pages or local
-                            <code>serve.py</code>); override with <code>?lvgl_wheel=</code>.</li>
+                        <li><code>?mip=</code> — MicroPython MIP names (ignored here; used by <code>micropython.html</code>).</li>
+                        <li><code>?wheels=</code> — comma-separated PyPI / TestPyPI project names (or direct <code>.whl</code> URLs) installed via micropip.</li>
                         <li>Click <strong>Run</strong> to install, then import the entry.</li>
                     </ul>
                 </div>
@@ -146,6 +143,8 @@
     <script>
         (function () {
             var SAFE_LOADER_NAME = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+            // Package stems may include hyphens (e.g. micropython-nano-gui).
+            var SAFE_PACKAGE_NAME = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
 
             function parseCommaList(raw) {
                 return raw.split(',').map(function (s) {
@@ -166,7 +165,8 @@
             function parseLoaderQuery(search) {
                 var modules = [];
                 var manifests = [];
-                var lvglWheel = '';
+                var mip = [];
+                var wheels = [];
                 var entryKind = null;
                 var entryName = null;
                 var raw = search.startsWith('?') ? search.slice(1) : search;
@@ -189,16 +189,17 @@
                             entryName = flist[0];
                         }
                         manifests.push.apply(manifests, flist);
-                    } else if (key === 'lvgl_wheel') {
-                        lvglWheel = val.trim();
-                    } else if (key === 'packages') {
-                        return { error: 'unsupported', key: key, modules: modules, manifests: manifests };
+                    } else if (key === 'mip') {
+                        mip.push.apply(mip, parseCommaList(val));
+                    } else if (key === 'wheels') {
+                        wheels.push.apply(wheels, parseCommaList(val));
                     }
                 }
                 return {
                     modules: modules,
                     manifests: manifests,
-                    lvglWheel: lvglWheel,
+                    mip: mip,
+                    wheels: wheels,
                     entryKind: entryKind,
                     entryName: entryName,
                 };
@@ -222,13 +223,6 @@
             }
 
             var plan = parseLoaderQuery(window.location.search);
-            if (plan.error === 'unsupported') {
-                abortLoader(
-                    '<p><code>?' + plan.key + '=</code> is not supported on <code>pyodide.html</code>. ' +
-                    'Use <a href="./micropython.html">micropython.html</a> (MicroPython) for packages, or drop that query param.</p>'
-                );
-                return;
-            }
             var badNames = [];
             plan.modules.forEach(function (name) {
                 if (!SAFE_LOADER_NAME.test(name)) badNames.push(name);
@@ -236,13 +230,23 @@
             plan.manifests.forEach(function (name) {
                 if (!SAFE_LOADER_NAME.test(name)) badNames.push(name);
             });
+            plan.mip.forEach(function (name) {
+                if (!SAFE_PACKAGE_NAME.test(name)) badNames.push(name);
+            });
+            plan.wheels.forEach(function (name) {
+                // Direct .whl URLs are allowed; otherwise same rules as package names.
+                if (/^https?:\/\//i.test(name)) {
+                    if (!/\.whl(\?|#|$)/i.test(name)) badNames.push(name);
+                } else if (!SAFE_PACKAGE_NAME.test(name)) {
+                    badNames.push(name);
+                }
+            });
             if (badNames.length) {
                 abortLoader(
-                    '<p>Unsafe <code>?modules=</code> or <code>?manifests=</code> value(s): ' +
+                    '<p>Unsafe loader query value(s): ' +
                     badNames.map(function (n) { return JSON.stringify(n); }).join(', ') +
                     '.</p>' +
-                    '<p>Names must be simple identifiers (letters, digits, underscore; ' +
-                    'no slashes or dots).</p>'
+                    '<p>Module/manifest names must be identifiers; package/mip/wheels names may include hyphens; wheel URLs must end in <code>.whl</code>.</p>'
                 );
                 return;
             }
@@ -250,7 +254,8 @@
             window.__pydisplayLoaderReady = true;
             window.__pydisplayModules = plan.modules.join(',');
             window.__pydisplayManifests = plan.manifests.join(',');
-            window.__pydisplayLvglWheel = plan.lvglWheel || '';
+            window.__pydisplayMip = plan.mip.join(',');
+            window.__pydisplayWheels = plan.wheels.join(',');
             window.__pydisplayEntryKind = plan.entryKind || '';
             window.__pydisplayEntry = plan.entryName || '';
 
@@ -282,6 +287,12 @@
                 }
                 if (plan.manifests.length) {
                     installParts.push(plan.manifests.length + ' manifest(s)');
+                }
+                if (plan.mip.length) {
+                    installParts.push('mip: ' + plan.mip.join(', '));
+                }
+                if (plan.wheels.length) {
+                    installParts.push('wheels: ' + plan.wheels.join(', '));
                 }
                 if (lede) {
                     lede.textContent = 'Pyodide loader: ' + installParts.join(', ') +
@@ -318,7 +329,12 @@
         from pyscript.ffi import create_proxy
 
         MANIFEST_MIP_TARGET = "examples"
-        LVGL_WHEELS_DIR_PAGES = "https://pydevices.github.io/lv_cpython_mod/wheels/"
+        # Prefer TestPyPI (PyDevices publishes here) then PyPI so third-party
+        # pure/wasm wheels resolve too. micropip tries each index in order.
+        WHEEL_INDEX_URLS = [
+            "https://test.pypi.org/simple/",
+            "https://pypi.org/simple/",
+        ]
 
         def _log_print(*args, **kwargs):
             el = document.getElementById("log")
@@ -350,24 +366,54 @@
             path = document.location.pathname
             return path[: path.rfind("/") + 1] if "/" in path else "/"
 
+        def _page_base():
+            return document.location.origin + _site_root()
+
+        def _github_to_raw(s):
+            """Map ``github:owner/repo/path`` → raw.githubusercontent.com …/HEAD/path."""
+            rest = s[len("github:") :].lstrip("/")
+            parts = rest.split("/")
+            if len(parts) < 3:
+                raise RuntimeError("Bad github: mip URL: " + s)
+            owner, repo = parts[0], parts[1]
+            path = "/".join(parts[2:])
+            return (
+                "https://raw.githubusercontent.com/"
+                + owner
+                + "/"
+                + repo
+                + "/HEAD/"
+                + path
+            )
+
         def _abs_url(rel_or_abs, base_url=None):
             """Resolve a path relative to the pyscript page (or an explicit base URL)."""
             from urllib.parse import urljoin
 
             s = str(rel_or_abs).strip()
             if s.startswith("github:"):
-                raise RuntimeError(
-                    "github: mip URLs are not supported on pyodide.html; "
-                    "use same-origin paths (packages/*.json relative urls)."
-                )
+                return _github_to_raw(s)
             if s.startswith("http://") or s.startswith("https://"):
                 return s
             if base_url:
                 return urljoin(base_url, s)
             if s.startswith("/"):
                 return document.location.origin + s
-            page_base = document.location.origin + _site_root()
-            return urljoin(page_base, s)
+            return urljoin(_page_base(), s)
+
+        def _mip_fetch_url(src):
+            """Resolve MIP JSON file URLs the same way MicroPython mip does on Pages.
+
+            Relative ``./src/...`` paths are against the *page* base
+            (``…/web/pyscript/``), not against ``packages/<name>.json``.
+            ``github:`` URLs become raw.githubusercontent.com (CORP-friendly).
+            """
+            s = str(src).strip()
+            if s.startswith("github:"):
+                return _github_to_raw(s)
+            if s.startswith("http://") or s.startswith("https://"):
+                return s
+            return _abs_url(s)
 
         def _parse_comma(raw):
             names = []
@@ -400,8 +446,8 @@
             with open(dest, "w", encoding="utf-8") as f:
                 f.write(code)
 
-        async def _install_manifest(name):
-            """Install packages/<name>.json (same MIP files micropython.html uses)."""
+        async def _install_mip_json(name, target):
+            """Install packages/<name>.json urls into ``target`` (MIP layout)."""
             manifest_url = _abs_url("packages/" + name + ".json")
             raw = await _fetch_text(manifest_url)
             try:
@@ -411,7 +457,6 @@
             urls = data.get("urls")
             if not isinstance(urls, list) or not urls:
                 raise RuntimeError("MIP manifest packages/" + name + ".json has no urls")
-            target = MANIFEST_MIP_TARGET
             os.makedirs(target, exist_ok=True)
             for entry in urls:
                 if not (isinstance(entry, (list, tuple)) and len(entry) >= 2):
@@ -421,73 +466,23 @@
                 dest_rel, src = entry[0], entry[1]
                 dest = os.path.join(target, dest_rel)
                 _ensure_parent_dirs(dest)
-                code = await _fetch_text(_abs_url(src, base_url=manifest_url))
+                code = await _fetch_text(_mip_fetch_url(src))
                 with open(dest, "w", encoding="utf-8") as f:
                     f.write(code)
                 _log_print("Installed", dest)
+
+        async def _install_manifest(name):
+            """Install packages/<name>.json (same MIP files micropython.html uses)."""
+            await _install_mip_json(name, MANIFEST_MIP_TARGET)
+
 
         def _prepare_vfs():
             # Match MicroPython VFS: mounts at /lib and /add_ons; lib.path expects cwd /.
             os.chdir("/")
             if "/" not in sys.path:
                 sys.path.insert(0, "/")
-
-        def _wheels_from_path(path):
-            """Read ``# pyodide wheels:`` from an installed example (first 10 lines)."""
-            try:
-                with open(path, encoding="utf-8") as f:
-                    for i, line in enumerate(f):
-                        if i >= 10:
-                            break
-                        s = line.strip()
-                        if s.startswith("# pyodide wheels:"):
-                            body = s.split(":", 1)[1].strip()
-                            return [p.strip() for p in body.split(",") if p.strip()]
-            except OSError:
-                pass
-            return []
-
-        def _wheels_for_entry(entry, modules):
-            for path in (
-                "examples/" + entry + ".py",
-                entry + ".py",
-            ):
-                found = _wheels_from_path(path)
-                if found:
-                    return found
-            for name in modules:
-                found = _wheels_from_path(name + ".py")
-                if found:
-                    return found
-            return []
-
-        def _lvgl_wheels_base():
-            host = str(document.location.hostname)
-            if host in ("127.0.0.1", "localhost"):
-                # serve.py links sibling lv_cpython_mod/web/wheels → ./wheels/
-                return _abs_url("wheels/")
-            return LVGL_WHEELS_DIR_PAGES
-
-        async def _resolve_lvgl_wheel_url(override=""):
-            if override:
-                return override
-            base = _lvgl_wheels_base()
-            if not base.endswith("/"):
-                base += "/"
-            index_url = base + "lvgl.json"
-            raw = await _fetch_text(index_url)
-            try:
-                data = json.loads(raw)
-            except json.JSONDecodeError as e:
-                raise RuntimeError("Invalid " + index_url + ": " + str(e)) from e
-            name = data.get("wheel")
-            if not isinstance(name, str) or not name.endswith(".whl"):
-                raise RuntimeError(
-                    index_url + " must contain a string \"wheel\" filename ending in .whl"
-                )
-            if "/" in name or name.startswith("."):
-                raise RuntimeError("Unsafe wheel filename in " + index_url + ": " + name)
-            return base + name
+            if "/add_ons" not in sys.path:
+                sys.path.insert(0, "/add_ons")
 
         async def _ensure_micropip():
             try:
@@ -504,37 +499,22 @@
 
             return micropip
 
-        async def _install_pyodide_wheels(wheels, lvgl_wheel_override=""):
+        async def _install_pyodide_wheels(wheels):
+            """micropip-install each ``?wheels=`` entry (project name or .whl URL)."""
             if not wheels:
                 return
             micropip = await _ensure_micropip()
             for which in wheels:
-                key = which.lower().replace("_", "-")
-                if key in ("lvgl", "lvgl-cpython", "lvglcpython"):
-                    url = await _resolve_lvgl_wheel_url(lvgl_wheel_override)
-                    _set("Installing lvgl…")
-                    _log_print("micropip.install", url)
-                    await micropip.install(url)
-                elif key in ("pdwidgets",):
-                    _set("Installing pdwidgets…")
-                    _log_print("micropip.install pdwidgets from TestPyPI")
-                    await micropip.install(
-                        "pdwidgets",
-                        index_urls="https://test.pypi.org/simple/",
-                    )
-                elif key in ("palettes",):
-                    _set("Installing palettes…")
-                    _log_print("micropip.install palettes from TestPyPI")
-                    await micropip.install(
-                        "palettes",
-                        index_urls="https://test.pypi.org/simple/",
-                    )
+                spec = str(which).strip()
+                if not spec:
+                    continue
+                _set("Installing " + spec + "…")
+                if spec.startswith("http://") or spec.startswith("https://"):
+                    _log_print("micropip.install", spec)
+                    await micropip.install(spec)
                 else:
-                    raise RuntimeError(
-                        "Unknown # pyodide wheels: entry "
-                        + repr(which)
-                        + " (supported: lvgl, pdwidgets, palettes)"
-                    )
+                    _log_print("micropip.install", spec, "indexes=", WHEEL_INDEX_URLS)
+                    await micropip.install(spec, index_urls=WHEEL_INDEX_URLS)
 
         async def _start(*_):
             global _started
@@ -542,7 +522,7 @@
                 return
             modules = _parse_comma(_from_window("__pydisplayModules"))
             manifests = _parse_comma(_from_window("__pydisplayManifests"))
-            lvgl_wheel = _from_window("__pydisplayLvglWheel")
+            wheels = _parse_comma(_from_window("__pydisplayWheels"))
             entry_kind = _from_window("__pydisplayEntryKind")
             entry = _from_window("__pydisplayEntry")
             if not entry and modules:
@@ -567,8 +547,7 @@
                     _set("Fetching " + name + "…")
                     await _install_module(name)
                 import lib.path  # noqa: F401 — adds lib/add_ons/examples to path
-                wheels = _wheels_for_entry(entry, modules)
-                await _install_pyodide_wheels(wheels, lvgl_wheel)
+                await _install_pyodide_wheels(wheels)
                 _set("Importing " + entry + "…")
                 __import__(entry)
                 _set("")

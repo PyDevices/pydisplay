@@ -1,4 +1,4 @@
-# pyscript mip: palettes
+# deps: palettes
 """
 proverbs.py
 ===========

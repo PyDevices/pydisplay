@@ -1,5 +1,4 @@
-# pyscript mip: pdwidgets
-# pyodide wheels: pdwidgets
+# deps: pdwidgets
 """
 widgets_media_busy
 ====================================================

@@ -34,7 +34,7 @@ Or rely on `import touch_setup`.
 
 [`src/examples/touch_gui_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/touch_gui_simpletest.py) — framebuffer smoke test. Full demos: `import touch_setup` then `import gui.demos.simple`.
 
-Browser: `# pyscript packages: micropython-touch` — [gallery loader](https://PyDevices.github.io/pydisplay/pyscript/micropython.html?modules=touch_gui_simpletest&packages=micropython-touch).
+Browser: `fetch_ph_gui` via `touch_setup` — [gallery loader](https://PyDevices.github.io/pydisplay/pyscript/micropython.html?modules=touch_gui_simpletest).
 
 ## See also
 
