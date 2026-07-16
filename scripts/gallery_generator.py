@@ -53,7 +53,18 @@ EXAMPLES_DIR = REPO_ROOT / "src" / "examples"
 PYSCRIPT_DIR = REPO_ROOT / "web" / "pyscript"
 INDEX = PYSCRIPT_DIR / "index.html"
 
-KEEP_HTML = frozenset({"index", "micropython", "repl", "simple", "embed", "pyodide"})
+KEEP_HTML = frozenset(
+    {
+        "index",
+        "micropython",
+        "repl",
+        "simple",
+        "embed",
+        "pyodide",
+        "run",
+        "run-pyodide",
+    }
+)
 
 ARROW = (
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '

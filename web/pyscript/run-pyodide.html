@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="module" src="./vendor/core.js"></script>
+<link rel="stylesheet" href="./vendor/core.css">
+</head>
+<body>
+<canvas id="display_canvas" width="320" height="480" tabindex="0"></canvas>
+<pre id="log" hidden></pre>
+<script>
+(function () {
+    var SAFE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+    var SAFE_PKG = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
+
+    function parseList(raw) {
+        return raw.split(',').map(function (s) {
+            s = s.trim();
+            if (s.toLowerCase().endsWith('.py')) s = s.slice(0, -3);
+            return s;
+        }).filter(Boolean);
+    }
+
+    function parseQuery(search) {
+        var modules = [], manifests = [], wheels = [];
+        var entryKind = null, entryName = null, debug = false;
+        var raw = search.startsWith('?') ? search.slice(1) : search;
+        raw.split('&').forEach(function (part) {
+            if (!part) return;
+            var eq = part.indexOf('=');
+            var key = eq === -1 ? part : decodeURIComponent(part.slice(0, eq));
+            var val = eq === -1 ? '' : decodeURIComponent(part.slice(eq + 1).replace(/\+/g, ' '));
+            if (key === 'modules') {
+                var list = parseList(val);
+                if (!entryKind && list.length) { entryKind = 'module'; entryName = list[0]; }
+                modules.push.apply(modules, list);
+            } else if (key === 'manifests') {
+                var list = parseList(val);
+                if (!entryKind && list.length) { entryKind = 'manifest'; entryName = list[0]; }
+                manifests.push.apply(manifests, list);
+            } else if (key === 'wheels') {
+                wheels.push.apply(wheels, parseList(val));
+            } else if (key === 'debug') {
+                debug = val === '' || /^(1|true|yes)$/i.test(val);
+            }
+        });
+        return { modules: modules, manifests: manifests, wheels: wheels, entryKind: entryKind, entryName: entryName, debug: debug };
+    }
+
+    function invalid(plan) {
+        var bad = [];
+        plan.modules.forEach(function (n) { if (!SAFE.test(n)) bad.push(n); });
+        plan.manifests.forEach(function (n) { if (!SAFE.test(n)) bad.push(n); });
+        plan.wheels.forEach(function (n) {
+            if (/^https?:\/\//i.test(n)) {
+                if (!/\.whl(\?|#|$)/i.test(n)) bad.push(n);
+            } else if (!SAFE_PKG.test(n)) {
+                bad.push(n);
+            }
+        });
+        return bad;
+    }
+
+    var plan = parseQuery(window.location.search);
+    if (invalid(plan).length) {
+        window.__pydisplayLoaderDisabled = true;
+        return;
+    }
+    if (plan.debug) document.getElementById('log').hidden = false;
+
+    window.__pydisplayModules = plan.modules.join(',');
+    window.__pydisplayManifests = plan.manifests.join(',');
+    window.__pydisplayWheels = plan.wheels.join(',');
+    window.__pydisplayEntry = plan.entryName || '';
+})();
+</script>
+<script type="py" config="./pyodide.toml" output="log">
+import builtins
+import json
+import os
+import sys
+from js import document
+
+MANIFEST_MIP_TARGET = "examples"
+WHEEL_INDEX_URLS = [
+    "https://test.pypi.org/simple/",
+    "https://pypi.org/simple/",
+]
+
+def _log_print(*args, **kwargs):
+    el = document.getElementById("log")
+    if el is not None:
+        sep = kwargs.get("sep", " ")
+        end = kwargs.get("end", "\n")
+        el.textContent += sep.join(str(a) for a in args) + end
+        el.scrollTop = el.scrollHeight
+
+builtins.print = _log_print
+
+def _from_window(name, default=""):
+    from js import window
+    return str(getattr(window, name, default) or default).strip()
+
+def _parse_comma(raw):
+    names = []
+    for part in str(raw).split(","):
+        name = part.strip()
+        if name.lower().endswith(".py"):
+            name = name[:-3]
+        if name:
+            names.append(name)
+    return names
+
+def _site_root():
+    path = document.location.pathname
+    return path[: path.rfind("/") + 1] if "/" in path else "/"
+
+def _page_base():
+    return document.location.origin + _site_root()
+
+def _github_to_raw(s):
+    rest = s[len("github:") :].lstrip("/")
+    parts = rest.split("/")
+    if len(parts) < 3:
+        raise RuntimeError("Bad github: mip URL: " + s)
+    owner, repo = parts[0], parts[1]
+    path = "/".join(parts[2:])
+    return "https://raw.githubusercontent.com/" + owner + "/" + repo + "/HEAD/" + path
+
+def _abs_url(rel_or_abs, base_url=None):
+    from urllib.parse import urljoin
+    s = str(rel_or_abs).strip()
+    if s.startswith("github:"):
+        return _github_to_raw(s)
+    if s.startswith("http://") or s.startswith("https://"):
+        return s
+    if base_url:
+        return urljoin(base_url, s)
+    if s.startswith("/"):
+        return document.location.origin + s
+    return urljoin(_page_base(), s)
+
+def _mip_fetch_url(src):
+    s = str(src).strip()
+    if s.startswith("github:"):
+        return _github_to_raw(s)
+    if s.startswith("http://") or s.startswith("https://"):
+        return s
+    return _abs_url(s)
+
+async def _fetch_text(url):
+    from pyodide.http import pyfetch
+    print("Fetching", url)
+    resp = await pyfetch(url)
+    if not resp.ok:
+        raise RuntimeError("HTTP " + str(resp.status) + " fetching " + url)
+    return await resp.string()
+
+def _ensure_parent_dirs(path):
+    parent = os.path.dirname(path)
+    if parent and parent not in (".", "/"):
+        os.makedirs(parent, exist_ok=True)
+
+async def _install_module(name):
+    code = await _fetch_text(_abs_url("src/examples/" + name + ".py"))
+    with open(name + ".py", "w", encoding="utf-8") as f:
+        f.write(code)
+
+async def _install_manifest(name):
+    raw = await _fetch_text(_abs_url("packages/" + name + ".json"))
+    data = json.loads(raw)
+    urls = data.get("urls")
+    if not isinstance(urls, list) or not urls:
+        raise RuntimeError("MIP manifest packages/" + name + ".json has no urls")
+    os.makedirs(MANIFEST_MIP_TARGET, exist_ok=True)
+    for entry in urls:
+        if not (isinstance(entry, (list, tuple)) and len(entry) >= 2):
+            raise RuntimeError("Bad mip urls entry: " + repr(entry))
+        dest = os.path.join(MANIFEST_MIP_TARGET, entry[0])
+        _ensure_parent_dirs(dest)
+        code = await _fetch_text(_mip_fetch_url(entry[1]))
+        with open(dest, "w", encoding="utf-8") as f:
+            f.write(code)
+        print("Installed", dest)
+
+def _prepare_vfs():
+    os.chdir("/")
+    if "/" not in sys.path:
+        sys.path.insert(0, "/")
+    if "/add_ons" not in sys.path:
+        sys.path.insert(0, "/add_ons")
+
+async def _ensure_micropip():
+    try:
+        import micropip
+        return micropip
+    except ImportError:
+        pass
+    from pyodide_js import loadPackage
+    await loadPackage("micropip")
+    import micropip
+    return micropip
+
+async def _install_wheels(wheels):
+    if not wheels:
+        return
+    micropip = await _ensure_micropip()
+    for which in wheels:
+        spec = str(which).strip()
+        if not spec:
+            continue
+        if spec.startswith("http://") or spec.startswith("https://"):
+            print("micropip.install", spec)
+            await micropip.install(spec)
+        else:
+            print("micropip.install", spec, "indexes=", WHEEL_INDEX_URLS)
+            await micropip.install(spec, index_urls=WHEEL_INDEX_URLS)
+
+async def _run():
+    if _from_window("__pydisplayLoaderDisabled"):
+        return
+    modules = _parse_comma(_from_window("__pydisplayModules"))
+    manifests = _parse_comma(_from_window("__pydisplayManifests"))
+    wheels = _parse_comma(_from_window("__pydisplayWheels"))
+    entry = _from_window("__pydisplayEntry")
+    if not entry and modules:
+        entry = modules[0]
+    elif not entry and manifests:
+        entry = manifests[0]
+    if not entry:
+        print("Missing ?modules= and/or ?manifests= in the URL.")
+        return
+    _prepare_vfs()
+    for name in manifests:
+        await _install_manifest(name)
+    for name in modules:
+        await _install_module(name)
+    import lib.path  # noqa: F401
+    await _install_wheels(wheels)
+    __import__(entry)
+
+await _run()
+</script>
+</body>
+</html>

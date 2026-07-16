@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="module" src="./vendor/core.js"></script>
+<link rel="stylesheet" href="./vendor/core.css">
+</head>
+<body>
+<canvas id="display_canvas" width="320" height="480" tabindex="0"></canvas>
+<pre id="log" hidden></pre>
+<script>
+(function () {
+    var SAFE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+    var SAFE_PKG = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
+
+    function parseList(raw) {
+        return raw.split(',').map(function (s) {
+            s = s.trim();
+            if (s.toLowerCase().endsWith('.py')) s = s.slice(0, -3);
+            return s;
+        }).filter(Boolean);
+    }
+
+    function parseQuery(search) {
+        var modules = [], manifests = [], mip = [];
+        var entryKind = null, entryName = null, debug = false;
+        var raw = search.startsWith('?') ? search.slice(1) : search;
+        raw.split('&').forEach(function (part) {
+            if (!part) return;
+            var eq = part.indexOf('=');
+            var key = eq === -1 ? part : decodeURIComponent(part.slice(0, eq));
+            var val = eq === -1 ? '' : decodeURIComponent(part.slice(eq + 1).replace(/\+/g, ' '));
+            if (key === 'modules') {
+                var list = parseList(val);
+                if (!entryKind && list.length) { entryKind = 'module'; entryName = list[0]; }
+                modules.push.apply(modules, list);
+            } else if (key === 'manifests') {
+                var list = parseList(val);
+                if (!entryKind && list.length) { entryKind = 'manifest'; entryName = list[0]; }
+                manifests.push.apply(manifests, list);
+            } else if (key === 'mip') {
+                mip.push.apply(mip, parseList(val));
+            } else if (key === 'debug') {
+                debug = val === '' || /^(1|true|yes)$/i.test(val);
+            }
+        });
+        return { modules: modules, manifests: manifests, mip: mip, entryKind: entryKind, entryName: entryName, debug: debug };
+    }
+
+    function invalid(plan) {
+        var bad = [];
+        plan.modules.forEach(function (n) { if (!SAFE.test(n)) bad.push(n); });
+        plan.manifests.forEach(function (n) { if (!SAFE.test(n)) bad.push(n); });
+        plan.mip.forEach(function (n) { if (!SAFE_PKG.test(n)) bad.push(n); });
+        return bad;
+    }
+
+    var plan = parseQuery(window.location.search);
+    if (invalid(plan).length) {
+        window.__pydisplayLoaderDisabled = true;
+        return;
+    }
+    if (plan.debug) document.getElementById('log').hidden = false;
+
+    window.__pydisplayModules = plan.modules.join(',');
+    window.__pydisplayManifests = plan.manifests.join(',');
+    window.__pydisplayMip = plan.mip.join(',');
+    window.__pydisplayEntry = plan.entryName || '';
+})();
+</script>
+<script type="mpy" config="./micropython.toml" output="log">
+import builtins
+from js import document
+
+MANIFEST_MIP_TARGET = "examples"
+MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+
+def _log_print(*args, **kwargs):
+    el = document.getElementById("log")
+    if el is not None:
+        sep = kwargs.get("sep", " ")
+        end = kwargs.get("end", "\n")
+        el.textContent += sep.join(str(a) for a in args) + end
+        el.scrollTop = el.scrollHeight
+
+builtins.print = _log_print
+
+def _from_window(name, default=""):
+    from js import window
+    return str(getattr(window, name, default) or default).strip()
+
+def _parse_comma(raw):
+    names = []
+    for part in str(raw).split(","):
+        name = part.strip()
+        if name.lower().endswith(".py"):
+            name = name[:-3]
+        if name:
+            names.append(name)
+    return names
+
+def _same_origin_base():
+    path = document.location.pathname
+    return document.location.origin + (path[: path.rfind("/") + 1] if "/" in path else "/")
+
+def _use_same_origin():
+    host = document.location.hostname
+    return host in ("127.0.0.1", "localhost") or host.endswith(".github.io")
+
+def _manifest_url(name):
+    if _use_same_origin():
+        return _same_origin_base() + "packages/" + name + ".json"
+    return "github:PyDevices/pydisplay/packages/" + name + ".json"
+
+def _module_url(name):
+    if _use_same_origin():
+        return _same_origin_base() + "src/examples/" + name + ".py"
+    return "github:PyDevices/pydisplay/src/examples/" + name + ".py"
+
+def _run():
+    if _from_window("__pydisplayLoaderDisabled"):
+        return
+    modules = _parse_comma(_from_window("__pydisplayModules"))
+    manifests = _parse_comma(_from_window("__pydisplayManifests"))
+    mip_pkgs = _parse_comma(_from_window("__pydisplayMip"))
+    entry = _from_window("__pydisplayEntry")
+    if not entry and modules:
+        entry = modules[0]
+    elif not entry and manifests:
+        entry = manifests[0]
+    if not entry:
+        print("Missing ?modules= and/or ?manifests= in the URL.")
+        return
+    import mip
+    for name in manifests:
+        mip.install(_manifest_url(name), target=MANIFEST_MIP_TARGET)
+    for name in modules:
+        mip.install(_module_url(name))
+    import lib.path  # noqa: F401
+    for which in mip_pkgs:
+        print("MIP install:", which)
+        mip.install(which, index=MIP_LIB_INDEX)
+    __import__(entry)
+
+_run()
+</script>
+</body>
+</html>

@@ -180,6 +180,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  {base}/web/pyscript/micropython.html?modules=calc_graphics,calc_engine")
     print(f"  {base}/web/pyscript/pyodide.html?modules=calc_lvgl,calc_engine")
     print(f"  {base}/web/pyscript/embed.html?modules=calc_graphics,calc_engine")
+    print(f"  {base}/web/pyscript/run.html?modules=hello&mip=palettes")
+    print(f"  {base}/web/pyscript/run-pyodide.html?modules=hello&wheels=palettes")
     print(f"  {base}/web/landing/index.html")
     print("")
     print(PAGE_SNIPPET)
