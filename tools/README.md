@@ -102,7 +102,7 @@ Results JSON: ``.cursor/compare_graphics_results.json``. Exit 0 when all runtime
 ./tools/test_testpypi_desktop.sh --headless   # CI / SSH without DISPLAY
 ```
 
-Installs `displaysys-sdldisplay`, `graphics-cmod`, and `lvgl-cpython` (no version pins). See [Publishing micropython-lib — verify after publish](../docs/publishing-micropython-lib.md#4-verify).
+Installs `displaysys-sdldisplay`, `usdl2`, `graphics-cmod`, and `lvgl-cpython` (no version pins). See [Publishing micropython-lib — verify after publish](../docs/publishing-micropython-lib.md#4-verify).
 
 | Script | Purpose |
 |--------|---------|

@@ -179,21 +179,13 @@ package_manifest_requires() {
 # manifest unless we add pip optional-extras support later.
 
 # Extra micropython-lib require() lines for displaysys-* TestPyPI / MIP manifests.
-# MODE_PYPROJECT turns micropython-lib requires into hatch dependencies; pypi= adds
-# packages that are not in micropython-lib (pygame-ce, usdl2).
+# Do not require() packages that are absent from micropython-lib (usdl2, pygame-ce):
+# upstream manifestfile MODE_COMPILE fails hard on missing requires, and MIP cannot
+# install native/PyPI-only deps. Install those separately on CPython / firmware.
 displaysys_manifest_requires() {
     local package="$1"
     case "$package" in
-        displaysys-pgdisplay)
-            printf '%s\n' \
-                'require("eventsys")' \
-                'require("pygame-ce", pypi="pygame-ce")'
-            ;;
-        displaysys-sdldisplay)
-            printf '%s\n' \
-                'require("eventsys")' \
-                'require("usdl2", pypi="usdl2")'
-            ;;
+        displaysys-pgdisplay | displaysys-sdldisplay | \
         displaysys-psdisplay | displaysys-jndisplay)
             printf '%s\n' 'require("eventsys")'
             ;;

@@ -64,12 +64,15 @@ check_import() {
 test_package() {
     local pypi_name="$1"
     local py_code="$2"
+    shift 2
+    local extras=("$@")
     local venv="${BASE_VENV}-${pypi_name}"
 
     rm -rf "$venv"
     python3 -m venv "$venv"
     "$venv/bin/pip" install -q -U pip
-    "$venv/bin/pip" install -i "$TESTPYPI_INDEX" --extra-index-url "$PYPI_INDEX" "$pypi_name"
+    "$venv/bin/pip" install -i "$TESTPYPI_INDEX" --extra-index-url "$PYPI_INDEX" \
+        "$pypi_name" "${extras[@]}"
     echo "--- $pypi_name ---"
     "$venv/bin/pip" freeze | sort
     check_import "$venv" "$py_code"
@@ -91,17 +94,18 @@ print('eventsys', type(r).__name__)
 test_package pydisplay-graphics "import graphics; print('graphics', graphics.implementation())"
 
 if [[ "$DESKTOP" -eq 1 ]]; then
+    # usdl2 / pygame-ce are runtime deps, not pip requires of the displaysys-* wheels.
     test_package displaysys-sdldisplay "
 from board_config import display_drv
 print('sdldisplay', type(display_drv).__name__)
 display_drv.fill(0)
 display_drv.show()
-"
+" usdl2
 
     test_package displaysys-pgdisplay "
 from displaysys.pgdisplay import PGDisplay
 print('pgdisplay', PGDisplay.__name__)
-"
+" pygame-ce
 fi
 
 echo "All standalone TestPyPI smoke tests passed."

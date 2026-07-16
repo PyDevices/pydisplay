@@ -219,7 +219,7 @@ pip install \
 | Flag | Index | Why it is needed |
 |------|-------|------------------|
 | `-i https://test.pypi.org/simple/` | **TestPyPI** (primary) | Resolves PyDevices packages you install and their deps that exist **only** on TestPyPI (`displaysys`, `eventsys`, `multimer`, `usdl2`, `displaysys-sdldisplay`, …). |
-| `--extra-index-url https://pypi.org/simple/` | **PyPI** (secondary) | Resolves dependencies published **only** on production PyPI (`pygame-ce` for `displaysys-pgdisplay`, and other third-party libs). |
+| `--extra-index-url https://pypi.org/simple/` | **PyPI** (secondary) | Resolves third-party deps published **only** on production PyPI (e.g. `pygame-ce` when you install it alongside `displaysys-pgdisplay`, and other third-party libs). |
 
 **Both must be present.** If you omit TestPyPI, pip cannot find PyDevices wheels. If you omit PyPI, pip fails when a declared dependency (for example `pygame-ce`) is not on TestPyPI.
 

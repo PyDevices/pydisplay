@@ -11,7 +11,8 @@
 #   ./tools/test_testpypi_desktop.sh --keep         # reuse venv path without deleting first
 #   ./tools/test_testpypi_desktop.sh --headless --keep   # CI / no DISPLAY
 #
-# Requires: python3, pip. Uses two-index install (TestPyPI primary, PyPI for usdl2, etc.).
+# Requires: python3, pip. Uses two-index install (TestPyPI primary, PyPI secondary).
+# Install usdl2 explicitly — it is not a pip dependency of displaysys-sdldisplay.
 # See docs/publishing-micropython-lib.md#two-index-pip-install-required
 
 set -euo pipefail
@@ -28,7 +29,7 @@ Usage: ./tools/test_testpypi_desktop.sh [--headless] [--keep]
 
 Create a venv, pip-install TestPyPI desktop packages (no version pins), and smoke-test:
 
-  displaysys-sdldisplay  graphics-cmod  lvgl-cpython
+  displaysys-sdldisplay  usdl2  graphics-cmod  lvgl-cpython
 
 Environment:
   TESTPYPI_VENV   venv directory (default: /tmp/pydisplay-testpypi-venv)
@@ -74,6 +75,7 @@ python3 -m venv "$VENV"
     -i "$TESTPYPI_INDEX" \
     --extra-index-url "$PYPI_INDEX" \
     displaysys-sdldisplay \
+    usdl2 \
     graphics-cmod \
     lvgl-cpython
 

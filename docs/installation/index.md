@@ -44,7 +44,7 @@ pip install \
 ```
 
 - **`-i` TestPyPI** — primary index for PyDevices packages (`displaysys`, `eventsys`, `usdl2`, …).
-- **`--extra-index-url` PyPI** — secondary index for dependencies published only on [pypi.org](https://pypi.org) (for example `pygame-ce` when installing `displaysys-pgdisplay`; still `import pygame` at runtime).
+- **`--extra-index-url` PyPI** — secondary index for dependencies published only on [pypi.org](https://pypi.org) (for example `pygame-ce` when using `displaysys-pgdisplay`; still `import pygame` at runtime).
 
 Omitting either index causes `pip` to fail: TestPyPI-only packages are not on PyPI, and PyPI-only deps are not on TestPyPI. Full explanation: [Publishing micropython-lib — two-index pip install](../publishing-micropython-lib.md#two-index-pip-install-required).
 

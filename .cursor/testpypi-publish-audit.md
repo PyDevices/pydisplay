@@ -98,8 +98,8 @@ Declared for the next tag publish (MIP + TestPyPI `pyproject.toml`):
 |---------|-------------------------|
 | `eventsys` | `multimer` |
 | `multimer` | *(none — stdlib backends on CPython; `usdl2` only if sdl2 timer backend is selected at runtime)* |
-| `displaysys-pgdisplay` | `displaysys`, `eventsys`, `pygame-ce` |
-| `displaysys-sdldisplay` | `displaysys`, `eventsys`, `usdl2` (TestPyPI) |
+| `displaysys-pgdisplay` | `displaysys`, `eventsys` (`pygame-ce` install separately) |
+| `displaysys-sdldisplay` | `displaysys`, `eventsys` (`usdl2` install separately) |
 | `displaysys-psdisplay`, `displaysys-jndisplay` | `displaysys`, `eventsys` |
 | Other `displaysys-*` | `displaysys` only |
 
