@@ -67,6 +67,8 @@ Details and manifest/`pwa.js` behavior: [PWA guide — wire pages](../guides/pys
 
 Storage can reach tens to hundreds of MB. Prefer stale-while-revalidate over precaching every WASM blob — see the [PWA guide](../guides/pyscript-pwa.md).
 
+Deploy-time `CACHE_NAME` hashing and the July 2026 legacy-cache migration are documented in [Orphaned service workers and cache migration](../guides/pyscript-pwa.md#orphaned-service-workers-and-cache-migration).
+
 ---
 
 ## PWA vs native Android APK

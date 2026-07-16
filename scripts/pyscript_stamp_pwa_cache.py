@@ -15,6 +15,10 @@ Usage::
     python scripts/pyscript_stamp_pwa_cache.py web/pyscript --check
 
 Deploy stamps a short hash; source in git keeps ``pydisplay-pwa-dev``.
+
+When ``sw.js`` contains ``MIGRATION: cache-purge`` (one-deploy cache purge for
+legacy installs), stamping is skipped. See ``docs/guides/pyscript-pwa.md``
+(Orphaned service workers and cache migration).
 """
 
 from __future__ import annotations
