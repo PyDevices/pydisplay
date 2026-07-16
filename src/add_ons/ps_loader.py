@@ -94,13 +94,11 @@ def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url
 def _install_index_deps_micropython(mip_mod, names, status):
     if not names:
         return
-    channel = mip_lib_channel()
     for which in names:
         if status:
             status("Installing " + which + "…")
-        pkg_url = _index_package_url(which, channel)
-        print("MIP install:", which, "channel=", channel)
-        mip_mod.install(pkg_url, index=MIP_LIB_INDEX)
+        print("MIP install:", which, "index=", MIP_LIB_INDEX)
+        mip_mod.install(which, index=MIP_LIB_INDEX)
 
 
 def _ensure_cwd():
