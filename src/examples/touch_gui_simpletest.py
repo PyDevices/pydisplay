@@ -1,10 +1,9 @@
-# pyscript packages: micropython-touch
 """
 touch_gui_simpletest.py - Smoke test for micropython-touch on pydisplay.
 
 ``touch_setup`` fetches the GUI and creates ``Display`` with a mouse/touch Poller.
 This oneshot only verifies the framebuffer path (full widget demos use Screen.change).
-On PyScript the gallery loader pre-installs the package (see ``# pyscript packages:``).
+``fetch_ph_gui`` (via the matching setup module) installs the GUI on desktop and in the browser.
 """
 
 from board_config import runtime

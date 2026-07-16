@@ -311,6 +311,108 @@ def _apply_patches(which):
         _prime_primitives()
 
 
+def _github_to_raw(spec):
+    """Turn ``github:owner/repo/path`` into a raw.githubusercontent.com URL."""
+    s = str(spec).strip()
+    if s.startswith("github:"):
+        s = s[7:]
+    parts = s.split("/")
+    if len(parts) < 2:
+        raise ValueError("bad github: URL " + repr(spec))
+    owner, repo = parts[0], parts[1]
+    path = "/".join(parts[2:]) if len(parts) > 2 else ""
+    return "https://raw.githubusercontent.com/" + owner + "/" + repo + "/HEAD/" + path
+
+
+def _http_get_text(url):
+    """Sync HTTP GET that works on CPython, Pyodide, and MicroPython where available."""
+    try:
+        from pyodide.http import open_url  # type: ignore[import-not-found]
+
+        return open_url(url).read()
+    except ImportError:
+        pass
+    try:
+        from urllib.request import urlopen
+
+        with urlopen(url) as resp:
+            data = resp.read()
+        if isinstance(data, bytes):
+            return data.decode("utf-8")
+        return data
+    except ImportError:
+        pass
+    try:
+        import urequests
+
+        resp = urequests.get(url)
+        try:
+            return resp.text
+        finally:
+            resp.close()
+    except ImportError as e:
+        raise RuntimeError("no HTTP client available to fetch " + url) from e
+
+
+def _resolve_pkg_src(src, json_url):
+    """Resolve a package.json source URL the way mip does (relative to the JSON)."""
+    s = str(src).strip()
+    if s.startswith("github:"):
+        return _github_to_raw(s)
+    if s.startswith("http://") or s.startswith("https://"):
+        return s
+    if s.startswith("./"):
+        s = s[2:]
+    # Relative to the package.json directory on raw.githubusercontent.com
+    if json_url.startswith("https://raw.githubusercontent.com/"):
+        base = json_url.rsplit("/", 1)[0] + "/"
+        return base + s
+    return s
+
+
+def _ensure_dir(path):
+    import os
+
+    if not path or path in (".", "/"):
+        return
+    parts = path.replace("\\", "/").split("/")
+    cur = ""
+    for part in parts:
+        if not part:
+            if not cur:
+                cur = "/"
+            continue
+        cur = part if not cur else (cur.rstrip("/") + "/" + part)
+        try:
+            os.mkdir(cur)
+        except OSError:
+            pass
+
+
+def _install_package_json(spec, target):
+    """Install a mip-style package.json (github: or https:) into ``target`` without mip."""
+    import json
+
+    json_url = _github_to_raw(spec) if str(spec).startswith("github:") else str(spec)
+    raw = _http_get_text(json_url)
+    data = json.loads(raw)
+    urls = data.get("urls")
+    if not isinstance(urls, list) or not urls:
+        raise RuntimeError("package.json has no urls: " + json_url)
+    _ensure_dir(target)
+    for entry in urls:
+        if not (isinstance(entry, (list, tuple)) and len(entry) >= 2):
+            raise RuntimeError("bad urls entry in " + json_url)
+        dest_rel, src = entry[0], entry[1]
+        dest = target.rstrip("/") + "/" + dest_rel
+        parent = dest.rsplit("/", 1)[0]
+        _ensure_dir(parent)
+        file_url = _resolve_pkg_src(src, json_url)
+        text = _http_get_text(file_url)
+        with open(dest, "w") as f:
+            f.write(text)
+
+
 def fetch_ph_gui(which, apply_patches=True):
     """Ensure ``which`` GUI is in add_ons/gui/ and optionally patched.
 
@@ -318,6 +420,9 @@ def fetch_ph_gui(which, apply_patches=True):
     (e.g. PyScript loader) before the setup module defines ``SSD`` — callers
     that import ``color_setup`` / ``hardware_setup`` / ``touch_setup`` will
     call again with patches enabled.
+
+    Uses ``mip`` when available; otherwise fetches the package.json over HTTP
+    (CPython / Pyodide).
     """
     if which not in _CORE_FILES:
         raise ValueError(
@@ -330,16 +435,21 @@ def fetch_ph_gui(which, apply_patches=True):
             _apply_patches(which)
         return True
 
-    try:
-        import mip
-    except ImportError:
-        # Cannot install or switch without mip; do not wipe an existing tree.
-        return False
-
     if present is not None or _gui_exists():
         _empty_gui()
 
-    mip.install(_PACKAGES[which], target=_add_ons_dir())
+    spec = _PACKAGES[which]
+    target = _add_ons_dir()
+    try:
+        import mip
+
+        mip.install(spec, target=target)
+    except ImportError:
+        try:
+            _install_package_json(spec, target)
+        except Exception:
+            return False
+
     _purge_gui_modules()
     if _detect_core() == which:
         if apply_patches:

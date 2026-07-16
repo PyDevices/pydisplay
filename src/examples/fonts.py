@@ -1,5 +1,4 @@
-# pyscript mip: palettes
-# pyodide wheels: palettes
+# deps: palettes
 """
 fonts.py
 ========

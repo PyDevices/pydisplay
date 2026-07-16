@@ -35,12 +35,12 @@ import json
 import multiprocessing as mp
 import os
 import re
+import sys
 import tempfile
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qs
 
 REPO = Path(__file__).resolve().parents[1]
 INDEX = REPO / "web" / "pyscript" / "index.html"
@@ -133,18 +133,26 @@ class CaseResult:
 
 
 def gallery_entries() -> list[dict[str, str]]:
-    html = INDEX.read_text(encoding="utf-8")
-    hrefs = re.findall(r'<a class="card" href="(micropython\.html\?[^"]+)">', html)
-    out: list[dict[str, str]] = []
-    seen: set[str] = set()
-    for href in hrefs:
-        q = href.split("?", 1)[1]
-        qs = parse_qs(q)
-        name = (qs.get("modules") or qs.get("manifests") or ["?"])[0].split(",")[0]
-        if name in seen:
+    """Collect gallery demos with per-runtime loader queries from url_maker."""
+    scripts = REPO / "scripts"
+    if str(scripts) not in sys.path:
+        sys.path.insert(0, str(scripts))
+    from gallery_generator import discover
+
+    out: list[dict[str, object]] = []
+    for ex in discover():
+        if not ex.in_gallery:
             continue
-        seen.add(name)
-        out.append({"name": name, "query": q, "href": href})
+        qs = ex.loader_queries()
+        queries = {rt: q.lstrip("?") for rt, q in qs.items()}
+        out.append(
+            {
+                "name": ex.name,
+                "query": queries["micropython"],
+                "queries": queries,
+                "href": f"micropython.html?{queries['micropython']}",
+            }
+        )
     return out
 
 
@@ -279,7 +287,8 @@ def run_case(
     from playwright.sync_api import sync_playwright
 
     name = entry["name"]
-    query = entry["query"]
+    queries = entry.get("queries") or {}
+    query = queries.get(loader) or entry["query"]
     url = f"{base}/{loader}.html?{query}"
     t0 = time.monotonic()
     hard_deadline = t0 + max(3.0, case_timeout_s - 0.7)

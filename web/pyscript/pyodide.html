@@ -77,7 +77,6 @@
             <code>?manifests=<em>name</em></code>
             (same MIP JSON as <a href="./micropython.html">micropython.html</a>).
             Also supports <code>?mip=</code> (MicroPython MIP),
-            <code>?packages=</code> (Hinch GUIs), and
             <code>?wheels=</code> (micropip from TestPyPI / PyPI).
             Whichever of modules/manifests comes first supplies the import entry.
         </p>
@@ -114,8 +113,7 @@
                         <li><code>?manifests=</code> — comma-separated MIP manifest names; each installs <code>packages/&lt;name&gt;.json</code> (same files as the MicroPython gallery).</li>
                         <li>Both may appear; whichever param comes <em>first</em> in the URL supplies the import entry point.</li>
                         <li><code>?mip=</code> — MicroPython MIP names (ignored here; used by <code>micropython.html</code>).</li>
-                        <li><code>?packages=</code> — Hinch GUI names (<code>micropython-nano-gui</code>, <code>micropython-micro-gui</code>, <code>micropython-touch</code>); installs into <code>/add_ons</code> from <code>packages/*.json</code> (resolves <code>github:</code> via raw.githubusercontent.com).</li>
-                        <li><code>?wheels=</code> — comma-separated PyPI / TestPyPI project names (or direct <code>.whl</code> URLs) installed via micropip. Gallery cards emit this from <code># pyodide wheels:</code>.</li>
+                        <li><code>?wheels=</code> — comma-separated PyPI / TestPyPI project names (or direct <code>.whl</code> URLs) installed via micropip.</li>
                         <li>Click <strong>Run</strong> to install, then import the entry.</li>
                     </ul>
                 </div>
@@ -167,7 +165,6 @@
             function parseLoaderQuery(search) {
                 var modules = [];
                 var manifests = [];
-                var packages = [];
                 var mip = [];
                 var wheels = [];
                 var entryKind = null;
@@ -192,8 +189,6 @@
                             entryName = flist[0];
                         }
                         manifests.push.apply(manifests, flist);
-                    } else if (key === 'packages') {
-                        packages.push.apply(packages, parseCommaList(val));
                     } else if (key === 'mip') {
                         mip.push.apply(mip, parseCommaList(val));
                     } else if (key === 'wheels') {
@@ -203,7 +198,6 @@
                 return {
                     modules: modules,
                     manifests: manifests,
-                    packages: packages,
                     mip: mip,
                     wheels: wheels,
                     entryKind: entryKind,
@@ -236,9 +230,6 @@
             plan.manifests.forEach(function (name) {
                 if (!SAFE_LOADER_NAME.test(name)) badNames.push(name);
             });
-            plan.packages.forEach(function (name) {
-                if (!SAFE_PACKAGE_NAME.test(name)) badNames.push(name);
-            });
             plan.mip.forEach(function (name) {
                 if (!SAFE_PACKAGE_NAME.test(name)) badNames.push(name);
             });
@@ -263,7 +254,6 @@
             window.__pydisplayLoaderReady = true;
             window.__pydisplayModules = plan.modules.join(',');
             window.__pydisplayManifests = plan.manifests.join(',');
-            window.__pydisplayPackages = plan.packages.join(',');
             window.__pydisplayMip = plan.mip.join(',');
             window.__pydisplayWheels = plan.wheels.join(',');
             window.__pydisplayEntryKind = plan.entryKind || '';
@@ -297,9 +287,6 @@
                 }
                 if (plan.manifests.length) {
                     installParts.push(plan.manifests.length + ' manifest(s)');
-                }
-                if (plan.packages.length) {
-                    installParts.push(plan.packages.length + ' package(s)');
                 }
                 if (plan.mip.length) {
                     installParts.push('mip: ' + plan.mip.join(', '));
@@ -342,18 +329,12 @@
         from pyscript.ffi import create_proxy
 
         MANIFEST_MIP_TARGET = "examples"
-        PACKAGE_MIP_TARGET = "add_ons"
         # Prefer TestPyPI (PyDevices publishes here) then PyPI so third-party
         # pure/wasm wheels resolve too. micropip tries each index in order.
         WHEEL_INDEX_URLS = [
             "https://test.pypi.org/simple/",
             "https://pypi.org/simple/",
         ]
-        PH_GUI_PACKAGES = (
-            "micropython-nano-gui",
-            "micropython-micro-gui",
-            "micropython-touch",
-        )
 
         def _log_print(*args, **kwargs):
             el = document.getElementById("log")
@@ -494,17 +475,6 @@
             """Install packages/<name>.json (same MIP files micropython.html uses)."""
             await _install_mip_json(name, MANIFEST_MIP_TARGET)
 
-        async def _install_ph_package(which):
-            """Pre-seed a Hinch GUI into /add_ons (same target as fetch_ph_gui)."""
-            if which not in PH_GUI_PACKAGES:
-                raise RuntimeError(
-                    "Unsupported ?packages= value "
-                    + repr(which)
-                    + " (supported: "
-                    + ", ".join(PH_GUI_PACKAGES)
-                    + ")"
-                )
-            await _install_mip_json(which, PACKAGE_MIP_TARGET)
 
         def _prepare_vfs():
             # Match MicroPython VFS: mounts at /lib and /add_ons; lib.path expects cwd /.
@@ -513,39 +483,6 @@
                 sys.path.insert(0, "/")
             if "/add_ons" not in sys.path:
                 sys.path.insert(0, "/add_ons")
-
-        def _header_list(path, prefix):
-            """Read a ``# prefix:`` comma list from the first 10 lines of a file."""
-            try:
-                with open(path, encoding="utf-8") as f:
-                    for i, line in enumerate(f):
-                        if i >= 10:
-                            break
-                        s = line.strip()
-                        if s.startswith(prefix):
-                            body = s.split(":", 1)[1].strip()
-                            return [p.strip() for p in body.split(",") if p.strip()]
-            except OSError:
-                pass
-            return []
-
-        def _packages_from_path(path):
-            return _header_list(path, "# pyscript packages:")
-
-        def _entry_paths(entry, modules):
-            paths = ["examples/" + entry + ".py", entry + ".py"]
-            for name in modules:
-                paths.append(name + ".py")
-            return paths
-
-        def _packages_for_entry(entry, modules, packages):
-            if packages:
-                return packages
-            for path in _entry_paths(entry, modules):
-                found = _packages_from_path(path)
-                if found:
-                    return found
-            return []
 
         async def _ensure_micropip():
             try:
@@ -585,7 +522,6 @@
                 return
             modules = _parse_comma(_from_window("__pydisplayModules"))
             manifests = _parse_comma(_from_window("__pydisplayManifests"))
-            packages = _parse_comma(_from_window("__pydisplayPackages"))
             wheels = _parse_comma(_from_window("__pydisplayWheels"))
             entry_kind = _from_window("__pydisplayEntryKind")
             entry = _from_window("__pydisplayEntry")
@@ -611,10 +547,6 @@
                     _set("Fetching " + name + "…")
                     await _install_module(name)
                 import lib.path  # noqa: F401 — adds lib/add_ons/examples to path
-                packages = _packages_for_entry(entry, modules, packages)
-                for which in packages:
-                    _set("Installing package " + which + "…")
-                    await _install_ph_package(which)
                 await _install_pyodide_wheels(wheels)
                 _set("Importing " + entry + "…")
                 __import__(entry)

@@ -15,7 +15,7 @@ Use `import lib.path` first in a development clone (see [full clone](../installa
 
 Every example **entry point** under `src/examples/` is included in the
 [browser gallery](https://PyDevices.github.io/pydisplay/pyscript/) by default
-(`scripts/pyscript_gen_packages.py`):
+(`scripts/gallery_generator.py`):
 
 | Entry | Kind |
 |-------|------|
@@ -23,32 +23,34 @@ Every example **entry point** under `src/examples/` is included in the
 | `examples/<name>/<name>.py` | package manifest (`?manifests=`) |
 | `examples/<name>/__init__.py` | package manifest (if no `<name>.py`) |
 
-Optional header comments (first 10 lines):
+Optional header comments (first 10 lines), one line per namespace:
 
 ```python
-# pyscript skip: gallery
-# pyscript featured
-# pyscript modules: calc_engine
-# pyscript packages: micropython-nano-gui
+# deps: palettes, lvgl
+# modules: calc_engine
+# manifests: alien
+# gallery: featured
 ```
 
 | Marker | Effect |
 |--------|--------|
-| `# pyscript skip: gallery` | Omit from the card grid |
-| `# pyscript featured` | Pin to the top of the gallery (badge) |
-| `# pyscript modules: …` | Extra same-tree modules to mip-install with the entry |
-| `# pyscript packages: …` | Repo-root mip packages (e.g. Hinch `gui/`) pre-installed into `/add_ons` before import |
+| `# deps: …` | Logical packages → `mip` / `wheels` via `url_maker` |
+| `# modules: …` | Extra example `.py` stems from this site |
+| `# manifests: …` | Extra site-served `packages/<name>.json` demo bundles |
+| `# gallery: featured` | Pin to the top of the gallery (badge) |
+| `# gallery: skip` | Omit from the card grid |
+| `# gallery: binaries` | Omit (needs non-mip assets) |
 
-See [PyScript local development](../guides/pyscript.md).
-
-### Search commands
+Hinch GUI demos need no package header — `fetch_ph_gui` installs via color/hardware/touch setup.
 
 ```bash
-rg '^# pyscript skip:' src/examples/
-rg '^# pyscript featured' src/examples/
-rg '^# pyscript modules:' src/examples/
-rg '^# pyscript packages:' src/examples/
+rg '^# gallery:' src/examples/
+rg '^# deps:' src/examples/
+rg '^# modules:' src/examples/
+rg '^# manifests:' src/examples/
 ```
+
+See [PyScript local development](../guides/pyscript.md).
 
 ### Canonical patterns
 

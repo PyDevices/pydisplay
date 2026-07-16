@@ -53,8 +53,9 @@
         </p>
         <p>
             Open a card and click <strong>Run</strong>. The first load may take a few seconds while
-            the runtime downloads; featured demos stay pinned at the top. Toggle <strong>MP</strong>
-            / <strong>Py</strong> in the header to switch MicroPython vs Pyodide loaders.
+            the runtime downloads; featured demos stay pinned at the top. Each card has
+            <strong>MicroPython</strong> and <strong>Pyodide</strong> links with the matching
+            install query (<code>?mip=</code> vs <code>?wheels=</code>).
         </p>
     </section>
 
@@ -62,437 +63,596 @@
         <section class="section" id="demos">
             <div class="section-head">
                 <h2>Demos</h2>
-                <span class="hint">every example entry under <code>src/examples/</code> — opt out with <code># pyscript skip: gallery</code></span>
+                <span class="hint">every example entry under <code>src/examples/</code> — opt out with <code># gallery: skip</code></span>
             </div>
             <div class="grid">
                 <!-- GEN:demos:start -->
-                <a class="card" href="micropython.html?modules=pydisplay_demo">
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                         <span class="tag featured">featured</span>
                     </div>
                     <h3>Pydisplay Demo</h3>
                     <p>pydisplay_demo.py — flagship board_config demo: clicks, rotation, scrolling.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=testris">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=pydisplay_demo">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=pydisplay_demo">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                         <span class="tag featured">featured</span>
                     </div>
                     <h3>Testris</h3>
                     <p>Testris game implemented in MicroPython by Brad Barnett.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=tv_remote_menu">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=testris">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=testris">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                         <span class="tag featured">featured</span>
                     </div>
                     <h3>Tv Remote Menu</h3>
                     <p>tv_remote_menu.py — 10-foot / remote-friendly menu for PyScript TV browsers.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?manifests=alien&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=tv_remote_menu">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=tv_remote_menu">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Alien</h3>
                     <p>Bounce a bitmap of an alien around the display.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=bouncing_balls">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?manifests=alien&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?manifests=alien&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Bouncing Balls</h3>
                     <p>Animate colored balls bouncing inside the display.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=boxlines&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=bouncing_balls">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=bouncing_balls">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Boxlines</h3>
                     <p>Test for lines and rectangles.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=calc_graphics,calc_engine&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=boxlines&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=boxlines&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Calc Graphics</h3>
                     <p>Dark-theme pocket calculator drawn with ``graphics.FrameBuffer``.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=calc_lvgl,calc_engine&wheels=lvgl-cpython">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=calc_graphics,calc_engine&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=calc_graphics,calc_engine&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Calc Lvgl</h3>
                     <p>Dark-theme pocket calculator built with LVGL.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=calc_widgets,calc_engine&mip=pdwidgets&wheels=pdwidgets">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=calc_lvgl,calc_engine">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=calc_lvgl,calc_engine&wheels=lvgl-cpython">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Calc Widgets</h3>
                     <p>Dark-theme pocket calculator built with ``pdwidgets``.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?manifests=chango&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=calc_widgets,calc_engine&mip=pdwidgets">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=calc_widgets,calc_engine&wheels=pdwidgets">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Chango</h3>
                     <p>Test for TrueType write_font_converter.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=color_test&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?manifests=chango&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?manifests=chango&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Color Test</h3>
                     <p>Test color with gradients.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=console_advanced_demo&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=color_test&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=color_test&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Console Advanced Demo</h3>
                     <p>console_advanced_demo.py - Advanced demo of the mpconsole module</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=console_simpletest">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=console_advanced_demo&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=console_advanced_demo&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Console Simpletest</h3>
                     <p>Call `console.hide()` to use the display for something else.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=displaybuf_simpletest">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=console_simpletest">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=console_simpletest">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Displaybuf Simpletest</h3>
                     <p>displaybuf_simpletest.py - Simple test program for displaybuf.py</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=displaysys_block_test">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=displaybuf_simpletest">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=displaybuf_simpletest">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Displaysys Block Test</h3>
                     <p>The <code>displaysys_block_test</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=displaysys_fill_rect_test">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=displaysys_block_test">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=displaysys_block_test">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Displaysys Fill Rect Test</h3>
                     <p>The <code>displaysys_fill_rect_test</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=eventsys_encoder_test">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=displaysys_fill_rect_test">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=displaysys_fill_rect_test">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Eventsys Encoder Test</h3>
                     <p>A simple test of an encoder in eventsys.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=eventsys_simpletest">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=eventsys_encoder_test">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=eventsys_encoder_test">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Eventsys Simpletest</h3>
                     <p>The <code>eventsys_simpletest</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=eventsys_touch_test">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=eventsys_simpletest">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=eventsys_simpletest">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Eventsys Touch Test</h3>
                     <p>eventsys_touch_test.py - Touch rotation test.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=feathers&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=eventsys_touch_test">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=eventsys_touch_test">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Feathers</h3>
                     <p>Modified by Brad Barnett from Russ Hughes's original to scroll vertically instead of horizontally</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=fonts&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=feathers&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=feathers&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Fonts</h3>
                     <p>Test text_font_converter.py</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=framebuf_simpletest">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=fonts&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=fonts&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Framebuf Simpletest</h3>
                     <p>Simple test example to demonstrate the use of framebuf.FrameBuffer.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=framebuf_text_compare">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=framebuf_simpletest">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=framebuf_simpletest">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Framebuf Text Compare</h3>
                     <p>Visual text compare: framebuf and graphics, native C vs Python.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=graphics_simpletest&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=framebuf_text_compare">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=framebuf_text_compare">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Graphics Simpletest</h3>
                     <p>Simple test example to demonstrate the use of graphics.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=hello&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=graphics_simpletest&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=graphics_simpletest&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Hello</h3>
                     <p>Test for text_font_converter.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=joystick_list_select&mip=pdwidgets&wheels=pdwidgets">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=hello&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=hello&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Joystick List Select</h3>
                     <p>The <code>joystick_list_select</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=keypins_simpletest">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=joystick_list_select&mip=pdwidgets">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=joystick_list_select&wheels=pdwidgets">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Keypins Simpletest</h3>
                     <p>The <code>keypins_simpletest</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=logo">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=keypins_simpletest">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=keypins_simpletest">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Logo</h3>
                     <p>Draws the PyDevices logo using only pydisplay's own graphics primitives -- no SVG import or renderer needed.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=lv_test_timer&wheels=lvgl-cpython">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=logo">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=logo">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Lv Test Timer</h3>
                     <p>LVGL timer smoke test. Uses whatever timer mode ``board_config`` / ``runtime``</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=micro_gui_simpletest&packages=micropython-micro-gui">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=lv_test_timer">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=lv_test_timer&wheels=lvgl-cpython">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Micro Gui Simpletest</h3>
                     <p>micro_gui_simpletest.py - Smoke test for micropython-micro-gui on pydisplay.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=nano_gui_simpletest&packages=micropython-nano-gui">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=micro_gui_simpletest">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=micro_gui_simpletest">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Nano Gui Simpletest</h3>
                     <p>nano_gui_simpletest.py - Copied from:</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?manifests=noto_fonts&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=nano_gui_simpletest">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=nano_gui_simpletest">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Noto Fonts</h3>
                     <p>Test for TrueType write_font_converter.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=paint">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?manifests=noto_fonts&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?manifests=noto_fonts&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Paint</h3>
                     <p>A simple paint application demonstrating the use of displaysys.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=pbm_create_new">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=paint">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=paint">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Pbm Create New</h3>
                     <p>The <code>pbm_create_new</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=pixel_sim_demos&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=pbm_create_new">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=pbm_create_new">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Pixel Sim Demos</h3>
                     <p>pixel_sim_demos.py — NeoPixel simulator effects in one file.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?manifests=proverbs&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=pixel_sim_demos&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=pixel_sim_demos&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Proverbs</h3>
                     <p>Test for TrueType write_font_converter.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=rotations&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?manifests=proverbs&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?manifests=proverbs&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Rotations</h3>
                     <p>Rotates the display 0, 90, 180, and 270 degrees and displays the rotation</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=scroll&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=rotations&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=rotations&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Scroll</h3>
                     <p>Test for hardware scrolling.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=tiny_hello&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=scroll&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=scroll&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Tiny Hello</h3>
                     <p>Test text_font_converter on small displays.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?manifests=tiny_toasters&mip=palettes&wheels=palettes">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=tiny_hello&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=tiny_hello&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Tiny Toasters</h3>
                     <p>Test sprites_converter.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=touch_gui_simpletest&packages=micropython-touch">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?manifests=tiny_toasters&mip=palettes">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?manifests=tiny_toasters&wheels=palettes">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Touch Gui Simpletest</h3>
                     <p>touch_gui_simpletest.py - Smoke test for micropython-touch on pydisplay.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=widgets_actions&mip=pdwidgets&wheels=pdwidgets">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=touch_gui_simpletest">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=touch_gui_simpletest">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Widgets Actions</h3>
                     <p>Showcase :class:`~pdwidgets.Menu` / :class:`~pdwidgets.ContextMenu`,</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=widgets_demo&mip=pdwidgets&wheels=pdwidgets">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=widgets_actions&mip=pdwidgets">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=widgets_actions&wheels=pdwidgets">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Widgets Demo</h3>
                     <p>The <code>widgets_demo</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=widgets_device_panel&mip=pdwidgets&wheels=pdwidgets">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=widgets_demo&mip=pdwidgets">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=widgets_demo&wheels=pdwidgets">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Widgets Device Panel</h3>
                     <p>A fictional "Aurora Synth" control panel built entirely from pdwidgets.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=widgets_form_kitchen&mip=pdwidgets&wheels=pdwidgets">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=widgets_device_panel&mip=pdwidgets">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=widgets_device_panel&wheels=pdwidgets">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Widgets Form Kitchen</h3>
                     <p>Showcase :class:`~pdwidgets.FormRow`, :class:`~pdwidgets.Divider`,</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=widgets_gauge_dash&mip=pdwidgets&wheels=pdwidgets">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=widgets_form_kitchen&mip=pdwidgets">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=widgets_form_kitchen&wheels=pdwidgets">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Widgets Gauge Dash</h3>
                     <p>Showcase :class:`~pdwidgets.Gauge` / :class:`~pdwidgets.Arc`,</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=widgets_media_busy&mip=pdwidgets&wheels=pdwidgets">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=widgets_gauge_dash&mip=pdwidgets">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=widgets_gauge_dash&wheels=pdwidgets">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Widgets Media Busy</h3>
                     <p>Showcase :class:`~pdwidgets.Image`, :class:`~pdwidgets.Spinner`,</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=widgets_nav_tabs&mip=pdwidgets&wheels=pdwidgets">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=widgets_media_busy&mip=pdwidgets">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=widgets_media_busy&wheels=pdwidgets">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Widgets Nav Tabs</h3>
                     <p>Showcase :class:`~pdwidgets.AppBar`, :class:`~pdwidgets.Page`,</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=widgets_percent&mip=pdwidgets&wheels=pdwidgets">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=widgets_nav_tabs&mip=pdwidgets">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=widgets_nav_tabs&wheels=pdwidgets">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Widgets Percent</h3>
                     <p>The <code>widgets_percent</code> demo running in the browser via PyScript.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=widgets_pickers&mip=pdwidgets&wheels=pdwidgets">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=widgets_percent&mip=pdwidgets">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=widgets_percent&wheels=pdwidgets">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Widgets Pickers</h3>
                     <p>Showcase :class:`~pdwidgets.ColorPicker` and :class:`~pdwidgets.DatePicker`.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=widgets_settings&mip=pdwidgets&wheels=pdwidgets">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=widgets_pickers&mip=pdwidgets">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=widgets_pickers&wheels=pdwidgets">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Widgets Settings</h3>
                     <p>A settings / preferences screen that exercises pdwidgets controls together:</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=widgets_sheets&mip=pdwidgets&wheels=pdwidgets">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=widgets_settings&mip=pdwidgets">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=widgets_settings&wheels=pdwidgets">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Widgets Sheets</h3>
                     <p>Showcase :class:`~pdwidgets.Drawer`, :class:`~pdwidgets.BottomSheet`,</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
-                <a class="card" href="micropython.html?modules=widgets_smartwatch&mip=pdwidgets&wheels=pdwidgets">
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=widgets_sheets&mip=pdwidgets">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=widgets_sheets&wheels=pdwidgets">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
+                <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     </div>
                     <h3>Widgets Smartwatch</h3>
                     <p>A smartwatch-style interface built with pdwidgets.</p>
-                    <span class="go">Open demo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                </a>
+                    <div class="card-runtimes">
+                        <a class="go" href="micropython.html?modules=widgets_smartwatch&mip=pdwidgets">MicroPython <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                        <a class="go" href="pyodide.html?modules=widgets_smartwatch&wheels=pdwidgets">Pyodide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                </article>
             <!-- GEN:demos:end -->
             </div>
         </section>
@@ -590,17 +750,7 @@
             }
 
             function rewriteDemoLinks(file) {
-                var cards = document.querySelectorAll('#demos a.card[href]');
-                for (var i = 0; i < cards.length; i++) {
-                    var a = cards[i];
-                    var href = a.getAttribute('href') || '';
-                    var next = href
-                        .replace(/(^|\/)(?:load|micropython)\.html(?=\?|$)/, '$1' + file)
-                        .replace(/(^|\/)pyodide\.html(?=\?|$)/, '$1' + file);
-                    if (next !== href) {
-                        a.setAttribute('href', next);
-                    }
-                }
+                // Cards expose both MicroPython and Pyodide links; do not rewrite.
             }
 
             function apply(key) {

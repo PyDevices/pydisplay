@@ -1,6 +1,5 @@
-# pyscript skip: gallery
-# pyscript mip: palettes
-# pyodide wheels: palettes
+# deps: palettes
+# gallery: skip
 """
 palettes_demo.py — Palette walk cycling wheel → cube → material (no env vars).
 """

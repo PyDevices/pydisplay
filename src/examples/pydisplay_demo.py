@@ -1,4 +1,4 @@
-# pyscript featured
+# gallery: featured
 """
 pydisplay_demo.py — flagship board_config demo: clicks, rotation, scrolling.
 

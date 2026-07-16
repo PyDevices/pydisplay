@@ -1,6 +1,5 @@
-# pyscript skip: gallery
-# pyscript mip: palettes
-# pyodide wheels: palettes
+# deps: palettes
+# gallery: skip
 # Vertical scroll + touch/click. Cycles display_drv ↔ DisplayBuffer on a timer
 # (no env vars). Chrome labels show which path is active (drv / dbuf).
 from board_config import display_drv, runtime

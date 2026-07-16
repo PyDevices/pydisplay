@@ -390,84 +390,98 @@ PACKAGES_DIR = REPO / "packages"
 
 
 def _pyscript_header_lists(script_path: Path) -> tuple[list[str], list[str], list[str]]:
-    """Read ``# pyscript modules:`` / ``packages:`` / ``mip:`` from an example (first 10 lines)."""
+    """Read ``# modules:`` / ``# manifests:`` / ``# deps:`` from an example (first 10 lines)."""
     modules: list[str] = []
-    packages: list[str] = []
-    mip: list[str] = []
+    manifests: list[str] = []
+    deps: list[str] = []
     if not script_path.is_file():
-        return modules, packages, mip
+        return modules, manifests, deps
     try:
         with open(script_path, encoding="utf-8") as fh:
             for i, line in enumerate(fh):
                 if i >= 10:
                     break
                 s = line.strip()
-                if s.startswith("# pyscript modules:"):
+                if s.startswith("# modules:"):
                     body = s.split(":", 1)[1].strip()
                     modules = [p.strip() for p in body.split(",") if p.strip()]
-                elif s.startswith("# pyscript packages:"):
+                elif s.startswith("# manifests:"):
                     body = s.split(":", 1)[1].strip()
-                    packages = [p.strip() for p in body.split(",") if p.strip()]
-                elif s.startswith("# pyscript mip:"):
+                    manifests = [p.strip() for p in body.split(",") if p.strip()]
+                elif s.startswith("# deps:"):
                     body = s.split(":", 1)[1].strip()
-                    mip = [p.strip() for p in body.split(",") if p.strip()]
+                    deps = [p.strip() for p in body.split(",") if p.strip()]
     except OSError:
         pass
-    return modules, packages, mip
+    return modules, manifests, deps
 
 
-def _pyscript_skip_tags(script_path: Path) -> list[str]:
-    """Return tags from ``# pyscript skip:`` (first 10 lines)."""
+def _pyscript_gallery_value(script_path: Path) -> str | None:
+    """Return ``featured`` / ``skip`` / ``binaries`` from ``# gallery:``, or None."""
     if not script_path.is_file():
-        return []
+        return None
     try:
         with open(script_path, encoding="utf-8") as fh:
             for i, line in enumerate(fh):
                 if i >= 10:
                     break
                 s = line.strip()
-                if s.startswith("# pyscript skip:"):
-                    body = s.split(":", 1)[1].strip()
-                    return [p.strip() for p in body.split(",") if p.strip()]
+                if s.startswith("# gallery:"):
+                    body = s.split(":", 1)[1].strip().lower()
+                    token = body.split(",")[0].strip()
+                    return token or None
     except OSError:
         pass
-    return []
+    return None
 
 
 def pyscript_skips_binaries(example_id: str, example_meta: dict) -> bool:
     """True when the example opts out of PyScript because mip cannot install binaries."""
     script = example_meta.get("script", f"examples/{example_id}.py")
-    return "binaries" in _pyscript_skip_tags(SRC / script)
+    return _pyscript_gallery_value(SRC / script) == "binaries"
 
 
 def pyscript_embed_query(example_id: str, example_meta: dict) -> str:
-    """Build ``manifests=`` / ``modules=`` (+ optional ``packages=`` / ``mip=``) for embed.html."""
+    """Build loader query via ``url_maker`` (modules/manifests/mip) for embed.html."""
+    scripts_dir = str(REPO / "scripts")
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    from url_maker import urls_from_deps
+
     script = example_meta.get("script", f"examples/{example_id}.py")
     script_path = SRC / script
 
-    extra_modules, packages, mip = _pyscript_header_lists(script_path)
+    extra_modules, extra_manifests, deps = _pyscript_header_lists(script_path)
+
+    modules: list[str] = []
+    manifests: list[str] = []
 
     if (PACKAGES_DIR / f"{example_id}.json").is_file() and (
         SRC / "examples" / example_id
     ).is_dir():
-        query = f"manifests={example_id}"
+        manifests = [example_id]
     elif script_path.is_file() and script_path.parent != SRC / "examples":
         pkg = script_path.parent.name
         if (PACKAGES_DIR / f"{pkg}.json").is_file() and (SRC / "examples" / pkg).is_dir():
-            query = f"manifests={pkg}"
+            manifests = [pkg]
         else:
-            query = f"modules={example_id}"
+            modules = [example_id]
     else:
-        # Mirror gallery: entry first, then ``# pyscript modules:`` extras (e.g. calc_engine).
-        module_list = [example_id] + [m for m in extra_modules if m != example_id]
-        query = f"modules={','.join(module_list)}"
+        modules = [example_id] + [m for m in extra_modules if m != example_id]
 
-    # Mirror gallery cards / ``scripts/pyscript_gen_packages.py`` loader hrefs.
-    if packages:
-        query += "&packages=" + ",".join(packages)
-    if mip:
-        query += "&mip=" + ",".join(mip)
-    return query
+    for name in extra_modules:
+        if name not in modules:
+            modules.append(name)
+    for name in extra_manifests:
+        if name not in manifests:
+            manifests.append(name)
+
+    return urls_from_deps(
+        modules=modules,
+        manifests=manifests,
+        deps=deps,
+        runtime="micropython",
+    ).lstrip("?")
 
 
 def _kill_pyscript_port(port: int = PYSCRIPT_PORT) -> None:

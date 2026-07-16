@@ -1,4 +1,4 @@
-# pyscript skip: gallery, binaries
+# gallery: binaries
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 #
 # SPDX-License-Identifier: MIT

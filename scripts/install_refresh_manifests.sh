@@ -59,7 +59,7 @@ Not generated here (edit manually when drivers/bus/ or drivers/touch/ changes):
   packages/i80bus.json, spibus.json, i2cbus.json, …
 
 Other scripts (see scripts/README.md):
-  pyscript_gen_packages.py — browser gallery cards only
+  gallery_generator.py — browser gallery cards only
 EOF
 }
 

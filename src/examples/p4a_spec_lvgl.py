@@ -1,4 +1,4 @@
-# pyscript skip: gallery
+# gallery: skip
 # SPDX-License-Identifier: MIT
 """
 p4a_spec_lvgl

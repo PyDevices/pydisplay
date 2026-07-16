@@ -1,4 +1,4 @@
-# pyscript skip: gallery, binaries
+# gallery: binaries
 """
 tower_climb.py — 1980s-style vertical scrolling platformer.
 

@@ -1,10 +1,9 @@
-# pyscript packages: micropython-nano-gui
 """
 nano_gui_simpletest.py - Copied from:
 https://github.com/peterhinch/micropython-nano-gui/tree/master?tab=readme-ov-file#23-verifying-hardware-configuration
 
 ``color_setup`` fetches micropython-nano-gui into add_ons/gui/ when needed.
-On PyScript the gallery loader pre-installs the package (see ``# pyscript packages:``).
+``fetch_ph_gui`` (via the matching setup module) installs the GUI on desktop and in the browser.
 """
 
 from board_config import runtime

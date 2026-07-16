@@ -1,5 +1,5 @@
-# pyscript modules: calc_engine
-# pyodide wheels: lvgl-cpython
+# deps: lvgl
+# modules: calc_engine
 """
 calc_lvgl
 ====================================================
