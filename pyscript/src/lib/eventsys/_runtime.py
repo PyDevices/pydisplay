@@ -272,7 +272,8 @@ class Runtime:
         * sync, signal-based backend (``multimer.uses_signals()``), interactive
           session (``-i`` or bare REPL then ``import``): return immediately —
           the REPL stays alive and the RT signal drives the auto-service, so a
-          keep-alive loop is optional here.
+          keep-alive loop is optional here. Soft-timer coalescing / pacing in
+          ``multimer`` prevents LVGL catch-up from busy-locking the REPL.
         * sync otherwise: block until quit, then tear down.
 
         The coroutine :meth:`run` stays public for ``await`` composition inside an
