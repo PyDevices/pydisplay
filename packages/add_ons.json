@@ -53,6 +53,10 @@
       "github:PyDevices/pydisplay/src/add_ons/png.py"
     ],
     [
+      "ps_loader.py",
+      "github:PyDevices/pydisplay/src/add_ons/ps_loader.py"
+    ],
+    [
       "tft_bitmap.py",
       "github:PyDevices/pydisplay/src/add_ons/tft_bitmap.py"
     ],
