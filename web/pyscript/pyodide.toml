@@ -96,3 +96,4 @@ interpreter = "./vendor/pyodide/pyodide.mjs"
 "./src/lib/multimer/_backends/threading.py" = "/lib/multimer/_backends/"
 "./src/lib/multimer/_backends/win32.py" = "/lib/multimer/_backends/"
 
+"./src/add_ons/ps_loader.py" = "/"

@@ -21,7 +21,7 @@
     <script type="module" src="./vendor/core.js"></script>
     <script src="https://pydevices.github.io/assets/js/theme-toggle.js" defer></script>
 </head>
-<body>
+<body data-loader-runtime="mpy">
     <header class="site-header">
         <div class="wrap">
             <a class="brand" href="https://pydevices.github.io/">
@@ -401,18 +401,7 @@
             print("MicroPython runtime ready. Click Run to start the demo.")
     </script>
 
-    <script>
-        (function () {
-            const _btn = document.getElementById('run-btn');
-            const _spin = document.querySelector('#loading .spinner');
-            const _t = setInterval(() => {
-                if (_btn && !_btn.disabled) {
-                    if (_spin) _spin.style.display = 'none';
-                    clearInterval(_t);
-                }
-            }, 150);
-        })();
-    </script>
+    <script src="./loader-ready.js"></script>
 
     <script>
         (function () {
