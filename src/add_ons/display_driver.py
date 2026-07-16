@@ -20,6 +20,11 @@ changes kept intentionally small:
 * Async mode arms the refresh task lazily on the first timer tick so module-top
   ``import display_driver`` is safe before any event loop exists.
 * No app-loop helper — LVGL apps call ``runtime.run_forever()``.
+
+Interactive desktop (librt + REPL): LVGL task handling is paced at ~30 ms with
+a wall-clock gate. The Runtime timer stays at 10 ms; a host-pump subscription
+drains SDL/keys every tick so the window cannot stall while LVGL is paused or
+slow.
 """
 
 import gc
@@ -32,13 +37,18 @@ import eventsys
 from eventsys import events
 
 try:
-    from multimer import asyncio
+    from multimer import asyncio, ticks_add, ticks_diff, ticks_ms
 except ImportError:
     asyncio = None
+    ticks_add = None
+    ticks_diff = None
+    ticks_ms = None
 
 asyncio_available = asyncio is not None
 
+LVGL_PERIOD_MS = 30
 _driver_ref = None
+_host_pump_sub = None
 
 
 def _asyncio_loop_running():
@@ -59,11 +69,12 @@ class event_loop:
 
     def __init__(
         self,
-        freq=25,
+        freq=None,
         max_scheduled=2,
         refresh_cb=None,
         asynchronous=False,
         exception_sink=None,
+        period_ms=None,
     ):
         if self.is_running():
             raise RuntimeError("Event loop is already running!")
@@ -73,11 +84,18 @@ class event_loop:
 
         event_loop._current_instance = self
 
-        self.delay = 1000 // freq
+        if period_ms is not None:
+            self.delay = int(period_ms)
+        elif freq is not None:
+            self.delay = max(1, 1000 // int(freq))
+        else:
+            self.delay = LVGL_PERIOD_MS
+
         self.refresh_cb = refresh_cb
         self.exception_sink = exception_sink if exception_sink else self.default_exception_sink
         self._pause = 0
         self._in_task = False
+        self._next_ok_ms = None
 
         self.asynchronous = asynchronous
         self.refresh_task = None
@@ -91,11 +109,6 @@ class event_loop:
             if not asyncio_available:
                 raise RuntimeError("Cannot run asynchronous event loop. asyncio is not available!")
             self.refresh_event = asyncio.Event()
-            # The async refresh task and AsyncTimer both need a running asyncio
-            # loop. If one is already running (host loop on PyScript/Jupyter, or
-            # imported from within a task) arm immediately; otherwise defer until
-            # arm() is called once the loop starts. This lets ``import
-            # display_driver`` sit at module top level before any loop exists.
             if _asyncio_loop_running():
                 self.arm()
         else:
@@ -161,20 +174,38 @@ class event_loop:
             while True:
                 self.tick()
 
+    def _gate_allows(self):
+        if ticks_ms is None or self._next_ok_ms is None:
+            return True
+        # Positive diff means _next_ok_ms is still in the future.
+        return ticks_diff(self._next_ok_ms, ticks_ms()) <= 0
+
+    def _arm_gate(self):
+        if ticks_ms is None or ticks_add is None:
+            return
+        # Pace from completion so a slow flush cannot be immediately followed
+        # by another (RT-signal backlog under micropython -i).
+        self._next_ok_ms = ticks_add(ticks_ms(), self.delay)
+
     def timer_cb(self, t):
         # Called from the runtime's shared timer (on the main thread).
         # In async mode the AsyncTimer fires from inside the running asyncio
         # loop, so we can safely arm (create the refresh task) on the first
-        # tick — no need for an external coordinator.
+        # tick -- no need for an external coordinator.
         if self.asynchronous and not self._async_armed:
             self.arm()
+        if not self._gate_allows():
+            return
         lv.tick_inc(self.delay)
         if self._pause > 0:
+            self._arm_gate()
             return
         if self.asynchronous:
             self.refresh_event.set()
+            self._arm_gate()
         else:
             self.task_handler()
+            self._arm_gate()
 
     async def async_refresh(self):
         while True:
@@ -188,13 +219,14 @@ class event_loop:
                         self.exception_sink(e)
                 if self.refresh_cb:
                     self.refresh_cb()
+                self._arm_gate()
 
     def default_exception_sink(self, e):
         sys.print_exception(e)
 
 
 def main():
-    global _driver_ref
+    global _driver_ref, _host_pump_sub
     gc.collect()
     if not lv.is_initialized():
         lv.init()
@@ -202,6 +234,7 @@ def main():
         if runtime is not None:
             runtime.claim_display_refresh()
         loop_inst = event_loop(
+            period_ms=LVGL_PERIOD_MS,
             asynchronous=runtime.timer_async if runtime is not None else False,
             refresh_cb=display_drv.show,
         )
@@ -219,6 +252,16 @@ def main():
             display_drv,
             devs,
         )
+        # Keep HOST/SDL draining on the 10 ms Runtime tick while LVGL task_handler
+        # runs only every ~30 ms (claim skips Runtime._service_tick).
+        if runtime is not None and _host_pump_sub is None:
+            vds = list(_driver_ref.virtual_devices)
+
+            def _host_pump(_t):
+                for vd in vds:
+                    vd.poll_host_device()
+
+            _host_pump_sub = runtime.on_tick(_host_pump, period=10, async_=False)
     finally:
         if loop_inst is not None:
             loop_inst.enable()
@@ -230,6 +273,13 @@ def main():
             # shared timer stops and the display is released. Tear LVGL down in
             # order: stop the event loop, then lv.deinit() to release LVGL's C
             # state so nothing dereferences it during interpreter finalization.
+            global _host_pump_sub
+            if _host_pump_sub is not None:
+                try:
+                    _host_pump_sub.deinit()
+                except Exception:
+                    pass
+                _host_pump_sub = None
             inst = event_loop.current_instance()
             if inst is not None:
                 inst.deinit()
@@ -284,7 +334,9 @@ def _keypad_cb(event, indev, data):
         data.key = event.key
 
 
-def create_devices(devs, lv_display):
+def create_devices(devs, lv_display, virtual_devices=None):
+    if virtual_devices is None:
+        virtual_devices = []
     for device in devs:
         if device.type in (eventsys.POINTER, eventsys.ENCODER, eventsys.KEYPAD):
             indev = lv.indev_create()
@@ -303,7 +355,9 @@ def create_devices(devs, lv_display):
             indev.set_read_cb(device.poll)
         elif device.type == eventsys.HOST:
             vd = eventsys.VirtualDevices(device)
-            create_devices(vd.devices, lv_display)
+            virtual_devices.append(vd)
+            create_devices(vd.devices, lv_display, virtual_devices)
+    return virtual_devices
 
 
 class DisplayDriver:
@@ -338,7 +392,7 @@ class DisplayDriver:
             display_drv.display_bus.register_callback(self.lv_display.flush_ready)
         self.lv_display.set_draw_buffers(self._draw_buf1, self._draw_buf2)
         self.lv_display.set_render_mode(lv.DISPLAY_RENDER_MODE.PARTIAL)
-        create_devices(devs, self.lv_display)
+        self.virtual_devices = create_devices(devs, self.lv_display)
 
     def _flush_cb(self, disp_drv, area, color_p):
         if hasattr(display_drv, "_sdl_active") and not display_drv._sdl_active():
@@ -356,4 +410,5 @@ class DisplayDriver:
             self.lv_display.flush_ready()
 
 
+# Import-time bootstrap (same as before the probe split).
 main()
