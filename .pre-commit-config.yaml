@@ -12,3 +12,17 @@ repos:
     rev: 0.9.1
     hooks:
       - id: nbstripout
+  - repo: local
+    hooks:
+      - id: install-refresh-manifests
+        name: refresh install manifests (packages/*.json)
+        entry: ./scripts/install_refresh_manifests.sh
+        language: system
+        pass_filenames: false
+        files: ^(src/|scripts/install_gen_manifests\.py|scripts/personal_examples\.py)
+      - id: gallery-generator
+        name: refresh PyScript gallery (index.html)
+        entry: python3 scripts/gallery_generator.py
+        language: system
+        pass_filenames: false
+        files: ^(src/examples/.*\.py$|scripts/gallery_generator\.py|scripts/url_maker\.py)

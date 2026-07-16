@@ -14,17 +14,27 @@ python3 -m venv .venv-docs
 .venv-docs/bin/mkdocs serve    # http://127.0.0.1:8000
 ```
 
-After editing files under `src/`:
+After editing files under `src/` (or install pre-commit hooks — see below):
 
 ```bash
 ./scripts/install_refresh_manifests.sh    # refresh packages/*.json and web/pyscript/micropython.toml
 ```
 
+Optional — run codegen on commit (CI still audits if you skip this):
+
+```bash
+.venv/bin/pip install -r requirements-dev.txt
+.venv/bin/pre-commit install
+```
+
+Hooks refresh install manifests when `src/` changes and the PyScript gallery when
+`src/examples/` (or gallery scripts) change.
+
 ## Pull request workflow
 
 1. Fork [PyDevices/pydisplay](https://github.com/PyDevices/pydisplay)
 2. Create a feature branch
-3. Make changes; run `./scripts/install_refresh_manifests.sh --audit` if you touched `src/`
+3. Make changes; run `./scripts/install_refresh_manifests.sh --audit` if you touched `src/` (or use pre-commit)
 4. For docs: see [Building docs](building-docs.md) — `mkdocs serve` and verify pages build
 5. Open a PR against `main` with a clear description
 
@@ -40,7 +50,10 @@ After editing files under `src/`:
 
 ## Code style
 
-Python is linted with Ruff — see `pyproject.toml`. Pre-commit hooks may run on commit.
+Python is linted with Ruff — see `pyproject.toml`. With `pre-commit install`, hooks
+run Ruff, strip notebook outputs, refresh install manifests, and refresh the PyScript
+gallery (narrow paths). CI keeps `--audit` / `--check` gates for contributors who do
+not use pre-commit.
 
 Public API docstrings: [Docstring conventions](contributing/docstrings.md).
 
