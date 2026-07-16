@@ -9,15 +9,12 @@ Run only (``import lib.path`` then ``import ps_loader``). MicroPython WASM uses
 firmware ``mip`` after ``lib.path``; Pyodide uses ``add_ons/mip.py``.
 """
 
-import sys
-
 MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
 MANIFEST_MIP_TARGET = "examples"
 WHEEL_INDEX_URLS = (
     "https://test.pypi.org/simple/",
     "https://pypi.org/simple/",
 )
-_MPY_LIB_CHANNEL_DEFAULT = "6"
 
 
 def parse_names(raw):
@@ -59,24 +56,6 @@ def module_url(name):
     return "github:PyDevices/pydisplay/src/examples/" + name + ".py"
 
 
-def mip_lib_channel():
-    mpy_byte = getattr(sys.implementation, "_mpy", 0) & 0xFF
-    if mpy_byte:
-        return str(mpy_byte)
-    return _MPY_LIB_CHANNEL_DEFAULT
-
-
-def _index_package_url(name, channel):
-    return (
-        MIP_LIB_INDEX.rstrip("/")
-        + "/package/"
-        + channel
-        + "/"
-        + name
-        + "/latest.json"
-    )
-
-
 def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url_base=None):
     manifest_kw = {"target": MANIFEST_MIP_TARGET}
     if url_base is not None:
@@ -94,13 +73,11 @@ def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url
 def _install_index_deps_micropython(mip_mod, names, status):
     if not names:
         return
-    channel = mip_lib_channel()
     for which in names:
         if status:
             status("Installing " + which + "…")
-        pkg_url = _index_package_url(which, channel)
-        print("MIP install:", which, "channel=", channel)
-        mip_mod.install(pkg_url, index=MIP_LIB_INDEX)
+        print("MIP install:", which, "index=", MIP_LIB_INDEX)
+        mip_mod.install(which, index=MIP_LIB_INDEX)
 
 
 def _ensure_cwd():

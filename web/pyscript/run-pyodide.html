@@ -77,13 +77,18 @@
 </script>
 <script type="py" config="./pyodide.toml" output="log">
 import builtins
+import os
+import sys
 from js import document
 
-def _ps_loader():
-    import lib.path  # noqa: F401
-    import ps_loader
-
-    return ps_loader
+try:
+    os.chdir("/")
+except OSError:
+    pass
+if "/" not in sys.path:
+    sys.path.insert(0, "/")
+import lib.path  # noqa: F401
+import ps_loader
 
 def _log_print(*args, **kwargs):
     el = document.getElementById("log")
@@ -102,10 +107,9 @@ def _from_window(name, default=""):
 async def _run():
     if _from_window("__pydisplayLoaderDisabled"):
         return
-    pl = _ps_loader()
-    modules = pl.parse_names(_from_window("__pydisplayModules"))
-    manifests = pl.parse_names(_from_window("__pydisplayManifests"))
-    wheels = pl.parse_names(_from_window("__pydisplayWheels"))
+    modules = ps_loader.parse_names(_from_window("__pydisplayModules"))
+    manifests = ps_loader.parse_names(_from_window("__pydisplayManifests"))
+    wheels = ps_loader.parse_names(_from_window("__pydisplayWheels"))
     entry = _from_window("__pydisplayEntry")
     if not entry and modules:
         entry = modules[0]
@@ -114,7 +118,7 @@ async def _run():
     if not entry:
         print("Missing ?modules= and/or ?manifests= in the URL.")
         return
-    await pl.install_pyodide(modules, manifests, wheels)
+    await ps_loader.install_pyodide(modules, manifests, wheels)
     __import__(entry)
 
 await _run()
