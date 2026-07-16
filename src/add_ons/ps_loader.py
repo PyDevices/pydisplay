@@ -9,15 +9,12 @@ Run only (``import lib.path`` then ``import ps_loader``). MicroPython WASM uses
 firmware ``mip`` after ``lib.path``; Pyodide uses ``add_ons/mip.py``.
 """
 
-import sys
-
 MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
 MANIFEST_MIP_TARGET = "examples"
 WHEEL_INDEX_URLS = (
     "https://test.pypi.org/simple/",
     "https://pypi.org/simple/",
 )
-_MPY_LIB_CHANNEL_DEFAULT = "6"
 
 
 def parse_names(raw):
@@ -57,24 +54,6 @@ def module_url(name):
     if _use_same_origin():
         return _page_base() + "src/examples/" + name + ".py"
     return "github:PyDevices/pydisplay/src/examples/" + name + ".py"
-
-
-def mip_lib_channel():
-    mpy_byte = getattr(sys.implementation, "_mpy", 0) & 0xFF
-    if mpy_byte:
-        return str(mpy_byte)
-    return _MPY_LIB_CHANNEL_DEFAULT
-
-
-def _index_package_url(name, channel):
-    return (
-        MIP_LIB_INDEX.rstrip("/")
-        + "/package/"
-        + channel
-        + "/"
-        + name
-        + "/latest.json"
-    )
 
 
 def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url_base=None):
