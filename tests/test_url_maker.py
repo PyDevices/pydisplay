@@ -14,38 +14,36 @@ from url_maker import rewrite_mip, rewrite_wheel, url, urls_from_deps  # noqa: E
 
 
 class UrlMakerTests(unittest.TestCase):
-    def test_micropython_filters_wheels(self):
+    def test_micropython_deps(self):
         q = url(
             modules=("hello",),
-            mip=("palettes",),
-            wheels=("palettes",),
+            deps=("palettes",),
             runtime="micropython",
         )
-        self.assertEqual(q, "?modules=hello&mip=palettes")
+        self.assertEqual(q, "?modules=hello&deps=palettes")
 
-    def test_pyodide_filters_mip(self):
+    def test_pyodide_deps(self):
         q = url(
             modules=("hello",),
-            mip=("palettes",),
-            wheels=("palettes",),
+            deps=("palettes",),
             runtime="pyodide",
         )
-        self.assertEqual(q, "?modules=hello&wheels=palettes")
+        self.assertEqual(q, "?modules=hello&deps=palettes")
 
     def test_runtime_none_returns_both(self):
-        out = url(modules=("hello",), mip=("palettes",), wheels=("palettes",), runtime=None)
+        out = url(modules=("hello",), deps=("palettes",), runtime=None)
         self.assertEqual(
             out,
             {
-                "micropython": "?modules=hello&mip=palettes",
-                "pyodide": "?modules=hello&wheels=palettes",
+                "micropython": "?modules=hello&deps=palettes",
+                "pyodide": "?modules=hello&deps=palettes",
             },
         )
 
     def test_deps_expand_both_channels(self):
         out = urls_from_deps(modules=("hello",), deps=("palettes",), runtime=None)
-        self.assertEqual(out["micropython"], "?modules=hello&mip=palettes")
-        self.assertEqual(out["pyodide"], "?modules=hello&wheels=palettes")
+        self.assertEqual(out["micropython"], "?modules=hello&deps=palettes")
+        self.assertEqual(out["pyodide"], "?modules=hello&deps=palettes")
 
     def test_lvgl_rewrite_wheels_omit_mip(self):
         out = urls_from_deps(
@@ -56,7 +54,7 @@ class UrlMakerTests(unittest.TestCase):
         self.assertEqual(out["micropython"], "?modules=calc_lvgl,calc_engine")
         self.assertEqual(
             out["pyodide"],
-            "?modules=calc_lvgl,calc_engine&wheels=lvgl-cpython",
+            "?modules=calc_lvgl,calc_engine&deps=lvgl-cpython",
         )
 
     def test_graphics_prefers_cmod_wheel(self):
@@ -66,17 +64,17 @@ class UrlMakerTests(unittest.TestCase):
         out = urls_from_deps(modules=("x",), deps=("graphics",), runtime=None)
         self.assertEqual(out["micropython"], "?modules=x")
         self.assertEqual(out["pyodide"], "?modules=x")
-        # empty-skip profile emits graphics-cmod on wheels
+        # empty-skip profile emits graphics-cmod on pyodide
         q = url(
             modules=("x",),
-            wheels=("graphics",),
+            deps=("graphics",),
             runtime="pyodide",
             profile="bare",
         )
-        self.assertEqual(q, "?modules=x&wheels=graphics-cmod")
+        self.assertEqual(q, "?modules=x&deps=graphics-cmod")
         q = url(
             modules=("x",),
-            mip=("graphics",),
+            deps=("graphics",),
             runtime="micropython",
             profile="firmware-cmods",
         )
@@ -90,35 +88,39 @@ class UrlMakerTests(unittest.TestCase):
         )
         self.assertEqual(
             out["micropython"],
-            "?modules=calc_widgets,calc_engine&mip=pdwidgets",
+            "?modules=calc_widgets,calc_engine&deps=pdwidgets",
         )
         self.assertEqual(
             out["pyodide"],
-            "?modules=calc_widgets,calc_engine&wheels=pdwidgets",
+            "?modules=calc_widgets,calc_engine&deps=pdwidgets",
         )
 
     def test_manifests_and_modules(self):
         q = url(
             modules=("demo",),
             manifests=("alien",),
-            mip=("palettes",),
+            deps=("palettes",),
             runtime="micropython",
         )
-        self.assertEqual(q, "?modules=demo&manifests=alien&mip=palettes")
+        self.assertEqual(q, "?modules=demo&manifests=alien&deps=palettes")
 
     def test_unknown_kwarg_errors(self):
         with self.assertRaises(TypeError):
             url(modules=("a",), packages=("x",))  # type: ignore[call-arg]
+        with self.assertRaises(TypeError):
+            url(modules=("a",), mip=("x",))  # type: ignore[call-arg]
+        with self.assertRaises(TypeError):
+            url(modules=("a",), wheels=("x",))  # type: ignore[call-arg]
 
-    def test_github_passthrough_on_mip(self):
+    def test_github_passthrough_on_deps(self):
         q = url(
             modules=("x",),
-            mip=("github:PyDevices/pydisplay/packages/foo.json",),
+            deps=("github:PyDevices/pydisplay/packages/foo.json",),
             runtime="micropython",
         )
         self.assertEqual(
             q,
-            "?modules=x&mip=github:PyDevices/pydisplay/packages/foo.json",
+            "?modules=x&deps=github:PyDevices/pydisplay/packages/foo.json",
         )
 
     def test_rewrite_helpers(self):

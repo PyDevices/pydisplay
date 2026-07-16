@@ -34,7 +34,7 @@ Optional header comments (first 10 lines), one line per namespace:
 
 | Marker | Effect |
 |--------|--------|
-| `# deps: …` | Logical packages → `mip` / `wheels` via `url_maker` |
+| `# deps: …` | Logical packages → `?deps=` via `url_maker` (MIP on MicroPython, micropip on Pyodide) |
 | `# modules: …` | Extra example `.py` stems from this site |
 | `# manifests: …` | Extra site-served `packages/<name>.json` demo bundles |
 | `# gallery: featured` | Pin to the top of the gallery (badge) |

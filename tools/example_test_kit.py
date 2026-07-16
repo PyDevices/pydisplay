@@ -442,7 +442,7 @@ def pyscript_skips_binaries(example_id: str, example_meta: dict) -> bool:
 
 
 def pyscript_embed_query(example_id: str, example_meta: dict) -> str:
-    """Build loader query via ``url_maker`` (modules/manifests/mip) for embed.html."""
+    """Build loader query via ``url_maker`` (modules/manifests/deps) for embed.html."""
     scripts_dir = str(REPO / "scripts")
     if scripts_dir not in sys.path:
         sys.path.insert(0, scripts_dir)

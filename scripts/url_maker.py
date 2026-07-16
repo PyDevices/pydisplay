@@ -1,21 +1,22 @@
 """Build PyScript loader query strings from logical install intents.
 
-Callers pass logical package names (``graphics``, ``lvgl``, ``palettes``, …).
-This module rewrites them per channel, drops builtins for the active profile,
-and emits query-only strings (``?modules=…&mip=…``). Prepend
-``micropython.html`` / ``pyodide.html`` yourself.
+Callers pass logical names matching example headers (``# deps:``, ``# modules:``,
+``# manifests:``). This module rewrites deps per runtime, drops builtins for the
+active profile, and emits query-only strings
+(``?modules=…&manifests=…&deps=…``). Prepend ``micropython.html`` /
+``pyodide.html`` yourself.
 
-    from url_maker import url
+    from url_maker import urls_from_deps
 
-    url(modules=("hello",), mip=("palettes",), runtime="micropython")
-    # -> '?modules=hello&mip=palettes'
+    urls_from_deps(modules=("hello",), deps=("palettes",), runtime="micropython")
+    # -> '?modules=hello&deps=palettes'
 
-    url(modules=("hello",), wheels=("palettes",), runtime="pyodide")
-    # -> '?modules=hello&wheels=palettes'
+    urls_from_deps(modules=("hello",), deps=("palettes",), runtime="pyodide")
+    # -> '?modules=hello&deps=palettes'
 
-    url(modules=("hello",), mip=("palettes",), wheels=("palettes",), runtime=None)
-    # -> {'micropython': '?modules=hello&mip=palettes',
-    #     'pyodide': '?modules=hello&wheels=palettes'}
+    urls_from_deps(modules=("hello",), deps=("palettes",), runtime=None)
+    # -> {'micropython': '?modules=hello&deps=palettes',
+    #     'pyodide': '?modules=hello&deps=palettes'}
 """
 
 from __future__ import annotations
@@ -25,7 +26,7 @@ from typing import Iterable
 RUNTIMES = ("micropython", "pyodide")
 
 # Profiles → logical names already present (frozen, cmod, or toml-mounted).
-# Skip those names when emitting mip/wheels for that profile.
+# Skip those names when emitting deps for that profile.
 PROFILES: dict[str, frozenset[str]] = {
     # Browser MP: src/lib + add_ons mounted; do not auto-install core libs.
     "pyscript-mp": frozenset(
@@ -50,7 +51,7 @@ PROFILES: dict[str, frozenset[str]] = {
     "firmware-cmods": frozenset({"graphics", "lvgl"}),
 }
 
-# Channel-aware rewrites: logical name → install name (or None to omit/error).
+# Runtime-aware rewrites: logical name → install name (or None to omit).
 _MIP_REWRITE: dict[str, str | None] = {
     "lvgl": None,  # C-only; no MIP package
     "lvgl-cpython": None,
@@ -156,8 +157,7 @@ def url(
     *,
     modules: Iterable[str] = (),
     manifests: Iterable[str] = (),
-    mip: Iterable[str] = (),
-    wheels: Iterable[str] = (),
+    deps: Iterable[str] = (),
     runtime: str | None = None,
     profile: str | None = None,
     **kwargs: object,
@@ -172,8 +172,7 @@ def url(
 
     modules_t = _dedupe(_as_tuple(modules))
     manifests_t = _dedupe(_as_tuple(manifests))
-    mip_t = _as_tuple(mip)
-    wheels_t = _as_tuple(wheels)
+    deps_t = _as_tuple(deps)
 
     if runtime is not None and runtime not in RUNTIMES:
         raise ValueError(f"runtime must be one of {RUNTIMES!r} or None, got {runtime!r}")
@@ -191,17 +190,12 @@ def url(
                 pass
             prof = profile
 
+        channel = "mip" if rt == "micropython" else "wheels"
         parts: list[tuple[str, list[str]]] = [
             ("modules", modules_t),
             ("manifests", manifests_t),
+            ("deps", _apply_channel(deps_t, channel=channel, profile=prof)),
         ]
-        if rt == "micropython":
-            # Prefer explicit mip=; if only wheels= given (logical deps), use those names.
-            src = mip_t if mip_t else wheels_t
-            parts.append(("mip", _apply_channel(src, channel="mip", profile=prof)))
-        else:
-            src = wheels_t if wheels_t else mip_t
-            parts.append(("wheels", _apply_channel(src, channel="wheels", profile=prof)))
         return _join_query(parts)
 
     if runtime is None:
@@ -217,13 +211,11 @@ def urls_from_deps(
     runtime: str | None = None,
     profile: str | None = None,
 ) -> str | dict[str, str]:
-    """Convenience: one logical ``deps`` list feeds both mip and wheels channels."""
-    deps_t = _as_tuple(deps)
+    """Emit loader queries from logical ``deps`` (rewritten per runtime)."""
     return url(
         modules=modules,
         manifests=manifests,
-        mip=deps_t,
-        wheels=deps_t,
+        deps=deps,
         runtime=runtime,
         profile=profile,
     )

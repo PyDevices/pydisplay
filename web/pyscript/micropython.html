@@ -108,7 +108,8 @@
                     <ul>
                         <li><code>?modules=</code> — comma-separated top-level module stems (no <code>.py</code>).</li>
                         <li><code>?manifests=</code> — comma-separated MIP manifest names; each installs <code>packages/&lt;name&gt;.json</code>.</li>
-                        <li>Both may appear; whichever param comes <em>first</em> in the URL supplies the import entry point.</li>
+                        <li><code>?deps=</code> — comma-separated packages installed via MIP (micropython-lib index).</li>
+                        <li>Modules/manifests may both appear; whichever param comes <em>first</em> in the URL supplies the import entry point.</li>
                         <li>Click <strong>Run</strong> to install everything, then import the entry.</li>
                     </ul>
                 </div>
@@ -159,7 +160,7 @@
             function parseLoaderQuery(search) {
                 const modules = [];
                 const manifests = [];
-                const mip = [];
+                const deps = [];
                 let entryKind = null;
                 let entryName = null;
                 const raw = search.startsWith('?') ? search.slice(1) : search;
@@ -184,14 +185,14 @@
                             entryName = list[0];
                         }
                         manifests.push.apply(manifests, list);
-                    } else if (key === 'mip') {
-                        mip.push.apply(mip, parseCommaList(val));
+                    } else if (key === 'deps') {
+                        deps.push.apply(deps, parseCommaList(val));
                     }
                 }
                 return {
                     modules: modules,
                     manifests: manifests,
-                    mip: mip,
+                    deps: deps,
                     entryKind: entryKind,
                     entryName: entryName,
                 };
@@ -209,7 +210,7 @@
                         bad.push(name);
                     }
                 });
-                plan.mip.forEach(function (name) {
+                plan.deps.forEach(function (name) {
                     if (!SAFE_PACKAGE_NAME.test(name)) {
                         bad.push(name);
                     }
@@ -249,7 +250,7 @@
             window.__pydisplayLoaderReady = true;
             window.__pydisplayModules = plan.modules.join(',');
             window.__pydisplayManifests = plan.manifests.join(',');
-            window.__pydisplayMip = plan.mip.join(',');
+            window.__pydisplayDeps = plan.deps.join(',');
             window.__pydisplayEntryKind = plan.entryKind || '';
             window.__pydisplayEntry = plan.entryName || '';
 
@@ -289,6 +290,9 @@
                 }
                 if (plan.manifests.length) {
                     installParts.push(plan.manifests.length + ' manifest(s)');
+                }
+                if (plan.deps.length) {
+                    installParts.push('deps: ' + plan.deps.join(', '));
                 }
                 if (lede) {
                     lede.textContent = 'MicroPython loader: ' + installParts.join(', ') +
@@ -358,7 +362,7 @@
         def _loader_plan():
             modules = _parse_comma(_from_window("__pydisplayModules"))
             manifests = _parse_comma(_from_window("__pydisplayManifests"))
-            mip_names = _parse_comma(_from_window("__pydisplayMip"))
+            deps = _parse_comma(_from_window("__pydisplayDeps"))
             entry_kind = _from_window("__pydisplayEntryKind")
             entry = _from_window("__pydisplayEntry")
             if not entry and modules:
@@ -367,7 +371,7 @@
             elif not entry and manifests:
                 entry_kind = entry_kind or "manifest"
                 entry = manifests[0]
-            return modules, manifests, mip_names, entry_kind, entry
+            return modules, manifests, deps, entry_kind, entry
 
         MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
 
@@ -391,7 +395,7 @@
                 return _same_origin_base() + "src/examples/" + name + ".py"
             return "github:PyDevices/pydisplay/src/examples/" + name + ".py"
 
-        def _install_mip_packages(names):
+        def _install_deps(names):
             if not names:
                 return
             import mip
@@ -409,7 +413,7 @@
             global _started
             if _started or _loader_disabled():
                 return
-            modules, manifests, mip_names, entry_kind, entry = _loader_plan()
+            modules, manifests, deps, entry_kind, entry = _loader_plan()
             if not entry:
                 _log_print("Missing ?modules= and/or ?manifests= in the URL.")
                 _set("Error — add ?modules= and/or ?manifests=.")
@@ -428,7 +432,7 @@
                 for name in modules:
                     mip.install(_module_url(name))
                 import lib.path  # add_ons on path for setups / fetch_ph_gui
-                _install_mip_packages(mip_names)
+                _install_deps(deps)
                 _set("Importing " + entry + "…")
                 __import__(entry)
                 _set("")

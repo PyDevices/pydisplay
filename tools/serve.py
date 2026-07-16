@@ -33,7 +33,7 @@ Why a custom server instead of `python -m http.server`?
 
 Everything here is CPython standard library only — no third-party deps.
 
-Pyodide gallery demos install third-party packages via ``?wheels=`` on
+Pyodide gallery demos install third-party packages via ``?deps=`` on
 ``pyodide.html`` (micropip / TestPyPI+PyPI). This server only serves static files.
 """
 
@@ -52,6 +52,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # Path prefix the page-side debug beacon POSTs to. Anything under it is treated
 # as a log sink so Cursor Debug mode tooling can pick its own sub-paths.
 DEBUG_PREFIX = "/__debug"
+
 
 def _stamp() -> str:
     now = datetime.datetime.now(datetime.UTC)

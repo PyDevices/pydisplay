@@ -32,7 +32,7 @@ Regenerate the card list with `python scripts/gallery_generator.py`. Every examp
 
 | Marker | Effect |
 |--------|--------|
-| `# deps: …` | Logical packages → `mip` / `wheels` via `url_maker` |
+| `# deps: …` | Logical packages → `?deps=` via `url_maker` (MIP on MicroPython, micropip on Pyodide) |
 | `# modules: …` | Extra example `.py` stems |
 | `# manifests: …` | Extra site-served demo bundles (`packages/<name>.json`) |
 | `# gallery: featured` | Pin to the top (badge) |

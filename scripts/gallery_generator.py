@@ -10,7 +10,7 @@ Default-includes every example **entry point** under ``src/examples/``:
 
 Optional headers (first 10 lines), one line per namespace::
 
-  # deps: palettes, lvgl          — logical packages → mip/wheels via url_maker
+  # deps: palettes, lvgl          — logical packages → ?deps= via url_maker
   # modules: calc_engine          — extra example .py stems (site)
   # manifests: alien              — site-served packages/<name>.json bundles
   # gallery: featured|skip|binaries
