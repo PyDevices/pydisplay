@@ -72,10 +72,12 @@
 <script type="mpy" config="./micropython.toml" output="log">
 import builtins
 from js import document
-import sys
-if "/add_ons" not in sys.path:
-    sys.path.insert(0, "/add_ons")
-import ps_loader
+
+def _ps_loader():
+    import lib.path  # noqa: F401
+    import ps_loader
+
+    return ps_loader
 
 def _log_print(*args, **kwargs):
     el = document.getElementById("log")
@@ -94,9 +96,10 @@ def _from_window(name, default=""):
 def _run():
     if _from_window("__pydisplayLoaderDisabled"):
         return
-    modules = ps_loader.parse_names(_from_window("__pydisplayModules"))
-    manifests = ps_loader.parse_names(_from_window("__pydisplayManifests"))
-    mip_pkgs = ps_loader.parse_names(_from_window("__pydisplayMip"))
+    pl = _ps_loader()
+    modules = pl.parse_names(_from_window("__pydisplayModules"))
+    manifests = pl.parse_names(_from_window("__pydisplayManifests"))
+    mip_pkgs = pl.parse_names(_from_window("__pydisplayMip"))
     entry = _from_window("__pydisplayEntry")
     if not entry and modules:
         entry = modules[0]
@@ -105,7 +108,7 @@ def _run():
     if not entry:
         print("Missing ?modules= and/or ?manifests= in the URL.")
         return
-    ps_loader.install_micropython(modules, manifests, mip_pkgs)
+    pl.install_micropython(modules, manifests, mip_pkgs)
     __import__(entry)
 
 _run()
