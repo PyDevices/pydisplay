@@ -311,7 +311,7 @@
         import builtins
         from js import document
         from pyscript.ffi import create_proxy
-        import ps_installers
+        import ps_loader
 
         def _log_print(*args, **kwargs):
             el = document.getElementById("log")
@@ -343,9 +343,9 @@
             global _started
             if _started or _loader_disabled():
                 return
-            modules = ps_installers.parse_names(_from_window("__pydisplayModules"))
-            manifests = ps_installers.parse_names(_from_window("__pydisplayManifests"))
-            deps = ps_installers.parse_names(_from_window("__pydisplayDeps"))
+            modules = ps_loader.parse_names(_from_window("__pydisplayModules"))
+            manifests = ps_loader.parse_names(_from_window("__pydisplayManifests"))
+            deps = ps_loader.parse_names(_from_window("__pydisplayDeps"))
             entry_kind = _from_window("__pydisplayEntryKind")
             entry = _from_window("__pydisplayEntry")
             if not entry and modules:
@@ -362,7 +362,7 @@
             _btn.disabled = True
             _btn.textContent = "Running…"
             try:
-                await ps_installers.install_pyodide(modules, manifests, deps, status=_set)
+                await ps_loader.install_pyodide(modules, manifests, deps, status=_set)
                 _set("Importing " + entry + "…")
                 __import__(entry)
                 _set("")

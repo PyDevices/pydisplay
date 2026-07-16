@@ -10,10 +10,11 @@ mpremote transport/CLI removed and local filesystem writes. For:
 
   - CPython (desktop)
   - CircuitPython (when urllib, urequests, or requests is available)
+  - Pyodide / PyScript (``pyodide.http.open_url`` when urllib is unavailable)
 
 MicroPython ships ``mip`` in firmware. ``lib.path`` appends ``add_ons`` on
 MicroPython (does not prepend), so firmware ``mip`` stays preferred when both
-exist. PyScript gallery loaders use ``ps_installers.py`` instead of this module.
+exist. PyScript gallery loaders call this module on Pyodide via ``ps_loader.py``.
 
 API (compatible subset of on-device mip)::
 
@@ -22,8 +23,8 @@ API (compatible subset of on-device mip)::
     mip.install("github:org/repo/path/package.json", target="add_ons")
     mip.install("http://example.com/pkg.py")
 
-``mpy`` defaults to **False** on CPython and CircuitPython (they cannot execute
-MicroPython ``.mpy`` bytecode on the filesystem).
+``mpy`` defaults to **False** on CPython, CircuitPython, and Pyodide (they use
+the index ``py`` channel or ``urls`` entries, not device ``.mpy`` bytecode).
 """
 
 from __future__ import annotations
@@ -90,7 +91,17 @@ def _rewrite_url(url, branch=None):
 
 
 def _http_get(url):
-    """Sync GET → bytes (urllib, urequests, or requests)."""
+    """Sync GET → bytes (Pyodide open_url, urllib, urequests, or requests)."""
+    try:
+        from pyodide.http import open_url  # type: ignore[import-not-found]
+
+        data = open_url(url).read()
+        if isinstance(data, str):
+            return data.encode("utf-8")
+        return data
+    except ImportError:
+        pass
+
     try:
         from urllib.error import HTTPError, URLError
         from urllib.request import urlopen
@@ -133,7 +144,7 @@ def _http_get(url):
                 close()
 
     raise RuntimeError(
-        "no HTTP client for mip (need urllib, urequests, or requests)"
+        "no HTTP client for mip (need pyodide.http, urllib, urequests, or requests)"
     )
 
 
@@ -197,7 +208,7 @@ def _default_target():
     return "lib"
 
 
-def _install_json(package_json_url, index, target, version, mpy):
+def _install_json(package_json_url, index, target, version, mpy, url_base=None):
     base_url = ""
     if package_json_url.startswith(_ALLOWED_PREFIXES):
         if package_json_url.startswith(("codeberg:", "github:", "gitlab:")):
@@ -225,20 +236,17 @@ def _install_json(package_json_url, index, target, version, mpy):
         fs_target_path = target.rstrip("/") + "/" + target_path
         url = str(src)
         abs_fs = url.startswith("/") or (len(url) > 1 and url[1] == ":")
-        if (
-            base_url
-            and not url.startswith(_ALLOWED_PREFIXES)
-            and not abs_fs
-        ):
+        if not url.startswith(_ALLOWED_PREFIXES) and not abs_fs:
             rel = url[2:] if url.startswith("./") else url
-            url = base_url.rstrip("/") + "/" + rel
+            root = url_base if url_base is not None else base_url
+            url = root.rstrip("/") + "/" + rel
         _download_file(url, fs_target_path, version)
 
     for dep, dep_version in package_json.get("deps", ()):
-        install(dep, index=index, target=target, version=dep_version, mpy=mpy)
+        install(dep, index=index, target=target, version=dep_version, mpy=mpy, url_base=url_base)
 
 
-def _install_package(package, index, target, version, mpy):
+def _install_package(package, index, target, version, mpy, url_base=None):
     if package.startswith(_ALLOWED_PREFIXES):
         if package.endswith(".py") or package.endswith(".mpy"):
             print("Downloading " + package + " to " + target)
@@ -251,12 +259,12 @@ def _install_package(package, index, target, version, mpy):
                 package += "/"
             package += "package.json"
         print("Installing " + package + " to " + target)
-        _install_json(package, index, target, version, mpy)
+        _install_json(package, index, target, version, mpy, url_base)
         return
 
     if package.endswith(".json"):
         print("Installing " + package + " to " + target)
-        _install_json(package, index, target, version, mpy)
+        _install_json(package, index, target, version, mpy, url_base)
         return
 
     if not version:
@@ -271,10 +279,10 @@ def _install_package(package, index, target, version, mpy):
     package_url = (
         index.rstrip("/") + "/package/" + mpy_version + "/" + package + "/" + version + ".json"
     )
-    _install_json(package_url, index, target, version, mpy)
+    _install_json(package_url, index, target, version, mpy, url_base)
 
 
-def install(package, index=None, target=None, version=None, mpy=None):
+def install(package, index=None, target=None, version=None, mpy=None, url_base=None):
     """Install a package the way MicroPython ``mip.install`` does.
 
     *package*
@@ -289,7 +297,10 @@ def install(package, index=None, target=None, version=None, mpy=None):
         Index version or VCS branch/tag for ``github:`` etc.
     *mpy*
         Prefer ``.mpy`` from the index when True. Defaults to False on
-        CPython and CircuitPython.
+        CPython, CircuitPython, and Pyodide.
+    *url_base*
+        When set, relative ``urls`` entries in a manifest resolve against this
+        base instead of the manifest JSON URL (gallery ``./src/…`` paths).
     """
     if index is None:
         index = _PACKAGE_INDEX
@@ -308,4 +319,11 @@ def install(package, index=None, target=None, version=None, mpy=None):
         package, version = package.split("@", 1)
 
     _ensure_dir(target)
-    _install_package(str(package), str(index).rstrip("/"), str(target), version, bool(mpy))
+    _install_package(
+        str(package),
+        str(index).rstrip("/"),
+        str(target),
+        version,
+        bool(mpy),
+        url_base,
+    )

@@ -16,8 +16,8 @@ mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip
 ```
 
 On **PyScript MicroPython** (`micropython.html`, `run.html`), `?deps=` / `?mip=` installs
-use the **bytecode** channel via ``add_ons/ps_installers.py`` (firmware ``mip``, not this
-module). Pyodide loaders use the same file with ``micropip`` for wheels.
+use the **bytecode** channel via ``add_ons/ps_loader.py`` (firmware ``mip`` on
+MicroPython; portable ``mip.py`` on Pyodide for manifests/modules).
 
 With `mpremote`:
 

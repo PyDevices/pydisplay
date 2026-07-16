@@ -41,7 +41,7 @@ interpreter = "./vendor/micropython/micropython.mjs"
 
 "./src/lib/board_config.py" = "/lib/"
 "./src/lib/path.py" = "/lib/"
-"./src/add_ons/ps_installers.py" = "/lib/"
+"./src/add_ons/ps_loader.py" = "/lib/"
 "./src/lib/displaysys/__init__.py" = "/lib/displaysys/"
 "./src/lib/displaysys/busdisplay.py" = "/lib/displaysys/"
 "./src/lib/displaysys/epaperdisplay.py" = "/lib/displaysys/"

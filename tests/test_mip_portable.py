@@ -67,6 +67,32 @@ class MipPortableTests(unittest.TestCase):
             mip.install(str(manifest), target=str(dest), mpy=False)
             self.assertEqual((dest / "mod.py").read_text(encoding="utf-8"), "ok\n")
 
+    def test_install_relative_urls_against_url_base(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            site = tmp_path / "pyscript"
+            (site / "src" / "examples").mkdir(parents=True)
+            (site / "src" / "examples" / "hello.py").write_text("hi\n", encoding="utf-8")
+            manifest = site / "packages" / "demo.json"
+            manifest.parent.mkdir()
+            manifest.write_text(
+                json.dumps(
+                    {
+                        "urls": [["hello.py", "./src/examples/hello.py"]],
+                        "version": "0",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            dest = tmp_path / "out"
+            mip.install(
+                str(manifest),
+                target=str(dest),
+                mpy=False,
+                url_base=str(site) + "/",
+            )
+            self.assertEqual((dest / "hello.py").read_text(encoding="utf-8"), "hi\n")
+
     def test_default_mpy_false_on_cpython(self):
         self.assertFalse(mip._default_mpy())
 

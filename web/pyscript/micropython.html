@@ -323,7 +323,7 @@
         import builtins
         from js import document
         from pyscript.ffi import create_proxy
-        import ps_installers
+        import ps_loader
 
         def _log_print(*args, **kwargs):
             el = document.getElementById("log")
@@ -349,9 +349,9 @@
             return str(val or default).strip()
 
         def _loader_plan():
-            modules = ps_installers.parse_names(_from_window("__pydisplayModules"))
-            manifests = ps_installers.parse_names(_from_window("__pydisplayManifests"))
-            deps = ps_installers.parse_names(_from_window("__pydisplayDeps"))
+            modules = ps_loader.parse_names(_from_window("__pydisplayModules"))
+            manifests = ps_loader.parse_names(_from_window("__pydisplayManifests"))
+            deps = ps_loader.parse_names(_from_window("__pydisplayDeps"))
             entry_kind = _from_window("__pydisplayEntryKind")
             entry = _from_window("__pydisplayEntry")
             if not entry and modules:
@@ -379,7 +379,7 @@
             _btn.textContent = "Running…"
             try:
                 _set("Installing…")
-                ps_installers.install_micropython(modules, manifests, deps, status=_set)
+                ps_loader.install_micropython(modules, manifests, deps, status=_set)
                 _set("Importing " + entry + "…")
                 __import__(entry)
                 _set("")
