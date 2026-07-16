@@ -45,6 +45,10 @@
       "github:PyDevices/pydisplay/src/add_ons/micropython.py"
     ],
     [
+      "mip.py",
+      "github:PyDevices/pydisplay/src/add_ons/mip.py"
+    ],
+    [
       "png.py",
       "github:PyDevices/pydisplay/src/add_ons/png.py"
     ],

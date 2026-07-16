@@ -193,6 +193,10 @@
       "github:PyDevices/pydisplay/src/examples/touch_gui_simpletest.py"
     ],
     [
+      "tv_remote_menu.py",
+      "github:PyDevices/pydisplay/src/examples/tv_remote_menu.py"
+    ],
+    [
       "widgets_actions.py",
       "github:PyDevices/pydisplay/src/examples/widgets_actions.py"
     ],
