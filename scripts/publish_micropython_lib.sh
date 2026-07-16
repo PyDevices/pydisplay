@@ -204,7 +204,8 @@ copy_source_tree() {
     local src="$1"
     local dest="$2"
     mkdir -p "$dest"
-    rsync -a "${RSYNC_EXCLUDES[@]}" "$src/" "$dest/"
+    # --delete drops removed modules (e.g. multimer/loop.py) so the sync matches src/
+    rsync -a --delete "${RSYNC_EXCLUDES[@]}" "$src/" "$dest/"
 }
 
 copy_displaysys_module() {
@@ -237,7 +238,8 @@ prune_skipped_artifacts() {
     \) -print0 | xargs -0 rm -rf
 }
 
-# Drop packages that are no longer produced from src/ (rsync does not --delete).
+# Drop packages that are no longer produced from src/ (rsync --delete only
+# cleans inside each package tree, not whole package directories).
 prune_stale_packages() {
     local expected_top=()
     local package_dir package name keep existing module base package_dir_name
