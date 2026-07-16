@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <script>try{if(localStorage.getItem('pydevices-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}</script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>pydisplay</title>
-    <meta name="description" content="Cross-platform display and event drivers for MicroPython, CircuitPython, and CPython.">
+    <title>pydisplay — PyDevices</title>
+    <meta name="description" content="Cross-platform display and event drivers for MicroPython, CircuitPython, and CPython — plus a browser PWA and Android companion.">
     <link rel="icon" type="image/svg+xml" href="https://pydevices.github.io/assets/img/logo.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +22,9 @@
             </a>
             <nav class="nav">
                 <a href="pyscript/">Demos</a>
+                <a href="pyscript/">PWA</a>
                 <a href="https://pydisplay.readthedocs.io">Docs</a>
+                <a href="https://pydevices.github.io/pydisplay_android/">Android</a>
                 <a href="https://github.com/PyDevices/pydisplay">GitHub</a>
             </nav>
             <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Toggle color theme">
@@ -33,51 +35,98 @@
     </header>
 
     <section class="hero wrap">
-        <div class="logo-badge"><img src="https://pydevices.github.io/assets/img/logo.svg" alt="PyDevices logo" width="112" height="112"></div>
+        <div class="logo-badge product-mark"><img src="img/product.svg" alt="pydisplay" width="112" height="112"></div>
         <span class="eyebrow">PyDevices / pydisplay</span>
-        <h1>Cross-platform display, input &amp; graphics — one Python codebase.</h1>
-        <p>pydisplay is the foundation of the PyDevices stack: pure-Python display, input, and event drivers that run unmodified on MicroPython, CircuitPython, and CPython. The same examples and board configs stretch from MCU panels to desktop windows and the browser — without a rewrite when you change interpreter.</p>
-        <p>Start with the live PyScript demos, dig into the docs for install paths (MIP, GitHub packages, TestPyPI), and add native cmods or LVGL when you need more speed or a full widget toolkit. The portable layer stays Python so your application logic stays shareable.</p>
+        <h1>Display, input &amp; events — one Python codebase.</h1>
+        <p>pydisplay is the foundation of the PyDevices stack: pure-Python display drivers, input, and a portable <code>Runtime</code> that run unmodified on MicroPython, CircuitPython, and CPython. The same board configs and examples stretch from MCU panels to desktop windows, the browser, and Android.</p>
+        <p>The biggest on-ramp is the installable <strong>PyScript PWA</strong> — live demos in the browser with no flash step. Need a native phone build? The <a href="https://pydevices.github.io/pydisplay_android/">pydisplay_android</a> companion ships a python-for-android APK path for the same stack.</p>
         <div class="cta">
             <a class="btn primary" href="pyscript/">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9z"/></svg>
-                Try the browser demos
+                Open the PyScript PWA
             </a>
+            <a class="btn" href="https://pydevices.github.io/pydisplay_android/">Android APK companion</a>
             <a class="btn" href="https://pydisplay.readthedocs.io">Documentation</a>
         </div>
     </section>
 
     <main class="cards wrap">
+        <div class="section-head">
+            <h2>Core runtime</h2>
+            <span class="hint">board_config + Runtime — not a separate event broker</span>
+        </div>
+        <div class="install-block">
+            <pre><code>from board_config import display_drv, runtime
+
+runtime.on(runtime.events.MOUSEBUTTONDOWN, on_click)
+runtime.run_forever()</code></pre>
+        </div>
+        <p class="prose" style="margin-top: 14px;">
+            <code>board_config</code> wires <code>display_drv</code> and <code>runtime</code> for your host.
+            Register handlers with <code>runtime.on(...)</code>, then drive the loop with
+            <code>runtime.run_forever()</code>. The same idiom appears in MCU examples,
+            the PyScript gallery, and the Android paint demo.
+        </p>
+
+        <div class="section-head" style="margin-top: 36px;">
+            <h2>In the stack</h2>
+            <span class="hint">add-ons live on their own pages</span>
+        </div>
+        <div class="grid">
+            <a class="card" href="https://pydevices.github.io/palettes/">
+                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18"/></svg></span>
+                <h3>palettes</h3>
+                <p>Wheels, cubes, Material swatches, and named colors via <code>get_palette()</code>.</p>
+                <span class="go">palettes Pages <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </a>
+            <a class="card" href="https://pydevices.github.io/pdwidgets/">
+                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+                <h3>pdwidgets</h3>
+                <p>Lightweight widgets on top of pydisplay — buttons, forms, nav, charts.</p>
+                <span class="go">pdwidgets Pages <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </a>
+            <a class="card" href="https://pydevices.github.io/pydisplay_android/">
+                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></span>
+                <h3>pydisplay_android</h3>
+                <p>Native APK companion via python-for-android — distinct from the browser PWA.</p>
+                <span class="go">Android Pages <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </a>
+        </div>
+
+        <div class="section-head" style="margin-top: 36px;">
+            <h2>More</h2>
+            <span class="hint">docs, simulation, packages</span>
+        </div>
         <div class="grid">
             <a class="card" href="https://pydisplay.readthedocs.io">
                 <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z"/><path d="M20 7v13a2 2 0 0 0-2-2H9"/></svg></span>
                 <h3>Documentation</h3>
-                <p>Guides, concepts and the full API reference on ReadTheDocs.</p>
+                <p>Guides, concepts, and API reference on Read the Docs.</p>
             </a>
             <a class="card" href="pyscript/">
                 <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                 <h3>PyScript demos</h3>
-                <p>Run the async examples live in your browser — no install required.</p>
+                <p>Gallery of the same <code>src/examples/</code> scripts — installable as a PWA.</p>
             </a>
             <a class="card" href="https://wokwi.com/projects/415770470006384641">
                 <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9zM9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg></span>
                 <h3>Wokwi example</h3>
-                <p>An ESP32-S3 simulation running pydisplay on virtual hardware.</p>
+                <p>ESP32-S3 simulation running pydisplay on virtual hardware.</p>
             </a>
             <a class="card" href="https://github.com/PyDevices/pydisplay">
                 <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-1-2.6c3-.3 6-1.5 6-6.5a5 5 0 0 0-1.4-3.5 4.6 4.6 0 0 0-.1-3.5s-1.1-.3-3.5 1.3a12 12 0 0 0-6 0C6.6 1.7 5.5 2 5.5 2a4.6 4.6 0 0 0-.1 3.5A5 5 0 0 0 4 9c0 5 3 6.2 6 6.5a3.4 3.4 0 0 0-1 2.6V22"/></svg></span>
                 <h3>Source on GitHub</h3>
-                <p>Browse the code, file issues and contribute to PyDevices/pydisplay.</p>
+                <p>Browse the code, file issues, and contribute.</p>
             </a>
             <a class="card" href="https://PyDevices.github.io/micropython-lib/mip/PyDevices">
                 <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg></span>
                 <h3>MIP package index</h3>
-                <p>Install pydisplay and its add-ons with <code>mip</code> on any *Python.</p>
+                <p>Install pydisplay and add-ons with <code>mip</code> on any *Python.</p>
             </a>
             <a class="card" href="https://pydevices.github.io/lv_bindings/">
                 <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
                 <h3>LVGL bindings</h3>
-                <p>Add a full widget toolkit with lv_bindings and the matching cmod for your runtime.</p>
+                <p>Full widget toolkit via lv_bindings and the matching cmod for your runtime.</p>
             </a>
         </div>
     </main>

@@ -1,4 +1,4 @@
-# pyscript mip: palettes
+# deps: palettes
 """
 tiny_toasters.py
 ================

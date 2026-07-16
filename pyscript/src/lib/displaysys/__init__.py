@@ -42,7 +42,6 @@ __all__ = [
     "color565",
     "color565_swapped",
     "color_rgb",
-    "default_quit_chord",
     "env_bool",
     "env_get",
     "env_int",
@@ -211,13 +210,6 @@ def capabilities():
             },
         },
     }
-
-
-def default_quit_chord():
-    """Default CTRL+Q quit chord for event-backend displays (lazy-imports eventsys.keys)."""
-    from eventsys.keys import Keys
-
-    return (Keys.K_q, Keys.KMOD_CTRL)
 
 
 def alloc_buffer(size):

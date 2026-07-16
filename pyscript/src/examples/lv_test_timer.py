@@ -1,4 +1,4 @@
-# pyodide wheels: lvgl
+# deps: lvgl
 """
 lv_test_timer.py
 
@@ -31,7 +31,6 @@ import lib.path  # noqa: F401 — must be first
 import json
 import time
 
-import lv_utils
 import lvgl as lv
 from board_config import display_drv, runtime
 
@@ -153,13 +152,9 @@ def build_ui():
     _arc_angle = 0
 
     # Pause shared LVGL task_handler while constructing widgets (not re-entrant).
-    inst = None
-    try:
-        import lv_utils
+    import display_driver
 
-        inst = lv_utils.event_loop.current_instance()
-    except ImportError:
-        inst = None
+    inst = display_driver.event_loop.current_instance()
     if inst is not None:
         inst.disable()
     try:

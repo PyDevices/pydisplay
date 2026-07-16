@@ -1,6 +1,5 @@
-# pyscript modules: calc_engine
-# pyscript mip: pdwidgets
-# pyodide wheels: pdwidgets
+# deps: pdwidgets
+# modules: calc_engine
 """
 calc_widgets
 ====================================================

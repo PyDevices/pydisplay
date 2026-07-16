@@ -1,5 +1,5 @@
-# pyscript modules: calc_engine
-# pyodide wheels: lvgl
+# deps: lvgl
+# modules: calc_engine
 """
 calc_lvgl
 ====================================================
@@ -20,8 +20,7 @@ _EXAMPLES = __file__.replace("\\", "/").rsplit("/", 1)[0]
 if _EXAMPLES not in sys.path:
     sys.path.insert(0, _EXAMPLES)
 
-import display_driver  # noqa: F401 — wires LVGL display/input into the runtime
-import lv_utils
+import display_driver  # wires LVGL display/input into the runtime
 import lvgl as lv
 from board_config import display_drv, runtime
 from calc_engine import CalcEngine
@@ -139,13 +138,7 @@ def _on_btn(e, key):
 def build_ui():
     global _engine, _expr_lbl, _num_lbl, _disp_panel, _max_expr_chars
 
-    inst = None
-    try:
-        import lv_utils
-
-        inst = lv_utils.event_loop.current_instance()
-    except ImportError:
-        inst = None
+    inst = display_driver.event_loop.current_instance()
     if inst is not None:
         inst.disable()
     try:

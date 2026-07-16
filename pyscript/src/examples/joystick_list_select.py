@@ -1,5 +1,4 @@
-# pyscript mip: pdwidgets
-# pyodide wheels: pdwidgets
+# deps: pdwidgets
 import board_config
 import eventsys
 import pdwidgets as pd

@@ -597,6 +597,12 @@ _DOM_NAMED_KEYS = {
     "ArrowDown": Keys.K_DOWN,
     "ArrowLeft": Keys.K_LEFT,
     "ArrowRight": Keys.K_RIGHT,
+    # Why BrowserBack/GoBack/Back → K_AC_BACK: webOS / Tizen / some Chromium TV
+    # remotes emit these DOM key names for the Back button; match Android SDL
+    # Back so HostEventsDevice can turn them into QUIT.
+    "BrowserBack": Keys.K_AC_BACK,
+    "GoBack": Keys.K_AC_BACK,
+    "Back": Keys.K_AC_BACK,
     "Home": Keys.K_HOME,
     "End": Keys.K_END,
     "PageUp": Keys.K_PAGEUP,
@@ -714,10 +720,21 @@ def chord_matches(chord, keycode, mod):
     return all(not (chord_mod & group and not mod & group) for group in _MOD_GROUPS)
 
 
+def default_quit_chord():
+    """Default CTRL+Q quit chord for host event backends.
+
+    Owned by eventsys alongside Android Back (``K_AC_BACK``) quit handling in
+    :func:`key_triggers_quit` / ``HostEventsDevice``. Display drivers may copy
+    this onto ``display.quit_chord`` so the host device can read it.
+    """
+    return (Keys.K_q, Keys.KMOD_CTRL)
+
+
 def key_triggers_quit(event_type, key, mod, quit_chord):
     """Return True when ``event_type`` is KEYDOWN and quit should fire.
 
-    Matches ``quit_chord`` (e.g. Ctrl+Q) or Android system Back (``K_AC_BACK``).
+    Matches ``quit_chord`` (e.g. Ctrl+Q from :func:`default_quit_chord`) or
+    Android system Back (``K_AC_BACK``).
     """
     from ._events import events
 

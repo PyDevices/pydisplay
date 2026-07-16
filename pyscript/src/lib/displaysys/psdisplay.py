@@ -9,7 +9,8 @@ displaysys.psdisplay
 from js import console, document
 from pyscript.ffi import create_proxy
 
-from displaysys import DisplayDriver, color_rgb, default_quit_chord
+from displaysys import DisplayDriver, color_rgb
+from eventsys.keys import default_quit_chord
 from eventsys import events
 from eventsys.keys import Keys, dom_key_scrolls_page, key_to_keycode, mod_mask
 
@@ -50,8 +51,9 @@ class PSDevices:
       ``JOYBUTTONDOWN`` / ``JOYBUTTONUP``.
 
     Quit chord handling is configured on :class:`PSDisplay` via ``quit_chord``
-    (default CTRL+Q); :class:`eventsys.QueueDevice` applies it when ``data=``
-    is the display driver.
+    (default from :func:`eventsys.keys.default_quit_chord`, CTRL+Q).
+    :class:`~eventsys.HostEventsDevice` applies the chord and Android Back
+    (``K_AC_BACK``) when constructed with ``display=``.
 
     Note:
         The element must be focused to receive key events.  The constructor sets

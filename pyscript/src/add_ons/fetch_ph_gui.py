@@ -318,6 +318,9 @@ def fetch_ph_gui(which, apply_patches=True):
     (e.g. PyScript loader) before the setup module defines ``SSD`` — callers
     that import ``color_setup`` / ``hardware_setup`` / ``touch_setup`` will
     call again with patches enabled.
+
+    Uses ``mip.install`` (firmware on MicroPython; portable ``add_ons/mip.py``
+    on CPython / Pyodide / CircuitPython).
     """
     if which not in _CORE_FILES:
         raise ValueError(
@@ -330,16 +333,19 @@ def fetch_ph_gui(which, apply_patches=True):
             _apply_patches(which)
         return True
 
-    try:
-        import mip
-    except ImportError:
-        # Cannot install or switch without mip; do not wipe an existing tree.
-        return False
-
     if present is not None or _gui_exists():
         _empty_gui()
 
-    mip.install(_PACKAGES[which], target=_add_ons_dir())
+    try:
+        import mip
+    except ImportError:
+        return False
+
+    try:
+        mip.install(_PACKAGES[which], target=_add_ons_dir(), mpy=False)
+    except Exception:
+        return False
+
     _purge_gui_modules()
     if _detect_core() == which:
         if apply_patches:

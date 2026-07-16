@@ -35,6 +35,9 @@ from ._runtime import DEFAULT_REFRESH_MS, Runtime
 from ._touch import TouchDevice
 
 Keys = keys.Keys
+default_quit_chord = keys.default_quit_chord
+key_triggers_quit = keys.key_triggers_quit
+chord_matches = keys.chord_matches
 
 # Device type constants (also available as eventsys.types.*)
 HOST = types.HOST
@@ -87,7 +90,10 @@ __all__ = [
     "TouchDevice",
     "VirtualDevices",
     "capabilities",
+    "chord_matches",
+    "default_quit_chord",
     "events",
+    "key_triggers_quit",
     "register_device",
     "register_event",
     "types",
