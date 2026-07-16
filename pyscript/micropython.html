@@ -321,14 +321,19 @@
 
     <script type="mpy" config="./micropython.toml" output="log">
         import builtins
+        import os
+        import sys
         from js import document
         from pyscript.ffi import create_proxy
 
-        def _ps_loader():
-            import lib.path  # noqa: F401
-            import ps_loader
-
-            return ps_loader
+        try:
+            os.chdir("/")
+        except OSError:
+            pass
+        if "/" not in sys.path:
+            sys.path.insert(0, "/")
+        import lib.path  # noqa: F401
+        import ps_loader
 
         def _log_print(*args, **kwargs):
             el = document.getElementById("log")
@@ -354,10 +359,9 @@
             return str(val or default).strip()
 
         def _loader_plan():
-            pl = _ps_loader()
-            modules = pl.parse_names(_from_window("__pydisplayModules"))
-            manifests = pl.parse_names(_from_window("__pydisplayManifests"))
-            deps = pl.parse_names(_from_window("__pydisplayDeps"))
+            modules = ps_loader.parse_names(_from_window("__pydisplayModules"))
+            manifests = ps_loader.parse_names(_from_window("__pydisplayManifests"))
+            deps = ps_loader.parse_names(_from_window("__pydisplayDeps"))
             entry_kind = _from_window("__pydisplayEntryKind")
             entry = _from_window("__pydisplayEntry")
             if not entry and modules:
@@ -385,8 +389,7 @@
             _btn.textContent = "Running…"
             try:
                 _set("Installing…")
-                pl = _ps_loader()
-                pl.install_micropython(modules, manifests, deps, status=_set)
+                ps_loader.install_micropython(modules, manifests, deps, status=_set)
                 _set("Importing " + entry + "…")
                 __import__(entry)
                 _set("")
