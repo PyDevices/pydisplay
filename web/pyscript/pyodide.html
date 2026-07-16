@@ -313,6 +313,17 @@
         from pyscript.ffi import create_proxy
 
         def _ps_loader():
+            # Pyodide needs cwd / and / on sys.path so ``import lib.path`` resolves
+            # the VFS mount at /lib/path.py (same bootstrap as pre-ps_loader loaders).
+            import os
+            import sys
+
+            try:
+                os.chdir("/")
+            except OSError:
+                pass
+            if "/" not in sys.path:
+                sys.path.insert(0, "/")
             import lib.path  # noqa: F401
             import ps_loader
 

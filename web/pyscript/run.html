@@ -74,6 +74,16 @@ import builtins
 from js import document
 
 def _ps_loader():
+    # Keep the same VFS bootstrap as pyodide.html so ``import lib.path`` is first.
+    import os
+    import sys
+
+    try:
+        os.chdir("/")
+    except OSError:
+        pass
+    if "/" not in sys.path:
+        sys.path.insert(0, "/")
     import lib.path  # noqa: F401
     import ps_loader
 
