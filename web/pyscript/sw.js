@@ -1,8 +1,25 @@
-/*! pydisplay PWA — TEMPORARY cache-purge service worker (one deploy).
- * Clears all legacy caches (e.g. pydisplay-pwa-dev from pre-hash installs) so
- * clients can fetch the stamped offline worker on the following deploy.
- * MIGRATION: cache-purge — skip CACHE_NAME stamp; restore from sw.offline.js */
-/* eslint-disable no-restricted-globals */
+/*! pydisplay PWA service worker — offline cache + COI headers for PyScript */
+/* CACHE_NAME is stamped at Pages deploy from a hash of STATIC_ASSETS + this
+ * file (see scripts/pyscript_stamp_pwa_cache.py). Git keeps -dev for local serve. */
+const CACHE_NAME = 'pydisplay-pwa-dev';
+
+const STATIC_ASSETS = [
+  './index.html',
+  './micropython.html',
+  './pyodide.html',
+  './simple.html',
+  './repl.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
+  './site.css',
+  './demo.css',
+  './pwa.css',
+  './pwa.js',
+  './mini-coi-fd.js',
+  './micropython.toml',
+  './pyodide.toml',
+];
 
 const RUNTIME_ORIGINS = [
   'pyscript.net',
@@ -23,34 +40,83 @@ function withCoiHeaders(response) {
   return new Response(status === 204 ? null : body, { status, statusText, headers });
 }
 
-function shouldAddCoi(url, request) {
+function isRuntimeOrigin(hostname) {
+  return RUNTIME_ORIGINS.some((origin) => hostname.includes(origin));
+}
+
+function isStaticAssetPath(pathname) {
+  return STATIC_ASSETS.some((asset) => {
+    const name = asset.replace(/^\.\//, '');
+    return pathname.endsWith('/' + name) || pathname.endsWith(name);
+  });
+}
+
+function shouldCache(url, request) {
   if (request.method !== 'GET') {
+    return false;
+  }
+  if (request.cache === 'only-if-cached' && request.mode !== 'same-origin') {
     return false;
   }
   if (url.origin === self.location.origin) {
     return true;
   }
-  return RUNTIME_ORIGINS.some((origin) => url.hostname.includes(origin));
+  return isRuntimeOrigin(url.hostname);
+}
+
+function cacheFirstStaleWhileRevalidate(request) {
+  return caches.match(request).then((cachedResponse) => {
+    const networkFetch = fetch(request)
+      .then((networkResponse) => {
+        if (
+          networkResponse &&
+          networkResponse.status === 200 &&
+          networkResponse.type !== 'error'
+        ) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache));
+        }
+        return networkResponse;
+      })
+      .catch(() => null);
+
+    if (cachedResponse) {
+      networkFetch.catch(() => {});
+      return cachedResponse;
+    }
+
+    return networkFetch.then((networkResponse) => {
+      if (networkResponse) {
+        return networkResponse;
+      }
+      return caches.match(request);
+    });
+  });
 }
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(self.skipWaiting());
+  event.waitUntil(
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll(STATIC_ASSETS))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
-      .then(() => self.clients.claim())
-      .then(() =>
-        self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((keys) =>
+        Promise.all(
+          keys.map((key) => {
+            if (key !== CACHE_NAME) {
+              return caches.delete(key);
+            }
+          })
+        )
       )
-      .then((clients) => {
-        clients.forEach((client) => {
-          client.navigate(client.url);
-        });
-      })
+      .then(() => self.clients.claim())
   );
 });
 
@@ -58,9 +124,19 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  if (!shouldCache(url, request)) {
+    event.respondWith(
+      fetch(request).then((response) => withCoiHeaders(response))
+    );
+    return;
+  }
+
   event.respondWith(
-    fetch(request).then((response) => {
-      if (shouldAddCoi(url, request)) {
+    cacheFirstStaleWhileRevalidate(request).then((response) => {
+      if (!response) {
+        return fetch(request).then((networkResponse) => withCoiHeaders(networkResponse));
+      }
+      if (url.origin === self.location.origin || isStaticAssetPath(url.pathname)) {
         return withCoiHeaders(response);
       }
       return response;

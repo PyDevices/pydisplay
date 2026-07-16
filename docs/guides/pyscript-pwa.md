@@ -185,7 +185,7 @@ The service worker runs in the background. It can cache responses and, for PyScr
 Key constants from the pydisplay worker:
 
 ```javascript
-const CACHE_NAME = 'pydisplay-pwa-v1';  // bump when cache layout changes
+const CACHE_NAME = 'pydisplay-pwa-dev';  // stamped at Pages deploy (see below)
 
 const STATIC_ASSETS = [
   './index.html',
@@ -231,7 +231,26 @@ Apply `withCoiHeaders` to **same-origin** responses (and shell assets) so `Share
 | CDN packages (jsDelivr, pyscript.net, …) | Stale-while-revalidate per request URL |
 | POST / non-GET | Do not cache |
 
-After deploying a new `sw.js`, bump `CACHE_NAME` so `activate` drops obsolete entries.
+### `CACHE_NAME` stamping at deploy
+
+Git keeps `CACHE_NAME = 'pydisplay-pwa-dev'` in `web/pyscript/sw.js`. The
+[Deploy PyScript site to GitHub Pages](https://github.com/PyDevices/pydisplay/blob/main/.github/workflows/deploy-pyscript.yml)
+workflow runs [`scripts/pyscript_stamp_pwa_cache.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/pyscript_stamp_pwa_cache.py)
+on the assembled `_site/pyscript/` tree **before** publishing to `gh-pages`. The
+script hashes `STATIC_ASSETS` plus the service-worker source and rewrites
+`CACHE_NAME` to `pydisplay-pwa-<hash>` (12 hex chars).
+
+That means:
+
+- **Shell changes** (HTML/CSS/PWA files listed in `STATIC_ASSETS`, or `sw.js`
+  logic) produce a new cache id → `activate` deletes older caches → installed
+  PWAs see fresh shell content and `pwa.js` can prompt **Reload**.
+- **Example / `src/` churn alone** does **not** change the hash — gallery card
+  updates do not nag installed users on every push. Stale-while-revalidate still
+  refreshes pages in the background.
+
+Local `python tools/serve.py` uses the git copy (`pydisplay-pwa-dev`); only the
+Pages artifact is stamped.
 
 See the full implementation: [`web/pyscript/sw.js`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/sw.js).
 
@@ -283,7 +302,9 @@ Pushes to `main` that touch `web/**` or `src/**` run [Deploy PyScript site to Gi
 1. Verifies generated manifests are fresh (`install_refresh_manifests.sh --audit`, `gallery_generator.py --check`).
 2. Copies `web/pyscript/*` into `_site/pyscript/`.
 3. Copies `src/lib`, `src/add_ons`, and examples into `_site/pyscript/src/`.
-4. Publishes to the `gh-pages` branch.
+4. Stamps `CACHE_NAME` in `_site/pyscript/sw.js` from shell content
+   (`pyscript_stamp_pwa_cache.py`).
+5. Publishes to the `gh-pages` branch.
 
 Before pushing PWA changes, refresh gallery metadata locally:
 
@@ -383,6 +404,57 @@ Users who install get that module every time. To ship multiple installable apps 
 
 ---
 
+## Orphaned service workers and cache migration
+
+### The problem
+
+Early pydisplay PWAs used a **fixed** `CACHE_NAME` (`pydisplay-pwa-dev`) that never
+changed between deploys. The `activate` handler only deletes caches whose names
+**differ** from the current `CACHE_NAME`:
+
+```javascript
+if (key !== CACHE_NAME) {
+  return caches.delete(key);
+}
+```
+
+So when the same name is reused forever, stale shell assets can sit in Cache
+Storage indefinitely. Worse, after we moved to **deploy-time hashing**, clients
+still on the old worker kept the same cache name and never picked up the new
+stamped worker — a classic **orphaned service worker** loop.
+
+### What we did (July 2026)
+
+We shipped a **one-deploy migration** worker in place of the normal offline
+`sw.js`. That temporary script:
+
+1. On `install` — `skipWaiting()` immediately.
+2. On `activate` — `caches.delete()` for **every** cache name (not just
+   mismatched ones), `clients.claim()`, then `client.navigate()` on all open
+   tabs so the next load is network-fresh.
+3. On `fetch` — network only, but still injects COI headers so PyScript keeps
+   working during the migration visit.
+
+The deploy workflow detected a `MIGRATION: cache-purge` marker in `sw.js` and
+skipped `CACHE_NAME` stamping for that deploy
+(`pyscript_stamp_pwa_cache.py`). A follow-up deploy restored the normal offline
+worker; stamping resumed and legacy clients received a hashed cache id.
+
+### If you need this again
+
+Keep a copy of the full offline worker (or restore from git history), replace
+`sw.js` with a purge-only worker for **one** Pages deploy, then restore. The
+migration worker must:
+
+- Change `sw.js` bytes so browsers install an update.
+- Delete **all** caches unconditionally.
+- Preserve COI on fetches during the purge visit.
+
+Add `MIGRATION: cache-purge` to the migration source so the stamp script skips
+missing `STATIC_ASSETS`. Remove the marker when restoring the normal worker.
+
+---
+
 ## Troubleshooting
 
 | Symptom | Likely cause | Fix |
@@ -391,7 +463,7 @@ Users who install get that module every time. To ship multiple installable apps 
 | `SharedArrayBuffer` error | COI not active | Ensure one `sw.js` adds COI headers; reload after first SW install |
 | Offline reload fails immediately | Demo never run online | Visit once online; click **Run** to pull runtime + packages |
 | Storage quota errors | Precache list too aggressive | Shrink `STATIC_ASSETS`; rely on fetch-time caching for WASM |
-| Stale content after deploy | Old cache | Bump `CACHE_NAME` in `sw.js` |
+| Stale content after deploy | Old cache / fixed `CACHE_NAME` | Ensure deploy stamps `CACHE_NAME`; for stuck legacy installs see [Orphaned service workers](#orphaned-service-workers-and-cache-migration) |
 | iOS: Install tip but no native prompt | Safari has no `beforeinstallprompt` | Follow **Share → Add to Home Screen**; tip is expected |
 | `micropython.html` 404 on old links | Renamed from `load.html` | Update bookmarks to `micropython.html?modules=…` |
 
@@ -413,4 +485,5 @@ Users who install get that module every time. To ship multiple installable apps 
 | Service worker | `web/pyscript/sw.js` |
 | Client bootstrap + UI | `web/pyscript/pwa.js`, `web/pyscript/pwa.css` |
 | Deploy workflow | `.github/workflows/deploy-pyscript.yml` |
+| `CACHE_NAME` stamp script | `scripts/pyscript_stamp_pwa_cache.py` |
 | Gallery generator | `scripts/gallery_generator.py` |
