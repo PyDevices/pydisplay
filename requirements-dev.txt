@@ -18,6 +18,7 @@ ipyevents>=2.0
 nbstripout>=0.9
 
 # Lint / format (see pyproject.toml; pre-commit hooks use ruff-pre-commit)
+pre-commit>=4.0
 ruff>=0.15.17
 
 # Display / image inspection
