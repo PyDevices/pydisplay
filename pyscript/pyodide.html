@@ -309,19 +309,9 @@
 
     <script type="py" config="./pyodide.toml" output="log">
         import builtins
-        import json
-        import os
-        import sys
         from js import document
         from pyscript.ffi import create_proxy
-
-        MANIFEST_MIP_TARGET = "examples"
-        # Prefer TestPyPI (PyDevices publishes here) then PyPI so third-party
-        # pure/wasm wheels resolve too. micropip tries each index in order.
-        WHEEL_INDEX_URLS = [
-            "https://test.pypi.org/simple/",
-            "https://pypi.org/simple/",
-        ]
+        import ps_loader
 
         def _log_print(*args, **kwargs):
             el = document.getElementById("log")
@@ -349,167 +339,13 @@
         def _loader_disabled():
             return bool(_from_window("__pydisplayLoaderDisabled"))
 
-        def _site_root():
-            path = document.location.pathname
-            return path[: path.rfind("/") + 1] if "/" in path else "/"
-
-        def _page_base():
-            return document.location.origin + _site_root()
-
-        def _github_to_raw(s):
-            """Map ``github:owner/repo/path`` → raw.githubusercontent.com …/HEAD/path."""
-            rest = s[len("github:") :].lstrip("/")
-            parts = rest.split("/")
-            if len(parts) < 3:
-                raise RuntimeError("Bad github: mip URL: " + s)
-            owner, repo = parts[0], parts[1]
-            path = "/".join(parts[2:])
-            return (
-                "https://raw.githubusercontent.com/"
-                + owner
-                + "/"
-                + repo
-                + "/HEAD/"
-                + path
-            )
-
-        def _abs_url(rel_or_abs, base_url=None):
-            """Resolve a path relative to the pyscript page (or an explicit base URL)."""
-            from urllib.parse import urljoin
-
-            s = str(rel_or_abs).strip()
-            if s.startswith("github:"):
-                return _github_to_raw(s)
-            if s.startswith("http://") or s.startswith("https://"):
-                return s
-            if base_url:
-                return urljoin(base_url, s)
-            if s.startswith("/"):
-                return document.location.origin + s
-            return urljoin(_page_base(), s)
-
-        def _mip_fetch_url(src):
-            """Resolve MIP JSON file URLs the same way MicroPython mip does on Pages.
-
-            Relative ``./src/...`` paths are against the *page* base
-            (``…/web/pyscript/``), not against ``packages/<name>.json``.
-            ``github:`` URLs become raw.githubusercontent.com (CORP-friendly).
-            """
-            s = str(src).strip()
-            if s.startswith("github:"):
-                return _github_to_raw(s)
-            if s.startswith("http://") or s.startswith("https://"):
-                return s
-            return _abs_url(s)
-
-        def _parse_comma(raw):
-            names = []
-            for part in str(raw).split(","):
-                name = part.strip()
-                if name.lower().endswith(".py"):
-                    name = name[:-3]
-                if name:
-                    names.append(name)
-            return names
-
-        async def _fetch_text(url):
-            from pyodide.http import pyfetch
-
-            _log_print("Fetching", url)
-            resp = await pyfetch(url)
-            if not resp.ok:
-                raise RuntimeError("HTTP " + str(resp.status) + " fetching " + url)
-            return await resp.string()
-
-        def _ensure_parent_dirs(path):
-            parent = os.path.dirname(path)
-            if parent and parent not in (".", "/"):
-                os.makedirs(parent, exist_ok=True)
-
-        async def _install_module(name):
-            url = _abs_url("src/examples/" + name + ".py")
-            code = await _fetch_text(url)
-            dest = name + ".py"
-            with open(dest, "w", encoding="utf-8") as f:
-                f.write(code)
-
-        async def _install_mip_json(name, target):
-            """Install packages/<name>.json urls into ``target`` (MIP layout)."""
-            manifest_url = _abs_url("packages/" + name + ".json")
-            raw = await _fetch_text(manifest_url)
-            try:
-                data = json.loads(raw)
-            except json.JSONDecodeError as e:
-                raise RuntimeError("Invalid MIP JSON packages/" + name + ".json: " + str(e)) from e
-            urls = data.get("urls")
-            if not isinstance(urls, list) or not urls:
-                raise RuntimeError("MIP manifest packages/" + name + ".json has no urls")
-            os.makedirs(target, exist_ok=True)
-            for entry in urls:
-                if not (isinstance(entry, (list, tuple)) and len(entry) >= 2):
-                    raise RuntimeError(
-                        "Bad mip urls entry in packages/" + name + ".json: " + repr(entry)
-                    )
-                dest_rel, src = entry[0], entry[1]
-                dest = os.path.join(target, dest_rel)
-                _ensure_parent_dirs(dest)
-                code = await _fetch_text(_mip_fetch_url(src))
-                with open(dest, "w", encoding="utf-8") as f:
-                    f.write(code)
-                _log_print("Installed", dest)
-
-        async def _install_manifest(name):
-            """Install packages/<name>.json (same MIP files micropython.html uses)."""
-            await _install_mip_json(name, MANIFEST_MIP_TARGET)
-
-
-        def _prepare_vfs():
-            # Match MicroPython VFS: mounts at /lib and /add_ons; lib.path expects cwd /.
-            os.chdir("/")
-            if "/" not in sys.path:
-                sys.path.insert(0, "/")
-            if "/add_ons" not in sys.path:
-                sys.path.insert(0, "/add_ons")
-
-        async def _ensure_micropip():
-            try:
-                import micropip
-
-                return micropip
-            except ImportError:
-                pass
-            from pyodide_js import loadPackage
-
-            _set("Loading micropip…")
-            await loadPackage("micropip")
-            import micropip
-
-            return micropip
-
-        async def _install_deps(deps):
-            """micropip-install each ``?deps=`` entry (project name or .whl URL)."""
-            if not deps:
-                return
-            micropip = await _ensure_micropip()
-            for which in deps:
-                spec = str(which).strip()
-                if not spec:
-                    continue
-                _set("Installing " + spec + "…")
-                if spec.startswith("http://") or spec.startswith("https://"):
-                    _log_print("micropip.install", spec)
-                    await micropip.install(spec)
-                else:
-                    _log_print("micropip.install", spec, "indexes=", WHEEL_INDEX_URLS)
-                    await micropip.install(spec, index_urls=WHEEL_INDEX_URLS)
-
         async def _start(*_):
             global _started
             if _started or _loader_disabled():
                 return
-            modules = _parse_comma(_from_window("__pydisplayModules"))
-            manifests = _parse_comma(_from_window("__pydisplayManifests"))
-            deps = _parse_comma(_from_window("__pydisplayDeps"))
+            modules = ps_loader.parse_names(_from_window("__pydisplayModules"))
+            manifests = ps_loader.parse_names(_from_window("__pydisplayManifests"))
+            deps = ps_loader.parse_names(_from_window("__pydisplayDeps"))
             entry_kind = _from_window("__pydisplayEntryKind")
             entry = _from_window("__pydisplayEntry")
             if not entry and modules:
@@ -526,15 +362,7 @@
             _btn.disabled = True
             _btn.textContent = "Running…"
             try:
-                _prepare_vfs()
-                for name in manifests:
-                    _set("Installing manifest " + name + "…")
-                    await _install_manifest(name)
-                for name in modules:
-                    _set("Fetching " + name + "…")
-                    await _install_module(name)
-                import lib.path  # noqa: F401 — adds lib/add_ons/examples to path
-                await _install_deps(deps)
+                await ps_loader.install_pyodide(modules, manifests, deps, status=_set)
                 _set("Importing " + entry + "…")
                 __import__(entry)
                 _set("")

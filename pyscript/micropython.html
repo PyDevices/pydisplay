@@ -323,8 +323,7 @@
         import builtins
         from js import document
         from pyscript.ffi import create_proxy
-
-        MANIFEST_MIP_TARGET = "examples"
+        import ps_loader
 
         def _log_print(*args, **kwargs):
             el = document.getElementById("log")
@@ -349,20 +348,10 @@
             val = getattr(window, name, default)
             return str(val or default).strip()
 
-        def _parse_comma(raw):
-            names = []
-            for part in str(raw).split(","):
-                name = part.strip()
-                if name.lower().endswith(".py"):
-                    name = name[:-3]
-                if name:
-                    names.append(name)
-            return names
-
         def _loader_plan():
-            modules = _parse_comma(_from_window("__pydisplayModules"))
-            manifests = _parse_comma(_from_window("__pydisplayManifests"))
-            deps = _parse_comma(_from_window("__pydisplayDeps"))
+            modules = ps_loader.parse_names(_from_window("__pydisplayModules"))
+            manifests = ps_loader.parse_names(_from_window("__pydisplayManifests"))
+            deps = ps_loader.parse_names(_from_window("__pydisplayDeps"))
             entry_kind = _from_window("__pydisplayEntryKind")
             entry = _from_window("__pydisplayEntry")
             if not entry and modules:
@@ -372,39 +361,6 @@
                 entry_kind = entry_kind or "manifest"
                 entry = manifests[0]
             return modules, manifests, deps, entry_kind, entry
-
-        MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
-
-        def _same_origin_base():
-            _path = document.location.pathname
-            return document.location.origin + (
-                _path[: _path.rfind("/") + 1] if "/" in _path else "/"
-            )
-
-        def _use_same_origin():
-            _host = document.location.hostname
-            return _host in ("127.0.0.1", "localhost") or _host.endswith(".github.io")
-
-        def _manifest_url(name):
-            if _use_same_origin():
-                return _same_origin_base() + "packages/" + name + ".json"
-            return "github:PyDevices/pydisplay/packages/" + name + ".json"
-
-        def _module_url(name):
-            if _use_same_origin():
-                return _same_origin_base() + "src/examples/" + name + ".py"
-            return "github:PyDevices/pydisplay/src/examples/" + name + ".py"
-
-        def _install_deps(names):
-            if not names:
-                return
-            import mip
-
-            for which in names:
-                _set("Installing " + which + "…")
-                _log_print("MIP install:", which, "index=", MIP_LIB_INDEX)
-                mip.install(which, index=MIP_LIB_INDEX)
-
 
         def _loader_disabled():
             return bool(_from_window("__pydisplayLoaderDisabled"))
@@ -423,16 +379,7 @@
             _btn.textContent = "Running…"
             try:
                 _set("Installing…")
-                import mip
-                for name in manifests:
-                    mip.install(
-                        _manifest_url(name),
-                        target=MANIFEST_MIP_TARGET,
-                    )
-                for name in modules:
-                    mip.install(_module_url(name))
-                import lib.path  # add_ons on path for setups / fetch_ph_gui
-                _install_deps(deps)
+                ps_loader.install_micropython(modules, manifests, deps, status=_set)
                 _set("Importing " + entry + "…")
                 __import__(entry)
                 _set("")
