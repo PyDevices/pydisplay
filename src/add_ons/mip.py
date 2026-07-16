@@ -9,12 +9,11 @@ Ported from ``tools/mpremote/mpremote/mip.py`` (itself from on-device mip), with
 mpremote transport/CLI removed and local filesystem writes. For:
 
   - CPython (desktop)
-  - Pyodide / PyScript
   - CircuitPython (when urllib, urequests, or requests is available)
 
 MicroPython ships ``mip`` in firmware. ``lib.path`` appends ``add_ons`` on
 MicroPython (does not prepend), so firmware ``mip`` stays preferred when both
-exist.
+exist. PyScript gallery loaders use ``ps_installers.py`` instead of this module.
 
 API (compatible subset of on-device mip)::
 
@@ -23,8 +22,8 @@ API (compatible subset of on-device mip)::
     mip.install("github:org/repo/path/package.json", target="add_ons")
     mip.install("http://example.com/pkg.py")
 
-``mpy`` defaults to **False** on non-MicroPython hosts (they cannot execute
-MicroPython ``.mpy`` bytecode).
+``mpy`` defaults to **False** on CPython and CircuitPython (they cannot execute
+MicroPython ``.mpy`` bytecode on the filesystem).
 """
 
 from __future__ import annotations
@@ -91,17 +90,7 @@ def _rewrite_url(url, branch=None):
 
 
 def _http_get(url):
-    """Sync GET → bytes (urllib, Pyodide open_url, urequests, or requests)."""
-    try:
-        from pyodide.http import open_url  # type: ignore[import-not-found]
-
-        data = open_url(url).read()
-        if isinstance(data, str):
-            return data.encode("utf-8")
-        return data
-    except ImportError:
-        pass
-
+    """Sync GET → bytes (urllib, urequests, or requests)."""
     try:
         from urllib.error import HTTPError, URLError
         from urllib.request import urlopen
@@ -144,7 +133,7 @@ def _http_get(url):
                 close()
 
     raise RuntimeError(
-        "no HTTP client for mip (need urllib, pyodide.http, urequests, or requests)"
+        "no HTTP client for mip (need urllib, urequests, or requests)"
     )
 
 
@@ -300,7 +289,7 @@ def install(package, index=None, target=None, version=None, mpy=None):
         Index version or VCS branch/tag for ``github:`` etc.
     *mpy*
         Prefer ``.mpy`` from the index when True. Defaults to False on
-        CPython / CircuitPython / Pyodide.
+        CPython and CircuitPython.
     """
     if index is None:
         index = _PACKAGE_INDEX
