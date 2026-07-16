@@ -4,9 +4,9 @@
 """PyScript gallery loader install plans (MicroPython WASM + Pyodide).
 
 Consolidates loader install logic for ``micropython.html``, ``pyodide.html``,
-``run.html``, and ``run-pyodide.html``. MicroPython WASM uses firmware ``mip``.
-Pyodide uses ``add_ons/mip.py`` for MIP manifests/modules and ``micropip`` for
-wheels.
+``run.html``, and ``run-pyodide.html``. Gallery pages call ``_ps_loader()`` on
+Run only (``import lib.path`` then ``import ps_loader``). MicroPython WASM uses
+firmware ``mip`` after ``lib.path``; Pyodide uses ``add_ons/mip.py``.
 """
 
 import sys
@@ -103,23 +103,43 @@ def _install_index_deps_micropython(mip_mod, names, status):
         mip_mod.install(pkg_url, index=MIP_LIB_INDEX)
 
 
-def install_micropython(modules, manifests, index_deps, status=None):
-    """Sync install plan for MicroPython WASM (firmware ``mip``)."""
-    import mip
-
-    _install_manifests_and_modules(mip, modules, manifests, status)
-    import lib.path  # noqa: F401
-    _install_index_deps_micropython(mip, index_deps, status)
-
-
-def prepare_vfs():
+def _ensure_cwd():
     import os
 
-    os.chdir("/")
-    if "/" not in sys.path:
-        sys.path.insert(0, "/")
-    if "/add_ons" not in sys.path:
-        sys.path.insert(0, "/add_ons")
+    try:
+        os.chdir("/")
+    except OSError:
+        pass
+
+
+def _import_firmware_mip():
+    """Firmware ``mip`` on MicroPython WASM (not ``add_ons/mip.py``).
+
+    ``lib.path`` must run first so ``add_ons`` is appended, not prepended.
+    """
+    import lib.path  # noqa: F401
+
+    import mip
+
+    return mip
+
+
+def _import_portable_mip():
+    """Portable ``add_ons/mip.py`` for Pyodide (no firmware ``mip``)."""
+    _ensure_cwd()
+    import lib.path  # noqa: F401
+
+    import mip
+
+    return mip
+
+
+def install_micropython(modules, manifests, index_deps, status=None):
+    """Sync install plan for MicroPython WASM (firmware ``mip``)."""
+    _ensure_cwd()
+    mip = _import_firmware_mip()
+    _install_manifests_and_modules(mip, modules, manifests, status)
+    _install_index_deps_micropython(mip, index_deps, status)
 
 
 async def _ensure_micropip(status):
@@ -159,8 +179,7 @@ async def _install_wheels_pyodide(names, status):
 
 async def install_pyodide(modules, manifests, wheel_deps, status=None):
     """Async install plan for Pyodide (``mip`` manifests/modules + micropip wheels)."""
-    prepare_vfs()
-    import mip
+    mip = _import_portable_mip()
 
     _install_manifests_and_modules(
         mip,
@@ -169,5 +188,4 @@ async def install_pyodide(modules, manifests, wheel_deps, status=None):
         status,
         url_base=_page_base(),
     )
-    import lib.path  # noqa: F401
     await _install_wheels_pyodide(wheel_deps, status)

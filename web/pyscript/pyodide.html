@@ -311,10 +311,12 @@
         import builtins
         from js import document
         from pyscript.ffi import create_proxy
-        import sys
-        if "/add_ons" not in sys.path:
-            sys.path.insert(0, "/add_ons")
-        import ps_loader
+
+        def _ps_loader():
+            import lib.path  # noqa: F401
+            import ps_loader
+
+            return ps_loader
 
         def _log_print(*args, **kwargs):
             el = document.getElementById("log")
@@ -346,9 +348,10 @@
             global _started
             if _started or _loader_disabled():
                 return
-            modules = ps_loader.parse_names(_from_window("__pydisplayModules"))
-            manifests = ps_loader.parse_names(_from_window("__pydisplayManifests"))
-            deps = ps_loader.parse_names(_from_window("__pydisplayDeps"))
+            pl = _ps_loader()
+            modules = pl.parse_names(_from_window("__pydisplayModules"))
+            manifests = pl.parse_names(_from_window("__pydisplayManifests"))
+            deps = pl.parse_names(_from_window("__pydisplayDeps"))
             entry_kind = _from_window("__pydisplayEntryKind")
             entry = _from_window("__pydisplayEntry")
             if not entry and modules:
@@ -365,7 +368,7 @@
             _btn.disabled = True
             _btn.textContent = "Running…"
             try:
-                await ps_loader.install_pyodide(modules, manifests, deps, status=_set)
+                await pl.install_pyodide(modules, manifests, deps, status=_set)
                 _set("Importing " + entry + "…")
                 __import__(entry)
                 _set("")
