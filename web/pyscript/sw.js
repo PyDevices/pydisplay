@@ -16,9 +16,18 @@ const STATIC_ASSETS = [
   './demo.css',
   './pwa.css',
   './pwa.js',
+  './loader-ready.js',
   './mini-coi-fd.js',
   './micropython.toml',
   './pyodide.toml',
+];
+
+// Loader HTML changes often; fetch network-first so fixes are not masked by cache.
+const NETWORK_FIRST_ASSETS = [
+  './micropython.html',
+  './pyodide.html',
+  './run.html',
+  './run-pyodide.html',
 ];
 
 const RUNTIME_ORIGINS = [
@@ -51,6 +60,13 @@ function isStaticAssetPath(pathname) {
   });
 }
 
+function isNetworkFirstPath(pathname) {
+  return NETWORK_FIRST_ASSETS.some((asset) => {
+    const name = asset.replace(/^\.\//, '');
+    return pathname.endsWith('/' + name) || pathname.endsWith(name);
+  });
+}
+
 function shouldCache(url, request) {
   if (request.method !== 'GET') {
     return false;
@@ -62,6 +78,22 @@ function shouldCache(url, request) {
     return true;
   }
   return isRuntimeOrigin(url.hostname);
+}
+
+function networkFirstStaleWhileRevalidate(request) {
+  return fetch(request)
+    .then((networkResponse) => {
+      if (
+        networkResponse &&
+        networkResponse.status === 200 &&
+        networkResponse.type !== 'error'
+      ) {
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache));
+      }
+      return networkResponse;
+    })
+    .catch(() => caches.match(request));
 }
 
 function cacheFirstStaleWhileRevalidate(request) {
@@ -132,7 +164,10 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    cacheFirstStaleWhileRevalidate(request).then((response) => {
+    (url.origin === self.location.origin && isNetworkFirstPath(url.pathname)
+      ? networkFirstStaleWhileRevalidate(request)
+      : cacheFirstStaleWhileRevalidate(request)
+    ).then((response) => {
       if (!response) {
         return fetch(request).then((networkResponse) => withCoiHeaders(networkResponse));
       }

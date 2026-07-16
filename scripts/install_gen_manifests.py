@@ -206,6 +206,9 @@ for entry in sorted(os.listdir(examples_root)):
         json.dump({"urls": urls, "version": package_ver}, f, indent=2)
     example_package_names.append(entry)
 
+# Gallery loaders use `import ps_loader` (top-level); also mount at VFS root.
+master_toml.append(pyscript_toml_file_entry("src/add_ons/ps_loader.py", "/"))
+
 # web/pyscript/packages → ../../packages (same layout as web/pyscript/src).
 pyscript_packages_link = os.path.join(output_dir, "web", "pyscript", "packages")
 packages_abs = os.path.join(output_dir, packages_dir.rstrip("/"))
