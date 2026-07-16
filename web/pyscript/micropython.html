@@ -409,7 +409,7 @@
         def _loader_disabled():
             return bool(_from_window("__pydisplayLoaderDisabled"))
 
-        def _start(*_):
+        async def _start(*_):
             global _started
             if _started or _loader_disabled():
                 return
