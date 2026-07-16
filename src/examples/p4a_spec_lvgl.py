@@ -31,7 +31,7 @@ if env_get("PYDISPLAY_HEIGHT") is None:
 if env_get("PYDISPLAY_SCALE") is None:
     env_set("PYDISPLAY_SCALE", "1")
 
-import display_driver  # noqa: E402, F401 — wires LVGL display/input into the runtime
+import display_driver  # noqa: E402 — wires LVGL display/input into the runtime
 import lvgl as lv  # noqa: E402
 from board_config import display_drv, runtime  # noqa: E402
 from p4a_spec_engine import (  # noqa: E402
@@ -207,13 +207,7 @@ def _add_check_column(parent, catalog, selected, font, y, w, height, store):
 def build_ui():
     global _model, _status, _fields, _perm_checks, _arch_checks
 
-    inst = None
-    try:
-        import lv_utils
-
-        inst = lv_utils.event_loop.current_instance()
-    except ImportError:
-        inst = None
+    inst = display_driver.event_loop.current_instance()
     if inst is not None:
         inst.disable()
     try:

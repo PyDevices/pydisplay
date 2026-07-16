@@ -147,9 +147,9 @@ that call `show()` themselves avoid a competing SDL refresh timer.
 - Install the CPython LVGL binding from TestPyPI (import name `lvgl`):
   `.venv/bin/pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ lvgl-cpython`
   (see https://github.com/PyDevices/lv_cpython_mod). The update script installs it.
-- `add_ons/lv_utils.py` subscribes its LVGL tick to the runtime's shared timer
-  (`runtime.on_tick`) and imports `asyncio` from `multimer`; `add_ons/display_driver.py`
-  claims runtime display refresh so LVGL presents frames from `task_handler`.
+- `add_ons/display_driver.py` owns the LVGL `event_loop` (tick via
+  `runtime.on_tick`, `asyncio` from `multimer`) and claims runtime display
+  refresh so LVGL presents frames from `task_handler`.
 - Test LVGL timers with `tools/lv_timer_test_kit.py` (modes: `sync`, `async`).
   Headless: `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/lv_timer_test_kit.py --only cpython-venv`.
 - Non-obvious: the sync `multimer.Timer` backend on CPython/Linux delivers via a

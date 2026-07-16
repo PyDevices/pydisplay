@@ -27,7 +27,7 @@ Your `board_config.py` should expose:
 
 Connect LVGL's display flush callback to copy LVGL's draw buffer through `display.blit_rect` (or the pattern documented in lv_micropython for your port).
 
-With [`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py), LVGL input is wired automatically: each indev `read_cb` polls the runtime's host device via virtual touch/encoder/keypad devices. **Do not call `runtime.poll()` in your LVGL main loop** — `lv.task_handler()` (driven by `lv_utils` + multimer) already drains input. Calling both competes for the same event queue and breaks clicks. Window-close (`QUIT`) is handled on the same path inside `HostEventsDevice`.
+With [`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py), LVGL input is wired automatically: each indev `read_cb` polls the runtime's host device via virtual touch/encoder/keypad devices. **Do not call `runtime.poll()` in your LVGL main loop** — `lv.task_handler()` (driven by `display_driver.event_loop` + multimer) already drains input. Calling both competes for the same event queue and breaks clicks. Window-close (`QUIT`) is handled on the same path inside `HostEventsDevice`.
 
 ### 4. Run the LVGL timer example
 
@@ -46,7 +46,7 @@ For production ESP32 projects, consider [kdschlosser's lvgl_micropython](https:/
 
 ## Helper add-ons
 
-`src/add_ons/lv_utils.py` — LVGL event loop helper (requires `multimer`).
+[`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py) includes the LVGL `event_loop` (requires `multimer`).
 
 Use **`runtime.timer_async`** (set in `board_config.py` when constructing `Runtime`) to choose the timer backend:
 
@@ -55,7 +55,7 @@ Use **`runtime.timer_async`** (set in `board_config.py` when constructing `Runti
 | `False` (desktop default) | MCU, MicroPython unix, CPython Linux — default `multimer.Timer` |
 | `True` | PyScript, Jupyter, or desktop with `PYDISPLAY_TIMER_ASYNC=1` — `multimer.AsyncTimer` |
 
-[`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py) passes this to `lv_utils.event_loop(async_=runtime.timer_async)`.
+[`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py) passes this to `event_loop(asynchronous=runtime.timer_async)`.
 
 When **`runtime.timer_async` is true**, `display_driver` claims runtime-driven refresh and calls `display.show()` from the aio LVGL refresh loop instead — so presentation stays on the asyncio path even when a sync timer backend would otherwise be used.
 

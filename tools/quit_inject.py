@@ -28,9 +28,13 @@ def display_backend_name():
 
 def deinit_display():
     try:
-        import lv_utils
+        import sys
 
-        inst = lv_utils.event_loop.current_instance()
+        # Avoid importing display_driver (runs main()) if it was never loaded.
+        dd = sys.modules.get("display_driver")
+        if dd is None:
+            return
+        inst = dd.event_loop.current_instance()
         if inst is not None:
             inst.deinit()
     except Exception:

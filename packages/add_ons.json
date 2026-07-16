@@ -41,10 +41,6 @@
       "github:PyDevices/pydisplay/src/add_ons/keypins.py"
     ],
     [
-      "lv_utils.py",
-      "github:PyDevices/pydisplay/src/add_ons/lv_utils.py"
-    ],
-    [
       "micropython.py",
       "github:PyDevices/pydisplay/src/add_ons/micropython.py"
     ],
