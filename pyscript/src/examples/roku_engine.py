@@ -8,7 +8,9 @@
 
 Roku External Control Protocol (ECP) client — no display, event, or UI imports.
 
-Talks HTTP on port 8060 and discovers devices via SSDP (``ST: roku:ecp``).
+Talks HTTP on port 8060 and discovers devices via SSDP (``ST: roku:ecp``),
+with a portable unicast ``:8060`` / ``/query/device-info`` scan fallback when
+multicast is blocked (common on WSL NAT and some host firewalls).
 Shared by the ``roku_remote`` graphics front end; designed so other UIs can
 reuse the same engine later.
 
@@ -76,6 +78,7 @@ ECP_KEYS = (
     "InputHDMI3",
     "InputHDMI4",
     "InputAV1",
+    "ClosedCaption",
 )
 
 ECP_KEY_SET = frozenset(ECP_KEYS)
@@ -175,6 +178,58 @@ def _xml_attrs(open_tag_src):
     return attrs
 
 
+def _xml_unescape(text):
+    """Decode common XML entities (``&amp;`` → ``&``, etc.)."""
+    if not text:
+        return ""
+    text = text.replace("&amp;", "&")
+    text = text.replace("&lt;", "<")
+    text = text.replace("&gt;", ">")
+    text = text.replace("&quot;", '"')
+    text = text.replace("&apos;", "'")
+    return text
+
+
+def _parse_media_player(text):
+    """Parse ``/query/media-player`` XML into a small state dict."""
+    if not text:
+        return {}
+    if isinstance(text, bytes):
+        try:
+            text = text.decode("utf-8")
+        except UnicodeError:
+            text = str(text)
+    i = text.find("<player")
+    if i < 0:
+        return {}
+    gt = text.find(">", i)
+    if gt < 0:
+        return {}
+    attrs = _xml_attrs(text[i : gt + 1])
+    plugin = {}
+    pi = text.find("<plugin", i)
+    if pi >= 0:
+        pgt = text.find(">", pi)
+        if pgt >= 0:
+            plugin = _xml_attrs(text[pi : pgt + 1])
+    fmt = {}
+    fi = text.find("<format", i)
+    if fi >= 0:
+        fgt = text.find(">", fi)
+        if fgt >= 0:
+            fmt = _xml_attrs(text[fi : fgt + 1])
+    return {
+        "state": attrs.get("state", "") or "",
+        "error": attrs.get("error", "") or "",
+        "app": _xml_unescape(plugin.get("name", "") or ""),
+        "app_id": plugin.get("id", "") or "",
+        "captions": (fmt.get("captions", "") or "").lower(),
+        "video": (fmt.get("video", "") or "").lower(),
+        "audio": (fmt.get("audio", "") or "").lower(),
+        "drm": (fmt.get("drm", "") or "").lower(),
+    }
+
+
 def _parse_apps(xml_text):
     """Parse /query/apps XML into list of {id, name, type, version}."""
     if isinstance(xml_text, bytes):
@@ -204,7 +259,7 @@ def _parse_apps(xml_text):
         close_i = lower.find("</app>", gt)
         if close_i < 0:
             break
-        name = xml_text[gt + 1 : close_i].strip()
+        name = _xml_unescape(xml_text[gt + 1 : close_i].strip())
         attrs = _xml_attrs(open_src)
         apps.append(
             {
@@ -361,88 +416,493 @@ def http_request(method, url, timeout=5.0, data=None):
     raise RuntimeError("no HTTP client (need urllib, urequests, or requests)")
 
 
-def discover_rokus(timeout=3.0, retries=2):
+def _sockaddr(host, port, socktype=socket.SOCK_STREAM):
+    """Resolve ``(host, port)`` to a stack sockaddr (tuple or buffer).
+
+    MicroPython unix ``connect`` / ``sendto`` often require the sockaddr from
+    ``getaddrinfo`` (a ``bytearray``), not a plain ``(host, port)`` tuple.
     """
-    SSDP M-SEARCH for Roku ECP devices.
+    try:
+        return socket.getaddrinfo(host, port, socket.AF_INET, socktype)[0][-1]
+    except Exception:
+        return (host, port)
 
-    Returns a list of dicts: ``{host, location, usn, st}``.
-    """
-    message = (
-        "M-SEARCH * HTTP/1.1\r\n"
-        "HOST: %s:%d\r\n"
-        'MAN: "ssdp:discover"\r\n'
-        "ST: %s\r\n"
-        "MX: 2\r\n"
-        "\r\n"
-    ) % (SSDP_ADDR, SSDP_PORT, SSDP_ST)
 
-    found = {}
-    deadline = None
-    if time is not None:
-        deadline = time.time() + float(timeout)
-
-    for _ in range(max(1, int(retries))):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+def _local_ipv4_from_fib_trie():
+    """Linux ``/proc/net/fib_trie`` host LOCAL addresses (MicroPython unix)."""
+    try:
+        f = open("/proc/net/fib_trie")
+    except OSError:
+        return ""
+    try:
+        lines = f.read().split("\n")
+    finally:
         try:
-            try:
-                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            except (OSError, AttributeError):
-                pass
-            try:
-                # IPPROTO_IP=0, IP_MULTICAST_TTL=33 on many stacks
-                sock.setsockopt(0, 33, 2)
-            except (OSError, AttributeError):
-                pass
-            try:
-                sock.settimeout(0.4)
-            except OSError:
-                pass
-
-            payload = message.encode() if isinstance(message, str) else message
-            try:
-                sock.sendto(payload, (SSDP_ADDR, SSDP_PORT))
-            except OSError as e:
-                sock.close()
-                raise RuntimeError("SSDP send failed: " + str(e)) from e
-
-            while True:
-                if deadline is not None and time.time() >= deadline:
-                    break
-                try:
-                    data, _addr = sock.recvfrom(2048)
-                except OSError:
-                    if deadline is None:
-                        break
-                    # keep waiting until overall timeout
-                    if time is not None and time.time() >= deadline:
-                        break
-                    continue
-                headers = _parse_ssdp_headers(data)
-                st = headers.get("st", "")
-                location = headers.get("location", "")
-                if "roku" not in st.lower() and "roku" not in location.lower():
-                    # still accept LOCATION pointing at :8060
-                    if ":8060" not in location:
+            f.close()
+        except Exception:
+            pass
+    in_local = False
+    candidates = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if line.startswith("Local:"):
+            in_local = True
+            i += 1
+            continue
+        if in_local and (line.startswith("Main:") or line.startswith("Id ")):
+            break
+        if in_local and "|--" in line:
+            part = line.split("|--", 1)[-1].strip().split()[0]
+            nxt = lines[i + 1] if i + 1 < len(lines) else ""
+            if "/32 host LOCAL" in nxt:
+                bits = part.split(".")
+                if len(bits) == 4:
+                    try:
+                        a = int(bits[0])
+                        d = int(bits[3])
+                    except ValueError:
+                        i += 1
                         continue
-                host = _host_from_location(location)
-                if not host:
-                    continue
-                found[host] = {
-                    "host": host,
-                    "location": location,
-                    "usn": headers.get("usn", ""),
-                    "st": st or SSDP_ST,
-                }
-                if deadline is None:
-                    # single-response mode when no time module
-                    break
-        finally:
+                    # Skip loopback / network / broadcast; WSL DNS stub.
+                    if a != 127 and d not in (0, 255) and part != "10.255.255.254":
+                        candidates.append(part)
+        i += 1
+    for ip in candidates:
+        if ip.startswith("192.168.") or ip.startswith("10."):
+            return ip
+        parts = ip.split(".")
+        if len(parts) == 4:
             try:
-                sock.close()
+                a, b = int(parts[0]), int(parts[1])
+            except ValueError:
+                continue
+            if a == 172 and 16 <= b <= 31:
+                return ip
+    return candidates[0] if candidates else ""
+
+
+def _prefix_from_default_route():
+    """``/24`` of the default gateway from ``/proc/net/route`` (Linux)."""
+    try:
+        f = open("/proc/net/route")
+    except OSError:
+        return ""
+    try:
+        next(f)
+        for line in f:
+            parts = line.split()
+            if len(parts) < 3 or parts[1] != "00000000":
+                continue
+            try:
+                g = int(parts[2], 16)
+            except ValueError:
+                continue
+            return "%d.%d.%d" % (g & 255, (g >> 8) & 255, (g >> 16) & 255)
+    except Exception:
+        return ""
+    finally:
+        try:
+            f.close()
+        except Exception:
+            pass
+    return ""
+
+
+def _local_ipv4():
+    """Best-effort primary IPv4 (UDP connect + getsockname, else Linux proc)."""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(_sockaddr("8.8.8.8", 80, socket.SOCK_DGRAM))
+            if hasattr(s, "getsockname"):
+                return s.getsockname()[0]
+        finally:
+            s.close()
+    except (OSError, AttributeError, ValueError, TypeError, IndexError):
+        pass
+    return _local_ipv4_from_fib_trie()
+
+
+def _prefix24(ip):
+    parts = (ip or "").split(".")
+    if len(parts) != 4:
+        return ""
+    return "%s.%s.%s" % (parts[0], parts[1], parts[2])
+
+
+def _windows_lan_prefixes():
+    """
+    Extra /24 prefixes from the Windows host (WSL NAT is not the LAN).
+
+    Uses powershell.exe when present; empty on MCU / plain Linux.
+    """
+    try:
+        import subprocess
+    except ImportError:
+        return []
+    try:
+        out = subprocess.check_output(
+            [
+                "powershell.exe",
+                "-NoProfile",
+                "-Command",
+                "Get-NetIPAddress -AddressFamily IPv4 | "
+                "Where-Object { $_.IPAddress -notlike '127.*' "
+                "-and $_.InterfaceAlias -notmatch 'WSL|vEthernet|Loopback|Bluetooth' } | "
+                "Select-Object -ExpandProperty IPAddress",
+            ],
+            stderr=subprocess.DEVNULL,
+            timeout=8,
+        )
+    except Exception:
+        return []
+    if isinstance(out, bytes):
+        try:
+            out = out.decode("utf-8", "replace")
+        except Exception:
+            out = out.decode("latin-1")
+    prefixes = []
+    for line in out.replace("\r", "\n").split("\n"):
+        p = _prefix24(line.strip())
+        # Skip APIPA / link-local — not useful for LAN Roku discovery.
+        if not p or p.startswith("169.254"):
+            continue
+        if p not in prefixes:
+            prefixes.append(p)
+    return prefixes
+
+
+def _is_wsl_nat_ipv4(ip):
+    """True when this looks like Hyper-V WSL NAT (not mirrored LAN)."""
+    parts = (ip or "").split(".")
+    if len(parts) != 4:
+        return False
+    try:
+        a, b = int(parts[0]), int(parts[1])
+    except ValueError:
+        return False
+    # WSL2 NAT is commonly 172.16–31.x; mirrored mode uses the real LAN IP.
+    if not (a == 172 and 16 <= b <= 31):
+        return False
+    try:
+        with open("/proc/version") as f:
+            ver = f.read().lower()
+        return "microsoft" in ver or "wsl" in ver
+    except Exception:
+        return False
+
+
+def _scan_prefixes():
+    """IPv4 /24 bases to probe for ECP (LAN prefixes preferred over WSL NAT)."""
+    prefixes = []
+    local_ip = _local_ipv4()
+    local = _prefix24(local_ip)
+    if local and not local.startswith("169.254"):
+        prefixes.append(local)
+    route = _prefix_from_default_route()
+    if route and route not in prefixes and not route.startswith("169.254"):
+        prefixes.append(route)
+    # Only shell out to Windows when still on WSL NAT — mirrored LAN already
+    # shares the Wi-Fi /24 and powershell during discover blocks the UI.
+    if _is_wsl_nat_ipv4(local_ip) or not prefixes:
+        for p in _windows_lan_prefixes():
+            if p not in prefixes:
+                prefixes.insert(0, p)
+    return prefixes
+
+
+def _tcp_open(host, port, timeout=0.25):
+    """True if TCP connect to host:port succeeds (MP/CPython portable)."""
+    s = None
+    try:
+        addr = _sockaddr(host, port, socket.SOCK_STREAM)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(timeout)
+        s.connect(addr)
+        return True
+    except (OSError, TypeError, ValueError, IndexError):
+        return False
+    finally:
+        if s is not None:
+            try:
+                s.close()
             except OSError:
                 pass
 
-    return list(found.values())
+
+def _tcp_open_retry(host, port, timeout=1.0, attempts=2):
+    """Retry flaky ECP listeners (some Rokus miss a single short connect)."""
+    for _ in range(max(1, int(attempts))):
+        if _tcp_open(host, port, timeout):
+            return True
+    return False
+
+
+def _ecp_device(host, port=ROKU_PORT, timeout=1.5):
+    """Return discovery dict if host speaks Roku ECP, else None."""
+    try:
+        status, body = http_request(
+            "GET", "http://%s:%d/query/device-info" % (host, port), timeout=timeout
+        )
+    except Exception:
+        return None
+    if not status or status >= 400 or not body:
+        return None
+    if b"device-info" not in body and b"<device-info" not in body:
+        return None
+    text = body
+    if isinstance(text, bytes):
+        try:
+            text = text.decode("utf-8")
+        except UnicodeError:
+            text = text.decode("latin-1")
+    name = (
+        _xml_tag(text, "user-device-name")
+        or _xml_tag(text, "friendly-device-name")
+        or _xml_tag(text, "model-name")
+        or host
+    )
+    return {
+        "host": host,
+        "name": name,
+        "location": "http://%s:%d/" % (host, port),
+        "usn": "",
+        "st": "scan:ecp",
+    }
+
+
+def _probe_hosts_parallel(hosts, port, connect_timeout, workers=24):
+    """Return hosts with open TCP ``port``. CPython futures or MP ``_thread``."""
+    n_workers = max(4, int(workers))
+    try:
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        open_hosts = []
+        with ThreadPoolExecutor(max_workers=n_workers) as pool:
+            futs = {
+                pool.submit(_tcp_open, host, port, connect_timeout): host
+                for host in hosts
+            }
+            for fut in as_completed(futs):
+                host = futs[fut]
+                try:
+                    ok = fut.result()
+                except Exception:
+                    ok = False
+                if ok:
+                    open_hosts.append(host)
+        return open_hosts
+    except ImportError:
+        pass
+
+    try:
+        import _thread
+    except ImportError:
+        return [h for h in hosts if _tcp_open(h, port, connect_timeout)]
+
+    # MicroPython unix: no concurrent.futures — small _thread pool.
+    queue = list(hosts)
+    qi = [0]
+    qlock = _thread.allocate_lock()
+    rlock = _thread.allocate_lock()
+    open_hosts = []
+    remaining = [len(queue)]
+
+    def _worker():
+        while True:
+            with qlock:
+                if qi[0] >= len(queue):
+                    return
+                host = queue[qi[0]]
+                qi[0] += 1
+            try:
+                ok = _tcp_open(host, port, connect_timeout)
+            except Exception:
+                ok = False
+            with rlock:
+                if ok:
+                    open_hosts.append(host)
+                remaining[0] -= 1
+
+    started = 0
+    for _ in range(min(n_workers, max(1, len(queue)))):
+        try:
+            _thread.start_new_thread(_worker, ())
+            started += 1
+        except Exception:
+            break
+    if started == 0:
+        return [h for h in hosts if _tcp_open(h, port, connect_timeout)]
+    while remaining[0] > 0:
+        if time is not None:
+            try:
+                time.sleep(0.05)
+            except Exception:
+                pass
+    return open_hosts
+
+
+def discover_rokus_scan(
+    prefixes=None,
+    port=ROKU_PORT,
+    connect_timeout=1.0,
+    priority_hosts=None,
+    workers=24,
+    on_device=None,
+):
+    """
+    Unicast scan: TCP :8060 then GET /query/device-info.
+
+    Portable fallback when SSDP multicast is blocked (WSL NAT, host firewall).
+    No third-party dependency. Parallel via ``concurrent.futures`` (CPython) or
+    ``_thread`` (MicroPython unix); sequential only if neither is available.
+
+    ``connect_timeout`` defaults to 1.0s. Keep ``workers`` modest — 64-way
+    floods drop some Rokus that answer fine alone (seen with a 65" TCL).
+    ``priority_hosts`` are probed first with a longer retry (rescans).
+    ``on_device(info)`` is called as each ECP device is confirmed (progressive UI).
+    Asleep sets typically close ECP and will not appear.
+    """
+    if prefixes is None:
+        prefixes = _scan_prefixes()
+    if not prefixes:
+        return []
+
+    hosts = []
+    for prefix in prefixes:
+        for i in range(1, 255):
+            hosts.append("%s.%d" % (prefix, i))
+
+    found = []
+    found_hosts = {}
+
+    def _accept(host):
+        if host in found_hosts:
+            return None
+        info = _ecp_device(host, port=port)
+        if not info:
+            return None
+        found_hosts[host] = True
+        found.append(info)
+        if on_device is not None:
+            try:
+                on_device(info)
+            except Exception:
+                pass
+        return info
+
+    seen = {}
+    # Prefer previously-found IPs — full-subnet floods can miss flaky listeners.
+    for host in priority_hosts or ():
+        host = (host or "").strip()
+        if not host or host in seen:
+            continue
+        seen[host] = True
+        if _tcp_open_retry(host, port, max(connect_timeout, 1.5), 3):
+            _accept(host)
+
+    rest = [h for h in hosts if h not in seen]
+    for host in _probe_hosts_parallel(rest, port, connect_timeout, workers):
+        _accept(host)
+
+    return found
+
+
+def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
+    """
+    Discover Roku ECP devices.
+
+    Returns a list of dicts: ``{host, location, usn, st[, name]}``.
+
+    SSDP M-SEARCH when ``ssdp`` is true. If that finds nothing (or ``ssdp`` is
+    false) and ``scan_fallback`` is true, unicast-scans /24 subnets for ECP on
+    port 8060. Prefer ``ssdp=False`` from UI threads that share multimer timers —
+    blocking ``recvfrom`` + soft timer re-entry can deadlock under librt.
+    """
+    devices = []
+    if ssdp:
+        message = (
+            "M-SEARCH * HTTP/1.1\r\n"
+            "HOST: %s:%d\r\n"
+            'MAN: "ssdp:discover"\r\n'
+            "ST: %s\r\n"
+            "MX: 2\r\n"
+            "\r\n"
+        ) % (SSDP_ADDR, SSDP_PORT, SSDP_ST)
+
+        found = {}
+        deadline = None
+        if time is not None:
+            deadline = time.time() + float(timeout)
+
+        for _ in range(max(1, int(retries))):
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            try:
+                try:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                except (OSError, AttributeError):
+                    pass
+                try:
+                    # IPPROTO_IP=0, IP_MULTICAST_TTL=33 on many stacks
+                    sock.setsockopt(0, 33, 2)
+                except (OSError, AttributeError):
+                    pass
+                try:
+                    sock.settimeout(0.4)
+                except OSError:
+                    pass
+
+                payload = message.encode("utf-8") if isinstance(message, str) else message
+                try:
+                    sock.sendto(
+                        payload, _sockaddr(SSDP_ADDR, SSDP_PORT, socket.SOCK_DGRAM)
+                    )
+                except (OSError, TypeError) as e:
+                    sock.close()
+                    raise RuntimeError("SSDP send failed: " + str(e)) from e
+
+                while True:
+                    if deadline is not None and time.time() >= deadline:
+                        break
+                    try:
+                        data, _addr = sock.recvfrom(2048)
+                    except OSError:
+                        if deadline is None:
+                            break
+                        # keep waiting until overall timeout
+                        if time is not None and time.time() >= deadline:
+                            break
+                        continue
+                    headers = _parse_ssdp_headers(data)
+                    st = headers.get("st", "")
+                    location = headers.get("location", "")
+                    if "roku" not in st.lower() and "roku" not in location.lower():
+                        # still accept LOCATION pointing at :8060
+                        if ":8060" not in location:
+                            continue
+                    host = _host_from_location(location)
+                    if not host:
+                        continue
+                    found[host] = {
+                        "host": host,
+                        "location": location,
+                        "usn": headers.get("usn", ""),
+                        "st": st or SSDP_ST,
+                    }
+                    if deadline is None:
+                        # single-response mode when no time module
+                        break
+            finally:
+                try:
+                    sock.close()
+                except OSError:
+                    pass
+
+        devices = list(found.values())
+    if devices or not scan_fallback:
+        return devices
+    return discover_rokus_scan()
 
 
 class RokuEngine:
@@ -457,7 +917,9 @@ class RokuEngine:
         self.device_info = {}
         self.apps = []
         self.active_app = {}
+        self.active_screensaver = ""
         self.media_player = ""
+        self.media_state = {}
         self.discovered = []
         # Optional inject for tests: callable(method, url, timeout, data) -> (status, body)
         self._http = None
@@ -468,29 +930,101 @@ class RokuEngine:
             self.port = int(port)
         self.connected = False
         self.last_error = ""
+        # Host-specific caches must not survive a TV switch.
+        self.apps = []
+        self.active_app = {}
+        self.active_screensaver = ""
+        self.device_info = {}
+        self.media_player = ""
+        self.media_state = {}
 
     @property
     def base_url(self):
         return "http://%s:%d" % (self.host, self.port)
 
+    def power_is_on(self):
+        """True when ``power-mode`` from device-info is ``PowerOn``."""
+        mode = (self.device_info or {}).get("power-mode") or ""
+        return mode == "PowerOn"
+
+    def inputs(self):
+        """TV tuner / HDMI / AV entries from the last apps query (``type=tvin``)."""
+        out = []
+        for app in self.apps or []:
+            if (app.get("type") or "").lower() == "tvin":
+                out.append(app)
+        return out
+
+    def media_active(self):
+        """True when media-player reports play / pause / buffer."""
+        state = ((self.media_state or {}).get("state") or "").lower()
+        return state in ("play", "pause", "buffer")
+
+    def captions_track_hint(self):
+        """True when format reports a captions value other than ``none``/empty."""
+        cap = ((self.media_state or {}).get("captions") or "").lower()
+        return bool(cap) and cap not in ("none", "off", "false")
+
+    def playback_status(self):
+        """Short ASCII status from active-app + media-player (for the UI banner)."""
+        if self.last_error and not self.connected:
+            return "err: " + self.last_error
+        if not self.host:
+            return "no host"
+        if not self.connected:
+            return "offline"
+        if not self.power_is_on():
+            return "OFF"
+        ms = self.media_state or {}
+        app = (
+            (self.active_app or {}).get("name")
+            or ms.get("app")
+            or ""
+        )
+        saver = (self.active_screensaver or "").strip()
+        state = (ms.get("state") or "").lower()
+        bits = []
+        if saver:
+            # Screensaver sibling from active-app (home or over an app).
+            app_l = app.lower()
+            if not app or app_l in ("roku", "home"):
+                bits.append("screensaver")
+            else:
+                bits.append(app)
+                bits.append("screensaver")
+            return " ".join(bits)
+        if app:
+            bits.append(app)
+        if state and state not in ("", "close", "none", "stop"):
+            bits.append(state)
+        if bits:
+            return " ".join(bits)
+        name = self.device_info.get("user-device-name") or self.device_info.get(
+            "model-name", ""
+        )
+        return name or "ready"
+
+    def refresh_playback(self):
+        """Query active-app + media-player; return ``playback_status()``."""
+        try:
+            self.query_active_app()
+        except Exception:
+            pass
+        try:
+            self.query_media_player()
+        except Exception:
+            pass
+        return self.playback_status()
+
     @property
     def status(self):
-        if self.last_error:
+        if self.last_error and not self.connected:
             return "err: " + self.last_error
         if not self.host:
             return "no host"
         if not self.connected:
             return "offline " + self.host
-        name = self.device_info.get("user-device-name") or self.device_info.get(
-            "model-name", ""
-        )
-        app = self.active_app.get("name", "")
-        bits = [self.host]
-        if name:
-            bits.append(name)
-        if app:
-            bits.append(app)
-        return " | ".join(bits)
+        return self.playback_status()
 
     def _request(self, method, path, data=b""):
         if not self.host:
@@ -512,9 +1046,23 @@ class RokuEngine:
             self.last_error = ""
         return status, body
 
-    def discover(self, timeout=3.0, retries=2):
+    def discover(
+        self, timeout=1.5, retries=1, scan_fallback=True, ssdp=True, on_device=None
+    ):
         try:
-            self.discovered = discover_rokus(timeout=timeout, retries=retries)
+            priority = [d.get("host") for d in (self.discovered or []) if d.get("host")]
+            if ssdp or not scan_fallback:
+                self.discovered = discover_rokus(
+                    timeout=timeout,
+                    retries=retries,
+                    scan_fallback=scan_fallback,
+                    ssdp=ssdp,
+                )
+            else:
+                # Scan-only path: keep prior IPs as priority probes.
+                self.discovered = discover_rokus_scan(
+                    priority_hosts=priority, on_device=on_device
+                )
             self.last_error = "" if self.discovered else "no Roku found"
         except Exception as e:
             self.discovered = []
@@ -522,9 +1070,10 @@ class RokuEngine:
         return self.discovered
 
     def connect(self, discover_if_empty=True):
-        """Ping device-info. If host empty and discover_if_empty, SSDP first."""
+        """Ping device-info. If host empty and discover_if_empty, discover first."""
         if not self.host and discover_if_empty:
-            devices = self.discover()
+            # Unicast scan only — SSDP recvfrom + multimer soft timers can deadlock.
+            devices = self.discover(ssdp=False, scan_fallback=True)
             if devices:
                 self.set_host(devices[0]["host"])
         if not self.host:
@@ -535,7 +1084,12 @@ class RokuEngine:
         self.connected = bool(info)
         if self.connected:
             try:
-                self.query_active_app()
+                self.refresh_playback()
+            except Exception:
+                pass
+            try:
+                if not self.apps:
+                    self.query_apps()
             except Exception:
                 pass
         return self.connected
@@ -634,8 +1188,22 @@ class RokuEngine:
         status, body = self._request("GET", "/query/active-app")
         if not body or status >= 400:
             self.active_app = {}
+            self.active_screensaver = ""
             return {}
         text = body.decode("utf-8") if isinstance(body, bytes) else body
+        # Optional <screensaver id="…" name="…"/> sibling (ECP docs).
+        saver = ""
+        si = text.find("<screensaver")
+        if si >= 0:
+            sgt = text.find(">", si)
+            if sgt >= 0:
+                sattrs = _xml_attrs(text[si : sgt + 1])
+                saver = _xml_unescape(
+                    sattrs.get("name", "") or sattrs.get("id", "") or ""
+                )
+                if not saver:
+                    saver = "screensaver"
+        self.active_screensaver = saver
         # <app id="12">Netflix</app> or screensaver sibling
         apps = _parse_apps(text)
         if apps:
@@ -649,9 +1217,11 @@ class RokuEngine:
         status, body = self._request("GET", "/query/media-player")
         if not body or status >= 400:
             self.media_player = ""
+            self.media_state = {}
             return ""
         text = body.decode("utf-8") if isinstance(body, bytes) else body
         self.media_player = text.strip()
+        self.media_state = _parse_media_player(self.media_player)
         return self.media_player
 
     def query_tv_channels(self):

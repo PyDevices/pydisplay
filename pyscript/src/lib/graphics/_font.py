@@ -331,10 +331,18 @@ class Font:
 
     def _read_line(self, char, line):
         """Read a line of font data for a character."""
+        # ROM fonts cover 256 code points (0..255). Skip anything outside that
+        # range instead of indexing off the end of the cache / file.
+        code = ord(char)
+        if code > 255:
+            return None
+        offset = (code * self.height) + line
         if self._cache:
-            return self._cache[(ord(char) * self.height) + line]
+            if offset >= len(self._cache):
+                return None
+            return self._cache[offset]
 
-        self._font.seek((ord(char) * self.height) + line)
+        self._font.seek(offset)
         try:
             return struct.unpack("B", self._font.read(1))[0]
         except RuntimeError:  # maybe character isnt there? go to next
