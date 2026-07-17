@@ -169,6 +169,14 @@
       "github:PyDevices/pydisplay/src/examples/pydisplay_demo.py"
     ],
     [
+      "roku_engine.py",
+      "github:PyDevices/pydisplay/src/examples/roku_engine.py"
+    ],
+    [
+      "roku_remote.py",
+      "github:PyDevices/pydisplay/src/examples/roku_remote.py"
+    ],
+    [
       "rotations.py",
       "github:PyDevices/pydisplay/src/examples/rotations.py"
     ],
