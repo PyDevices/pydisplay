@@ -384,6 +384,7 @@ class SDLDisplay(DisplayDriver):
         )
         if not self._window:
             raise RuntimeError(f"{usdl2.SDL_GetError()}")
+        self._lock_window_size()
         self._renderer = usdl2.SDL_CreateRenderer(self._window, -1, render_flags)
         if not self._renderer and (render_flags & usdl2.SDL_RENDERER_ACCELERATED):
             render_flags = (
@@ -409,6 +410,14 @@ class SDLDisplay(DisplayDriver):
 
     ############### Required API Methods ################
 
+    def _lock_window_size(self) -> None:
+        """Keep the OS window fixed to the scaled panel size (not user-resizable)."""
+        w = int(self.width * self._scale)
+        h = int(self.height * self._scale)
+        usdl2.SDL_SetWindowResizable(self._window, 0)
+        usdl2.SDL_SetWindowMinimumSize(self._window, w, h)
+        usdl2.SDL_SetWindowMaximumSize(self._window, w, h)
+
     def init(self) -> None:
         """
         Initializes the display instance.  Called by __init__ and rotation setter.
@@ -420,6 +429,7 @@ class SDLDisplay(DisplayDriver):
                 int(self.height * self._scale),
             )
         )
+        self._lock_window_size()
         retcheck(usdl2.SDL_RenderSetLogicalSize(self._renderer, self.width, self.height))
 
         super().vscrdef(
