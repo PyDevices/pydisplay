@@ -70,12 +70,15 @@ class ClusterUI:
             left.remove_flag(lv.obj.FLAG.SCROLLABLE)
 
         gs = theme.gauge_scale()
-        rpm_sz = int(min(side_w - 8, (sh - 24) * 0.58) * gs)
-        fuel_sz = int(min(side_w - 8, (sh - 24) * 0.36) * gs)
+        col_h = sh - 8
+        rpm_sz = int(min(side_w - 8, col_h * 0.58) * gs)
+        fuel_sz = int(min(side_w - 8, col_h * 0.36) * gs)
+        # Even vertical gaps: top / between / bottom.
+        left_gap = max(4, (col_h - rpm_sz - fuel_sz) // 3)
         self.gauges["rpm"] = gauges.make_rpm_gauge(left, rpm_sz)
-        self.gauges["rpm"].set_pos((side_w - rpm_sz) // 2, 4)
+        self.gauges["rpm"].set_pos((side_w - rpm_sz) // 2, left_gap)
         self.gauges["fuel"] = gauges.make_fuel_gauge(left, fuel_sz)
-        self.gauges["fuel"].set_pos((side_w - fuel_sz) // 2, 12 + rpm_sz)
+        self.gauges["fuel"].set_pos((side_w - fuel_sz) // 2, left_gap + rpm_sz + left_gap)
 
         # Right stack: Temp + Oil
         right = lv.obj(shell)
@@ -85,12 +88,13 @@ class ClusterUI:
         if hasattr(right, "remove_flag"):
             right.remove_flag(lv.obj.FLAG.SCROLLABLE)
 
-        temp_sz = int(min(side_w - 8, (sh - 24) * 0.48) * gs)
-        oil_sz = int(min(side_w - 8, (sh - 24) * 0.40) * gs)
+        temp_sz = int(min(side_w - 8, col_h * 0.48) * gs)
+        oil_sz = int(min(side_w - 8, col_h * 0.40) * gs)
+        right_gap = max(4, (col_h - temp_sz - oil_sz) // 3)
         self.gauges["temp"] = gauges.make_temp_gauge(right, temp_sz)
-        self.gauges["temp"].set_pos((side_w - temp_sz) // 2, 8)
+        self.gauges["temp"].set_pos((side_w - temp_sz) // 2, right_gap)
         self.gauges["oil"] = gauges.make_oil_gauge(right, oil_sz)
-        self.gauges["oil"].set_pos((side_w - oil_sz) // 2, 16 + temp_sz)
+        self.gauges["oil"].set_pos((side_w - oil_sz) // 2, right_gap + temp_sz + right_gap)
 
         # Center chrome
         c_outer, c_content = chrome.make_center_bezel(shell, cx, cy, center_w, center_h)
@@ -163,6 +167,7 @@ class ClusterUI:
         theme.on_change(self._on_theme_change)
 
     def _on_theme_change(self):
+        chrome.apply_theme()
         for g in self.gauges.values():
             if hasattr(g, "apply_theme"):
                 g.apply_theme()

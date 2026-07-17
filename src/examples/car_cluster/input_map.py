@@ -107,20 +107,17 @@ def _find_keypad_indev():
 def _mapped_keypad_cb(event, indev, data):
     """Replacement for display_driver._keypad_cb.
 
-    Digits → vehicle throttle/gear.
     Arrows → FocusNav (KEYPAD indev only auto-navigates on KEY_NEXT/PREV).
     Enter  → remapped lv.KEY.ENTER for the active group.
+    Digits are ignored (vehicle drive profile is automatic).
     """
     if event is None or events is None:
         return
 
-    vehicle = _vehicle
     nav = _focus_nav
 
     if event.type == events.KEYDOWN:
-        digit = digit_from_key(event.key)
-        if digit is not None and vehicle is not None:
-            vehicle.press_digit(digit)
+        if digit_from_key(event.key) is not None:
             data.state = lv.INDEV_STATE.RELEASED
             data.key = 0
             return
@@ -137,9 +134,7 @@ def _mapped_keypad_cb(event, indev, data):
         data.key = mapped if mapped is not None else event.key
 
     elif event.type == events.KEYUP:
-        digit = digit_from_key(event.key)
-        if digit is not None and vehicle is not None:
-            vehicle.release_digit()
+        if digit_from_key(event.key) is not None:
             data.state = lv.INDEV_STATE.RELEASED
             data.key = 0
             return

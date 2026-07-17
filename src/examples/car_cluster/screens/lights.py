@@ -4,7 +4,7 @@
 import lvgl as lv
 
 import theme
-from screens._common import content_size, make_slider, make_switch, prep_page, section_label
+from screens._common import apply_switch_theme, content_size, make_switch, prep_page, section_label
 
 
 class LightsScreen:
@@ -13,7 +13,15 @@ class LightsScreen:
         w, h = content_size(prep_page(page, w, h), w, h)
         font = theme.pick_font(200, page)
 
-        section_label(page, "EXTERIOR", 4)
+        # Even spacing of 9 rows (brightness row anchors left unused).
+        n = 9
+        y0, y_last = 32, min(436, h - 48)
+        step = (y_last - y0) / (n - 1)
+        anchors = [int(round(y0 + i * step)) for i in range(n)]
+
+        ext = section_label(page, "EXTERIOR", 4)
+        ext.align(lv.ALIGN.TOP_MID, -4, 4)
+
         self.switches = {}
         ext_rows = (
             ("autodim", "Auto dim"),
@@ -22,8 +30,8 @@ class LightsScreen:
             ("fog", "Fog lamps"),
             ("high_beam", "High beam"),
         )
-        y = 36
-        for key, label in ext_rows:
+        for i, (key, label) in enumerate(ext_rows):
+            y = anchors[i]
             lbl = lv.label(page)
             lbl.set_text(label)
             lbl.set_style_text_color(theme.text(), 0)
@@ -49,10 +57,11 @@ class LightsScreen:
 
             sw.add_event_cb(_make(key, sw), lv.EVENT.VALUE_CHANGED, None)
             self.switches[key] = sw
-            y += 44
 
-        section_label(page, "CABIN", y + 4)
-        y += 32
+        cab = section_label(page, "CABIN", anchors[5])
+        cab.align(lv.ALIGN.TOP_MID, 0, anchors[5])
+
+        y = anchors[6]
         lbl = lv.label(page)
         lbl.set_text("Cabin lights")
         lbl.set_style_text_color(theme.text(), 0)
@@ -70,20 +79,6 @@ class LightsScreen:
 
         sw.add_event_cb(_cabin_cb, lv.EVENT.VALUE_CHANGED, None)
         self.switches["cabin"] = sw
-        y += 48
-
-        section_label(page, "BRIGHTNESS", y)
-        y += 28
-        self.slider = make_slider(page, w - 24, group)
-        self.slider.set_pos(8, y)
-        self.slider.set_value(int(vehicle.lights.get("brightness", 0.85) * 100), 0)
-
-        def _br(e):
-            val = self.slider.get_value() / 100.0
-            vehicle.lights["brightness"] = val
-            theme.set_brightness(max(0.35, val))
-
-        self.slider.add_event_cb(_br, lv.EVENT.VALUE_CHANGED, None)
 
         self.status = lv.label(page)
         self.status.set_style_text_color(theme.accent_lite(), 0)
@@ -94,6 +89,11 @@ class LightsScreen:
     def update(self):
         lit = [k for k, on in self.vehicle.lights.items() if on and k != "brightness"]
         self.status.set_text("Active: " + (", ".join(lit) if lit else "none"))
+
+    def apply_theme(self):
+        for sw in self.switches.values():
+            apply_switch_theme(sw)
+        self.status.set_style_text_color(theme.accent_lite(), 0)
 
 
 def build(page, vehicle, group, w=0, h=0):

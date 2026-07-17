@@ -13,7 +13,9 @@ Controls:
   Left/Right — switch focus group (left rail / center / right rail)
   Up/Down    — previous/next control within the active group
   Enter      — activate focused control
-  Digits 1–9 / 0 — throttle while held; latch gear (0 = 10th); speeds ~gear×13 mph
+
+Vehicle speed, gear, RPM, and oil pressure follow an automatic drive cycle
+(speed ≈ 10× gear). Fuel and coolant stay fixed.
 """
 
 import sys
@@ -41,7 +43,7 @@ import input_map  # noqa: E402 — capture hook must run before display_driver
 
 input_map.capture_virtual_devices()
 
-from displaysys import env_get, env_set
+from displaysys import env_bool, env_get, env_set
 
 if env_get("PYDISPLAY_WIDTH") is None:
     env_set("PYDISPLAY_WIDTH", "1200")
@@ -89,13 +91,35 @@ def _dt_s(now):
     return dt
 
 
+# Design / interactive freeze: set CAR_CLUSTER_FREEZE=1 (or truthy) to hold
+# gauges/screens at static values so layout can be tweaked from the REPL.
+_FREEZE = env_bool("CAR_CLUSTER_FREEZE", False)
+
+
 def _on_tick(timer):
     global _ui, _vehicle
     if _ui is None or _vehicle is None:
         return
+    if _FREEZE:
+        return
     dt = _dt_s(_now_ms())
     _vehicle.tick(dt)
     _ui.update()
+
+
+def freeze(static=True):
+    """Hold or resume vehicle/gauge animation (interactive design helper)."""
+    global _FREEZE
+    _FREEZE = bool(static)
+    if _FREEZE and _ui is not None and _vehicle is not None:
+        # Snap once to a readable static scene.
+        _vehicle.rpm = 3200
+        _vehicle.speed_mph = 48
+        _vehicle.fuel_frac = 0.62
+        _vehicle.coolant_f = 195
+        _vehicle.oil_psi = 42
+        _ui.update()
+    return _FREEZE
 
 
 def build_ui():
@@ -124,6 +148,8 @@ def build_ui():
 
         runtime.on_tick(_drain_rails, period=30, async_=False)
         _ui.rails.drain_pending()
+        if _FREEZE:
+            freeze(True)
     finally:
         if inst is not None:
             inst.enable()
@@ -131,5 +157,8 @@ def build_ui():
 
 build_ui()
 
-# Keep the shared runtime alive (desktop window / PyScript canvas).
-runtime.run_forever()
+# Keep the shared runtime alive when launched as a script. When imported
+# (design session / REPL ``import``), timers keep the UI live under -i /
+# signal backends; the importer can call ``runtime.run_forever()`` if needed.
+if __name__ == "__main__":
+    runtime.run_forever()

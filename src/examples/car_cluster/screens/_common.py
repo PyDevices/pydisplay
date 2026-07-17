@@ -52,6 +52,32 @@ def section_label(parent, text, y, *, accent=False):
     return lbl
 
 
+def scale_2x(lbl):
+    """2× transform about the label center."""
+    w = max(1, lbl.get_width())
+    h = max(1, lbl.get_height())
+    lbl.set_style_transform_pivot_x(w // 2, 0)
+    lbl.set_style_transform_pivot_y(h // 2, 0)
+    try:
+        lbl.set_style_transform_scale(512, 0)
+    except Exception:
+        lbl.set_style_transform_scale_x(512, 0)
+        lbl.set_style_transform_scale_y(512, 0)
+
+
+def scale_2x_edge(lbl, *, left=True):
+    """2× transform pivoting on the left or right edge."""
+    w = max(1, lbl.get_width())
+    h = max(1, lbl.get_height())
+    lbl.set_style_transform_pivot_x(0 if left else w, 0)
+    lbl.set_style_transform_pivot_y(h // 2, 0)
+    try:
+        lbl.set_style_transform_scale(512, 0)
+    except Exception:
+        lbl.set_style_transform_scale_x(512, 0)
+        lbl.set_style_transform_scale_y(512, 0)
+
+
 def kv_row(parent, y, key, value_text, width):
     k = lv.label(parent)
     k.set_text(key)
@@ -67,6 +93,30 @@ def kv_row(parent, y, key, value_text, width):
     zero_pad(v)
     v.set_pos(max(width // 2, 140), y)
     return k, v
+
+
+def apply_kv_edge_scale(keys, vals, page_w, *, pad=14, dy=None, page=None):
+    """Design-session layout: 2× edge-pivoted keys/values + pad/dy nudges."""
+    if not keys:
+        return
+    if page is None:
+        page = keys[0].get_parent()
+    try:
+        lv.obj.update_layout(page)
+    except Exception:
+        pass
+    label_h = max(1, keys[0].get_height())
+    if dy is None:
+        dy = label_h
+    for lbl in keys:
+        scale_2x_edge(lbl, left=True)
+        lbl.set_style_translate_x(pad - 8, 0)
+        lbl.set_style_translate_y(dy, 0)
+    for lbl in vals:
+        w = max(1, lbl.get_width())
+        scale_2x_edge(lbl, left=False)
+        lbl.set_style_translate_x(page_w - pad - w - 152, 0)
+        lbl.set_style_translate_y(dy, 0)
 
 
 def spread_rows(count, top, bottom, height):
@@ -102,6 +152,16 @@ def make_button(parent, text, w, h, group=None):
     return btn
 
 
+def apply_button_theme(btn):
+    btn.set_style_bg_color(theme.panel_raised(), 0)
+    btn.set_style_border_color(theme.accent_dim(), 0)
+    btn.set_style_outline_color(theme.accent(), lv.STATE.FOCUSED)
+    try:
+        btn.get_child(0).set_style_text_color(theme.text(), 0)
+    except Exception:
+        pass
+
+
 def _style_switch(sw):
     st = lv.style_t()
     st.init()
@@ -134,6 +194,12 @@ def make_switch(parent, group=None):
     if group is not None:
         lv_util.group_add(group, sw)
     return sw
+
+
+def apply_switch_theme(sw):
+    sw.set_style_bg_color(theme.chrome_mid(), lv.PART.MAIN)
+    sw.set_style_bg_color(theme.accent(), lv.PART.INDICATOR | lv.STATE.CHECKED)
+    sw.set_style_bg_color(theme.text(), lv.PART.KNOB)
 
 
 def _style_slider(sl):
@@ -184,6 +250,12 @@ def make_slider(parent, w, group=None):
     return sl
 
 
+def apply_slider_theme(sl):
+    sl.set_style_bg_color(theme.chrome_lo(), lv.PART.MAIN)
+    sl.set_style_bg_color(theme.accent(), lv.PART.INDICATOR)
+    sl.set_style_bg_color(theme.accent_lite(), lv.PART.KNOB)
+
+
 def make_bar(parent, w, h):
     bar = lv.bar(parent)
     bar.set_size(w, h)
@@ -204,3 +276,8 @@ def make_bar(parent, w, h):
     bar.add_style(st2, lv.PART.INDICATOR)
     theme.retain_style(st2)
     return bar
+
+
+def apply_bar_theme(bar):
+    bar.set_style_bg_color(theme.chrome_lo(), lv.PART.MAIN)
+    bar.set_style_bg_color(theme.accent(), lv.PART.INDICATOR)

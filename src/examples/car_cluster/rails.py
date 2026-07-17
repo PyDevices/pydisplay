@@ -56,7 +56,7 @@ class Rails:
             btn.set_size(lv.pct(100), btn_h)
             btn.set_style_pad_all(2, 0)
             btn.set_style_pad_row(2, 0)
-            chrome.style_rail_button(btn, selected=(i == 0))
+            chrome.style_rail_button(btn, selected=(i == 0), initial=True)
             btn.set_flex_flow(lv.FLEX_FLOW.COLUMN)
             btn.set_flex_align(lv.FLEX_ALIGN.CENTER, lv.FLEX_ALIGN.CENTER, lv.FLEX_ALIGN.CENTER)
 
@@ -107,19 +107,25 @@ class Rails:
             return
         self._selecting = True
         try:
+            nest = getattr(getattr(lv, "_nesting", None), "value", None)
             self._selected = index
-            for i, btn in enumerate(self.buttons):
-                chrome.style_rail_button(btn, selected=(i == index))
-                btn.set_style_pad_all(2, 0)
-                btn.set_style_pad_row(2, 0)
-                icon = self._icon_lbls[i]
-                if icon is not None:
-                    icon.set_style_text_color(
-                        theme.text() if i == index else theme.accent_lite(), 0
-                    )
             self._pending_tab = (index, 1 if anim else 0)
+            # While nested in an LVGL FOCUSED callback, only record pending.
+            # Restyling / add_style while nesting!=0 hard-locks under key storms.
+            if nest:
+                return
+            self._apply_selection_styles(index)
         finally:
             self._selecting = False
+
+    def _apply_selection_styles(self, index):
+        for i, btn in enumerate(self.buttons):
+            chrome.style_rail_button(btn, selected=(i == index))
+            icon = self._icon_lbls[i]
+            if icon is not None:
+                icon.set_style_text_color(
+                    theme.text() if i == index else theme.accent_lite(), 0
+                )
 
     def drain_pending(self):
         """Apply a deferred tabview change outside the LVGL event callback stack.
@@ -140,6 +146,8 @@ class Rails:
             pass
         self._pending_tab = None
         index, anim_en = pending
+        # Apply deferred rail restyle outside the FOCUSED callback.
+        self._apply_selection_styles(index)
         try:
             if self.tabview.get_tab_act() == index:
                 return
