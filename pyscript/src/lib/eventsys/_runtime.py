@@ -558,7 +558,18 @@ class Runtime:
         self._ensure_ticks()
         self._pending_timer_async = False
         timer_class = AsyncTimer if async_ else Timer
-        timer = timer_class(-1)
+        # Prefer virtual id -1 (auto-allocate). Some ports (e.g. ESP32-P4) only
+        # accept concrete hardware timer numbers — fall back to 0..3.
+        timer = None
+        last_err = None
+        for timer_id in (-1, 0, 1, 2, 3):
+            try:
+                timer = timer_class(timer_id)
+                break
+            except ValueError as exc:
+                last_err = exc
+        if timer is None:
+            raise last_err
         timer.init(
             mode=timer_class.PERIODIC,
             period=tick_ms,
