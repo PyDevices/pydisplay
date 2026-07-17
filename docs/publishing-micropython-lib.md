@@ -76,7 +76,7 @@ Typical runtime: **~10–20 minutes**.
     displaysys
   ```
 
-  Fuller desktop stack smoke test (`displaysys-sdldisplay`, `graphics-cmod`, `lvgl-cpython`, `board_config` draw):
+  Fuller desktop stack smoke test (`displaysys`, `usdl2`, `graphics-cmod`, `lvgl-cpython`, `board_config` draw):
 
   ```bash
   ./tools/test_testpypi_desktop.sh --headless
@@ -192,9 +192,9 @@ Or `mpremote mip install --index "https://PyDevices.github.io/micropython-lib/mi
 
 ### TestPyPI
 
-PyDevices CPython wheels are published to [TestPyPI](https://test.pypi.org) only (not production PyPI). Browse package names there (`displaysys`, `eventsys`, `displaysys-pgdisplay`, `pydisplay-graphics`, …).
+PyDevices CPython wheels are published to [TestPyPI](https://test.pypi.org) only (not production PyPI). Browse package names there (`displaysys`, `eventsys`, `multimer`, `pydisplay-graphics`, …).
 
-**Naming:** MIP package names (e.g. `graphics`) may differ from the pip/TestPyPI project name when the MIP name is already taken on pypi.org. The mapping lives in `pypi_publish_name()` in [`publish_micropython_lib.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_micropython_lib.sh).
+**Naming:** MIP package names (e.g. `graphics`) may differ from the pip/TestPyPI project name when the MIP name is already taken on pypi.org. The mapping lives in `pypi_publish_name()` in [`publish_sync_packages.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_sync_packages.sh).
 
 #### Two-index `pip install` (required)
 
@@ -207,19 +207,19 @@ pip install \
   displaysys
 ```
 
-Example with a desktop backend (pulls in `pygame-ce` from PyPI; imports as `pygame`):
+Example with desktop SDL (`usdl2` from TestPyPI; `pygame-ce` from PyPI when using `PGDisplay`):
 
 ```bash
 pip install \
   -i https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
-  displaysys displaysys-pgdisplay
+  displaysys usdl2
 ```
 
 | Flag | Index | Why it is needed |
 |------|-------|------------------|
-| `-i https://test.pypi.org/simple/` | **TestPyPI** (primary) | Resolves PyDevices packages you install and their deps that exist **only** on TestPyPI (`displaysys`, `eventsys`, `multimer`, `usdl2`, `displaysys-sdldisplay`, …). |
-| `--extra-index-url https://pypi.org/simple/` | **PyPI** (secondary) | Resolves third-party deps published **only** on production PyPI (e.g. `pygame-ce` when you install it alongside `displaysys-pgdisplay`, and other third-party libs). |
+| `-i https://test.pypi.org/simple/` | **TestPyPI** (primary) | Resolves PyDevices packages you install and their deps that exist **only** on TestPyPI (`displaysys`, `eventsys`, `multimer`, `usdl2`, …). |
+| `--extra-index-url https://pypi.org/simple/` | **PyPI** (secondary) | Resolves third-party deps published **only** on production PyPI (e.g. `pygame-ce` for `PGDisplay`, and other third-party libs). |
 
 **Both must be present.** If you omit TestPyPI, pip cannot find PyDevices wheels. If you omit PyPI, pip fails when a declared dependency (for example `pygame-ce`) is not on TestPyPI.
 
@@ -244,12 +244,12 @@ From a pydisplay checkout on a tagged commit (or pass `--version`):
 ```bash
 # Sync only (no TestPyPI)
 git tag -a v0.0.5 -m "Release 0.0.5"   # or use publish_release_tag.sh
-./scripts/publish_micropython_lib.sh --skip-pypi \
+./scripts/publish_sync_packages.sh --skip-pypi \
   --commit-message "pydisplay: Sync from local." --push
 
 # With TestPyPI (needs hatch, twine, TESTPYPI_API_TOKEN or ~/.pypirc)
 export TESTPYPI_API_TOKEN=...
-./scripts/publish_micropython_lib.sh \
+./scripts/publish_sync_packages.sh \
   --commit-message "pydisplay: Sync and TestPyPI upload." --push
 
 # MIP index → gh-pages
@@ -258,7 +258,7 @@ MICROPYTHON_LIB_DIR=../micropython-lib ./scripts/publish_mip_ghpages.sh
 
 Local gh-pages push requires git credentials for micropython-lib.
 
-Script options: `./scripts/publish_micropython_lib.sh --help`
+Script options: `./scripts/publish_sync_packages.sh --help`
 
 ---
 
@@ -268,7 +268,7 @@ Script options: `./scripts/publish_micropython_lib.sh --help`
 |--------|------------|
 | Version already exists | Push a **new tag** with a higher semver — TestPyPI rejects duplicate versions |
 | Upload fails mid-run | Partial uploads may succeed; fix the error, bump the tag, push again |
-| `graphics` sdist 400 | Name is taken on [pypi.org/project/graphics](https://pypi.org/project/graphics); PyPI project is `pydisplay-graphics` (MIP name stays `graphics`). See `pypi_publish_name()` in [`publish_micropython_lib.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_micropython_lib.sh). |
+| `graphics` sdist 400 | Name is taken on [pypi.org/project/graphics](https://pypi.org/project/graphics); PyPI project is `pydisplay-graphics` (MIP name stays `graphics`). See `pypi_publish_name()` in [`publish_sync_packages.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_sync_packages.sh). |
 | Slow | Normal — each lib package gets hatch build + twine upload |
 | Not for devices | Boards use the **MIP index**, not TestPyPI |
 
@@ -281,7 +281,7 @@ Script options: `./scripts/publish_micropython_lib.sh --help`
 | `Resource not accessible` / 403 on checkout | Missing or wrong `MICROPYTHON_LIB_DEPLOY_TOKEN` |
 | Push to `PyDevices` fails | PAT lacks write access or SSO not authorized for PyDevices |
 | TestPyPI 403 | Bad `TESTPYPI_API_TOKEN` |
-| TestPyPI 400 on sdist (wheel OK) | PyPI project name taken on pypi.org — add a mapping in `pypi_publish_name()` in [`publish_micropython_lib.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_micropython_lib.sh) |
+| TestPyPI 400 on sdist (wheel OK) | PyPI project name taken on pypi.org — add a mapping in `pypi_publish_name()` in [`publish_sync_packages.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_sync_packages.sh) |
 | MIP compile error | Bad `manifest.py` in micropython-lib — see job log for package path |
 | `No changes to commit` | Sources already match; MIP step may still run if enabled |
 | Workflow did not start | Tag must match `v*.*.*` (e.g. `v0.0.5`, not `0.0.5`) |
@@ -293,7 +293,7 @@ Script options: `./scripts/publish_micropython_lib.sh --help`
 | Script | Role |
 |--------|------|
 | [`scripts/publish_release_tag.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_release_tag.sh) | Create/push `vX.Y.Z` tag (triggers CI publish) |
-| [`scripts/publish_micropython_lib.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_micropython_lib.sh) | Rsync `src/lib` → micropython-lib; optional TestPyPI |
+| [`scripts/publish_sync_packages.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_sync_packages.sh) | Sync `src/lib` packages → micropython-lib; optional TestPyPI |
 | [`scripts/build.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/build.py) | Compile MIP index (used by `publish_mip_ghpages.sh`) |
 | [`scripts/publish_mip_ghpages.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_mip_ghpages.sh) | Build index and push `mip/PyDevices` on gh-pages |
 | [`scripts/publish_make_pyproject.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_make_pyproject.py) | Hatch `pyproject.toml` from firmware-style manifests |

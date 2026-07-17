@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Smoke-test PyDevices desktop wheels from TestPyPI in a throwaway venv.
 #
-# Installs displaysys-sdldisplay (SDL2 desktop backend + board_config), graphics-cmod,
+# Installs displaysys (full package + board_config), usdl2, graphics-cmod,
 # and lvgl-cpython, then runs a short import/draw check (opens a real SDL window by default).
 #
 # Usage (from repo root):
@@ -12,7 +12,7 @@
 #   ./tools/test_testpypi_desktop.sh --headless --keep   # CI / no DISPLAY
 #
 # Requires: python3, pip. Uses two-index install (TestPyPI primary, PyPI secondary).
-# Install usdl2 explicitly — it is not a pip dependency of displaysys-sdldisplay.
+# Install usdl2 explicitly — it is not a pip dependency of displaysys.
 # See docs/publishing-micropython-lib.md#two-index-pip-install-required
 
 set -euo pipefail
@@ -29,7 +29,7 @@ Usage: ./tools/test_testpypi_desktop.sh [--headless] [--keep]
 
 Create a venv, pip-install TestPyPI desktop packages (no version pins), and smoke-test:
 
-  displaysys-sdldisplay  usdl2  graphics-cmod  lvgl-cpython
+  displaysys  usdl2  graphics-cmod  lvgl-cpython
 
 Environment:
   TESTPYPI_VENV   venv directory (default: /tmp/pydisplay-testpypi-venv)
@@ -74,7 +74,7 @@ python3 -m venv "$VENV"
 "$VENV/bin/pip" install \
     -i "$TESTPYPI_INDEX" \
     --extra-index-url "$PYPI_INDEX" \
-    displaysys-sdldisplay \
+    displaysys \
     usdl2 \
     graphics-cmod \
     lvgl-cpython

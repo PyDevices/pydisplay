@@ -58,7 +58,7 @@ That pushes tag `vX.Y.Z` and triggers sync + TestPyPI + MIP index. See [Publish 
 ./scripts/publish_release_tag.sh 0.0.5 --push
 ```
 
-Version comes from the git tag (no `VERSION` file). [`publish_micropython_lib.sh`](publish_micropython_lib.sh) also accepts `--version` or `PYDISPLAY_VERSION` for local runs.
+Version comes from the git tag (no `VERSION` file). [`publish_sync_packages.sh`](publish_sync_packages.sh) also accepts `--version` or `PYDISPLAY_VERSION` for local runs.
 
 **Manual dispatch** (Actions → Publish micropython-lib) — optional inputs:
 
@@ -114,7 +114,7 @@ python scripts/install_sync_framebuf.py --check    # CI freshness (also run via 
 | `install_` | `install_gen_manifests.py`, `install_refresh_manifests.sh`, `install_sync_framebuf.py` | `src/` tree changes → updates `packages/*.json`, `web/pyscript/micropython.toml`; `src/add_ons/framebuf.py` changes → regenerates gitignored `src/lib/graphics/framebuf.py` |
 | `pyscript_` | `gallery_generator.py` | Gallery cards in `web/pyscript/index.html` |
 | `mkdocs_` | `mkdocs_gen_ref_pages.py`, `mkdocs_gen_notebook_pages.py` | Automatically on `mkdocs build` |
-| `publish_` | `publish_micropython_lib.sh`, `publish_release_tag.sh`, `build.py`, `publish_mip_ghpages.sh`, `publish_make_pyproject.py` | Tag push → CI release; or local / manual workflow |
+| `publish_` | `publish_sync_packages.sh`, `publish_release_tag.sh`, `build.py`, `publish_mip_ghpages.sh`, `publish_make_pyproject.py` | Tag push → CI release; or local / manual workflow |
 
 `manifestfile.py` is a shared library for the publish scripts (not prefixed).
 

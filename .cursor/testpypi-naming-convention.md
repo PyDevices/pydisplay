@@ -19,7 +19,6 @@ MIP names stay short. pip project names must **not collide with [pypi.org](https
 When [pypi.org](https://pypi.org/project/<name>/) returns **404**, use the same string for TestPyPI and MIP:
 
 - `displaysys`, `eventsys`, `multimer`
-- Optional MIP-oriented `displaysys-sdldisplay`, `displaysys-pgdisplay`, … (prefer full `displaysys` on CPython/Android)
 - `usdl2` (separate repo; no collision today)
 
 Import paths follow the wheel layout (`import displaysys`, `import displaysys.sdldisplay`, …). The full `displaysys` wheel includes every module under `src/lib/displaysys/`.
@@ -32,7 +31,7 @@ When the MIP name is **taken on pypi.org**, prefix with `pydisplay-`:
 |----------|----------------|--------|-----|
 | `graphics` | **`pydisplay-graphics`** | `graphics` | [pypi.org/project/graphics](https://pypi.org/project/graphics) exists |
 
-Mapping lives in `pypi_publish_name()` in [`scripts/publish_micropython_lib.sh`](../scripts/publish_micropython_lib.sh). MIP and source trees keep the short name `graphics/`.
+Mapping lives in `pypi_publish_name()` in [`scripts/publish_sync_packages.sh`](../scripts/publish_sync_packages.sh). MIP and source trees keep the short name `graphics/`.
 
 ### 3. Native CPython extensions (separate repos): suffix disambiguation
 
@@ -47,22 +46,15 @@ Do **not** publish as bare `lvgl` — [pypi.org/project/lvgl](https://pypi.org/p
 
 `graphics-cmod` and `pydisplay-graphics` both provide `import graphics`; prefer **`graphics-cmod`** on desktop/Android when the native wheel matches the platform, and **`pydisplay-graphics`** for pure-Python-only or cross-check installs.
 
-### 4. displaysys backends: `displaysys-<backend>`
+### 4. displaysys is one package
 
-The main **`displaysys`** wheel is the full package (every module under `src/lib/displaysys/`) plus `board_config.py` at wheel root. Prefer that alone on CPython/Android.
-
-Optional MIP-oriented backend wheels still use the folder name as the pip project name:
-
-- `displaysys-sdldisplay`, `displaysys-pgdisplay`, `displaysys-busdisplay`, …
-- Each ships one module under `displaysys/` and declares `require("displaysys")`.
-- Do **not** install these on top of the full `displaysys` wheel on CPython (overlapping package path).
-- No pypi.org collisions as of 2026-07-09.
+The **`displaysys`** wheel / MIP package is the full tree (every module under `src/lib/displaysys/`) plus `board_config.py` at package root. There are **no** per-backend `displaysys-*` packages on TestPyPI or the MIP index.
 
 ### 5. Third-party dependencies: production PyPI only
 
 Dependencies that live on **pypi.org** stay on the **secondary** index (`--extra-index-url`):
 
-- `pygame-ce` (imports as `pygame`) — `displaysys-pgdisplay`
+- `pygame-ce` (imports as `pygame`) — install alongside `displaysys` when using `PGDisplay`
 - Other upstream libs — never renamed to PyDevices prefixes
 
 See [Two-index pip install](../docs/publishing-micropython-lib.md#two-index-pip-install-required).
@@ -81,9 +73,9 @@ After a version is on TestPyPI, **do not rename** the project (TestPyPI rejects 
 
 ---
 
-## Inventory (2026-07-09)
+## Inventory (2026-07-16)
 
-### pydisplay tag publish (`publish_micropython_lib.sh`)
+### pydisplay tag publish (`publish_sync_packages.sh`)
 
 | MIP / folder | pip / TestPyPI | Import | pypi.org |
 |--------------|----------------|--------|----------|
@@ -91,14 +83,6 @@ After a version is on TestPyPI, **do not rename** the project (TestPyPI rejects 
 | `eventsys` | `eventsys` | `eventsys` | free |
 | `multimer` | `multimer` | `multimer` | free |
 | `graphics` | **`pydisplay-graphics`** | `graphics` | **taken** → mapped |
-| `displaysys-sdldisplay` | `displaysys-sdldisplay` | `displaysys.sdldisplay` | free |
-| `displaysys-pgdisplay` | `displaysys-pgdisplay` | `displaysys.pgdisplay` | free |
-| `displaysys-psdisplay` | `displaysys-psdisplay` | `displaysys.psdisplay` | free |
-| `displaysys-jndisplay` | `displaysys-jndisplay` | `displaysys.jndisplay` | free |
-| `displaysys-busdisplay` | `displaysys-busdisplay` | `displaysys.busdisplay` | free |
-| `displaysys-fbdisplay` | `displaysys-fbdisplay` | `displaysys.fbdisplay` | free |
-| `displaysys-pixeldisplay` | `displaysys-pixeldisplay` | `displaysys.pixeldisplay` | free |
-| `displaysys-epaperdisplay` | `displaysys-epaperdisplay` | `displaysys.epaperdisplay` | free |
 
 ### Sibling repos (own workflows)
 
@@ -107,7 +91,7 @@ After a version is on TestPyPI, **do not rename** the project (TestPyPI rejects 
 | `graphics-cmod` | `graphics` | free | cibuildwheel; linux + windows + android |
 | `lvgl-cpython` | `lvgl` | free (`lvgl` taken) | cibuildwheel; LVGL version in tag (e.g. 9.5.6) |
 | `usdl2` | `usdl2` | free | pure-Python ctypes SDL2 shim |
-| `pdwidgets` | `pdwidgets` | `pdwidgets` | free | separate repo |
+| `pdwidgets` | `pdwidgets` | free | separate repo |
 | `palettes` | `palettes` | free on TestPyPI (`palettes` taken on pypi.org) | separate repo |
 
 ### Firmware-only (never published)
@@ -122,14 +106,14 @@ See [PyDevices/displayif](https://github.com/PyDevices/displayif) and board conf
 
 | Name | Notes |
 |------|--------|
-| *(none currently)* | |
+| `displaysys-*` backend packages | Removed — use full `displaysys` only (TestPyPI delete + micropython-lib / MIP prune) |
 
 ---
 
 ## Adding a new mapped name
 
 1. Check pypi.org (and optionally test.pypi.org for PyDevices duplicates).
-2. **pydisplay micropython-lib packages:** extend `pypi_publish_name()` in `publish_micropython_lib.sh`; MIP folder name unchanged.
+2. **pydisplay micropython-lib packages:** extend `pypi_publish_name()` in `publish_sync_packages.sh`; MIP folder name unchanged.
 3. **Native repos:** set `[project].name` in that repo’s `pyproject.toml`.
 4. Update this inventory and [testpypi-publish-audit.md](testpypi-publish-audit.md).
 5. Smoke-test: [`tools/test_testpypi_standalone.sh`](../tools/test_testpypi_standalone.sh) or [`tools/test_testpypi_desktop.sh`](../tools/test_testpypi_desktop.sh).

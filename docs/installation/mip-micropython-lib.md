@@ -29,11 +29,7 @@ mpremote mip install --index "https://PyDevices.github.io/micropython-lib/mip/Py
 
 **Core:**
 
-- `displaysys`, `eventsys`, `graphics`, `multimer`
-
-**Display extensions** (pull in `displaysys` automatically):
-
-- `displaysys-busdisplay`, `displaysys-epaperdisplay`, `displaysys-fbdisplay`, `displaysys-jndisplay`, `displaysys-pgdisplay`, `displaysys-pixeldisplay`, `displaysys-psdisplay`, `displaysys-sdldisplay`
+- `displaysys` (full package — all backends), `eventsys`, `graphics`, `multimer`
 
 **Drivers** (examples):
 

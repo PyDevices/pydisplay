@@ -18,21 +18,19 @@ Audited **2026-07-08** from local clones under `~/github/cmods` and `~/github/py
 
 ## pydisplay → micropython-lib + TestPyPI
 
-**Script:** [`scripts/publish_micropython_lib.sh`](../scripts/publish_micropython_lib.sh)  
+**Script:** [`scripts/publish_sync_packages.sh`](../scripts/publish_sync_packages.sh)  
 **CI:** runs on `ubuntu-latest` only; `hatch build` + `twine upload` per package.
 
 **TestPyPI packages today** (from manifest `pypi_publish=` names):
 
 | Package | Example wheel (v0.0.7) | Platform model |
 |---------|------------------------|----------------|
-| `displaysys` | `displaysys-0.0.7-py2.py3-none-any.whl` | universal; core + `board_config.py` (next publish) |
+| `displaysys` | `displaysys-0.0.7-py2.py3-none-any.whl` | universal; full tree + `board_config.py` |
 | `eventsys` | `eventsys-0.0.7-py2.py3-none-any.whl` | universal |
 | `multimer` | `multimer-0.0.7-py2.py3-none-any.whl` | universal |
 | `pydisplay-graphics` | `pydisplay_graphics-0.0.7-py2.py3-none-any.whl` | universal (PyPI name mapped from `graphics`) |
 
-**Layout:** `displaysys` is the full package (all modules under `src/lib/displaysys/` plus `board_config.py`). Optional `displaysys-*` backend wheels remain for small MIP installs only — do not stack them on top of the full `displaysys` wheel on CPython. Published packages do not include `examples/` trees.
-
-**Not on TestPyPI yet (until next pydisplay tag release):** ~~`displaysys-*` backend subpackages~~ — published from v0.0.8+; see [naming convention](testpypi-naming-convention.md).
+**Layout:** `displaysys` is the full package (all modules under `src/lib/displaysys/` plus `board_config.py`). Per-backend `displaysys-*` packages are **not** published. Published packages do not include `examples/` trees.
 
 **Linux / Windows / Android:** universal `none-any` wheels install on all three; no per-OS wheel matrix is required for these packages.
 
@@ -86,11 +84,11 @@ Both use the same shape: matrix `ubuntu-latest` + `windows-latest`, plus a dedic
 | **Pure pydisplay libs** (`displaysys`, `eventsys`, `multimer`, `pydisplay-graphics`) | **Met by design** — universal wheels; manifest `require()` graph in § Pip dependency graph |
 | **usdl2** | **Met for CPython shim** — universal wheel; MP cmod is separate |
 | **displayif** | **N/A** — firmware-only user C module, not a pip/MIP package |
-| **displaysys-* backends** | **Published** (v0.0.8+) — see [naming convention](testpypi-naming-convention.md) |
+| **displaysys-* backends** | **Removed** — use full `displaysys` only |
 
 No change needed for cibuildwheel repos unless you want **more Android ABIs** or **older CPython minors on Android** (today android wheels are cp313–cp314 only, per `pyproject.toml` comments).
 
-### Pip dependency graph (`publish_micropython_lib.sh` manifests)
+### Pip dependency graph (`publish_sync_packages.sh` manifests)
 
 Declared for the next tag publish (MIP + TestPyPI `pyproject.toml`):
 
@@ -98,12 +96,9 @@ Declared for the next tag publish (MIP + TestPyPI `pyproject.toml`):
 |---------|-------------------------|
 | `eventsys` | `multimer` |
 | `multimer` | *(none — stdlib backends on CPython; `usdl2` only if sdl2 timer backend is selected at runtime)* |
-| `displaysys-pgdisplay` | `displaysys`, `eventsys` (`pygame-ce` install separately) |
-| `displaysys-sdldisplay` | `displaysys`, `eventsys` (`usdl2` install separately) |
-| `displaysys-psdisplay`, `displaysys-jndisplay` | `displaysys`, `eventsys` |
-| Other `displaysys-*` | `displaysys` only |
+| `displaysys` | *(none — install `usdl2` / `pygame-ce` separately for desktop backends)* |
 
-Install any of these from TestPyPI using the [two-index `pip` command](../docs/publishing-micropython-lib.md#two-index-pip-install-required): TestPyPI as `-i` (PyDevices packages) and PyPI as `--extra-index-url` (deps like `pygame-ce` that are not on TestPyPI).
+Install from TestPyPI using the [two-index `pip` command](../docs/publishing-micropython-lib.md#two-index-pip-install-required): TestPyPI as `-i` (PyDevices packages) and PyPI as `--extra-index-url` (deps like `pygame-ce` that are not on TestPyPI).
 
 After a pydisplay tag publish, run the desktop stack smoke test (headless in CI or SSH):
 

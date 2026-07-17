@@ -41,20 +41,10 @@ Includes 2 functions that install from different sources:
     - By default, installs all modules as precompiled bytecode (.mpy) files.
     - Includes:
         - Core packages:
-            - displaysys
+            - displaysys (full package — all backends)
             - eventsys
             - graphics
             - multimer
-        - Display extensions for the displaysys package.
-          Installing any of these will automatically install the displaysys core package:
-            - displaysys-busdisplay
-            - displaysys-epaperdisplay
-            - displaysys-fbdisplay
-            - displaysys-jndisplay
-            - displaysys-pgdisplay
-            - displaysys-pixeldisplay
-            - displaysys-psdisplay
-            - displaysys-sdldisplay
         - Display drivers, for example:
             - gc9a01
             - ili9341
@@ -165,17 +155,6 @@ install("displaysys")
 install("eventsys")
 install("graphics")
 install("multimer")
-
-## Display extensions:
-##### Installing any of these will automatically install the `displaysys` core package
-install("displaysys-busdisplay")
-install("displaysys-epaperdisplay")
-install("displaysys-fbdisplay")
-install("displaysys-jndisplay")
-install("displaysys-pgdisplay")
-install("displaysys-pixeldisplay")
-install("displaysys-psdisplay")
-install("displaysys-sdldisplay")
 
 ## Display drivers, for example:
 install("gc9a01")

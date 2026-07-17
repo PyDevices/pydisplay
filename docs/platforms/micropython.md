@@ -50,7 +50,7 @@ For best SDL2 performance on MicroPython Unix, CircuitPython Unix, and `micropyt
 
 Without **`usdl2`**, `SDLDisplay` falls back to pure-Python ffi/ctypes bindings; timer selection is unchanged (`multimer` still picks `_librt` or threading backends first on each platform).
 
-On **CPython** desktop, the ctypes shim is published on TestPyPI as package **`usdl2`** (install with the [two-index pip pattern](../publishing-micropython-lib.md#two-index-pip-install-required); install it alongside `displaysys-sdldisplay` — it is not a MIP/`require()` dependency).
+On **CPython** desktop, the ctypes shim is published on TestPyPI as package **`usdl2`** (install with the [two-index pip pattern](../publishing-micropython-lib.md#two-index-pip-install-required); install it alongside `displaysys` when using `SDLDisplay` — it is not a MIP/`require()` dependency).
 
 ## Frozen firmware
 

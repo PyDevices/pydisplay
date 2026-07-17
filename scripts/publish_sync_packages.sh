@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Copy packages to the micropython-lib directory
+# Sync pydisplay packages into micropython-lib and optionally upload TestPyPI wheels.
 # Install example:  mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
 # Resolves to:  https://pydevices.github.io/micropython-lib/mip/PyDevices/package/6/displaysys/latest.json
 # Repo URL:  https://github.com/PyDevices/micropython-lib/blob/gh-pages/mip/PyDevices/package/6/displaysys/latest.json
 #
 # CI / automation:
-#   MICROPYTHON_LIB_DIR=../micropython-lib ./scripts/publish_micropython_lib.sh \
+#   MICROPYTHON_LIB_DIR=../micropython-lib ./scripts/publish_sync_packages.sh \
 #     --skip-pypi --commit-message "pydisplay: Sync from abc123." --push
 
 set -euo pipefail
@@ -18,10 +18,11 @@ CLI_VERSION=""
 
 usage() {
     cat <<'EOF'
-Usage: ./scripts/publish_micropython_lib.sh [OPTION]
+Usage: ./scripts/publish_sync_packages.sh [OPTION]
 
-Copy pydisplay src/ into a local PyDevices/micropython-lib checkout, optionally
-build TestPyPI wheels, then commit (and optionally push) on the PyDevices branch.
+Copy pydisplay src/lib packages into a local PyDevices/micropython-lib checkout,
+optionally build TestPyPI wheels, then commit (and optionally push) on the
+PyDevices branch.
 
 Options:
   --skip-pypi           Sync manifests only; skip hatch/twine TestPyPI uploads.
@@ -178,49 +179,12 @@ package_manifest_requires() {
 # usdl2 only when selected at runtime (_select.py); do not add usdl2 to multimer's
 # manifest unless we add pip optional-extras support later.
 
-# Extra micropython-lib require() lines for displaysys-* TestPyPI / MIP manifests.
-# Do not require() packages that are absent from micropython-lib (usdl2, pygame-ce):
-# upstream manifestfile MODE_COMPILE fails hard on missing requires, and MIP cannot
-# install native/PyPI-only deps. Install those separately on CPython / firmware.
-displaysys_manifest_requires() {
-    local package="$1"
-    case "$package" in
-        displaysys-pgdisplay | displaysys-sdldisplay | \
-        displaysys-psdisplay | displaysys-jndisplay)
-            printf '%s\n' 'require("eventsys")'
-            ;;
-    esac
-}
-
 copy_source_tree() {
     local src="$1"
     local dest="$2"
     mkdir -p "$dest"
     # --delete drops removed modules (e.g. multimer/loop.py) so the sync matches src/
     rsync -a --delete "${RSYNC_EXCLUDES[@]}" "$src/" "$dest/"
-}
-
-copy_displaysys_module() {
-    local module="$1"
-    local dest_dir="$2"
-    local base
-    base="$(basename "$module")"
-
-    if should_skip_name "$base"; then
-        return
-    fi
-    if [[ "$base" == *.pyc ]] || [[ "$base" == *.pyo ]]; then
-        return
-    fi
-
-    mkdir -p "$dest_dir"
-    if [ -d "$module" ]; then
-        copy_source_tree "$module" "$dest_dir/$base"
-    elif [ -f "$module" ] && [[ "$base" == *.py ]]; then
-        local stem="${base%.py}"
-        rm -rf "$dest_dir/$stem"
-        cp "$module" "$dest_dir/"
-    fi
 }
 
 prune_skipped_artifacts() {
@@ -234,8 +198,7 @@ prune_skipped_artifacts() {
 # cleans inside each package tree, not whole package directories).
 prune_stale_packages() {
     local expected_top=()
-    local package_dir package name keep existing module base package_dir_name
-    local expected_displaysys=("displaysys")
+    local package_dir package name keep existing
 
     for package_dir in "$SOURCE_DIR/lib"/*; do
         [[ -d "$package_dir" ]] || continue
@@ -262,32 +225,12 @@ prune_stale_packages() {
         done
     fi
 
-    for module in "$SOURCE_DIR/lib/displaysys"/*; do
-        base="$(basename "$module")"
-        if should_skip_name "$base" || [[ "$base" == *.pyc ]] || [[ "$base" == *.pyo ]]; then
-            continue
-        fi
-        if [[ "$base" == boarddisplay.py || "$base" == __init__.py ]]; then
-            continue
-        fi
-        if [[ -f "$module" && "$base" == *.py ]]; then
-            package_dir_name=$(basename "$module" .py)
-            expected_displaysys+=("displaysys-$package_dir_name")
-        fi
-    done
-
+    # displaysys is a single full package; drop any leftover displaysys-* backends.
     if [[ -d "$DEST_DIR/displaysys" ]]; then
         for existing in "$DEST_DIR/displaysys"/*; do
             [[ -e "$existing" ]] || continue
             name=$(basename "$existing")
-            keep=0
-            for package in "${expected_displaysys[@]}"; do
-                if [[ "$name" == "$package" ]]; then
-                    keep=1
-                    break
-                fi
-            done
-            if [[ "$keep" -eq 0 ]]; then
+            if [[ "$name" != "displaysys" ]]; then
                 echo "Removing stale displaysys package: $existing"
                 rm -rf "$existing"
             fi
@@ -366,8 +309,7 @@ EOF
     fi
 done
 
-# Main displaysys package: full tree (all backends). CPython/Android need only this
-# wheel for ``from displaysys.sdldisplay import SDLDisplay`` etc.
+# displaysys: full tree (all backends) + board_config. One MIP/TestPyPI package.
 echo
 echo "Processing displaysys (full package)"
 mkdir -p "$DEST_DIR/displaysys/displaysys"
@@ -392,45 +334,6 @@ if [[ "$SKIP_PYPI" -eq 0 ]]; then
     build_and_upload_pypi
     popd
 fi
-
-# Optional per-backend displaysys-* packages for small MIP installs (MicroPython).
-# Each ships one module under displaysys/; do not install these on top of the
-# full displaysys wheel on CPython (overlapping files / clobber).
-for module in "$SOURCE_DIR/lib/displaysys"/*; do
-    base="$(basename "$module")"
-    if should_skip_name "$base" || [[ "$base" == *.pyc ]] || [[ "$base" == *.pyo ]]; then
-        continue
-    fi
-    if [[ "$base" == boarddisplay.py || "$base" == __init__.py ]]; then
-        continue
-    fi
-    package_dir=$(basename "$module" .py)
-    package=displaysys-$package_dir
-    echo
-    echo "Processing $package"
-    mkdir -p "$DEST_DIR/displaysys/$package/displaysys"
-    copy_displaysys_module "$module" "$DEST_DIR/displaysys/$package/displaysys"
-    extra_requires="$(displaysys_manifest_requires "$package")"
-    cat <<EOF > $DEST_DIR/displaysys/$package/manifest.py
-metadata(
-    description="$DESCRIPTION_PREFIX $package",
-    version="$VERSION",
-    author="$AUTHOR",
-    license="$LICENSE",
-    pypi_publish="$(pypi_publish_name "$package")",
-)
-require("displaysys")
-${extra_requires}
-package("displaysys")
-EOF
-    cp $README_FULL_PATH $DEST_DIR/displaysys/$package/README.md
-    if [[ "$SKIP_PYPI" -eq 0 ]]; then
-        ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package $DEST_DIR/displaysys/$package/manifest.py
-        pushd $PYPI_DIR/$package
-        build_and_upload_pypi
-        popd
-    fi
-done
 
 prune_stale_packages
 prune_skipped_artifacts

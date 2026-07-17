@@ -27,7 +27,7 @@ On host (not on-device MicroPython), `lib_install(..., mpy=False)` maps to `mpre
 
 ## micropython-lib MIP index (`.mpy` default, `.py` optional)
 
-Published by [`scripts/publish_micropython_lib.sh`](../scripts/publish_micropython_lib.sh) into the PyDevices/micropython-lib `gh-pages` tree, compiled by [`scripts/build.py`](../scripts/build.py) (upstream micropython-lib `tools/build.py`).
+Published by [`scripts/publish_sync_packages.sh`](../scripts/publish_sync_packages.sh) into the PyDevices/micropython-lib `gh-pages` tree, compiled by [`scripts/build.py`](../scripts/build.py) (upstream micropython-lib `tools/build.py`).
 
 For each package the build script writes **two** index entries:
 

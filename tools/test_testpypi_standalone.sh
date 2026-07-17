@@ -6,7 +6,7 @@
 #
 # Usage:
 #   ./tools/test_testpypi_standalone.sh
-#   ./tools/test_testpypi_standalone.sh --desktop   # also sdldisplay + pgdisplay stacks
+#   ./tools/test_testpypi_standalone.sh --desktop   # also SDL + pygame stacks
 #
 # See docs/publishing-micropython-lib.md#two-index-pip-install-required
 
@@ -24,7 +24,7 @@ Usage: ./tools/test_testpypi_standalone.sh [--desktop]
 Install each TestPyPI package into its own venv and run a minimal import smoke test.
 
 Options:
-  --desktop  Also test displaysys-sdldisplay and displaysys-pgdisplay (headless SDL/pg)
+  --desktop  Also test SDLDisplay / PGDisplay stacks (headless SDL/pg)
   -h         This help
 EOF
 }
@@ -94,15 +94,16 @@ print('eventsys', type(r).__name__)
 test_package pydisplay-graphics "import graphics; print('graphics', graphics.implementation())"
 
 if [[ "$DESKTOP" -eq 1 ]]; then
-    # usdl2 / pygame-ce are runtime deps, not pip requires of the displaysys-* wheels.
-    test_package displaysys-sdldisplay "
+    # usdl2 / pygame-ce are runtime deps, not pip requires of the displaysys wheel.
+    # Distinct venv labels so the two stacks do not clobber each other.
+    BASE_VENV="${BASE_VENV}-sdl" test_package displaysys "
 from board_config import display_drv
 print('sdldisplay', type(display_drv).__name__)
 display_drv.fill(0)
 display_drv.show()
 " usdl2
 
-    test_package displaysys-pgdisplay "
+    BASE_VENV="${BASE_VENV}-pg" test_package displaysys "
 from displaysys.pgdisplay import PGDisplay
 print('pgdisplay', PGDisplay.__name__)
 " pygame-ce

@@ -125,7 +125,7 @@ jobs:
           if [[ "${{ github.event_name }}" != "push" && "${{ inputs.upload_testpypi }}" != "true" ]]; then
             EXTRA=(--skip-pypi --commit-message "$MSG" --push)
           fi
-          ./scripts/publish_micropython_lib.sh "${EXTRA[@]}"
+          ./scripts/publish_sync_packages.sh "${EXTRA[@]}"
 
       - name: Publish MIP index to gh-pages
         if: github.event_name == 'push' || inputs.publish_mip_index == true

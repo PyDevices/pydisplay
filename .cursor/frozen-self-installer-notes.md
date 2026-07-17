@@ -21,7 +21,7 @@ from <xyz> import <clever_install_fn>  # name TBD
 
 **What gets installed first:** The four `src/lib` packages only — `displaysys`, `eventsys`, `graphics`, `multimer`. Add-ons, examples, and board configs stay optional later steps.
 
-**Source of truth:** Maintainer-published packages from the PyDevices micropython-lib fork, published via `scripts/publish_micropython_lib.sh` → MIP index at `https://PyDevices.github.io/micropython-lib/mip/PyDevices`. Same channel as `installer.py` `lib_install()` ([`installation/mip-micropython-lib.md`](../docs/installation/mip-micropython-lib.md) on RTD describes the index; this installer should **warn explicitly** that it is not the official MicroPython micropython-lib registry).
+**Source of truth:** Maintainer-published packages from the PyDevices micropython-lib fork, published via `scripts/publish_sync_packages.sh` → MIP index at `https://PyDevices.github.io/micropython-lib/mip/PyDevices`. Same channel as `installer.py` `lib_install()` ([`installation/mip-micropython-lib.md`](../docs/installation/mip-micropython-lib.md) on RTD describes the index; this installer should **warn explicitly** that it is not the official MicroPython micropython-lib registry).
 
 **Suggested first-run warning (UI copy):**
 
@@ -42,7 +42,7 @@ from <xyz> import <clever_install_fn>  # name TBD
 **Existing code to reuse / align with:**
 
 - [`installer.py`](../installer.py) — `lib_install()` vs `repo_install()` split
-- [`scripts/publish_micropython_lib.sh`](../scripts/publish_micropython_lib.sh) — what actually lands on the MIP index
+- [`scripts/publish_sync_packages.sh`](../scripts/publish_sync_packages.sh) — what actually lands on the MIP index
 - Desktop `board_config` in [`src/lib/board_config.py`](../src/lib/board_config.py) — likely still needed after core install
 
 **Open questions:**
