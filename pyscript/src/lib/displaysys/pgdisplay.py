@@ -273,6 +273,23 @@ class PGDisplay(DisplayDriver):
 
     ############### Required API Methods ################
 
+    def _lock_window_size(self) -> None:
+        """Keep the OS window fixed to the scaled panel size (not user-resizable).
+
+        Not passing ``pg.RESIZABLE`` already prevents a resize grip, but this
+        also clamps the SDL window when a caller opts into ``pg.RESIZABLE`` or
+        the platform WM would otherwise allow resizing.
+        """
+        try:
+            from pygame._sdl2.video import Window
+        except ImportError:
+            return
+        try:
+            win = Window.from_display_module()
+        except Exception:
+            return
+        win.resizable = False
+
     def init(self) -> None:
         """
         Initializes the display instance.  Called by __init__ and rotation setter.
@@ -285,6 +302,7 @@ class PGDisplay(DisplayDriver):
             vsync=0,
         )
         pg.display.set_caption(self._title)
+        self._lock_window_size()
 
         super().vscrdef(
             0, self.height, 0
