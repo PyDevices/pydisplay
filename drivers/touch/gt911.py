@@ -31,6 +31,9 @@ from time import sleep_ms
 from machine import Pin
 from micropython import const
 
+# OpenMV uses Pin.OUT_PP; standard MicroPython / CircuitPython ports use Pin.OUT.
+_PIN_OUT = getattr(Pin, "OUT_PP", Pin.OUT)
+
 _DEFAULT_ADDR = const(0x5D)
 
 _COMMAND = const(0x8040)
@@ -65,7 +68,7 @@ class GT911:
         self.bus = bus
         self.address = address
         self.touch_callback = touch_callback
-        self.rst_pin = Pin(reset_pin, Pin.OUT_PP, value=0)
+        self.rst_pin = Pin(reset_pin, _PIN_OUT, value=0)
         self.irq_pin = None
         self.irq_pin_label = irq_pin
 
@@ -128,7 +131,7 @@ class GT911:
             self.irq_pin.irq(handler=None)
         self.rst_pin(0)
         sleep_ms(10)
-        self.irq_pin = Pin(self.irq_pin_label, Pin.OUT_PP, value=0)
+        self.irq_pin = Pin(self.irq_pin_label, _PIN_OUT, value=0)
         sleep_ms(50)
         self.rst_pin(1)
         # Note must wait for at least 50ms before switching the IRQ pin to input.
