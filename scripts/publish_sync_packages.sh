@@ -120,7 +120,6 @@ echo "Release version: $VERSION"
 # graphics.framebuf is generated from add_ons/framebuf.py before packaging.
 "$SOURCE_REPO/scripts/install_sync_framebuf.py"
 
-DESCRIPTION_PREFIX="PyDisplay"
 AUTHOR="Brad Barnett <contact@pydevices.com>"
 LICENSE="MIT"
 
@@ -131,7 +130,6 @@ export MICROPYTHON_LIB_DIR="$DEST_REPO"
 SOURCE_DIR=$SOURCE_REPO/src
 DEST_DIR=$DEST_REPO/micropython/$BASENAME
 PYPI_DIR=$SOURCE_REPO/wheels
-README_FULL_PATH=$SOURCE_REPO/README.md
 
 DISPLAY_SOURCE_DIR=$SOURCE_REPO/drivers/display
 TOUCH_SOURCE_DIR=$SOURCE_REPO/drivers/touch
@@ -162,6 +160,46 @@ pypi_publish_name() {
         graphics) echo "pydisplay-graphics" ;;
         *) echo "$1" ;;
     esac
+}
+
+# Short PyPI summary (one line) — not the monorepo tagline.
+package_summary() {
+    case "$1" in
+        displaysys)
+            echo "Cross-platform display drivers for MicroPython, CircuitPython, and CPython"
+            ;;
+        eventsys)
+            echo "Cross-platform input events (PyGame/SDL2-style) with Runtime and device adapters"
+            ;;
+        multimer)
+            echo "Cross-platform machine.Timer-style and asyncio timers for MicroPython and CPython"
+            ;;
+        graphics)
+            echo "Pure-Python graphics for pydisplay (FrameBuffer, Draw, fonts); import as graphics"
+            ;;
+        *)
+            echo "PyDisplay $1"
+            ;;
+    esac
+}
+
+# Package-facing README used as the TestPyPI long description.
+package_readme_path() {
+    local package="$1"
+    echo "$SOURCE_DIR/lib/$package/README.md"
+}
+
+copy_package_readme() {
+    local package="$1"
+    local dest_readme="$2"
+    local src_readme
+    src_readme="$(package_readme_path "$package")"
+    if [[ ! -f "$src_readme" ]]; then
+        echo "Error: missing package README for $package: $src_readme" >&2
+        echo "Add a professional package page at src/lib/$package/README.md" >&2
+        exit 1
+    fi
+    cp "$src_readme" "$dest_readme"
 }
 
 # Extra micropython-lib require() lines for top-level pydisplay package manifests.
@@ -290,7 +328,7 @@ for package_dir in "$SOURCE_DIR/lib"/*; do
         # write the following text to $DEST_DIR/$package/manifest.py
         cat <<EOF > $DEST_DIR/$package/manifest.py
 metadata(
-    description="$DESCRIPTION_PREFIX $package",
+    description="$(package_summary "$package")",
     version="$VERSION",
     author="$AUTHOR",
     license="$LICENSE",
@@ -299,7 +337,7 @@ metadata(
 ${extra_requires}
 package("$package")
 EOF
-        cp $README_FULL_PATH $DEST_DIR/$package/README.md
+        copy_package_readme "$package" "$DEST_DIR/$package/README.md"
         if [[ "$SKIP_PYPI" -eq 0 ]]; then
             ./scripts/publish_make_pyproject.py --output $PYPI_DIR/$package $DEST_DIR/$package/manifest.py
             pushd $PYPI_DIR/$package
@@ -318,7 +356,7 @@ rm -f "$DEST_DIR/displaysys/displaysys/displaysys/boarddisplay.py"
 cp "$SOURCE_DIR/lib/board_config.py" "$DEST_DIR/displaysys/displaysys/board_config.py"
 cat <<EOF > $DEST_DIR/displaysys/displaysys/manifest.py
 metadata(
-    description="$DESCRIPTION_PREFIX displaysys",
+    description="$(package_summary "displaysys")",
     version="$VERSION",
     author="$AUTHOR",
     license="$LICENSE",
@@ -327,7 +365,7 @@ metadata(
 package("displaysys")
 module("board_config.py")
 EOF
-cp $README_FULL_PATH $DEST_DIR/displaysys/displaysys/README.md
+copy_package_readme "displaysys" "$DEST_DIR/displaysys/displaysys/README.md"
 if [[ "$SKIP_PYPI" -eq 0 ]]; then
     ./scripts/publish_make_pyproject.py --output $PYPI_DIR/displaysys $DEST_DIR/displaysys/displaysys/manifest.py
     pushd $PYPI_DIR/displaysys

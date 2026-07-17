@@ -47,6 +47,8 @@ from build import ensure_path_exists, error_color  # noqa: E402
 DEFAULT_AUTHOR = "micropython-lib <contact@micropython.org>"
 DEFAULT_LICENSE = "MIT"
 HOME_PAGE = "https://github.com/PyDevices/pydisplay"
+DOCS_PAGE = "https://pydisplay.readthedocs.io/en/latest/"
+ISSUES_PAGE = "https://github.com/PyDevices/pydisplay/issues"
 TESTPYPI = "https://test.pypi.org/simple/"
 
 
@@ -150,12 +152,19 @@ def build(manifest_path, output_path):
         print(error_color("Error:"), "No package or module files in manifest.", file=sys.stderr)
         sys.exit(1)
 
-    # Copy README.md if it exists
+    # Copy README.md if it exists (required for a professional TestPyPI page).
     readme_path = os.path.join(os.path.dirname(manifest_path), "README.md")
     readme_toml = ""
     if os.path.exists(readme_path):
         shutil.copyfile(readme_path, os.path.join(output_path, "README.md"))
         readme_toml = 'readme = "README.md"'
+    else:
+        print(
+            error_color("Error:"),
+            package_name,
+            "missing README.md next to manifest (needed for TestPyPI long description).",
+        )
+        sys.exit(1)
 
     # Apply default author and license, otherwise use the package metadata.
     license_toml = 'license = {{ text = "{}" }}'.format(
@@ -190,7 +199,7 @@ description = "{}"
 {}
 version = "{}"
 dependencies = [{}]
-urls = {{ Homepage = "{}" }}
+urls = {{ Homepage = "{}", Documentation = "{}", Issues = "{}" }}
 {}
 """.format(
                 quoted_escape(manifest.metadata().pypi_publish),
@@ -200,6 +209,8 @@ urls = {{ Homepage = "{}" }}
                 quoted_escape(manifest.metadata().version),
                 ", ".join('"{}"'.format(quoted_escape(r)) for r in manifest.pypi_dependencies()),
                 quoted_escape(HOME_PAGE),
+                quoted_escape(DOCS_PAGE),
+                quoted_escape(ISSUES_PAGE),
                 readme_toml,
             ),
             file=toml_file,
