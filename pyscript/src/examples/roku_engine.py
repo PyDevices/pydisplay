@@ -314,11 +314,110 @@ def _host_from_location(location):
     return loc
 
 
+def _parse_http_url(url):
+    """Split ``http://host[:port]/path`` → (host, port, path)."""
+    u = url
+    if "://" in u:
+        scheme, u = u.split("://", 1)
+        if scheme.lower() != "http":
+            raise ValueError("only http:// URLs supported")
+    hostport, path = (u.split("/", 1) + [""])[:2]
+    path = "/" + path
+    if hostport.startswith("["):
+        end = hostport.find("]")
+        if end < 0:
+            raise ValueError("bad IPv6 URL host")
+        host = hostport[1:end]
+        rest = hostport[end + 1 :]
+        port = int(rest[1:]) if rest.startswith(":") else 80
+    elif ":" in hostport:
+        host, port_s = hostport.rsplit(":", 1)
+        port = int(port_s)
+    else:
+        host, port = hostport, 80
+    return host, port, path
+
+
+def _http_request_socket(method, url, timeout=5.0, data=b""):
+    """Minimal HTTP/1.0 over ``socket`` (no urllib/urequests required)."""
+    host, port, path = _parse_http_url(url)
+    if isinstance(data, str):
+        data = data.encode("utf-8")
+    elif data is None:
+        data = b""
+    req = "%s %s HTTP/1.0\r\nHost: %s\r\nConnection: close\r\n" % (
+        method,
+        path,
+        host if port == 80 else "%s:%d" % (host, port),
+    )
+    if method != "GET" or data:
+        req += "Content-Length: %d\r\n" % len(data)
+    req += "\r\n"
+    payload = req.encode("utf-8") + data
+
+    addr = _sockaddr(host, port, socket.SOCK_STREAM)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        try:
+            sock.settimeout(timeout)
+        except OSError:
+            pass
+        sock.connect(addr)
+        view = memoryview(payload)
+        sent = 0
+        while sent < len(payload):
+            n = sock.send(view[sent:])
+            if n is None or n <= 0:
+                break
+            sent += n
+
+        chunks = []
+        while True:
+            try:
+                chunk = sock.recv(2048)
+            except OSError:
+                break
+            if not chunk:
+                break
+            chunks.append(chunk)
+    finally:
+        try:
+            sock.close()
+        except OSError:
+            pass
+
+    raw = b"".join(chunks) if chunks else b""
+    sep = raw.find(b"\r\n\r\n")
+    if sep < 0:
+        raise RuntimeError("HTTP response missing header separator")
+    header_blob = raw[:sep]
+    body = raw[sep + 4 :]
+    status_line = header_blob.split(b"\r\n", 1)[0]
+    parts = status_line.split(b" ", 2)
+    try:
+        status = int(parts[1]) if len(parts) >= 2 else 0
+    except (ValueError, IndexError):
+        status = 0
+    # Honor Content-Length when present (ignore trailers / keep-alive noise).
+    for line in header_blob.split(b"\r\n")[1:]:
+        if line.lower().startswith(b"content-length:"):
+            try:
+                clen = int(line.split(b":", 1)[1].strip())
+            except (ValueError, IndexError):
+                break
+            if clen >= 0:
+                body = body[:clen]
+            break
+    return status, body
+
+
 def http_request(method, url, timeout=5.0, data=None):
     """
     Portable HTTP GET/POST → (status_code, body_bytes).
 
-    Tries urllib, then urequests/requests. Raises RuntimeError if no client.
+    Tries urllib, then urequests/requests, then a minimal socket client
+    (needed on Windows MicroPython where ``~`` in ``sys.path`` is not
+    expanded and host ``urequests`` is often missing).
     """
     method = method.upper()
     body = data if data is not None else b""
@@ -413,7 +512,10 @@ def http_request(method, url, timeout=5.0, data=None):
             if callable(close):
                 close()
 
-    raise RuntimeError("no HTTP client (need urllib, urequests, or requests)")
+    try:
+        return _http_request_socket(method, url, timeout=timeout, data=body)
+    except Exception as e:
+        raise RuntimeError("HTTP via socket failed: " + str(e)) from e
 
 
 def _sockaddr(host, port, socktype=socket.SOCK_STREAM):
@@ -538,6 +640,28 @@ def _local_ipv4_from_wlan():
         return ""
 
 
+def _ipv4_from_sockname(name):
+    """Extract dotted IPv4 from CPython ``(host, port)`` or MicroPython sockaddr bytes."""
+    if isinstance(name, (tuple, list)) and name:
+        host = name[0]
+        if isinstance(host, str) and _valid_station_ipv4(host):
+            return host
+        # socket.sockaddr() → (AF_INET, addr_bytes, port)
+        if (
+            len(name) >= 2
+            and isinstance(name[1], (bytes, bytearray))
+            and len(name[1]) >= 4
+        ):
+            b = name[1]
+            return "%d.%d.%d.%d" % (b[0], b[1], b[2], b[3])
+    if isinstance(name, (bytes, bytearray)) and hasattr(socket, "sockaddr"):
+        try:
+            return _ipv4_from_sockname(socket.sockaddr(name))
+        except (OSError, ValueError, TypeError, IndexError):
+            pass
+    return ""
+
+
 def _local_ipv4():
     """Best-effort primary IPv4 (UDP connect + getsockname, WLAN, else Linux proc)."""
     try:
@@ -545,7 +669,7 @@ def _local_ipv4():
         try:
             s.connect(_sockaddr("8.8.8.8", 80, socket.SOCK_DGRAM))
             if hasattr(s, "getsockname"):
-                ip = s.getsockname()[0]
+                ip = _ipv4_from_sockname(s.getsockname())
                 if _valid_station_ipv4(ip):
                     return ip
         finally:
@@ -716,11 +840,123 @@ def _default_scan_workers():
         return 24
 
 
+def _probe_hosts_poll(hosts, port, connect_timeout, batch_size=32):
+    """Parallel TCP probe via ``select.poll`` (no threads — Windows MP)."""
+    import select
+
+    if not hasattr(select, "poll"):
+        raise ImportError("select.poll")
+    timeout_ms = max(50, int(float(connect_timeout) * 1000))
+    batch_size = max(1, int(batch_size))
+    open_hosts = []
+    poll_mask = select.POLLOUT
+    for attr in ("POLLERR", "POLLHUP"):
+        poll_mask |= getattr(select, attr, 0)
+
+    for i in range(0, len(hosts), batch_size):
+        batch = hosts[i : i + batch_size]
+        poller = select.poll()
+        socks = {}  # id(sock) -> (host, sock)
+        for host in batch:
+            s = None
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                try:
+                    s.setblocking(False)
+                except (OSError, AttributeError):
+                    s.settimeout(0)
+                addr = _sockaddr(host, port, socket.SOCK_STREAM)
+                try:
+                    s.connect(addr)
+                    # Immediate success (rare)
+                    if hasattr(s, "getpeername"):
+                        s.getpeername()
+                        open_hosts.append(host)
+                        s.close()
+                        continue
+                except OSError:
+                    pass
+                socks[id(s)] = (host, s)
+                poller.register(s, poll_mask)
+            except (OSError, TypeError, ValueError, IndexError):
+                if s is not None:
+                    try:
+                        s.close()
+                    except OSError:
+                        pass
+
+        pending = set(socks)
+        deadline = None
+        if time is not None and hasattr(time, "ticks_ms"):
+            deadline = time.ticks_add(time.ticks_ms(), timeout_ms)
+        while pending:
+            wait = 50
+            if deadline is not None:
+                left = time.ticks_diff(deadline, time.ticks_ms())
+                if left <= 0:
+                    break
+                wait = min(wait, max(1, left))
+            try:
+                ready = poller.poll(wait)
+            except OSError:
+                break
+            for item in ready:
+                s = item[0]
+                key = id(s)
+                if key not in socks:
+                    continue
+                host, s = socks[key]
+                ok = False
+                try:
+                    if hasattr(s, "getpeername"):
+                        s.getpeername()
+                        ok = True
+                except OSError:
+                    ok = False
+                if ok:
+                    open_hosts.append(host)
+                try:
+                    poller.unregister(s)
+                except (OSError, KeyError, ValueError):
+                    pass
+                try:
+                    s.close()
+                except OSError:
+                    pass
+                pending.discard(key)
+                del socks[key]
+
+        for key in list(pending):
+            host, s = socks[key]
+            try:
+                poller.unregister(s)
+            except (OSError, KeyError, ValueError):
+                pass
+            try:
+                s.close()
+            except OSError:
+                pass
+    return open_hosts
+
+
 def _probe_hosts_parallel(hosts, port, connect_timeout, workers=None):
-    """Return hosts with open TCP ``port``. CPython futures or MP ``_thread``."""
+    """Return hosts with open TCP ``port``.
+
+    Prefers ``select.poll`` (works without ``_thread`` — Windows MicroPython),
+    then CPython futures / MP ``_thread``, then sequential connects.
+    """
     if workers is None:
         workers = _default_scan_workers()
     n_workers = max(1, int(workers))
+
+    # Non-threaded parallel path first — Windows MP has no ``_thread``.
+    try:
+        return _probe_hosts_poll(
+            hosts, port, connect_timeout, batch_size=max(8, n_workers)
+        )
+    except (ImportError, AttributeError, OSError):
+        pass
+
     try:
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -821,8 +1057,8 @@ def discover_rokus_scan(
     Unicast scan: TCP :8060 then GET /query/device-info.
 
     Portable fallback when SSDP multicast is blocked (WSL NAT, host firewall).
-    No third-party dependency. Parallel via ``concurrent.futures`` (CPython) or
-    ``_thread`` (MicroPython unix); sequential only if neither is available.
+    No third-party dependency. Parallel via ``select.poll`` (no threads),
+    ``concurrent.futures`` (CPython), or ``_thread``; sequential only if none.
 
     ``connect_timeout`` defaults to 1.0s. Keep ``workers`` modest — 64-way
     floods drop some Rokus that answer fine alone (seen with a 65" TCL).
@@ -873,7 +1109,8 @@ def discover_rokus_scan(
             _accept(host)
 
     rest = [h for h in hosts if h not in seen]
-    for host in _probe_hosts_parallel(rest, port, connect_timeout, workers):
+    open_hosts = _probe_hosts_parallel(rest, port, connect_timeout, workers)
+    for host in open_hosts:
         _accept(host)
 
     return found
@@ -934,10 +1171,23 @@ def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
                     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 except (OSError, AttributeError):
                     pass
+                # Multicast TTL: Linux IP_MULTICAST_TTL=33; Winsock=10 (IPPROTO_IP=0).
+                for ttl_opt in (
+                    getattr(socket, "IP_MULTICAST_TTL", None),
+                    33,
+                    10,
+                ):
+                    if ttl_opt is None:
+                        continue
+                    try:
+                        sock.setsockopt(0, ttl_opt, 2)
+                        break
+                    except (OSError, AttributeError):
+                        pass
                 try:
-                    # IPPROTO_IP=0, IP_MULTICAST_TTL=33 on many stacks
-                    sock.setsockopt(0, 33, 2)
-                except (OSError, AttributeError):
+                    # Winsock often needs an explicit bind before multicast replies arrive.
+                    sock.bind(_sockaddr("0.0.0.0", 0, socket.SOCK_DGRAM))
+                except (OSError, AttributeError, TypeError):
                     pass
                 try:
                     sock.settimeout(0.4)
