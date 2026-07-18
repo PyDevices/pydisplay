@@ -879,6 +879,27 @@ def discover_rokus_scan(
     return found
 
 
+def _monotonic_deadline_ms(seconds):
+    """End tick for a relative wait (avoids SNTP steps breaking ``time.time()``)."""
+    if time is None:
+        return None
+    ms = max(1, int(float(seconds) * 1000))
+    if hasattr(time, "ticks_ms") and hasattr(time, "ticks_add"):
+        return time.ticks_add(time.ticks_ms(), ms)
+    # CPython: no ticks_ms — wall clock is normally fine there.
+    return ("wall", time.time() + float(seconds))
+
+
+def _monotonic_expired(deadline):
+    if deadline is None:
+        return False
+    if isinstance(deadline, tuple) and deadline and deadline[0] == "wall":
+        return time.time() >= deadline[1]
+    if time is not None and hasattr(time, "ticks_diff"):
+        return time.ticks_diff(deadline, time.ticks_ms()) <= 0
+    return False
+
+
 def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
     """
     Discover Roku ECP devices.
@@ -887,8 +908,10 @@ def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
 
     SSDP M-SEARCH when ``ssdp`` is true. If that finds nothing (or ``ssdp`` is
     false) and ``scan_fallback`` is true, unicast-scans /24 subnets for ECP on
-    port 8060. Prefer ``ssdp=False`` from UI threads that share multimer timers —
-    blocking ``recvfrom`` + soft timer re-entry can deadlock under librt.
+    port 8060. SSDP wait uses a monotonic tick deadline — wall ``time.time()``
+    is unsafe on MCU targets where SNTP steps the clock during discovery.
+    Prefer ``ssdp=False`` from UI threads that share multimer soft timers if
+    blocking ``recvfrom`` + timer re-entry deadlocks under librt.
     """
     devices = []
     if ssdp:
@@ -902,9 +925,7 @@ def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
         ) % (SSDP_ADDR, SSDP_PORT, SSDP_ST)
 
         found = {}
-        deadline = None
-        if time is not None:
-            deadline = time.time() + float(timeout)
+        deadline = _monotonic_deadline_ms(timeout)
 
         for _ in range(max(1, int(retries))):
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -933,15 +954,14 @@ def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
                     raise RuntimeError("SSDP send failed: " + str(e)) from e
 
                 while True:
-                    if deadline is not None and time.time() >= deadline:
+                    if _monotonic_expired(deadline):
                         break
                     try:
                         data, _addr = sock.recvfrom(2048)
                     except OSError:
                         if deadline is None:
                             break
-                        # keep waiting until overall timeout
-                        if time is not None and time.time() >= deadline:
+                        if _monotonic_expired(deadline):
                             break
                         continue
                     headers = _parse_ssdp_headers(data)
@@ -1121,18 +1141,35 @@ class RokuEngine:
     ):
         try:
             priority = [d.get("host") for d in (self.discovered or []) if d.get("host")]
-            if ssdp or not scan_fallback:
-                self.discovered = discover_rokus(
+            found = []
+            if ssdp:
+                # Keep scan_fallback out of discover_rokus so on_device still runs
+                # on the unicast path; enrich SSDP hits with ECP names for the UI.
+                found = discover_rokus(
                     timeout=timeout,
                     retries=retries,
-                    scan_fallback=scan_fallback,
-                    ssdp=ssdp,
+                    scan_fallback=False,
+                    ssdp=True,
                 )
-            else:
-                # Scan-only path: keep prior IPs as priority probes.
-                self.discovered = discover_rokus_scan(
+                enriched = []
+                for info in found:
+                    named = _ecp_device(
+                        info.get("host") or "", timeout=min(self.timeout, 1.5)
+                    )
+                    if named:
+                        info = named
+                    enriched.append(info)
+                    if on_device is not None:
+                        try:
+                            on_device(info)
+                        except Exception:
+                            pass
+                found = enriched
+            if not found and scan_fallback:
+                found = discover_rokus_scan(
                     priority_hosts=priority, on_device=on_device
                 )
+            self.discovered = found
             self.last_error = "" if self.discovered else "no Roku found"
         except Exception as e:
             self.discovered = []
@@ -1142,8 +1179,7 @@ class RokuEngine:
     def connect(self, discover_if_empty=True):
         """Ping device-info. If host empty and discover_if_empty, discover first."""
         if not self.host and discover_if_empty:
-            # Unicast scan only — SSDP recvfrom + multimer soft timers can deadlock.
-            devices = self.discover(ssdp=False, scan_fallback=True)
+            devices = self.discover(ssdp=True, scan_fallback=True)
             if devices:
                 self.set_host(devices[0]["host"])
         if not self.host:

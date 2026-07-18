@@ -262,6 +262,10 @@ class _Remote:
         self._pending_status = None
         self._playback_busy = False
         self._status_ticks = 0
+        # Soft Timer callbacks can re-enter Python while _draw_all/_flash/_present
+        # is running (schedule between bytecodes). Concurrent FBDisplay.show() on
+        # DPI has been observed to reboot the ESP32-P4; skip pump while UI draws.
+        self._ui_lock = 0
 
         # Compose into the display's own buffer when possible (FBDisplay / DPI).
         # A full-frame Python blit_rect on 720×720 is ~12s; direct compose + show is ~20ms.
@@ -736,6 +740,13 @@ class _Remote:
         face = t["key"]
         return t["text"], face, _shade(face, 0.78), _shade(face, 1.12)
 
+    def _ui_begin(self):
+        self._ui_lock += 1
+
+    def _ui_end(self):
+        if self._ui_lock > 0:
+            self._ui_lock -= 1
+
     def _present(self):
         if not self._compose_direct:
             display_drv.blit_rect(self.ba, 0, 0, self.width, self.height)
@@ -853,11 +864,15 @@ class _Remote:
             self.fb.text16(line, x + self.pad, ty, t["muted"])
 
     def _draw_all(self):
-        self._draw_chassis()
-        self._draw_status()
-        for btn in self.buttons:
-            self._draw_button(btn, pressed=False)
-        self._present()
+        self._ui_begin()
+        try:
+            self._draw_chassis()
+            self._draw_status()
+            for btn in self.buttons:
+                self._draw_button(btn, pressed=False)
+            self._present()
+        finally:
+            self._ui_end()
 
     def _play_label(self):
         """Play-button text from media-player state: play / pause / neither."""
@@ -959,35 +974,49 @@ class _Remote:
         if line is None:
             line = self.engine.playback_status()
         self._status_line = _ascii_label(line)
-        self._draw_status()
-        self._present()
-        if self.page == "remote":
-            self._sync_play_button()
-            self._sync_captions_button()
+        self._ui_begin()
+        try:
+            self._draw_status()
+            self._present()
+            if self.page == "remote":
+                self._sync_play_button()
+                self._sync_captions_button()
+        finally:
+            self._ui_end()
 
     def _queue_status(self, line):
         """Publish a status line for the soft status pump (safe from worker threads)."""
-        self._pending_status = _ascii_label(line) if line is not None else None
+        if line is None:
+            return
+        labeled = _ascii_label(line)
+        # Avoid full-panel present() storms when playback text is unchanged.
+        if labeled == self._status_line or labeled == self._pending_status:
+            return
+        self._pending_status = labeled
 
     def _status_pump(self, _=None):
         """Drain pending status; periodically refresh playback on the remote page."""
+        if self._ui_lock:
+            return
         pending = self._pending_status
         if pending is not None:
             self._pending_status = None
-            try:
-                self._status_line = pending
-                self._draw_status()
-                if self.page == "remote":
-                    self._sync_play_button()
-                    self._sync_captions_button()
-                self._present()
-            except Exception:
-                pass
+            if pending != self._status_line:
+                try:
+                    self._status_line = pending
+                    self._draw_status()
+                    if self.page == "remote":
+                        self._sync_play_button()
+                        self._sync_captions_button()
+                    self._present()
+                except Exception:
+                    pass
         self._status_ticks += 1
+        # ~10s cadence — each refresh that changes status does a full show().
         if (
             self.page == "remote"
             and self.engine.connected
-            and self._status_ticks % 8 == 0
+            and self._status_ticks % 40 == 0
             and not self._playback_busy
         ):
             self._playback_busy = True
@@ -1024,13 +1053,21 @@ class _Remote:
 
     def _flash(self, btn):
         """Draw pressed face. Caller restores via ``_unpress`` (no soft timer)."""
-        self._draw_button(btn, pressed=True)
-        self._present()
+        self._ui_begin()
+        try:
+            self._draw_button(btn, pressed=True)
+            self._present()
+        finally:
+            self._ui_end()
 
     def _unpress(self, bid):
-        if bid and bid in self._by_id:
-            self._draw_button(self._by_id[bid], pressed=False)
-            self._present()
+        self._ui_begin()
+        try:
+            if bid and bid in self._by_id:
+                self._draw_button(self._by_id[bid], pressed=False)
+                self._present()
+        finally:
+            self._ui_end()
 
     def _run_bg(self, fn):
         """Run ``fn`` off the librt soft-timer delivery path when possible.
@@ -1141,7 +1178,11 @@ class _Remote:
         self._build_layout()
         self._draw_all()
         devices = self.engine.discover(
-            ssdp=False, scan_fallback=True, on_device=self._on_device_found
+            timeout=3.0,
+            retries=1,
+            ssdp=True,
+            scan_fallback=True,
+            on_device=self._on_device_found,
         )
         # Engine list is authoritative at end (may reorder); keep progressive list
         # if callback already filled it.
@@ -1161,6 +1202,7 @@ class _Remote:
         self._build_layout()
         self._draw_all()
 
+
     def _pick_device(self, dev):
         host = (dev or {}).get("host") or ""
         name = ((dev or {}).get("name") or "").strip() or host
@@ -1174,13 +1216,17 @@ class _Remote:
         # this call (blocking HTTP, but UI already shows the remote).
         self.page = "remote"
         self._status_line = name
-        self._build_layout()
-        self._draw_all()
-        self.engine.connect(discover_if_empty=False)
-        # Rebuild so the power button shows ON/OFF from device-info.
-        self._build_layout()
-        self._draw_all()
-        self._refresh_status(self.engine.playback_status())
+        self._ui_begin()
+        try:
+            self._build_layout()
+            self._draw_all()
+            self.engine.connect(discover_if_empty=False)
+            # Rebuild so the power button shows ON/OFF from device-info.
+            self._build_layout()
+            self._draw_all()
+            self._refresh_status(self.engine.playback_status())
+        finally:
+            self._ui_end()
 
     def _toggle_power(self):
         """Send PowerOn/PowerOff from current state; update the PWR face."""
@@ -1386,3 +1432,4 @@ class _Remote:
 
 remote = _Remote()
 runtime.run_forever()
+
