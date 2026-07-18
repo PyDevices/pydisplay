@@ -13,11 +13,15 @@ Optional headers (first 10 lines), one line per namespace::
   # deps: palettes, lvgl          — logical packages → ?deps= via url_maker
   # modules: calc_engine          — extra example .py stems (site)
   # manifests: alien              — site-served packages/<name>.json bundles
-  # gallery: featured|skip|binaries
+  # gallery: featured|skip|binaries|nochrome
 
 MIP manifests for package examples live in ``packages/<name>.json`` (generated
 by ``scripts/install_gen_manifests.py``). PyScript loads them via the
 ``web/pyscript/packages`` symlink as ``?manifests=<name>``.
+
+``# gallery: nochrome`` keeps the demo in the gallery but links the minimal
+``run.html`` / ``run-pyodide.html`` shells (no gallery chrome) — useful for
+large landscape demos.
 
 Then:
 
@@ -78,7 +82,7 @@ GENERIC_ICON = (
 )
 
 HEADER_SCAN_LINES = 10
-GALLERY_VALUES = frozenset({"featured", "skip", "binaries"})
+GALLERY_VALUES = frozenset({"featured", "skip", "binaries", "nochrome"})
 
 LOCAL_IMPORT_RE = re.compile(
     r"^\s*(?:from\s+([\w.]+)\s+import|import\s+([\w.]+))",
@@ -99,6 +103,7 @@ class Example:
         self.deps: list[str] = []
         self.pyscript_files: list[str] = []
         self.featured = False
+        self.nochrome = False
         self.in_gallery = True
 
     @property
@@ -138,10 +143,16 @@ class Example:
             manifests=self._manifests_for_query(),
             deps=self.deps,
             runtime=None,
+            shell="run" if self.nochrome else "chrome",
         )
 
     def loader_hrefs(self) -> dict[str, str]:
         queries = self.loader_queries()
+        if self.nochrome:
+            return {
+                "micropython": f"run.html{queries['micropython']}",
+                "pyodide": f"run-pyodide.html{queries['pyodide']}",
+            }
         return {
             "micropython": f"micropython.html{queries['micropython']}",
             "pyodide": f"pyodide.html{queries['pyodide']}",
@@ -160,7 +171,7 @@ def parse_header_list(lines: list[str], prefix: str) -> list[str]:
 
 
 def parse_gallery_value(lines: list[str]) -> str | None:
-    """Return featured|skip|binaries or None. Exactly one value when present."""
+    """Return featured|skip|binaries|nochrome or None. Exactly one value when present."""
     for line in lines[:HEADER_SCAN_LINES]:
         s = line.strip()
         if not s.startswith("# gallery:"):
@@ -172,7 +183,9 @@ def parse_gallery_value(lines: list[str]) -> str | None:
         token = body.split(",")[0].strip()
         if token in GALLERY_VALUES:
             return token
-        raise SystemExit(f"invalid # gallery: value {body!r} (want featured|skip|binaries)")
+        raise SystemExit(
+            f"invalid # gallery: value {body!r} (want featured|skip|binaries|nochrome)"
+        )
     return None
 
 
@@ -315,6 +328,7 @@ def parse_example(path: Path) -> Example | None:
     gallery = parse_gallery_value(lines)
     ex.in_gallery = gallery not in ("skip", "binaries")
     ex.featured = gallery == "featured"
+    ex.nochrome = gallery == "nochrome"
     ex.docstring_blurb = extract_blurb(text, name)
     ex.extra_modules = parse_header_list(lines, "# modules:")
     ex.extra_manifests = parse_header_list(lines, "# manifests:")
@@ -382,11 +396,12 @@ def discover() -> list[Example]:
 
 
 def render_card(ex: Example) -> str:
-    tag = (
-        '\n                        <span class="tag featured">featured</span>'
-        if ex.featured
-        else ""
-    )
+    if ex.featured:
+        tag = '\n                        <span class="tag featured">featured</span>'
+    elif ex.nochrome:
+        tag = '\n                        <span class="tag">nochrome</span>'
+    else:
+        tag = ""
     hrefs = ex.loader_hrefs()
     # No target=_blank: keep demos in one window (browser or PWA).
     return f'''                <article class="card">
@@ -507,7 +522,11 @@ def main(argv: list[str] | None = None) -> int:
         n = copy_gallery_examples(args.copy_examples)
         print(f"copied {n} gallery example file(s) to {args.copy_examples}")
 
-    examples = sorted(discover(), key=lambda e: (not e.featured, e.title.lower()))
+    # featured, then nochrome, then A-Z
+    examples = sorted(
+        discover(),
+        key=lambda e: (0 if e.featured else 1 if e.nochrome else 2, e.title.lower()),
+    )
     stale: list[str] = []
 
     def write(path: Path, content: str) -> None:
@@ -541,11 +560,13 @@ def main(argv: list[str] | None = None) -> int:
     n_module = sum(1 for ex in examples if ex.kind == "module" and ex.in_gallery)
     n_manifest = sum(1 for ex in examples if ex.kind == "manifest" and ex.in_gallery)
     n_featured = sum(1 for ex in examples if ex.featured and ex.in_gallery)
+    n_nochrome = sum(1 for ex in examples if ex.nochrome and ex.in_gallery)
     n_gallery = sum(1 for ex in examples if ex.in_gallery)
     n_local_only = sum(1 for ex in examples if not ex.in_gallery)
     print(
         f"\n{n_gallery} gallery demo(s) "
-        f"({n_module} module, {n_manifest} manifest; {n_featured} featured)"
+        f"({n_module} module, {n_manifest} manifest; {n_featured} featured"
+        f"; {n_nochrome} nochrome)"
         f"; {n_local_only} local-only (gallery: skip/binaries)."
     )
 

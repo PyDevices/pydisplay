@@ -94,9 +94,9 @@ def _import_firmware_mip():
 
     ``lib.path`` must run first so ``add_ons`` is appended, not prepended.
     """
-    import lib.path  # noqa: F401
-
     import mip
+
+    import lib.path  # noqa: F401
 
     return mip
 
@@ -104,11 +104,21 @@ def _import_firmware_mip():
 def _import_portable_mip():
     """Portable ``add_ons/mip.py`` for Pyodide (no firmware ``mip``)."""
     _ensure_cwd()
-    import lib.path  # noqa: F401
-
     import mip
 
+    import lib.path  # noqa: F401
+
     return mip
+
+
+def _refresh_path_after_install():
+    """Re-scan cwd dirs so mip-created ``examples/`` is on ``sys.path``.
+
+    ``lib.path`` often runs before manifests exist; only existing dirs are added.
+    """
+    import lib.path
+
+    lib.path.update()
 
 
 def install_micropython(modules, manifests, index_deps, status=None):
@@ -116,6 +126,7 @@ def install_micropython(modules, manifests, index_deps, status=None):
     _ensure_cwd()
     mip = _import_firmware_mip()
     _install_manifests_and_modules(mip, modules, manifests, status)
+    _refresh_path_after_install()
     _install_index_deps_micropython(mip, index_deps, status)
 
 
@@ -165,4 +176,5 @@ async def install_pyodide(modules, manifests, wheel_deps, status=None):
         status,
         url_base=_page_base(),
     )
+    _refresh_path_after_install()
     await _install_wheels_pyodide(wheel_deps, status)

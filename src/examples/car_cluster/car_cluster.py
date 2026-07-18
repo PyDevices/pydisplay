@@ -1,4 +1,4 @@
-# gallery: skip
+# gallery: nochrome
 # deps: lvgl
 # SPDX-License-Identifier: MIT
 """
