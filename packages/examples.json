@@ -173,6 +173,10 @@
       "github:PyDevices/pydisplay/src/examples/roku_engine.py"
     ],
     [
+      "roku_install.py",
+      "github:PyDevices/pydisplay/src/examples/roku_install.py"
+    ],
+    [
       "roku_remote.py",
       "github:PyDevices/pydisplay/src/examples/roku_remote.py"
     ],

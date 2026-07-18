@@ -509,18 +509,52 @@ def _prefix_from_default_route():
     return ""
 
 
+def _valid_station_ipv4(ip):
+    """True for a usable unicast IPv4 (not empty / 0.0.0.0 / APIPA)."""
+    if not ip or ip == "0.0.0.0" or str(ip).startswith("169.254"):
+        return False
+    parts = str(ip).split(".")
+    if len(parts) != 4:
+        return False
+    try:
+        return all(0 <= int(p) <= 255 for p in parts)
+    except ValueError:
+        return False
+
+
+def _local_ipv4_from_wlan():
+    """MicroPython STA ifconfig — works when UDP getsockname is empty (esp-hosted)."""
+    try:
+        import network
+    except ImportError:
+        return ""
+    try:
+        wlan = network.WLAN(network.STA_IF)
+        if not wlan.active() or not wlan.isconnected():
+            return ""
+        ip = wlan.ifconfig()[0]
+        return ip if _valid_station_ipv4(ip) else ""
+    except Exception:
+        return ""
+
+
 def _local_ipv4():
-    """Best-effort primary IPv4 (UDP connect + getsockname, else Linux proc)."""
+    """Best-effort primary IPv4 (UDP connect + getsockname, WLAN, else Linux proc)."""
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
             s.connect(_sockaddr("8.8.8.8", 80, socket.SOCK_DGRAM))
             if hasattr(s, "getsockname"):
-                return s.getsockname()[0]
+                ip = s.getsockname()[0]
+                if _valid_station_ipv4(ip):
+                    return ip
         finally:
             s.close()
     except (OSError, AttributeError, ValueError, TypeError, IndexError):
         pass
+    ip = _local_ipv4_from_wlan()
+    if ip:
+        return ip
     return _local_ipv4_from_fib_trie()
 
 
@@ -672,9 +706,21 @@ def _ecp_device(host, port=ROKU_PORT, timeout=1.5):
     }
 
 
-def _probe_hosts_parallel(hosts, port, connect_timeout, workers=24):
+def _default_scan_workers():
+    """Fewer parallel connects on ``network`` STA targets (esp-hosted / MCU)."""
+    try:
+        import network  # noqa: F401
+
+        return 4
+    except ImportError:
+        return 24
+
+
+def _probe_hosts_parallel(hosts, port, connect_timeout, workers=None):
     """Return hosts with open TCP ``port``. CPython futures or MP ``_thread``."""
-    n_workers = max(4, int(workers))
+    if workers is None:
+        workers = _default_scan_workers()
+    n_workers = max(1, int(workers))
     try:
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -701,7 +747,19 @@ def _probe_hosts_parallel(hosts, port, connect_timeout, workers=24):
     except ImportError:
         return [h for h in hosts if _tcp_open(h, port, connect_timeout)]
 
-    # MicroPython unix: no concurrent.futures — small _thread pool.
+    # MicroPython: no concurrent.futures — small _thread pool.
+    # Chunk large /24 lists; a single 254-host wait can hang on esp-hosted.
+    chunk = 32
+    if len(hosts) > chunk:
+        open_all = []
+        for i in range(0, len(hosts), chunk):
+            open_all.extend(
+                _probe_hosts_parallel(
+                    hosts[i : i + chunk], port, connect_timeout, n_workers
+                )
+            )
+        return open_all
+
     queue = list(hosts)
     qi = [0]
     qlock = _thread.allocate_lock()
@@ -734,7 +792,15 @@ def _probe_hosts_parallel(hosts, port, connect_timeout, workers=24):
             break
     if started == 0:
         return [h for h in hosts if _tcp_open(h, port, connect_timeout)]
+    # Bound wait so a stuck connect cannot freeze discovery forever.
+    deadline = None
+    if time is not None and hasattr(time, "ticks_ms"):
+        per = max(50, int(float(connect_timeout) * 1000))
+        slack = ((len(queue) + started - 1) // started) * per + 5000
+        deadline = time.ticks_add(time.ticks_ms(), slack)
     while remaining[0] > 0:
+        if deadline is not None and time.ticks_diff(deadline, time.ticks_ms()) <= 0:
+            break
         if time is not None:
             try:
                 time.sleep(0.05)
@@ -748,7 +814,7 @@ def discover_rokus_scan(
     port=ROKU_PORT,
     connect_timeout=1.0,
     priority_hosts=None,
-    workers=24,
+    workers=None,
     on_device=None,
 ):
     """
@@ -760,13 +826,17 @@ def discover_rokus_scan(
 
     ``connect_timeout`` defaults to 1.0s. Keep ``workers`` modest — 64-way
     floods drop some Rokus that answer fine alone (seen with a 65" TCL).
+    On MicroPython ``network`` targets the default is 4 workers.
     ``priority_hosts`` are probed first with a longer retry (rescans).
     ``on_device(info)`` is called as each ECP device is confirmed (progressive UI).
     Asleep sets typically close ECP and will not appear.
     """
+    if workers is None:
+        workers = _default_scan_workers()
     if prefixes is None:
         prefixes = _scan_prefixes()
-    if not prefixes:
+    priority_hosts = tuple(priority_hosts or ())
+    if not prefixes and not priority_hosts:
         return []
 
     hosts = []
@@ -794,7 +864,7 @@ def discover_rokus_scan(
 
     seen = {}
     # Prefer previously-found IPs — full-subnet floods can miss flaky listeners.
-    for host in priority_hosts or ():
+    for host in priority_hosts:
         host = (host or "").strip()
         if not host or host in seen:
             continue

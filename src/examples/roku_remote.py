@@ -263,8 +263,18 @@ class _Remote:
         self._playback_busy = False
         self._status_ticks = 0
 
-        # Screen compose buffer — all drawing targets FrameBuffer; display_drv only presents.
-        self.ba = bytearray(self.width * self.height * self.bpp)
+        # Compose into the display's own buffer when possible (FBDisplay / DPI).
+        # A full-frame Python blit_rect on 720×720 is ~12s; direct compose + show is ~20ms.
+        # SDL/PG keep a texture handle in ``_buffer`` (int) — not a sized pixel buffer.
+        need = self.width * self.height * self.bpp
+        drv_buf = getattr(display_drv, "_buffer", None)
+        self._compose_direct = False
+        if drv_buf is not None:
+            try:
+                self._compose_direct = len(drv_buf) >= need
+            except TypeError:
+                self._compose_direct = False
+        self.ba = drv_buf if self._compose_direct else bytearray(need)
         self.fb = FrameBuffer(self.ba, self.width, self.height, RGB565)
         max_w = self.width
         max_h = max(48, self.height // 8)
@@ -727,7 +737,8 @@ class _Remote:
         return t["text"], face, _shade(face, 0.78), _shade(face, 1.12)
 
     def _present(self):
-        display_drv.blit_rect(self.ba, 0, 0, self.width, self.height)
+        if not self._compose_direct:
+            display_drv.blit_rect(self.ba, 0, 0, self.width, self.height)
         display_drv.show()
 
     def _draw_chassis(self):

@@ -119,6 +119,11 @@ class FBDisplay(DisplayDriver):
                     self._buffer[(y + row) * self.width + x + col] = color
             return (x, y, w, h)
 
+        # Full-frame contiguous copy (avoids 720x row slice assigns on large DPI panels).
+        if x == 0 and y == 0 and w == self.width and h == self.height:
+            self._buffer[:] = buf
+            return (x, y, w, h)
+
         for row in range(h):
             source_begin = row * w * BPP
             source_end = source_begin + w * BPP
