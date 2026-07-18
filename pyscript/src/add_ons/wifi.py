@@ -7,6 +7,16 @@ Provides a CircuitPython-shaped subset so examples can use::
     wifi.radio.connect("ssid", "password")
     print(wifi.radio.ipv4_address)
 
+Store credentials on the board in ``/secrets.py`` (not in this module)::
+
+    WIFI_SSID = "your-ssid"
+    WIFI_PASSWORD = "your-passphrase"
+
+Then::
+
+    import wifi
+    wifi.connect_from_secrets()
+
 This is **not** a full ``wifi.Radio`` implementation and is **not** a drop-in
 for CircuitPython ``socketpool.SocketPool(wifi.radio)`` (that requires the
 native CP radio object). On MicroPython, use ``network``/``socket`` or a
@@ -20,7 +30,8 @@ from time import sleep_ms
 
 import network
 
-_retries = 50
+# ESP32-P4 + external C6 (esp-hosted) DHCP can exceed 5s on first join.
+_retries = 150
 
 
 def _valid_ipv4(ip):
@@ -62,3 +73,20 @@ class Radio:
 
 
 radio = Radio()
+
+
+def connect_from_secrets(module="secrets"):
+    """Connect using ``WIFI_SSID`` / ``WIFI_PASSWORD`` (or ``ssid`` / ``password``).
+
+    Returns ``True`` if an IPv4 address is assigned after ``connect()``.
+    """
+    try:
+        s = __import__(module)
+    except ImportError:
+        return False
+    ssid = getattr(s, "WIFI_SSID", None) or getattr(s, "ssid", None)
+    password = getattr(s, "WIFI_PASSWORD", None) or getattr(s, "password", None)
+    if not ssid:
+        return False
+    radio.connect(ssid, password or "")
+    return radio.ipv4_address is not None
