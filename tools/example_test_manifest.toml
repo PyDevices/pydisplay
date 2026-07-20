@@ -53,6 +53,38 @@ deps = ["lvgl"]
 runtimes = ["cpython-venv", "python.exe"]
 timeout_s = 60
 
+[examples.roku_graphics]
+import = "roku_graphics"
+script = "examples/roku_graphics.py"
+kind = "async"
+quit = "poll"
+deps = ["core"]
+timeout_s = 45
+
+[examples.roku_widgets]
+import = "roku_widgets"
+script = "examples/roku_widgets.py"
+kind = "pdwidgets"
+quit = "inject"
+deps = ["add_ons"]
+timeout_s = 45
+
+[examples.roku_lvgl]
+import = "roku_lvgl"
+script = "examples/roku_lvgl.py"
+kind = "lvgl"
+quit = "inject"
+deps = ["lvgl"]
+timeout_s = 45
+
+[examples.roku_remote]
+import = "roku_remote"
+script = "examples/roku_remote.py"
+kind = "lvgl"
+quit = "inject"
+deps = ["lvgl"]
+timeout_s = 45
+
 [examples.paint]
 import = "paint"
 script = "examples/paint.py"

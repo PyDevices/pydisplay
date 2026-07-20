@@ -21,25 +21,6 @@ def _scale_label(lbl, scale):
         lbl.set_style_transform_scale_y(scale, 0)
 
 
-def _center_scaled(lbl, box_w, box_h, scale, x_ofs=0, y_ofs=0):
-    lbl.set_style_translate_x(0, 0)
-    lbl.set_style_translate_y(0, 0)
-    lbl.align(lv.ALIGN.CENTER, x_ofs, y_ofs)
-    w = max(1, lbl.get_width())
-    h = max(1, lbl.get_height())
-    lbl.set_style_transform_pivot_x(w // 2, 0)
-    lbl.set_style_transform_pivot_y(h // 2, 0)
-    try:
-        lbl.set_style_transform_scale_x(scale, 0)
-        lbl.set_style_transform_scale_y(scale, 0)
-    except Exception:
-        lbl.set_style_transform_scale(scale, 0)
-    cx = lbl.get_x() + w // 2
-    cy = lbl.get_y() + h // 2
-    lbl.set_style_translate_x(box_w // 2 + x_ofs - cx, 0)
-    lbl.set_style_translate_y(box_h // 2 + y_ofs - cy, 0)
-
-
 class SpeedScreen:
     def __init__(self, page, vehicle, group, w=0, h=0):
         self.vehicle = vehicle
@@ -59,10 +40,7 @@ class SpeedScreen:
         lv_util.hide(self.analog.widget())
 
         dig = self.digital.widget()
-        bw, bh = dig.get_width(), dig.get_height()
-        y_ofs = -bh // 12
-        _center_scaled(self.digital.num, bw, bh, 2048, 0, y_ofs)
-        _center_scaled(self.digital.num_shadow, bw, bh, 2048, 4, y_ofs + 4)
+        self.digital.set_num_scale(2048)
         self.digital.num.set_style_text_color(lv.color_hex(0xFFFFFF), 0)
         uh = max(1, self.digital.unit.get_height())
         self.digital.unit.set_style_translate_x(0, 0)

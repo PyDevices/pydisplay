@@ -11,8 +11,10 @@ Roku External Control Protocol (ECP) client — no display, event, or UI imports
 Talks HTTP on port 8060 and discovers devices via SSDP (``ST: roku:ecp``),
 with a portable unicast ``:8060`` / ``/query/device-info`` scan fallback when
 multicast is blocked (common on WSL NAT and some host firewalls).
-Shared by the ``roku_remote`` graphics front end; designed so other UIs can
-reuse the same engine later.
+Shared by every Roku front end (``roku_graphics``, ``roku_widgets``,
+``roku_lvgl``, and the ``roku_remote`` launcher): all UI-agnostic ECP,
+discovery, and label/action helpers live here so the display layer is fully
+replaceable.
 
 Requires the Roku setting **Control by mobile apps → Enabled**. WiFi must
 already be associated on microcontroller targets; unix MicroPython uses the
@@ -38,6 +40,7 @@ try:
     import time
 except ImportError:  # pragma: no cover
     time = None
+
 
 # Default host: empty → discover / set manually. Edit for a fixed target.
 ROKU_HOST = ""
@@ -188,6 +191,20 @@ def _xml_unescape(text):
     text = text.replace("&quot;", '"')
     text = text.replace("&apos;", "'")
     return text
+
+
+def ascii_label(text):
+    """Unescape XML, then replace non-ASCII / control chars with spaces.
+
+    UI-agnostic helper shared by the front ends for safe single-line labels on
+    bitmap fonts. Kept in the engine so ``roku_graphics`` / ``roku_widgets`` /
+    ``roku_lvgl`` render identical device / app text.
+    """
+    out = []
+    for ch in _xml_unescape(text or ""):
+        o = ord(ch)
+        out.append(ch if 32 <= o <= 126 else " ")
+    return "".join(out)
 
 
 def _parse_media_player(text):
@@ -856,7 +873,8 @@ def _probe_hosts_poll(hosts, port, connect_timeout, batch_size=32):
     for i in range(0, len(hosts), batch_size):
         batch = hosts[i : i + batch_size]
         poller = select.poll()
-        socks = {}  # id(sock) -> (host, sock)
+        socks = {}  # canonical key id(sock) -> (host, sock)
+        fd_to_key = {}  # fileno -> id(sock): CPython poll() returns int fds
         for host in batch:
             s = None
             try:
@@ -877,6 +895,10 @@ def _probe_hosts_poll(hosts, port, connect_timeout, batch_size=32):
                 except OSError:
                     pass
                 socks[id(s)] = (host, s)
+                try:
+                    fd_to_key[s.fileno()] = id(s)
+                except (AttributeError, OSError):
+                    pass
                 poller.register(s, poll_mask)
             except (OSError, TypeError, ValueError, IndexError):
                 if s is not None:
@@ -886,24 +908,33 @@ def _probe_hosts_poll(hosts, port, connect_timeout, batch_size=32):
                         pass
 
         pending = set(socks)
-        deadline = None
-        if time is not None and hasattr(time, "ticks_ms"):
-            deadline = time.ticks_add(time.ticks_ms(), timeout_ms)
+        # Portable per-batch deadline (ticks on MCU, wall clock on CPython).
+        # Prior code only armed a deadline when ``time.ticks_ms`` existed, so on
+        # CPython the loop had no timeout and filtered hosts (no RST, no connect)
+        # kept ``pending`` non-empty forever, hanging the whole scan.
+        deadline = _monotonic_deadline_ms(connect_timeout)
+        # Fallback bound for runtimes with no clock at all.
+        max_iters = max(1, timeout_ms // 50 + 2)
+        iters = 0
         while pending:
-            wait = 50
             if deadline is not None:
-                left = time.ticks_diff(deadline, time.ticks_ms())
-                if left <= 0:
+                if _monotonic_expired(deadline):
                     break
-                wait = min(wait, max(1, left))
+            elif iters >= max_iters:
+                break
+            iters += 1
             try:
-                ready = poller.poll(wait)
+                ready = poller.poll(50)
             except OSError:
                 break
             for item in ready:
-                s = item[0]
-                key = id(s)
-                if key not in socks:
+                obj = item[0]
+                # CPython poll() yields int fds; MicroPython yields the socket.
+                if isinstance(obj, int):
+                    key = fd_to_key.get(obj)
+                else:
+                    key = id(obj)
+                if key is None or key not in socks:
                     continue
                 host, s = socks[key]
                 ok = False
@@ -1108,10 +1139,20 @@ def discover_rokus_scan(
         if _tcp_open_retry(host, port, max(connect_timeout, 1.5), 3):
             _accept(host)
 
+    if found:
+        return found
+
     rest = [h for h in hosts if h not in seen]
-    open_hosts = _probe_hosts_parallel(rest, port, connect_timeout, workers)
-    for host in open_hosts:
-        _accept(host)
+    # Probe in worker-sized chunks and confirm ECP between chunks so a present
+    # Roku short-circuits the remaining /24 (fast discovery) without raising the
+    # socket fan-out, which is known to drop real Rokus.
+    step = max(8, int(workers))
+    for i in range(0, len(rest), step):
+        chunk = rest[i : i + step]
+        for host in _probe_hosts_parallel(chunk, port, connect_timeout, workers):
+            _accept(host)
+        if found:
+            break
 
     return found
 
@@ -1163,6 +1204,11 @@ def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
 
         found = {}
         deadline = _monotonic_deadline_ms(timeout)
+        # Once a Roku replies, keep listening only a short grace window so
+        # multicast discovery returns in ~1s instead of burning the full
+        # timeout waiting for more replies that rarely come.
+        grace_deadline = [None]
+        grace_secs = 0.6
 
         for _ in range(max(1, int(retries))):
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -1206,6 +1252,10 @@ def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
                 while True:
                     if _monotonic_expired(deadline):
                         break
+                    if grace_deadline[0] is not None and _monotonic_expired(
+                        grace_deadline[0]
+                    ):
+                        break
                     try:
                         data, _addr = sock.recvfrom(2048)
                     except OSError:
@@ -1230,6 +1280,8 @@ def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
                         "usn": headers.get("usn", ""),
                         "st": st or SSDP_ST,
                     }
+                    if grace_deadline[0] is None:
+                        grace_deadline[0] = _monotonic_deadline_ms(grace_secs)
                     if deadline is None:
                         # single-response mode when no time module
                         break
@@ -1238,6 +1290,12 @@ def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
                     sock.close()
                 except OSError:
                     pass
+            if (
+                found
+                and grace_deadline[0] is not None
+                and _monotonic_expired(grace_deadline[0])
+            ):
+                break
 
         devices = list(found.values())
     if devices or not scan_fallback:
@@ -1355,6 +1413,114 @@ class RokuEngine:
         except Exception:
             pass
         return self.playback_status()
+
+    # --- Presentation helpers (UI-agnostic strings from engine state) ------
+
+    def play_label(self):
+        """Transport Play/Pause caption from media-player state.
+
+        ``PAUSE`` while playing/buffering, ``PLAY`` while paused, else ``P/PA``.
+        """
+        state = ((self.media_state or {}).get("state") or "").lower()
+        if state in ("play", "buffer"):
+            return "PAUSE"
+        if state == "pause":
+            return "PLAY"
+        return "P/PA"
+
+    def power_label(self):
+        """``ON`` / ``OFF`` for the power key face, from ``power-mode``."""
+        return "ON" if self.power_is_on() else "OFF"
+
+    def power_key(self):
+        """The ECP key that toggles power from the current state."""
+        return "PowerOff" if self.power_is_on() else "PowerOn"
+
+    def input_short_label(self, app, max_chars=4):
+        """Short ASCII label for a ``type=tvin`` input (TV / H1 / H2 / AV / …)."""
+        aid = (app.get("id") or "").lower()
+        name = ascii_label(app.get("name") or "").strip()
+        lab = ""
+        if "dtv" in aid or "tuner" in aid or name.upper() in ("LIVE TV", "TV"):
+            lab = "TV"
+        elif "hdmi" in aid:
+            for ch in aid:
+                if ch.isdigit():
+                    lab = "H" + ch
+                    break
+            if not lab:
+                lab = "HDMI"
+        elif "cvbs" in aid or "av" in aid:
+            lab = "AV"
+        elif name:
+            up = name.upper()
+            if "HDMI" in up:
+                for ch in up:
+                    if ch.isdigit():
+                        lab = "H" + ch
+                        break
+                if not lab:
+                    lab = "HDMI"
+            elif "TV" in up:
+                lab = "TV"
+            elif "AV" in up or "COMPOSITE" in up:
+                lab = "AV"
+            else:
+                lab = name
+        else:
+            lab = aid.split(".")[-1] if aid else "?"
+        lab = ascii_label(lab).strip() or "?"
+        if max_chars > 0 and len(lab) > max_chars:
+            lab = lab[:max_chars]
+        return lab
+
+    # --- Composite actions (ECP + state, no drawing) -----------------------
+
+    def press_refresh(self, key):
+        """Send ``key`` then refresh playback state. Returns the press result."""
+        ok = self.press(key)
+        try:
+            self.refresh_playback()
+        except Exception:
+            pass
+        return ok
+
+    def launch_refresh(self, app_id, query=""):
+        """Launch ``app_id`` then refresh playback state. Returns the launch result."""
+        ok = self.launch(app_id, query)
+        try:
+            self.refresh_playback()
+        except Exception:
+            pass
+        return ok
+
+    def mark_power_optimistic(self):
+        """Flip cached ``power-mode`` for an immediate UI redraw; return the key.
+
+        Lets a front end repaint the power face before the (blocking) ECP call
+        runs on a worker. Pair with :meth:`press_refresh` on the returned key.
+        """
+        key = self.power_key()
+        if not self.device_info:
+            self.device_info = {}
+        self.device_info["power-mode"] = "DisplayOff" if key == "PowerOff" else "PowerOn"
+        return key
+
+    def toggle_power(self):
+        """Blocking convenience: flip power, send the key, resync device state.
+
+        Returns the ECP key that was sent. Front ends that want an optimistic
+        redraw should instead call :meth:`mark_power_optimistic` on the main
+        thread and :meth:`press_refresh` on a worker.
+        """
+        key = self.mark_power_optimistic()
+        self.press(key)
+        try:
+            self.query_device_info()
+            self.refresh_playback()
+        except Exception:
+            pass
+        return key
 
     @property
     def status(self):

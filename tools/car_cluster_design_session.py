@@ -213,38 +213,47 @@ def apply_speed_layout():
         dig.clear_flag(lv.obj.FLAG.HIDDEN)
     ana.add_flag(lv.obj.FLAG.HIDDEN)
 
-    shadow, num, unit = dig.get_child(0), dig.get_child(1), dig.get_child(2)
-    bw, bh = dig.get_width(), dig.get_height()
-    y_ofs = -bh // 12
+    unit = dig.get_child(2)
+    scr = ui.screens[0]
+    digital = getattr(scr, "digital", None)
+    if digital is not None:
+        digital.set_num_scale(2048)
+        digital.num.set_style_text_color(lv.color_hex(0xFFFFFF), 0)
+        unit = digital.unit
+    else:
+        shadow, num = dig.get_child(0), dig.get_child(1)
+        bw, bh = dig.get_width(), dig.get_height()
+        y_ofs = -bh // 12
 
-    def _center_scaled(lbl, scale, x_ofs=0, y_ofs=0):
-        lbl.set_style_translate_x(0, 0)
-        lbl.set_style_translate_y(0, 0)
-        lbl.align(lv.ALIGN.CENTER, x_ofs, y_ofs)
-        w = max(1, lbl.get_width())
-        h = max(1, lbl.get_height())
-        lbl.set_style_transform_pivot_x(w // 2, 0)
-        lbl.set_style_transform_pivot_y(h // 2, 0)
-        try:
-            lbl.set_style_transform_scale_x(scale, 0)
-            lbl.set_style_transform_scale_y(scale, 0)
-        except Exception:
-            lbl.set_style_transform_scale(scale, 0)
-        cx = lbl.get_x() + w // 2
-        cy = lbl.get_y() + h // 2
-        lbl.set_style_translate_x(bw // 2 + x_ofs - cx, 0)
-        lbl.set_style_translate_y(bh // 2 + y_ofs - cy, 0)
+        def _center_scaled(lbl, scale, x_ofs=0, y_ofs=0):
+            lbl.set_width(bw)
+            lbl.set_style_text_align(lv.TEXT_ALIGN.CENTER, 0)
+            lbl.set_style_translate_x(0, 0)
+            lbl.set_style_translate_y(0, 0)
+            lbl.align(lv.ALIGN.CENTER, x_ofs, y_ofs)
+            w = max(1, lbl.get_width())
+            h = max(1, lbl.get_height())
+            lbl.set_style_transform_pivot_x(w // 2, 0)
+            lbl.set_style_transform_pivot_y(h // 2, 0)
+            try:
+                lbl.set_style_transform_scale_x(scale, 0)
+                lbl.set_style_transform_scale_y(scale, 0)
+            except Exception:
+                lbl.set_style_transform_scale(scale, 0)
+            cx = lbl.get_x() + w // 2
+            cy = lbl.get_y() + h // 2
+            lbl.set_style_translate_x(bw // 2 + x_ofs - cx, 0)
+            lbl.set_style_translate_y(bh // 2 + y_ofs - cy, 0)
 
-    _center_scaled(num, 2048, 0, y_ofs)
-    _center_scaled(shadow, 2048, 4, y_ofs + 4)
-    num.set_style_text_color(lv.color_hex(0xFFFFFF), 0)
+        _center_scaled(num, 2048, 0, y_ofs)
+        _center_scaled(shadow, 2048, 4, y_ofs + 4)
+        num.set_style_text_color(lv.color_hex(0xFFFFFF), 0)
+
     uh = max(1, unit.get_height())
     unit.set_style_translate_x(0, 0)
     unit.set_style_translate_y(0, 0)
     unit.align(lv.ALIGN.BOTTOM_MID, 0, -12 - uh)
     _set_scale(unit, 768)
-
-    scr = ui.screens[0]
     odo = getattr(scr, "odo", None)
     toggle = getattr(scr, "toggle", None)
     gear = getattr(scr, "gear", None)
