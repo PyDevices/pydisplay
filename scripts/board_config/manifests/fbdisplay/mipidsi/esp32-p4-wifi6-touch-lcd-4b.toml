@@ -90,6 +90,10 @@ address = "0x5D"
 width = 720
 height = 720
 touch_points = 5
+# Panel mapping (verified on-device): OpenMV default reverse_axis=True sent
+# bottom-mid taps to ~left-mid; reverse_axis=False fixes X but Y is mirrored.
+reverse_axis = false
+reverse_y = true
 
 [touch.cp]
 driver = "gt911"

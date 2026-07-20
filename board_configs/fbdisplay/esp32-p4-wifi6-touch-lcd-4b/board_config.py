@@ -74,9 +74,6 @@ fb = Display(
 )
 i2c = I2C(1, scl=Pin(I2C_SCL), sda=Pin(I2C_SDA), freq=400_000)
 
-# Panel mapping (verified on-device): OpenMV default reverse_axis=True sent
-# bottom-mid taps to ~left-mid; reverse_axis=False fixes X but Y is mirrored
-# (button ~y=665 → ~y=50). reverse_y matches the glass-to-display origin.
 touch_drv = GT911(
     i2c,
     reset_pin=TOUCH_RESET,
