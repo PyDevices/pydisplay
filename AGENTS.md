@@ -160,3 +160,21 @@ that call `show()` themselves avoid a competing SDL refresh timer.
   incompatible with the generic example matrix for some ports.
 - **`multimer` is fragile** — read [`.cursor/rules/multimer-fragile.mdc`](.cursor/rules/multimer-fragile.mdc)
   before editing `src/lib/multimer/` (thinking model required, small diffs, revert failures).
+
+### MCU board bring-up (displayif / soft-reset)
+
+When bringing up or debugging a MicroPython `board_configs/fbdisplay/*` board
+that uses displayif (`mipidsi`, `rgbframebuffer`, `picodvi`, …), especially with
+LVGL and mpftp soft-reset:
+
+- Soft-reset + re-import is the acceptance test (no hard reset).
+- Prefer `mip.install` over Wi‑Fi for large Python trees; mpftp for thin files
+  and firmware.
+- Symptom table, wrap architecture, and bring-up methods live in the sibling
+  displayif repo:
+  [`SOFT_RESET_AND_BRINGUP.md`](https://github.com/PyDevices/displayif/blob/main/SOFT_RESET_AND_BRINGUP.md)
+  (local: `../cmods/displayif/SOFT_RESET_AND_BRINGUP.md` or
+  `~/gh/pydevices/cmods/displayif/…`). Start at displayif `AGENTS.md`.
+- Do not leave flash-backed debug logs on the touch/refresh path (looks like
+  flicker). Fix displayif/bindings root causes rather than board_config
+  workarounds.

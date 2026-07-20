@@ -80,10 +80,18 @@ class FBDisplay(DisplayDriver):
         else:
             color_bytes = (c & 0xFFFF).to_bytes(2, "little")
 
+        # Full-width: one contiguous assign (same mipidsi row-slice cost as blit_rect).
+        if x == 0 and w == self.width:
+            block = color_bytes * (w * h)
+            begin = y * self.width * BPP
+            self._buffer[begin : begin + len(block)] = block
+            return (x, y, w, h)
+
+        rowbytes = color_bytes * w
         for _y in range(y, y + h):
             begin = (_y * self.width + x) * BPP
             end = begin + w * BPP
-            self._buffer[begin:end] = color_bytes * w
+            self._buffer[begin:end] = rowbytes
         return (x, y, w, h)
 
     def blit_rect(self, buf, x, y, w, h):
@@ -119,9 +127,19 @@ class FBDisplay(DisplayDriver):
                     self._buffer[(y + row) * self.width + x + col] = color
             return (x, y, w, h)
 
-        # Full-frame contiguous copy (avoids 720x row slice assigns on large DPI panels).
-        if x == 0 and y == 0 and w == self.width and h == self.height:
-            self._buffer[:] = buf
+        # Native FB blit (mipidsi on ESP32-P4): Python memoryview row slices into
+        # SPIRAM are ~25ms/row; C memcpy is sub-millisecond for LVGL partials.
+        native_blit = getattr(self._raw_buffer, "blit", None)
+        if native_blit is not None:
+            native_blit(buf, x, y, w, h)
+            return (x, y, w, h)
+
+        # Contiguous copy for full-width strips (and full frames). Per-row
+        # memoryview slice assigns into some native FBs (e.g. mipidsi on
+        # ESP32-P4 720x720) are ~28ms/row — a height/10 LVGL partial was ~2s.
+        if x == 0 and w == self.width:
+            begin = y * self.width * BPP
+            self._buffer[begin : begin + h * self.width * BPP] = buf
             return (x, y, w, h)
 
         for row in range(h):

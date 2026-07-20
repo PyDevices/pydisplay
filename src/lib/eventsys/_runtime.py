@@ -68,15 +68,19 @@ def _is_interactive_session():
     CPython: ``sys.flags.interactive`` (``python -i …``) or bare REPL
     (``__main__.__file__ is None``; bare ``python`` often has interactive=0).
 
-    MicroPython and similar: ``-i`` on ``/proc/self/cmdline``, or bare REPL
-    via ``__main__.__file__ is None``. No env vars; no reserved filenames.
+    MicroPython and similar: ``-i`` on ``/proc/self/cmdline``, bare REPL
+    (``__main__.__file__ is None``), or raw-REPL / paste exec where
+    ``__file__`` is ``<stdin>`` / ``<string>`` (mpftp ``exec``, soft-reboot
+    paste). Named scripts (``micropython app.py``) still block in
+    ``run_forever``. No env vars; no reserved filenames.
     """
     import sys
 
     if getattr(sys.implementation, "name", "") == "cpython":
         flags = getattr(sys, "flags", None)
         return bool(getattr(flags, "interactive", 0)) or (_main_file() is None)
-    return _cmdline_has_dash_i() or (_main_file() is None)
+    main = _main_file()
+    return _cmdline_has_dash_i() or main is None or main in ("<stdin>", "<string>")
 
 
 class _RuntimeTimerSubscription:
@@ -269,11 +273,12 @@ class Runtime:
         * async, a loop already running (PyScript/Jupyter): arm the auto-service
           on that loop and return — the host loop keeps the app alive.
         * async, no running loop (desktop ``timer_async``): ``asyncio.run(self.run())``.
-        * sync, signal-based backend (``multimer.uses_signals()``), interactive
-          session (``-i`` or bare REPL then ``import``): return immediately —
-          the REPL stays alive and the RT signal drives the auto-service, so a
-          keep-alive loop is optional here. Soft-timer coalescing / pacing in
-          ``multimer`` prevents LVGL catch-up from busy-locking the REPL.
+        * sync, signal-style backend (``multimer.uses_signals()`` — librt or
+          ``machine.Timer``), interactive session (``-i`` or bare REPL then
+          ``import``): return immediately — the REPL stays alive and the timer
+          drives the auto-service, so a keep-alive loop is optional here.
+          Soft-timer coalescing / pacing in ``multimer`` prevents LVGL catch-up
+          from busy-locking the REPL.
         * sync otherwise: block until quit, then tear down.
 
         The coroutine :meth:`run` stays public for ``await`` composition inside an
@@ -304,8 +309,8 @@ class Runtime:
             asyncio.run(self.run())
             return
 
-        # Interactive + signal backend: timer keeps the app live at the REPL;
-        # blocking here would wedge the session needlessly.
+        # Interactive + self-driving timer (librt signals / machine.Timer):
+        # timer keeps the app live at the REPL; blocking here wedges the session.
         if _is_interactive_session() and multimer.uses_signals():
             return
         try:
