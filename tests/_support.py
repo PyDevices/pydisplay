@@ -93,6 +93,29 @@ class FakeFrameBuffer:
         self.refresh_count += 1
 
 
+class FakeU16FrameBuffer:
+    """CircuitPython-style RGB565 framebuffer indexed as uint16 elements.
+
+    ``memoryview(fb)`` has length ``width * height`` (not byte length). Qualia's
+    ``DotClockFramebuffer`` looks like this; ``FBDisplay`` must paint via a
+    ``cast('B')`` byte view rather than a Python per-pixel loop.
+    """
+
+    def __init__(self, width, height):
+        import array
+
+        self.width = width
+        self.height = height
+        self.data = array.array("H", [0] * (width * height))
+        self.refresh_count = 0
+
+    def __buffer__(self, flags):
+        return memoryview(self.data)
+
+    def refresh(self):
+        self.refresh_count += 1
+
+
 @contextlib.contextmanager
 def quiet():
     """Suppress the chatty ``print`` calls emitted while building a display."""
@@ -108,6 +131,16 @@ def make_fbdisplay(width=8, height=4, reverse_bytes_in_word=False):
     from displaysys.fbdisplay import FBDisplay
 
     fb = FakeFrameBuffer(width, height)
+    with quiet():
+        display = FBDisplay(fb, reverse_bytes_in_word=reverse_bytes_in_word)
+    return display, fb
+
+
+def make_u16_fbdisplay(width=8, height=4, reverse_bytes_in_word=False):
+    """Build an ``FBDisplay`` backed by a uint16-indexed framebuffer."""
+    from displaysys.fbdisplay import FBDisplay
+
+    fb = FakeU16FrameBuffer(width, height)
     with quiet():
         display = FBDisplay(fb, reverse_bytes_in_word=reverse_bytes_in_word)
     return display, fb

@@ -266,7 +266,17 @@ class Loop:
     def default_exception_handler(loop, context):
         print(context["message"], file=sys.stderr)
         print("future:", context["future"], "coro=", context["future"].coro, file=sys.stderr)
-        sys.print_exception(context["exception"], sys.stderr)
+        exc = context["exception"]
+        print_exc = getattr(sys, "print_exception", None)
+        if print_exc is not None:
+            print_exc(exc, sys.stderr)
+        else:
+            try:
+                import traceback
+
+                traceback.print_exception(type(exc), exc, getattr(exc, "__traceback__", None))
+            except Exception:
+                print(repr(exc), file=sys.stderr)
 
     def call_exception_handler(context):
         (Loop._exc_handler or Loop.default_exception_handler)(Loop, context)

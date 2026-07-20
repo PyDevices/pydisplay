@@ -241,6 +241,28 @@ class Runtime:
         if self._pending_timer_async and self._timer is None:
             self.start_timer(async_=True)
 
+    @staticmethod
+    def _arm_lvgl_event_loop():
+        """Start LVGL ``display_driver.event_loop`` once an asyncio loop is running.
+
+        ``import display_driver`` with ``timer_async`` defers ``event_loop.arm()``
+        until a running loop exists. The already-running host-loop branch of
+        :meth:`run_forever` did that; :meth:`run` (``asyncio.run`` path used on
+        CircuitPython and desktop ``timer_async``) must too — otherwise LVGL
+        never gets ``task_handler`` / flush and the panel stays blank.
+        """
+        try:
+            import sys as _sys
+
+            _dd = _sys.modules.get("display_driver")
+            if _dd is None:
+                return
+            _inst = _dd.event_loop.current_instance()
+            if _inst is not None:
+                _inst.arm()
+        except Exception:
+            pass
+
     async def run(self, tick_ms=SERVICE_TICK_MS):
         """Run the app until quit — asyncio-native entry for ``timer_async`` apps.
 
@@ -258,6 +280,7 @@ class Runtime:
         from multimer import asyncio
 
         self.arm_async_refresh()
+        self._arm_lvgl_event_loop()
         while not self._quit_requested:
             await asyncio.sleep(tick_ms / 1000)
         # Teardown here runs outside the service tick (this coroutine is a
@@ -293,16 +316,7 @@ class Runtime:
                 # without a real get_running_loop() (e.g. sync MicroPython Run
                 # click). Arm it here so task_handler/flush can run. No-op if
                 # display_driver is unused or already armed.
-                try:
-                    import sys as _sys
-
-                    _dd = _sys.modules.get("display_driver")
-                    if _dd is not None:
-                        _inst = _dd.event_loop.current_instance()
-                        if _inst is not None:
-                            _inst.arm()
-                except Exception:
-                    pass
+                self._arm_lvgl_event_loop()
                 return
             from multimer import asyncio
 

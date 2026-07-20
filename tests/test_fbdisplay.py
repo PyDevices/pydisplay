@@ -10,7 +10,7 @@ framebuffer so the pixel-pushing paths can be checked byte-for-byte.
 import unittest
 
 import _env  # noqa: F401
-from _support import make_fbdisplay
+from _support import make_fbdisplay, make_u16_fbdisplay
 
 
 class TestFBDisplayDrawing(unittest.TestCase):
@@ -88,6 +88,57 @@ class TestBlitTransparent(unittest.TestCase):
         self.assertEqual(result, (0, 0, 4, 1))
         # only columns 0 and 2 written; columns 1 and 3 stay transparent
         self.assertEqual(bytes(fb.data), nonkey + key + nonkey + key)
+
+
+class TestFBDisplayU16Buffer(unittest.TestCase):
+    """Qualia / DotClockFramebuffer path: memoryview length == pixel count."""
+
+    def test_detects_u16_and_byte_view(self):
+        d, _ = make_u16_fbdisplay(4, 2)
+        self.assertTrue(d._buffer_u16)
+        self.assertIsNotNone(d._pixel_bytes)
+        self.assertEqual(len(d._buffer), 8)
+        self.assertEqual(len(d._pixel_bytes), 16)
+
+    def test_blit_rect_bulk_copy_matches_bytes(self):
+        d, fb = make_u16_fbdisplay(4, 2)
+        src = bytearray(b"\x01\x02\x03\x04\x05\x06\x07\x08")
+        d.blit_rect(src, 0, 0, 4, 1)
+        # little-endian uint16 words from the byte stream
+        self.assertEqual(list(fb.data[:4]), [0x0201, 0x0403, 0x0605, 0x0807])
+
+    def test_blit_rect_full_frame(self):
+        d, fb = make_u16_fbdisplay(4, 2)
+        src = bytearray(range(16))
+        d.blit_rect(src, 0, 0, 4, 2)
+        self.assertEqual(bytes(memoryview(fb.data).cast("B")), bytes(src))
+
+    def test_fill_rect_via_byte_view(self):
+        d, fb = make_u16_fbdisplay(4, 2)
+        d.fill_rect(0, 0, 2, 1, 0xF800)
+        self.assertEqual(fb.data[0], 0xF800)
+        self.assertEqual(fb.data[1], 0xF800)
+        self.assertEqual(fb.data[2], 0)
+
+
+class TestFBDisplayBitmapKwargs(unittest.TestCase):
+    def test_accepts_bitmap_without_bitmaptools(self):
+        # bitmaptools missing → falls back to raw buffer path; must not crash.
+        from _support import FakeFrameBuffer, quiet
+
+        from displaysys.fbdisplay import FBDisplay
+
+        fb2 = FakeFrameBuffer(4, 2)
+
+        class _DummyBitmap:
+            pass
+
+        with quiet():
+            disp = FBDisplay(fb2, bitmap=_DummyBitmap())
+        self.assertIsNone(disp._bitmaptools)
+        src = bytearray(b"\x01\x02\x03\x04")
+        disp.blit_rect(src, 0, 0, 2, 1)
+        self.assertEqual(bytes(fb2.data[:4]), b"\x01\x02\x03\x04")
 
 
 if __name__ == "__main__":

@@ -91,4 +91,13 @@ else:
 
                     _set_backend(sdl2)
                 except ImportError:
-                    pass
+                    try:
+                        from ._backends import polling
+
+                        _set_backend(polling)
+                    except ImportError:
+                        # CircuitPython: no machine.Timer; async-only Timer API.
+                        if getattr(sys.implementation, "name", "") == "circuitpython":
+                            from ._async_timer import AsyncTimer
+
+                            Timer = AsyncTimer
