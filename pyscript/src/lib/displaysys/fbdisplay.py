@@ -9,22 +9,49 @@ displaysys.fbdisplay
 from displaysys import DisplayDriver
 
 
+def _as_u16_pixels(buf):
+    """View RGB565 byte data as uint16 pixels (little-endian) for bitmaptools."""
+    mv = memoryview(buf)
+    try:
+        return mv.cast("H")
+    except (AttributeError, TypeError, ValueError):
+        import array
+
+        return array.array("H", mv)
+
+
 class FBDisplay(DisplayDriver):
     """
     A class to interface with CircuitPython FrameBuffer objects.
 
     Args:
-        buffer (FrameBuffer): The CircuitPython FrameBuffer object.
+        buffer (FrameBuffer): The CircuitPython FrameBuffer object
+            (e.g. ``dotclockframebuffer.DotClockFramebuffer``, already in PSRAM).
         width (int, optional): The width of the display. Defaults to None.
         height (int, optional): The height of the display. Defaults to None.
         reverse_bytes_in_word (bool, optional): Whether to reverse the bytes in a word. Defaults to False.
+        bitmap: Optional ``displayio.Bitmap`` paint surface (typically allocated in
+            SPIRAM/PSRAM). When set with ``bitmaptools``, blit/fill use C
+            ``arrayblit`` / ``fill_region`` — the Adafruit Qualia RGB666 path —
+            instead of Python loops into the raw framebuffer.
+        display: Optional ``framebufferio.FramebufferDisplay`` that owns ``bitmap``
+            as its root group. ``show()`` calls ``display.refresh()`` so dirty
+            regions are composited in C into the DotClock PSRAM framebuffer.
 
     Attributes:
         color_depth (int): The color depth of the display
     """
 
     def __init__(
-        self, buffer, width=None, height=None, reverse_bytes_in_word=False, *, quiet=False
+        self,
+        buffer,
+        width=None,
+        height=None,
+        reverse_bytes_in_word=False,
+        *,
+        bitmap=None,
+        display=None,
+        quiet=False,
     ):
         self._raw_buffer = buffer
         mv = memoryview(buffer)
@@ -33,11 +60,32 @@ class FBDisplay(DisplayDriver):
         self._requires_byteswap = reverse_bytes_in_word
         self._rotation = 0
         self.color_depth = 16
+        self._bitmap = bitmap
+        self._display = display
+        self._bitmaptools = None
+        if bitmap is not None:
+            try:
+                import bitmaptools as _bt
+
+                self._bitmaptools = _bt
+            except ImportError:
+                self._bitmap = None
+
         # Native framebuffers may expose RGB565 as bytes ('B') or uint16 ('H').
-        # FBDisplay indexes in bytes; detect half-word buffers by length.
+        # DotClockFramebuffer on CircuitPython is uint16-indexed (len == pixels);
+        # painting through that view is a Python per-pixel loop (~12s for 720x720).
+        # Prefer a byte view so blit/fill can use bulk memoryview assigns when no
+        # displayio.Bitmap is provided.
         pix = self._width * self._height
         self._buffer_u16 = len(mv) == pix
         self._buffer = mv
+        self._pixel_bytes = mv
+        if self._buffer_u16:
+            try:
+                self._pixel_bytes = mv.cast("B")
+            except (AttributeError, TypeError, ValueError):
+                # No cast: fall back to slow uint16 element stores in blit/fill.
+                self._pixel_bytes = None
 
         super().__init__(quiet=quiet)
 
@@ -62,8 +110,18 @@ class FBDisplay(DisplayDriver):
         Returns:
             (tuple): A tuple containing the x, y, w, h values
         """
-        if self._buffer_u16:
-            color = c & 0xFFFF
+        color = c & 0xFFFF
+        bt = self._bitmaptools
+        if bt is not None and self._bitmap is not None:
+            # C fill into PSRAM Bitmap (Adafruit Qualia path).
+            if self._auto_byteswap:
+                color = ((color & 0xFF) << 8) | (color >> 8)
+            bt.fill_region(self._bitmap, x, y, x + w, y + h, color)
+            return (x, y, w, h)
+
+        dest = self._pixel_bytes
+        if dest is None:
+            # uint16 buffer without byte cast — last-resort element stores.
             if self._auto_byteswap:
                 color = ((color & 0xFF) << 8) | (color >> 8)
             buf = self._buffer
@@ -76,22 +134,33 @@ class FBDisplay(DisplayDriver):
 
         BPP = self.color_depth // 8
         if self._auto_byteswap:
-            color_bytes = (c & 0xFFFF).to_bytes(2, "big")
+            color_bytes = color.to_bytes(2, "big")
         else:
-            color_bytes = (c & 0xFFFF).to_bytes(2, "little")
+            color_bytes = color.to_bytes(2, "little")
 
-        # Full-width: one contiguous assign (same mipidsi row-slice cost as blit_rect).
+        # Full-width: contiguous band assigns. A single ``color_bytes * (w*h)`` for
+        # 720x720 is ~1MB and can OOM on CircuitPython; chunked bands stay small
+        # while avoiding per-row slice assigns (~60ms/row into DotClockFramebuffer).
         if x == 0 and w == self.width:
-            block = color_bytes * (w * h)
-            begin = y * self.width * BPP
-            self._buffer[begin : begin + len(block)] = block
+            band_rows = min(h, 48)
+            block = color_bytes * (w * band_rows)
+            y0 = y
+            left = h
+            while left:
+                rows = band_rows if left >= band_rows else left
+                if rows != band_rows:
+                    block = color_bytes * (w * rows)
+                begin = y0 * self.width * BPP
+                dest[begin : begin + len(block)] = block
+                y0 += rows
+                left -= rows
             return (x, y, w, h)
 
         rowbytes = color_bytes * w
         for _y in range(y, y + h):
             begin = (_y * self.width + x) * BPP
             end = begin + w * BPP
-            self._buffer[begin:end] = rowbytes
+            dest[begin:end] = rowbytes
         return (x, y, w, h)
 
     def blit_rect(self, buf, x, y, w, h):
@@ -117,7 +186,15 @@ class FBDisplay(DisplayDriver):
         if len(buf) != w * h * BPP:
             raise ValueError("The source buffer is not the correct size")
 
-        if self._buffer_u16:
+        bt = self._bitmaptools
+        if bt is not None and self._bitmap is not None:
+            # C arrayblit into PSRAM Bitmap — same idea as Adafruit's Qualia demos
+            # (paint Bitmap; FramebufferDisplay composites into DotClock PSRAM).
+            bt.arrayblit(self._bitmap, _as_u16_pixels(buf), x, y, x + w, y + h)
+            return (x, y, w, h)
+
+        dest = self._pixel_bytes
+        if dest is None:
             # Source is byte-packed RGB565; dest buffer is uint16 elements.
             src = memoryview(buf)
             for row in range(h):
@@ -139,7 +216,7 @@ class FBDisplay(DisplayDriver):
         # ESP32-P4 720x720) are ~28ms/row — a height/10 LVGL partial was ~2s.
         if x == 0 and w == self.width:
             begin = y * self.width * BPP
-            self._buffer[begin : begin + h * self.width * BPP] = buf
+            dest[begin : begin + h * self.width * BPP] = buf
             return (x, y, w, h)
 
         for row in range(h):
@@ -147,7 +224,7 @@ class FBDisplay(DisplayDriver):
             source_end = source_begin + w * BPP
             dest_begin = ((y + row) * self.width + x) * BPP
             dest_end = dest_begin + w * BPP
-            self._buffer[dest_begin:dest_end] = buf[source_begin:source_end]
+            dest[dest_begin:dest_end] = buf[source_begin:source_end]
         return (x, y, w, h)
 
     def pixel(self, x, y, c):
@@ -169,5 +246,23 @@ class FBDisplay(DisplayDriver):
     def show(self, _timer=None) -> None:
         """
         Refreshes the display.
+
+        When a ``FramebufferDisplay`` is in ``auto_refresh`` mode (Adafruit
+        Qualia / DotClock), skip manual refresh — paced background refresh
+        avoids tearing against the continuous DPI scanout. Manual
+        ``refresh()`` every LVGL tick was the flicker source.
         """
+        disp = self._display
+        if disp is not None:
+            if getattr(disp, "auto_refresh", False):
+                return
+            try:
+                disp.refresh()
+                return
+            except TypeError:
+                try:
+                    disp.refresh(None, None)
+                    return
+                except Exception:
+                    pass
         self._raw_buffer.refresh()

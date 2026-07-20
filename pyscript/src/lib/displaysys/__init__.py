@@ -214,8 +214,17 @@ def capabilities():
 
 def alloc_buffer(size):
     """
-    Create a new buffer of the specified size.  In the future, this function may be
-    modified to use port-specific memory allocation such as ESP32's heap_caps_malloc.
+    Create a new buffer of the specified size.
+
+    Prefers SPIRAM/PSRAM when the port exposes it:
+
+    * **MicroPython ESP32** — ``esp32.idf_heap_caps_malloc``-style helpers when
+      present; otherwise a normal ``bytearray`` (large objects may still land
+      in PSRAM depending on IDF heap config).
+    * **CircuitPython** — GC ``bytearray``; on ESP32-S3 boards with PSRAM,
+      large allocations are typically served from SPIRAM. For display surfaces,
+      prefer ``displayio.Bitmap`` (see ``FBDisplay(..., bitmap=...)``) so paints
+      go through C ``bitmaptools`` into PSRAM rather than Python loops.
 
     Args:
         size (int): The size of the buffer to create.
@@ -223,6 +232,25 @@ def alloc_buffer(size):
     Returns:
         (memoryview): The new buffer.
     """
+    size = int(size)
+    # MicroPython / forks that expose heap_caps to Python.
+    for mod_name, fn_name, caps in (
+        ("esp32", "idf_heap_caps_malloc", None),
+        ("esp32", "heap_caps_malloc", 0x400),  # MALLOC_CAP_SPIRAM on IDF
+    ):
+        try:
+            mod = __import__(mod_name)
+            fn = getattr(mod, fn_name, None)
+            if fn is None:
+                continue
+            ptr = fn(size) if caps is None else fn(size, caps)
+            if ptr:
+                import uctypes
+
+                return memoryview(uctypes.bytearray_at(ptr, size))
+        except Exception:
+            pass
+
     return memoryview(bytearray(size))
 
 

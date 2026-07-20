@@ -55,3 +55,23 @@ def _tick(max_items=None):
             timer._next = ticks_add(timer._next, timer._period_ms)
 
     return fired
+
+
+def _backend_drain():
+    _tick()
+
+
+def _backend_sleep_ms(ms):
+    """Sleep while pumping due polling timers (CircuitPython / no-thread hosts)."""
+    import time
+
+    end = ticks_add(ticks_ms(), max(0, int(ms)))
+    while ticks_diff(end, ticks_ms()) > 0:
+        _tick()
+        # coarse yield; supervisor.delay or time.sleep
+        try:
+            import supervisor
+
+            supervisor.delay(1)
+        except Exception:
+            time.sleep(0.001)
