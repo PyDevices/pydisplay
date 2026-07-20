@@ -435,7 +435,7 @@ function updateMemoryViews() {
   var b = wasmMemory.buffer;
   HEAP8 = new Int8Array(b);
   HEAP16 = new Int16Array(b);
-  HEAPU8 = new Uint8Array(b);
+  Module['HEAPU8'] = HEAPU8 = new Uint8Array(b);
   HEAPU16 = new Uint16Array(b);
   HEAP32 = new Int32Array(b);
   HEAPU32 = new Uint32Array(b);
@@ -4360,6 +4360,7 @@ var findStringEnd = (heapOrArray, idx, maxBytesToRead, ignoreNul) => {
 
 
 
+
   FS.createPreloadedFile = FS_createPreloadedFile;
   FS.preloadFile = FS_preloadFile;
   FS.staticInit();;
@@ -4603,7 +4604,6 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'INT53_MIN',
   'bigintToI53Checked',
   'HEAP8',
-  'HEAPU8',
   'HEAP16',
   'HEAPU16',
   'HEAP32',
@@ -4879,9 +4879,7 @@ var _proxy_c_to_js_has_attr = Module['_proxy_c_to_js_has_attr'] = makeInvalidEar
 var _proxy_c_to_js_lookup_attr = Module['_proxy_c_to_js_lookup_attr'] = makeInvalidEarlyAccess('_proxy_c_to_js_lookup_attr');
 var _proxy_c_to_js_store_attr = Module['_proxy_c_to_js_store_attr'] = makeInvalidEarlyAccess('_proxy_c_to_js_store_attr');
 var _proxy_c_to_js_delete_attr = Module['_proxy_c_to_js_delete_attr'] = makeInvalidEarlyAccess('_proxy_c_to_js_delete_attr');
-var _proxy_c_to_js_get_type = Module['_proxy_c_to_js_get_type'] = makeInvalidEarlyAccess('_proxy_c_to_js_get_type');
-var _proxy_c_to_js_get_array = Module['_proxy_c_to_js_get_array'] = makeInvalidEarlyAccess('_proxy_c_to_js_get_array');
-var _proxy_c_to_js_get_dict = Module['_proxy_c_to_js_get_dict'] = makeInvalidEarlyAccess('_proxy_c_to_js_get_dict');
+var _proxy_c_to_js_get_type_and_data = Module['_proxy_c_to_js_get_type_and_data'] = makeInvalidEarlyAccess('_proxy_c_to_js_get_type_and_data');
 var _proxy_c_to_js_get_iter = Module['_proxy_c_to_js_get_iter'] = makeInvalidEarlyAccess('_proxy_c_to_js_get_iter');
 var _proxy_c_to_js_iternext = Module['_proxy_c_to_js_iternext'] = makeInvalidEarlyAccess('_proxy_c_to_js_iternext');
 var _proxy_c_to_js_resume = Module['_proxy_c_to_js_resume'] = makeInvalidEarlyAccess('_proxy_c_to_js_resume');
@@ -4921,9 +4919,7 @@ function assignWasmExports(wasmExports) {
   assert(typeof wasmExports['proxy_c_to_js_lookup_attr'] != 'undefined', 'missing Wasm export: proxy_c_to_js_lookup_attr');
   assert(typeof wasmExports['proxy_c_to_js_store_attr'] != 'undefined', 'missing Wasm export: proxy_c_to_js_store_attr');
   assert(typeof wasmExports['proxy_c_to_js_delete_attr'] != 'undefined', 'missing Wasm export: proxy_c_to_js_delete_attr');
-  assert(typeof wasmExports['proxy_c_to_js_get_type'] != 'undefined', 'missing Wasm export: proxy_c_to_js_get_type');
-  assert(typeof wasmExports['proxy_c_to_js_get_array'] != 'undefined', 'missing Wasm export: proxy_c_to_js_get_array');
-  assert(typeof wasmExports['proxy_c_to_js_get_dict'] != 'undefined', 'missing Wasm export: proxy_c_to_js_get_dict');
+  assert(typeof wasmExports['proxy_c_to_js_get_type_and_data'] != 'undefined', 'missing Wasm export: proxy_c_to_js_get_type_and_data');
   assert(typeof wasmExports['proxy_c_to_js_get_iter'] != 'undefined', 'missing Wasm export: proxy_c_to_js_get_iter');
   assert(typeof wasmExports['proxy_c_to_js_iternext'] != 'undefined', 'missing Wasm export: proxy_c_to_js_iternext');
   assert(typeof wasmExports['proxy_c_to_js_resume'] != 'undefined', 'missing Wasm export: proxy_c_to_js_resume');
@@ -4959,9 +4955,7 @@ function assignWasmExports(wasmExports) {
   _proxy_c_to_js_lookup_attr = Module['_proxy_c_to_js_lookup_attr'] = createExportWrapper('proxy_c_to_js_lookup_attr', 3);
   _proxy_c_to_js_store_attr = Module['_proxy_c_to_js_store_attr'] = createExportWrapper('proxy_c_to_js_store_attr', 3);
   _proxy_c_to_js_delete_attr = Module['_proxy_c_to_js_delete_attr'] = createExportWrapper('proxy_c_to_js_delete_attr', 2);
-  _proxy_c_to_js_get_type = Module['_proxy_c_to_js_get_type'] = createExportWrapper('proxy_c_to_js_get_type', 1);
-  _proxy_c_to_js_get_array = Module['_proxy_c_to_js_get_array'] = createExportWrapper('proxy_c_to_js_get_array', 2);
-  _proxy_c_to_js_get_dict = Module['_proxy_c_to_js_get_dict'] = createExportWrapper('proxy_c_to_js_get_dict', 2);
+  _proxy_c_to_js_get_type_and_data = Module['_proxy_c_to_js_get_type_and_data'] = createExportWrapper('proxy_c_to_js_get_type_and_data', 2);
   _proxy_c_to_js_get_iter = Module['_proxy_c_to_js_get_iter'] = createExportWrapper('proxy_c_to_js_get_iter', 1);
   _proxy_c_to_js_iternext = Module['_proxy_c_to_js_iternext'] = createExportWrapper('proxy_c_to_js_iternext', 2);
   _proxy_c_to_js_resume = Module['_proxy_c_to_js_resume'] = createExportWrapper('proxy_c_to_js_resume', 2);
@@ -5690,25 +5684,20 @@ class PyProxy {
             return js_obj;
         }
 
+        const obj_data = Module._malloc(2 * 4);
         const type = Module.ccall(
-            "proxy_c_to_js_get_type",
+            "proxy_c_to_js_get_type_and_data",
             "number",
-            ["number"],
-            [js_obj._ref],
+            ["number", "pointer"],
+            [js_obj._ref, obj_data],
         );
 
+        let js_obj_out;
         if (type === 1 || type === 2) {
             // List or tuple.
-            const array_ref = Module._malloc(2 * 4);
             const item = Module._malloc(3 * 4);
-            Module.ccall(
-                "proxy_c_to_js_get_array",
-                "null",
-                ["number", "pointer"],
-                [js_obj._ref, array_ref],
-            );
-            const len = Module.getValue(array_ref, "i32");
-            const items_ptr = Module.getValue(array_ref + 4, "i32");
+            const len = Module.getValue(obj_data, "i32");
+            const items_ptr = Module.getValue(obj_data + 4, "i32");
             const js_array = [];
             for (let i = 0; i < len; ++i) {
                 Module.ccall(
@@ -5720,23 +5709,13 @@ class PyProxy {
                 const js_item = proxy_convert_mp_to_js_obj_jsside(item);
                 js_array.push(PyProxy.toJs(js_item));
             }
-            Module._free(array_ref);
             Module._free(item);
-            return js_array;
-        }
-
-        if (type === 3) {
+            js_obj_out = js_array;
+        } else if (type === 3) {
             // Dict.
-            const map_ref = Module._malloc(2 * 4);
             const item = Module._malloc(3 * 4);
-            Module.ccall(
-                "proxy_c_to_js_get_dict",
-                "null",
-                ["number", "pointer"],
-                [js_obj._ref, map_ref],
-            );
-            const alloc = Module.getValue(map_ref, "i32");
-            const table_ptr = Module.getValue(map_ref + 4, "i32");
+            const alloc = Module.getValue(obj_data, "i32");
+            const table_ptr = Module.getValue(obj_data + 4, "i32");
             const js_dict = {};
             for (let i = 0; i < alloc; ++i) {
                 const mp_key = Module.getValue(table_ptr + i * 8, "i32");
@@ -5767,13 +5746,20 @@ class PyProxy {
                     js_dict[js_key] = PyProxy.toJs(js_value);
                 }
             }
-            Module._free(map_ref);
             Module._free(item);
-            return js_dict;
+            js_obj_out = js_dict;
+        } else if (type === 4) {
+            // Buffer protocol; create a copy of the data to a new Uint8Array.
+            const len = Module.getValue(obj_data, "i32");
+            const buf = Module.getValue(obj_data + 4, "i32");
+            js_obj_out = Module.HEAPU8.slice(buf, buf + len);
+        } else {
+            // Cannot convert to JS, leave as a PyProxy.
+            js_obj_out = js_obj;
         }
 
-        // Cannot convert to JS, leave as a PyProxy.
-        return js_obj;
+        Module._free(obj_data);
+        return js_obj_out;
     }
 }
 
