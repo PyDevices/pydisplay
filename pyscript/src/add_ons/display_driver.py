@@ -31,6 +31,14 @@ import gc
 import sys
 
 from board_config import display_drv, runtime
+
+# board_config.Runtime arms machine.Timer immediately. Halt it before any
+# LVGL import/init: a soft-timer callback during lv_init / module load has
+# corrupted draw_buf handlers on ESP32-P4 (Illegal instruction in
+# width_to_stride). main() re-arms after DisplayDriver exists.
+if runtime is not None:
+    runtime.stop_timer()
+
 import lvgl as lv
 
 import eventsys
@@ -93,9 +101,14 @@ class event_loop:
 
         self.refresh_cb = refresh_cb
         self.exception_sink = exception_sink if exception_sink else self.default_exception_sink
-        self._pause = 0
+        # Start paused and do not arm machine.Timer until ``enable()``. On
+        # ESP32-P4, even a no-op timer callback interrupting SPIRAM
+        # ``draw_buf_create`` corrupts LVGL handlers (Illegal instruction,
+        # MTVAL often an ASCII fragment like ``star``).
+        self._pause = 1
         self._in_task = False
         self._next_ok_ms = None
+        self._last_tick_ms = None
 
         self.asynchronous = asynchronous
         self.refresh_task = None
@@ -111,8 +124,13 @@ class event_loop:
             self.refresh_event = asyncio.Event()
             if _asyncio_loop_running():
                 self.arm()
-        else:
-            self._timer_sub = runtime.on_tick(self.timer_cb, period=self.delay, async_=False)
+        # Sync: defer ``on_tick`` until first ``enable()`` (see ``_arm_sync_timer``).
+
+    def _arm_sync_timer(self):
+        """Subscribe the sync tick once; safe to call repeatedly."""
+        if self.asynchronous or self._timer_sub is not None:
+            return
+        self._timer_sub = runtime.on_tick(self.timer_cb, period=self.delay, async_=False)
 
     def arm(self):
         """Create the async refresh task + shared timer once a loop is running.
@@ -142,6 +160,8 @@ class event_loop:
     def enable(self):
         if self._pause > 0:
             self._pause -= 1
+        if self._pause == 0:
+            self._arm_sync_timer()
 
     @staticmethod
     def is_running():
@@ -194,9 +214,19 @@ class event_loop:
         # tick -- no need for an external coordinator.
         if self.asynchronous and not self._async_armed:
             self.arm()
+        # Advance LVGL time by real elapsed ms. The present-frame gate may
+        # skip task_handler when show()/flush is slow (mipidsi ~30ms); if we
+        # also skipped tick_inc there, timers ran at ~half wall-clock speed.
+        if ticks_ms is not None:
+            now = ticks_ms()
+            if self._last_tick_ms is None:
+                self._last_tick_ms = now
+            elapsed = ticks_diff(now, self._last_tick_ms)
+            if elapsed > 0:
+                lv.tick_inc(elapsed)
+                self._last_tick_ms = now
         if not self._gate_allows():
             return
-        lv.tick_inc(self.delay)
         if self._pause > 0:
             self._arm_gate()
             return
@@ -230,18 +260,14 @@ def main():
     gc.collect()
     if not lv.is_initialized():
         lv.init()
-    if not event_loop.is_running():
-        if runtime is not None:
-            runtime.claim_display_refresh()
-        loop_inst = event_loop(
-            period_ms=LVGL_PERIOD_MS,
-            asynchronous=runtime.timer_async if runtime is not None else False,
-            refresh_cb=display_drv.show,
-        )
-    else:
-        loop_inst = event_loop.current_instance()
-
+    # board_config.Runtime arms auto-service immediately (even when
+    # needs_refresh is False). Halt every machine.Timer callback before
+    # SPIRAM draw_buf_create; re-arm only after buffers exist.
+    if runtime is not None:
+        runtime.stop_timer()
+    loop_inst = event_loop.current_instance()
     if loop_inst is not None:
+        # Already-running loop: pause around driver (re)construction.
         loop_inst.disable()
     try:
         if lv.group_get_default() is None:
@@ -252,6 +278,20 @@ def main():
             display_drv,
             devs,
         )
+        # Start event_loop only after draw buffers exist (sync path defers
+        # on_tick until enable(); still construct after DisplayDriver so
+        # host_pump / service cannot arm the shared timer early).
+        if loop_inst is None:
+            if runtime is not None:
+                runtime.claim_display_refresh()
+            # Always present after task_handler. mipidsi blit msyncs SPIRAM, but
+            # esp_lcd DPI still needs refresh()/draw_bitmap (FBDisplay.show) or
+            # the panel stays blank after the initial black frame.
+            loop_inst = event_loop(
+                period_ms=LVGL_PERIOD_MS,
+                asynchronous=runtime.timer_async if runtime is not None else False,
+                refresh_cb=display_drv.show,
+            )
         # Keep HOST/SDL draining on the 10 ms Runtime tick while LVGL task_handler
         # runs only every ~30 ms (claim skips Runtime._service_tick).
         if runtime is not None and _host_pump_sub is None:
@@ -262,6 +302,9 @@ def main():
                     vd.poll_host_device()
 
             _host_pump_sub = runtime.on_tick(_host_pump, period=10, async_=False)
+        # Restore Runtime auto-service (touch / QUIT) cleared by stop_timer().
+        if runtime is not None:
+            runtime._arm_service()
     finally:
         if loop_inst is not None:
             loop_inst.enable()
@@ -343,16 +386,27 @@ def create_devices(devs, lv_display, virtual_devices=None):
             indev.set_display(lv_display)
             device.user_data = indev
             if device.type == eventsys.POINTER:
-                device.subscribe(_touch_cb)
+                event_cb = _touch_cb
+                device.subscribe(event_cb)
                 indev.set_type(lv.INDEV_TYPE.POINTER)
             elif device.type == eventsys.ENCODER:
-                device.subscribe(_encoder_cb)
+                event_cb = _encoder_cb
+                device.subscribe(event_cb)
                 indev.set_type(lv.INDEV_TYPE.ENCODER)
             elif device.type == eventsys.KEYPAD:
-                device.subscribe(_keypad_cb)
+                event_cb = _keypad_cb
+                device.subscribe(event_cb)
                 indev.set_type(lv.INDEV_TYPE.KEYPAD)
+
+            # LVGL calls read_cb every period with (indev, data). device.poll
+            # only invokes subscribers when there is a new event, so idle
+            # reads never wrote data.state/point — taps were invisible.
+            def _read_cb(indev_obj, data, _dev=device, _cb=event_cb):
+                _dev.poll(indev_obj, data)
+                _cb(None, indev_obj, data)
+
             indev.set_group(lv.group_get_default())
-            indev.set_read_cb(device.poll)
+            indev.set_read_cb(_read_cb)
         elif device.type == eventsys.HOST:
             vd = eventsys.VirtualDevices(device)
             virtual_devices.append(vd)

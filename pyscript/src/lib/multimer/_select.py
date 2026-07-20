@@ -8,10 +8,9 @@ import sys
 Timer = None
 _sleep_ms = None
 _drain = None
-# True when the active backend uses OS signals to fire timer callbacks (e.g.
-# librt POSIX timers). Those backends do NOT need sleep_ms to pump the
-# scheduler/event queue; pump-based backends (win32 APC, SDL2, the threading
-# fallback) do.
+# True when the active backend delivers timer callbacks without a sleep/pump
+# loop (librt POSIX-timer signals, or MicroPython ``machine.Timer``). Pump-based
+# backends (win32 APC, SDL2, the threading fallback) leave this False.
 _uses_signals = False
 
 
@@ -21,6 +20,15 @@ def _set_backend(module):
     _sleep_ms = getattr(module, "_backend_sleep_ms", None)
     _drain = getattr(module, "_backend_drain", None)
     _uses_signals = getattr(module, "_uses_signals", False)
+
+
+def _use_machine_timer():
+    """Bind MicroPython/CircuitPython ``machine.Timer`` (self-driving)."""
+    global Timer, _uses_signals
+    from machine import Timer as _MachineTimer
+
+    Timer = _MachineTimer
+    _uses_signals = True
 
 
 def _running_in_ipython_kernel():
@@ -61,7 +69,7 @@ else:
             _set_backend(librt)
         except ImportError:
             try:
-                from machine import Timer
+                _use_machine_timer()
             except ImportError:
                 try:
                     from ._backends import threading
@@ -71,7 +79,7 @@ else:
                     pass
     if Timer is None:
         try:
-            from machine import Timer
+            _use_machine_timer()
         except ImportError:
             try:
                 from ._backends import threading

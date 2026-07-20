@@ -42,13 +42,13 @@ sleep_ms = _select_sleep_ms()
 
 
 def uses_signals():
-    """True when the active sync backend fires timers via OS signals.
+    """True when the active sync backend delivers timers without a sleep pump.
 
-    Signal backends (librt POSIX-timer signal) run callbacks on the main thread
-    during a plain sleep, so at an interactive prompt the timer keeps ticking
-    with no pump loop. Pump-based backends (win32 APC, SDL2, threading) and the
-    async-only runtimes return False. Public accessor so callers (e.g.
-    ``eventsys.Runtime.run_forever``) need not reach into ``multimer._select``.
+    Covers librt POSIX-timer signals and MicroPython ``machine.Timer``: callbacks
+    keep firing at an interactive prompt with no ``run_forever`` keep-alive loop.
+    Pump-based backends (win32 APC, SDL2, threading) and async-only runtimes
+    return False. Public accessor so callers (e.g. ``eventsys.Runtime.run_forever``)
+    need not reach into ``multimer._select``.
     """
     from . import _select
 

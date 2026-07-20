@@ -8,9 +8,12 @@ already has — does not read or write environment variables.
 Shows runtime, OS, display, timer backend, and LVGL version; a seconds counter
 and spinning arc prove LVGL timers fire; a tap button exercises input.
 
-Interactive: ``runtime.run_forever()``. Kit mode (``kit`` argv) still uses a
-small sync/async wait for click injection because LVGL owns the host queue.
-Parent may set ``PYDISPLAY_TIMER_ASYNC`` before launch.
+Interactive (default): build UI then ``runtime.run_forever()``. On an interactive
+REPL with a self-driving timer (``machine.Timer`` / signals), ``run_forever``
+returns immediately so the prompt comes back for introspection while LVGL keeps
+ticking. Kit mode (``kit`` argv) still uses a short sync/async wait for click
+injection because LVGL owns the host queue. Parent may set
+``PYDISPLAY_TIMER_ASYNC`` before launch.
 """
 
 import sys
@@ -31,8 +34,13 @@ import lib.path  # noqa: F401 — must be first
 import json
 import time
 
-import lvgl as lv
 from board_config import display_drv, runtime
+
+# Stop board_config auto-service before LVGL / display_driver import (ESP32-P4).
+if runtime is not None:
+    runtime.stop_timer()
+
+import lvgl as lv
 
 _seconds = 0
 _taps = 0
@@ -153,6 +161,7 @@ def build_ui():
 
     # Pause shared LVGL task_handler while constructing widgets (not re-entrant).
     import display_driver
+
 
     inst = display_driver.event_loop.current_instance()
     if inst is not None:
@@ -399,6 +408,9 @@ def _wants_kit():
 if _wants_kit():
     run_kit()
 else:
+    # Canonical interactive entry — no app loop here. display_driver wires LVGL
+    # into the shared runtime at import; run_forever keeps the app alive or
+    # returns immediately on an interactive REPL with a self-driving timer.
     import display_driver  # noqa: F401
 
     build_ui()
