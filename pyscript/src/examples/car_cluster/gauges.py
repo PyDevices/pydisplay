@@ -531,6 +531,10 @@ class AnalogGauge:
 class DigitalSpeed:
     def __init__(self, parent, w, h):
         self.value = 0
+        self._box_w = w
+        self._box_h = h
+        self._num_scale = 256
+        self._num_y_ofs = -h // 12
         self.box = lv.obj(parent)
         self.box.set_size(w, h)
         _no_scroll(self.box)
@@ -539,18 +543,19 @@ class DigitalSpeed:
         font = theme.pick_font(max(w, h), self.box)
         font_sm = theme.pick_font(max(180, h // 2), self.box)
 
+        # Full-width + text-align center: stays parent-centered as digits change.
         self.num_shadow = lv.label(self.box)
         self.num_shadow.set_text("0")
         self.num_shadow.set_style_text_color(theme.chrome_lo(), 0)
         theme.apply_font(self.num_shadow, font)
-        self.num_shadow.align(lv.ALIGN.CENTER, 4, -h // 12 + 4)
+        self.num_shadow.set_width(w)
         self.num_shadow.set_style_text_align(lv.TEXT_ALIGN.CENTER, 0)
 
         self.num = lv.label(self.box)
         self.num.set_text("0")
         self.num.set_style_text_color(lv.color_hex(0xFFFFFF), 0)
         theme.apply_font(self.num, font)
-        self.num.align(lv.ALIGN.CENTER, 0, -h // 12)
+        self.num.set_width(w)
         self.num.set_style_text_align(lv.TEXT_ALIGN.CENTER, 0)
         try:
             self.num.set_style_text_letter_space(6, 0)
@@ -558,12 +563,44 @@ class DigitalSpeed:
         except Exception:
             pass
 
+        self._layout_num()
+
         self.unit = lv.label(self.box)
         self.unit.set_text("MPH")
         self.unit.set_style_text_color(theme.secondary(), 0)
         theme.apply_font(self.unit, font_sm)
         uh = max(1, self.unit.get_height())
         self.unit.align(lv.ALIGN.BOTTOM_MID, 0, -12 - uh)
+
+    def _center_scaled(self, lbl, scale, x_ofs=0, y_ofs=0):
+        box_w, box_h = self._box_w, self._box_h
+        lbl.set_style_translate_x(0, 0)
+        lbl.set_style_translate_y(0, 0)
+        lbl.align(lv.ALIGN.CENTER, x_ofs, y_ofs)
+        w = max(1, lbl.get_width())
+        h = max(1, lbl.get_height())
+        lbl.set_style_transform_pivot_x(w // 2, 0)
+        lbl.set_style_transform_pivot_y(h // 2, 0)
+        try:
+            lbl.set_style_transform_scale_x(scale, 0)
+            lbl.set_style_transform_scale_y(scale, 0)
+        except Exception:
+            lbl.set_style_transform_scale(scale, 0)
+        cx = lbl.get_x() + w // 2
+        cy = lbl.get_y() + h // 2
+        lbl.set_style_translate_x(box_w // 2 + x_ofs - cx, 0)
+        lbl.set_style_translate_y(box_h // 2 + y_ofs - cy, 0)
+
+    def _layout_num(self):
+        y_ofs = self._num_y_ofs
+        scale = self._num_scale
+        self._center_scaled(self.num, scale, 0, y_ofs)
+        self._center_scaled(self.num_shadow, scale, 4, y_ofs + 4)
+
+    def set_num_scale(self, scale):
+        """Transform scale for the digital digits (256 = 1×, 2048 = 8×)."""
+        self._num_scale = int(scale)
+        self._layout_num()
 
     def set_value(self, v):
         v = int(_clamp_int(v, 0, 199))
@@ -575,6 +612,7 @@ class DigitalSpeed:
             self.num.set_style_text_color(theme.warn(), 0)
         else:
             self.num.set_style_text_color(lv.color_hex(0xFFFFFF), 0)
+        self._layout_num()
 
     def set_pos(self, x, y):
         self.box.set_pos(x, y)

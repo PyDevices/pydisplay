@@ -173,12 +173,24 @@
       "github:PyDevices/pydisplay/src/examples/roku_engine.py"
     ],
     [
+      "roku_graphics.py",
+      "github:PyDevices/pydisplay/src/examples/roku_graphics.py"
+    ],
+    [
       "roku_install.py",
       "github:PyDevices/pydisplay/src/examples/roku_install.py"
     ],
     [
+      "roku_lvgl.py",
+      "github:PyDevices/pydisplay/src/examples/roku_lvgl.py"
+    ],
+    [
       "roku_remote.py",
       "github:PyDevices/pydisplay/src/examples/roku_remote.py"
+    ],
+    [
+      "roku_widgets.py",
+      "github:PyDevices/pydisplay/src/examples/roku_widgets.py"
     ],
     [
       "rotations.py",

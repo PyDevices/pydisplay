@@ -629,8 +629,13 @@ class Runtime:
         """Pause runtime-driven ``display.show()`` while a GUI layer presents frames."""
         if self._refresh_claim is not None:
             raise RuntimeError("display refresh already claimed")
-        if self._refresh_subscription is None:
-            return _DisplayRefreshClaim(self)
+        # Always record the claim, even when the runtime-driven refresh
+        # subscription has not been armed yet (deferred sync refresh on desktop
+        # win32/SDL2 backends arms lazily from the first poll()). The claim's
+        # second job is to tell _service_tick a GUI layer owns input polling;
+        # dropping it here let Runtime.poll() keep draining input events out
+        # from under LVGL. ``_refresh_paused`` gates the deferred ``_show`` when
+        # it is finally armed, so pausing now is correct and harmless.
         self._refresh_paused = True
         self._refresh_claim = _DisplayRefreshClaim(self)
         return self._refresh_claim
