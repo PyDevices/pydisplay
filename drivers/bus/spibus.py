@@ -4,11 +4,11 @@ spibus
 """
 
 import struct
+from time import sleep_ms
 
 from machine import SPI, Pin
 import micropython
 from micropython import const
-from time import sleep_ms
 
 DC_CMD = const(0)
 DC_DATA = const(1)
@@ -64,6 +64,9 @@ class SPIBus:
         self._firstbit: int = SPI.LSB if lsb_first else SPI.MSB
 
         if mosi == -1 and miso == -1 and sck == -1:
+            self._sck = None
+            self._mosi = None
+            self._miso = None
             self._spi: SPI = SPI(
                 id,
                 baudrate=self._baudrate,
@@ -73,6 +76,9 @@ class SPIBus:
                 firstbit=self._firstbit,
             )
         else:
+            self._sck = Pin(sck, Pin.OUT)
+            self._mosi = Pin(mosi, Pin.OUT)
+            self._miso = Pin(miso, Pin.IN) if miso > -1 else None
             self._spi: SPI = SPI(
                 id,
                 baudrate=self._baudrate,
@@ -80,9 +86,9 @@ class SPIBus:
                 phase=self._phase,
                 bits=self._bits,
                 firstbit=self._firstbit,
-                sck=Pin(sck, Pin.OUT),
-                mosi=Pin(mosi, Pin.OUT),
-                miso=Pin(miso, Pin.IN) if miso > -1 else None,
+                sck=self._sck,
+                mosi=self._mosi,
+                miso=self._miso,
             )
 
         # DC and CS pins must be set AFTER the SPI bus is initialized on some boards
@@ -119,13 +125,20 @@ class SPIBus:
             None
         """
 
-        self._spi.init(
-            baudrate=self._baudrate,
-            polarity=self._polarity,
-            phase=self._phase,
-            bits=self._bits,
-            firstbit=self._firstbit,
-        )
+        # Re-pass pins: on ESP32-S3, SPI.init(baudrate=...) without sck/mosi
+        # clears the GPIO matrix and silent-fails subsequent transfers.
+        init_kw = {
+            "baudrate": self._baudrate,
+            "polarity": self._polarity,
+            "phase": self._phase,
+            "bits": self._bits,
+            "firstbit": self._firstbit,
+        }
+        if self._sck is not None:
+            init_kw["sck"] = self._sck
+            init_kw["mosi"] = self._mosi
+            init_kw["miso"] = self._miso
+        self._spi.init(**init_kw)
 
         self._cs(CS_ACTIVE)
 

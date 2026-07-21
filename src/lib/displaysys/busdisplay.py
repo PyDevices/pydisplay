@@ -40,7 +40,6 @@ _RASET = const(0x2B)
 _RAMWR = const(0x2C)
 _COLMOD = const(0x3A)
 _MADCTL = const(0x36)
-_RAMCONT = const(0x3C)
 _SWRESET = const(0x01)
 _SLPIN = const(0x10)
 _SLPOUT = const(0x11)
@@ -295,17 +294,19 @@ class BusDisplay(DisplayDriver):
         y1 = y + self.rowstart
         y2 = y1 + h - 1
 
+        # One Memory Write (0x2C) per strip. Do not use Memory Write Continue (0x3C):
+        # SPI buses release CS between sends, and many ST7789 panels ignore 0x3C, which
+        # scatters later chunks (dots / misplaced bars). Each strip gets its own window.
         if h > w:
             buf = memoryview(bytearray(color_bytes * h))
-            passes = w
+            for i in range(w):
+                self._set_window(x1 + i, y1, x1 + i, y2)
+                self.send_color(_RAMWR, buf)
         else:
             buf = memoryview(bytearray(color_bytes * w))
-            passes = h
-
-        self._set_window(x1, y1, x2, y2)
-        self.send(_RAMWR)
-        for _ in range(passes):
-            self.send_color(_RAMCONT, buf)
+            for i in range(h):
+                self._set_window(x1, y1 + i, x2, y1 + i)
+                self.send_color(_RAMWR, buf)
         return (x, y, w, h)
 
     def pixel(self, x: int, y: int, c: int):

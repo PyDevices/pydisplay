@@ -12,7 +12,7 @@ _INIT_SEQUENCE = [
     (0x11, b"\x00", 120),  # Exit sleep mode
     (0x13, b"\x00", 0),  # Turn on the display
     (0xB6, b"\x0a\x82", 0),  # Set display function control
-    (0x31, b"\x55", 10),  # Set pixel format to 16 bits per pixel (RGB565)
+    (0x3A, b"\x55", 10),  # COLMOD: 16 bits per pixel (RGB565)
     (0xB2, b"\x0c\x0c\x00\x33\x33", 0),  # Set porch control
     (0xB7, b"\x35", 0),  # Set gate control
     (0xBB, b"\x28", 0),  # Set VCOMS setting

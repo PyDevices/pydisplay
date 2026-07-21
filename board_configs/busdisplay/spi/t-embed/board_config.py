@@ -1,4 +1,4 @@
-"""T-Embed ST7789 display with encoder"""
+"""LILYGO T-Embed ST7789 170x320 SPI + rotary (displayif native spibus)."""
 
 from machine import Pin
 from rotary_irq_esp import RotaryIRQ
@@ -7,28 +7,36 @@ from st7789 import ST7789
 
 import eventsys
 
+# Keep peripherals powered (LilyGO PIN_POWER_ON).
+Pin(46, Pin.OUT, value=1)
+
 display_bus = SPIBus(
-    id=1,
-    baudrate=60_000_000,
+    # ESP32-S3: SPI(2) + explicit pins (SPI(2) defaults hit Octal PSRAM pads).
+    id=2,
+    baudrate=40_000_000,
     sck=12,
     mosi=11,
     miso=-1,
     dc=13,
     cs=10,
+    reset=9,
 )
 
 display_drv = ST7789(
     display_bus,
     width=170,
     height=320,
-    colstart=0,
+    colstart=35,
     rowstart=0,
-    rotation=0,
-    mirrored=False,
+    # Portrait 170x320. Encoder at bottom -> (0,0) upper-left.
+    # MADCTL MX|MY|BGR (0xC8): matches russhughes rot2 / TFT_eSPI setRotation(2) for 170x320.
+    # (rot0 0x08 put origin wrong on this panel; 0x48 Y-flipped; 0x88 X-flipped.)
+    rotation=180,
+    mirrored=True,
     color_depth=16,
-    bgr=False,
+    bgr=True,
     reverse_bytes_in_word=True,
-    invert=False,
+    invert=True,
     brightness=1.0,
     backlight_pin=15,
     backlight_on_high=True,
@@ -36,23 +44,10 @@ display_drv = ST7789(
     reset_high=True,
     power_pin=None,
     power_on_high=True,
-    cp={
-        "width": 170,
-        "height": 320,
-        "colstart": 0,
-        "rowstart": 0,
-        "rotation": 0,
-        "mirrored": False,
-        "color_depth": 16,
-        "bgr": False,
-        "reverse_bytes_in_word": True,
-        "invert": False,
-        "brightness": 1.0,
-        "backlight_pin": "board.D15",
-        "backlight_on_high": True,
-    },
 )
-encoder_drv = RotaryIRQ(1, 2, pull_up=True, half_step=True)
+
+# LilyGO: PIN_ENCODE_A=2, PIN_ENCODE_B=1, PIN_ENCODE_BTN=0
+encoder_drv = RotaryIRQ(2, 1, pull_up=True, half_step=True)
 encoder_read_func = encoder_drv.value
 encoder_button = Pin(0, Pin.IN, Pin.PULL_UP)
 
