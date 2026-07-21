@@ -1,5 +1,9 @@
-"""480x480 ST7701 parallel RGB - MicroPython (ESP32-S3)"""
+"""480x480 ST7701 parallel RGB - MicroPython (ESP32-S3)
 
+LILYGO T-RGB 2.1" full circle (CST820). Touch RST on XL9535 IO1; IRQ=GPIO1.
+"""
+
+from cst8xx import CST8XX
 from machine import I2C, Pin
 from st7701 import LCDPins, run_init
 from xl9535 import XL9535
@@ -19,10 +23,19 @@ _LCD_CS = 3
 _LCD_SDA = 4
 _LCD_CLK = 5
 _LCD_RST = 6
+_TP_RST = 1
+_TP_IRQ = 1  # ESP32 GPIO (not expander)
 
-i2c = I2C(0, scl=Pin(48), sda=Pin(8))
+i2c = I2C(0, scl=Pin(48), sda=Pin(8), freq=400_000)
 xl = XL9535(i2c)
-_pin_mask = (1 << _PWR_EN) | (1 << _LCD_CS) | (1 << _LCD_SDA) | (1 << _LCD_CLK) | (1 << _LCD_RST)
+_pin_mask = (
+    (1 << _PWR_EN)
+    | (1 << _LCD_CS)
+    | (1 << _LCD_SDA)
+    | (1 << _LCD_CLK)
+    | (1 << _LCD_RST)
+    | (1 << _TP_RST)
+)
 xl.pinMode8(0, _pin_mask, xl.OUT)
 xl.digitalWrite(_PWR_EN, 1)
 
@@ -65,4 +78,17 @@ fb = displayif.DotClockFramebuffer(**tft_pins, **tft_timings)
 
 display_drv = FBDisplay(fb)
 
-runtime = None
+# CST820: RST on XL9535 IO1. Poll continuously (IRQ is edge-only on CST820).
+touch_drv = CST8XX(
+    i2c,
+    address=0x15,
+    rst_pin=xl.Pin(_TP_RST, xl.OUT, value=1),
+)
+touch_read_func = touch_drv.get_positions
+touch_rotation_table = (0, 0, 0, 0)
+
+runtime = eventsys.Runtime(
+    display=display_drv,
+    touch_read=touch_read_func,
+    touch_rotation_table=touch_rotation_table,
+)

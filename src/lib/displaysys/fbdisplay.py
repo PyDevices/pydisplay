@@ -257,9 +257,8 @@ class FBDisplay(DisplayDriver):
         Refreshes the display.
 
         Present the frame. Drivers with ``auto_refresh=True`` (CP Qualia
-        ``FramebufferDisplay``) composite on their own schedule — skip here.
-        MP ``displayif.DotClockFramebuffer`` uses ``auto_refresh=False`` so this
-        call runs tear-free double-FB present (``refresh()``).
+        ``FramebufferDisplay``, MP ``displayif.DotClockFramebuffer``) already
+        scan the painted buffer — skip here. Otherwise call ``refresh()``.
         """
         disp = self._display
         if disp is not None:

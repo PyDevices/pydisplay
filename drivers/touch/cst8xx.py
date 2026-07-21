@@ -70,15 +70,28 @@ class CST8XX:
             self.set_irq_ctl(irq_en, motion_mask)
 
     def touched(self):
-        return self._read(_REG_FINGER_NUM)[0]
+        n = self._read(_REG_FINGER_NUM)[0]
+        return n if 0 < n < 6 else 0
 
     def get_point(self):
-        if self.touched() != 1:
+        # Burst from gesture/finger through Y so CST820 stays coherent.
+        buf = self._read(_REG_GESTURE_ID, 6)
+        fingers = buf[1]
+        if not (0 < fingers < 6):
             return None
-        xy_data = self._read(_REG_TOUCHDATA, 4)
-        x = ((xy_data[0] & 0x0F) << 8) + xy_data[1]
-        y = ((xy_data[2] & 0x0F) << 8) + xy_data[3]
+        xh, xl, yh, yl = buf[2], buf[3], buf[4], buf[5]
+        # Idle / invalid samples often leave XH as 0xFF with fingers==0; still
+        # reject out-of-range coords if the finger count is bogus.
+        if xh == 0xFF and xl == 0x00 and yh == 0x00 and yl == 0x00:
+            return None
+        x = ((xh & 0x0F) << 8) | xl
+        y = ((yh & 0x0F) << 8) | yl
         return (x, y)
+
+    def get_positions(self):
+        """Return ``[(x, y)]`` or ``[]`` — eventsys ``touch_read`` shape."""
+        point = self.get_point()
+        return [point] if point else []
 
     def get_gestures(self):
         if not self.touched():
@@ -86,7 +99,7 @@ class CST8XX:
         return self._read(_REG_GESTURE_ID)[0]
 
     def get_points(self):
-        raise NotImplementedError("get_points() not implemented (yet)")
+        return self.get_positions()
 
     def reset(self):
         if self.rst:

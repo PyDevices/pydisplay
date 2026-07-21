@@ -9,12 +9,12 @@ import eventsys
 
 FG, BG, ARM = 0xFFFF, 0x0000, 12
 W, H = display_drv.width, display_drv.height
+# Inboard targets (round panels clip the corners).
 TARGETS = (
-    (20, 20),
-    (W - 20, 20),
-    (20, H - 20),
-    (W - 20, H - 20),
-    (W // 2, H // 2),
+    (W // 4, H // 4),
+    (W // 2, H // 4),
+    (3 * W // 4, H // 2),
+    (W // 2, 3 * H // 4),
 )
 
 idx = 0

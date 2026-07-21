@@ -11,6 +11,10 @@
     [
       "xl9535.py",
       "github:PyDevices/pydisplay/drivers/io_expander/xl9535.py"
+    ],
+    [
+      "cst8xx.py",
+      "github:PyDevices/pydisplay/drivers/touch/cst8xx.py"
     ]
   ],
   "deps": [
@@ -20,6 +24,14 @@
     ],
     [
       "github:PyDevices/pydisplay/packages/displayif.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/multimer.json",
       "main"
     ]
   ],
