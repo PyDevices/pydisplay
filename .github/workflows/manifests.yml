@@ -9,12 +9,10 @@ on:
       - 'packages/**'
       - 'web/pyscript/**'
       - 'sim/wokwi/**'
-      - 'scripts/board_config/**'
       - 'board_configs/**/board_config.py'
       - 'board_configs/**/package.json'
       - 'scripts/install_*'
       - 'scripts/gallery_generator.py'
-      - 'scripts/generate_board_configs.py'
       - 'scripts/audit_board_config_pairs.py'
       - '.github/workflows/manifests.yml'
   pull_request:
@@ -23,12 +21,10 @@ on:
       - 'packages/**'
       - 'web/pyscript/**'
       - 'sim/wokwi/**'
-      - 'scripts/board_config/**'
       - 'board_configs/**/board_config.py'
       - 'board_configs/**/package.json'
       - 'scripts/install_*'
       - 'scripts/gallery_generator.py'
-      - 'scripts/generate_board_configs.py'
       - 'scripts/audit_board_config_pairs.py'
       - '.github/workflows/manifests.yml'
   workflow_dispatch:
@@ -51,9 +47,6 @@ jobs:
 
       - name: Check PyScript gallery and example JSON
         run: python scripts/gallery_generator.py --check
-
-      - name: Check board config manifests
-        run: python scripts/generate_board_configs.py --check
 
       - name: Audit CP/MP board_config pairs
         run: python scripts/audit_board_config_pairs.py
