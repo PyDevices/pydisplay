@@ -1,0 +1,9 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/fbdisplay/cp_adafruit_feather_rp2040_dvi_320x240/board_config.py"
+    ]
+  ],
+  "version": "0.1"
+}
