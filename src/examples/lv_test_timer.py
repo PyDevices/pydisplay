@@ -37,7 +37,9 @@ import time
 from board_config import display_drv, runtime
 
 # Stop board_config auto-service before LVGL / display_driver import (ESP32-P4).
-if runtime is not None:
+# If display_driver is already loaded, stop_timer() wipes its on_tick subs and
+# leaves event_loop._timer_sub dangling so LVGL never ticks again.
+if runtime is not None and "display_driver" not in sys.modules:
     runtime.stop_timer()
 
 import lvgl as lv
@@ -66,7 +68,15 @@ def reset_taps():
 def _format_timer_type(timer_cls):
     if timer_cls is None:
         return "?"
-    mod = getattr(timer_cls, "__module__", "?")
+    # MicroPython's machine.Timer often has no __module__; still label it.
+    try:
+        import machine
+
+        if timer_cls is getattr(machine, "Timer", None):
+            return "machine"
+    except ImportError:
+        pass
+    mod = getattr(timer_cls, "__module__", None) or "?"
     name = getattr(timer_cls, "__name__", "?")
     part = mod.rsplit(".", 1)[-1]
     if part == "aio":

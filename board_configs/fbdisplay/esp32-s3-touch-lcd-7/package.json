@@ -1,0 +1,35 @@
+{
+  "urls": [
+    [
+      "board_config.py",
+      "github:PyDevices/pydisplay/board_configs/fbdisplay/esp32-s3-touch-lcd-7/board_config.py"
+    ],
+    [
+      "ch422g.py",
+      "github:PyDevices/pydisplay/drivers/io_expander/ch422g.py"
+    ],
+    [
+      "gt911.py",
+      "github:PyDevices/pydisplay/drivers/touch/gt911.py"
+    ]
+  ],
+  "deps": [
+    [
+      "github:PyDevices/pydisplay/packages/displaysys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/displayif.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/multimer.json",
+      "main"
+    ]
+  ],
+  "version": "0.1"
+}

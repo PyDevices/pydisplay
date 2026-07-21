@@ -257,8 +257,10 @@ class FBDisplay(DisplayDriver):
         Refreshes the display.
 
         Present the frame. Drivers with ``auto_refresh=True`` (CP Qualia
-        ``FramebufferDisplay``, MP ``displayif.DotClockFramebuffer``) already
-        scan the painted buffer — skip here. Otherwise call ``refresh()``.
+        ``FramebufferDisplay``) already composite into the scanned buffer —
+        skip here. MP ``displayif.DotClockFramebuffer`` uses double panel FBs
+        with ``auto_refresh=False``, so ``show()`` must call ``refresh()`` to
+        promote the back buffer (LVGL wires this as ``refresh_cb``).
         """
         disp = self._display
         if disp is not None:
