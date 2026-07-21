@@ -148,7 +148,7 @@ manual_package_stems = {
     "epaper_chip",
     "pixeldisplay",
     "epaperdisplay",
-    "rgbframebuffer",
+    "displayif",
     "mipidsi",
     "picodvi",
     "tt21100",

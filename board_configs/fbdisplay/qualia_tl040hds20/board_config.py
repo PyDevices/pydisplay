@@ -1,4 +1,13 @@
-"""Qualia S3 RGB-666 with TL040HDS20 4.0" 720x720 Square Display"""
+"""Qualia S3 RGB-666 with TL040HDS20 4.0" 720x720 Square Display
+
+Pin map and IO-expander bring-up match CircuitPython
+``adafruit_qualia_s3_rgb666`` ``board.TFT_PINS`` / ``board.TFT_IO_EXPANDER``
+(see ``ports/espressif/boards/adafruit_qualia_s3_rgb666/pins.c``).
+
+Touch on the TL040HDS20 is at I2C address ``0x48``.
+"""
+
+import time
 
 from ft6x36 import FT6x36
 from machine import I2C, Pin
@@ -8,32 +17,34 @@ from displaysys.fbdisplay import FBDisplay
 import eventsys
 
 try:
-    from rgbframebuffer import RGBFrameBuffer
+    import displayif
 except ImportError as exc:
     raise NotImplementedError(
-        "Parallel RGB scanout requires displayif rgbframebuffer cmod (esp32 port)"
+        "Parallel RGB scanout requires displayif.DotClockFramebuffer (esp32 port)"
     ) from exc
 
 
 def send_init_sequence(init_sequence, mosi, sck, cs):
+    """Bit-bang 8-bit SPI for panel init (empty for TL040HDS20)."""
     cs(0)
     for byte in init_sequence:
         for _ in range(8):
-            mosi(byte & 0x80)
+            mosi(1 if (byte & 0x80) else 0)
             sck(1)
             byte <<= 1
             sck(0)
     cs(1)
 
 
+# From CircuitPython board.TFT_PINS (NOT the learn-guide LCD-EV example).
 tft_pins = {
-    "de": 17,
-    "vsync": 3,
-    "hsync": 46,
-    "dclk": 9,
-    "red": (1, 2, 42, 41, 40),
-    "green": (21, 47, 48, 45, 38, 39),
-    "blue": (10, 11, 12, 13, 14),
+    "de": 2,
+    "vsync": 42,
+    "hsync": 41,
+    "dclk": 1,
+    "red": (11, 10, 9, 46, 3),
+    "green": (48, 47, 21, 14, 13, 12),
+    "blue": (40, 39, 38, 0, 45),
 }
 
 tft_timings = {
@@ -57,11 +68,26 @@ init_sequence = bytes()
 
 i2c = I2C(0, sda=Pin(8), scl=Pin(18), freq=100000)
 print(f"i2c.scan() = {i2c.scan()}")
-iox = PCA9554(i2c, address=0x38)
+
+# Match board.TFT_IO_EXPANDER: address 0x3f (rev B uses 0x38).
+iox = PCA9554(i2c, address=0x3F)
+# pins.c i2c_init_sequence: config=0x78 (clk/cs/reset/mosi out), polarity=0
+iox.config = 0x78
+i2c.writeto_mem(0x3F, 0x02, b"\x00")
+# gpio_data shadow 0xFD; then assert reset (active low), release after delay
+iox.output_state = 0xFD
+# CS high (bit1), CLK low (bit0), RESET low (bit2) — enter reset
+iox.output_state = (iox.output_state | 0x02) & ~0x05
+time.sleep_ms(10)
+# Release reset
+iox.output_state = iox.output_state | 0x04
+time.sleep_ms(100)
+
 btn_down = iox.Pin(6, Pin.IN)
 btn_up = iox.Pin(5, Pin.IN)
-reset = iox.Pin(2, Pin.OUT, value=1)
+# Backlight enable (TPS61169); often already on by default.
 backlight = iox.Pin(4, Pin.OUT, value=1)
+reset = iox.Pin(2, Pin.OUT, value=1)
 
 send_init_sequence(
     init_sequence,
@@ -69,25 +95,12 @@ send_init_sequence(
     sck=iox.Pin(0, Pin.OUT, value=0),
     cs=iox.Pin(1, Pin.OUT, value=1),
 )
-fb = RGBFrameBuffer(**tft_pins, **tft_timings)
 
-mv = memoryview(fb)
-mv[::] = b"\x34\x12" * (fb.width * fb.height)
-fb.refresh()
-
+fb = displayif.DotClockFramebuffer(**tft_pins, **tft_timings)
 display_drv = FBDisplay(fb)
 
-
 touch_drv = FT6x36(i2c, address=0x48)
-
-
-def touch_read_func():
-    touches = touch_drv.touches
-    if len(touches):
-        return touches[0]["x"], touches[0]["y"]
-    return None
-
-
+touch_read_func = touch_drv.get_positions
 touch_rotation_table = (0, 0, 0, 0)
 
 runtime = eventsys.Runtime(

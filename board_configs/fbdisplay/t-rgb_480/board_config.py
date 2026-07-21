@@ -8,10 +8,10 @@ from displaysys.fbdisplay import FBDisplay
 import eventsys
 
 try:
-    from rgbframebuffer import RGBFrameBuffer
+    import displayif
 except ImportError as exc:
     raise NotImplementedError(
-        "Parallel RGB scanout requires displayif rgbframebuffer cmod (esp32 port)"
+        "Parallel RGB scanout requires displayif.DotClockFramebuffer (esp32 port)"
     ) from exc
 
 _PWR_EN = 2
@@ -61,7 +61,7 @@ tft_timings = {
     "pclk_idle_high": False,
 }
 
-fb = RGBFrameBuffer(**tft_pins, **tft_timings)
+fb = displayif.DotClockFramebuffer(**tft_pins, **tft_timings)
 
 display_drv = FBDisplay(fb)
 

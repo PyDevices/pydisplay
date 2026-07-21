@@ -6,8 +6,8 @@ import board
 import busio
 import digitalio
 import displayio
+import dotclockframebuffer
 import gt911
-import rgbframebuffer
 
 from displaysys.fbdisplay import FBDisplay
 import eventsys
@@ -21,7 +21,7 @@ time.sleep(0.12)
 
 displayio.release_displays()
 
-fb = rgbframebuffer.RGBFrameBuffer(
+fb = dotclockframebuffer.DotClockFramebuffer(
     de=board.LCD_ENABLE,
     vsync=board.LCD_VSYNC,
     hsync=board.LCD_HSYNC,

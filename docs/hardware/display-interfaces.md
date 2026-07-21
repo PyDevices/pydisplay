@@ -9,7 +9,7 @@ Maps hardware interface types to pydisplay `displaysys` backends and pydevices/d
 | SPI + MIPI DCS | SPI TFT | `fourwire.FourWire` + chip driver | **BusDisplay** | `SPIBus` | Done |
 | 8080 8-bit parallel | I80 parallel | `paralleldisplaybus.ParallelBus` | **BusDisplay** | `I80Bus` | displayif + bit-bang |
 | I2C DCS | I2C OLED | `i2cdisplaybus.I2CDisplayBus` | **BusDisplay** | `I2CBus` | Done |
-| RGB parallel timed | RGB565 / **RGB666** | `dotclockframebuffer` | **FBDisplay** | `rgbframebuffer` | displayif (esp32, mimxrt1062) |
+| RGB parallel timed | RGB565 / **RGB666** | `dotclockframebuffer` | **FBDisplay** | `displayif.DotClockFramebuffer` | displayif (esp32, mimxrt1062) |
 | HUB75 LED matrix | HUB75 | `rgbmatrix.RGBMatrix` | **FBDisplay** | `rgbmatrix` | displayif |
 | WS2812 / DotStar grid | Addressable LED matrix | `adafruit_pixel_framebuf` | **PixelDisplay** | `displaysys.pixeldisplay.PixelFramebuffer` + neopixel | Done |
 | SPI E-ink | E-paper | `epaperdisplay.EPaperDisplay` chip drivers | **EPaperDisplay** | SPI + chip driver | CP displayio push; MP bus.send path |

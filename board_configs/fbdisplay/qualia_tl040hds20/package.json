@@ -19,7 +19,7 @@
       "main"
     ],
     [
-      "github:PyDevices/pydisplay/packages/rgbframebuffer.json",
+      "github:PyDevices/pydisplay/packages/displayif.json",
       "main"
     ]
   ],

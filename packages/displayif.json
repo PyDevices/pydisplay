@@ -4,5 +4,5 @@
     ["github:PyDevices/pydisplay/packages/displaysys.json", "main"]
   ],
   "version": "0.1",
-  "notes": "Board configs that import displayif rgbframebuffer (parallel RGB / eLCDIF)."
+  "notes": "Board configs that import displayif.DotClockFramebuffer (parallel RGB / eLCDIF)."
 }
