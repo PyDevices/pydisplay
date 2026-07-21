@@ -26,7 +26,7 @@ class FBDisplay(DisplayDriver):
 
     Args:
         buffer (FrameBuffer): The CircuitPython FrameBuffer object
-            (e.g. ``dotclockframebuffer.DotClockFramebuffer``, already in PSRAM).
+            (e.g. ``displayif.DotClockFramebuffer`` / CP ``dotclockframebuffer``, already in PSRAM).
         width (int, optional): The width of the display. Defaults to None.
         height (int, optional): The height of the display. Defaults to None.
         reverse_bytes_in_word (bool, optional): Whether to reverse the bytes in a word. Defaults to False.
@@ -117,6 +117,15 @@ class FBDisplay(DisplayDriver):
             if self._auto_byteswap:
                 color = ((color & 0xFF) << 8) | (color >> 8)
             bt.fill_region(self._bitmap, x, y, x + w, y + h, color)
+            return (x, y, w, h)
+
+        # Native FB fill (displayif.DotClockFramebuffer on ESP32-S3): Python band assigns into
+        # PSRAM are hundreds of ms for 720x720; C fill is a few ms.
+        native_fill = getattr(self._raw_buffer, "fill_rect", None)
+        if native_fill is not None:
+            if self._auto_byteswap:
+                color = ((color & 0xFF) << 8) | (color >> 8)
+            native_fill(x, y, w, h, color)
             return (x, y, w, h)
 
         dest = self._pixel_bytes
@@ -247,10 +256,10 @@ class FBDisplay(DisplayDriver):
         """
         Refreshes the display.
 
-        When a ``FramebufferDisplay`` is in ``auto_refresh`` mode (Adafruit
-        Qualia / DotClock), skip manual refresh — paced background refresh
-        avoids tearing against the continuous DPI scanout. Manual
-        ``refresh()`` every LVGL tick was the flicker source.
+        Present the frame. Drivers with ``auto_refresh=True`` (CP Qualia
+        ``FramebufferDisplay``) composite on their own schedule — skip here.
+        MP ``displayif.DotClockFramebuffer`` uses ``auto_refresh=False`` so this
+        call runs tear-free double-FB present (``refresh()``).
         """
         disp = self._display
         if disp is not None:
@@ -265,4 +274,7 @@ class FBDisplay(DisplayDriver):
                     return
                 except Exception:
                     pass
-        self._raw_buffer.refresh()
+        raw = self._raw_buffer
+        if getattr(raw, "auto_refresh", False):
+            return
+        raw.refresh()
