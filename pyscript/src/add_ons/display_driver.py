@@ -128,8 +128,14 @@ class event_loop:
 
     def _arm_sync_timer(self):
         """Subscribe the sync tick once; safe to call repeatedly."""
-        if self.asynchronous or self._timer_sub is not None:
+        if self.asynchronous:
             return
+        # runtime.stop_timer() deinits the HW timer and clears callbacks but
+        # does not notify us — drop a stale handle so we can re-subscribe.
+        if self._timer_sub is not None:
+            if runtime is not None and runtime._timer is not None:
+                return
+            self._timer_sub = None
         self._timer_sub = runtime.on_tick(self.timer_cb, period=self.delay, async_=False)
 
     def arm(self):
@@ -294,7 +300,9 @@ def main():
             )
         # Keep HOST/SDL draining on the 10 ms Runtime tick while LVGL task_handler
         # runs only every ~30 ms (claim skips Runtime._service_tick).
-        if runtime is not None and _host_pump_sub is None:
+        # stop_timer() may have wiped callbacks while leaving a stale handle.
+        if runtime is not None and (_host_pump_sub is None or runtime._timer is None):
+            _host_pump_sub = None
             vds = list(_driver_ref.virtual_devices)
 
             def _host_pump(_t):
