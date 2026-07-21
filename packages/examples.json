@@ -77,6 +77,10 @@
       "github:PyDevices/pydisplay/src/examples/eventsys_simpletest.py"
     ],
     [
+      "eventsys_touch_coords.py",
+      "github:PyDevices/pydisplay/src/examples/eventsys_touch_coords.py"
+    ],
+    [
       "eventsys_touch_test.py",
       "github:PyDevices/pydisplay/src/examples/eventsys_touch_test.py"
     ],

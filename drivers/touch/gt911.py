@@ -44,8 +44,22 @@ _TOUCH_POINTS = const(0x804C)
 _MODULE_SWITCH1 = const(0x804D)
 _CONFIG_CHKSUM = const(0x80FF)
 _CONFIG_FRESH = const(0x8100)
-_POINT_DATA_START = const(0x8150)
+# First touch point follows the status byte at 0x814E (Espressif esp_lcd_touch_gt911).
+_POINT_DATA_START = const(0x814F)
 _DATA_BUFFER = const(0x814E)
+
+
+def _as_out_pin(pin, *, value=0):
+    """``machine.Pin`` from an id, or an existing pin-like (e.g. IO-expander)."""
+    if isinstance(pin, (int, str)):
+        return Pin(pin, _PIN_OUT, value=value)
+    # Expander / duck-typed pins: drive initial level, keep the object.
+    if value is not None:
+        try:
+            pin(value)
+        except TypeError:
+            pin.value(value)
+    return pin
 
 
 class GT911:
@@ -64,34 +78,37 @@ class GT911:
         sito=True,
         refresh_rate=240,
         touch_callback=None,
+        update_config=False,
     ):
         self.bus = bus
         self.address = address
         self.touch_callback = touch_callback
-        self.rst_pin = Pin(reset_pin, _PIN_OUT, value=0)
+        self.rst_pin = _as_out_pin(reset_pin, value=0)
         self.irq_pin = None
         self.irq_pin_label = irq_pin
 
         # Reset the touch panel controller.
         self.reset()
 
-        # Write and update the config.
-        self._write_reg(_RESOLUTION_X, width, 2)
-        self._write_reg(_RESOLUTION_Y, height, 2)
-        self._write_reg(_TOUCH_POINTS, touch_points)
-        self._write_reg(
-            _MODULE_SWITCH1,
-            (int(reverse_y) << 7)
-            | (int(reverse_x) << 6)
-            | (int(reverse_axis) << 3)
-            | (int(sito) << 2)
-            | 0x01,
-        )
-        self._write_reg(_REFRESH_RATE, (1000 * 1000) // (refresh_rate * 250))
-        self._write_reg(_COMMAND, 0x00)
-        self._update_config()
+        # Optional: rewrite firmware config. Many panels (e.g. Waveshare GT911)
+        # ship a working factory config — rewriting it can stop touch reports.
+        if update_config:
+            self._write_reg(_RESOLUTION_X, width, 2)
+            self._write_reg(_RESOLUTION_Y, height, 2)
+            self._write_reg(_TOUCH_POINTS, touch_points)
+            self._write_reg(
+                _MODULE_SWITCH1,
+                (int(reverse_y) << 7)
+                | (int(reverse_x) << 6)
+                | (int(reverse_axis) << 3)
+                | (int(sito) << 2)
+                | 0x01,
+            )
+            self._write_reg(_REFRESH_RATE, (1000 * 1000) // (refresh_rate * 250))
+            self._write_reg(_COMMAND, 0x00)
+            self._update_config()
 
-        # Allocate scratch buffer.
+        # Allocate scratch buffer: x, y, size, track_id
         self.points_data = [array("H", [0, 0, 0, 0]) for x in range(5)]
 
     def _read_reg(self, reg, size=1, buf=None):
@@ -116,14 +133,33 @@ class GT911:
         return self._read_reg(0x8140, 4)
 
     def read_points(self):
+        """Return ``(n, points)`` only when the GT911 buffer-ready bit is set.
+
+        Matching Espressif ``esp_lcd_touch_gt911``: ignore the point-count
+        nibble unless bit 0x80 is set. Returning a stale nibble without a fresh
+        buffer read re-reports old ``points_data`` (often 0,0) and pins the
+        cursor at the top-left.
+        """
         status = self._read_reg(_DATA_BUFFER)[0]
+        if not (status & 0x80):
+            return 0, self.points_data
         n_points = status & 0x0F
-        if status & 0x80:
-            for i in range(n_points):
-                self._read_reg(_POINT_DATA_START + i * 8, buf=self.points_data[i])
-                # We read an extra reserved byte, shift track ID to fix it.
-                self.points_data[i][-1] = self.points_data[i][-1] >> 8
+        if n_points == 0 or n_points > 5:
             self._write_reg(_DATA_BUFFER, 0)
+            return 0, self.points_data
+        # One contiguous read: status is at 0x814E; points follow at 0x814F.
+        buf = self._read_reg(_POINT_DATA_START, n_points * 8)
+        for i in range(n_points):
+            o = i * 8
+            # Packed: track_id, x_lo, x_hi, y_lo, y_hi, size_lo, size_hi, reserved
+            x = buf[o + 1] | (buf[o + 2] << 8)
+            y = buf[o + 3] | (buf[o + 4] << 8)
+            size = buf[o + 5] | (buf[o + 6] << 8)
+            self.points_data[i][0] = x
+            self.points_data[i][1] = y
+            self.points_data[i][2] = size
+            self.points_data[i][3] = buf[o]
+        self._write_reg(_DATA_BUFFER, 0)
         return n_points, self.points_data
 
     def reset(self):
