@@ -4,6 +4,7 @@ spibus
 """
 
 import struct
+import sys
 from time import sleep_ms
 
 from machine import SPI, Pin
@@ -125,8 +126,9 @@ class SPIBus:
             None
         """
 
-        # Re-pass pins: on ESP32-S3, SPI.init(baudrate=...) without sck/mosi
-        # clears the GPIO matrix and silent-fails subsequent transfers.
+        # Re-pass pins only on ESP: SPI.init(baudrate=...) without sck/mosi
+        # clears the GPIO matrix there. On rp2, pin kwargs raise
+        # "extra keyword arguments given".
         init_kw = {
             "baudrate": self._baudrate,
             "polarity": self._polarity,
@@ -134,7 +136,7 @@ class SPIBus:
             "bits": self._bits,
             "firstbit": self._firstbit,
         }
-        if self._sck is not None:
+        if self._sck is not None and sys.platform.startswith("esp"):
             init_kw["sck"] = self._sck
             init_kw["mosi"] = self._mosi
             init_kw["miso"] = self._miso

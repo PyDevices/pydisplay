@@ -19,9 +19,14 @@
       "main"
     ],
     [
-      "github:PyDevices/pydisplay/packages/spibus.json",
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/multimer.json",
       "main"
     ]
   ],
-  "version": "0.1"
+  "version": "0.2",
+  "notes": "Uses firmware-native displayif spibus (do not mip-install packages/spibus.json)."
 }

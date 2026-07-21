@@ -9,15 +9,24 @@
       "github:PyDevices/pydisplay/drivers/display/gc9a01.py"
     ],
     [
-      "adafruit_focaltouch.py",
-      "github:PyDevices/pydisplay/drivers/touch/circuitpython/adafruit_focaltouch.py"
+      "cst816.py",
+      "github:PyDevices/pydisplay/drivers/touch/circuitpython/cst816.py"
     ]
   ],
   "deps": [
     [
       "github:PyDevices/pydisplay/packages/displaysys.json",
       "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/eventsys.json",
+      "main"
+    ],
+    [
+      "github:PyDevices/pydisplay/packages/multimer.json",
+      "main"
     ]
   ],
-  "version": "0.1"
+  "version": "0.2",
+  "notes": "Waveshare RP2040-Touch-LCD-1.28: busio SPI/I2C on LCD_*/IMU_*, CST816 touch, 10 MHz SPI, MADCTL 0x98 / COLMOD 0x05."
 }

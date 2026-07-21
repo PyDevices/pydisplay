@@ -209,6 +209,10 @@
       "github:PyDevices/pydisplay/src/examples/scroll_touch_test.py"
     ],
     [
+      "simon.py",
+      "github:PyDevices/pydisplay/src/examples/simon.py"
+    ],
+    [
       "testris.py",
       "github:PyDevices/pydisplay/src/examples/testris.py"
     ],
@@ -399,6 +403,18 @@
     [
       "chango/chango_64.py",
       "github:PyDevices/pydisplay/src/examples/chango/chango_64.py"
+    ],
+    [
+      "circuitpython/cst816.py",
+      "github:PyDevices/pydisplay/src/examples/circuitpython/cst816.py"
+    ],
+    [
+      "circuitpython/gc9a01_waveshare.py",
+      "github:PyDevices/pydisplay/src/examples/circuitpython/gc9a01_waveshare.py"
+    ],
+    [
+      "circuitpython/simon_waveshare_rp2040_touch_lcd_1_28.py",
+      "github:PyDevices/pydisplay/src/examples/circuitpython/simon_waveshare_rp2040_touch_lcd_1_28.py"
     ],
     [
       "noto_fonts/NotoSansMono_32.py",

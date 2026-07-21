@@ -1,7 +1,9 @@
-"""Waveshare RP2040-Touch-LCD-1.28 GC9A01 — CircuitPython"""
+"""Waveshare RP2040-Touch-LCD-1.28 GC9A01 240x240 — CircuitPython"""
 
-from adafruit_focaltouch import Adafruit_FocalTouch
 import board
+import busio
+from cst816 import CST816
+import digitalio
 from displayio import release_displays
 from fourwire import FourWire
 from gc9a01 import GC9A01
@@ -10,12 +12,19 @@ import eventsys
 
 release_displays()
 
+# Sticky GPIO backlight (PWM backlight dies on soft-reset / looks blank).
+_bl = digitalio.DigitalInOut(board.LCD_BL)
+_bl.switch_to_output(value=True)
+
+# Official CP board build exposes LCD_* / IMU_* aliases; no board.SPI()/I2C().
+spi = busio.SPI(clock=board.LCD_CLK, MOSI=board.LCD_DIN)
 display_bus = FourWire(
-    board.SPI(),
-    command=board.GP8,
-    chip_select=board.GP9,
-    baudrate=60_000_000,
-    reset=board.GP13,
+    spi,
+    command=board.LCD_DC,
+    chip_select=board.LCD_CS,
+    reset=board.LCD_RST,
+    # 60 MHz was flaky on cold boot; Waveshare demos use a lower rate.
+    baudrate=10_000_000,
 )
 
 display_drv = GC9A01(
@@ -30,22 +39,30 @@ display_drv = GC9A01(
     bgr=True,
     reverse_bytes_in_word=True,
     invert=True,
-    brightness=1.0,
-    backlight_pin=board.GP25,
-    backlight_on_high=True,
 )
-i2c = board.I2C()
-touch_drv = Adafruit_FocalTouch(i2c)
 
+# Waveshare GC9A01A: MADCTL 0x98, COLMOD 0x05 (driver init + reinforce).
+try:
+    display_drv.send(0x36, bytes([0x98]))
+    display_drv.send(0x3A, bytes([0x05]))
+except Exception:
+    try:
+        display_bus.send(0x3A, bytes([0x05]))
+    except Exception:
+        pass
 
-def touch_read_func():
-    touches = touch_drv.touches
-    if len(touches):
-        return touches[0]["x"], touches[0]["y"]
-    return None
-
-
+touch_drv = None
+touch_read_func = None
 touch_rotation_table = (0, 5, 6, 3)
+
+try:
+    i2c = busio.I2C(board.IMU_SCL, board.IMU_SDA, frequency=100_000)
+    # Touch RST=GP22, IRQ=GP21 (polled; IRQ unused here).
+    touch_drv = CST816(i2c, rst_pin=board.GP22)
+    touch_read_func = touch_drv.get_point
+except Exception:
+    touch_drv = None
+    touch_read_func = None
 
 runtime = eventsys.Runtime(
     display=display_drv,
