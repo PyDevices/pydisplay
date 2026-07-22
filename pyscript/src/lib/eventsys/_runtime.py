@@ -170,6 +170,7 @@ class Runtime:
         self._in_service_poll = False
         self._pending_teardown = False
         self._teardown_done = False
+        self._teardown_oneshot_armed = False
         self.host_dev = None
         self.touch_dev = None
         self.keypad_dev = None
@@ -607,6 +608,10 @@ class Runtime:
                 continue
             entry[2] = self._ticks_add(now, entry[1])
             entry[0](timer_obj)
+        # Sync QUIT from inside a service tick sets ``_pending_teardown`` and
+        # must run after all tick callbacks (including refresh) for this fire.
+        if self._pending_teardown:
+            self._try_perform_teardown()
 
     def on_tick(self, callback, *, period, async_=False):
         """Subscribe ``callback`` to the shared timer (about every ``period`` ms).
@@ -746,16 +751,18 @@ class Runtime:
         if self._quit_requested:
             return
         self._quit_requested = True
+        # Stop presentation immediately so later callbacks in this same tick
+        # (refresh ``show``) do not touch a display we are about to release.
+        self._refresh_paused = True
         # When QUIT is detected from inside the auto-service tick, defer the hard
-        # teardown: stopping/deiniting the shared timer from within its own
-        # callback is unsafe (the async timer would cancel its running task,
-        # wedging the loop). Sync keep-alive / ``run()`` exit finally tear down;
-        # async hosts without a keep-alive (PyScript) must schedule teardown.
+        # teardown until after ``_dispatch_tick`` finishes (sync) or via
+        # ``asyncio.sleep(0)`` / ``setTimeout`` (async). Stopping the shared
+        # timer from inside its own callback is unsafe on some backends.
         if self._in_service_poll:
             self._pending_teardown = True
             self._schedule_deferred_teardown()
             return
-        self._perform_teardown()
+        self._try_perform_teardown()
 
     def _schedule_deferred_teardown(self):
         """Run :meth:`_perform_teardown` after the current timer callback returns."""
@@ -781,7 +788,50 @@ class Runtime:
                 return
             except Exception:
                 pass
-        # Sync: ``run_forever`` / ``run`` finally or atexit will tear down.
+        # Sync: ``_pending_teardown`` is already set; ``_dispatch_tick`` calls
+        # ``_try_perform_teardown`` after the remaining tick callbacks for this
+        # fire (works for interactive+signals where ``run_forever`` returned).
+
+    def _try_perform_teardown(self):
+        """Teardown now, or via a one-shot if the shared timer is still busy."""
+        if self._teardown_done:
+            return
+        timer = self._timer
+        # CPython librt soft path can still hold ``_busy`` while ``schedule``
+        # invokes the callback synchronously inside ``_deliver``. Deinit then
+        # deadlocks in ``_wait_idle``. Arm a one-shot on another timer id.
+        if timer is not None and getattr(timer, "_busy", False):
+            self._arm_oneshot_teardown()
+            return
+        self._perform_teardown()
+
+    def _arm_oneshot_teardown(self):
+        """Schedule ``_perform_teardown`` on a short one-shot helper timer."""
+        if self._teardown_done or self._teardown_oneshot_armed:
+            return
+        self._teardown_oneshot_armed = True
+        self._pending_teardown = True
+        from multimer import Timer
+
+        helper = None
+        last_err = None
+        for timer_id in (-1, 0, 1, 2, 3):
+            try:
+                helper = Timer(timer_id)
+                break
+            except ValueError as exc:
+                last_err = exc
+        if helper is None:
+            raise last_err
+
+        def _go(_timer):
+            # Do not helper.deinit() here: on CPython librt, soft callbacks run
+            # inside ``_deliver`` with ``_busy`` set, so deinit→_wait_idle
+            # deadlocks. ONE_SHOT disarms itself after the callback returns.
+            self._teardown_oneshot_armed = False
+            self._perform_teardown()
+
+        helper.init(mode=Timer.ONE_SHOT, period=1, callback=_go, hard=False)
 
     def _perform_teardown(self):
         """Stop the shared timer and release the display (idempotent)."""
@@ -790,6 +840,7 @@ class Runtime:
         self._teardown_done = True
         self._quit_requested = True
         self._pending_teardown = False
+        self._teardown_oneshot_armed = False
         try:
             import pydisplay_test_mode
 

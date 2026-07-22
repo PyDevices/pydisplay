@@ -511,3 +511,5 @@ class PGDisplay(DisplayDriver):
         _joysticks = []
         pg.display.quit()
         pg.quit()
+        self._window = None
+        self._buffer = None
