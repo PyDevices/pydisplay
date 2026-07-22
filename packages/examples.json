@@ -133,6 +133,10 @@
       "github:PyDevices/pydisplay/src/examples/lv_test_timer.py"
     ],
     [
+      "lvgl_test.py",
+      "github:PyDevices/pydisplay/src/examples/lvgl_test.py"
+    ],
+    [
       "micro_gui_simpletest.py",
       "github:PyDevices/pydisplay/src/examples/micro_gui_simpletest.py"
     ],

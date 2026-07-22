@@ -6,20 +6,23 @@
 """
 roku_remote
 ====================================================
-Launcher for the flagship museum-quality LVGL Roku remote.
+Launcher for the Roku remote stack.
 
-The Roku remote is now a modular stack sharing one UI-agnostic engine:
+Loads prefs (``frontend``, MRU host/serial, saved TVs), resumes the last TV
+when its serial still matches, then starts the chosen front end:
 
-* :mod:`roku_engine`   -- ECP client + discovery + label/action helpers (no UI)
-* :mod:`roku_lvgl`     -- flagship LVGL front end (**launched here**)
-* :mod:`roku_graphics` -- ``graphics.FrameBuffer`` front end
+* :mod:`roku_engine`   -- ECP client + discovery + prefs (no UI)
+* :mod:`roku_lvgl`     -- LVGL front end (default)
 * :mod:`roku_widgets`  -- ``pdwidgets`` front end
+* :mod:`roku_graphics` -- ``graphics.FrameBuffer`` front end
 
-Running ``roku_remote`` opens the LVGL UI. To try another front end, run
-``roku_graphics`` or ``roku_widgets`` directly. Requires Roku
-**Control by mobile apps -> Enabled**; join WiFi before running on a
-microcontroller. Set the target with ``ROKU_HOST`` in :mod:`roku_engine`, or
-use SCAN / the IP pad on device.
+Switching front ends from MORE writes prefs and asks you to restart the app
+(exit / re-run ``roku_remote``). PyScript and Jupyter: leave the page / restart
+the kernel the same way. Soft-reset is not relied on (it does not re-run
+``main.py``).
+
+Requires Roku **Control by mobile apps -> Enabled**; join WiFi before running
+on a microcontroller. Optional fixed target: ``ROKU_HOST`` in :mod:`roku_engine`.
 """
 
 import sys
@@ -28,6 +31,55 @@ _EXAMPLES = __file__.replace("\\", "/").rsplit("/", 1)[0]
 if _EXAMPLES not in sys.path:
     sys.path.insert(0, _EXAMPLES)
 
-# Importing the LVGL front end builds the UI and hands control to
-# ``runtime.run_forever()``; nothing else to do here.
-import roku_lvgl  # noqa: F401,E402
+import roku_engine  # noqa: E402
+from roku_engine import (  # noqa: E402
+    DEFAULT_FRONTEND,
+    RokuEngine,
+    get_frontend,
+)
+
+
+def _import_frontend(name):
+    """Import one front-end module by prefs id."""
+    if name == "widgets":
+        import roku_widgets as mod
+
+        return mod
+    if name == "graphics":
+        import roku_graphics as mod
+
+        return mod
+    import roku_lvgl as mod
+
+    return mod
+
+
+def main():
+    # Suppress front-end auto-start on import; we call ``run()`` below.
+    roku_engine._LAUNCHER_OWNS_RUN = True
+
+    engine = RokuEngine()
+    start_page = "devices"
+    try:
+        if engine.resume_last_host():
+            start_page = "remote"
+    except Exception:
+        start_page = "devices"
+
+    name = get_frontend()
+    try:
+        mod = _import_frontend(name)
+    except Exception as err:
+        # Fall back for this session only — do not rewrite prefs, or a
+        # transient import failure (missing pdwidgets path, etc.) would erase
+        # the user's chosen front end and always reopen LVGL after restart.
+        print(
+            "roku_remote: %s front end unavailable (%s); using %s"
+            % (name, err, DEFAULT_FRONTEND)
+        )
+        mod = _import_frontend(DEFAULT_FRONTEND)
+
+    mod.run(engine=engine, start_page=start_page)
+
+
+main()
