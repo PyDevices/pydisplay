@@ -54,6 +54,11 @@ pd.DEBUG = False
 
 FRONTEND = "widgets"
 
+# Keep at most this many page panels. MicroPython's heap fragments when every
+# visited page's Button/Label tree stays live; render then dies on a small
+# contiguous alloc even with mem_free reporting hundreds of KB.
+_PAGE_CACHE_MAX = 2
+
 
 def _shade(c, factor):
     """Darken (``factor`` < 1) or lighten (``factor`` > 1) an RGB565 color."""
@@ -157,6 +162,7 @@ class _RemoteUI:
         self._press_dev = None
         self._page_panels = {}
         self._page_parent = None
+        self._page_lru = []
 
         self.screen = pd.Screen(self.display, bg=self.BG, visible=False)
         plaque_w = self.W - 2 * self.pad
@@ -529,20 +535,55 @@ class _RemoteUI:
         """Drop all lazy page panels (full reset)."""
         for name in list(self._page_panels.keys()):
             self._drop_page(name)
+        self._page_lru = []
         self.content.invalidate()
+
+    def _gc(self):
+        try:
+            import gc
+
+            gc.collect()
+        except Exception:
+            pass
 
     def _drop_page(self, name):
         """Destroy one cached page panel so the next show rebuilds it."""
         panel = self._page_panels.pop(name, None)
+        if name in self._page_lru:
+            try:
+                self._page_lru.remove(name)
+            except ValueError:
+                pass
         if panel is None:
             return
         if name == "remote":
             self._play_btn = None
             self._power_btn = None
+        # Detach children first so dirty sets / event closures can drop.
+        for child in list(getattr(panel, "children", ()) or ()):
+            try:
+                panel.remove_child(child)
+            except Exception:
+                pass
         try:
             self.content.remove_child(panel)
         except Exception:
             pass
+        self._gc()
+
+    def _trim_page_cache(self, keep):
+        """LRU-cap live page panels to limit MicroPython heap fragmentation."""
+        lru = self._page_lru
+        if keep in lru:
+            lru.remove(keep)
+        lru.append(keep)
+        while len(lru) > _PAGE_CACHE_MAX:
+            old = lru.pop(0)
+            if old != keep:
+                self._drop_page(old)
+        for name in list(self._page_panels.keys()):
+            if name not in lru:
+                self._drop_page(name)
 
     def _page_panel(self, name):
         panel = self._page_panels.get(name)
@@ -586,6 +627,7 @@ class _RemoteUI:
         self.page = name
         for n, p in self._page_panels.items():
             p.visible = n == name
+        self._trim_page_cache(name)
         self.content.invalidate()
 
     def _button_parent(self):
