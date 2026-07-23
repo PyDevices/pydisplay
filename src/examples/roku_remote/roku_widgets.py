@@ -47,6 +47,7 @@ from roku_engine import (
     other_frontends,
     restart_app,
     set_frontend,
+    unicast_scan_supported,
 )
 from roku_sim import make_engine
 
@@ -100,13 +101,15 @@ class _RemoteUI:
         self.btn_text = 16
         self.text_sm = 16
         self.text_14 = 14  # two-line plaque status (romfont MEDIUM)
+        self.text_8 = 8  # two-line on short panels (pdwidgets: 8/14/16 only)
         self.text_scale = max(1, self.unit // 280) + (1 if self.unit >= 400 else 0)
         self.name_h = self.btn_text * self.text_scale
         self.sm_h = self.name_h
-        # Tall enough for two scaled plaque rows (and at least H/8 like LVGL).
+        # Tall enough for two scaled plaque rows; compact on short panels (T-HMI).
+        _plaque_floor = 40 if self.H <= 360 else 64
         self.plaque_h = max(
-            64,
-            self.H // 8,
+            _plaque_floor,
+            self.H // 10,
             self.btn_text * self.text_scale * 2 + 4 * self.pad,
         )
 
@@ -114,6 +117,7 @@ class _RemoteUI:
         self.BG = pal.color565(0x12, 0x14, 0x1A)
         self.STATUS_BG = pal.color565(0x1C, 0x22, 0x2E)
         self.PLAQUE_EDGE = pal.color565(0x2A, 0x31, 0x40)
+        self.DPAD_RING = pal.color565(0x1E, 0x25, 0x30)
         self.KEY_BG = pal.color565(0x3A, 0x40, 0x4E)
         self.ALT_BG = pal.color565(0x2E, 0x34, 0x40)
         self.ACCENT_BG = pal.color565(0x7C, 0x5C, 0xFC)
@@ -151,6 +155,8 @@ class _RemoteUI:
         self._status_ticks = 0
         self._scan_busy = False
         self._scan_full = False
+        self._scan_kind = None  # "scan" | "full" while busy
+        self._scan_cancel = False
         self._pending_scan = False
         self._scan_yield = False
         self._press_t0 = 0
@@ -364,8 +370,11 @@ class _RemoteUI:
         return "\n".join(lines)
 
     def _status_face(self, nlines=1):
-        """Romfont height for BL status: text14 when two lines, else text16."""
-        return self.text_14 if int(nlines or 1) >= 2 else self.btn_text
+        """Romfont height for BL status: smaller face when two lines."""
+        if int(nlines or 1) < 2:
+            return self.btn_text
+        # pdwidgets Label allows 8/14/16 only — use SMALL on short panels.
+        return self.text_8 if self.H <= 360 else self.text_14
 
     def _status_line_h(self, nlines=1):
         return self._status_face(nlines) * self.text_scale
@@ -623,7 +632,9 @@ class _RemoteUI:
             align_to=btn,
         )
 
-    def _button(self, label, x, y, w, h, on_click, role="key", wrap=False, round_btn=False):
+    def _button(
+        self, label, x, y, w, h, on_click, role="key", wrap=False, round_btn=False, backdrop=None
+    ):
         fg, bg, bg_hi, bg_lo, rim = self._colors_for(role)
         rad = (min(int(w), int(h)) // 2) if round_btn else self.radius
         btn = pd.Button(
@@ -644,6 +655,12 @@ class _RemoteUI:
             bg_hi=bg_hi,
             bg_lo=bg_lo,
             rim=rim,
+            # Full-face circle: default 2px pad shrinks the raised face inside
+            # the hit box and reads as a blocky padded chip on small D-pad keys.
+            padding=(0, 0, 0, 0) if round_btn else None,
+            # Round keys sit on the D-pad disc (sibling Card), not as Card
+            # children — fill AABB corners with the disc color on redraw.
+            backdrop=backdrop,
         )
         if wrap:
             self._apply_wrapped_label(btn, label)
@@ -686,10 +703,14 @@ class _RemoteUI:
             return int(time.time() * 1000)
 
         def _down(_sender, _event, d=dev):
+            if self._scan_busy:
+                return
             self._press_t0 = _now_ms()
             self._press_dev = d
 
         def _up(_sender, _event, d=dev):
+            if self._scan_busy:
+                return
             t0 = self._press_t0
             self._press_t0 = 0
             if self._press_dev is not d:
@@ -745,12 +766,19 @@ class _RemoteUI:
         if H < 80:
             H = max(80, self.H - self.plaque_h - 2 * self.pad)
 
-        gaps = 7 * gap
-        ring = max(150, int(min(w * 0.6, H * 0.34)))
-        row_h = max(38, (H - ring - gaps) // 6)
-        leftover = H - ring - gaps - 6 * row_h
+        gaps = 5 * gap
+        n_rows = 5
+        min_row = 24 if H <= 280 else 38
+        ring_ideal = int(min(w * 0.72, H * 0.42))
+        ring_max = max(0, H - gaps - n_rows * min_row)
+        ring = max(64, min(ring_ideal, ring_max))
+        row_h = max(min_row, (H - ring - gaps) // n_rows)
+        leftover = H - ring - gaps - n_rows * row_h
         if leftover > 0:
-            row_h += leftover // 6
+            row_h += leftover // n_rows
+        while ring + n_rows * row_h + gaps > H and ring > 56:
+            ring -= 4
+            row_h = max(20, (H - ring - gaps) // n_rows)
 
         y = pad
 
@@ -770,24 +798,38 @@ class _RemoteUI:
         self._power_btn = util[2] if len(util) > 2 else None
         y += row_h + gap
 
-        # 2) Circular D-pad (round arrows + OK on a 3x3 grid)
+        # 2) Circular D-pad disc + round arrows/OK (LVGL ring parity).
+        # Disc is a sibling Card; keys stay under content with backdrop= so
+        # raised Button redraw fills AABB corners with the ring color (same
+        # as graphics filling the scratch buffer before the circle face).
         dx = x0 + (w - ring) // 2
         cell = max(1, ring // 3)
         margin = max(2, min(self.pad, cell // 6))
         arrow = max(1, cell - 2 * margin)
-        cx = dx + ring // 2
-        cy = y + ring // 2
+        half = ring // 2
+        pd.Card(
+            self.content,
+            x=dx,
+            y=y,
+            w=ring,
+            h=ring,
+            radius=half,
+            shadow=0,
+            bg=self.DPAD_RING,
+            padding=(0, 0, 0, 0),
+        )
 
         def _round_at(lab, ox, oy, size, role, on_click):
             self._button(
                 lab,
-                cx + ox - size // 2,
-                cy + oy - size // 2,
+                dx + half + ox - size // 2,
+                y + half + oy - size // 2,
                 size,
                 size,
                 on_click,
                 role,
                 round_btn=True,
+                backdrop=self.DPAD_RING,
             )
 
         _round_at("^", 0, -cell, arrow, "key", lambda: self._ecp("Up"))
@@ -845,22 +887,7 @@ class _RemoteUI:
         )
         y += row_h + gap
 
-        # 6) Channel
-        self._place3(
-            x0,
-            y,
-            w,
-            row_h,
-            gap,
-            (
-                ("CH-", "key", lambda: self._ecp("ChannelDown")),
-                ("ENT", "alt", lambda: self._ecp("Enter")),
-                ("CH+", "key", lambda: self._ecp("ChannelUp")),
-            ),
-        )
-        y += row_h + gap
-
-        # 7) Chrome: APPS | MORE | SELECT
+        # 6) Chrome: APPS | MORE | SELECT
         self._place3(
             x0,
             y,
@@ -882,26 +909,48 @@ class _RemoteUI:
         x0 = pad
         w = W - 2 * pad
         row_h = max(40, H // 11)
-        third = (w - 2 * gap) // 3
-        self._button("REMOTE", x0, pad, third, row_h, self._goto_remote, "ui")
-        self._button(
-            "SCAN",
-            x0 + third + gap,
-            pad,
-            third,
-            row_h,
-            self._scan_button,
-            "accent",
-        )
-        self._button(
-            "FULL",
-            x0 + 2 * (third + gap),
-            pad,
-            third,
-            row_h,
-            self._full_scan_button,
-            "accent",
-        )
+        scanning = bool(self._scan_busy)
+        kind = self._scan_kind
+        scan_lab = "Cancel" if scanning and kind == "scan" else "SCAN"
+        full_lab = "Cancel" if scanning and kind == "full" else "FULL"
+
+        def _locked():
+            return
+
+        remote_cb = _locked if scanning else self._goto_remote
+        if unicast_scan_supported():
+            third = (w - 2 * gap) // 3
+            self._button("REMOTE", x0, pad, third, row_h, remote_cb, "ui")
+            self._button(
+                scan_lab,
+                x0 + third + gap,
+                pad,
+                third,
+                row_h,
+                self._scan_button,
+                "accent",
+            )
+            self._button(
+                full_lab,
+                x0 + 2 * (third + gap),
+                pad,
+                third,
+                row_h,
+                self._full_scan_button,
+                "accent",
+            )
+        else:
+            half = (w - gap) // 2
+            self._button("REMOTE", x0, pad, half, row_h, remote_cb, "ui")
+            self._button(
+                scan_lab,
+                x0 + half + gap,
+                pad,
+                half,
+                row_h,
+                self._scan_button,
+                "accent",
+            )
         y = pad + row_h + gap
         slot_h = max(44, self.plaque_h - 2 * pad)
         devices = self.discover_list or []
@@ -1024,6 +1073,10 @@ class _RemoteUI:
             self._refresh_playback_bg()
 
     def _arm_switch(self, frontend):
+        """MORE: arm a front-end change; same button again cancels."""
+        if self._switch_armed == frontend:
+            self._cancel_switch()
+            return
         self._switch_armed = frontend
         self._layout_status_width(reserve_time=False)
         avail = self._status_avail_width()
@@ -1032,7 +1085,13 @@ class _RemoteUI:
             first = s.split("\n", 1)[0]
             return self._text_px(first) <= avail
 
-        self._set_status(format_switch_status(frontend, fits=fits, tail="\npress REMOTE"))
+        self._set_status(format_switch_status(frontend, fits=fits))
+
+    def _cancel_switch(self):
+        """Disarm MORE front-end switch; restore inputs status."""
+        self._switch_armed = None
+        n = len(self.engine.inputs() or [])
+        self._set_status(("%d inputs" % n) if n else "no inputs")
 
     def _confirm_switch(self):
         fe = self._switch_armed
@@ -1052,6 +1111,8 @@ class _RemoteUI:
         return True
 
     def _goto_remote(self):
+        if self._scan_busy:
+            return
         if self._switch_armed:
             self._confirm_switch()
             return
@@ -1173,6 +1234,8 @@ class _RemoteUI:
         self._run_bg(_work)
 
     def _launch(self, app):
+        if self._switch_armed:
+            self._cancel_switch()
         app_id = app.get("id", "")
         self.selected_app_id = str(app_id or "")
         if self.page == "apps":
@@ -1268,6 +1331,8 @@ class _RemoteUI:
         self._run_bg(_work)
 
     def _arm_delete(self, dev):
+        if self._scan_busy:
+            return
         host = ((dev or {}).get("host") or "").strip()
         if not host:
             return
@@ -1283,6 +1348,10 @@ class _RemoteUI:
         self._set_status(format_delete_status(name, fits, tail="\npress Scan"))
 
     def _scan_button(self):
+        if self._scan_busy:
+            if self._scan_kind == "scan":
+                self._cancel_scan()
+            return
         host = self._delete_armed
         if host:
             self._delete_armed = None
@@ -1299,11 +1368,30 @@ class _RemoteUI:
         self._start_scan(full=False)
 
     def _full_scan_button(self):
-        """Select FULL: disarm delete and run SSDP + cache + unicast /24."""
+        """Select FULL: disarm delete; /24 when supported, else same as SCAN."""
+        if self._scan_busy:
+            if self._scan_kind == "full":
+                self._cancel_scan()
+            return
         self._delete_armed = None
-        self._start_scan(full=True)
+        self._start_scan(full=unicast_scan_supported())
+
+    def _cancel_scan(self):
+        """Stop an in-flight Select SCAN/FULL (engine checkpoints + UI unlock)."""
+        if not self._scan_busy or self._scan_cancel:
+            return
+        self._scan_cancel = True
+        self._pending_scan = False
+        self._scan_yield = False
+        try:
+            self.engine.cancel_discover()
+        except Exception:
+            pass
+        self._set_status("Cancelling...")
 
     def _pick_device(self, dev):
+        if self._scan_busy:
+            return
         host = (dev or {}).get("host") or ""
         name = ((dev or {}).get("name") or "").strip() or host
         if not host:
@@ -1336,6 +1424,8 @@ class _RemoteUI:
         self._delete_armed = None
         self._scan_busy = True
         self._scan_full = bool(full)
+        self._scan_kind = "full" if full else "scan"
+        self._scan_cancel = False
         self._pending_devices = []
         self.page = "devices"
         self._set_status("Full scan..." if full else "Scanning...")
@@ -1353,10 +1443,19 @@ class _RemoteUI:
             pass
 
     def _run_scan_work(self):
+        if self._scan_cancel:
+            self._scan_busy = False
+            self._scan_kind = None
+            self._scan_cancel = False
+            self._set_status("cancelled")
+            self._build_page()
+            return
         self._paint_now()
         scan_fallback = bool(getattr(self, "_scan_full", False))
 
         def _on_device(dev):
+            if self._scan_cancel:
+                return
             host = (dev or {}).get("host") or ""
             if not host:
                 return
@@ -1366,6 +1465,7 @@ class _RemoteUI:
             self._pending_devices.append(dev)
 
         def _work():
+            cancelled = False
             try:
                 devices = self.engine.discover(
                     timeout=3.0,
@@ -1374,6 +1474,9 @@ class _RemoteUI:
                     scan_fallback=scan_fallback,
                     on_device=_on_device,
                 )
+                cancelled = bool(self._scan_cancel)
+                if cancelled:
+                    return
                 for dev in devices or []:
                     _on_device(dev)
                 merged = self._merge_device_lists(
@@ -1385,9 +1488,17 @@ class _RemoteUI:
                 else:
                     self._queue_status("found %d - pick one" % len(merged))
             except Exception as e:
-                self._queue_status(str(e))
+                if not self._scan_cancel:
+                    self._queue_status(str(e))
             finally:
+                cancelled = cancelled or bool(self._scan_cancel)
                 self._scan_busy = False
+                self._scan_kind = None
+                self._scan_cancel = False
+                if cancelled:
+                    self._pending_select_list = None
+                    self._queue_status("cancelled")
+                    self._pending_rebuild = True
 
         self._run_bg(_work)
 

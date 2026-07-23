@@ -54,8 +54,9 @@ import lib.path  # noqa: F401 — adds lib/, add_ons/, examples/
 from displaysys import env_set
 
 # Local desktop test panel — change these and re-run. Must stay above board_config.
-_WIDTH = 480
-_HEIGHT = 800
+# Match LilyGO T-HMI (ST7789 I80): 240x320.
+_WIDTH = 240
+_HEIGHT = 320
 _SCALE = None  # e.g. 1 or 2; None = board_config default + autoscale
 
 env_set("PYDISPLAY_WIDTH", _WIDTH)

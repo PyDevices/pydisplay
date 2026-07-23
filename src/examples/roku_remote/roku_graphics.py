@@ -49,6 +49,7 @@ from roku_engine import (
     other_frontends,
     restart_app,
     set_frontend,
+    unicast_scan_supported,
 )
 from roku_sim import make_engine
 
@@ -134,6 +135,8 @@ _THEME = {
     "chassis2": _c565(0x1A, 0x1E, 0x28),
     "bezel": _c565(0x0A, 0x0C, 0x10),
     "status_bg": _c565(0x1C, 0x22, 0x2E),
+    "plaque_edge": _c565(0x2A, 0x31, 0x40),
+    "dpad_ring": _c565(0x1E, 0x25, 0x30),
     "key": _c565(0x3A, 0x40, 0x4E),
     "key_alt": _c565(0x2E, 0x34, 0x40),
     "accent": _c565(0x7C, 0x5C, 0xFC),
@@ -200,12 +203,15 @@ class _Remote:
         self._delete_armed = None
         self._chrome_face = ""
         self._pending_chrome = False
+        # Remote D-pad disc: (cx, cy, radius) or None when not on remote.
+        self._dpad_ring = None
 
         # Layout regions — tall plaque like widgets/lvgl (two text rows + pads).
         self.progress_h = 2
+        _plaque_floor = 40 if self.height <= 360 else 64
         self.plaque_h = max(
-            64,
-            self.height // 8,
+            _plaque_floor,
+            self.height // 10,
             self.FONT_H * self.font_scale * 2 + 4 * self.pad,
         )
         self.status_h = self.plaque_h  # content offset alias
@@ -225,6 +231,9 @@ class _Remote:
         self._pending_select_list = None
         self._pending_scan_status = None
         self._scan_busy = False
+        self._scan_kind = None
+        self._scan_cancel = False
+        self._scan_full = False
         # Select-page long-press delete (MOUSEBUTTONDOWN → UP), like widgets.
         self._press_t0 = 0
         self._press_btn = None
@@ -310,6 +319,7 @@ class _Remote:
     def _build_layout(self):
         self.buttons = []
         self._by_id = {}
+        self._dpad_ring = None
         y = self.pad
         # Status band is drawn separately; reserve space.
         y += self.status_h + self.pad
@@ -356,18 +366,25 @@ class _Remote:
             self._add(bid, lab, x0 + i * (bw + gap), y, bw, row_h, role=role, ecp=ecp)
 
     def _layout_remote(self, x0, y0, w):
-        """Match ``roku_lvgl._build_remote``: 6 rows + circular D-pad."""
+        """Match ``roku_lvgl._build_remote``: 5 rows + circular D-pad."""
         gap = self.pad
         H = self.height - y0 - self.pad
         if H < 80:
             H = max(80, self.height - self.plaque_h - 2 * self.pad)
 
-        gaps = 7 * gap
-        ring = max(150, int(min(w * 0.6, H * 0.34)))
-        row_h = max(38, (H - ring - gaps) // 6)
-        leftover = H - ring - gaps - 6 * row_h
+        gaps = 5 * gap
+        n_rows = 5
+        min_row = 24 if H <= 280 else 38
+        ring_ideal = int(min(w * 0.72, H * 0.42))
+        ring_max = max(0, H - gaps - n_rows * min_row)
+        ring = max(64, min(ring_ideal, ring_max))
+        row_h = max(min_row, (H - ring - gaps) // n_rows)
+        leftover = H - ring - gaps - n_rows * row_h
         if leftover > 0:
-            row_h += leftover // 6
+            row_h += leftover // n_rows
+        while ring + n_rows * row_h + gaps > H and ring > 56:
+            ring -= 4
+            row_h = max(20, (H - ring - gaps) // n_rows)
 
         # 1) Utility: BACK | HOME | PWR
         pwr_lab = "PWR " + self.engine.power_label()
@@ -385,13 +402,14 @@ class _Remote:
         )
         y = y0 + row_h + gap
 
-        # 2) Circular D-pad (round arrows + OK on a 3x3 grid)
+        # 2) Circular D-pad disc + round arrows/OK (LVGL ring parity).
         dx = x0 + (w - ring) // 2
         cell = max(1, ring // 3)
         margin = max(2, min(self.pad, cell // 6))
         arrow = max(1, cell - 2 * margin)
         cx = dx + ring // 2
         cy = y + ring // 2
+        self._dpad_ring = (cx, cy, ring // 2)
 
         def _round_at(bid, lab, ox, oy, size, role, ecp):
             self._add(
@@ -461,22 +479,7 @@ class _Remote:
         )
         y += row_h + gap
 
-        # 6) Channel
-        self._place3(
-            x0,
-            y,
-            w,
-            row_h,
-            gap,
-            (
-                ("ch_dn", "CH-", "ChannelDown", "key"),
-                ("enter", "ENT", "Enter", "key_alt"),
-                ("ch_up", "CH+", "ChannelUp", "key"),
-            ),
-        )
-        y += row_h + gap
-
-        # 7) Chrome: APPS | MORE | SELECT
+        # 6) Chrome: APPS | MORE | SELECT
         self._place3(
             x0,
             y,
@@ -535,12 +538,27 @@ class _Remote:
         """Pick among discovered Rokus (friendly name only)."""
         row_h = max(36, self.height // 14)
         gap = self.pad
-        third = (w - 2 * gap) // 3
-        self._add("back_pg", "REMOTE", x0, y0, third, row_h, role="ui")
-        self._add("find", "SCAN", x0 + third + gap, y0, third, row_h, role="accent")
-        self._add(
-            "find_full", "FULL", x0 + 2 * (third + gap), y0, third, row_h, role="accent"
-        )
+        scanning = bool(self._scan_busy)
+        kind = self._scan_kind
+        scan_lab = "Cancel" if scanning and kind == "scan" else "SCAN"
+        full_lab = "Cancel" if scanning and kind == "full" else "FULL"
+        if unicast_scan_supported():
+            third = (w - 2 * gap) // 3
+            self._add("back_pg", "REMOTE", x0, y0, third, row_h, role="ui")
+            self._add("find", scan_lab, x0 + third + gap, y0, third, row_h, role="accent")
+            self._add(
+                "find_full",
+                full_lab,
+                x0 + 2 * (third + gap),
+                y0,
+                third,
+                row_h,
+                role="accent",
+            )
+        else:
+            half = (w - gap) // 2
+            self._add("back_pg", "REMOTE", x0, y0, half, row_h, role="ui")
+            self._add("find", scan_lab, x0 + half + gap, y0, half, row_h, role="accent")
         y = y0 + row_h + gap
         slot_h = max(32, self.FONT_H * self.font_scale + 2 * self.pad)
         devices = self.discover_list or []
@@ -673,7 +691,12 @@ class _Remote:
 
         fg, face, lo, hi = self._role_colors(btn.role, pressed)
         self.btn_fb = FrameBuffer(self.btn_ba, w, h, RGB565)
-        self.btn_fb.fill(self.theme["chassis"])
+        # Round D-pad keys sit on the disc — fill corners with ring color so a
+        # partial redraw does not punch chassis-colored holes in the disc.
+        if btn.round and self._dpad_ring:
+            self.btn_fb.fill(self.theme.get("dpad_ring", self.theme["key_alt"]))
+        else:
+            self.btn_fb.fill(self.theme["chassis"])
         if btn.round:
             r = min(w, h) // 2
         else:
@@ -793,6 +816,12 @@ class _Remote:
         on_select = self.page == "devices"
         full_width = on_select or bool(self._switch_armed)
         time_txt = "" if full_width else (self._time_line or "")
+        # Fit BR clock first (pos/dur needs ~11+ glyphs; the old w//3 cap clipped
+        # duration on 240-wide panels). Budget up to half the plaque.
+        if time_txt:
+            max_time_chars = max(4, (w - 2 * inner) // (2 * cw))
+            if len(time_txt) > max_time_chars:
+                time_txt = time_txt[: max(1, max_time_chars - 1)] + "."
         reserve = (len(time_txt) * cw + inner) if time_txt else 0
         max_status_w = max(40, w - 2 * inner - reserve)
         max_chars = max(4, max_status_w // cw)
@@ -821,11 +850,11 @@ class _Remote:
                 line = line[: max(1, max_chars - 1)] + "."
             draw_st(line, x + inner, y_bot + li * st_ch, t["muted"], scale)
 
-        # Bottom-right clock
+        # Bottom-right clock (right-aligned; already fitted above)
         if time_txt:
-            if len(time_txt) > max(4, (w // 3) // cw):
-                time_txt = time_txt[: max(1, (w // 3) // cw - 1)] + "."
             tx = x + w - inner - len(time_txt) * cw
+            if tx < x + inner:
+                tx = x + inner
             self._text16(time_txt, tx, y_bot, t["muted"], scale)
 
         # Hairline scrub rail in the pad gap under the plaque
@@ -843,11 +872,26 @@ class _Remote:
                         fw = w
                     self.fb.fill_rect(x, ty, fw, self.progress_h, fill_c)
 
+    def _draw_dpad_ring(self):
+        """Filled disc behind the D-pad (matches LVGL ``dpad_ring`` panel)."""
+        ring = self._dpad_ring
+        if not ring:
+            return
+        cx, cy, r = ring
+        if r <= 0:
+            return
+        t = self.theme
+        face = t.get("dpad_ring", t["key_alt"])
+        edge = t.get("plaque_edge", t["bezel"])
+        self.fb.circle(cx, cy, r, face, True)
+        self.fb.circle(cx, cy, r, edge, False)
+
     def _draw_all(self):
         self._ui_begin()
         try:
             self._draw_chassis()
             self._draw_plaque()
+            self._draw_dpad_ring()
             for btn in self.buttons:
                 self._draw_button(btn, pressed=False)
             self._present()
@@ -945,13 +989,12 @@ class _Remote:
         """Publish BL status for the soft pump (safe from worker threads)."""
         if line is None:
             return
+        # Always queue — even when the app label is unchanged — so the pump
+        # can refresh BR time / scrub from the latest engine probe (widgets/LVGL).
         if "\n" in line:
-            labeled = "\n".join(ascii_label(p) for p in line.split("\n"))
+            self._pending_status = "\n".join(ascii_label(p) for p in line.split("\n"))
         else:
-            labeled = ascii_label(line)
-        if labeled == self._status_line or labeled == self._pending_status:
-            return
-        self._pending_status = labeled
+            self._pending_status = ascii_label(line)
 
     def _queue_state(self, line):
         if line is not None:
@@ -969,9 +1012,9 @@ class _Remote:
         pending = self._pending_status
         if pending is not None:
             self._pending_status = None
-            if pending != self._status_line:
-                self._set_status(pending)
-                dirty = True
+            # Always apply: ``_set_status`` syncs position/duration + progress.
+            self._set_status(pending)
+            dirty = True
         pending_st = self._pending_state
         if pending_st is not None:
             self._pending_state = None
@@ -1017,11 +1060,11 @@ class _Remote:
             self._draw_all()
 
         self._status_ticks += 1
-        # ~10s cadence — each refresh that changes status does a full show().
+        # ~1s (pump is 250ms) — match widgets/LVGL so the clock/scrub keep up.
         if (
             self.page == "remote"
             and self.engine.connected
-            and self._status_ticks % 40 == 0
+            and self._status_ticks % 4 == 0
             and not self._playback_busy
         ):
             self._playback_busy = True
@@ -1123,6 +1166,8 @@ class _Remote:
             return
         # Device rows: track press for long-press delete; activate on UP.
         if btn.id.startswith("dev_"):
+            if self._scan_busy:
+                return
             self._press_btn = btn
             self._press_t0 = self._now_ms()
             return
@@ -1135,6 +1180,8 @@ class _Remote:
         self._press_btn = None
         t0 = self._press_t0
         self._press_t0 = 0
+        if self._scan_busy:
+            return
         if btn is None or not btn.id.startswith("dev_"):
             return
         hit = self._hit(e.pos)
@@ -1154,6 +1201,8 @@ class _Remote:
             self._pick_device(btn.meta)
 
     def _arm_delete(self, dev):
+        if self._scan_busy:
+            return
         host = ((dev or {}).get("host") or "").strip()
         if not host:
             return
@@ -1229,6 +1278,8 @@ class _Remote:
         Worker threads must not draw; append to the mailbox and let
         :meth:`_status_pump` add the device on the main tick.
         """
+        if self._scan_cancel:
+            return
         host = (dev or {}).get("host") or ""
         if not host:
             return
@@ -1276,13 +1327,17 @@ class _Remote:
         self._pending_scan_status = None
         self.page = "devices"
         self._set_state("")
+        self._scan_busy = True
+        self._scan_full = bool(full)
+        self._scan_kind = "full" if full else "scan"
+        self._scan_cancel = False
         self._set_status("Full scan..." if full else "Scanning...")
         self._build_layout()
         self._draw_all()
-        self._scan_busy = True
         scan_fallback = bool(full)
 
         def _work():
+            cancelled = False
             try:
                 devices = self.engine.discover(
                     timeout=3.0,
@@ -1291,6 +1346,9 @@ class _Remote:
                     scan_fallback=scan_fallback,
                     on_device=self._on_device_found,
                 )
+                cancelled = bool(self._scan_cancel)
+                if cancelled:
+                    return
                 for dev in devices or []:
                     self._on_device_found(dev)
                 # Merge onto existing list — never clear cached TVs here.
@@ -1305,14 +1363,32 @@ class _Remote:
                 else:
                     self._pending_scan_status = "found %d - pick one" % n
             except Exception as e:
-                self._pending_scan_status = str(e)
+                if not self._scan_cancel:
+                    self._pending_scan_status = str(e)
             finally:
+                cancelled = cancelled or bool(self._scan_cancel)
                 self._scan_busy = False
+                self._scan_kind = None
+                self._scan_cancel = False
+                if cancelled:
+                    self._pending_scan_status = "cancelled"
 
         self._run_bg(_work)
 
+    def _cancel_scan(self):
+        if not self._scan_busy or self._scan_cancel:
+            return
+        self._scan_cancel = True
+        try:
+            self.engine.cancel_discover()
+        except Exception:
+            pass
+        self._set_status("Cancelling...")
+        self._present()
 
     def _pick_device(self, dev):
+        if self._scan_busy:
+            return
         host = (dev or {}).get("host") or ""
         name = ((dev or {}).get("name") or "").strip() or host
         if not host:
@@ -1372,6 +1448,10 @@ class _Remote:
         self._activate_action(btn)
 
     def _arm_switch(self, frontend):
+        """MORE: arm a front-end change; same button again cancels."""
+        if self._switch_armed == frontend:
+            self._cancel_switch()
+            return
         self._switch_armed = frontend
         max_chars = max(8, (self.width - 4 * self.pad) // (self.FONT_W * self.font_scale))
 
@@ -1379,9 +1459,13 @@ class _Remote:
             parts = s.split("\n")
             return all(len(p) <= max_chars for p in parts)
 
-        self._refresh_status(
-            format_switch_status(frontend, fits=fits, tail="\npress REMOTE")
-        )
+        self._refresh_status(format_switch_status(frontend, fits=fits))
+
+    def _cancel_switch(self):
+        """Disarm MORE front-end switch; restore inputs status."""
+        self._switch_armed = None
+        n = len(self.engine.inputs() or [])
+        self._refresh_status(("%d inputs" % n) if n else "no inputs")
 
     def _confirm_switch(self):
         fe = self._switch_armed
@@ -1438,6 +1522,8 @@ class _Remote:
             self._arm_switch(btn.meta)
             return
         if bid == "back_pg":
+            if self._scan_busy:
+                return
             if self._switch_armed:
                 self._confirm_switch()
                 return
@@ -1456,6 +1542,10 @@ class _Remote:
 
         if bid == "find":
             if self.page == "devices":
+                if self._scan_busy:
+                    if self._scan_kind == "scan":
+                        self._cancel_scan()
+                    return
                 host = getattr(self, "_delete_armed", None)
                 if host:
                     self._delete_armed = None
@@ -1478,7 +1568,11 @@ class _Remote:
             return
 
         if bid == "find_full":
-            self._run_scan(seed_priority=True, full=True)
+            if self._scan_busy:
+                if self._scan_kind == "full":
+                    self._cancel_scan()
+                return
+            self._run_scan(seed_priority=True, full=unicast_scan_supported())
             return
 
         if bid == "apps_refresh":
@@ -1495,6 +1589,8 @@ class _Remote:
             return
 
         if bid.startswith("app_") and btn.meta:
+            if self._switch_armed:
+                self._cancel_switch()
             app = btn.meta
             app_id = app.get("id", "")
             self.selected_app_id = str(app_id or "")
@@ -1514,6 +1610,8 @@ class _Remote:
             return
 
         if bid.startswith("in_") and btn.meta:
+            if self._switch_armed:
+                self._cancel_switch()
             app = btn.meta
             app_id = app.get("id", "")
 
