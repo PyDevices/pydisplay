@@ -17,8 +17,10 @@ HTTP keypress / apps / queries). Uses only the four core pydisplay packages
 (``graphics``, ``displaysys`` via ``board_config``, ``eventsys``, ``multimer``).
 
 Geometry scales from a 320x480 reference up through tall phone portraits.
-Compact layouts show classic remote chrome; expanded layouts add side volume,
-channel / input shortcuts, theme picker, Select / Scan, and an apps rail.
+Remote chrome matches ``roku_lvgl``: utility, D-pad, options (replay / info /
+CC), transport, volume, channel, then APPS | MORE | SELECT. MORE lists TV
+inputs (not diagnostic probes). Status uses a four-field plaque (name /
+state / app / time) plus an under-plaque scrub rail.
 
 Launch via ``roku_remote`` (prefs + MRU). Direct ``roku_graphics.run()`` also works.
 Requires Roku **Control by mobile apps → Enabled**. Join WiFi before running
@@ -40,13 +42,15 @@ from graphics import RGB565, Area, FrameBuffer
 from multimer import Timer
 from roku_engine import (
     FRONTEND_BUTTONS,
-    RokuEngine,
+    app_label,
     ascii_label,
-    format_delete_status_chars,
+    format_delete_status,
     format_switch_status,
     other_frontends,
+    restart_app,
     set_frontend,
 )
+from roku_sim import make_engine
 
 FRONTEND = "graphics"
 
@@ -124,78 +128,24 @@ def _shade(c, factor):
     return _c565(r, g, b)
 
 
-# Named themes: professional chassis + key roles (no external palettes package).
-_THEMES = {
-    "midnight": {
-        "chassis": _c565(0x12, 0x14, 0x1A),
-        "chassis2": _c565(0x1A, 0x1E, 0x28),
-        "bezel": _c565(0x0A, 0x0C, 0x10),
-        "status_bg": _c565(0x1C, 0x22, 0x2E),
-        "key": _c565(0x3A, 0x40, 0x4E),
-        "key_alt": _c565(0x2E, 0x34, 0x40),
-        "accent": _c565(0x7C, 0x5C, 0xFC),
-        "accent2": _c565(0x5A, 0x3E, 0xD0),
-        "power": _c565(0xE0, 0x5A, 0x4A),
-        "transport": _c565(0x3A, 0x5A, 0x72),
-        "text": _c565(0xF2, 0xF4, 0xF8),
-        "muted": _c565(0x9A, 0xA0, 0xB0),
-        "ok_text": _c565(0xFF, 0xFF, 0xFF),
-        "press": _c565(0xE8, 0xEC, 0xF4),
-        "press_text": _c565(0x18, 0x1A, 0x22),
-    },
-    "graphite": {
-        "chassis": _c565(0x1A, 0x1A, 0x1C),
-        "chassis2": _c565(0x28, 0x28, 0x2C),
-        "bezel": _c565(0x0E, 0x0E, 0x10),
-        "status_bg": _c565(0x24, 0x24, 0x28),
-        "key": _c565(0x48, 0x48, 0x50),
-        "key_alt": _c565(0x38, 0x38, 0x40),
-        "accent": _c565(0x5A, 0xC8, 0xFA),
-        "accent2": _c565(0x2E, 0x8A, 0xC0),
-        "power": _c565(0xFF, 0x6B, 0x5A),
-        "transport": _c565(0x50, 0x58, 0x68),
-        "text": _c565(0xF5, 0xF5, 0xF7),
-        "muted": _c565(0xA0, 0xA0, 0xA8),
-        "ok_text": _c565(0x10, 0x12, 0x16),
-        "press": _c565(0xFF, 0xFF, 0xFF),
-        "press_text": _c565(0x20, 0x20, 0x24),
-    },
-    "ocean": {
-        "chassis": _c565(0x0E, 0x1A, 0x22),
-        "chassis2": _c565(0x14, 0x28, 0x34),
-        "bezel": _c565(0x08, 0x12, 0x18),
-        "status_bg": _c565(0x16, 0x2E, 0x3A),
-        "key": _c565(0x2A, 0x4A, 0x58),
-        "key_alt": _c565(0x22, 0x3C, 0x48),
-        "accent": _c565(0x2E, 0xD2, 0xC0),
-        "accent2": _c565(0x1A, 0xA0, 0x92),
-        "power": _c565(0xF0, 0x70, 0x60),
-        "transport": _c565(0x2A, 0x5A, 0x6E),
-        "text": _c565(0xE8, 0xF4, 0xF8),
-        "muted": _c565(0x8A, 0xB0, 0xBC),
-        "ok_text": _c565(0x0A, 0x18, 0x1C),
-        "press": _c565(0xD0, 0xF8, 0xF0),
-        "press_text": _c565(0x0E, 0x1A, 0x22),
-    },
-    "ember": {
-        "chassis": _c565(0x1A, 0x12, 0x10),
-        "chassis2": _c565(0x28, 0x1A, 0x14),
-        "bezel": _c565(0x10, 0x0A, 0x08),
-        "status_bg": _c565(0x2A, 0x1C, 0x16),
-        "key": _c565(0x4A, 0x36, 0x2C),
-        "key_alt": _c565(0x3A, 0x2A, 0x22),
-        "accent": _c565(0xFF, 0x9A, 0x3C),
-        "accent2": _c565(0xD0, 0x6A, 0x20),
-        "power": _c565(0xE0, 0x40, 0x40),
-        "transport": _c565(0x5A, 0x40, 0x30),
-        "text": _c565(0xFF, 0xF0, 0xE4),
-        "muted": _c565(0xC0, 0xA0, 0x88),
-        "ok_text": _c565(0x1A, 0x10, 0x0C),
-        "press": _c565(0xFF, 0xE0, 0xC0),
-        "press_text": _c565(0x2A, 0x16, 0x10),
-    },
+# Chassis + key roles (matches LVGL midnight palette).
+_THEME = {
+    "chassis": _c565(0x12, 0x14, 0x1A),
+    "chassis2": _c565(0x1A, 0x1E, 0x28),
+    "bezel": _c565(0x0A, 0x0C, 0x10),
+    "status_bg": _c565(0x1C, 0x22, 0x2E),
+    "key": _c565(0x3A, 0x40, 0x4E),
+    "key_alt": _c565(0x2E, 0x34, 0x40),
+    "accent": _c565(0x7C, 0x5C, 0xFC),
+    "accent2": _c565(0x5A, 0x3E, 0xD0),
+    "power": _c565(0xE0, 0x5A, 0x4A),
+    "transport": _c565(0x3A, 0x5A, 0x72),
+    "text": _c565(0xF2, 0xF4, 0xF8),
+    "muted": _c565(0x9A, 0xA0, 0xB0),
+    "ok_text": _c565(0xFF, 0xFF, 0xFF),
+    "press": _c565(0xE8, 0xEC, 0xF4),
+    "press_text": _c565(0x18, 0x1A, 0x22),
 }
-_THEME_NAMES = ("midnight", "graphite", "ocean", "ember")
 
 
 class _Btn:
@@ -216,43 +166,55 @@ class _Btn:
 class _Remote:
     FONT_W = 8
     FONT_H = 16
+    FONT_H14 = 14  # two-line plaque status (text14)
 
     def __init__(self, engine=None, start_page="devices"):
         self.width = display_drv.width
         self.height = display_drv.height
         self.bpp = display_drv.color_depth // 8
         self.unit = min(self.width, self.height)
-        self.expanded = self.height >= 640 or (self.height >= 560 and self.unit >= 360)
 
         self.pad = max(3, self.unit // 64)
         self.radius = max(5, self.unit // 36)
-        self.font_scale = max(1, self.unit // 280)
-        self.title_scale = self.font_scale + (1 if self.unit >= 400 else 0)
+        # 320→1 (comfortable); 480+→2 — bare unit//280 stays 1 until 560.
+        self.font_scale = max(1, self.unit // 280) + (1 if self.unit >= 400 else 0)
 
-        self.theme_name = "midnight"
-        self.theme = _THEMES[self.theme_name]
-        self.engine = engine if engine is not None else RokuEngine()
+        self.theme = _THEME
+        self.engine = engine if engine is not None else make_engine()
         self.ip_buf = self.engine.host or ""
         self.page = (
             start_page if start_page in ("devices", "remote", "apps", "more") else "devices"
         )
         self.app_offset = 0
         self.app_page_size = 1
+        self.selected_app_id = ""
         self.discover_list = []
+        # Plaque fields (TL name / TR state / BL status / BR time) — match widgets/lvgl.
+        self._name_line = "Roku Remote"
+        self._state_line = ""
         self._status_line = "ready"
-        self._dev_dump = ""
+        self._time_line = ""
+        self._progress_visible = False
         self._switch_armed = None
         self._delete_armed = None
+        self._chrome_face = ""
+        self._pending_chrome = False
 
-        # Layout regions
-        self.status_h = max(28, self.FONT_H * self.font_scale + 2 * self.pad)
-        self.margin_x = self.pad if not self.expanded else max(self.pad, self.width // 10)
-        self.side_w = 0 if not self.expanded else max(36, self.width // 9)
+        # Layout regions — tall plaque like widgets/lvgl (two text rows + pads).
+        self.progress_h = 2
+        self.plaque_h = max(
+            64,
+            self.height // 8,
+            self.FONT_H * self.font_scale * 2 + 4 * self.pad,
+        )
+        self.status_h = self.plaque_h  # content offset alias
+        self.margin_x = self.pad
 
         self.buttons = []
         self._by_id = {}
         self._status_timer = Timer(-1)
         self._pending_status = None
+        self._pending_state = None
         self._playback_busy = False
         self._status_ticks = 0
         # Discovery runs on a worker; the soft pump applies results on the main
@@ -262,6 +224,9 @@ class _Remote:
         self._pending_select_list = None
         self._pending_scan_status = None
         self._scan_busy = False
+        # Select-page long-press delete (MOUSEBUTTONDOWN → UP), like widgets.
+        self._press_t0 = 0
+        self._press_btn = None
         # Soft Timer callbacks can re-enter Python while _draw_all/_flash/_present
         # is running (schedule between bytecodes). Concurrent FBDisplay.show() on
         # DPI has been observed to reboot the ESP32-P4; skip pump while UI draws.
@@ -287,7 +252,15 @@ class _Remote:
 
         resume = self.page == "remote" and (self.engine.host or "").strip()
         if resume:
-            self._status_line = self.engine.playback_status() or "ready"
+            name = ""
+            try:
+                name = (self.engine.device_info or {}).get("user-device-name") or ""
+            except Exception:
+                pass
+            self._name_line = ascii_label(name or self.engine.host or "Roku")
+            self._state_line = ""
+            self._status_line = self.engine.playback_app_label() or "ready"
+            self._time_line = self.engine.position_label()
             self._build_layout()
             self._draw_all()
             self._refresh_playback_bg()
@@ -297,6 +270,9 @@ class _Remote:
             self.discover_list = list(self.engine.cached_devices() or [])
             n = len(self.discover_list)
             self._status_line = ("%d saved" % n) if n else "no TVs - press Scan"
+            self._state_line = ""
+            self._time_line = ""
+            self._progress_visible = False
             self._build_layout()
             self._draw_all()
 
@@ -313,7 +289,8 @@ class _Remote:
 
             self._run_bg(_soft)
 
-        runtime.on(runtime.events.MOUSEBUTTONDOWN, self._on_mouse)
+        runtime.on(runtime.events.MOUSEBUTTONDOWN, self._on_mouse_down)
+        runtime.on(runtime.events.MOUSEBUTTONUP, self._on_mouse_up)
         runtime.on(runtime.events.KEYDOWN, self._on_key)
         # Soft pump: apply playback status from bg workers + periodic refresh.
         # Must not call Timer.deinit from this callback (librt deadlock).
@@ -338,9 +315,6 @@ class _Remote:
 
         content_x = self.margin_x
         content_w = self.width - 2 * self.margin_x
-        if self.expanded:
-            content_x = self.margin_x + self.side_w + self.pad
-            content_w = self.width - content_x - self.margin_x - self.side_w - self.pad
 
         if self.page == "apps":
             self._layout_apps(content_x, y, content_w)
@@ -353,9 +327,6 @@ class _Remote:
             return
 
         self._layout_remote(content_x, y, content_w)
-        if self.expanded:
-            self._layout_side_volume()
-            self._layout_side_channel()
 
     def _add(
         self, bid, label, x, y, w, h, role="key", ecp=None, meta=None, round=False
@@ -376,233 +347,146 @@ class _Remote:
         self._by_id[bid] = b
         return b
 
+    def _place3(self, x0, y, w, row_h, gap, specs):
+        """Place three equal-width buttons (LVGL ``_place3`` parity)."""
+        n = 3
+        bw = (w - gap * (n - 1)) // n
+        for i, (bid, lab, ecp, role) in enumerate(specs):
+            self._add(bid, lab, x0 + i * (bw + gap), y, bw, row_h, role=role, ecp=ecp)
+
     def _layout_remote(self, x0, y0, w):
-        # Top utility row: Back | Home | Power (or Find on compact)
-        row_h = max(36, self.height // 14)
+        """Match ``roku_lvgl._build_remote``: 6 rows + circular D-pad."""
         gap = self.pad
-        n = 3
-        bw = (w - gap * (n - 1)) // n
-        # Power label reflects current TV state; press toggles On/Off.
-        pwr_lab = "ON" if self.engine.power_is_on() else "OFF"
-        labels = (
-            ("back", "BACK", "Back", "key"),
-            ("home", "HOME", "Home", "accent"),
-            ("power", pwr_lab, None, "power"),
-        )
-        for i, (bid, lab, ecp, role) in enumerate(labels):
-            self._add(bid, lab, x0 + i * (bw + gap), y0, bw, row_h, role=role, ecp=ecp)
-        y = y0 + row_h + gap * 2
+        H = self.height - y0 - self.pad
+        if H < 80:
+            H = max(80, self.height - self.plaque_h - 2 * self.pad)
 
-        # D-pad block (square-ish)
-        dpad = min(w, max(140, self.height // 3))
-        if dpad > w:
-            dpad = w
-        dx = x0 + (w - dpad) // 2
-        cell = dpad // 3
-        dpad_y = y
-        # Up
-        self._add("up", "^", dx + cell, dpad_y, cell, cell, role="dpad", ecp="Up")
-        # Left / OK / Right
-        self._add("left", "<", dx, dpad_y + cell, cell, cell, role="dpad", ecp="Left")
-        self._add(
-            "ok", "OK", dx + cell, dpad_y + cell, cell, cell, role="accent", ecp="Select"
-        )
-        self._add(
-            "right", ">", dx + 2 * cell, dpad_y + cell, cell, cell, role="dpad", ecp="Right"
-        )
-        # Down
-        self._add(
-            "down", "v", dx + cell, dpad_y + 2 * cell, cell, cell, role="dpad", ecp="Down"
-        )
-        y = dpad_y + dpad + gap * 2
+        gaps = 7 * gap
+        ring = max(150, int(min(w * 0.6, H * 0.34)))
+        row_h = max(38, (H - ring - gaps) // 6)
+        leftover = H - ring - gaps - 6 * row_h
+        if leftover > 0:
+            row_h += leftover // 6
 
-        # Smaller round BS / ENT: centered in the gutters between the content
-        # border and the Left / Right D-pad buttons. Prefer the band above
-        # REPLAY / SEARCH (pulled up half a height into the dpad gap when that
-        # gap allows); otherwise the Left / OK / Right row.
-        n = 3
-        bw = (w - gap * (n - 1)) // n
-        left_gutter = max(0, dx - x0)
-        right_gutter = max(0, (x0 + w) - (dx + 3 * cell))
-        if min(left_gutter, right_gutter) >= 18:
-            side = max(18, min(row_h, (bw * 5) // 8, left_gutter, right_gutter))
-            bs_x = x0 + (left_gutter - side) // 2
-            ent_x = dx + 3 * cell + (right_gutter - side) // 2
-        else:
-            # D-pad is full-width; fall back to content-edge alignment.
-            side = max(22, min(row_h, (bw * 5) // 8))
-            bs_x = x0
-            ent_x = x0 + w - side
-        half = side // 2
-        if gap * 2 >= half:
-            sat_y = y - half
-            y = sat_y + side + gap
-        else:
-            sat_y = dpad_y + cell + (cell - side) // 2
-        self._add(
-            "bs",
-            "BS",
-            bs_x,
-            sat_y,
-            side,
-            side,
-            role="key_alt",
-            ecp="Backspace",
-            round=True,
+        # 1) Utility: BACK | HOME | PWR
+        pwr_lab = "PWR " + self.engine.power_label()
+        self._place3(
+            x0,
+            y0,
+            w,
+            row_h,
+            gap,
+            (
+                ("back", "BACK", "Back", "key"),
+                ("home", "HOME", "Home", "accent"),
+                ("power", pwr_lab, None, "power"),
+            ),
         )
-        self._add(
-            "enter_row",
-            "ENT",
-            ent_x,
-            sat_y,
-            side,
-            side,
-            role="key_alt",
-            ecp="Enter",
-            round=True,
-        )
-        # Captions (C): same band as BS/ENT, centered above mid-row Info (*).
-        if self._captions_visible():
-            cap_side = side
-            mid_col_x = x0 + bw + gap
-            cap_x = mid_col_x + (bw - cap_side) // 2
-            cap_role = "accent" if self.engine.captions_track_hint() else "key_alt"
+        y = y0 + row_h + gap
+
+        # 2) Circular D-pad (round arrows + OK on a 3x3 grid)
+        dx = x0 + (w - ring) // 2
+        cell = max(1, ring // 3)
+        margin = max(2, min(self.pad, cell // 6))
+        arrow = max(1, cell - 2 * margin)
+        cx = dx + ring // 2
+        cy = y + ring // 2
+
+        def _round_at(bid, lab, ox, oy, size, role, ecp):
             self._add(
-                "cap",
-                "C",
-                cap_x,
-                sat_y,
-                cap_side,
-                cap_side,
-                role=cap_role,
-                ecp="ClosedCaption",
+                bid,
+                lab,
+                cx + ox - size // 2,
+                cy + oy - size // 2,
+                size,
+                size,
+                role=role,
+                ecp=ecp,
                 round=True,
             )
-        mid = (
-            ("replay", "REPLAY", "InstantReplay", "key"),
-            ("info", "*", "Info", "key"),
-            ("search", "SRCH", "Search", "key"),
-        )
-        for i, (bid, lab, ecp, role) in enumerate(mid):
-            self._add(bid, lab, x0 + i * (bw + gap), y, bw, row_h, role=role, ecp=ecp)
-        y += row_h + gap * 2
 
-        # Transport: Rev / Play / Fwd — Play label tracks media-player state.
-        n = 3
-        bw = (w - gap * (n - 1)) // n
-        for i, (bid, lab, ecp) in enumerate(
+        _round_at("up", "^", 0, -cell, arrow, "dpad", "Up")
+        _round_at("down", "v", 0, cell, arrow, "dpad", "Down")
+        _round_at("left", "<", -cell, 0, arrow, "dpad", "Left")
+        _round_at("right", ">", cell, 0, arrow, "dpad", "Right")
+        _round_at("ok", "OK", 0, 0, cell, "accent", "Select")
+        y += ring + gap
+
+        # 3) Options: Replay | Info | CC
+        cc_role = "accent" if self.engine.captions_track_hint() else "key_alt"
+        self._place3(
+            x0,
+            y,
+            w,
+            row_h,
+            gap,
             (
-                ("rev", "<<", "Rev"),
-                ("play", self.engine.play_label(), "Play"),
-                ("fwd", ">>", "Fwd"),
-            )
-        ):
-            self._add(bid, lab, x0 + i * (bw + gap), y, bw, row_h, role="transport", ecp=ecp)
-        y += row_h + gap * 2
+                ("replay", "RPL", "InstantReplay", "key_alt"),
+                ("info", "*", "Info", "key_alt"),
+                ("cc", "CC", "ClosedCaption", cc_role),
+            ),
+        )
+        y += row_h + gap
 
-        # Bottom chrome: theme / apps / more / discover(+ip)
-        if self.expanded:
-            labs = (
-                ("theme", "THEME", None, "ui"),
+        # 4) Transport
+        play_face = self.engine.play_label()
+        self._chrome_face = "%s|%s" % (play_face, self.engine.power_label())
+        self._place3(
+            x0,
+            y,
+            w,
+            row_h,
+            gap,
+            (
+                ("rev", "<<", "Rev", "transport"),
+                ("play", play_face, "Play", "transport"),
+                ("fwd", ">>", "Fwd", "transport"),
+            ),
+        )
+        y += row_h + gap
+
+        # 5) Volume
+        self._place3(
+            x0,
+            y,
+            w,
+            row_h,
+            gap,
+            (
+                ("vol_dn", "VOL-", "VolumeDown", "key"),
+                ("vol_mute", "MUTE", "VolumeMute", "key_alt"),
+                ("vol_up", "VOL+", "VolumeUp", "key"),
+            ),
+        )
+        y += row_h + gap
+
+        # 6) Channel
+        self._place3(
+            x0,
+            y,
+            w,
+            row_h,
+            gap,
+            (
+                ("ch_dn", "CH-", "ChannelDown", "key"),
+                ("enter", "ENT", "Enter", "key_alt"),
+                ("ch_up", "CH+", "ChannelUp", "key"),
+            ),
+        )
+        y += row_h + gap
+
+        # 7) Chrome: APPS | MORE | SELECT
+        self._place3(
+            x0,
+            y,
+            w,
+            row_h,
+            gap,
+            (
                 ("apps_pg", "APPS", None, "ui"),
                 ("more_pg", "MORE", None, "ui"),
                 ("find", "SELECT", None, "ui"),
-            )
-        else:
-            labs = (
-                ("theme", "THM", None, "ui"),
-                ("apps_pg", "APP", None, "ui"),
-                ("more_pg", "...", None, "ui"),
-                ("find", "SEL", None, "ui"),
-            )
-        n = len(labs)
-        bw = (w - gap * (n - 1)) // n
-        bh = max(32, row_h - 4)
-
-        # Live TV / HDMI / AV (type=tvin): one row below transport when it fits
-        # with chrome; otherwise skip (no new page).
-        inputs = self.engine.inputs()
-        ih = max(28, row_h - 6)
-        y_in = y
-        show_inputs = bool(inputs) and (y_in + ih + gap + bh <= self.height - self.pad)
-        if show_inputs:
-            n_in = len(inputs)
-            ibw = (w - gap * (n_in - 1)) // n_in
-            for i, app in enumerate(inputs):
-                lab = self.engine.input_short_label(app, max(2, ibw // 8))
-                self._add(
-                    "in_%d" % i,
-                    lab,
-                    x0 + i * (ibw + gap),
-                    y_in,
-                    ibw,
-                    ih,
-                    role="key_alt",
-                    meta=app,
-                )
-            y_bot = y_in + ih + gap
-        else:
-            # Drop the chrome row by half a button height (keep inside the bezel).
-            y_bot = min(y + bh // 2, self.height - self.pad - bh)
-
-        for i, (bid, lab, ecp, role) in enumerate(labs):
-            self._add(bid, lab, x0 + i * (bw + gap), y_bot, bw, bh, role=role, ecp=ecp)
-
-    def _layout_side_volume(self):
-        x = self.margin_x
-        top = self.pad + self.status_h + self.pad
-        bottom = self.height - self.pad
-        h = bottom - top
-        # Volume rocker: Up / Mute / Down stacked
-        seg = h // 3
-        self._add("vol_up", "+", x, top, self.side_w, seg - self.pad, role="transport", ecp="VolumeUp")
-        self._add(
-            "vol_mute",
-            "M",
-            x,
-            top + seg,
-            self.side_w,
-            seg - self.pad,
-            role="key_alt",
-            ecp="VolumeMute",
-        )
-        self._add(
-            "vol_dn",
-            "-",
-            x,
-            top + 2 * seg,
-            self.side_w,
-            seg - self.pad,
-            role="transport",
-            ecp="VolumeDown",
-        )
-
-    def _layout_side_channel(self):
-        x = self.width - self.margin_x - self.side_w
-        top = self.pad + self.status_h + self.pad
-        bottom = self.height - self.pad
-        h = bottom - top
-        seg = h // 3
-        self._add("ch_up", "CH+", x, top, self.side_w, seg - self.pad, role="key", ecp="ChannelUp")
-        self._add(
-            "enter",
-            "ENT",
-            x,
-            top + seg,
-            self.side_w,
-            seg - self.pad,
-            role="key_alt",
-            ecp="Enter",
-        )
-        self._add(
-            "ch_dn",
-            "CH-",
-            x,
-            top + 2 * seg,
-            self.side_w,
-            seg - self.pad,
-            role="key",
-            ecp="ChannelDown",
+            ),
         )
 
     def _layout_apps(self, x0, y0, w):
@@ -624,10 +508,17 @@ class _Remote:
         self.app_page_size = max_slots
         apps = self.engine.store_apps()
         slice_apps = apps[self.app_offset : self.app_offset + max_slots]
+        sel = str(
+            self.selected_app_id
+            or (self.engine.active_app or {}).get("id")
+            or ""
+        )
         for i, app in enumerate(slice_apps):
-            name = ascii_label(app.get("name") or app.get("id") or "?")
+            name = app_label(app.get("name") or app.get("id") or "?")
             col = i % cols
             row = i // cols
+            aid = str(app.get("id") or "")
+            role = "accent" if (sel and aid == sel) or (not sel and i == 0) else "key"
             self._add(
                 "app_%d" % i,
                 name,
@@ -635,7 +526,7 @@ class _Remote:
                 y + row * (bh + gap),
                 bw,
                 bh,
-                role="accent" if i == 0 else "key",
+                role=role,
                 meta=app,
             )
 
@@ -665,8 +556,10 @@ class _Remote:
             )
 
     def _layout_more(self, x0, y0, w):
-        row_h = max(34, self.height // 16)
+        """MORE: REMOTE + other frontends; TV inputs grid (LVGL parity)."""
+        row_h = max(40, self.height // 11)
         gap = self.pad
+        half = (w - gap) // 2
         third = (w - 2 * gap) // 3
         others = other_frontends(FRONTEND)
         self._add("back_pg", "REMOTE", x0, y0, third, row_h, role="ui")
@@ -683,27 +576,27 @@ class _Remote:
                 meta=fe,
             )
         y = y0 + row_h + gap
-        actions = (
-            ("dev_info", "DEV INFO", None),
-            ("media", "MEDIA", None),
-            ("tv_ch", "TV CH", None),
-            ("chanperf", "PERF", None),
-        )
-        cols = 2
-        bw = (w - gap) // cols
-        for i, (bid, lab, ecp) in enumerate(actions):
-            col = i % cols
-            row = i // cols
-            role = "ui" if ecp is None else "key"
+        inputs = self.engine.inputs()
+        if not inputs:
+            self._add("no_inputs", "no inputs", x0, y, w, row_h, role="key_alt")
+            return
+        avail = self.height - y - self.pad
+        max_slots = max(1, (avail + gap) // (row_h + gap)) * 2
+        for i, app in enumerate(inputs[:max_slots]):
+            lab = ascii_label((app.get("name") or "").strip())
+            if not lab:
+                lab = self.engine.input_short_label(app, max_chars=10)
+            col = i % 2
+            row = i // 2
             self._add(
-                bid,
+                "in_%d" % i,
                 lab,
-                x0 + col * (bw + gap),
+                x0 + col * (half + gap),
                 y + row * (row_h + gap),
-                bw,
+                half,
                 row_h,
-                role=role,
-                ecp=ecp,
+                role="key_alt",
+                meta=app,
             )
 
     # ----- drawing --------------------------------------------------------
@@ -833,139 +726,260 @@ class _Remote:
                 self.btn_fb.text16(line, tx, ty, fg)
         self.fb.blit(self.btn_fb, x, y)
 
-    def _draw_status(self):
-        t = self.theme
-        y = self.pad
-        x = self.pad
-        w = self.width - 2 * self.pad
-        h = self.status_h
-        self.fb.fill_rect(x, y, w, h, t["status_bg"])
-        self.fb.rect(x, y, w, h, t["bezel"])
-        line = self._status_line or self.engine.status
-        if self.page == "more" and self._dev_dump and not self._switch_armed:
-            line = self._dev_dump[: max(8, w // (self.FONT_W * self.font_scale))]
-        scale = self.font_scale
-        max_chars = max(4, (w - 2 * self.pad) // (self.FONT_W * scale))
-        if len(line) > max_chars:
-            line = line[: max_chars - 1] + "."
-        ty = max(0, y + (h - self.FONT_H * scale) // 2)
+    def _text16(self, text, x, y, color, scale=None):
+        if scale is None:
+            scale = self.font_scale
         if scale != 1:
-            self.fb.text16(line, x + self.pad, ty, t["muted"], scale)
+            self.fb.text16(text, x, y, color, scale)
         else:
-            self.fb.text16(line, x + self.pad, ty, t["muted"])
+            self.fb.text16(text, x, y, color)
+
+    def _text14(self, text, x, y, color, scale=None):
+        if scale is None:
+            scale = self.font_scale
+        if scale != 1:
+            self.fb.text14(text, x, y, color, scale)
+        else:
+            self.fb.text14(text, x, y, color)
+
+    def _draw_plaque(self):
+        """Brushed plaque: TL name, TR state, BL status (≤2 lines), BR time."""
+        t = self.theme
+        x = self.pad
+        y = self.pad
+        w = self.width - 2 * self.pad
+        h = self.plaque_h
+        edge = _shade(t["status_bg"], 1.2)
+        self.fb.fill_rect(x, y, w, h, t["status_bg"])
+        self.fb.rect(x, y, w, h, edge)
+        # Name/state/buttons: text16. Two-line BL status: text14.
+        scale = self.font_scale
+        cw = self.FONT_W * scale
+        ch = self.FONT_H * scale
+        half = max(1, h // 2)
+        y_top = y + max(2, (half - ch) // 2)
+        inner = self.pad
+
+        # Top-left device name
+        name = self._name_line or "Roku Remote"
+        max_name = max(4, (w - 2 * inner - 8 * cw) // cw)
+        if len(name) > max_name:
+            name = name[: max(1, max_name - 1)] + "."
+        self._text16(name, x + inner, y_top, t["text"], scale)
+
+        # Top-right media state
+        state = self._state_line or ""
+        if state:
+            max_st = max(2, (w // 3) // cw)
+            if len(state) > max_st:
+                state = state[: max(1, max_st - 1)] + "."
+            tx = x + w - inner - len(state) * cw
+            self._text16(state, tx, y_top, t["muted"], scale)
+
+        # Bottom-left status (app / prompts); may be two lines
+        status = self._status_line or ""
+        on_select = self.page == "devices"
+        full_width = on_select or bool(self._switch_armed)
+        time_txt = "" if full_width else (self._time_line or "")
+        reserve = (len(time_txt) * cw + inner) if time_txt else 0
+        max_status_w = max(40, w - 2 * inner - reserve)
+        max_chars = max(4, max_status_w // cw)
+        if "\n" in status:
+            parts = status.split("\n")
+        else:
+            parts = [status]
+        lines = []
+        for p in parts:
+            p = ascii_label(p) if p else ""
+            wrapped = _wrap_label(p, max_chars, 2)
+            lines.extend(wrapped)
+            if len(lines) >= 2:
+                break
+        lines = lines[:2] or [""]
+        nlines = len(lines)
+        # Two lines use text14 so the stack fits the plaque better.
+        st_ch = (self.FONT_H14 if nlines >= 2 else self.FONT_H) * scale
+        block_h = nlines * st_ch
+        y_bot = y + h - block_h - max(2, inner // 2)
+        # Keep BL under TL when two lines; clamp into lower half.
+        y_bot = max(y + half // 2, min(y_bot, y + h - block_h - 2))
+        draw_st = self._text14 if nlines >= 2 else self._text16
+        for li, line in enumerate(lines):
+            if len(line) > max_chars:
+                line = line[: max(1, max_chars - 1)] + "."
+            draw_st(line, x + inner, y_bot + li * st_ch, t["muted"], scale)
+
+        # Bottom-right clock
+        if time_txt:
+            if len(time_txt) > max(4, (w // 3) // cw):
+                time_txt = time_txt[: max(1, (w // 3) // cw - 1)] + "."
+            tx = x + w - inner - len(time_txt) * cw
+            self._text16(time_txt, tx, y_bot, t["muted"], scale)
+
+        # Hairline scrub rail in the pad gap under the plaque
+        gap_y = max(1, (self.pad - self.progress_h) // 2)
+        ty = y + h + gap_y
+        track_c = edge
+        fill_c = t["transport"]
+        self.fb.fill_rect(x, ty, w, self.progress_h, track_c)
+        if self._progress_visible:
+            frac = self.engine.progress_fraction()
+            if frac is not None:
+                fw = int(w * frac + 0.5)
+                if fw > 0:
+                    if fw > w:
+                        fw = w
+                    self.fb.fill_rect(x, ty, fw, self.progress_h, fill_c)
 
     def _draw_all(self):
         self._ui_begin()
         try:
             self._draw_chassis()
-            self._draw_status()
+            self._draw_plaque()
             for btn in self.buttons:
                 self._draw_button(btn, pressed=False)
             self._present()
         finally:
             self._ui_end()
 
-    def _captions_visible(self):
-        """Show the captions C button while media is actively playing."""
-        return bool(self.engine.media_active())
+    def _apply_chrome_face(self):
+        """In-place Play / Power faces (no full page rebuild)."""
+        play_face = self.engine.play_label()
+        power_face = self.engine.power_label()
+        self._chrome_face = "%s|%s" % (play_face, power_face)
+        play = self._by_id.get("play")
+        if play is not None and play.label != play_face:
+            play.label = play_face
+            self._draw_button(play, pressed=False)
+        power = self._by_id.get("power")
+        pwr_lab = "PWR " + power_face
+        if power is not None and power.label != pwr_lab:
+            power.label = pwr_lab
+            self._draw_button(power, pressed=False)
+        cc = self._by_id.get("cc")
+        if cc is not None:
+            role = "accent" if self.engine.captions_track_hint() else "key_alt"
+            if cc.role != role:
+                cc.role = role
+                self._draw_button(cc, pressed=False)
 
-    def _sync_play_button(self):
-        """Update the transport Play face when media state changes."""
-        btn = self._by_id.get("play")
-        if btn is None:
+    def _note_playback_chrome(self, force_rebuild=False):
+        """Mailbox plaque (app + state) and in-place play/power chrome."""
+        self._queue_playback_plaque()
+        aid = str((self.engine.active_app or {}).get("id") or "")
+        if aid:
+            self.selected_app_id = aid
+        face = "%s|%s" % (self.engine.play_label(), self.engine.power_label())
+        if self.page != "remote":
+            self._chrome_face = face
             return
-        lab = self.engine.play_label()
-        if btn.label == lab:
+        if force_rebuild:
+            self._chrome_face = face
             return
-        btn.label = lab
-        try:
-            self._draw_button(btn, pressed=False)
-            self._present()
-        except Exception:
-            pass
+        self._chrome_face = face
+        self._pending_chrome = True
 
-    def _sync_captions_button(self):
-        """Show/hide or recolor the captions C button from media-player state."""
-        want = self._captions_visible()
-        btn = self._by_id.get("cap")
-        if want and btn is None:
-            # Layout needs the button; rebuild remote page once.
-            if self.page == "remote":
-                self._build_layout()
-                self._draw_all()
+    def _set_name(self, line):
+        self._name_line = ascii_label(line or "Roku Remote")
+
+    def _set_state(self, line):
+        self._state_line = ascii_label(line if line is not None else "")
+
+    def _set_time(self, line):
+        self._time_line = ascii_label(line if line is not None else "")
+
+    def _set_progress_visible(self, visible):
+        self._progress_visible = bool(visible)
+
+    def _update_progress(self):
+        frac = self.engine.progress_fraction()
+        self._progress_visible = frac is not None
+
+    def _set_status(self, line):
+        """Bottom-left plaque: app name or user feedback; sync BR clock + rail."""
+        on_select = self.page == "devices"
+        full_width = on_select or bool(self._switch_armed)
+        raw = line if line is not None else ""
+        if "\n" in raw:
+            self._status_line = "\n".join(ascii_label(p) for p in raw.split("\n"))
+        else:
+            self._status_line = ascii_label(raw)
+        if on_select:
+            self._set_time("")
+            self._set_progress_visible(False)
             return
-        if not want and btn is not None:
-            if self.page == "remote":
-                self._build_layout()
-                self._draw_all()
+        if full_width:
+            self._set_time("")
+            self._set_progress_visible(False)
             return
-        if btn is None:
-            return
-        role = "accent" if self.engine.captions_track_hint() else "key_alt"
-        if btn.role == role and btn.label == "C":
-            return
-        btn.role = role
-        btn.label = "C"
-        try:
-            self._draw_button(btn, pressed=False)
-            self._present()
-        except Exception:
-            pass
+        self._set_time(self.engine.position_label())
+        self._update_progress()
 
     def _refresh_status(self, line=None):
-        """Redraw status band. Pass ``line`` to show a message; else playback status."""
+        """Redraw plaque. Pass ``line`` for BL status; else playback app label."""
         if line is None:
-            line = self.engine.playback_status()
-        self._status_line = ascii_label(line)
+            line = self.engine.playback_app_label()
+        self._set_status(line)
         self._ui_begin()
         try:
-            self._draw_status()
-            self._present()
+            self._draw_plaque()
             if self.page == "remote":
-                self._sync_play_button()
-                self._sync_captions_button()
+                self._apply_chrome_face()
+            self._present()
         finally:
             self._ui_end()
 
     def _queue_status(self, line):
-        """Publish a status line for the soft status pump (safe from worker threads)."""
+        """Publish BL status for the soft pump (safe from worker threads)."""
         if line is None:
             return
-        labeled = ascii_label(line)
-        # Avoid full-panel present() storms when playback text is unchanged.
+        if "\n" in line:
+            labeled = "\n".join(ascii_label(p) for p in line.split("\n"))
+        else:
+            labeled = ascii_label(line)
         if labeled == self._status_line or labeled == self._pending_status:
             return
         self._pending_status = labeled
 
+    def _queue_state(self, line):
+        if line is not None:
+            self._pending_state = ascii_label(line)
+
+    def _queue_playback_plaque(self):
+        self._queue_status(self.engine.playback_app_label())
+        self._queue_state(self.engine.playback_state_label())
+
     def _status_pump(self, _=None):
-        """Drain pending status; periodically refresh playback on the remote page."""
+        """Drain pending plaque/chrome; periodically refresh playback."""
         if self._ui_lock:
             return
+        dirty = False
         pending = self._pending_status
         if pending is not None:
             self._pending_status = None
             if pending != self._status_line:
+                self._set_status(pending)
+                dirty = True
+        pending_st = self._pending_state
+        if pending_st is not None:
+            self._pending_state = None
+            if pending_st != self._state_line:
+                self._set_state(pending_st)
+                dirty = True
+        if self._pending_chrome:
+            self._pending_chrome = False
+            if self.page == "remote":
                 try:
-                    self._status_line = pending
-                    self._draw_status()
-                    if self.page == "remote":
-                        self._sync_play_button()
-                        self._sync_captions_button()
-                    self._present()
+                    self._apply_chrome_face()
+                    dirty = True
                 except Exception:
                     pass
-
-        # Deferred single-tap pick (double-tap arms delete instead).
-        pend = getattr(self, "_pending_pick", None)
-        if pend is not None:
-            import time as _time
-
-            if _time.time() - pend.get("t", 0) >= 0.55:
-                self._pending_pick = None
-                try:
-                    self._pick_device(pend.get("dev"))
-                except Exception:
-                    pass
+        if dirty:
+            try:
+                self._draw_plaque()
+                self._present()
+            except Exception:
+                pass
 
         # Soft-refresh / full Select list replace (name updates for cached TVs).
         if self._pending_select_list is not None:
@@ -981,11 +995,11 @@ class _Remote:
             new = [d for d in self._pending_devices if d.get("host") not in known]
             if new:
                 self.discover_list.extend(new)
-                self._status_line = "Scanning... %d" % len(self.discover_list)
+                self._set_status("Scanning... %d" % len(self.discover_list))
                 self._build_layout()
                 self._draw_all()
         if self.page == "devices" and self._pending_scan_status is not None:
-            self._status_line = self._pending_scan_status
+            self._set_status(self._pending_scan_status)
             self._pending_scan_status = None
             self._build_layout()
             self._draw_all()
@@ -1002,7 +1016,8 @@ class _Remote:
 
             def _work():
                 try:
-                    self._queue_status(self.engine.refresh_playback())
+                    self.engine.refresh_playback()
+                    self._note_playback_chrome()
                 except Exception:
                     pass
                 self._playback_busy = False
@@ -1010,13 +1025,15 @@ class _Remote:
             self._run_bg(_work)
 
     def _refresh_playback_bg(self, flash=None):
-        """Background: refresh active-app/media-player and queue status."""
+        """Background: refresh active-app/media-player and queue plaque."""
         if flash is not None:
             self._refresh_status(flash)
 
         def _work():
             try:
-                self._queue_status(self.engine.refresh_playback())
+                self.engine.refresh_playback()
+                self._note_playback_chrome(force_rebuild=False)
+                self._pending_chrome = True
             except Exception:
                 pass
 
@@ -1076,11 +1093,70 @@ class _Remote:
         fn()
         return False
 
-    def _on_mouse(self, e):
+    def _now_ms(self):
+        import time as _time
+
+        try:
+            if hasattr(_time, "ticks_ms"):
+                return _time.ticks_ms()
+        except Exception:
+            pass
+        return int(_time.time() * 1000)
+
+    def _on_mouse_down(self, e):
         btn = self._hit(e.pos)
         if btn is None:
+            self._press_btn = None
+            self._press_t0 = 0
             return
+        # Device rows: track press for long-press delete; activate on UP.
+        if btn.id.startswith("dev_"):
+            self._press_btn = btn
+            self._press_t0 = self._now_ms()
+            return
+        self._press_btn = None
+        self._press_t0 = 0
         self._activate(btn)
+
+    def _on_mouse_up(self, e):
+        btn = self._press_btn
+        self._press_btn = None
+        t0 = self._press_t0
+        self._press_t0 = 0
+        if btn is None or not btn.id.startswith("dev_"):
+            return
+        hit = self._hit(e.pos)
+        if hit is not btn:
+            return
+        dt = self._now_ms() - t0
+        try:
+            import time as _time
+
+            if hasattr(_time, "ticks_diff") and hasattr(_time, "ticks_ms"):
+                dt = _time.ticks_diff(self._now_ms(), t0)
+        except Exception:
+            pass
+        if dt >= 550:
+            self._arm_delete(btn.meta)
+        else:
+            self._pick_device(btn.meta)
+
+    def _arm_delete(self, dev):
+        host = ((dev or {}).get("host") or "").strip()
+        if not host:
+            return
+        self._delete_armed = host
+        name = ascii_label(((dev or {}).get("name") or "").strip() or host)
+        max_chars = max(8, (self.width - 4 * self.pad) // (self.FONT_W * self.font_scale))
+
+        def fits(s):
+            # Two-line budget: first line + optional "\npress Scan".
+            parts = s.split("\n")
+            return all(len(p) <= max_chars for p in parts)
+
+        self._refresh_status(
+            format_delete_status(name, fits, tail="\npress Scan")
+        )
 
     def _on_key(self, e):
         key = e.key
@@ -1099,16 +1175,20 @@ class _Remote:
         }
         ecp = mapping.get(key)
         if ecp:
-            self._refresh_status(ecp)
+            self._ecp(ecp)
 
-            def _press():
-                self.engine.press(ecp)
-                try:
-                    self._queue_status(self.engine.refresh_playback())
-                except Exception:
-                    pass
+    def _ecp(self, key):
+        """One-shot keypress; plaque/chrome update from a worker."""
 
-            self._run_bg(_press)
+        def _press():
+            self.engine.press(key)
+            try:
+                self.engine.refresh_playback()
+                self._note_playback_chrome()
+            except Exception:
+                pass
+
+        self._run_bg(_press)
 
     def _set_page(self, page):
         self.page = page
@@ -1119,15 +1199,15 @@ class _Remote:
         """Fetch the app list and show the apps page."""
         self.page = "apps"
         self.app_offset = 0
-        self._status_line = "loading apps..."
+        self._set_status("loading apps...")
         self._build_layout()
         self._draw_all()
         self.engine.query_apps()
         n = len(self.engine.store_apps())
         if n:
-            self._status_line = "%d apps" % n
+            self._set_status("%d apps" % n)
         else:
-            self._status_line = self.engine.last_error or "no apps"
+            self._set_status(self.engine.last_error or "no apps")
         self._build_layout()
         self._draw_all()
 
@@ -1155,7 +1235,8 @@ class _Remote:
         self.discover_list = list(self.engine.cached_devices() or [])
         self.page = "devices"
         n = len(self.discover_list)
-        self._status_line = ("%d saved" % n) if n else "no TVs - press Scan"
+        self._set_state("")
+        self._set_status(("%d saved" % n) if n else "no TVs - press Scan")
         self._build_layout()
         self._draw_all()
 
@@ -1182,7 +1263,8 @@ class _Remote:
         self._pending_devices = []
         self._pending_scan_status = None
         self.page = "devices"
-        self._status_line = "Scanning..."
+        self._set_state("")
+        self._set_status("Scanning...")
         self._build_layout()
         self._draw_all()
         self._scan_busy = True
@@ -1223,13 +1305,15 @@ class _Remote:
         if not host:
             self._refresh_status("no host")
             return
+        self._delete_armed = None
         self.engine.set_host(host)
         self.ip_buf = host
         self.app_offset = 0
-        # Jump to remote immediately, then finish ECP connect in the background of
-        # this call (blocking HTTP, but UI already shows the remote).
+        # Jump to remote immediately, then finish ECP connect (blocking HTTP).
         self.page = "remote"
-        self._status_line = name
+        self._set_name(name)
+        self._set_state("")
+        self._set_status(name)
         self._ui_begin()
         try:
             self._build_layout()
@@ -1238,18 +1322,17 @@ class _Remote:
             # Rebuild so the power button shows ON/OFF from device-info.
             self._build_layout()
             self._draw_all()
-            self._refresh_status(self.engine.playback_status())
+            self._queue_playback_plaque()
+            self._refresh_playback_bg()
         finally:
             self._ui_end()
 
     def _toggle_power(self):
         """Send PowerOn/PowerOff from current state; update the PWR face."""
-        # Optimistic UI flip on the main thread; ECP runs in the background.
         key = self.engine.mark_power_optimistic()
-        self._status_line = ascii_label(key)
         if self.page == "remote":
-            self._build_layout()
-            self._draw_all()
+            self._apply_chrome_face()
+            self._present()
         else:
             self._refresh_status(key)
 
@@ -1257,7 +1340,8 @@ class _Remote:
             self.engine.press(key)
             try:
                 self.engine.query_device_info()
-                self._queue_status(self.engine.refresh_playback())
+                self.engine.refresh_playback()
+                self._note_playback_chrome()
             except Exception:
                 pass
 
@@ -1276,14 +1360,14 @@ class _Remote:
 
     def _arm_switch(self, frontend):
         self._switch_armed = frontend
-        scale = self.font_scale
-        max_chars = max(8, (self.width - 4 * self.pad) // (self.FONT_W * scale))
+        max_chars = max(8, (self.width - 4 * self.pad) // (self.FONT_W * self.font_scale))
+
+        def fits(s):
+            parts = s.split("\n")
+            return all(len(p) <= max_chars for p in parts)
+
         self._refresh_status(
-            format_switch_status(
-                frontend,
-                fits=lambda s: len(s) <= max_chars,
-                tail=" press REMOTE",
-            )
+            format_switch_status(frontend, fits=fits, tail="\npress REMOTE")
         )
 
     def _confirm_switch(self):
@@ -1298,19 +1382,27 @@ class _Remote:
         if not ok:
             self._refresh_status("save failed")
             return True
-        self._refresh_status("restart app")
+        msg = restart_app()
+        if msg:
+            self._refresh_status(msg)
         return True
+
+    def _open_more(self):
+        """Show MORE; load apps if needed so TV inputs can appear."""
+        self._switch_armed = None
+        self.page = "more"
+        if not self.engine.apps:
+            self._set_status("loading inputs...")
+            self._build_layout()
+            self._draw_all()
+            self.engine.query_apps()
+        n = len(self.engine.inputs() or [])
+        self._set_status(("%d inputs" % n) if n else "no inputs")
+        self._build_layout()
+        self._draw_all()
 
     def _activate_action(self, btn):
         bid = btn.id
-
-        if bid == "theme":
-            i = _THEME_NAMES.index(self.theme_name)
-            self.theme_name = _THEME_NAMES[(i + 1) % len(_THEME_NAMES)]
-            self.theme = _THEMES[self.theme_name]
-            self._status_line = "theme: " + self.theme_name
-            self._draw_all()
-            return
 
         if bid == "power":
             self._toggle_power()
@@ -1322,13 +1414,12 @@ class _Remote:
             if not self.engine.apps:
                 self._refresh_apps()
             else:
-                self._status_line = "%d apps" % len(self.engine.store_apps())
+                self._set_status("%d apps" % len(self.engine.store_apps()))
                 self._build_layout()
                 self._draw_all()
             return
         if bid == "more_pg":
-            self._switch_armed = None
-            self._set_page("more")
+            self._open_more()
             return
         if bid.startswith("fe_") and btn.meta:
             self._arm_switch(btn.meta)
@@ -1347,26 +1438,7 @@ class _Remote:
             return
 
         if bid.startswith("dev_") and btn.meta:
-            # Double-tap arms delete (graphics has click, not long-press).
-            # Single tap waits ~0.55s then selects.
-            import time as _time
-
-            host = (btn.meta.get("host") or "").strip()
-            name = ascii_label((btn.meta.get("name") or "").strip() or host)
-            now = _time.time()
-            pend = getattr(self, "_pending_pick", None)
-            if pend and pend.get("host") == host and (now - pend.get("t", 0)) < 0.55:
-                self._pending_pick = None
-                self._delete_armed = host
-                scale = self.font_scale
-                max_chars = max(
-                    8, (self.width - 4 * self.pad) // (self.FONT_W * scale)
-                )
-                self._refresh_status(
-                    format_delete_status_chars(name, max_chars, tail=" Scan")
-                )
-                return
-            self._pending_pick = {"host": host, "dev": btn.meta, "t": now}
+            # Handled on MOUSEBUTTONUP (tap vs long-press).
             return
 
         if bid == "find":
@@ -1408,13 +1480,16 @@ class _Remote:
         if bid.startswith("app_") and btn.meta:
             app = btn.meta
             app_id = app.get("id", "")
-            name = app.get("name") or ""
-            self._refresh_status("launch " + name)
+            self.selected_app_id = str(app_id or "")
+            if self.page == "apps":
+                self._build_layout()
+                self._draw_all()
 
             def _launch():
                 self.engine.launch(app_id)
                 try:
-                    self._queue_status(self.engine.refresh_playback())
+                    self.engine.refresh_playback()
+                    self._note_playback_chrome()
                 except Exception:
                     pass
 
@@ -1424,66 +1499,23 @@ class _Remote:
         if bid.startswith("in_") and btn.meta:
             app = btn.meta
             app_id = app.get("id", "")
-            name = app.get("name") or app_id
-            self._refresh_status("input " + ascii_label(name))
 
             def _launch_in():
                 self.engine.launch(app_id)
                 try:
-                    self._queue_status(self.engine.refresh_playback())
+                    self.engine.refresh_playback()
+                    self._note_playback_chrome()
                 except Exception:
                     pass
 
             self._run_bg(_launch_in)
             return
 
-        if bid == "cap":
-            self._refresh_status("ClosedCaption")
-
-            def _cc():
-                self.engine.press("ClosedCaption")
-                try:
-                    self._queue_status(self.engine.refresh_playback())
-                except Exception:
-                    pass
-
-            self._run_bg(_cc)
-            return
-
-        if bid == "dev_info":
-            info = self.engine.query_device_info()
-            self._dev_dump = info.get("model-name", "") + " " + info.get("power-mode", "")
-            self._refresh_status(self._dev_dump or self.engine.last_error or "no info")
-            return
-
-        if bid == "media":
-            self._refresh_status(self.engine.refresh_playback() or "no media")
-            return
-
-        if bid == "tv_ch":
-            raw = self.engine.query_tv_active_channel() or self.engine.query_tv_channels()
-            self._dev_dump = (raw.replace("\n", " ")[:48]) if raw else "n/a"
-            self._refresh_status(self._dev_dump)
-            return
-
-        if bid == "chanperf":
-            raw = self.engine.query_chanperf()
-            self._dev_dump = (raw.replace("\n", " ")[:48]) if raw else self.engine.last_error
-            self._refresh_status(self._dev_dump or "perf n/a")
+        if bid == "no_inputs":
             return
 
         if btn.ecp:
-            key = btn.ecp
-            self._refresh_status(key)
-
-            def _press():
-                self.engine.press(key)
-                try:
-                    self._queue_status(self.engine.refresh_playback())
-                except Exception:
-                    pass
-
-            self._run_bg(_press)
+            self._ecp(btn.ecp)
             return
 
 

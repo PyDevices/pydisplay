@@ -69,8 +69,10 @@ class TestRuntimeQuitLifecycle(unittest.TestCase):
         runtime = Runtime(display=Display())
         runtime.before_quit = lambda: order.append("before")
         runtime._handle_quit()
-        self.assertEqual(order, ["before", "quit"])
         self.assertTrue(runtime.quit_requested)
+        # Quit always defers teardown (avoid re-entrant GUI deinit); flush it.
+        runtime._try_perform_teardown()
+        self.assertEqual(order, ["before", "quit"])
 
 
 class TestHostEventsDeviceQuitChord(unittest.TestCase):

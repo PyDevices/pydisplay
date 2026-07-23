@@ -48,18 +48,33 @@ def _main_file():
     return getattr(m, "__file__", None)
 
 
+def _cmdline_tokens(cmdline_path="/proc/self/cmdline"):
+    """Null-separated tokens from ``/proc/self/cmdline``, or ``()`` if unavailable."""
+    try:
+        with open(cmdline_path, "rb") as f:
+            return tuple(t for t in f.read().split(b"\0") if t)
+    except Exception:
+        return ()
+
+
 def _cmdline_has_dash_i(cmdline_path="/proc/self/cmdline"):
     """True if process cmdline contains a ``-i`` token (Linux unix ports).
 
     MicroPython strips ``-i`` from ``sys.argv`` but leaves it on
     ``/proc/self/cmdline``. Missing procfs (MCU, Windows) returns False.
     """
-    try:
-        with open(cmdline_path, "rb") as f:
-            toks = [t for t in f.read().split(b"\0") if t]
-    except Exception:
-        return False
-    return b"-i" in toks
+    return b"-i" in _cmdline_tokens(cmdline_path)
+
+
+def _cmdline_has_batch_flag(cmdline_path="/proc/self/cmdline"):
+    """True if cmdline has ``-m`` or ``-c`` (script/module entry, no lingering REPL).
+
+    MicroPython ``-m pkg`` often leaves ``sys.modules['__main__']`` without a
+    usable ``__file__``, which would otherwise look like a bare REPL. Missing
+    procfs returns False.
+    """
+    toks = _cmdline_tokens(cmdline_path)
+    return b"-m" in toks or b"-c" in toks
 
 
 def _is_interactive_session():
@@ -68,19 +83,30 @@ def _is_interactive_session():
     CPython: ``sys.flags.interactive`` (``python -i …``) or bare REPL
     (``__main__.__file__ is None``; bare ``python`` often has interactive=0).
 
-    MicroPython and similar: ``-i`` on ``/proc/self/cmdline``, bare REPL
-    (``__main__.__file__ is None``), or raw-REPL / paste exec where
-    ``__file__`` is ``<stdin>`` / ``<string>`` (mpftp ``exec``, soft-reboot
-    paste). Named scripts (``micropython app.py``) still block in
-    ``run_forever``. No env vars; no reserved filenames.
+    MicroPython and similar:
+
+    * ``-i`` on ``/proc/self/cmdline`` → interactive (return to REPL).
+    * ``-m`` / ``-c`` without ``-i`` → not interactive (``run_forever`` blocks;
+      there is no REPL after the entry finishes). Needed because ``-m`` often
+      leaves ``__main__`` with no ``__file__``.
+    * bare REPL (``__main__.__file__ is None``) or raw-REPL / paste exec where
+      ``__file__`` is ``<stdin>`` / ``<string>`` (mpftp ``exec``, soft-reboot
+      paste) → interactive.
+    * named scripts (``micropython app.py``) → not interactive.
+
+    No env vars; no reserved filenames.
     """
     import sys
 
     if getattr(sys.implementation, "name", "") == "cpython":
         flags = getattr(sys, "flags", None)
         return bool(getattr(flags, "interactive", 0)) or (_main_file() is None)
+    if _cmdline_has_dash_i():
+        return True
+    if _cmdline_has_batch_flag():
+        return False
     main = _main_file()
-    return _cmdline_has_dash_i() or main is None or main in ("<stdin>", "<string>")
+    return main is None or main in ("<stdin>", "<string>")
 
 
 class _RuntimeTimerSubscription:
@@ -149,6 +175,10 @@ class Runtime:
         self._display = display
         self._before_quit = None
         self._quit_requested = False
+        # When set, :meth:`run_forever` / :meth:`run` exits the process with this
+        # code after teardown (e.g. app restart). Normal window-close leaves
+        # this ``None`` so the interpreter ends with status 0.
+        self._exit_code = None
         self._timer_async = bool(timer_async)
         self._timer = None
         self._tick_callbacks = []
@@ -287,6 +317,7 @@ class Runtime:
         # Teardown here runs outside the service tick (this coroutine is a
         # separate task from the AsyncTimer), so stopping the timer is safe.
         self._perform_teardown()
+        self._raise_exit_code()
 
     def run_forever(self, tick_ms=SERVICE_TICK_MS):
         """Universal blocking entry — identical client code for every backend.
@@ -322,6 +353,7 @@ class Runtime:
             from multimer import asyncio
 
             asyncio.run(self.run())
+            self._raise_exit_code()
             return
 
         # Interactive + self-driving timer (librt signals / machine.Timer):
@@ -333,6 +365,7 @@ class Runtime:
                 multimer.sleep_ms(tick_ms)
         finally:
             self._perform_teardown()
+        self._raise_exit_code()
 
     def run_async(self, coro_or_fn):
         """Run a bespoke async entry point, respecting an already-running loop.
@@ -363,13 +396,27 @@ class Runtime:
     def quit_requested(self):
         return self._quit_requested
 
-    def request_quit(self):
+    def request_quit(self, code=None):
         """Request a clean shutdown (same path as a device QUIT event).
 
         Useful from application code and from development deadline hooks
         registered via ``multimer.set_deadline_hook``.
+
+        Optional *code*: after teardown, exit the process with that status
+        (from :meth:`run_forever` / :meth:`run`, not from the timer callback).
+        Omit for a normal quit (interpreter status 0).
         """
+        if code is not None:
+            self._exit_code = int(code)
         self._handle_quit()
+
+    def _raise_exit_code(self):
+        """``sys.exit`` when :meth:`request_quit` stored a non-``None`` code."""
+        code = self._exit_code
+        if code is None:
+            return
+        self._exit_code = None
+        raise SystemExit(code)
 
     @property
     def before_quit(self):
@@ -754,15 +801,21 @@ class Runtime:
         # Stop presentation immediately so later callbacks in this same tick
         # (refresh ``show``) do not touch a display we are about to release.
         self._refresh_paused = True
-        # When QUIT is detected from inside the auto-service tick, defer the hard
-        # teardown until after ``_dispatch_tick`` finishes (sync) or via
-        # ``asyncio.sleep(0)`` / ``setTimeout`` (async). Stopping the shared
-        # timer from inside its own callback is unsafe on some backends.
+        # Defer hard teardown — never run ``before_quit`` (e.g. LVGL
+        # ``lv.deinit``) on this call stack. Re-entrant deinit from a GUI click
+        # (front-end switch → ``restart_app`` → ``request_quit``) has segfaulted
+        # on CircuitPython. Service-tick QUIT must also wait until after
+        # ``_dispatch_tick`` finishes (stopping the shared timer from inside its
+        # own callback is unsafe).
+        #
+        # Outside the service tick (soft timer / GUI): only set flags. Do not
+        # arm a ONE_SHOT here — on MicroPython librt that allocates under a
+        # locked heap (``MemoryError: heap is locked``). ``run_forever``'s
+        # loop sees ``_quit_requested`` and tears down in ``finally``; bare
+        # REPL + signals still has atexit.
+        self._pending_teardown = True
         if self._in_service_poll:
-            self._pending_teardown = True
             self._schedule_deferred_teardown()
-            return
-        self._try_perform_teardown()
 
     def _schedule_deferred_teardown(self):
         """Run :meth:`_perform_teardown` after the current timer callback returns."""

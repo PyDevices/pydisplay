@@ -41,18 +41,17 @@ import lvgl as lv  # noqa: E402
 from board_config import display_drv, runtime  # noqa: E402
 from roku_engine import (  # noqa: E402
     FRONTEND_BUTTONS,
-    RokuEngine,
+    app_label,
     ascii_label,
     format_delete_status,
     format_switch_status,
     other_frontends,
+    restart_app,
     set_frontend,
 )
+from roku_sim import make_engine  # noqa: E402
 
 FRONTEND = "lvgl"
-
-# Animated spinner on the Select page while Scan runs (status text is enough).
-_SHOW_SCAN_SPINNER = False
 
 # Museum charcoal chassis + single violet accent.
 _COL = {
@@ -100,12 +99,13 @@ def _sym(name, fallback):
 
 
 def _pick_font(unit, ref_obj=None):
+    # Largest request is 24 (common LVGL montserrat build); fall through if missing.
     if unit >= 560:
-        candidates = (28, 24, 22, 20, 18, 16, 14, 12)
+        candidates = (24, 22, 20, 18, 16, 14, 12)
     elif unit >= 400:
-        candidates = (22, 20, 18, 16, 14, 12)
+        candidates = (24, 22, 20, 18, 16, 14, 12)
     else:
-        candidates = (16, 14, 12)
+        candidates = (20, 18, 16, 14, 12)
     for size in candidates:
         font = getattr(lv, "font_montserrat_" + str(size), None)
         if font is not None:
@@ -144,7 +144,7 @@ def _no_scroll(obj):
 
 class _RokuLvgl:
     def __init__(self, engine=None, start_page="devices"):
-        self.engine = engine if engine is not None else RokuEngine()
+        self.engine = engine if engine is not None else make_engine()
         self.ip_buf = self.engine.host or ""
         self.page = start_page if start_page in ("devices", "remote", "apps", "more") else "devices"
         self.app_offset = 0
@@ -239,6 +239,7 @@ class _RokuLvgl:
         try:
             scr = lv.screen_active()
             self.font = _pick_font(self.unit, scr)
+            # Kept for small-panel experiments later; UI currently uses self.font.
             self.font_sm = _pick_font(max(200, self.unit // 2), scr)
 
             bg = self._panel_style(
@@ -277,7 +278,7 @@ class _RokuLvgl:
             self.state_lbl = lv.label(plaque)
             self.state_lbl.set_text("")
             self.state_lbl.set_style_text_color(_hex(_COL["muted"]), 0)
-            _apply_font(self.state_lbl, self.font_sm)
+            _apply_font(self.state_lbl, self.font)
             ta = getattr(lv, "TEXT_ALIGN", None)
             right = getattr(ta, "RIGHT", None) if ta is not None else None
             if right is not None and hasattr(self.state_lbl, "set_style_text_align"):
@@ -290,7 +291,7 @@ class _RokuLvgl:
             self.status_lbl = lv.label(plaque)
             self.status_lbl.set_text("")
             self.status_lbl.set_style_text_color(_hex(_COL["muted"]), 0)
-            _apply_font(self.status_lbl, self.font_sm)
+            _apply_font(self.status_lbl, self.font)
             self._status_time_reserve = max(48, self.unit // 4)
             self._status_inner_pad = self.pad
             self._layout_status_width(reserve_time=(self.page != "devices"))
@@ -309,7 +310,7 @@ class _RokuLvgl:
             self.time_lbl = lv.label(plaque)
             self.time_lbl.set_text("")
             self.time_lbl.set_style_text_color(_hex(_COL["muted"]), 0)
-            _apply_font(self.time_lbl, self.font_sm)
+            _apply_font(self.time_lbl, self.font)
             if right is not None and hasattr(self.time_lbl, "set_style_text_align"):
                 try:
                     self.time_lbl.set_style_text_align(right, 0)
@@ -472,7 +473,7 @@ class _RokuLvgl:
         lbl = lv.label(btn)
         lbl.set_text(text)
         lbl.set_style_text_color(_hex(fg), 0)
-        _apply_font(lbl, font or self.font_sm)
+        _apply_font(lbl, font or self.font)
         if wrap:
             try:
                 lbl.set_width(max(8, int(w) - max(4, self.pad)))
@@ -592,9 +593,16 @@ class _RokuLvgl:
 
     def _content_metrics(self):
         W = self.W
-        H = self.content.get_height() if hasattr(self.content, "get_height") else (
-            self.H - self.plaque_h - 2 * self.pad
-        )
+        fallback = max(80, self.H - self.plaque_h - 2 * self.pad)
+        H = fallback
+        if self.content is not None and hasattr(self.content, "get_height"):
+            try:
+                reported = int(self.content.get_height())
+                # Ignore 0 / nonsense before LVGL has laid out the content pane.
+                if reported >= 80:
+                    H = reported
+            except Exception:
+                pass
         return W, H
 
     def _row(self, w, row_h, row_bg):
@@ -605,7 +613,7 @@ class _RokuLvgl:
         _no_scroll(r)
         return r
 
-    def _place3(self, row, w, row_h, gap, specs):
+    def _place3(self, row, w, row_h, gap, specs, font=None):
         """Place up to three equal buttons: left / center / right of the band.
 
         Each spec is ``(text, role, action)`` where *action* is a callable
@@ -620,10 +628,12 @@ class _RokuLvgl:
         ):
             if isinstance(action, str):
                 btn = self._key_button(
-                    row, text, 0, 0, bw, row_h, role, hold_key=action
+                    row, text, 0, 0, bw, row_h, role, hold_key=action, font=font
                 )
             else:
-                btn = self._key_button(row, text, 0, 0, bw, row_h, role, action)
+                btn = self._key_button(
+                    row, text, 0, 0, bw, row_h, role, action, font=font
+                )
             btn.align(al, 0, 0)
             out.append(btn)
             labels.append(self._last_btn_label)
@@ -634,6 +644,10 @@ class _RokuLvgl:
         pad = self.pad
         gap = pad
         w = W - 2 * pad
+        # Prefer the computed content height; some ports report 0 from
+        # get_height() before the first layout pass.
+        if H < 80:
+            H = max(80, self.H - self.plaque_h - 2 * self.pad)
 
         # One shared transparent style for every row band on this page.
         row_bg = self._mk_style()
@@ -642,8 +656,19 @@ class _RokuLvgl:
         row_bg.set_pad_all(0)
 
         # A prominent D-pad plus six equal button rows, sized to the content.
+        # Keep ring width-capped and square; grow row_h with spare height only
+        # within safe bounds (do not solve ring from leftover — that can go
+        # negative / huge when H is wrong and hide the D-pad).
+        gaps = 7 * gap
         ring = max(150, int(min(w * 0.6, H * 0.34)))
-        row_h = max(38, (H - ring - 7 * gap) // 6)
+        row_h = max(38, (H - ring - gaps) // 6)
+        # Mild vertical fill: give integer remainder to rows, not the ring.
+        leftover = H - ring - gaps - 6 * row_h
+        if leftover > 0:
+            row_h += leftover // 6
+
+        # Remote page: all labels use the large font (plaque does too).
+        font = self.font
 
         # 1) Utility row anchored to the top; rows below stack via align_to.
         util = self._row(w, row_h, row_bg)
@@ -652,7 +677,7 @@ class _RokuLvgl:
             (_sym("LEFT", "BACK"), "key", "Back"),
             (_sym("HOME", "HOME"), "accent", "Home"),
             (_sym("POWER", "PWR") + " " + self.engine.power_label(), "power", self._toggle_power),
-        ])
+        ], font=font)
         self._power_lbl = util_lbls[2] if len(util_lbls) > 2 else None
 
         # 2) Circular D-pad ring, centered under the utility row.
@@ -678,27 +703,27 @@ class _RokuLvgl:
         arrow = max(1, cell - 2 * margin)
         up = self._key_button(
             ringobj, _sym("UP", "^"), 0, 0, arrow, arrow, "key",
-            hold_key="Up", round_btn=True,
+            hold_key="Up", round_btn=True, font=font,
         )
         up.align(lv.ALIGN.CENTER, 0, -cell)
         down = self._key_button(
             ringobj, _sym("DOWN", "v"), 0, 0, arrow, arrow, "key",
-            hold_key="Down", round_btn=True,
+            hold_key="Down", round_btn=True, font=font,
         )
         down.align(lv.ALIGN.CENTER, 0, cell)
         left = self._key_button(
             ringobj, _sym("LEFT", "<"), 0, 0, arrow, arrow, "key",
-            hold_key="Left", round_btn=True,
+            hold_key="Left", round_btn=True, font=font,
         )
         left.align(lv.ALIGN.CENTER, -cell, 0)
         right = self._key_button(
             ringobj, _sym("RIGHT", ">"), 0, 0, arrow, arrow, "key",
-            hold_key="Right", round_btn=True,
+            hold_key="Right", round_btn=True, font=font,
         )
         right.align(lv.ALIGN.CENTER, cell, 0)
         ok = self._key_button(
             ringobj, "OK", 0, 0, cell, cell, "accent",
-            hold_key="Select", round_btn=True, font=self.font,
+            hold_key="Select", round_btn=True, font=font,
         )
         ok.align(lv.ALIGN.CENTER, 0, 0)
 
@@ -709,7 +734,7 @@ class _RokuLvgl:
             (_sym("REFRESH", "RPL"), "alt", "InstantReplay"),
             (_sym("LIST", "*"), "alt", "Info"),
             (_sym("EYE_OPEN", "CC"), "alt", "ClosedCaption"),
-        ])
+        ], font=font)
 
         # 4) Transport row: Rewind | Play/Pause | Forward.
         play_face = self.engine.play_label()
@@ -722,7 +747,7 @@ class _RokuLvgl:
             (_sym("PREV", "<<"), "transport", "Rev"),
             (play, "transport", "Play"),
             (_sym("NEXT", ">>"), "transport", "Fwd"),
-        ])
+        ], font=font)
         self._play_lbl = trans_lbls[1] if len(trans_lbls) > 1 else None
 
         # 5) Volume row (relocated from the sides into the open bottom area).
@@ -732,7 +757,7 @@ class _RokuLvgl:
             (_sym("VOLUME_MID", "VOL-"), "key", "VolumeDown"),
             (_sym("MUTE", "MUTE"), "alt", "VolumeMute"),
             (_sym("VOLUME_MAX", "VOL+"), "key", "VolumeUp"),
-        ])
+        ], font=font)
 
         # 6) Channel row.
         chan = self._row(w, row_h, row_bg)
@@ -741,7 +766,7 @@ class _RokuLvgl:
             ("CH-", "key", "ChannelDown"),
             (_sym("OK", "ENT"), "alt", "Enter"),
             ("CH+", "key", "ChannelUp"),
-        ])
+        ], font=font)
 
         # 7) Chrome row: APPS | MORE | SELECT.
         chrome = self._row(w, row_h, row_bg)
@@ -750,7 +775,7 @@ class _RokuLvgl:
             ("APPS", "ui", self._open_apps),
             ("MORE", "ui", self._open_more),
             ("SELECT", "ui", self._open_select),
-        ])
+        ], font=font)
 
     def _build_devices(self):
         """Select page: cached TVs + Scan (network discover is explicit only)."""
@@ -781,59 +806,6 @@ class _RokuLvgl:
                 wrap=True,
                 on_long=(lambda d=dev: self._arm_delete(d)),
             )
-        if self._scan_busy and _SHOW_SCAN_SPINNER:
-            self._build_scan_indicator(x0, w, y + len(devices[:max_slots]) * (slot_h + gap), H)
-
-    def _build_scan_indicator(self, x0, w, y, H):
-        """Animated 'working' clue so the user knows discovery is not hung."""
-        spin = max(28, min(w // 4, (H - y) - self.pad))
-        if spin < 24:
-            return
-        cx = x0 + (w - spin) // 2
-        made = False
-        if hasattr(lv, "spinner"):
-            try:
-                sp = lv.spinner(self.content)
-                sp.set_size(spin, spin)
-                made = True
-            except (TypeError, AttributeError):
-                try:
-                    sp = lv.spinner(self.content, 1000, 60)
-                    sp.set_size(spin, spin)
-                    made = True
-                except Exception:
-                    made = False
-            if made:
-                try:
-                    _no_scroll(sp)
-                    sp.set_pos(cx, y)
-                    sp.set_style_arc_color(_hex(_COL["accent"]), lv.PART.INDICATOR)
-                    sp.set_style_arc_color(_hex(_COL["plaque_edge"]), lv.PART.MAIN)
-                except Exception:
-                    pass
-        if not made:
-            # Fallback: a pulsing accent dot driven by the LVGL animation timer.
-            dot = lv.obj(self.content)
-            dsz = max(16, spin // 2)
-            dot.set_size(dsz, dsz)
-            dot.add_style(
-                self._panel_style(_COL["accent"], _shade(_COL["accent"], 0.7), dsz // 2),
-                0,
-            )
-            _no_scroll(dot)
-            dot.set_pos(x0 + (w - dsz) // 2, y)
-            try:
-                a = lv.anim_t()
-                a.init()
-                a.set_var(dot)
-                a.set_values(lv.OPA.COVER, lv.OPA._40)
-                a.set_time(500)
-                a.set_playback_time(500)
-                a.set_repeat_count(lv.ANIM_REPEAT.INFINITE)
-                a.set_custom_exec_cb(lambda _a, v: dot.set_style_opa(v, 0))
-                lv.anim_t.start(a)
-            except Exception:
-                pass
 
     def _build_apps(self):
         W, H = self._content_metrics()
@@ -865,7 +837,7 @@ class _RokuLvgl:
             or ""
         )
         for i, app in enumerate(window):
-            name = ascii_label(app.get("name") or app.get("id") or "?")
+            name = app_label(app.get("name") or app.get("id") or "?")
             col = i % cols
             row = i // cols
             aid = str(app.get("id") or "")
@@ -955,7 +927,9 @@ class _RokuLvgl:
         if not ok:
             self._set_status("save failed")
             return True
-        self._set_status("restart app")
+        msg = restart_app()
+        if msg:
+            self._set_status(msg)
         return True
 
     def _goto_remote(self):
@@ -1091,9 +1065,9 @@ class _RokuLvgl:
         return max(40, plaque_w - 2 * inner - reserve)
 
     def _text_px(self, text):
-        """Measure a single line of status text in pixels (font_sm)."""
+        """Measure a single line of plaque status text in pixels (self.font)."""
         s = text or ""
-        font = self.font_sm
+        font = self.font
         if font is None and hasattr(lv, "font_get_default"):
             try:
                 font = lv.font_get_default()

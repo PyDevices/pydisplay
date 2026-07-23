@@ -177,30 +177,6 @@
       "github:PyDevices/pydisplay/src/examples/pydisplay_demo.py"
     ],
     [
-      "roku_engine.py",
-      "github:PyDevices/pydisplay/src/examples/roku_engine.py"
-    ],
-    [
-      "roku_graphics.py",
-      "github:PyDevices/pydisplay/src/examples/roku_graphics.py"
-    ],
-    [
-      "roku_install.py",
-      "github:PyDevices/pydisplay/src/examples/roku_install.py"
-    ],
-    [
-      "roku_lvgl.py",
-      "github:PyDevices/pydisplay/src/examples/roku_lvgl.py"
-    ],
-    [
-      "roku_remote.py",
-      "github:PyDevices/pydisplay/src/examples/roku_remote.py"
-    ],
-    [
-      "roku_widgets.py",
-      "github:PyDevices/pydisplay/src/examples/roku_widgets.py"
-    ],
-    [
       "rotations.py",
       "github:PyDevices/pydisplay/src/examples/rotations.py"
     ],
@@ -455,6 +431,38 @@
     [
       "proverbs/proverbs_30.py",
       "github:PyDevices/pydisplay/src/examples/proverbs/proverbs_30.py"
+    ],
+    [
+      "roku_remote/__init__.py",
+      "github:PyDevices/pydisplay/src/examples/roku_remote/__init__.py"
+    ],
+    [
+      "roku_remote/__main__.py",
+      "github:PyDevices/pydisplay/src/examples/roku_remote/__main__.py"
+    ],
+    [
+      "roku_remote/roku_engine.py",
+      "github:PyDevices/pydisplay/src/examples/roku_remote/roku_engine.py"
+    ],
+    [
+      "roku_remote/roku_graphics.py",
+      "github:PyDevices/pydisplay/src/examples/roku_remote/roku_graphics.py"
+    ],
+    [
+      "roku_remote/roku_lvgl.py",
+      "github:PyDevices/pydisplay/src/examples/roku_remote/roku_lvgl.py"
+    ],
+    [
+      "roku_remote/roku_remote.py",
+      "github:PyDevices/pydisplay/src/examples/roku_remote/roku_remote.py"
+    ],
+    [
+      "roku_remote/roku_sim.py",
+      "github:PyDevices/pydisplay/src/examples/roku_remote/roku_sim.py"
+    ],
+    [
+      "roku_remote/roku_widgets.py",
+      "github:PyDevices/pydisplay/src/examples/roku_remote/roku_widgets.py"
     ],
     [
       "tiny_toasters/__init__.py",

@@ -14,6 +14,7 @@ from unittest import mock
 import _env  # noqa: F401
 
 from eventsys._runtime import (
+    _cmdline_has_batch_flag,
     _cmdline_has_dash_i,
     _is_interactive_session,
 )
@@ -38,6 +39,38 @@ class TestCmdlineHasDashI(unittest.TestCase):
             path = f.name
         try:
             self.assertFalse(_cmdline_has_dash_i(path))
+        finally:
+            os.unlink(path)
+
+
+class TestCmdlineHasBatchFlag(unittest.TestCase):
+    def test_missing_path_false(self):
+        self.assertFalse(_cmdline_has_batch_flag("/no/such/cmdline"))
+
+    def test_dash_m(self):
+        with tempfile.NamedTemporaryFile(delete=False) as f:
+            f.write(b"micropython\0-m\0examples.roku_remote\0")
+            path = f.name
+        try:
+            self.assertTrue(_cmdline_has_batch_flag(path))
+        finally:
+            os.unlink(path)
+
+    def test_dash_c(self):
+        with tempfile.NamedTemporaryFile(delete=False) as f:
+            f.write(b"micropython\0-c\0print(1)\0")
+            path = f.name
+        try:
+            self.assertTrue(_cmdline_has_batch_flag(path))
+        finally:
+            os.unlink(path)
+
+    def test_script_only(self):
+        with tempfile.NamedTemporaryFile(delete=False) as f:
+            f.write(b"micropython\0/tmp/app.py\0")
+            path = f.name
+        try:
+            self.assertFalse(_cmdline_has_batch_flag(path))
         finally:
             os.unlink(path)
 
@@ -86,6 +119,9 @@ class TestIsInteractiveSession(unittest.TestCase):
                 mock.patch("eventsys._runtime._cmdline_has_dash_i", return_value=True)
             )
             stack.enter_context(
+                mock.patch("eventsys._runtime._cmdline_has_batch_flag", return_value=True)
+            )
+            stack.enter_context(
                 mock.patch("eventsys._runtime._main_file", return_value="/tmp/app.py")
             )
             self.assertTrue(_is_interactive_session())
@@ -96,6 +132,9 @@ class TestIsInteractiveSession(unittest.TestCase):
             stack.enter_context(mock.patch.object(sys, "implementation", impl))
             stack.enter_context(
                 mock.patch("eventsys._runtime._cmdline_has_dash_i", return_value=False)
+            )
+            stack.enter_context(
+                mock.patch("eventsys._runtime._cmdline_has_batch_flag", return_value=False)
             )
             stack.enter_context(
                 mock.patch("eventsys._runtime._main_file", return_value="/tmp/app.py")
@@ -109,18 +148,52 @@ class TestIsInteractiveSession(unittest.TestCase):
             stack.enter_context(
                 mock.patch("eventsys._runtime._cmdline_has_dash_i", return_value=False)
             )
+            stack.enter_context(
+                mock.patch("eventsys._runtime._cmdline_has_batch_flag", return_value=False)
+            )
             stack.enter_context(mock.patch("eventsys._runtime._main_file", return_value=None))
             self.assertTrue(_is_interactive_session())
 
-    def test_micropython_stdin_not_interactive(self):
+    def test_micropython_dash_m_no_main_file_blocks(self):
+        """``-m pkg`` often has no ``__main__.__file__`` but must still block."""
         impl = types.SimpleNamespace(name="micropython")
         with contextlib.ExitStack() as stack:
             stack.enter_context(mock.patch.object(sys, "implementation", impl))
             stack.enter_context(
                 mock.patch("eventsys._runtime._cmdline_has_dash_i", return_value=False)
             )
-            stack.enter_context(mock.patch("eventsys._runtime._main_file", return_value="<stdin>"))
+            stack.enter_context(
+                mock.patch("eventsys._runtime._cmdline_has_batch_flag", return_value=True)
+            )
+            stack.enter_context(mock.patch("eventsys._runtime._main_file", return_value=None))
             self.assertFalse(_is_interactive_session())
+
+    def test_micropython_dash_i_with_dash_m_interactive(self):
+        impl = types.SimpleNamespace(name="micropython")
+        with contextlib.ExitStack() as stack:
+            stack.enter_context(mock.patch.object(sys, "implementation", impl))
+            stack.enter_context(
+                mock.patch("eventsys._runtime._cmdline_has_dash_i", return_value=True)
+            )
+            stack.enter_context(
+                mock.patch("eventsys._runtime._cmdline_has_batch_flag", return_value=True)
+            )
+            stack.enter_context(mock.patch("eventsys._runtime._main_file", return_value=None))
+            self.assertTrue(_is_interactive_session())
+
+    def test_micropython_stdin_paste_interactive(self):
+        """mpftp / raw-REPL paste keeps a REPL; ``run_forever`` should return."""
+        impl = types.SimpleNamespace(name="micropython")
+        with contextlib.ExitStack() as stack:
+            stack.enter_context(mock.patch.object(sys, "implementation", impl))
+            stack.enter_context(
+                mock.patch("eventsys._runtime._cmdline_has_dash_i", return_value=False)
+            )
+            stack.enter_context(
+                mock.patch("eventsys._runtime._cmdline_has_batch_flag", return_value=False)
+            )
+            stack.enter_context(mock.patch("eventsys._runtime._main_file", return_value="<stdin>"))
+            self.assertTrue(_is_interactive_session())
 
 
 @unittest.skipUnless(sys.platform.startswith("linux"), "Linux subprocess/PTY probes")
@@ -181,6 +254,35 @@ class TestInteractiveSubprocess(unittest.TestCase):
                 check=False,
             )
             self.assertIn("I 1", dash_i.stdout + dash_i.stderr, msg=repr(dash_i.stdout))
+
+            # ``-m`` must not look like a bare REPL (no __main__.__file__).
+            mod_dir = tempfile.mkdtemp(prefix="pd_mp_m_")
+            try:
+                init = os.path.join(mod_dir, "pd_m_probe")
+                os.makedirs(init)
+                with open(os.path.join(init, "__init__.py"), "w") as f:
+                    f.write("")
+                with open(os.path.join(init, "__main__.py"), "w") as f:
+                    f.write(
+                        "import sys\n"
+                        f"sys.path.insert(0, {root!r})\n"
+                        "from eventsys._runtime import _is_interactive_session\n"
+                        "print('I', int(_is_interactive_session()))\n"
+                    )
+                dash_m = subprocess.run(
+                    [mp, "-m", "pd_m_probe"],
+                    cwd=mod_dir,
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                    check=False,
+                )
+                self.assertEqual(dash_m.returncode, 0, msg=dash_m.stderr)
+                self.assertIn("I 0", dash_m.stdout, msg=repr(dash_m.stdout))
+            finally:
+                import shutil
+
+                shutil.rmtree(mod_dir, ignore_errors=True)
         finally:
             try:
                 os.unlink(script)
