@@ -347,13 +347,13 @@ EOF
     fi
 done
 
-# displaysys: full tree (all backends) + board_config. One MIP/TestPyPI package.
+# displaysys: full tree (all backends). One MIP/TestPyPI package.
+# board_config.py is not included — install a board_configs/*/ package instead.
 echo
 echo "Processing displaysys (full package)"
 mkdir -p "$DEST_DIR/displaysys/displaysys"
 copy_source_tree "$SOURCE_DIR/lib/displaysys" "$DEST_DIR/displaysys/displaysys/displaysys"
 rm -f "$DEST_DIR/displaysys/displaysys/displaysys/boarddisplay.py"
-cp "$SOURCE_DIR/lib/board_config.py" "$DEST_DIR/displaysys/displaysys/board_config.py"
 cat <<EOF > $DEST_DIR/displaysys/displaysys/manifest.py
 metadata(
     description="$(package_summary "displaysys")",
@@ -363,7 +363,6 @@ metadata(
     pypi_publish="$(pypi_publish_name "displaysys")",
 )
 package("displaysys")
-module("board_config.py")
 EOF
 copy_package_readme "displaysys" "$DEST_DIR/displaysys/displaysys/README.md"
 if [[ "$SKIP_PYPI" -eq 0 ]]; then

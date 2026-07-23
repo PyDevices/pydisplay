@@ -25,7 +25,7 @@ pyodide_toml_path = output_dir + "web/pyscript/pyodide.toml"
 packages = [
     ["add_ons", [], []],
     ["examples", [], []],
-    ["lib/displaysys", [], ["board_config.py", "path.py"]],
+    ["lib/displaysys", [], ["path.py"]],
     ["lib/eventsys", [], []],
     ["lib/graphics", [], []],
     ["lib/multimer", [], []],
@@ -33,6 +33,13 @@ packages = [
 
 # Packages omitted from web/pyscript/micropython.toml (PyScript mounts add_ons for browser examples).
 toml_exclude = ["examples"]
+
+# PyScript [files] mounts that are not part of any mip package JSON.
+# Desktop/browser default board_config stays available in the gallery VFS only;
+# MCU installs get board_config from board_configs/*/package.json instead.
+toml_only_mounts = [
+    ("src/lib/board_config.py", "/lib/"),
+]
 
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
 # MicroPython mip only fetches .py / .mpy / .json (see micropython-lib mip).
@@ -83,6 +90,9 @@ master_toml = [
     "",
     "[files]",
 ]
+for rel_path, mount in toml_only_mounts:
+    master_toml.append(pyscript_toml_file_entry(rel_path, mount))
+master_toml.append("")
 
 # Iterate over the packages and create the package files
 for package_path, deps, extra_files in packages:
