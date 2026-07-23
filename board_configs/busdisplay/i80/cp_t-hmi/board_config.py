@@ -26,8 +26,8 @@ display_bus = ParallelBus(
 
 display_drv = ST7789(
     display_bus,
-    width=320,
-    height=240,
+    width=240,
+    height=320,
     colstart=0,
     rowstart=0,
     rotation=0,

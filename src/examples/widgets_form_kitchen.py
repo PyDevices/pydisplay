@@ -31,6 +31,7 @@ card = pd.Card(
     y=bar.height + 8,
     align=pd.ALIGN.TOP,
     title="Preferences",
+    style="raised",
 )
 
 y = 28
@@ -68,7 +69,7 @@ def on_focus(_s=None, _e=None):
 name.add_event_cb(pd.events.MOUSEBUTTONDOWN, on_focus)
 
 y += name.height + 12
-save = pd.Button(card, label="Save", y=y, align=pd.ALIGN.TOP, radius=6)
+save = pd.Button(card, label="Save", y=y, align=pd.ALIGN.TOP, radius=6, style="raised")
 
 
 def do_save(_s=None, _e=None):
