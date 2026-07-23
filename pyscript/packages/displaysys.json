@@ -1,10 +1,6 @@
 {
   "urls": [
     [
-      "board_config.py",
-      "github:PyDevices/pydisplay/src/lib/board_config.py"
-    ],
-    [
       "path.py",
       "github:PyDevices/pydisplay/src/lib/path.py"
     ],
