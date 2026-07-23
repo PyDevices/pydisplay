@@ -54,6 +54,18 @@ pd.DEBUG = False
 
 FRONTEND = "widgets"
 
+
+def _shade(c, factor):
+    """Darken (``factor`` < 1) or lighten (``factor`` > 1) an RGB565 color."""
+    r = (c >> 8) & 0xF8
+    g = (c >> 3) & 0xFC
+    b = (c << 3) & 0xF8
+    r = max(0, min(255, int(r * factor)))
+    g = max(0, min(255, int(g * factor)))
+    b = max(0, min(255, int(b * factor)))
+    return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)
+
+
 _KEY_MAP = {
     Keys.K_UP: "Up",
     Keys.K_DOWN: "Down",
@@ -105,6 +117,7 @@ class _RemoteUI:
         self.KEY_BG = pal.color565(0x3A, 0x40, 0x4E)
         self.ALT_BG = pal.color565(0x2E, 0x34, 0x40)
         self.ACCENT_BG = pal.color565(0x7C, 0x5C, 0xFC)
+        self.ACCENT2 = pal.color565(0x5A, 0x3E, 0xD0)
         self.POWER_BG = pal.color565(0xE0, 0x5A, 0x4A)
         self.TRANSPORT_BG = pal.color565(0x3A, 0x5A, 0x72)
         self.UI_BG = pal.color565(0x24, 0x28, 0x34)
@@ -517,17 +530,60 @@ class _RemoteUI:
         self.content.invalidate()
 
     def _colors_for(self, role):
+        """Return ``(text, face, bg_hi, bg_lo, rim)`` matching ``roku_graphics`` roles."""
         if role == "accent":
-            return self.ON_ACCENT, self.ACCENT_BG
+            face = self.ACCENT_BG
+            return (
+                self.ON_ACCENT,
+                face,
+                _shade(face, 1.15),
+                self.ACCENT2,
+                _shade(face, 0.55),
+            )
         if role == "power":
-            return self.TEXT, self.POWER_BG
+            face = self.POWER_BG
+            return (
+                self.TEXT,
+                face,
+                _shade(face, 1.12),
+                _shade(face, 0.75),
+                _shade(face, 0.55),
+            )
         if role == "transport":
-            return self.TEXT, self.TRANSPORT_BG
+            face = self.TRANSPORT_BG
+            return (
+                self.TEXT,
+                face,
+                _shade(face, 1.12),
+                _shade(face, 0.8),
+                _shade(face, 0.55),
+            )
         if role == "alt":
-            return self.TEXT, self.ALT_BG
+            face = self.ALT_BG
+            return (
+                self.TEXT,
+                face,
+                _shade(face, 1.1),
+                _shade(face, 0.8),
+                _shade(face, 0.55),
+            )
         if role == "ui":
-            return self.MUTED, self.UI_BG
-        return self.TEXT, self.KEY_BG
+            face = self.UI_BG
+            return (
+                self.MUTED,
+                face,
+                _shade(face, 1.1),
+                _shade(face, 0.8),
+                _shade(face, 0.55),
+            )
+        face = self.KEY_BG
+        return (
+            self.TEXT,
+            face,
+            _shade(face, 1.12),
+            _shade(face, 0.78),
+            _shade(face, 0.55),
+        )
 
     def _apply_wrapped_label(self, btn, label, height=None):
         """Wrap a button's label and center the text block in the tile."""
@@ -557,7 +613,7 @@ class _RemoteUI:
         )
 
     def _button(self, label, x, y, w, h, on_click, role="key", wrap=False, round_btn=False):
-        fg, bg = self._colors_for(role)
+        fg, bg, bg_hi, bg_lo, rim = self._colors_for(role)
         rad = (min(int(w), int(h)) // 2) if round_btn else self.radius
         btn = pd.Button(
             self.content,
@@ -573,6 +629,10 @@ class _RemoteUI:
             text_height=self.btn_text,
             scale=self.text_scale,
             shadow=0,
+            style="raised",
+            bg_hi=bg_hi,
+            bg_lo=bg_lo,
+            rim=rim,
         )
         if wrap:
             self._apply_wrapped_label(btn, label)
@@ -585,7 +645,7 @@ class _RemoteUI:
 
     def _device_button(self, label, x, y, w, h, dev, role="key"):
         """Select-page TV row: short tap picks, long-press arms delete."""
-        fg, bg = self._colors_for(role)
+        fg, bg, bg_hi, bg_lo, rim = self._colors_for(role)
         btn = pd.Button(
             self.content,
             label=label,
@@ -600,6 +660,10 @@ class _RemoteUI:
             text_height=self.btn_text,
             scale=self.text_scale,
             shadow=0,
+            style="raised",
+            bg_hi=bg_hi,
+            bg_lo=bg_lo,
+            rim=rim,
         )
 
         def _now_ms():
