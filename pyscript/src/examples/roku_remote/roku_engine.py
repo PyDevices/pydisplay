@@ -36,8 +36,12 @@ Usage::
     apps = eng.query_apps()
 """
 
-import socket
 import sys
+
+try:
+    import socket
+except ImportError:  # pragma: no cover — e.g. CircuitPython unix without socket
+    socket = None
 
 try:
     import time
@@ -230,6 +234,35 @@ def ascii_label(text):
         o = ord(ch)
         out.append(ch if 32 <= o <= 126 else " ")
     return "".join(out)
+
+
+def pad_slash_breaks(text):
+    """Insert `` / `` at bare ``/`` so wrap-friendly UIs can break there.
+
+    Only when *neither* adjacent character is already a space. If either side
+    already has a space, that ``/`` is left unchanged.
+
+    Example: ``Movies/Shows`` → ``Movies / Shows``; ``Movies /Shows`` unchanged.
+    """
+    s = text or ""
+    out = []
+    n = len(s)
+    for i, ch in enumerate(s):
+        if ch == "/":
+            left_sp = i > 0 and s[i - 1] == " "
+            right_sp = i + 1 < n and s[i + 1] == " "
+            if not left_sp and not right_sp:
+                out.append(" / ")
+            else:
+                out.append("/")
+        else:
+            out.append(ch)
+    return "".join(out)
+
+
+def app_label(text):
+    """ASCII-safe app name with slash padding for line-break opportunities."""
+    return pad_slash_breaks(ascii_label(text))
 
 
 def format_delete_status(name, fits, tail=""):
@@ -640,12 +673,16 @@ def http_request(method, url, timeout=5.0, data=None):
         raise RuntimeError("HTTP via socket failed: " + str(e)) from e
 
 
-def _sockaddr(host, port, socktype=socket.SOCK_STREAM):
+def _sockaddr(host, port, socktype=None):
     """Resolve ``(host, port)`` to a stack sockaddr (tuple or buffer).
 
     MicroPython unix ``connect`` / ``sendto`` often require the sockaddr from
     ``getaddrinfo`` (a ``bytearray``), not a plain ``(host, port)`` tuple.
     """
+    if socket is None:
+        raise OSError("socket module not available")
+    if socktype is None:
+        socktype = socket.SOCK_STREAM
     try:
         return socket.getaddrinfo(host, port, socket.AF_INET, socktype)[0][-1]
     except Exception:
@@ -776,7 +813,11 @@ def _ipv4_from_sockname(name):
         ):
             b = name[1]
             return "%d.%d.%d.%d" % (b[0], b[1], b[2], b[3])
-    if isinstance(name, (bytes, bytearray)) and hasattr(socket, "sockaddr"):
+    if (
+        socket is not None
+        and isinstance(name, (bytes, bytearray))
+        and hasattr(socket, "sockaddr")
+    ):
         try:
             return _ipv4_from_sockname(socket.sockaddr(name))
         except (OSError, ValueError, TypeError, IndexError):
@@ -786,18 +827,19 @@ def _ipv4_from_sockname(name):
 
 def _local_ipv4():
     """Best-effort primary IPv4 (UDP connect + getsockname, WLAN, else Linux proc)."""
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    if socket is not None:
         try:
-            s.connect(_sockaddr("8.8.8.8", 80, socket.SOCK_DGRAM))
-            if hasattr(s, "getsockname"):
-                ip = _ipv4_from_sockname(s.getsockname())
-                if _valid_station_ipv4(ip):
-                    return ip
-        finally:
-            s.close()
-    except (OSError, AttributeError, ValueError, TypeError, IndexError):
-        pass
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            try:
+                s.connect(_sockaddr("8.8.8.8", 80, socket.SOCK_DGRAM))
+                if hasattr(s, "getsockname"):
+                    ip = _ipv4_from_sockname(s.getsockname())
+                    if _valid_station_ipv4(ip):
+                        return ip
+            finally:
+                s.close()
+        except (OSError, AttributeError, ValueError, TypeError, IndexError):
+            pass
     ip = _local_ipv4_from_wlan()
     if ip:
         return ip
@@ -1473,6 +1515,86 @@ def set_frontend(name):
     prefs = _load_prefs()
     prefs["frontend"] = name
     return _write_prefs(prefs)
+
+
+def _restart_is_browser():
+    """True on PyScript / Jupyter / WASM where process restart is unavailable."""
+    if getattr(sys, "platform", "") in ("emscripten", "webassembly"):
+        return True
+    try:
+        import pyscript  # noqa: F401
+
+        return True
+    except ImportError:
+        pass
+    try:
+        get_ipython()  # noqa: F821
+        return True
+    except NameError:
+        return False
+
+
+def _restart_is_jupyter():
+    try:
+        get_ipython()  # noqa: F821
+        return True
+    except NameError:
+        return False
+
+
+# Distinct from SDL window-close (usually 0) so a host shell can relaunch.
+# Supported desktop relaunch path — from ``pydisplay/src``:
+#   while true; do micropython -m examples.roku_remote; [ $? -eq 42 ] || break; done
+# PowerShell:
+#   while ($true) { micropython -m examples.roku_remote; if ($LASTEXITCODE -ne 42) { break } }
+# (bash ``while cmd; do`` is wrong — exit 42 fails the while-condition.)
+RESTART_EXIT_CODE = 42
+
+
+def restart_app():
+    """Restart after a front-end prefs change.
+
+    * PyScript / Jupyter / WASM: return a short status (``reload page`` /
+      ``restart kernel``); caller shows it — no process exit.
+    * MCU: ``machine.reset()`` / ``microcontroller.reset()`` (does not return).
+    * Desktop: ``runtime.request_quit(42)`` so SDL teardown runs, then the
+      process exits 42 from ``run_forever``. Relaunch with a host shell loop
+      (see ``RESTART_EXIT_CODE``); there is no in-process ``execv`` path.
+    """
+    if _restart_is_browser():
+        if _restart_is_jupyter():
+            return "restart kernel"
+        return "reload page"
+
+    try:
+        import machine
+
+        machine.reset()
+    except (ImportError, AttributeError):
+        pass
+    try:
+        import microcontroller
+
+        microcontroller.reset()
+    except (ImportError, AttributeError):
+        pass
+
+    # Clean Runtime shutdown (same path as window close), then exit 42.
+    try:
+        from board_config import runtime
+
+        runtime.request_quit(RESTART_EXIT_CODE)
+        return None
+    except Exception:
+        pass
+
+    try:
+        sys.exit(RESTART_EXIT_CODE)
+    except SystemExit:
+        raise
+    except Exception:
+        pass
+    raise SystemExit(RESTART_EXIT_CODE)
 
 
 def format_switch_status(frontend, fits=None, tail="\npress REMOTE"):

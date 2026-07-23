@@ -116,6 +116,19 @@ class _TimerCore:
             max_gap = min(max_gap, 2000)
             gap = min(gap, max_gap)
             self._soft_gap_ms = gap
+            # ONE_SHOT cleanup must not run in the librt/FFI signal path
+            # (heap locked on MicroPython → MemoryError in timer_settime).
+            if self._mode == self.ONE_SHOT:
+                self._deinit_oneshot_safe()
+
+    def _deinit_oneshot_safe(self):
+        """Disarm a fired ONE_SHOT; absorb heap-locked failures on signal path."""
+        try:
+            self.deinit()
+        except MemoryError:
+            # Kernel oneshot already has a zero interval; leak the timer id
+            # until process exit rather than allocating under a locked heap.
+            pass
 
     def _deliver(self):
         if self._busy:
@@ -147,7 +160,10 @@ class _TimerCore:
             self._busy = False
 
         if self._mode == self.ONE_SHOT:
-            self.deinit()
+            if self._hard:
+                # May still be heap-locked on librt+MP FFI; absorb if so.
+                self._deinit_oneshot_safe()
+            # Soft: ``_soft_invoke`` deinits after the scheduled callback.
             return 0
         return self._period_ms
 
