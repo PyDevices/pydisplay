@@ -137,6 +137,7 @@ class _RemoteUI:
         self._playback_busy = False
         self._status_ticks = 0
         self._scan_busy = False
+        self._scan_full = False
         self._pending_scan = False
         self._scan_yield = False
         self._press_t0 = 0
@@ -808,14 +809,24 @@ class _RemoteUI:
         x0 = pad
         w = W - 2 * pad
         row_h = max(40, H // 11)
-        self._button("REMOTE", x0, pad, (w - gap) // 2, row_h, self._goto_remote, "ui")
+        third = (w - 2 * gap) // 3
+        self._button("REMOTE", x0, pad, third, row_h, self._goto_remote, "ui")
         self._button(
             "SCAN",
-            x0 + (w - gap) // 2 + gap,
+            x0 + third + gap,
             pad,
-            (w - gap) // 2,
+            third,
             row_h,
             self._scan_button,
+            "accent",
+        )
+        self._button(
+            "FULL",
+            x0 + 2 * (third + gap),
+            pad,
+            third,
+            row_h,
+            self._full_scan_button,
             "accent",
         )
         y = pad + row_h + gap
@@ -1212,7 +1223,12 @@ class _RemoteUI:
             self._set_status("deleted")
             self._build_page()
             return
-        self._start_scan()
+        self._start_scan(full=False)
+
+    def _full_scan_button(self):
+        """Select FULL: disarm delete and run SSDP + cache + unicast /24."""
+        self._delete_armed = None
+        self._start_scan(full=True)
 
     def _pick_device(self, dev):
         host = (dev or {}).get("host") or ""
@@ -1241,14 +1257,15 @@ class _RemoteUI:
 
         self._run_bg(_work)
 
-    def _start_scan(self):
+    def _start_scan(self, full=False):
         if self._scan_busy:
             return
         self._delete_armed = None
         self._scan_busy = True
+        self._scan_full = bool(full)
         self._pending_devices = []
         self.page = "devices"
-        self._set_status("Scanning...")
+        self._set_status("Full scan..." if full else "Scanning...")
         self._build_page()
         # Defer discover so the Select page can paint first.
         self._scan_yield = True
@@ -1264,6 +1281,7 @@ class _RemoteUI:
 
     def _run_scan_work(self):
         self._paint_now()
+        scan_fallback = bool(getattr(self, "_scan_full", False))
 
         def _on_device(dev):
             host = (dev or {}).get("host") or ""
@@ -1280,7 +1298,7 @@ class _RemoteUI:
                     timeout=3.0,
                     retries=1,
                     ssdp=True,
-                    scan_fallback=True,
+                    scan_fallback=scan_fallback,
                     on_device=_on_device,
                 )
                 for dev in devices or []:

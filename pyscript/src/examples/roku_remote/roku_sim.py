@@ -411,13 +411,11 @@ class RokuSimEngine(RokuEngine):
         if not devices:
             return False
         self.set_host(devices[0]["host"])
-        return self.connect(discover_if_empty=False)
+        return self.connect()
 
     def connect(self, discover_if_empty=True):
-        if not self.host and discover_if_empty:
-            devices = self.discover()
-            if devices:
-                self.set_host(devices[0]["host"])
+        """Ping device-info for the current host (no auto-discover / auto-pick)."""
+        del discover_if_empty
         if not self.host:
             self.last_error = "no host"
             self.connected = False

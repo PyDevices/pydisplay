@@ -176,6 +176,7 @@ class _RokuLvgl:
         self._playback_busy = False
         self._status_ticks = 0
         self._scan_busy = False
+        self._scan_full = False
         self._last_scan_busy = False
         # Explicit Scan only (see _start_scan); Select opens the cached list.
         self._pending_scan = False
@@ -778,17 +779,20 @@ class _RokuLvgl:
         ], font=font)
 
     def _build_devices(self):
-        """Select page: cached TVs + Scan (network discover is explicit only)."""
+        """Select page: cached TVs + Scan/Full (network discover is explicit only)."""
         W, H = self._content_metrics()
         pad = self.pad
         gap = pad
         x0 = pad
         w = W - 2 * pad
         row_h = max(40, H // 11)
-        self._key_button(self.content, "REMOTE", x0, 0, (w - gap) // 2, row_h, "ui",
+        third = (w - 2 * gap) // 3
+        self._key_button(self.content, "REMOTE", x0, 0, third, row_h, "ui",
                          self._goto_remote)
-        self._key_button(self.content, "SCAN", x0 + (w - gap) // 2 + gap, 0,
-                         (w - gap) // 2, row_h, "accent", self._scan_button)
+        self._key_button(self.content, "SCAN", x0 + third + gap, 0, third, row_h,
+                         "accent", self._scan_button)
+        self._key_button(self.content, "FULL", x0 + 2 * (third + gap), 0, third, row_h,
+                         "accent", self._full_scan_button)
         y = row_h + gap
         slot_h = max(44, self.plaque_h - 2 * pad)
         devices = self.discover_list or []
@@ -1413,7 +1417,7 @@ class _RokuLvgl:
         self._set_status(format_delete_status(name, fits, tail="\npress Scan"))
 
     def _scan_button(self):
-        """Select-page Scan: confirm delete if armed, else start network discover."""
+        """Select-page Scan: confirm delete if armed, else quick discover."""
         host = self._delete_armed
         if host:
             self._delete_armed = None
@@ -1427,7 +1431,12 @@ class _RokuLvgl:
             self._set_status("deleted")
             self._show_page("devices")
             return
-        self._start_scan()
+        self._start_scan(full=False)
+
+    def _full_scan_button(self):
+        """Select FULL: disarm delete and run SSDP + cache + unicast /24."""
+        self._delete_armed = None
+        self._start_scan(full=True)
 
     def _pick_device(self, dev):
         host = (dev or {}).get("host") or ""
@@ -1455,15 +1464,16 @@ class _RokuLvgl:
 
         self._run_bg(_work)
 
-    def _start_scan(self):
+    def _start_scan(self, full=False):
         """Explicit network discover — merges into cache; never clears the list."""
         if self._scan_busy:
             return
         self._delete_armed = None
         self._scan_busy = True
+        self._scan_full = bool(full)
         self._last_scan_busy = True
         self._pending_devices = []
-        self._set_status("Scanning...")
+        self._set_status("Full scan..." if full else "Scanning...")
         self._set_state("")
         # Keep the Select page painted, then defer discover so LVGL can refresh.
         self._show_page("devices")
@@ -1542,6 +1552,7 @@ class _RokuLvgl:
         if self._scan_worker_active:
             return
         self._scan_worker_active = True
+        scan_fallback = bool(getattr(self, "_scan_full", False))
         # Present the devices page before a possibly-blocking inline discover.
         self._paint_now()
 
@@ -1561,7 +1572,11 @@ class _RokuLvgl:
         def _work():
             try:
                 devices = self.engine.discover(
-                    timeout=8.0, retries=1, ssdp=True, scan_fallback=True, on_device=_on_device
+                    timeout=8.0,
+                    retries=1,
+                    ssdp=True,
+                    scan_fallback=scan_fallback,
+                    on_device=_on_device,
                 )
                 for dev in devices or []:
                     _on_device(dev)

@@ -961,6 +961,38 @@ def _tcp_open_retry(host, port, timeout=1.0, attempts=2):
     return False
 
 
+def _nonblock_connect_ok(sock, poll_events=0):
+    """True if a non-blocking ``connect`` finished successfully.
+
+    CPython/Winsock expose ``getpeername``; unix MicroPython often does not, so
+    fall back to ``SO_ERROR`` or POLLOUT without POLLERR/POLLHUP.
+    """
+    if sock is None:
+        return False
+    if hasattr(sock, "getpeername"):
+        try:
+            sock.getpeername()
+            return True
+        except OSError:
+            return False
+    try:
+        so_err = getattr(socket, "SO_ERROR", None)
+        if so_err is not None:
+            return sock.getsockopt(socket.SOL_SOCKET, so_err) == 0
+    except (OSError, AttributeError, TypeError):
+        pass
+    try:
+        import select
+
+        err_bits = getattr(select, "POLLERR", 0) | getattr(select, "POLLHUP", 0)
+        out_bit = getattr(select, "POLLOUT", 0)
+        if poll_events and out_bit and (poll_events & out_bit):
+            return not (poll_events & err_bits)
+    except ImportError:
+        pass
+    return False
+
+
 def _ecp_device(host, port=ROKU_PORT, timeout=1.5):
     """Return discovery dict if host speaks Roku ECP, else None."""
     try:
@@ -1035,9 +1067,8 @@ def _probe_hosts_poll(hosts, port, connect_timeout, batch_size=32):
                 addr = _sockaddr(host, port, socket.SOCK_STREAM)
                 try:
                     s.connect(addr)
-                    # Immediate success (rare)
-                    if hasattr(s, "getpeername"):
-                        s.getpeername()
+                    # Immediate success (rare on non-blocking)
+                    if _nonblock_connect_ok(s, getattr(select, "POLLOUT", 0)):
                         open_hosts.append(host)
                         s.close()
                         continue
@@ -1078,6 +1109,7 @@ def _probe_hosts_poll(hosts, port, connect_timeout, batch_size=32):
                 break
             for item in ready:
                 obj = item[0]
+                ev = item[1] if len(item) > 1 else 0
                 # CPython poll() yields int fds; MicroPython yields the socket.
                 if isinstance(obj, int):
                     key = fd_to_key.get(obj)
@@ -1086,14 +1118,7 @@ def _probe_hosts_poll(hosts, port, connect_timeout, batch_size=32):
                 if key is None or key not in socks:
                     continue
                 host, s = socks[key]
-                ok = False
-                try:
-                    if hasattr(s, "getpeername"):
-                        s.getpeername()
-                        ok = True
-                except OSError:
-                    ok = False
-                if ok:
+                if _nonblock_connect_ok(s, ev):
                     open_hosts.append(host)
                 try:
                     poller.unregister(s)
@@ -1659,8 +1684,9 @@ def discover_rokus_scan(
     On MicroPython ``network`` targets the default is 4 workers.
     ``priority_hosts`` are probed first with a longer retry (rescans).
     ``on_device(info)`` is called as each ECP device is confirmed (progressive UI).
-    ``find_all`` continues after the first hit (device picker); default False keeps
-    the fast short-circuit for ``connect()``.
+    ``find_all`` continues after the first hit (device picker / full LAN search).
+    Default False is only for rare one-shot probes; ``RokuEngine.discover``
+    always passes True. ``connect()`` does not auto-discover.
     Asleep sets typically close ECP and will not appear.
     """
     if workers is None:
@@ -1709,7 +1735,7 @@ def discover_rokus_scan(
 
     rest = [h for h in hosts if h not in seen]
     # Probe in worker-sized chunks. When not find_all, stop after the first
-    # confirmed Roku so connect()/single-target discovery stays fast.
+    # confirmed Roku (legacy one-shot). Engine.discover always uses find_all.
     step = max(8, int(workers))
     for i in range(0, len(rest), step):
         chunk = rest[i : i + step]
@@ -1892,7 +1918,7 @@ def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
         devices = list(found.values())
     if devices or not scan_fallback:
         return devices
-    return discover_rokus_scan()
+    return discover_rokus_scan(find_all=True)
 
 
 class RokuEngine:
@@ -2267,6 +2293,14 @@ class RokuEngine:
     def discover(
         self, timeout=1.5, retries=1, scan_fallback=True, ssdp=True, on_device=None
     ):
+        """Find reachable Rokus (SSDP + cache reprobe, optional unicast /24).
+
+        Cache hosts are probed first (and reported via ``on_device``) so the UI
+        can populate quickly. Select **SCAN** passes ``scan_fallback=False``
+        (SSDP + known-host reprobe only). Select **FULL** passes ``True`` so a
+        unicast ``/24`` runs and never-saved TVs are not missed. Does not pick
+        a target host — callers use Select / ``set_host`` / ``resume_last_host``.
+        """
         try:
             known = _load_known_hosts()
             priority = []
@@ -2280,8 +2314,8 @@ class RokuEngine:
                     priority.append(host)
             found = []
             path = "none"
-            # UI progressive discovery (on_device) wants every TV; connect() wants one.
-            find_all = on_device is not None
+            # Always enumerate every reachable TV (Scan / Select / CLI).
+            find_all = True
             if ssdp:
                 # Keep scan_fallback out of discover_rokus so on_device still runs
                 # on the unicast path; enrich SSDP hits with ECP names for the UI.
@@ -2307,7 +2341,7 @@ class RokuEngine:
                             pass
                 found = enriched
             # Re-probe persisted / session-known hosts SSDP missed (UDP flakiness).
-            if find_all and priority:
+            if priority:
                 have = {d.get("host") for d in found if d.get("host")}
                 missing = [h for h in priority if h not in have]
                 if missing:
@@ -2317,15 +2351,9 @@ class RokuEngine:
                     if recovered:
                         found = list(found) + list(recovered)
                         path = (path or "none") + "+reprobe"
-            # Unicast scan when nothing found, or when the UI asked for every TV
-            # and SSDP returned empty. Partial known-host reprobe must not skip
-            # the /24 scan — that permanently hides TVs never saved on this host
-            # (common under WSL where SSDP is dead and HOME != Windows cache).
-            ssdp_empty = (path or "").startswith("ssdp_empty")
-            need_scan = scan_fallback and (
-                not found or (find_all and ssdp_empty)
-            )
-            if need_scan:
+            # Full unicast /24 when scan_fallback is on (Select FULL). Select SCAN
+            # passes False so SSDP + cache reprobe stay fast.
+            if scan_fallback:
                 have = {d.get("host") for d in found if d.get("host")}
 
                 def _on_new(info):
@@ -2343,6 +2371,7 @@ class RokuEngine:
                     priority_hosts=priority,
                     on_device=_on_new if on_device is not None else None,
                     find_all=find_all,
+                    connect_timeout=0.35,
                 )
                 if not found:
                     found = scanned
@@ -2420,14 +2449,16 @@ class RokuEngine:
             self.connected = False
             self.last_error = "TV changed"
             return False
-        return self.connect(discover_if_empty=False)
+        return self.connect()
 
     def connect(self, discover_if_empty=True):
-        """Ping device-info. If host empty and discover_if_empty, discover first."""
-        if not self.host and discover_if_empty:
-            devices = self.discover(ssdp=True, scan_fallback=True)
-            if devices:
-                self.set_host(devices[0]["host"])
+        """Ping device-info for the current host.
+
+        Does not auto-discover or pick a TV. ``discover_if_empty`` is retained for
+        call-site compatibility and ignored — empty host → failure. Use
+        ``resume_last_host``, Select + ``set_host``, or an explicit host first.
+        """
+        del discover_if_empty
         if not self.host:
             self.last_error = "no host"
             self.connected = False

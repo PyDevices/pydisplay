@@ -534,8 +534,12 @@ class _Remote:
         """Pick among discovered Rokus (friendly name only)."""
         row_h = max(36, self.height // 14)
         gap = self.pad
-        self._add("back_pg", "REMOTE", x0, y0, w // 2 - gap, row_h, role="ui")
-        self._add("find", "SCAN", x0 + w // 2, y0, w // 2, row_h, role="accent")
+        third = (w - 2 * gap) // 3
+        self._add("back_pg", "REMOTE", x0, y0, third, row_h, role="ui")
+        self._add("find", "SCAN", x0 + third + gap, y0, third, row_h, role="accent")
+        self._add(
+            "find_full", "FULL", x0 + 2 * (third + gap), y0, third, row_h, role="accent"
+        )
         y = y0 + row_h + gap
         slot_h = max(32, self.FONT_H * self.font_scale + 2 * self.pad)
         devices = self.discover_list or []
@@ -1225,9 +1229,9 @@ class _Remote:
                 return
         self._pending_devices.append(dev)
 
-    def _run_scan(self, seed_priority=True):
+    def _run_scan(self, seed_priority=True, full=False):
         """Compatibility shim: start a background scan (progressive updates)."""
-        self._start_scan(seed_priority=seed_priority)
+        self._start_scan(seed_priority=seed_priority, full=full)
 
     def _open_select(self):
         """Show Select page from cache (no network scan); soft-refresh names."""
@@ -1253,7 +1257,7 @@ class _Remote:
 
         self._run_bg(_soft)
 
-    def _start_scan(self, seed_priority=True):
+    def _start_scan(self, seed_priority=True, full=False):
         """Show the Select page and scan on a worker; merge into cache (no prune)."""
         if self._scan_busy:
             return
@@ -1264,10 +1268,11 @@ class _Remote:
         self._pending_scan_status = None
         self.page = "devices"
         self._set_state("")
-        self._set_status("Scanning...")
+        self._set_status("Full scan..." if full else "Scanning...")
         self._build_layout()
         self._draw_all()
         self._scan_busy = True
+        scan_fallback = bool(full)
 
         def _work():
             try:
@@ -1275,7 +1280,7 @@ class _Remote:
                     timeout=3.0,
                     retries=1,
                     ssdp=True,
-                    scan_fallback=True,
+                    scan_fallback=scan_fallback,
                     on_device=self._on_device_found,
                 )
                 for dev in devices or []:
@@ -1352,7 +1357,7 @@ class _Remote:
         # Brief pressed face, then restore BEFORE any work. Holding the pressed
         # look across blocking ECP HTTP made ~5s white buttons (socket timeout
         # under the librt soft-tick delivery path).
-        skip_flash = bid == "find" or bid.startswith("dev_")
+        skip_flash = bid in ("find", "find_full") or bid.startswith("dev_")
         if not skip_flash:
             self._flash(btn)
             self._unpress(bid)
@@ -1459,9 +1464,13 @@ class _Remote:
                     self._build_layout()
                     self._draw_all()
                     return
-                self._run_scan(seed_priority=True)
+                self._run_scan(seed_priority=True, full=False)
             else:
                 self._open_select()
+            return
+
+        if bid == "find_full":
+            self._run_scan(seed_priority=True, full=True)
             return
 
         if bid == "apps_refresh":
