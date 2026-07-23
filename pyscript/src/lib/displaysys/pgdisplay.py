@@ -9,8 +9,11 @@ displaysys.pgdisplay
 import pygame as pg
 
 from displaysys import (
+    _DESKTOP_WINDOW_CHROME_H,
+    _DESKTOP_WINDOW_CHROME_W,
     DisplayDriver,
     color_rgb,
+    desktop_work_area,
     fit_scale_to_desktop,
     notify_board_config_scale_override,
 )
@@ -251,14 +254,24 @@ class PGDisplay(DisplayDriver):
             self._scale = 1
 
         pg.init()
-        try:
-            info = pg.display.Info()
-            desktop_w, desktop_h = info.current_w, info.current_h
-        except Exception:
-            desktop_w, desktop_h = 0, 0
+        ux, uy, desktop_w, desktop_h = desktop_work_area()
+        if desktop_w <= 0 or desktop_h <= 0:
+            try:
+                info = pg.display.Info()
+                desktop_w, desktop_h = info.current_w, info.current_h
+                ux, uy = 0, 0
+            except Exception:
+                desktop_w, desktop_h = 0, 0
+        self._work_area = (ux, uy, desktop_w, desktop_h)
         requested_scale = self._scale
         fitted = fit_scale_to_desktop(
-            self.width, self.height, requested_scale, desktop_w, desktop_h
+            self.width,
+            self.height,
+            requested_scale,
+            desktop_w,
+            desktop_h,
+            chrome_w=_DESKTOP_WINDOW_CHROME_W,
+            chrome_h=_DESKTOP_WINDOW_CHROME_H,
         )
         notify_board_config_scale_override("PGDisplay", requested_scale, fitted, quiet=quiet)
         if fitted != requested_scale:
@@ -270,6 +283,9 @@ class PGDisplay(DisplayDriver):
         self._buffer.fill((0, 0, 0))
 
         super().__init__(quiet=quiet)
+        # DisplayDriver.__init__ used to reset touch_scale to 1.0; keep window scale
+        # so HostEventsDevice maps pygame coords into panel space.
+        self.touch_scale = self._scale
 
     ############### Required API Methods ################
 
@@ -280,22 +296,43 @@ class PGDisplay(DisplayDriver):
         also clamps the SDL window when a caller opts into ``pg.RESIZABLE`` or
         the platform WM would otherwise allow resizing.
         """
+        win = self._sdl_window()
+        if win is not None:
+            win.resizable = False
+
+    def _sdl_window(self):
         try:
             from pygame._sdl2.video import Window
         except ImportError:
-            return
+            return None
         try:
-            win = Window.from_display_module()
+            return Window.from_display_module()
         except Exception:
+            return None
+
+    def _place_window(self, win_w, win_h) -> None:
+        """Center the window in the usable work area (taskbar / chrome aware)."""
+        win = self._sdl_window()
+        if win is None:
             return
-        win.resizable = False
+        ux, uy, uw, uh = getattr(self, "_work_area", (0, 0, 0, 0))
+        if uw <= 0 or uh <= 0:
+            return
+        x = ux + max(0, (uw - win_w) // 2)
+        y = uy + _DESKTOP_WINDOW_CHROME_H + max(0, (uh - _DESKTOP_WINDOW_CHROME_H - win_h) // 2)
+        try:
+            win.position = (x, y)
+        except Exception:
+            pass
 
     def init(self) -> None:
         """
         Initializes the display instance.  Called by __init__ and rotation setter.
         """
+        win_w = int(self.width * self._scale)
+        win_h = int(self.height * self._scale)
         self._window = pg.display.set_mode(
-            size=(int(self.width * self._scale), int(self.height * self._scale)),
+            size=(win_w, win_h),
             flags=self._window_flags,
             depth=self.color_depth,
             display=0,
@@ -303,6 +340,7 @@ class PGDisplay(DisplayDriver):
         )
         pg.display.set_caption(self._title)
         self._lock_window_size()
+        self._place_window(win_w, win_h)
 
         super().vscrdef(
             0, self.height, 0

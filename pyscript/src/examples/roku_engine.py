@@ -11,6 +11,9 @@ Roku External Control Protocol (ECP) client — no display, event, or UI imports
 Talks HTTP on port 8060 and discovers devices via SSDP (``ST: roku:ecp``),
 with a portable unicast ``:8060`` / ``/query/device-info`` scan fallback when
 multicast is blocked (common on WSL NAT and some host firewalls).
+Prefs are persisted (``~/.roku_prefs`` on desktop, ``/roku_prefs`` on MCU):
+saved TVs, most-recent host/serial, and chosen front end. Missing prefs are
+fine (empty defaults).
 Shared by every Roku front end (``roku_graphics``, ``roku_widgets``,
 ``roku_lvgl``, and the ``roku_remote`` launcher): all UI-agnostic ECP,
 discovery, and label/action helpers live here so the display layer is fully
@@ -46,9 +49,31 @@ except ImportError:  # pragma: no cover
 ROKU_HOST = ""
 ROKU_PORT = 8060
 
+# When True, front-end modules skip auto ``run()`` on import (``roku_remote``
+# owns launch). The example kit imports front ends directly, so leave False.
+_LAUNCHER_OWNS_RUN = False
+
 SSDP_ADDR = "239.255.255.250"
 SSDP_PORT = 1900
 SSDP_ST = "roku:ecp"
+
+# Persistent prefs (desktop home vs MCU root). Plain open()/read/write.
+_PREFS_HOME_NAME = ".roku_prefs"
+_PREFS_MCU_NAME = "/roku_prefs"
+
+# Front-end ids stored in prefs / offered on the MORE switcher.
+FRONTEND_IDS = ("lvgl", "widgets", "graphics")
+FRONTEND_LABELS = {
+    "lvgl": "lvgl",
+    "widgets": "widgets",
+    "graphics": "graphics",
+}
+FRONTEND_BUTTONS = {
+    "lvgl": "LVGL",
+    "widgets": "WIDGETS",
+    "graphics": "GFX",
+}
+DEFAULT_FRONTEND = "lvgl"
 
 # Documented ECP keypress names (remote + TV extras).
 ECP_KEYS = (
@@ -207,6 +232,84 @@ def ascii_label(text):
     return "".join(out)
 
 
+def format_delete_status(name, fits, tail=""):
+    """Build a delete-confirm status line fitted by ``fits(str) -> bool``.
+
+    Full form: ``Delete Name?`` (+ optional ``tail``, e.g. ``\\npress Scan``).
+    When truncated: ``Delete Pref...?`` — the ``...`` replaces the space that
+    would sit before ``?`` (no space between the ellipsis and ``?``).
+    """
+    name = ascii_label(name or "").strip() or "?"
+    tail = tail or ""
+    full = "Delete %s?" % name + tail
+    if fits(full):
+        return full
+    lo = 0
+    hi = len(name)
+    best = "Delete...?" + tail
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        pref = name[:mid].rstrip()
+        cand = "Delete %s...?" % pref + tail
+        if fits(cand):
+            best = cand
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return best
+
+
+def format_delete_status_chars(name, max_chars, tail=""):
+    """Like :func:`format_delete_status` with a character budget for the whole string."""
+    limit = max(8, int(max_chars or 0))
+
+    def fits(s):
+        return len(s) <= limit
+
+    return format_delete_status(name, fits, tail=tail)
+
+
+def _parse_clock_ms(text):
+    """Parse ECP clock text like ``6916 ms`` into an int millisecond count."""
+    if text is None:
+        return None
+    if not isinstance(text, str):
+        try:
+            text = str(text)
+        except Exception:
+            return None
+    text = text.strip().lower().replace(",", "")
+    if not text:
+        return None
+    # Prefer the first integer/float token (ignore a trailing ``ms`` unit).
+    token = text.split()[0] if text.split() else text
+    if token.endswith("ms"):
+        token = token[:-2]
+    try:
+        return int(float(token))
+    except (TypeError, ValueError):
+        return None
+
+
+def _format_clock_ms(ms):
+    """Format milliseconds as ``m:ss`` or ``h:mm:ss`` (empty if unknown)."""
+    if ms is None:
+        return ""
+    try:
+        ms = int(ms)
+    except (TypeError, ValueError):
+        return ""
+    if ms < 0:
+        return ""
+    sec = ms // 1000
+    h = sec // 3600
+    m = (sec % 3600) // 60
+    s = sec % 60
+    if h:
+        return "%d:%02d:%02d" % (h, m, s)
+    return "%d:%02d" % (m, s)
+
+
 def _parse_media_player(text):
     """Parse ``/query/media-player`` XML into a small state dict."""
     if not text:
@@ -244,6 +347,8 @@ def _parse_media_player(text):
         "video": (fmt.get("video", "") or "").lower(),
         "audio": (fmt.get("audio", "") or "").lower(),
         "drm": (fmt.get("drm", "") or "").lower(),
+        "position_ms": _parse_clock_ms(_xml_tag(text, "position")),
+        "duration_ms": _parse_clock_ms(_xml_tag(text, "duration")),
     }
 
 
@@ -838,9 +943,11 @@ def _ecp_device(host, port=ROKU_PORT, timeout=1.5):
         or _xml_tag(text, "model-name")
         or host
     )
+    serial = (_xml_tag(text, "serial-number") or "").strip()
     return {
         "host": host,
         "name": name,
+        "serial": serial,
         "location": "http://%s:%d/" % (host, port),
         "usn": "",
         "st": "scan:ecp",
@@ -1076,6 +1183,339 @@ def _probe_hosts_parallel(hosts, port, connect_timeout, workers=None):
     return open_hosts
 
 
+def _env_get(name):
+    """Portable getenv (CPython / MicroPython / CircuitPython)."""
+    try:
+        import os
+    except ImportError:
+        return None
+    environ = getattr(os, "environ", None)
+    if environ is not None:
+        try:
+            val = environ.get(name)
+            if val:
+                return val
+        except Exception:
+            pass
+    getenv = getattr(os, "getenv", None)
+    if getenv is not None:
+        try:
+            return getenv(name)
+        except Exception:
+            return None
+    return None
+
+
+def _path_join(base, name):
+    """Join directory + filename without requiring ``os.path``."""
+    if not base:
+        return name
+    if base.endswith("/") or base.endswith("\\"):
+        return base + name
+    if sys.platform == "win32" and len(base) >= 2 and base[1] == ":":
+        return base + "\\" + name
+    return base + "/" + name
+
+
+def _user_home_dir():
+    """Best-effort user home on desktop hosts; empty on typical MCU images."""
+    for key in ("HOME", "USERPROFILE"):
+        val = _env_get(key)
+        if val:
+            return val
+    try:
+        import os
+
+        expanduser = getattr(getattr(os, "path", None), "expanduser", None)
+        if expanduser is not None:
+            home = expanduser("~")
+            if home and home != "~":
+                return home
+    except Exception:
+        pass
+    return ""
+
+
+def _prefs_path():
+    """Desktop: ``~/.roku_prefs``. MCU: ``/roku_prefs``."""
+    home = _user_home_dir()
+    if home and home not in (".", "/"):
+        return _path_join(home, _PREFS_HOME_NAME)
+    return _PREFS_MCU_NAME
+
+
+def _read_text_file(path):
+    try:
+        with open(path, "r") as f:
+            return f.read()
+    except OSError:
+        return ""
+
+
+def _write_text_file(path, text):
+    try:
+        with open(path, "w") as f:
+            f.write(text)
+        return True
+    except OSError:
+        return False
+
+
+def _normalize_known_device(item):
+    """Return ``{host, name, serial}`` or ``None`` if host is empty."""
+    if not item:
+        return None
+    host = (item.get("host") or "").strip()
+    if not host:
+        return None
+    return {
+        "host": host,
+        "name": (item.get("name") or "").strip(),
+        "serial": (item.get("serial") or "").strip(),
+    }
+
+
+def _default_prefs():
+    return {
+        "frontend": DEFAULT_FRONTEND,
+        "last_host": "",
+        "last_serial": "",
+        "devices": [],
+    }
+
+
+def _normalize_prefs(data):
+    """Coerce *data* into a prefs dict (missing fields → defaults)."""
+    out = _default_prefs()
+    if not isinstance(data, dict):
+        return out
+    fe = (data.get("frontend") or "").strip()
+    if fe in FRONTEND_IDS:
+        out["frontend"] = fe
+    out["last_host"] = (data.get("last_host") or "").strip()
+    out["last_serial"] = (data.get("last_serial") or "").strip()
+    devices = data.get("devices")
+    if isinstance(devices, list):
+        clean = []
+        seen = {}
+        for item in devices:
+            if isinstance(item, dict):
+                row = _normalize_known_device(item)
+            else:
+                row = _normalize_known_device({"host": str(item)})
+            if row and row["host"] not in seen:
+                seen[row["host"]] = True
+                clean.append(row)
+        out["devices"] = clean
+    return out
+
+
+def _devices_from_list(data):
+    """Normalize a JSON list of device dicts / host strings."""
+    out = []
+    seen = {}
+    for item in data or []:
+        if isinstance(item, dict):
+            row = _normalize_known_device(item)
+        else:
+            row = _normalize_known_device({"host": str(item)})
+        if row and row["host"] not in seen:
+            seen[row["host"]] = True
+            out.append(row)
+    return out
+
+
+def _load_prefs():
+    """Load prefs; missing or unreadable file → empty defaults."""
+    path = _prefs_path()
+    text = _read_text_file(path)
+    if text and text.strip():
+        try:
+            import json
+
+            data = json.loads(text)
+            if isinstance(data, dict):
+                return _normalize_prefs(data)
+            if isinstance(data, list):
+                prefs = _default_prefs()
+                prefs["devices"] = _devices_from_list(data)
+                return prefs
+        except Exception:
+            pass
+    return _default_prefs()
+
+
+def _write_prefs(prefs):
+    """Overwrite the prefs file. Returns True on success."""
+    clean = _normalize_prefs(prefs)
+    clean["devices"] = sorted(
+        clean["devices"],
+        key=lambda r: (r.get("name") or r.get("host") or "").lower(),
+    )
+    path = _prefs_path()
+    try:
+        import json
+
+        body = json.dumps(clean)
+    except Exception:
+        # Minimal fallback without json: devices only (lose frontend/MRU).
+        lines = []
+        for row in clean["devices"]:
+            if row.get("name"):
+                lines.append("%s\t%s" % (row["host"], row["name"]))
+            else:
+                lines.append(row["host"])
+        body = "\n".join(lines)
+        if body:
+            body += "\n"
+    return _write_text_file(path, body)
+
+
+def _load_known_hosts():
+    """Return list of ``{host, name, serial}`` from prefs (Select cache)."""
+    return list(_load_prefs().get("devices") or [])
+
+
+def _write_known_hosts(rows):
+    """Replace the prefs device list with *rows* (already normalized)."""
+    prefs = _load_prefs()
+    clean = []
+    seen = {}
+    for item in rows or []:
+        row = _normalize_known_device(item)
+        if not row or row["host"] in seen:
+            continue
+        seen[row["host"]] = True
+        clean.append(row)
+    prefs["devices"] = clean
+    # Drop MRU if that TV was removed from the list.
+    last = (prefs.get("last_host") or "").strip()
+    if last and last not in seen:
+        prefs["last_host"] = ""
+        prefs["last_serial"] = ""
+    return _write_prefs(prefs)
+
+
+def _save_known_hosts(devices):
+    """Merge *devices* into prefs (additive).
+
+    - Never removes a cached TV unless the caller rewrites via
+      :func:`_remove_known_host`.
+    - When a device reports ``serial``, a prior entry with the same serial but a
+      different IP is replaced (DHCP move) so the list does not grow duplicates.
+    """
+    by_host = {}
+    by_serial = {}
+    for item in _load_known_hosts():
+        row = _normalize_known_device(item)
+        if not row:
+            continue
+        by_host[row["host"]] = row
+        if row["serial"]:
+            by_serial[row["serial"]] = row
+
+    for item in devices or []:
+        row = _normalize_known_device(item)
+        if not row:
+            continue
+        serial = row["serial"]
+        host = row["host"]
+        if serial:
+            prev = by_serial.get(serial)
+            if prev and prev.get("host") and prev["host"] != host:
+                by_host.pop(prev["host"], None)
+        else:
+            prev_host = by_host.get(host)
+            if prev_host and prev_host.get("serial") and not serial:
+                row["serial"] = prev_host["serial"]
+                serial = row["serial"]
+        prev = by_host.get(host) or {}
+        if not row["name"]:
+            row["name"] = prev.get("name") or ""
+        if not row["serial"]:
+            row["serial"] = prev.get("serial") or ""
+        by_host[host] = row
+        if row["serial"]:
+            by_serial[row["serial"]] = row
+
+    return _write_known_hosts(list(by_host.values()))
+
+
+def _remove_known_host(host):
+    """Drop one cached host (user-initiated). Returns True if something changed."""
+    host = (host or "").strip()
+    if not host:
+        return False
+    rows = _load_known_hosts()
+    kept = [r for r in rows if (r.get("host") or "") != host]
+    if len(kept) == len(rows):
+        return False
+    return _write_known_hosts(kept)
+
+
+def other_frontends(current=None):
+    """Return front-end ids other than *current* (default: prefs frontend)."""
+    cur = (current or get_frontend() or DEFAULT_FRONTEND).strip()
+    return [f for f in FRONTEND_IDS if f != cur]
+
+
+def get_frontend():
+    """Chosen front end id from prefs (default ``lvgl``)."""
+    fe = (_load_prefs().get("frontend") or "").strip()
+    return fe if fe in FRONTEND_IDS else DEFAULT_FRONTEND
+
+
+def set_frontend(name):
+    """Persist front-end choice. Returns True on success."""
+    name = (name or "").strip()
+    if name not in FRONTEND_IDS:
+        return False
+    prefs = _load_prefs()
+    prefs["frontend"] = name
+    return _write_prefs(prefs)
+
+
+def format_switch_status(frontend, fits=None, tail="\npress REMOTE"):
+    """Status text for MORE front-end switch confirm (same shape as delete)."""
+    label = FRONTEND_LABELS.get(frontend, frontend or "?")
+    line = "Switch to %s?" % label
+    text = line + (tail or "")
+    if fits is None or fits(text):
+        return text
+    # Names are short; if the band is tiny, drop the tail first.
+    if fits(line):
+        return line
+    return "Switch?"
+
+
+def _set_last_device(host, serial):
+    prefs = _load_prefs()
+    prefs["last_host"] = (host or "").strip()
+    prefs["last_serial"] = (serial or "").strip()
+    return _write_prefs(prefs)
+
+
+def _reprobe_known_hosts(missing_hosts, on_device=None, timeout=1.5):
+    """ECP-probe *missing_hosts*; return newly confirmed device dicts."""
+    found = []
+    for host in missing_hosts or []:
+        host = (host or "").strip()
+        if not host:
+            continue
+        if not _tcp_open_retry(host, ROKU_PORT, max(float(timeout), 1.0), 2):
+            continue
+        info = _ecp_device(host, timeout=timeout)
+        if not info:
+            continue
+        found.append(info)
+        if on_device is not None:
+            try:
+                on_device(info)
+            except Exception:
+                pass
+    return found
+
+
 def discover_rokus_scan(
     prefixes=None,
     port=ROKU_PORT,
@@ -1083,6 +1523,7 @@ def discover_rokus_scan(
     priority_hosts=None,
     workers=None,
     on_device=None,
+    find_all=False,
 ):
     """
     Unicast scan: TCP :8060 then GET /query/device-info.
@@ -1096,6 +1537,8 @@ def discover_rokus_scan(
     On MicroPython ``network`` targets the default is 4 workers.
     ``priority_hosts`` are probed first with a longer retry (rescans).
     ``on_device(info)`` is called as each ECP device is confirmed (progressive UI).
+    ``find_all`` continues after the first hit (device picker); default False keeps
+    the fast short-circuit for ``connect()``.
     Asleep sets typically close ECP and will not appear.
     """
     if workers is None:
@@ -1139,22 +1582,45 @@ def discover_rokus_scan(
         if _tcp_open_retry(host, port, max(connect_timeout, 1.5), 3):
             _accept(host)
 
-    if found:
+    if found and not find_all:
         return found
 
     rest = [h for h in hosts if h not in seen]
-    # Probe in worker-sized chunks and confirm ECP between chunks so a present
-    # Roku short-circuits the remaining /24 (fast discovery) without raising the
-    # socket fan-out, which is known to drop real Rokus.
+    # Probe in worker-sized chunks. When not find_all, stop after the first
+    # confirmed Roku so connect()/single-target discovery stays fast.
     step = max(8, int(workers))
     for i in range(0, len(rest), step):
         chunk = rest[i : i + step]
         for host in _probe_hosts_parallel(chunk, port, connect_timeout, workers):
             _accept(host)
-        if found:
+        if found and not find_all:
             break
 
     return found
+
+
+def _ssdp_set_multicast_if(sock, local_ip):
+    """Pin SSDP multicast to *local_ip* (needed on multi-homed Windows/WSL hosts)."""
+    if not local_ip:
+        return False
+    try:
+        packed = socket.inet_aton(local_ip)
+    except (OSError, AttributeError, ValueError, TypeError):
+        return False
+    # IPPROTO_IP=0; IP_MULTICAST_IF=9 on Winsock (and often on POSIX).
+    candidates = []
+    ipproto = getattr(socket, "IPPROTO_IP", None)
+    mcast_if = getattr(socket, "IP_MULTICAST_IF", None)
+    if ipproto is not None and mcast_if is not None:
+        candidates.append((ipproto, mcast_if))
+    candidates.append((0, 9))
+    for level, opt in candidates:
+        try:
+            sock.setsockopt(level, opt, packed)
+            return True
+        except (OSError, AttributeError, TypeError):
+            continue
+    return False
 
 
 def _monotonic_deadline_ms(seconds):
@@ -1204,11 +1670,11 @@ def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
 
         found = {}
         deadline = _monotonic_deadline_ms(timeout)
-        # Once a Roku replies, keep listening only a short grace window so
-        # multicast discovery returns in ~1s instead of burning the full
-        # timeout waiting for more replies that rarely come.
+        # After the first reply, keep listening long enough for siblings on the
+        # LAN (0.6s was cutting multi-TV homes short once multicast works).
         grace_deadline = [None]
-        grace_secs = 0.6
+        grace_secs = 2.0
+        local_ip = _local_ipv4()
 
         for _ in range(max(1, int(retries))):
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -1230,6 +1696,9 @@ def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
                         break
                     except (OSError, AttributeError):
                         pass
+                # Multi-homed Windows (LAN + WSL/VPN/APIPA): without this, M-SEARCH
+                # often leaves the wrong NIC and zero Rokus reply.
+                mcast_if_ok = _ssdp_set_multicast_if(sock, local_ip)
                 try:
                     # Winsock often needs an explicit bind before multicast replies arrive.
                     sock.bind(_sockaddr("0.0.0.0", 0, socket.SOCK_DGRAM))
@@ -1274,6 +1743,7 @@ def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
                     host = _host_from_location(location)
                     if not host:
                         continue
+                    is_new = host not in found
                     found[host] = {
                         "host": host,
                         "location": location,
@@ -1318,6 +1788,9 @@ class RokuEngine:
         self.active_screensaver = ""
         self.media_player = ""
         self.media_state = {}
+        # Hide plaque clock when ECP reuses the same position (many apps stall it).
+        self._last_position_ms = None
+        self._position_changed_at = 0.0
         self.discovered = []
         # Optional inject for tests: callable(method, url, timeout, data) -> (status, body)
         self._http = None
@@ -1335,6 +1808,8 @@ class RokuEngine:
         self.device_info = {}
         self.media_player = ""
         self.media_state = {}
+        self._last_position_ms = None
+        self._position_changed_at = 0.0
 
     @property
     def base_url(self):
@@ -1345,12 +1820,41 @@ class RokuEngine:
         mode = (self.device_info or {}).get("power-mode") or ""
         return mode == "PowerOn"
 
+    @staticmethod
+    def _is_tv_input(app):
+        """True for TV inputs: ``type=tvin`` and/or ``id`` like ``tvinput.hdmi1``."""
+        if not app:
+            return False
+        t = (app.get("type") or "").strip().lower()
+        aid = (app.get("id") or "").strip().lower()
+        return t == "tvin" or aid.startswith("tvinput.")
+
     def inputs(self):
-        """TV tuner / HDMI / AV entries from the last apps query (``type=tvin``)."""
+        """TV tuner / HDMI / AV entries from the last apps query."""
         out = []
+        seen = {}
         for app in self.apps or []:
-            if (app.get("type") or "").lower() == "tvin":
-                out.append(app)
+            if not self._is_tv_input(app):
+                continue
+            hid = app.get("id") or ""
+            if hid in seen:
+                continue
+            seen[hid] = True
+            out.append(app)
+        return out
+
+    def store_apps(self):
+        """Installed channels for the APPS UI (excludes TV inputs)."""
+        out = []
+        seen = {}
+        for app in self.apps or []:
+            if self._is_tv_input(app):
+                continue
+            hid = app.get("id") or ""
+            if hid in seen:
+                continue
+            seen[hid] = True
+            out.append(app)
         return out
 
     def media_active(self):
@@ -1363,16 +1867,14 @@ class RokuEngine:
         cap = ((self.media_state or {}).get("captions") or "").lower()
         return bool(cap) and cap not in ("none", "off", "false")
 
-    def playback_status(self):
-        """Short ASCII status from active-app + media-player (for the UI banner)."""
+    def playback_app_label(self):
+        """App / connection feedback for the plaque (no play/pause word)."""
         if self.last_error and not self.connected:
             return "err: " + self.last_error
         if not self.host:
             return "no host"
         if not self.connected:
             return "offline"
-        if not self.power_is_on():
-            return "OFF"
         ms = self.media_state or {}
         app = (
             (self.active_app or {}).get("name")
@@ -1380,30 +1882,111 @@ class RokuEngine:
             or ""
         )
         saver = (self.active_screensaver or "").strip()
-        state = (ms.get("state") or "").lower()
-        bits = []
         if saver:
-            # Screensaver sibling from active-app (home or over an app).
             app_l = app.lower()
             if not app or app_l in ("roku", "home"):
-                bits.append("screensaver")
-            else:
-                bits.append(app)
-                bits.append("screensaver")
-            return " ".join(bits)
+                return "screensaver"
+            return app
         if app:
-            bits.append(app)
-        if state and state not in ("", "close", "none", "stop"):
-            bits.append(state)
-        if bits:
-            return " ".join(bits)
+            return app
+        # Only trust power-mode when we have device-info and nothing is playing.
+        # Empty device_info (never queried) must not mask a live media-player.
+        if self.device_info and not self.power_is_on():
+            return "OFF"
         name = self.device_info.get("user-device-name") or self.device_info.get(
             "model-name", ""
         )
         return name or "ready"
 
+    def playback_state_label(self):
+        """Player ``state`` attribute from media-player (unfiltered; may be empty)."""
+        return ((self.media_state or {}).get("state") or "").strip()
+
+    def playback_status(self):
+        """Combined app + state (single-line UIs / back-compat)."""
+        app = self.playback_app_label()
+        state = self.playback_state_label()
+        if app and state:
+            return app + " " + state
+        return app or state
+
+    def _track_position(self, pos):
+        """Record when ``position_ms`` last changed (for stale-clock hiding)."""
+        if pos is None:
+            self._last_position_ms = None
+            self._position_changed_at = 0.0
+            return
+        if pos != self._last_position_ms:
+            self._last_position_ms = pos
+            try:
+                self._position_changed_at = float(time.time()) if time else 0.0
+            except Exception:
+                self._position_changed_at = 0.0
+
+    def _position_is_stale(self):
+        """True when ECP ``position`` has not changed for 3+ seconds."""
+        if not self._position_changed_at or time is None:
+            return False
+        try:
+            return float(time.time()) - self._position_changed_at >= 3.0
+        except Exception:
+            return False
+
+    def position_label(self):
+        """Right-plaque clock: ``m:ss`` or ``m:ss/m:ss`` when media reports times.
+
+        Returns empty when position has not advanced for 3+ seconds — many apps
+        (Netflix, Prime, …) leave ECP ``position`` stuck while ``state=play``.
+        """
+        ms = self.media_state or {}
+        pos = ms.get("position_ms")
+        if pos is None:
+            return ""
+        if self._position_is_stale():
+            return ""
+        left = _format_clock_ms(pos)
+        if not left:
+            return ""
+        dur = ms.get("duration_ms")
+        if dur is not None and dur > 0:
+            right = _format_clock_ms(dur)
+            if right:
+                return left + "/" + right
+        return left
+
+    def progress_fraction(self):
+        """``position_ms / duration_ms`` in ``0.0..1.0``, or ``None`` if unusable.
+
+        Requires a positive duration and a non-stale position (same 3s rule as
+        :meth:`position_label`). Used for the under-plaque scrub rail.
+        """
+        ms = self.media_state or {}
+        pos = ms.get("position_ms")
+        dur = ms.get("duration_ms")
+        if pos is None or dur is None:
+            return None
+        if self._position_is_stale():
+            return None
+        try:
+            pos = int(pos)
+            dur = int(dur)
+        except (TypeError, ValueError):
+            return None
+        if dur <= 0:
+            return None
+        if pos < 0:
+            pos = 0
+        if pos > dur:
+            pos = dur
+        return float(pos) / float(dur)
+
     def refresh_playback(self):
-        """Query active-app + media-player; return ``playback_status()``."""
+        """Query active-app + media-player together; return ``playback_status()``.
+
+        One refresh cycle always updates app name, play/pause state, and
+        position/duration (when the player reports them) from the same pair of
+        ECP GETs so the plaque stays coherent.
+        """
         try:
             self.query_active_app()
         except Exception:
@@ -1412,6 +1995,10 @@ class RokuEngine:
             self.query_media_player()
         except Exception:
             pass
+        # A successful media/app probe means we can talk to the device even if a
+        # prior keypress timed out and left last_error set.
+        if self.active_app or self.media_state:
+            self.connected = True
         return self.playback_status()
 
     # --- Presentation helpers (UI-agnostic strings from engine state) ------
@@ -1544,20 +2131,35 @@ class RokuEngine:
                 status, body = http_request(method, url, timeout=self.timeout, data=data)
         except Exception as e:
             self.last_error = str(e)
-            self.connected = False
+            # Do not clear ``connected`` on transient socket errors — a single
+            # failed keypress must not make the plaque say "offline" while the
+            # TV is still playing.
             return 0, b""
-        if status and status >= 400:
-            self.last_error = "HTTP %d %s" % (status, path)
-        else:
+        if status and 200 <= status < 400:
+            self.connected = True
             self.last_error = ""
+        elif status and status >= 400:
+            self.last_error = "HTTP %d %s" % (status, path)
         return status, body
 
     def discover(
         self, timeout=1.5, retries=1, scan_fallback=True, ssdp=True, on_device=None
     ):
         try:
-            priority = [d.get("host") for d in (self.discovered or []) if d.get("host")]
+            known = _load_known_hosts()
+            priority = []
+            seen_pri = {}
+            for host in [
+                d.get("host") for d in (self.discovered or []) if d.get("host")
+            ] + [d.get("host") for d in known if d.get("host")]:
+                host = (host or "").strip()
+                if host and host not in seen_pri:
+                    seen_pri[host] = True
+                    priority.append(host)
             found = []
+            path = "none"
+            # UI progressive discovery (on_device) wants every TV; connect() wants one.
+            find_all = on_device is not None
             if ssdp:
                 # Keep scan_fallback out of discover_rokus so on_device still runs
                 # on the unicast path; enrich SSDP hits with ECP names for the UI.
@@ -1567,6 +2169,7 @@ class RokuEngine:
                     scan_fallback=False,
                     ssdp=True,
                 )
+                path = "ssdp" if found else "ssdp_empty"
                 enriched = []
                 for info in found:
                     named = _ecp_device(
@@ -1581,16 +2184,121 @@ class RokuEngine:
                         except Exception:
                             pass
                 found = enriched
-            if not found and scan_fallback:
-                found = discover_rokus_scan(
-                    priority_hosts=priority, on_device=on_device
+            # Re-probe persisted / session-known hosts SSDP missed (UDP flakiness).
+            if find_all and priority:
+                have = {d.get("host") for d in found if d.get("host")}
+                missing = [h for h in priority if h not in have]
+                if missing:
+                    recovered = _reprobe_known_hosts(
+                        missing, on_device=on_device, timeout=min(self.timeout, 1.5)
+                    )
+                    if recovered:
+                        found = list(found) + list(recovered)
+                        path = (path or "none") + "+reprobe"
+            # Unicast scan when nothing found, or when the UI asked for every TV
+            # and SSDP returned empty. Partial known-host reprobe must not skip
+            # the /24 scan — that permanently hides TVs never saved on this host
+            # (common under WSL where SSDP is dead and HOME != Windows cache).
+            ssdp_empty = (path or "").startswith("ssdp_empty")
+            need_scan = scan_fallback and (
+                not found or (find_all and ssdp_empty)
+            )
+            if need_scan:
+                have = {d.get("host") for d in found if d.get("host")}
+
+                def _on_new(info):
+                    host = (info or {}).get("host")
+                    if not host or host in have:
+                        return
+                    have.add(host)
+                    if on_device is not None:
+                        try:
+                            on_device(info)
+                        except Exception:
+                            pass
+
+                scanned = discover_rokus_scan(
+                    priority_hosts=priority,
+                    on_device=_on_new if on_device is not None else None,
+                    find_all=find_all,
                 )
+                if not found:
+                    found = scanned
+                    path = "scan_fallback"
+                else:
+                    for info in scanned or []:
+                        host = (info or {}).get("host")
+                        if host and host not in {
+                            d.get("host") for d in found if d.get("host")
+                        }:
+                            found.append(info)
+                    if scanned:
+                        path = (path or "none") + "+scan"
             self.discovered = found
             self.last_error = "" if self.discovered else "no Roku found"
+            if found:
+                _save_known_hosts(found)
         except Exception as e:
             self.discovered = []
             self.last_error = str(e)
         return self.discovered
+
+    def cached_devices(self):
+        """Persistent Select-page list (``{host, name, serial}``); never auto-pruned."""
+        return _load_known_hosts()
+
+    def remember_devices(self, devices):
+        """Merge *devices* into the persistent cache (additive / serial IP update)."""
+        return _save_known_hosts(devices)
+
+    def forget_device(self, host):
+        """User-initiated remove of one cached TV."""
+        return _remove_known_host(host)
+
+    def refresh_cached_names(self):
+        """Soft-probe each cached host; refresh name/serial; never drop unreachable.
+
+        Returns the full cache after merging any successful probes. Used when
+        opening the Select page — not a network scan.
+        """
+        known = _load_known_hosts()
+        touched = []
+        for item in known:
+            host = (item.get("host") or "").strip()
+            if not host:
+                continue
+            info = _ecp_device(host, timeout=min(self.timeout, 1.5))
+            if info:
+                touched.append(info)
+        if touched:
+            _save_known_hosts(touched)
+        return _load_known_hosts()
+
+    def resume_last_host(self):
+        """Probe prefs MRU host; connect only when saved serial still matches.
+
+        ``ROKU_HOST`` (if set) overrides the MRU host and skips the serial check.
+        Missing prefs / empty MRU → False (caller opens Select).
+        """
+        forced = (ROKU_HOST or "").strip()
+        prefs = _load_prefs()
+        host = forced or (prefs.get("last_host") or "").strip()
+        want_serial = "" if forced else (prefs.get("last_serial") or "").strip()
+        if not host:
+            return False
+        if not forced and not want_serial:
+            return False
+        self.set_host(host)
+        info = self.query_device_info()
+        if not info:
+            self.connected = False
+            return False
+        live = (info.get("serial-number") or "").strip()
+        if want_serial and live != want_serial:
+            self.connected = False
+            self.last_error = "TV changed"
+            return False
+        return self.connect(discover_if_empty=False)
 
     def connect(self, discover_if_empty=True):
         """Ping device-info. If host empty and discover_if_empty, discover first."""
@@ -1605,6 +2313,25 @@ class RokuEngine:
         info = self.query_device_info()
         self.connected = bool(info)
         if self.connected:
+            serial = info.get("serial-number") or ""
+            try:
+                self.remember_devices(
+                    [
+                        {
+                            "host": self.host,
+                            "name": info.get("user-device-name")
+                            or info.get("model-name")
+                            or "",
+                            "serial": serial,
+                        }
+                    ]
+                )
+            except Exception:
+                pass
+            try:
+                _set_last_device(self.host, serial)
+            except Exception:
+                pass
             try:
                 self.refresh_playback()
             except Exception:
@@ -1624,10 +2351,16 @@ class RokuEngine:
         return 200 <= status < 300 or status == 200
 
     def keydown(self, key):
+        if key not in ECP_KEY_SET and not str(key).startswith("Lit_"):
+            self.last_error = "unknown key: " + str(key)
+            return False
         status, _ = self._request("POST", "/keydown/" + key, b"")
         return 200 <= status < 300
 
     def keyup(self, key):
+        if key not in ECP_KEY_SET and not str(key).startswith("Lit_"):
+            self.last_error = "unknown key: " + str(key)
+            return False
         status, _ = self._request("POST", "/keyup/" + key, b"")
         return 200 <= status < 300
 
@@ -1740,10 +2473,12 @@ class RokuEngine:
         if not body or status >= 400:
             self.media_player = ""
             self.media_state = {}
+            self._track_position(None)
             return ""
         text = body.decode("utf-8") if isinstance(body, bytes) else body
         self.media_player = text.strip()
         self.media_state = _parse_media_player(self.media_player)
+        self._track_position((self.media_state or {}).get("position_ms"))
         return self.media_player
 
     def query_tv_channels(self):

@@ -20,12 +20,13 @@ and hands control to ``runtime.run_forever()``. Blocking ECP calls run on a
 worker thread; widget mutations are applied from a soft ``multimer.Timer`` pump
 on the main tick so the render loop never races the worker.
 
-Edit ``ROKU_HOST`` below, or leave empty and use SCAN / the IP pad on device.
+Launch via ``roku_remote`` (prefs + MRU). Direct ``roku_widgets.run()`` also works.
 Requires Roku **Control by mobile apps -> Enabled**. Join WiFi before running
 on a microcontroller.
 """
 
 import sys
+import time
 
 _EXAMPLES = __file__.replace("\\", "/").rsplit("/", 1)[0]
 if _EXAMPLES not in sys.path:
@@ -35,13 +36,19 @@ import board_config
 import pdwidgets as pd
 from eventsys.keys import Keys
 from multimer import Timer
-from roku_engine import ROKU_HOST as _DEFAULT_HOST
-from roku_engine import RokuEngine, ascii_label
+from roku_engine import (
+    FRONTEND_BUTTONS,
+    RokuEngine,
+    ascii_label,
+    format_delete_status_chars,
+    format_switch_status,
+    other_frontends,
+    set_frontend,
+)
 
 pd.DEBUG = False
 
-# Override here, or leave "" and use SCAN / IP pad.
-ROKU_HOST = _DEFAULT_HOST
+FRONTEND = "widgets"
 
 _KEY_MAP = {
     Keys.K_UP: "Up",
@@ -61,7 +68,7 @@ _KEY_MAP = {
 class _RemoteUI:
     """pdwidgets front end. Pages are rebuilt in-place under one content panel."""
 
-    def __init__(self):
+    def __init__(self, engine=None, start_page="devices"):
         self.display = pd.Display(board_config.display_drv, board_config.runtime)
         self.runtime = board_config.runtime
         pal = self.display.pal
@@ -89,20 +96,34 @@ class _RemoteUI:
         self.MUTED = pal.color565(0x9A, 0xA0, 0xB0)
         self.ON_ACCENT = pal.color565(0xFF, 0xFF, 0xFF)
 
-        self.engine = RokuEngine(host=ROKU_HOST)
+        self.engine = engine if engine is not None else RokuEngine()
         self.ip_buf = self.engine.host or ""
-        self.page = "devices"
+        self.page = (
+            start_page if start_page in ("devices", "remote", "apps", "more") else "devices"
+        )
         self.app_offset = 0
         self.app_page_size = 1
+        self.selected_app_id = ""
         self.discover_list = []
+        self._delete_armed = None
+        self._switch_armed = None
 
         # Cross-thread mailboxes (worker writes, soft pump applies on main tick).
         self._pending_status = None
         self._pending_devices = []
+        self._pending_select_list = None
         self._pending_rebuild = False
+        self._chrome_face = ""
+        self._pending_chrome = False
+        self._play_btn = None
+        self._power_btn = None
         self._playback_busy = False
         self._status_ticks = 0
         self._scan_busy = False
+        self._pending_scan = False
+        self._scan_yield = False
+        self._press_t0 = 0
+        self._press_dev = None
 
         self.screen = pd.Screen(self.display, bg=self.BG, visible=False)
         self.status = pd.Label(
@@ -138,7 +159,11 @@ class _RemoteUI:
         except Exception:
             pass
 
-        self._start_scan()
+        if self.page == "remote" and (self.engine.host or "").strip():
+            self._set_status(self.engine.playback_status() or "ready")
+            self._refresh_playback_bg()
+        else:
+            self._open_select(soft_refresh=True)
 
     # ----- helpers --------------------------------------------------------
 
@@ -213,9 +238,63 @@ class _RemoteUI:
         btn.add_event_cb(pd.events.MOUSEBUTTONUP, _cb)
         return btn
 
+    def _device_button(self, label, x, y, w, h, dev, role="key"):
+        """Select-page TV row: short tap picks, long-press arms delete."""
+        fg, bg = self._colors_for(role)
+        btn = pd.Button(
+            self.content,
+            label=label,
+            x=int(x),
+            y=int(y),
+            w=int(w),
+            h=int(h),
+            radius=self.radius,
+            fg=bg,
+            bg=bg,
+            text_color=fg,
+            text_height=self.btn_text,
+            shadow=0,
+        )
+
+        def _now_ms():
+            try:
+                if hasattr(time, "ticks_ms"):
+                    return time.ticks_ms()
+            except Exception:
+                pass
+            return int(time.time() * 1000)
+
+        def _down(_sender, _event, d=dev):
+            self._press_t0 = _now_ms()
+            self._press_dev = d
+
+        def _up(_sender, _event, d=dev):
+            t0 = self._press_t0
+            self._press_t0 = 0
+            if self._press_dev is not d:
+                return
+            dt = _now_ms() - t0
+            try:
+                if hasattr(time, "ticks_diff") and hasattr(time, "ticks_ms"):
+                    dt = time.ticks_diff(_now_ms(), t0)
+            except Exception:
+                pass
+            if dt >= 550:
+                self._arm_delete(d)
+            else:
+                self._pick_device(d)
+
+        down_ev = getattr(pd.events, "MOUSEBUTTONDOWN", None)
+        if down_ev is not None:
+            btn.add_event_cb(down_ev, _down)
+        btn.add_event_cb(pd.events.MOUSEBUTTONUP, _up)
+        return btn
+
     # ----- page building --------------------------------------------------
 
     def _build_page(self):
+        self._play_btn = None
+        self._power_btn = None
         self._clear_content()
         if self.page == "devices":
             self._build_devices()
@@ -223,8 +302,6 @@ class _RemoteUI:
             self._build_apps()
         elif self.page == "more":
             self._build_more()
-        elif self.page == "ip":
-            self._build_ip()
         else:
             self._build_remote()
 
@@ -241,7 +318,7 @@ class _RemoteUI:
         bw = (w - 2 * gap) // 3
         self._button("BACK", x0, y, bw, row_h, lambda: self._ecp("Back"), "key")
         self._button("HOME", x0 + bw + gap, y, bw, row_h, lambda: self._ecp("Home"), "accent")
-        self._button(
+        self._power_btn = self._button(
             "PWR " + self.engine.power_label(),
             x0 + 2 * (bw + gap),
             y,
@@ -263,17 +340,19 @@ class _RemoteUI:
         self._button("v", dx + cell, y + 2 * cell, cell, cell, lambda: self._ecp("Down"), "key")
         y += dpad + gap * 2
 
-        # Mid row: REPLAY | * | SRCH
+        # Mid row: REPLAY | * | CC (closed captions)
         bw = (w - 2 * gap) // 3
         self._button("REPLAY", x0, y, bw, row_h, lambda: self._ecp("InstantReplay"), "key")
         self._button("*", x0 + bw + gap, y, bw, row_h, lambda: self._ecp("Info"), "key")
-        self._button("SRCH", x0 + 2 * (bw + gap), y, bw, row_h, lambda: self._ecp("Search"), "key")
+        self._button("CC", x0 + 2 * (bw + gap), y, bw, row_h, lambda: self._ecp("ClosedCaption"), "key")
         y += row_h + gap
 
         # Transport: << | PLAY | >>
+        play_face = self.engine.play_label()
+        self._chrome_face = "%s|%s" % (play_face, self.engine.power_label())
         self._button("<<", x0, y, bw, row_h, lambda: self._ecp("Rev"), "transport")
-        self._button(
-            self.engine.play_label(),
+        self._play_btn = self._button(
+            play_face,
             x0 + bw + gap,
             y,
             bw,
@@ -296,11 +375,11 @@ class _RemoteUI:
         self._button("CH+", x0 + 2 * (bw + gap), y, bw, row_h, lambda: self._ecp("ChannelUp"), "key")
         y += row_h + gap
 
-        # Chrome: APPS | MORE | SCAN
+        # Chrome: APPS | MORE | SELECT
         bh = max(30, row_h - 4)
         self._button("APPS", x0, y, bw, bh, self._open_apps, "ui")
-        self._button("MORE", x0 + bw + gap, y, bw, bh, lambda: self._goto("more"), "ui")
-        self._button("SCAN", x0 + 2 * (bw + gap), y, bw, bh, self._rescan, "ui")
+        self._button("MORE", x0 + bw + gap, y, bw, bh, self._open_more, "ui")
+        self._button("SELECT", x0 + 2 * (bw + gap), y, bw, bh, self._open_select, "ui")
 
     def _build_devices(self):
         W = self.content.width
@@ -309,9 +388,15 @@ class _RemoteUI:
         x0 = pad
         w = W - 2 * pad
         row_h = max(34, self.content.height // 12)
-        self._button("REMOTE", x0, pad, (w - gap) // 2, row_h, lambda: self._goto("remote"), "ui")
+        self._button("REMOTE", x0, pad, (w - gap) // 2, row_h, self._goto_remote, "ui")
         self._button(
-            "RESCAN", x0 + (w - gap) // 2 + gap, pad, (w - gap) // 2, row_h, self._rescan, "accent"
+            "SCAN",
+            x0 + (w - gap) // 2 + gap,
+            pad,
+            (w - gap) // 2,
+            row_h,
+            self._scan_button,
+            "accent",
         )
         y = pad + row_h + gap
         slot_h = max(34, self.status_h)
@@ -319,14 +404,16 @@ class _RemoteUI:
         avail = self.content.height - y - pad
         max_slots = max(1, (avail + gap) // (slot_h + gap))
         for i, dev in enumerate(devices[:max_slots]):
-            label = ascii_label((dev.get("name") or "").strip() or "Roku")
-            self._button(
+            name = ascii_label((dev.get("name") or "").strip() or "")
+            host = ascii_label((dev.get("host") or "").strip() or "")
+            label = name or host or "Roku"
+            self._device_button(
                 label,
                 x0,
                 y + i * (slot_h + gap),
                 w,
                 slot_h,
-                (lambda d=dev: self._pick_device(d)),
+                dev,
                 "accent" if i == 0 else "key",
             )
 
@@ -338,7 +425,7 @@ class _RemoteUI:
         w = W - 2 * pad
         row_h = max(34, self.content.height // 12)
         third = (w - 2 * gap) // 3
-        self._button("REMOTE", x0, pad, third, row_h, lambda: self._goto("remote"), "ui")
+        self._button("REMOTE", x0, pad, third, row_h, self._goto_remote, "ui")
         self._button("REFRESH", x0 + third + gap, pad, third, row_h, self._refresh_apps, "ui")
         self._button("NEXT", x0 + 2 * (third + gap), pad, third, row_h, self._apps_next, "ui")
         y = pad + row_h + gap
@@ -350,12 +437,18 @@ class _RemoteUI:
         rows = max(1, (avail + gap) // (bh + gap))
         max_slots = rows * cols
         self.app_page_size = max_slots
-        apps = self.engine.apps or []
+        apps = self.engine.store_apps()
         window = apps[self.app_offset : self.app_offset + max_slots]
+        sel = str(
+            self.selected_app_id
+            or (self.engine.active_app or {}).get("id")
+            or ""
+        )
         for i, app in enumerate(window):
             name = ascii_label(app.get("name") or app.get("id") or "?")
             col = i % cols
             row = i // cols
+            aid = str(app.get("id") or "")
             self._button(
                 name,
                 x0 + col * (bw + gap),
@@ -363,7 +456,7 @@ class _RemoteUI:
                 bw,
                 bh,
                 (lambda a=app: self._launch(a)),
-                "accent" if i == 0 else "key",
+                "accent" if aid and aid == sel else "key",
             )
 
     def _build_more(self):
@@ -374,16 +467,31 @@ class _RemoteUI:
         w = W - 2 * pad
         row_h = max(34, self.content.height // 12)
         half = (w - gap) // 2
-        self._button("REMOTE", x0, pad, half, row_h, lambda: self._goto("remote"), "ui")
-        self._button("IP", x0 + half + gap, pad, half, row_h, lambda: self._goto("ip"), "ui")
+        third = (w - 2 * gap) // 3
+        others = other_frontends(FRONTEND)
+        self._button("REMOTE", x0, pad, third, row_h, self._goto_remote, "ui")
+        for i, fe in enumerate(others[:2]):
+            lab = FRONTEND_BUTTONS.get(fe, fe.upper())
+            self._button(
+                lab,
+                x0 + (i + 1) * (third + gap),
+                pad,
+                third,
+                row_h,
+                (lambda f=fe: self._arm_switch(f)),
+                "ui",
+            )
         y = pad + row_h + gap
-        actions = (
-            ("DEV INFO", self._show_dev_info),
-            ("MEDIA", self._show_media),
-            ("TV CH", self._show_tv_channel),
-            ("PERF", self._show_perf),
-        )
-        for i, (lab, fn) in enumerate(actions):
+        inputs = self.engine.inputs()
+        if not inputs:
+            self._button("no inputs", x0, y, w, row_h, lambda: None, "alt")
+            return
+        avail = self.content.height - y - pad
+        max_slots = max(1, (avail + gap) // (row_h + gap)) * 2
+        for i, app in enumerate(inputs[:max_slots]):
+            lab = ascii_label((app.get("name") or "").strip())
+            if not lab:
+                lab = self.engine.input_short_label(app, max_chars=10)
             col = i % 2
             row = i // 2
             self._button(
@@ -392,40 +500,8 @@ class _RemoteUI:
                 y + row * (row_h + gap),
                 half,
                 row_h,
-                fn,
-                "key",
-            )
-
-    def _build_ip(self):
-        W = self.content.width
-        pad = self.pad
-        gap = pad
-        x0 = pad
-        w = W - 2 * pad
-        row_h = max(34, self.content.height // 12)
-        third = (w - 2 * gap) // 3
-        self._button("BACK", x0, pad, third, row_h, lambda: self._goto("more"), "ui")
-        self._button("CLR", x0 + third + gap, pad, third, row_h, self._ip_clear, "ui")
-        self._button("SET", x0 + 2 * (third + gap), pad, third, row_h, self._ip_set, "accent")
-        y = pad + row_h + gap
-        shown = self.ip_buf if self.ip_buf else "(empty)"
-        self._button(shown, x0, y, w, row_h, lambda: None, "alt")
-        y += row_h + gap
-        keys = "123456789.0<"
-        cols = 3
-        bw = (w - gap * (cols - 1)) // cols
-        for i, ch in enumerate(keys):
-            col = i % cols
-            row = i // cols
-            lab = "BS" if ch == "<" else ch
-            self._button(
-                lab,
-                x0 + col * (bw + gap),
-                y + row * (row_h + gap),
-                bw,
-                row_h,
-                (lambda c=ch: self._ip_key(c)),
-                "key",
+                (lambda a=app: self._launch(a)),
+                "alt",
             )
 
     # ----- navigation -----------------------------------------------------
@@ -433,20 +509,77 @@ class _RemoteUI:
     def _goto(self, page):
         self.page = page
         self._build_page()
-        if page == "remote" and self.engine.connected:
+        if page == "remote":
+            # Always re-probe — clears sticky apps/inputs plaque text and
+            # recovers from a false "offline" after a transient error.
             self._refresh_playback_bg()
+
+    def _arm_switch(self, frontend):
+        self._switch_armed = frontend
+        self._set_status(
+            format_switch_status(
+                frontend,
+                fits=lambda s: len(s) <= self._status_max_chars(),
+                tail=" press REMOTE",
+            )
+        )
+
+    def _confirm_switch(self):
+        fe = self._switch_armed
+        self._switch_armed = None
+        if not fe:
+            return False
+        try:
+            ok = set_frontend(fe)
+        except Exception:
+            ok = False
+        if not ok:
+            self._set_status("save failed")
+            return True
+        self._set_status("restart app")
+        return True
+
+    def _goto_remote(self):
+        if self._switch_armed:
+            self._confirm_switch()
+            return
+        host = (self.engine.host or "").strip()
+        if not host:
+            self._set_status("pick a TV first")
+            return
+        self._goto("remote")
+
+    def _open_more(self):
+        self._switch_armed = None
+        self._goto("more")
+        if self.engine.apps:
+            n = len(self.engine.inputs() or [])
+            if n:
+                self._set_status("%d inputs" % n)
+            return
+        self._set_status("loading inputs...")
+
+        def _work():
+            self.engine.query_apps()
+            n = len(self.engine.inputs() or [])
+            self._queue_status(("%d inputs" % n) if n else "no inputs")
+            self._pending_rebuild = True
+
+        self._run_bg(_work)
 
     def _open_apps(self):
         self.page = "apps"
         self.app_offset = 0
+        if not self.selected_app_id:
+            self.selected_app_id = str((self.engine.active_app or {}).get("id") or "")
         if self.engine.apps:
-            self._set_status("%d apps" % len(self.engine.apps))
+            self._set_status("%d apps" % len(self.engine.store_apps()))
             self._build_page()
         else:
             self._refresh_apps()
 
     def _apps_next(self):
-        n = len(self.engine.apps or [])
+        n = len(self.engine.store_apps())
         step = max(1, int(self.app_page_size or 1))
         if n:
             self.app_offset = (self.app_offset + step) % n
@@ -454,26 +587,63 @@ class _RemoteUI:
 
     # ----- ECP actions ----------------------------------------------------
 
-    def _ecp(self, key):
-        self._set_status(key)
+    def _set_btn_label(self, btn, text):
+        if btn is None:
+            return
+        lab = getattr(btn, "label", None)
+        if lab is None:
+            return
+        try:
+            lab.value = ascii_label(text)
+        except Exception:
+            pass
 
+    def _apply_chrome_face(self):
+        play_face = self.engine.play_label()
+        power_face = self.engine.power_label()
+        self._chrome_face = "%s|%s" % (play_face, power_face)
+        self._set_btn_label(self._play_btn, play_face)
+        self._set_btn_label(self._power_btn, "PWR " + power_face)
+
+    def _note_playback_chrome(self, line=None, force_rebuild=False):
+        """Mailbox plaque text; queue in-place play/power label update."""
+        if line is not None:
+            self._queue_status(line)
+        aid = str((self.engine.active_app or {}).get("id") or "")
+        if aid:
+            self.selected_app_id = aid
+        face = "%s|%s" % (self.engine.play_label(), self.engine.power_label())
+        if self.page != "remote":
+            self._chrome_face = face
+            return
+        if force_rebuild:
+            self._chrome_face = face
+            self._pending_rebuild = True
+            return
+        if face != self._chrome_face:
+            self._chrome_face = face
+            self._pending_chrome = True
+
+    def _ecp(self, key):
         def _work():
             self.engine.press(key)
-            self._queue_status(self.engine.refresh_playback())
+            try:
+                self._note_playback_chrome(self.engine.refresh_playback())
+            except Exception:
+                pass
 
         self._run_bg(_work)
 
     def _toggle_power(self):
         key = self.engine.mark_power_optimistic()
-        self._set_status(key)
         if self.page == "remote":
-            self._build_page()
+            self._apply_chrome_face()
 
         def _work():
             self.engine.press(key)
             try:
                 self.engine.query_device_info()
-                self._queue_status(self.engine.refresh_playback())
+                self._note_playback_chrome(self.engine.refresh_playback())
             except Exception:
                 pass
 
@@ -481,11 +651,16 @@ class _RemoteUI:
 
     def _launch(self, app):
         app_id = app.get("id", "")
-        self._set_status("launch " + ascii_label(app.get("name") or ""))
+        self.selected_app_id = str(app_id or "")
+        if self.page == "apps":
+            self._build_page()
 
         def _work():
             self.engine.launch_refresh(app_id)
-            self._queue_status(self.engine.playback_status())
+            try:
+                self._note_playback_chrome(self.engine.refresh_playback())
+            except Exception:
+                pass
 
         self._run_bg(_work)
 
@@ -497,7 +672,7 @@ class _RemoteUI:
 
         def _work():
             self.engine.query_apps()
-            n = len(self.engine.apps or [])
+            n = len(self.engine.store_apps())
             self._queue_status(("%d apps" % n) if n else (self.engine.last_error or "no apps"))
             self._pending_rebuild = True
 
@@ -506,9 +681,11 @@ class _RemoteUI:
     def _refresh_playback_bg(self):
         def _work():
             try:
-                self._queue_status(self.engine.refresh_playback())
+                line = self.engine.refresh_playback()
             except Exception:
-                pass
+                line = self.engine.playback_status()
+            self._note_playback_chrome(line, force_rebuild=False)
+            self._pending_chrome = True
 
         self._run_bg(_work)
 
@@ -544,34 +721,89 @@ class _RemoteUI:
         self._set_status("perf...")
         self._run_bg(_work)
 
-    # ----- IP entry -------------------------------------------------------
+    # ----- Select page (cached TVs) + explicit Scan -----------------------
 
-    def _ip_clear(self):
-        self.ip_buf = ""
-        self._build_page()
+    def _merge_device_lists(self, *lists):
+        by_host = {}
+        by_serial = {}
+        for lst in lists:
+            for item in lst or []:
+                host = ((item or {}).get("host") or "").strip()
+                if not host:
+                    continue
+                serial = ((item or {}).get("serial") or "").strip()
+                name = ((item or {}).get("name") or "").strip()
+                if serial and serial in by_serial:
+                    old = by_serial[serial]
+                    old_host = (old.get("host") or "").strip()
+                    if old_host and old_host != host:
+                        by_host.pop(old_host, None)
+                prev = by_host.get(host) or {}
+                row = {
+                    "host": host,
+                    "name": name or prev.get("name") or "",
+                    "serial": serial or prev.get("serial") or "",
+                }
+                by_host[host] = row
+                if row["serial"]:
+                    by_serial[row["serial"]] = row
+        rows = list(by_host.values())
+        rows.sort(key=lambda r: (r.get("name") or r.get("host") or "").lower())
+        return rows
 
-    def _ip_key(self, ch):
-        if ch == "<":
-            self.ip_buf = self.ip_buf[:-1]
-        elif len(self.ip_buf) < 15:
-            self.ip_buf += ch
+    def _open_select(self, soft_refresh=True):
+        self._delete_armed = None
+        self.discover_list = self._merge_device_lists(
+            self.engine.cached_devices(), self.discover_list
+        )
+        self.page = "devices"
         self._build_page()
-
-    def _ip_set(self):
-        self.engine.set_host(self.ip_buf)
-        self.app_offset = 0
-        self._set_status("connecting " + (self.ip_buf or "?"))
-        self.page = "remote"
-        self._build_page()
+        n = len(self.discover_list)
+        self._set_status(("%d saved" % n) if n else "no TVs - press Scan")
+        if not soft_refresh:
+            return
 
         def _work():
-            self.engine.connect(discover_if_empty=False)
-            self._queue_status(self.engine.playback_status())
-            self._pending_rebuild = True
+            try:
+                devices = self.engine.refresh_cached_names()
+            except Exception:
+                devices = self.engine.cached_devices()
+            self._pending_select_list = devices
+            n2 = len(devices or [])
+            self._queue_status(("%d saved" % n2) if n2 else "no TVs - press Scan")
 
         self._run_bg(_work)
 
-    # ----- discovery ------------------------------------------------------
+    def _status_max_chars(self):
+        """Character budget for the top status band (full width on Select)."""
+        cw = max(6, (self.btn_text * 6) // 10)
+        return max(8, (self.W - 2 * self.pad) // cw)
+
+    def _arm_delete(self, dev):
+        host = ((dev or {}).get("host") or "").strip()
+        if not host:
+            return
+        name = ascii_label(((dev or {}).get("name") or "").strip() or host)
+        self._delete_armed = host
+        self._set_status(
+            format_delete_status_chars(name, self._status_max_chars(), tail=" Scan")
+        )
+
+    def _scan_button(self):
+        host = self._delete_armed
+        if host:
+            self._delete_armed = None
+            try:
+                self.engine.forget_device(host)
+            except Exception:
+                pass
+            self.discover_list = [
+                d for d in (self.discover_list or []) if (d.get("host") or "") != host
+            ]
+            self._set_status("deleted")
+            self._build_page()
+            return
+        self._start_scan()
 
     def _pick_device(self, dev):
         host = (dev or {}).get("host") or ""
@@ -579,6 +811,7 @@ class _RemoteUI:
         if not host:
             self._set_status("no host")
             return
+        self._delete_armed = None
         self.engine.set_host(host)
         self.ip_buf = host
         self.app_offset = 0
@@ -587,24 +820,40 @@ class _RemoteUI:
         self._build_page()
 
         def _work():
-            self.engine.connect(discover_if_empty=False)
-            self._queue_status(self.engine.playback_status())
+            ok = self.engine.connect(discover_if_empty=False)
+            if ok:
+                self._queue_status(self.engine.playback_status())
+            else:
+                self._queue_status(
+                    self.engine.last_error or "unreachable - Scan or delete"
+                )
             self._pending_rebuild = True
 
         self._run_bg(_work)
 
-    def _rescan(self):
-        self.page = "devices"
-        self.discover_list = []
-        self._pending_devices = []
-        self._set_status("Scanning...")
-        self._build_page()
-        self._start_scan()
-
     def _start_scan(self):
         if self._scan_busy:
             return
+        self._delete_armed = None
         self._scan_busy = True
+        self._pending_devices = []
+        self.page = "devices"
+        self._set_status("Scanning...")
+        self._build_page()
+        # Defer discover so the Select page can paint first.
+        self._scan_yield = True
+        self._pending_scan = True
+
+    def _paint_now(self):
+        try:
+            tick = getattr(self.display, "tick", None)
+            if tick is not None:
+                tick()
+        except Exception:
+            pass
+
+    def _run_scan_work(self):
+        self._paint_now()
 
         def _on_device(dev):
             host = (dev or {}).get("host") or ""
@@ -626,10 +875,14 @@ class _RemoteUI:
                 )
                 for dev in devices or []:
                     _on_device(dev)
-                if not (devices or self._pending_devices):
+                merged = self._merge_device_lists(
+                    self.discover_list, self._pending_devices, devices
+                )
+                self._pending_select_list = merged
+                if not merged:
                     self._queue_status(self.engine.last_error or "no Roku found")
                 else:
-                    self._queue_status("found %d - pick one" % len(self._pending_devices))
+                    self._queue_status("found %d - pick one" % len(merged))
             except Exception as e:
                 self._queue_status(str(e))
             finally:
@@ -647,15 +900,37 @@ class _RemoteUI:
     def _pump(self, _=None):
         # Apply worker results on the main tick so the render loop is never
         # mutated from a worker thread.
+        if self._pending_scan:
+            if self._scan_yield:
+                self._scan_yield = False
+            else:
+                self._pending_scan = False
+                self._run_scan_work()
+
         if self._pending_status is not None:
             self.status.value = self._pending_status
             self._pending_status = None
 
+        if self._pending_chrome:
+            self._pending_chrome = False
+            if self.page == "remote":
+                self._apply_chrome_face()
+
+        if self._pending_select_list is not None:
+            self.discover_list = self._merge_device_lists(
+                self.discover_list, self._pending_select_list
+            )
+            self._pending_select_list = None
+            if self.page == "devices":
+                self._build_page()
+
         if self._pending_devices and self.page == "devices":
-            known = {d.get("host") for d in self.discover_list}
-            new = [d for d in self._pending_devices if d.get("host") not in known]
-            if new:
-                self.discover_list.extend(new)
+            batch = self._pending_devices
+            self._pending_devices = []
+            before = {d.get("host") for d in self.discover_list}
+            self.discover_list = self._merge_device_lists(self.discover_list, batch)
+            after = {d.get("host") for d in self.discover_list}
+            if after != before or self._scan_busy:
                 self._build_page()
 
         if self._pending_rebuild:
@@ -663,17 +938,18 @@ class _RemoteUI:
             self._build_page()
 
         self._status_ticks += 1
+        # ~1s (pump is 250ms): keep app / state / position in sync.
         if (
             self.page == "remote"
-            and self.engine.connected
-            and self._status_ticks % 40 == 0
+            and (self.engine.host or "").strip()
+            and self._status_ticks % 4 == 0
             and not self._playback_busy
         ):
             self._playback_busy = True
 
             def _work():
                 try:
-                    self._queue_status(self.engine.refresh_playback())
+                    self._note_playback_chrome(self.engine.refresh_playback())
                 except Exception:
                     pass
                 self._playback_busy = False
@@ -681,8 +957,19 @@ class _RemoteUI:
             self._run_bg(_work)
 
 
-remote = _RemoteUI()
+def create(engine=None, start_page="devices"):
+    """Build the pdwidgets front end (does not call ``run_forever``)."""
+    return _RemoteUI(engine=engine, start_page=start_page)
 
-# Canonical entry: pdwidgets wired input + rendering into the shared runtime at
-# Display construction, so this just keeps the app alive.
-board_config.runtime.run_forever()
+
+def run(engine=None, start_page="devices"):
+    """Create the UI and hand control to ``runtime.run_forever()``."""
+    create(engine=engine, start_page=start_page)
+    board_config.runtime.run_forever()
+
+
+# Direct import / example kit: auto-start. ``roku_remote`` owns launch when set.
+import roku_engine as _roku_engine  # noqa: E402
+
+if not getattr(_roku_engine, "_LAUNCHER_OWNS_RUN", False):
+    run()
