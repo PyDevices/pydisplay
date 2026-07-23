@@ -46,9 +46,7 @@ class HostEventsDevice(Device):
                     # Quit chord (default Ctrl+Q) and Android / TV Back → QUIT.
                     # Why K_AC_BACK: Android SDL maps KEYCODE_BACK here; PyScript
                     # TV browsers map BrowserBack/GoBack/Back to the same code.
-                    if key_triggers_quit(
-                        event.type, event.key, event.mod, quit_chord
-                    ):
+                    if key_triggers_quit(event.type, event.key, event.mod, quit_chord):
                         event = events.Quit(events.QUIT)
                 elif event.type == events.KEYUP:
                     # Swallow key-up for quit keys so apps do not see a dangling
@@ -58,34 +56,37 @@ class HostEventsDevice(Device):
                     if quit_chord and event.key == chord_key:
                         continue
                 if event.type in self._data2:
-                    if (
-                        event.type
-                        in (
-                            events.MOUSEMOTION,
-                            events.MOUSEBUTTONDOWN,
-                            events.MOUSEBUTTONUP,
-                        )
-                        and (scale := self.scale) != 1
+                    if event.type in (
+                        events.MOUSEMOTION,
+                        events.MOUSEBUTTONDOWN,
+                        events.MOUSEBUTTONUP,
                     ):
-                        pos = (int(event.pos[0] // scale), int(event.pos[1] // scale))
-                        if event.type == events.MOUSEMOTION:
-                            rel = (event.rel[0] // scale, event.rel[1] // scale)
-                            event = events.Motion(
-                                event.type,
-                                pos,
-                                rel,
-                                event.buttons,
-                                event.touch,
-                                event.window,
-                            )
+                        # Prefer live display.touch_scale (PGDisplay window scale).
+                        scale = getattr(self._data, "touch_scale", None)
+                        if scale is None:
+                            scale = self.scale
                         else:
-                            event = events.Button(
-                                event.type,
-                                pos,
-                                event.button,
-                                event.touch,
-                                event.window,
-                            )
+                            self.scale = scale
+                        if scale and scale != 1:
+                            pos = (int(event.pos[0] // scale), int(event.pos[1] // scale))
+                            if event.type == events.MOUSEMOTION:
+                                rel = (event.rel[0] // scale, event.rel[1] // scale)
+                                event = events.Motion(
+                                    event.type,
+                                    pos,
+                                    rel,
+                                    event.buttons,
+                                    event.touch,
+                                    event.window,
+                                )
+                            else:
+                                event = events.Button(
+                                    event.type,
+                                    pos,
+                                    event.button,
+                                    event.touch,
+                                    event.window,
+                                )
                     eventlist.append(event)
             return eventlist if eventlist else None
         return None

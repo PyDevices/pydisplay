@@ -1,0 +1,43 @@
+# mpftp (sibling Cursor extension)
+
+Troubleshoot and drive the **mpftp** MicroPython board extension from this workspace.
+
+## Repo
+
+- Source: `/home/brad/gh/bdbarnett/mpftp` (not under `pydevices/`)
+- Skill: `.cursor/skills/mpftp` (symlink → that repo)
+- Installed remote extension: `~/.cursor-server/extensions/bdbarnett.mpftp-0.1.0`
+
+## Prefer CLI → extension RPC
+
+Extension must be loaded (this Cursor window). Share the UI serial session:
+
+```bash
+mpftp status          # ~/.mpftp/rpc.port, usually 127.0.0.1:7430
+mpftp ports
+mpftp connect COM4
+mpftp ls /
+mpftp watch           # ~/.mpftp/activity.log
+```
+
+Do **not** spawn a second sidecar while the UI is connected.
+
+## Dev loop (after TypeScript / python changes)
+
+```bash
+cd /home/brad/gh/bdbarnett/mpftp
+./scripts/install-cursor-wsl.sh
+# then: Developer: Reload Window
+```
+
+## Logs
+
+| Path | Purpose |
+|------|---------|
+| `~/.mpftp/activity.log` | NDJSON connects, transfers, RPC, errors |
+| `~/.mpftp/repl.log` | Mirrored REPL I/O |
+| `~/.mpftp/rpc.port` | Live AgentRpcServer address |
+
+## WSL note
+
+Sidecar uses Windows `python.exe` + mpremote so **COM** ports work without usbipd.

@@ -12,6 +12,8 @@ from sys import implementation
 import usdl2
 
 from displaysys import (
+    _DESKTOP_WINDOW_CHROME_H,
+    _DESKTOP_WINDOW_CHROME_W,
     DisplayDriver,
     color_rgb,
     fit_scale_to_desktop,
@@ -252,29 +254,55 @@ def _sdl_init_display():
         retcheck(usdl2.SDL_InitSubSystem(extra))
 
 
-def _desktop_size(display_index=0):
-    """Return (width, height) of the usable desktop area, or (0, 0) if unknown."""
+def _desktop_usable(display_index=0):
+    """Return ``(x, y, w, h)`` of the usable desktop area, or zeros if unknown.
+
+    Prefers ``SDL_GetDisplayUsableBounds`` (excludes taskbar / dock). Falls back
+    to the full desktop mode at ``(0, 0)``.
+    """
     display_index = int(display_index)
     try:
         get_bounds = usdl2.SDL_GetDisplayUsableBounds
         get_mode = usdl2.SDL_GetDesktopDisplayMode
     except AttributeError:
-        return 0, 0
+        return 0, 0, 0, 0
 
     try:
         rect = bytearray(16)
         if get_bounds(display_index, rect) == 0:
-            w, h = struct.unpack_from("<ii", rect, 8)
+            x, y, w, h = struct.unpack_from("<iiii", rect, 0)
             if w > 0 and h > 0:
-                return w, h
+                return x, y, w, h
         mode = bytearray(16)
         if get_mode(display_index, mode) == 0:
             w, h = struct.unpack_from("<ii", mode, 4)
             if w > 0 and h > 0:
-                return w, h
+                return 0, 0, w, h
     except Exception:
         pass
-    return 0, 0
+    return 0, 0, 0, 0
+
+
+def _desktop_size(display_index=0):
+    """Return ``(width, height)`` of the usable desktop area, or ``(0, 0)``."""
+    _x, _y, w, h = _desktop_usable(display_index)
+    return w, h
+
+
+def _window_position(win_w, win_h, x, y, usable=None):
+    """Center a window in the usable work area when *x*/*y* request centering."""
+    centered = x == usdl2.SDL_WINDOWPOS_CENTERED and y == usdl2.SDL_WINDOWPOS_CENTERED
+    if not centered:
+        return x, y
+    if usable is None:
+        usable = _desktop_usable()
+    ux, uy, uw, uh = usable
+    if uw <= 0 or uh <= 0:
+        return x, y
+    # Leave title-bar chrome above the client so the frame stays in the work area.
+    x = ux + max(0, (uw - win_w) // 2)
+    y = uy + _DESKTOP_WINDOW_CHROME_H + max(0, (uh - _DESKTOP_WINDOW_CHROME_H - win_h) // 2)
+    return x, y
 
 
 def _hard_process_exit(code: int = 0) -> None:
@@ -366,20 +394,30 @@ class SDLDisplay(DisplayDriver):
         _save_tty()
         _sdl_init_display()
         requested_scale = self._scale
-        desktop_w, desktop_h = _desktop_size()
+        usable = _desktop_usable()
+        _ux, _uy, desktop_w, desktop_h = usable
         fitted = fit_scale_to_desktop(
-            self.width, self.height, requested_scale, desktop_w, desktop_h
+            self.width,
+            self.height,
+            requested_scale,
+            desktop_w,
+            desktop_h,
+            chrome_w=_DESKTOP_WINDOW_CHROME_W,
+            chrome_h=_DESKTOP_WINDOW_CHROME_H,
         )
         notify_board_config_scale_override("SDLDisplay", requested_scale, fitted, quiet=quiet)
         if fitted != requested_scale:
             self._scale = fitted
         _init_joysticks()
+        win_w = int(self.width * self._scale)
+        win_h = int(self.height * self._scale)
+        x, y = _window_position(win_w, win_h, x, y, usable=usable)
         self._window = usdl2.SDL_CreateWindow(
             self._title.encode(),
             x,
             y,
-            int(self.width * self._scale),
-            int(self.height * self._scale),
+            win_w,
+            win_h,
             self._window_flags,
         )
         if not self._window:

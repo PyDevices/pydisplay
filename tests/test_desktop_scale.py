@@ -7,7 +7,12 @@ import unittest
 
 import _env  # noqa: F401
 
-from displaysys import _DESKTOP_SCALE_MARGIN, fit_scale_to_desktop
+from displaysys import (
+    _DESKTOP_SCALE_MARGIN,
+    _DESKTOP_WINDOW_CHROME_H,
+    desktop_work_area,
+    fit_scale_to_desktop,
+)
 
 
 class TestFitScaleToDesktop(unittest.TestCase):
@@ -26,6 +31,27 @@ class TestFitScaleToDesktop(unittest.TestCase):
         max_h = 752 - _DESKTOP_SCALE_MARGIN
         fitted = fit_scale_to_desktop(320, 480, 2, 1280, 752, margin=_DESKTOP_SCALE_MARGIN)
         self.assertAlmostEqual(fitted, max_h / 480, places=5)
+
+    def test_chrome_reserved(self):
+        # Usable 1280x752 (taskbar excluded); chrome reserves title bar / frame.
+        max_h = 752 - _DESKTOP_SCALE_MARGIN - _DESKTOP_WINDOW_CHROME_H
+        fitted = fit_scale_to_desktop(
+            320,
+            480,
+            2,
+            1280,
+            752,
+            chrome_w=16,
+            chrome_h=_DESKTOP_WINDOW_CHROME_H,
+        )
+        self.assertAlmostEqual(fitted, max_h / 480, places=5)
+        self.assertLess(fitted, fit_scale_to_desktop(320, 480, 2, 1280, 752))
+
+    def test_desktop_work_area_shape(self):
+        area = desktop_work_area()
+        self.assertEqual(len(area), 4)
+        for v in area:
+            self.assertIsInstance(v, int)
 
 
 if __name__ == "__main__":
