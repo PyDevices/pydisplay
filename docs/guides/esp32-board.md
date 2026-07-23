@@ -64,6 +64,12 @@ import lib.path
 import eventsys_simpletest
 ```
 
+## Background network / workers
+
+ESP32 MicroPython `_thread` stacks are tiny. Prefer a job queue drained from
+`runtime.on_tick` (or an LVGL timer) over `start_new_thread` for HTTP and
+discovery. Details: [MicroPython platform notes](../platforms/micropython.md#background-work-_thread).
+
 ## Next
 
 - [**App starter**](../examples/app-starter.md) — copy-paste template for your first app

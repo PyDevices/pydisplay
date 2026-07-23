@@ -142,6 +142,22 @@ that call `show()` themselves avoid a competing SDL refresh timer.
   display-agnostic. GUI layers claim presentation via
   `runtime.claim_display_refresh()` (LVGL via `add_ons/display_driver.py`).
 
+### MCU: no `_thread` for network / blocking work
+
+ESP32 MicroPython `mp_thread` stacks are tiny (~5KiB on ESP32-P4). Starting
+`_thread.start_new_thread` for HTTP/ECP/discovery (or other deep call stacks)
+from a soft-timer / LVGL timer / input path causes `Stack protection fault` /
+`Guru Meditation` in task `mp_thread` — often right after the UI first paints.
+
+**Do this instead:** queue the callable and drain at most one job from the main
+tick (`runtime.on_tick`, an `lv.timer`, or a soft `multimer.Timer` pump). Touch
+only engine/mailbox state in the job; apply widget/FB mutations on the pump.
+See `roku_widgets` / `roku_lvgl` / `roku_graphics` (`_run_bg` + `_drain_bg`).
+
+Desktop CPython may still use threads; this rule is for MCU MicroPython (and
+any port with a similarly small `_thread` stack). Do not “fix” this in
+`eventsys` with speculative reentrancy guards — keep the pattern in the app.
+
 ### LVGL
 
 - Install the CPython LVGL binding from TestPyPI (import name `lvgl`):

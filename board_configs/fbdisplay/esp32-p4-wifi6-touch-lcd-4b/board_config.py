@@ -83,7 +83,10 @@ touch_drv = GT911(
     height=720,
     touch_points=5,
     reverse_axis=False,
-    reverse_y=True,
+    # Factory Y already matches the FB; X is mirrored (left→high). reverse_* are
+    # applied in software by gt911 when update_config is False (default).
+    reverse_x=True,
+    reverse_y=False,
 )
 
 

@@ -86,6 +86,14 @@ class GT911:
         self.rst_pin = _as_out_pin(reset_pin, value=0)
         self.irq_pin = None
         self.irq_pin_label = irq_pin
+        self.width = int(width)
+        self.height = int(height)
+        self.reverse_x = bool(reverse_x)
+        self.reverse_y = bool(reverse_y)
+        self.reverse_axis = bool(reverse_axis)
+        # Chip config rewrite is optional; without it, apply axis flags in software
+        # on each read so reverse_* always match the constructor contract.
+        self._hw_axis_config = bool(update_config)
 
         # Reset the touch panel controller.
         self.reset()
@@ -155,6 +163,13 @@ class GT911:
             x = buf[o + 1] | (buf[o + 2] << 8)
             y = buf[o + 3] | (buf[o + 4] << 8)
             size = buf[o + 5] | (buf[o + 6] << 8)
+            if not self._hw_axis_config:
+                if self.reverse_axis:
+                    x, y = y, x
+                if self.reverse_x:
+                    x = self.width - 1 - x
+                if self.reverse_y:
+                    y = self.height - 1 - y
             self.points_data[i][0] = x
             self.points_data[i][1] = y
             self.points_data[i][2] = size

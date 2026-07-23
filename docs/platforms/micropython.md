@@ -38,6 +38,18 @@ SPI displays use `spibus.py`; parallel I80 displays use `i80bus.py`. These insta
 
 For fastest buses, community C drivers (e.g. [lvgl_micropython](https://github.com/kdschlosser/lvgl_micropython)) can be wired through `BusDisplay`.
 
+### Background work (`_thread`)
+
+On ESP32, MicroPython worker threads (`_thread` / `mp_thread`) have a very small
+stack. Do **not** run network I/O, discovery, or other deep call stacks on a
+new thread from a soft timer or input callback — that overflows the stack
+(`Stack protection fault` in task `mp_thread`).
+
+Queue the work and run it on the main tick instead: `eventsys.Runtime.on_tick`,
+an LVGL `lv.timer`, or a soft `multimer.Timer` pump. Keep UI mutations on that
+same main path. Desktop CPython can still use threads; this constraint is for
+MCU MicroPython.
+
 ## Unix (desktop MicroPython)
 
 Same workflow as [CPython desktop](cpython-desktop.md), but run `micropython -i path.py` instead of `python3`.

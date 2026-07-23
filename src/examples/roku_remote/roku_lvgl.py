@@ -21,9 +21,9 @@ desktop windows.
 
 Import order matters: ``display_driver`` must be imported after ``board_config``
 so LVGL's display / input devices are wired before widgets are created. Blocking
-ECP calls run on a worker thread; because LVGL is not re-entrant, the worker only
-touches the engine and sets mailbox flags, and an ``lv.timer`` applies every
-widget change on the LVGL (main) thread.
+ECP/scan work is queued and drained from an ``lv.timer`` pump (no ``_thread`` —
+ESP32 thread stacks are too small for network). The pump only touches LVGL on
+the main thread; queued jobs touch the engine and set mailbox flags.
 
 Launch via ``roku_remote`` (prefs + MRU). Direct ``roku_lvgl.run()`` also works.
 Requires Roku **Control by mobile apps -> Enabled**. Join WiFi before running
@@ -206,6 +206,9 @@ class _RokuLvgl:
         self._scan_worker_active = False
         # ECP keys currently held (keydown without keyup); avoids double keyup.
         self._held_keys = {}
+        # Cooperative bg queue (drained by ``_pump`` — no ``_thread``).
+        self._bg_q = []
+        self._bg_busy = False
 
         self.W = display_drv.width
         self.H = display_drv.height
@@ -1286,29 +1289,32 @@ class _RokuLvgl:
         self._queue_status(self.engine.playback_app_label())
         self._queue_state(self.engine.playback_state_label())
 
-    # ----- ECP actions (worker thread; no LVGL calls) ---------------------
+    # ----- ECP actions (queued; drained by ``_pump``; no LVGL in jobs) -----
 
     def _run_bg(self, fn):
-        try:
-            import _thread
+        """Queue ``fn`` for the LVGL soft-pump (no ``_thread``).
 
-            _thread.start_new_thread(fn, ())
-            return True
+        ESP32-P4 ``_thread`` stacks are ~5KiB; network/ECP there overflowed
+        ``mp_thread``. Jobs run on the main tick via :meth:`_pump` instead.
+        """
+        q = self._bg_q
+        if len(q) >= 8:
+            q.pop(0)
+        q.append(fn)
+        return True
+
+    def _drain_bg(self):
+        """Run at most one queued background job on the LVGL tick."""
+        q = self._bg_q
+        if not q or self._bg_busy:
+            return
+        self._bg_busy = True
+        job = q.pop(0)
+        try:
+            job()
         except Exception:
             pass
-        try:
-            from concurrent.futures import ThreadPoolExecutor
-
-            pool = getattr(self, "_bg_pool", None)
-            if pool is None:
-                self._bg_pool = ThreadPoolExecutor(max_workers=2)
-                pool = self._bg_pool
-            pool.submit(fn)
-            return True
-        except Exception:
-            pass
-        fn()
-        return False
+        self._bg_busy = False
 
     def _ecp(self, key):
         """One-shot keypress (chrome / non-hold actions)."""
@@ -1731,33 +1737,16 @@ class _RokuLvgl:
                     self._queue_status("cancelled")
                     self._pending_rebuild = True
 
-        # Prefer a worker (pump applies devices). Only paint inline when we must
-        # run discover on the LVGL thread (no _thread / futures).
-        self._scan_progressive_inline = False
-        try:
-            import _thread
-
-            _thread.start_new_thread(_work, ())
-            return
-        except Exception:
-            pass
-        try:
-            from concurrent.futures import ThreadPoolExecutor
-
-            pool = getattr(self, "_bg_pool", None)
-            if pool is None:
-                self._bg_pool = ThreadPoolExecutor(max_workers=2)
-                pool = self._bg_pool
-            pool.submit(_work)
-            return
-        except Exception:
-            pass
+        # Queue on the soft-pump (same as ECP). Progressive list updates land
+        # after discover returns; avoid ``_thread`` on ESP32.
         self._scan_progressive_inline = True
-        _work()
+        self._run_bg(_work)
 
     # ----- soft pump (LVGL main thread) -----------------------------------
 
     def _pump(self, _timer=None):
+        self._drain_bg()
+
         if self._pending_scan:
             if self._scan_yield:
                 # Skip one pump so the runtime tick can paint first.
