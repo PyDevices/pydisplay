@@ -180,6 +180,7 @@ class _Remote:
         self.font_scale = max(1, self.unit // 280) + (1 if self.unit >= 400 else 0)
 
         self.theme = _THEME
+        self._chassis_rows = None
         self.engine = engine if engine is not None else make_engine()
         self.ip_buf = self.engine.host or ""
         self.page = (
@@ -644,14 +645,21 @@ class _Remote:
 
     def _draw_chassis(self):
         t = self.theme
-        # Vertical gradient background
         h = self.height
-        for j in range(h):
-            c = _lerp(t["chassis"], t["chassis2"], j / (h - 1) if h > 1 else 0)
-            self.fb.fill_rect(0, j, self.width, 1, c)
+        w = self.width
+        rows = self._chassis_rows
+        if rows is None or len(rows) != h:
+            rows = []
+            for j in range(h):
+                rows.append(
+                    _lerp(t["chassis"], t["chassis2"], j / (h - 1) if h > 1 else 0)
+                )
+            self._chassis_rows = rows
+        for j, c in enumerate(rows):
+            self.fb.fill_rect(0, j, w, 1, c)
         # Inset bezel
         m = max(2, self.pad // 2)
-        self.fb.rect(m, m, self.width - 2 * m, self.height - 2 * m, t["bezel"])
+        self.fb.rect(m, m, w - 2 * m, h - 2 * m, t["bezel"])
 
     def _draw_button(self, btn, pressed=False):
         x, y, w, h = btn.area.x, btn.area.y, btn.area.w, btn.area.h
