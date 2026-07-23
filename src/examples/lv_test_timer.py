@@ -3,7 +3,7 @@
 lv_test_timer.py
 
 LVGL timer smoke test. Uses whatever timer mode ``board_config`` / ``runtime``
-already has — does not read or write environment variables.
+already has.
 
 Shows runtime, OS, display, timer backend, and LVGL version; a seconds counter
 and spinning arc prove LVGL timers fire; a tap button exercises input.
@@ -12,8 +12,13 @@ Interactive (default): build UI then ``runtime.run_forever()``. On an interactiv
 REPL with a self-driving timer (``machine.Timer`` / signals), ``run_forever``
 returns immediately so the prompt comes back for introspection while LVGL keeps
 ticking. Kit mode (``kit`` argv) still uses a short sync/async wait for click
-injection because LVGL owns the host queue. Parent may set
-``PYDISPLAY_TIMER_ASYNC`` before launch.
+injection because LVGL owns the host queue.
+
+Parent may set before launch:
+
+* ``PYDISPLAY_TIMER_ASYNC`` — desktop sync/async timers (``board_config``)
+* ``PYDISPLAY_LV_ROTATION`` — ``0``/``90``/``180``/``270`` applied to
+  ``display_drv.rotation`` before ``display_driver`` import
 """
 
 import sys
@@ -35,6 +40,15 @@ import json
 import time
 
 from board_config import display_drv, runtime
+from displaysys import env_get
+
+# Optional logical orientation for LVGL (hw MADCTL/SDL/PG or software rotate).
+_lv_rot = env_get("PYDISPLAY_LV_ROTATION")
+if _lv_rot is not None and str(_lv_rot).strip() != "":
+    try:
+        display_drv.rotation = int(str(_lv_rot).strip())
+    except (TypeError, ValueError):
+        pass
 
 # Stop board_config auto-service before LVGL / display_driver import (ESP32-P4).
 # If display_driver is already loaded, stop_timer() wipes its on_tick subs and
@@ -138,6 +152,7 @@ def get_platform_info():
         "timer": _timer_type(),
         "lvgl": _lvgl_label(),
         "mode": _mode_label(),
+        "rotation": int(getattr(display_drv, "rotation", 0) or 0),
     }
 
 
@@ -153,6 +168,7 @@ def _add_info_labels(scr, info, y_start=26, line_h=16):
         f"Display: {info['display']}",
         f"Timer: {info['timer']}",
         f"LVGL: {info['lvgl']}",
+        f"Rotation: {info.get('rotation', 0)}",
     )
     y = y_start
     for text in lines:

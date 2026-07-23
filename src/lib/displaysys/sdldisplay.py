@@ -324,6 +324,7 @@ def _hard_process_exit(code: int = 0) -> None:
 
 class SDLDisplay(DisplayDriver):
     needs_refresh = True
+    supports_hw_rotation = True
 
     """
     A class to emulate an LCD using SDL2.

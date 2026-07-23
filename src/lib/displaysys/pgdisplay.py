@@ -197,6 +197,7 @@ def _init_joysticks() -> None:
 
 class PGDisplay(DisplayDriver):
     needs_refresh = True
+    supports_hw_rotation = True
 
     """
     A class to emulate an LCD using pygame.
