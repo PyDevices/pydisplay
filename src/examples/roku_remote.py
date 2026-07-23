@@ -25,14 +25,10 @@ Requires Roku **Control by mobile apps -> Enabled**; join WiFi before running
 on a microcontroller. Optional fixed target: ``ROKU_HOST`` in :mod:`roku_engine`.
 """
 
-import sys
+import lib.path  # noqa: F401 — adds lib/, add_ons/, examples/
 
-_EXAMPLES = __file__.replace("\\", "/").rsplit("/", 1)[0]
-if _EXAMPLES not in sys.path:
-    sys.path.insert(0, _EXAMPLES)
-
-import roku_engine  # noqa: E402
-from roku_engine import (  # noqa: E402
+import roku_engine
+from roku_engine import (
     DEFAULT_FRONTEND,
     RokuEngine,
     get_frontend,
