@@ -1038,6 +1038,28 @@ def _default_scan_workers():
         return 24
 
 
+def unicast_scan_supported():
+    """True when a full ``/24`` unicast sweep is safe.
+
+    MicroPython builds that expose ``network`` (ESP STA, esp-hosted, …) stall
+    for a long time under a 254-host probe and can wedge the UI. Desktop
+    CPython and Windows PE (no ``network``) keep Select **FULL**.
+    """
+    try:
+        import sys
+
+        if getattr(sys.implementation, "name", "") != "micropython":
+            return True
+    except Exception:
+        return True
+    try:
+        import network  # noqa: F401
+
+        return False
+    except ImportError:
+        return True
+
+
 def _probe_hosts_poll(hosts, port, connect_timeout, batch_size=32):
     """Parallel TCP probe via ``select.poll`` (no threads — Windows MP)."""
     import select
@@ -1622,8 +1644,12 @@ def restart_app():
     raise SystemExit(RESTART_EXIT_CODE)
 
 
-def format_switch_status(frontend, fits=None, tail="\npress REMOTE"):
-    """Status text for MORE front-end switch confirm (same shape as delete)."""
+def format_switch_status(frontend, fits=None, tail="\nREMOTE or tap again"):
+    """Status text for MORE front-end switch confirm (same shape as delete).
+
+    Default tail: confirm with REMOTE, or tap the same front-end button again
+    to cancel.
+    """
     label = FRONTEND_LABELS.get(frontend, frontend or "?")
     line = "Switch to %s?" % label
     text = line + (tail or "")
@@ -1642,10 +1668,15 @@ def _set_last_device(host, serial):
     return _write_prefs(prefs)
 
 
-def _reprobe_known_hosts(missing_hosts, on_device=None, timeout=1.5):
+def _reprobe_known_hosts(missing_hosts, on_device=None, timeout=1.5, cancel_check=None):
     """ECP-probe *missing_hosts*; return newly confirmed device dicts."""
     found = []
     for host in missing_hosts or []:
+        try:
+            if cancel_check and cancel_check():
+                break
+        except Exception:
+            pass
         host = (host or "").strip()
         if not host:
             continue
@@ -1671,6 +1702,7 @@ def discover_rokus_scan(
     workers=None,
     on_device=None,
     find_all=False,
+    cancel_check=None,
 ):
     """
     Unicast scan: TCP :8060 then GET /query/device-info.
@@ -1688,6 +1720,8 @@ def discover_rokus_scan(
     Default False is only for rare one-shot probes; ``RokuEngine.discover``
     always passes True. ``connect()`` does not auto-discover.
     Asleep sets typically close ECP and will not appear.
+    ``cancel_check`` is an optional zero-arg callable; when it returns true the
+    sweep stops between host chunks (Select Cancel).
     """
     if workers is None:
         workers = _default_scan_workers()
@@ -1696,6 +1730,12 @@ def discover_rokus_scan(
     priority_hosts = tuple(priority_hosts or ())
     if not prefixes and not priority_hosts:
         return []
+
+    def _cancelled():
+        try:
+            return bool(cancel_check and cancel_check())
+        except Exception:
+            return False
 
     hosts = []
     for prefix in prefixes:
@@ -1723,6 +1763,8 @@ def discover_rokus_scan(
     seen = {}
     # Prefer previously-found IPs — full-subnet floods can miss flaky listeners.
     for host in priority_hosts:
+        if _cancelled():
+            return found
         host = (host or "").strip()
         if not host or host in seen:
             continue
@@ -1738,8 +1780,12 @@ def discover_rokus_scan(
     # confirmed Roku (legacy one-shot). Engine.discover always uses find_all.
     step = max(8, int(workers))
     for i in range(0, len(rest), step):
+        if _cancelled():
+            break
         chunk = rest[i : i + step]
         for host in _probe_hosts_parallel(chunk, port, connect_timeout, workers):
+            if _cancelled():
+                break
             _accept(host)
         if found and not find_all:
             break
@@ -1792,7 +1838,9 @@ def _monotonic_expired(deadline):
     return False
 
 
-def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
+def discover_rokus(
+    timeout=3.0, retries=2, scan_fallback=True, ssdp=True, cancel_check=None
+):
     """
     Discover Roku ECP devices.
 
@@ -1804,8 +1852,16 @@ def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
     is unsafe on MCU targets where SNTP steps the clock during discovery.
     Prefer ``ssdp=False`` from UI threads that share multimer soft timers if
     blocking ``recvfrom`` + timer re-entry deadlocks under librt.
+    ``cancel_check`` stops the SSDP listen / unicast fallback early when true.
     """
     devices = []
+
+    def _cancelled():
+        try:
+            return bool(cancel_check and cancel_check())
+        except Exception:
+            return False
+
     if ssdp:
         message = (
             "M-SEARCH * HTTP/1.1\r\n"
@@ -1867,6 +1923,8 @@ def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
                     raise RuntimeError("SSDP send failed: " + str(e)) from e
 
                 while True:
+                    if _cancelled():
+                        break
                     if _monotonic_expired(deadline):
                         break
                     if grace_deadline[0] is not None and _monotonic_expired(
@@ -1916,9 +1974,13 @@ def discover_rokus(timeout=3.0, retries=2, scan_fallback=True, ssdp=True):
                 break
 
         devices = list(found.values())
+    if _cancelled():
+        return devices
     if devices or not scan_fallback:
         return devices
-    return discover_rokus_scan(find_all=True)
+    if not unicast_scan_supported():
+        return devices
+    return discover_rokus_scan(find_all=True, cancel_check=cancel_check)
 
 
 class RokuEngine:
@@ -1940,8 +2002,13 @@ class RokuEngine:
         self._last_position_ms = None
         self._position_changed_at = 0.0
         self.discovered = []
+        self._discover_cancel = False
         # Optional inject for tests: callable(method, url, timeout, data) -> (status, body)
         self._http = None
+
+    def cancel_discover(self):
+        """Ask an in-flight :meth:`discover` to stop at the next checkpoint."""
+        self._discover_cancel = True
 
     def set_host(self, host, port=None):
         self.host = (host or "").strip()
@@ -2298,9 +2365,16 @@ class RokuEngine:
         Cache hosts are probed first (and reported via ``on_device``) so the UI
         can populate quickly. Select **SCAN** passes ``scan_fallback=False``
         (SSDP + known-host reprobe only). Select **FULL** passes ``True`` so a
-        unicast ``/24`` runs and never-saved TVs are not missed. Does not pick
-        a target host — callers use Select / ``set_host`` / ``resume_last_host``.
+        unicast ``/24`` runs when :func:`unicast_scan_supported` (skipped on
+        MicroPython ``network`` STA targets where the sweep wedges the UI).
+        Does not pick a target host — callers use Select / ``set_host`` /
+        ``resume_last_host``.
         """
+        self._discover_cancel = False
+
+        def _cancelled():
+            return bool(self._discover_cancel)
+
         try:
             known = _load_known_hosts()
             priority = []
@@ -2316,7 +2390,7 @@ class RokuEngine:
             path = "none"
             # Always enumerate every reachable TV (Scan / Select / CLI).
             find_all = True
-            if ssdp:
+            if ssdp and not _cancelled():
                 # Keep scan_fallback out of discover_rokus so on_device still runs
                 # on the unicast path; enrich SSDP hits with ECP names for the UI.
                 found = discover_rokus(
@@ -2324,10 +2398,13 @@ class RokuEngine:
                     retries=retries,
                     scan_fallback=False,
                     ssdp=True,
+                    cancel_check=_cancelled,
                 )
                 path = "ssdp" if found else "ssdp_empty"
                 enriched = []
                 for info in found:
+                    if _cancelled():
+                        break
                     named = _ecp_device(
                         info.get("host") or "", timeout=min(self.timeout, 1.5)
                     )
@@ -2341,19 +2418,23 @@ class RokuEngine:
                             pass
                 found = enriched
             # Re-probe persisted / session-known hosts SSDP missed (UDP flakiness).
-            if priority:
+            if priority and not _cancelled():
                 have = {d.get("host") for d in found if d.get("host")}
                 missing = [h for h in priority if h not in have]
                 if missing:
                     recovered = _reprobe_known_hosts(
-                        missing, on_device=on_device, timeout=min(self.timeout, 1.5)
+                        missing,
+                        on_device=on_device,
+                        timeout=min(self.timeout, 1.5),
+                        cancel_check=_cancelled,
                     )
                     if recovered:
                         found = list(found) + list(recovered)
                         path = (path or "none") + "+reprobe"
             # Full unicast /24 when scan_fallback is on (Select FULL). Select SCAN
-            # passes False so SSDP + cache reprobe stay fast.
-            if scan_fallback:
+            # passes False so SSDP + cache reprobe stay fast. On MicroPython +
+            # network (MCU STA) skip the /24 — it wedges lwIP for tens of seconds.
+            if scan_fallback and unicast_scan_supported() and not _cancelled():
                 have = {d.get("host") for d in found if d.get("host")}
 
                 def _on_new(info):
@@ -2372,6 +2453,7 @@ class RokuEngine:
                     on_device=_on_new if on_device is not None else None,
                     find_all=find_all,
                     connect_timeout=0.35,
+                    cancel_check=_cancelled,
                 )
                 if not found:
                     found = scanned
@@ -2385,8 +2467,14 @@ class RokuEngine:
                             found.append(info)
                     if scanned:
                         path = (path or "none") + "+scan"
+            elif scan_fallback and not unicast_scan_supported():
+                path = (path or "none") + "+no_subnet"
+            # Keep whatever we found even when Cancelled — Select keeps the list.
             self.discovered = found
-            self.last_error = "" if self.discovered else "no Roku found"
+            if _cancelled():
+                self.last_error = ""
+            else:
+                self.last_error = "" if self.discovered else "no Roku found"
             if found:
                 _save_known_hosts(found)
         except Exception as e:
