@@ -54,11 +54,6 @@ pd.DEBUG = False
 
 FRONTEND = "widgets"
 
-# Only the remote page is kept across navigations. Devices / Apps / More are
-# built on entry and dropped on leave — MicroPython fragments badly if those
-# trees stay live with raised Buttons.
-_CACHED_PAGES = ("remote",)
-
 
 def _shade(c, factor):
     """Darken (``factor`` < 1) or lighten (``factor`` > 1) an RGB565 color."""
@@ -160,8 +155,6 @@ class _RemoteUI:
         self._scan_yield = False
         self._press_t0 = 0
         self._press_dev = None
-        self._page_panels = {}
-        self._page_parent = None
 
         self.screen = pd.Screen(self.display, bg=self.BG, visible=False)
         plaque_w = self.W - 2 * self.pad
@@ -281,9 +274,8 @@ class _RemoteUI:
         except Exception:
             pass
 
-        # Build only the page we will show (lazy panels keep the rest cold).
         if self.page == "remote" and (self.engine.host or "").strip():
-            self._show_page("remote", rebuild=True)
+            self._build_page()
             name = ""
             try:
                 name = (self.engine.device_info or {}).get("user-device-name") or ""
@@ -531,97 +523,22 @@ class _RemoteUI:
         self._update_progress()
 
     def _clear_content(self):
-        """Drop all lazy page panels (full reset)."""
-        for name in list(self._page_panels.keys()):
-            self._drop_page(name)
+        for child in list(self.content.children):
+            try:
+                self.content.remove_child(child)
+            except Exception:
+                pass
+        self._play_btn = None
+        self._power_btn = None
+        # Ensure the content panel background is redrawn even when the page
+        # leaves empty regions (Apps / More vs full-coverage Select rows).
         self.content.invalidate()
-
-    def _gc(self):
         try:
             import gc
 
             gc.collect()
         except Exception:
             pass
-
-    def _drop_page(self, name):
-        """Destroy one cached page panel so the next show rebuilds it."""
-        panel = self._page_panels.pop(name, None)
-        if panel is None:
-            return
-        if name == "remote":
-            self._play_btn = None
-            self._power_btn = None
-        # Detach children first so dirty sets / event closures can drop.
-        for child in list(getattr(panel, "children", ()) or ()):
-            try:
-                panel.remove_child(child)
-            except Exception:
-                pass
-        try:
-            self.content.remove_child(panel)
-        except Exception:
-            pass
-        self._gc()
-
-    def _trim_page_cache(self, keep):
-        """Keep ``keep`` plus a hidden ``remote`` panel; drop everything else."""
-        for name in list(self._page_panels.keys()):
-            if name == keep:
-                continue
-            if name in _CACHED_PAGES:
-                continue
-            self._drop_page(name)
-
-    def _page_panel(self, name):
-        panel = self._page_panels.get(name)
-        if panel is not None:
-            return panel
-        panel = pd.Widget(
-            self.content,
-            x=0,
-            y=0,
-            w=self.content.width,
-            h=self.content.height,
-            align=pd.ALIGN.TOP_LEFT,
-            bg=self.BG,
-            padding=(0, 0, 0, 0),
-            visible=False,
-        )
-        self._page_panels[name] = panel
-        return panel
-
-    def _show_page(self, name, rebuild=False):
-        """Show ``name``; only ``remote`` is retained when navigating away."""
-        cacheable = name in _CACHED_PAGES
-        panel = self._page_panels.get(name)
-        # Non-cached pages always rebuild so Select/Apps/More never accumulate.
-        need = (not cacheable) or rebuild or panel is None or not panel.children
-        if need:
-            if panel is not None:
-                self._drop_page(name)
-            panel = self._page_panel(name)
-            self._page_parent = panel
-            self.page = name
-            try:
-                if name == "devices":
-                    self._build_devices()
-                elif name == "apps":
-                    self._build_apps()
-                elif name == "more":
-                    self._build_more()
-                else:
-                    self._build_remote()
-            finally:
-                self._page_parent = None
-        self.page = name
-        for n, p in self._page_panels.items():
-            p.visible = n == name
-        self._trim_page_cache(name)
-        self.content.invalidate()
-
-    def _button_parent(self):
-        return self._page_parent if self._page_parent is not None else self.content
 
     def _colors_for(self, role):
         """Return ``(text, face, bg_hi, bg_lo, rim)`` matching ``roku_graphics`` roles."""
@@ -710,7 +627,7 @@ class _RemoteUI:
         fg, bg, bg_hi, bg_lo, rim = self._colors_for(role)
         rad = (min(int(w), int(h)) // 2) if round_btn else self.radius
         btn = pd.Button(
-            self._button_parent(),
+            self.content,
             label=label,
             x=int(x),
             y=int(y),
@@ -741,7 +658,7 @@ class _RemoteUI:
         """Select-page TV row: short tap picks, long-press arms delete."""
         fg, bg, bg_hi, bg_lo, rim = self._colors_for(role)
         btn = pd.Button(
-            self._button_parent(),
+            self.content,
             label=label,
             x=int(x),
             y=int(y),
@@ -797,8 +714,15 @@ class _RemoteUI:
     # ----- page building --------------------------------------------------
 
     def _build_page(self):
-        """Rebuild the current page panel (data changed)."""
-        self._show_page(self.page, rebuild=True)
+        self._clear_content()
+        if self.page == "devices":
+            self._build_devices()
+        elif self.page == "apps":
+            self._build_apps()
+        elif self.page == "more":
+            self._build_more()
+        else:
+            self._build_remote()
 
     def _place3(self, x0, y, w, row_h, gap, specs):
         """Place three equal-width buttons (LVGL ``_place3`` parity)."""
@@ -812,9 +736,8 @@ class _RemoteUI:
 
     def _build_remote(self):
         """Match ``roku_lvgl._build_remote``: 6 rows + circular D-pad."""
-        parent = self._button_parent()
-        W = parent.width
-        H = parent.height
+        W = self.content.width
+        H = self.content.height
         pad = self.pad
         gap = pad
         x0 = pad
@@ -952,9 +875,8 @@ class _RemoteUI:
         )
 
     def _build_devices(self):
-        parent = self._button_parent()
-        W = parent.width
-        H = parent.height
+        W = self.content.width
+        H = self.content.height
         pad = self.pad
         gap = pad
         x0 = pad
@@ -1000,9 +922,8 @@ class _RemoteUI:
             )
 
     def _build_apps(self):
-        parent = self._button_parent()
-        W = parent.width
-        H = parent.height
+        W = self.content.width
+        H = self.content.height
         pad = self.pad
         gap = pad
         x0 = pad
@@ -1046,9 +967,8 @@ class _RemoteUI:
 
     def _build_more(self):
         """MORE: REMOTE + other frontends; TV inputs grid (LVGL parity)."""
-        parent = self._button_parent()
-        W = parent.width
-        H = parent.height
+        W = self.content.width
+        H = self.content.height
         pad = self.pad
         gap = pad
         x0 = pad
@@ -1096,7 +1016,8 @@ class _RemoteUI:
     # ----- navigation -----------------------------------------------------
 
     def _goto(self, page):
-        self._show_page(page, rebuild=False)
+        self.page = page
+        self._build_page()
         if page == "remote":
             # Always re-probe — clears sticky apps/inputs plaque text and
             # recovers from a false "offline" after a transient error.
@@ -1159,12 +1080,13 @@ class _RemoteUI:
         self._run_bg(_work)
 
     def _open_apps(self):
+        self.page = "apps"
         self.app_offset = 0
         if not self.selected_app_id:
             self.selected_app_id = str((self.engine.active_app or {}).get("id") or "")
         if self.engine.apps:
             self._set_status("%d apps" % len(self.engine.store_apps()))
-            self._show_page("apps", rebuild=True)
+            self._build_page()
         else:
             self._refresh_apps()
 
@@ -1173,7 +1095,7 @@ class _RemoteUI:
         step = max(1, int(self.app_page_size or 1))
         if n:
             self.app_offset = (self.app_offset + step) % n
-        self._show_page("apps", rebuild=True)
+        self._build_page()
 
     # ----- ECP actions ----------------------------------------------------
 
@@ -1326,7 +1248,8 @@ class _RemoteUI:
         self.discover_list = self._merge_device_lists(
             self.engine.cached_devices(), self.discover_list
         )
-        self._show_page("devices", rebuild=True)
+        self.page = "devices"
+        self._build_page()
         n = len(self.discover_list)
         self._set_status(("%d saved" % n) if n else "no TVs - press Scan")
         self._set_state("")
