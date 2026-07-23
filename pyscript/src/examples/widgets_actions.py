@@ -37,9 +37,9 @@ def open_menu(_=None, event=None):
     menu.show()
 
 
-pd.Button(screen, label="Menu", x=screen.width - 56, y=4, w=52, h=28).add_event_cb(
-    pd.events.MOUSEBUTTONDOWN, open_menu
-)
+pd.Button(
+    screen, label="Menu", x=screen.width - 56, y=4, w=52, h=28, radius=6, style="raised"
+).add_event_cb(pd.events.MOUSEBUTTONDOWN, open_menu)
 
 y = bar.height + 8
 seg = pd.SegmentedControl(
@@ -49,13 +49,14 @@ seg = pd.SegmentedControl(
     y=y,
     w=screen.width - 16,
     value=0,
+    style="raised",
 )
 y += seg.height + 8
 
 chip_row_y = y
 for i, name in enumerate(("All", "New", "Star")):
     cls = pd.Chip if i < 2 else pd.Tag
-    cls(screen, label=name, x=8 + i * 64, y=chip_row_y, value=(i == 0))
+    cls(screen, label=name, x=8 + i * 64, y=chip_row_y, value=(i == 0), style="raised")
 
 y = chip_row_y + 32
 lv = pd.ListView(screen, x=8, y=y, w=screen.width - 40, h=screen.height - y - 8)
