@@ -224,9 +224,10 @@ class _Remote:
         self._pending_state = None
         self._playback_busy = False
         self._status_ticks = 0
-        # Discovery runs on a worker; the soft pump applies results on the main
-        # tick so __init__ returns immediately (the run loop, hence the quit
-        # deadline, must not wait on a blocking LAN scan).
+        # Discovery / ECP jobs queue here; ``_status_pump`` drains one per tick
+        # (no ``_thread`` — ESP32 stacks are too small for network).
+        self._bg_q = []
+        self._bg_busy = False
         self._pending_devices = []
         self._pending_select_list = None
         self._pending_scan_status = None
@@ -1006,6 +1007,7 @@ class _Remote:
 
     def _status_pump(self, _=None):
         """Drain pending plaque/chrome; periodically refresh playback."""
+        self._drain_bg()
         if self._ui_lock:
             return
         dirty = False
@@ -1121,32 +1123,29 @@ class _Remote:
             self._ui_end()
 
     def _run_bg(self, fn):
-        """Run ``fn`` off the librt soft-timer delivery path when possible.
+        """Queue ``fn`` for the status soft-pump (no ``_thread``).
 
-        Mouse handlers run inside the shared soft tick. Blocking ``urlopen``
-        there often burns the full socket timeout (~5s); a worker keeps the UI
-        snappy. Falls back to inline ``fn()`` when threads are unavailable.
+        ESP32-P4 ``_thread`` stacks are ~5KiB; network/ECP there overflowed
+        ``mp_thread``. Jobs run on the main tick via :meth:`_status_pump`.
         """
-        try:
-            import _thread
+        q = self._bg_q
+        if len(q) >= 8:
+            q.pop(0)
+        q.append(fn)
+        return True
 
-            _thread.start_new_thread(fn, ())
-            return True
+    def _drain_bg(self):
+        """Run at most one queued background job on the main tick."""
+        q = self._bg_q
+        if not q or self._bg_busy:
+            return
+        self._bg_busy = True
+        job = q.pop(0)
+        try:
+            job()
         except Exception:
             pass
-        try:
-            from concurrent.futures import ThreadPoolExecutor
-
-            pool = getattr(self, "_bg_pool", None)
-            if pool is None:
-                self._bg_pool = ThreadPoolExecutor(max_workers=2)
-                pool = self._bg_pool
-            pool.submit(fn)
-            return True
-        except Exception:
-            pass
-        fn()
-        return False
+        self._bg_busy = False
 
     def _now_ms(self):
         import time as _time

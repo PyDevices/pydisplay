@@ -18,9 +18,9 @@ up through tall phone portraits.
 
 Input and frame rendering are driven by the shared ``eventsys.Runtime``:
 ``pd.Display`` wires them in at construction, so the example just builds the UI
-and hands control to ``runtime.run_forever()``. Blocking ECP calls run on a
-worker thread; widget mutations are applied from a soft ``multimer.Timer`` pump
-on the main tick so the render loop never races the worker.
+and hands control to ``runtime.run_forever()``. Blocking ECP/scan work is queued
+and drained from the soft ``on_tick`` pump (no ``_thread`` — ESP32 thread stacks
+are too small for network).
 
 Launch via ``roku_remote`` (prefs + MRU). Direct ``roku_widgets.run()`` also works.
 Requires Roku **Control by mobile apps -> Enabled**. Join WiFi before running
@@ -37,7 +37,6 @@ if _EXAMPLES not in sys.path:
 import board_config
 import pdwidgets as pd
 from eventsys.keys import Keys
-from multimer import Timer
 from roku_engine import (
     FRONTEND_BUTTONS,
     app_label,
@@ -86,6 +85,20 @@ class _RemoteUI:
     """pdwidgets front end. Pages are rebuilt in-place under one content panel."""
 
     def __init__(self, engine=None, start_page="devices"):
+        # Large RGB565 panels (e.g. 720x720): slow the render tick and use flat
+        # faces — raised gradients + 10ms ticks starve input and flash white.
+        self._btn_style = "raised"
+        try:
+            h = int(getattr(board_config.display_drv, "height", 0) or 0)
+            w = int(getattr(board_config.display_drv, "width", 0) or 0)
+            area = w * h
+            if area >= 480 * 480:
+                pd.Display.tick_period = 100
+                self._btn_style = "flat"
+            elif max(h, w) <= 400:
+                pd.Display.tick_period = 50
+        except Exception:
+            pass
         self.display = pd.Display(board_config.display_drv, board_config.runtime)
         self.runtime = board_config.runtime
         pal = self.display.pal
@@ -161,6 +174,8 @@ class _RemoteUI:
         self._scan_yield = False
         self._press_t0 = 0
         self._press_dev = None
+        self._bg_q = []
+        self._bg_busy = False
 
         self.screen = pd.Screen(self.display, bg=self.BG, visible=False)
         plaque_w = self.W - 2 * self.pad
@@ -271,14 +286,17 @@ class _RemoteUI:
 
         self.screen.visible = True
 
-        # Soft pump: apply worker results + periodic playback refresh on main tick.
-        self._pump_timer = Timer(-1)
+        # Soft pump on the shared runtime timer (not a second machine.Timer —
+        # a second soft IRQ can nest during I2C and blow ESP32-P4's ~55-frame
+        # Python recursion limit).
         try:
-            self._pump_timer.init(
-                mode=Timer.PERIODIC, period=250, callback=self._pump, hard=False
+            self._pump_sub = self.runtime.on_tick(
+                self._pump,
+                period=250,
+                async_=getattr(self.runtime, "timer_async", False),
             )
         except Exception:
-            pass
+            self._pump_sub = None
 
         if self.page == "remote" and (self.engine.host or "").strip():
             self._build_page()
@@ -297,27 +315,32 @@ class _RemoteUI:
     # ----- helpers --------------------------------------------------------
 
     def _run_bg(self, fn):
-        """Run ``fn`` off the input/render path; inline fallback when no threads."""
-        try:
-            import _thread
+        """Queue ``fn`` for the shared soft-pump (no ``_thread``).
 
-            _thread.start_new_thread(fn, ())
-            return True
+        ESP32-P4 ``_thread`` stacks are ~5KiB. Starting a worker for
+        name-refresh/ECP/scan led to ``Stack protection fault`` in ``mp_thread``
+        while the main soft-timer path flooded with recursion-limit errors.
+        Jobs run on the main tick via :meth:`_pump` instead.
+        """
+        q = self._bg_q
+        if len(q) >= 8:
+            # Drop oldest; keep newest keypresses/scans.
+            q.pop(0)
+        q.append(fn)
+        return True
+
+    def _drain_bg(self):
+        """Run at most one queued background job on the main tick."""
+        q = self._bg_q
+        if not q or self._bg_busy:
+            return
+        self._bg_busy = True
+        job = q.pop(0)
+        try:
+            job()
         except Exception:
             pass
-        try:
-            from concurrent.futures import ThreadPoolExecutor
-
-            pool = getattr(self, "_bg_pool", None)
-            if pool is None:
-                self._bg_pool = ThreadPoolExecutor(max_workers=2)
-                pool = self._bg_pool
-            pool.submit(fn)
-            return True
-        except Exception:
-            pass
-        fn()
-        return False
+        self._bg_busy = False
 
     def _measure_lbl(self, height=None):
         """Label for width probes (single face/scale; any plaque label works)."""
@@ -651,7 +674,7 @@ class _RemoteUI:
             text_height=self.btn_text,
             scale=self.text_scale,
             shadow=0,
-            style="raised",
+            style=self._btn_style,
             bg_hi=bg_hi,
             bg_lo=bg_lo,
             rim=rim,
@@ -688,7 +711,7 @@ class _RemoteUI:
             text_height=self.btn_text,
             scale=self.text_scale,
             shadow=0,
-            style="raised",
+            style=self._btn_style,
             bg_hi=bg_hi,
             bg_lo=bg_lo,
             rim=rim,
@@ -1207,11 +1230,11 @@ class _RemoteUI:
         self._pending_chrome = True
 
     def _ecp(self, key):
+        # Keypress only here — playback chrome is refreshed by the soft pump.
+        # Doing refresh_playback on every tap flooded the worker and the MCU.
         def _work():
-            self.engine.press(key)
             try:
-                self.engine.refresh_playback()
-                self._note_playback_chrome()
+                self.engine.press(key)
             except Exception:
                 pass
 
@@ -1512,6 +1535,8 @@ class _RemoteUI:
     def _pump(self, _=None):
         # Apply worker results on the main tick so the render loop is never
         # mutated from a worker thread.
+        self._drain_bg()
+
         if self._pending_scan:
             if self._scan_yield:
                 self._scan_yield = False
