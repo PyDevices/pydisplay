@@ -1,0 +1,869 @@
+From 9d5044041d0c87fda37b949a4a8cfe7f96fc181a Mon Sep 17 00:00:00 2001
+From: Cursor Agent <cursoragent@cursor.com>
+Date: Thu, 23 Jul 2026 08:39:35 +0000
+Subject: [PATCH] Add opt-in raised gradient faces for Button, Chip, Card, and
+ SegmentedControl
+
+Introduce a shared shade/lerp raised-fill helper and style="raised" (default
+remains flat). Pressed raised buttons invert lighting; labels/icons use a
+transparent face so the gradient shows through.
+---
+ src/pdwidgets/widgets/_raised.py           | 98 ++++++++++++++++++++++
+ src/pdwidgets/widgets/button.py            | 98 +++++++++++++++++++---
+ src/pdwidgets/widgets/card.py              | 77 +++++++++++++----
+ src/pdwidgets/widgets/chip.py              | 43 +++++++++-
+ src/pdwidgets/widgets/icon_button.py       | 43 +++++++++-
+ src/pdwidgets/widgets/segmented_control.py | 59 +++++++++++--
+ tests/test_raised.py                       | 83 ++++++++++++++++++
+ tools/pdwidgets_bench.py                   | 34 ++++++--
+ 8 files changed, 491 insertions(+), 44 deletions(-)
+ create mode 100644 src/pdwidgets/widgets/_raised.py
+ create mode 100644 tests/test_raised.py
+
+diff --git a/src/pdwidgets/widgets/_raised.py b/src/pdwidgets/widgets/_raised.py
+new file mode 100644
+index 0000000..222713a
+--- /dev/null
++++ b/src/pdwidgets/widgets/_raised.py
+@@ -0,0 +1,98 @@
++# SPDX-FileCopyrightText: 2024 Brad Barnett
++#
++# SPDX-License-Identifier: MIT
++"""Shared top-lit raised (gradient + rim) face drawing for pdwidgets.
++
++Opt-in visual language matching pydisplay ``roku_graphics._draw_button``:
++vertical hi→lo gradient, soft darker rim, pressed lighting invert.
++"""
++
++_STYLES = ("flat", "raised")
++
++
++def normalize_style(style):
++    """Return ``\"flat\"`` or ``\"raised\"``; raise ``ValueError`` if invalid."""
++    if style is None:
++        return "flat"
++    if style not in _STYLES:
++        raise ValueError("style must be 'flat' or 'raised'")
++    return style
++
++
++def _channels(c, pal=None):
++    if pal is not None:
++        return pal.color_rgb(c)
++    return (c >> 8) & 0xF8, (c >> 3) & 0xFC, (c << 3) & 0xF8
++
++
++def _pack(r, g, b, pal=None):
++    if pal is not None:
++        return pal.color565(r, g, b)
++    return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)
++
++
++def shade(c, factor, pal=None):
++    """Darken (``factor`` < 1) or lighten (``factor`` > 1) an RGB565 color."""
++    r, g, b = _channels(c, pal)
++    r = max(0, min(255, int(r * factor)))
++    g = max(0, min(255, int(g * factor)))
++    b = max(0, min(255, int(b * factor)))
++    return _pack(r, g, b, pal)
++
++
++def lerp(c1, c2, t, pal=None):
++    """Linear interpolate between two RGB565 colors; ``t`` in ``[0, 1]``."""
++    r1, g1, b1 = _channels(c1, pal)
++    r2, g2, b2 = _channels(c2, pal)
++    r = int(r1 + (r2 - r1) * t)
++    g = int(g1 + (g2 - g1) * t)
++    b = int(b1 + (b2 - b1) * t)
++    return _pack(r, g, b, pal)
++
++
++def raised_face_colors(bg, bg_hi=None, bg_lo=None, rim=None, pal=None):
++    """Derive hi / lo / rim from face mid ``bg`` when optional colors omitted."""
++    hi = bg_hi if bg_hi is not None else shade(bg, 1.12, pal)
++    lo = bg_lo if bg_lo is not None else shade(bg, 0.78, pal)
++    rim_c = rim if rim is not None else shade(bg, 0.55, pal)
++    return hi, lo, rim_c
++
++
++def fill_raised_round_rect(
++    fb, x, y, w, h, radius, hi, lo, rim, pressed=False, pal=None
++):
++    """Fill a top-lit raised round rect; ``pressed`` inverts the gradient."""
++    if w <= 0 or h <= 0:
++        return
++    r = radius
++    if r < 0:
++        r = 0
++    max_r = min(w, h) // 2
++    if r > max_r:
++        r = max_r
++
++    for j in range(h):
++        if j < r:
++            d = r - j
++        elif j >= h - r:
++            d = r - (h - 1 - j)
++        else:
++            d = 0
++        if d:
++            inset = 0
++            rr = r * r
++            dd = d * d
++            s = 0
++            while (s + 1) * (s + 1) <= rr - dd:
++                s += 1
++            inset = r - s
++        else:
++            inset = 0
++        t = j / (h - 1) if h > 1 else 0
++        # pressed → invert lighting (lo at top, hi at bottom)
++        c = lerp(lo, hi, t, pal) if pressed else lerp(hi, lo, t, pal)
++        ww = w - 2 * inset
++        if ww > 0:
++            fb.fill_rect(x + inset, y + j, ww, 1, c)
++
++    fb.round_rect(x, y, w, h, r, rim, f=False)
+diff --git a/src/pdwidgets/widgets/button.py b/src/pdwidgets/widgets/button.py
+index 7afb0c6..45312c8 100644
+--- a/src/pdwidgets/widgets/button.py
++++ b/src/pdwidgets/widgets/button.py
+@@ -7,12 +7,14 @@ from eventsys import events
+ 
+ from .._constants import ALIGN, ICON_SIZE, PAD, TEXT_SIZE, TEXT_WIDTH
+ from ..widget import Widget
++from ._raised import fill_raised_round_rect, normalize_style, raised_face_colors
+ from .icon import Icon
+ from .label import Label
+ 
+ 
+ class Button(Widget):
+     """Clickable control with optional icon and text label."""
++
+     def __init__(  # noqa: PLR0913
+         self,
+         parent: Widget,
+@@ -36,6 +38,10 @@ class Button(Widget):
+         icon_file=None,
+         icon_color=None,
+         shadow=0,
++        style="flat",
++        bg_hi=None,
++        bg_lo=None,
++        rim=None,
+     ):
+         """
+         Initialize a Button widget to display an icon and/or text.
+@@ -63,10 +69,19 @@ class Button(Widget):
+             icon_color (int): The color of the icon.
+             shadow (int): Fake drop-shadow offset in pixels drawn behind the
+                 button in ``color_theme.shadow`` (0 disables; the default).
++            style (str): ``\"flat\"`` (default solid fill + outline press) or
++                ``\"raised\"`` (top-lit gradient + rim; press inverts lighting).
++            bg_hi (int): Optional raised highlight color; default shade of ``bg``.
++            bg_lo (int): Optional raised shade color; default shade of ``bg``.
++            rim (int): Optional raised rim stroke; default shade of ``bg``.
+         """
+         self.radius = radius
+         self.pressed_offset = pressed_offset
+         self.shadow = shadow
++        self._style = normalize_style(style)
++        self._bg_hi = bg_hi
++        self._bg_lo = bg_lo
++        self._rim = rim
+         self._pressed = pressed
+         if w is None and label:
+             w = (len(label) + 1) * TEXT_WIDTH + 2 * PAD
+@@ -74,19 +89,36 @@ class Button(Widget):
+         h = h or ICON_SIZE.LARGE + 2 * PAD
+         bg = bg if bg is not None else parent.color_theme.primary_variant
+         fg = fg if fg is not None else parent.color_theme.on_primary
+-        super().__init__(parent, x, y, w, h, align, align_to, fg, bg, visible, value, padding)
++        super().__init__(
++            parent, x, y, w, h, align, align_to, fg, bg, visible, value, padding
++        )
++        face_bg = parent.color_theme.transparent if self._style == "raised" else self.bg
+         if icon_file:
+             icon_align = ALIGN.CENTER if not label else ALIGN.LEFT
+-            icon_color = icon_color if icon_color is not None else parent.color_theme.on_primary
++            icon_color = (
++                icon_color if icon_color is not None else parent.color_theme.on_primary
++            )
+             self.icon = Icon(
+-                self, 0, 0, None, None, icon_align, None, icon_color, self.bg, True, icon_file
++                self,
++                0,
++                0,
++                None,
++                None,
++                icon_align,
++                None,
++                icon_color,
++                face_bg,
++                True,
++                icon_file,
+             )
+         if label:
+             if text_height not in TEXT_SIZE:
+                 raise ValueError("Text height must be 8, 14 or 16 pixels.")
+             label_align = ALIGN.CENTER if not icon_file else ALIGN.OUTER_RIGHT
+             label_align_to = self.icon if icon_file else self
+-            text_color = text_color if text_color is not None else parent.color_theme.on_primary
++            text_color = (
++                text_color if text_color is not None else parent.color_theme.on_primary
++            )
+             self.label = Label(
+                 self,
+                 0,
+@@ -96,7 +128,7 @@ class Button(Widget):
+                 label_align,
+                 label_align_to,
+                 text_color,
+-                self.bg,
++                face_bg,
+                 True,
+                 label,
+                 None,
+@@ -105,10 +137,46 @@ class Button(Widget):
+         else:
+             self.label = None
+ 
++    @property
++    def style(self):
++        """Face style: ``\"flat\"`` or ``\"raised\"``."""
++        return self._style
++
+     def _register_callbacks(self):
+         self.add_event_cb(events.MOUSEBUTTONDOWN, self.press)
+         self.add_event_cb(events.MOUSEBUTTONUP, self.release)
+ 
++    def _draw_face(self, pressed=False):
++        pa = self.padded_area
++        if self._style == "raised":
++            pal = self.display.pal
++            hi, lo, rim = raised_face_colors(
++                self.bg, self._bg_hi, self._bg_lo, self._rim, pal=pal
++            )
++            fill_raised_round_rect(
++                self.display.framebuf,
++                pa.x,
++                pa.y,
++                pa.w,
++                pa.h,
++                self.radius,
++                hi,
++                lo,
++                rim,
++                pressed=pressed,
++                pal=pal,
++            )
++            return
++        self.display.framebuf.round_rect(*pa, self.radius, self.bg, f=True)
++
++    def _redraw_content(self):
++        """Repaint face and visible children (used for raised press invert)."""
++        self.draw()
++        for child in self.children:
++            if child.visible:
++                child.draw()
++        self.display.refresh(self.area)
++
+     def draw(self, _=None):
+         """
+         Draw the button background and shape (with an optional drop shadow).
+@@ -127,16 +195,26 @@ class Button(Widget):
+                 self.color_theme.shadow,
+                 f=True,
+             )
+-        self.display.framebuf.round_rect(*pa, self.radius, self.bg, f=True)
++        self._draw_face(pressed=self._pressed and self._style == "raised")
+ 
+     def press(self, data=None, event=None):
+-        """Draw pressed-state outline (mouse down handler)."""
++        """Draw pressed-state feedback (mouse down handler)."""
+         self._pressed = True
+-        self.display.framebuf.round_rect(*self.padded_area, self.radius, self.fg, f=False)
++        if self._style == "raised":
++            self._redraw_content()
++            return
++        self.display.framebuf.round_rect(
++            *self.padded_area, self.radius, self.fg, f=False
++        )
+         self.display.refresh(self.area)
+ 
+     def release(self, data=None, event=None):
+-        """Restore normal outline (mouse up handler)."""
++        """Restore normal face (mouse up handler)."""
+         self._pressed = False
+-        self.display.framebuf.round_rect(*self.padded_area, self.radius, self.bg, f=False)
++        if self._style == "raised":
++            self._redraw_content()
++            return
++        self.display.framebuf.round_rect(
++            *self.padded_area, self.radius, self.bg, f=False
++        )
+         self.display.refresh(self.area)
+diff --git a/src/pdwidgets/widgets/card.py b/src/pdwidgets/widgets/card.py
+index 512003a..84e339f 100644
+--- a/src/pdwidgets/widgets/card.py
++++ b/src/pdwidgets/widgets/card.py
+@@ -5,11 +5,13 @@
+ 
+ from .._constants import ALIGN, PAD
+ from ..widget import Widget
++from ._raised import fill_raised_round_rect, normalize_style, raised_face_colors
+ from .label import Label
+ 
+ 
+ class Card(Widget):
+     """Rounded container with optional title and drop shadow."""
++
+     def __init__(  # noqa: PLR0913
+         self,
+         parent: Widget,
+@@ -28,6 +30,10 @@ class Card(Widget):
+         shadow=2,
+         title=None,
+         font=None,
++        style="flat",
++        bg_hi=None,
++        bg_lo=None,
++        rim=None,
+     ):
+         """
+         Initialize a Card: a rounded, optionally-shadowed container for grouping
+@@ -54,6 +60,10 @@ class Card(Widget):
+             shadow (int): Fake drop-shadow offset in pixels (0 disables).
+             title (str): Optional title drawn along the top of the card.
+             font (module): Optional proportional font module for the title.
++            style (str): ``\"flat\"`` (default) or ``\"raised\"`` gradient face.
++            bg_hi (int): Optional raised highlight color.
++            bg_lo (int): Optional raised shade color.
++            rim (int): Optional raised rim stroke.
+ 
+         Usage:
+             card = Card(screen, w=200, h=120, title="Settings")
+@@ -63,9 +73,16 @@ class Card(Widget):
+         fg = fg if fg is not None else parent.color_theme.on_surface
+         self.radius = radius
+         self.shadow = shadow
+-        super().__init__(parent, x, y, w, h, align, align_to, fg, bg, visible, value, padding)
++        self._style = normalize_style(style)
++        self._bg_hi = bg_hi
++        self._bg_lo = bg_lo
++        self._rim = rim
++        super().__init__(
++            parent, x, y, w, h, align, align_to, fg, bg, visible, value, padding
++        )
+         self.title_label = None
+         if title:
++            title_bg = parent.color_theme.transparent if self._style == "raised" else bg
+             self.title_label = Label(
+                 self,
+                 value=title,
+@@ -73,23 +90,16 @@ class Card(Widget):
+                 y=PAD,
+                 align=ALIGN.TOP_LEFT,
+                 fg=fg,
+-                bg=bg,
++                bg=title_bg,
+                 font=font,
+             )
+ 
+-    def draw(self, area=None):
+-        """
+-        Draw the card's shadow and rounded surface.
++    @property
++    def style(self):
++        """Face style: ``\"flat\"`` or ``\"raised\"``."""
++        return self._style
+ 
+-        When a child asks the card to repaint just its sub-area (via
+-        ``parent.draw(child.area)``), only that region is refilled with the card
+-        color so sibling widgets are not erased; a full (``area is None``) draw
+-        repaints the shadow and rounded surface.
+-        """
+-        if area is not None:
+-            self.display.framebuf.fill_rect(*area, self.bg)
+-            return
+-        self.parent.draw(self.area)
++    def _draw_face(self):
+         pa = self.padded_area
+         if self.shadow:
+             self.display.framebuf.round_rect(
+@@ -101,4 +111,43 @@ class Card(Widget):
+                 self.color_theme.shadow,
+                 f=True,
+             )
++        if self._style == "raised":
++            pal = self.display.pal
++            hi, lo, rim = raised_face_colors(
++                self.bg, self._bg_hi, self._bg_lo, self._rim, pal=pal
++            )
++            fill_raised_round_rect(
++                self.display.framebuf,
++                pa.x,
++                pa.y,
++                pa.w,
++                pa.h,
++                self.radius,
++                hi,
++                lo,
++                rim,
++                pal=pal,
++            )
++            return
+         self.display.framebuf.round_rect(*pa, self.radius, self.bg, f=True)
++
++    def draw(self, area=None):
++        """
++        Draw the card's shadow and rounded surface.
++
++        When a child asks the card to repaint just its sub-area (via
++        ``parent.draw(child.area)``), only that region is refilled with the card
++        color so sibling widgets are not erased; a full (``area is None``) draw
++        repaints the shadow and rounded surface.
++
++        Raised cards always repaint the full gradient face (partial solid fills
++        would punch holes in the lighting).
++        """
++        if area is not None:
++            if self._style == "raised":
++                self._draw_face()
++                return
++            self.display.framebuf.fill_rect(*area, self.bg)
++            return
++        self.parent.draw(self.area)
++        self._draw_face()
+diff --git a/src/pdwidgets/widgets/chip.py b/src/pdwidgets/widgets/chip.py
+index d2fde13..1b38da9 100644
+--- a/src/pdwidgets/widgets/chip.py
++++ b/src/pdwidgets/widgets/chip.py
+@@ -7,10 +7,12 @@ from eventsys import events
+ 
+ from .._constants import PAD, TEXT_SIZE, TEXT_WIDTH
+ from ..widget import Widget
++from ._raised import fill_raised_round_rect, normalize_style, raised_face_colors
+ 
+ 
+ class Chip(Widget):
+     """Compact selectable filter chip."""
++
+     def __init__(  # noqa: PLR0913
+         self,
+         parent: Widget,
+@@ -28,16 +30,31 @@ class Chip(Widget):
+         label="",
+         text_height=TEXT_SIZE.MEDIUM,
+         radius=10,
++        style="flat",
++        bg_hi=None,
++        bg_lo=None,
++        rim=None,
+     ):
+         """Selectable filter chip; ``value`` is selected bool."""
+         self.label = label
+         self.text_height = text_height
+         self.radius = radius
++        self._style = normalize_style(style)
++        self._bg_hi = bg_hi
++        self._bg_lo = bg_lo
++        self._rim = rim
+         w = w or (len(label) + 2) * TEXT_WIDTH + 2 * PAD
+         h = h or text_height + 2 * PAD
+         bg = bg if bg is not None else parent.color_theme.chip
+         fg = fg if fg is not None else parent.color_theme.on_chip
+-        super().__init__(parent, x, y, w, h, align, align_to, fg, bg, visible, value, padding)
++        super().__init__(
++            parent, x, y, w, h, align, align_to, fg, bg, visible, value, padding
++        )
++
++    @property
++    def style(self):
++        """Face style: ``\"flat\"`` or ``\"raised\"``."""
++        return self._style
+ 
+     def _register_callbacks(self):
+         self.add_event_cb(events.MOUSEBUTTONDOWN, self._toggle)
+@@ -50,8 +67,28 @@ class Chip(Widget):
+         pa = self.padded_area
+         selected = bool(self._value)
+         fill = self.color_theme.chip_selected if selected else self.color_theme.chip
+-        ink = self.color_theme.on_chip_selected if selected else self.color_theme.on_chip
+-        self.display.framebuf.round_rect(*pa, self.radius, fill, f=True)
++        ink = (
++            self.color_theme.on_chip_selected if selected else self.color_theme.on_chip
++        )
++        if self._style == "raised":
++            pal = self.display.pal
++            hi, lo, rim = raised_face_colors(
++                fill, self._bg_hi, self._bg_lo, self._rim, pal=pal
++            )
++            fill_raised_round_rect(
++                self.display.framebuf,
++                pa.x,
++                pa.y,
++                pa.w,
++                pa.h,
++                self.radius,
++                hi,
++                lo,
++                rim,
++                pal=pal,
++            )
++        else:
++            self.display.framebuf.round_rect(*pa, self.radius, fill, f=True)
+         tw = len(self.label) * TEXT_WIDTH
+         tx = pa.x + (pa.w - tw) // 2
+         ty = pa.y + (pa.h - self.text_height) // 2
+diff --git a/src/pdwidgets/widgets/icon_button.py b/src/pdwidgets/widgets/icon_button.py
+index c2c4d04..e7452d6 100644
+--- a/src/pdwidgets/widgets/icon_button.py
++++ b/src/pdwidgets/widgets/icon_button.py
+@@ -5,13 +5,15 @@
+ 
+ from .._constants import ALIGN
+ from ..widget import Widget
++from ._raised import normalize_style
+ from .button import Button
+ from .icon import Icon
+ 
+ 
+ class IconButton(Button):
+     """Button whose content is a centered icon."""
+-    def __init__(
++
++    def __init__(  # noqa: PLR0913
+         self,
+         parent: Widget,
+         x=0,
+@@ -26,6 +28,12 @@ class IconButton(Button):
+         value=None,
+         padding=None,
+         icon_file=None,
++        radius=0,
++        shadow=0,
++        style="flat",
++        bg_hi=None,
++        bg_lo=None,
++        rim=None,
+     ):
+         """
+         Initialize an IconButton widget to display an icon on a button.
+@@ -44,14 +52,43 @@ class IconButton(Button):
+             value (str): The user-assigned value of the icon button.
+             padding (tuple): The padding on each side of the icon button.
+             icon_file (str): The icon file to display.
++            radius (int): Corner radius (default 0).
++            shadow (int): Fake drop-shadow offset in pixels (0 disables).
++            style (str): ``\"flat\"`` or ``\"raised\"`` (see :class:`Button`).
++            bg_hi (int): Optional raised highlight color.
++            bg_lo (int): Optional raised shade color.
++            rim (int): Optional raised rim stroke.
+ 
+         Usage:
+             icon_button = IconButton(screen, icon_file="pdwidgets.icons.home_filled_36dp")
+         """
+         fg = fg if fg is not None else parent.fg
+         bg = bg if bg is not None else parent.bg
+-        self.icon = Icon(None, 0, 0, None, None, ALIGN.CENTER, None, fg, bg, True, icon_file)
++        style = normalize_style(style)
++        face_bg = parent.color_theme.transparent if style == "raised" else bg
++        self.icon = Icon(
++            None, 0, 0, None, None, ALIGN.CENTER, None, fg, face_bg, True, icon_file
++        )
+         w = w or self.icon.width
+         h = h or self.icon.height
+-        super().__init__(parent, x, y, w, h, align, align_to, fg, bg, visible, value, padding)
++        super().__init__(
++            parent,
++            x,
++            y,
++            w,
++            h,
++            align,
++            align_to,
++            fg,
++            bg,
++            visible,
++            value,
++            padding,
++            radius=radius,
++            shadow=shadow,
++            style=style,
++            bg_hi=bg_hi,
++            bg_lo=bg_lo,
++            rim=rim,
++        )
+         self.icon.parent = self
+diff --git a/src/pdwidgets/widgets/segmented_control.py b/src/pdwidgets/widgets/segmented_control.py
+index aadd6ed..508486c 100644
+--- a/src/pdwidgets/widgets/segmented_control.py
++++ b/src/pdwidgets/widgets/segmented_control.py
+@@ -7,10 +7,12 @@ from eventsys import events
+ 
+ from .._constants import PAD, TEXT_SIZE, TEXT_WIDTH
+ from ..widget import Widget
++from ._raised import fill_raised_round_rect, normalize_style, raised_face_colors
+ 
+ 
+ class SegmentedControl(Widget):
+     """Exclusive pill-style segment selector."""
++
+     def __init__(  # noqa: PLR0913
+         self,
+         parent: Widget,
+@@ -28,17 +30,32 @@ class SegmentedControl(Widget):
+         labels=None,
+         text_height=TEXT_SIZE.MEDIUM,
+         radius=8,
++        style="flat",
++        bg_hi=None,
++        bg_lo=None,
++        rim=None,
+     ):
+         """Exclusive segments; ``value`` is the selected index."""
+         self.labels = list(labels or ["A", "B"])
+         self.text_height = text_height
+         self.radius = radius
++        self._style = normalize_style(style)
++        self._bg_hi = bg_hi
++        self._bg_lo = bg_lo
++        self._rim = rim
+         n = len(self.labels)
+         w = w or (sum(len(s) for s in self.labels) * TEXT_WIDTH + n * 4 * PAD)
+         h = h or text_height + 2 * PAD
+         bg = bg if bg is not None else parent.color_theme.segment
+         fg = fg if fg is not None else parent.color_theme.on_segment
+-        super().__init__(parent, x, y, w, h, align, align_to, fg, bg, visible, value, padding)
++        super().__init__(
++            parent, x, y, w, h, align, align_to, fg, bg, visible, value, padding
++        )
++
++    @property
++    def style(self):
++        """Face style: ``\"flat\"`` or ``\"raised\"`` (raised applies to selected)."""
++        return self._style
+ 
+     def _register_callbacks(self):
+         self.add_event_cb(events.MOUSEBUTTONDOWN, self._tap)
+@@ -54,17 +71,47 @@ class SegmentedControl(Widget):
+     def draw(self, _=None):
+         """Draw segment backgrounds and labels."""
+         pa = self.padded_area
+-        self.display.framebuf.round_rect(*pa, self.radius, self.color_theme.segment, f=True)
++        self.display.framebuf.round_rect(
++            *pa, self.radius, self.color_theme.segment, f=True
++        )
+         n = len(self.labels) or 1
+         seg_w = pa.w // n
++        pal = self.display.pal
+         for i, label in enumerate(self.labels):
+             x = pa.x + i * seg_w
+             selected = i == self._value
+-            fill = self.color_theme.segment_selected if selected else self.color_theme.segment
+-            ink = self.color_theme.on_segment_selected if selected else self.color_theme.on_segment
+-            self.display.framebuf.fill_rect(x, pa.y, seg_w, pa.h, fill)
++            fill = (
++                self.color_theme.segment_selected
++                if selected
++                else self.color_theme.segment
++            )
++            ink = (
++                self.color_theme.on_segment_selected
++                if selected
++                else self.color_theme.on_segment
++            )
++            if selected and self._style == "raised":
++                hi, lo, rim = raised_face_colors(
++                    fill, self._bg_hi, self._bg_lo, self._rim, pal=pal
++                )
++                fill_raised_round_rect(
++                    self.display.framebuf,
++                    x,
++                    pa.y,
++                    seg_w,
++                    pa.h,
++                    self.radius,
++                    hi,
++                    lo,
++                    rim,
++                    pal=pal,
++                )
++            else:
++                self.display.framebuf.fill_rect(x, pa.y, seg_w, pa.h, fill)
+             tw = len(label) * TEXT_WIDTH
+             tx = x + (seg_w - tw) // 2
+             ty = pa.y + (pa.h - self.text_height) // 2
+             self.display.framebuf.text(label, tx, ty, ink, height=self.text_height)
+-        self.display.framebuf.round_rect(*pa, self.radius, self.color_theme.outline, f=False)
++        self.display.framebuf.round_rect(
++            *pa, self.radius, self.color_theme.outline, f=False
++        )
+diff --git a/tests/test_raised.py b/tests/test_raised.py
+new file mode 100644
+index 0000000..f042b8a
+--- /dev/null
++++ b/tests/test_raised.py
+@@ -0,0 +1,83 @@
++# SPDX-FileCopyrightText: 2024 Brad Barnett
++#
++# SPDX-License-Identifier: MIT
++"""Unit tests for opt-in raised face helpers."""
++
++import unittest
++
++from pdwidgets.widgets._raised import (
++    fill_raised_round_rect,
++    lerp,
++    normalize_style,
++    raised_face_colors,
++    shade,
++)
++
++
++class FakeFB:
++    def __init__(self):
++        self.fills = []
++        self.rects = []
++
++    def fill_rect(self, x, y, w, h, c):
++        self.fills.append((x, y, w, h, c))
++
++    def round_rect(self, x, y, w, h, r, c, f=False):
++        self.rects.append((x, y, w, h, r, c, f))
++
++
++class TestRaisedHelpers(unittest.TestCase):
++    def test_normalize_style(self):
++        self.assertEqual(normalize_style(None), "flat")
++        self.assertEqual(normalize_style("flat"), "flat")
++        self.assertEqual(normalize_style("raised"), "raised")
++        with self.assertRaises(ValueError):
++            normalize_style("bevel")
++
++    def test_shade_lighten_darken(self):
++        mid = 0x8410  # mid grey-ish RGB565
++        hi = shade(mid, 1.12)
++        lo = shade(mid, 0.78)
++        self.assertNotEqual(hi, mid)
++        self.assertNotEqual(lo, mid)
++        self.assertNotEqual(hi, lo)
++
++    def test_lerp_endpoints(self):
++        a = 0xF800
++        b = 0x001F
++        self.assertEqual(lerp(a, b, 0), a)
++        self.assertEqual(lerp(a, b, 1), b)
++
++    def test_raised_face_colors_defaults(self):
++        bg = 0x4208
++        hi, lo, rim = raised_face_colors(bg)
++        self.assertEqual(
++            (hi, lo, rim), (shade(bg, 1.12), shade(bg, 0.78), shade(bg, 0.55))
++        )
++
++    def test_fill_raised_draws_rows_and_rim(self):
++        fb = FakeFB()
++        fill_raised_round_rect(
++            fb, 2, 3, 20, 12, 4, 0xFFFF, 0x0000, 0x8410, pressed=False
++        )
++        self.assertEqual(len(fb.fills), 12)
++        self.assertEqual(len(fb.rects), 1)
++        self.assertEqual(fb.rects[0][:6], (2, 3, 20, 12, 4, 0x8410))
++        self.assertFalse(fb.rects[0][6])
++
++    def test_fill_raised_pressed_inverts_gradient(self):
++        fb_up = FakeFB()
++        fb_dn = FakeFB()
++        fill_raised_round_rect(
++            fb_up, 0, 0, 10, 4, 0, 0xFFFF, 0x0000, 0x8410, pressed=False
++        )
++        fill_raised_round_rect(
++            fb_dn, 0, 0, 10, 4, 0, 0xFFFF, 0x0000, 0x8410, pressed=True
++        )
++        up_colors = [row[4] for row in fb_up.fills]
++        dn_colors = [row[4] for row in fb_dn.fills]
++        self.assertEqual(up_colors, list(reversed(dn_colors)))
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tools/pdwidgets_bench.py b/tools/pdwidgets_bench.py
+index 65b55ba..a6346e5 100644
+--- a/tools/pdwidgets_bench.py
++++ b/tools/pdwidgets_bench.py
+@@ -17,6 +17,7 @@ It builds a representative screen (a handful of each widget type) and times:
+ * pointer event dispatch (a synthetic ``MOUSEMOTION`` through the tree)
+ * ``pct.Width`` / ``pct.Height`` value computation
+ """
++
+ import os
+ import sys
+ 
+@@ -28,6 +29,7 @@ os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
+ from time import perf_counter
+ 
+ import board_config
++
+ import pdwidgets as pd
+ from pdwidgets import pct
+ 
+@@ -38,22 +40,36 @@ def build_screen():
+ 
+     # A representative mix of widgets.
+     for i in range(4):
+-        b = pd.Button(screen, x=4, y=4 + i * 40, w=120, h=32, label=f"Btn {i}", radius=6)
++        b = pd.Button(
++            screen, x=4, y=4 + i * 40, w=120, h=32, label=f"Btn {i}", radius=6
++        )
+         b.add_event_cb(pd.events.MOUSEBUTTONDOWN, lambda s, e: None)
++    # Flat vs raised strip (visual + press-path smoke).
++    pd.Label(screen, x=4, y=168, value="flat")
++    flat = pd.Button(
++        screen, x=40, y=160, w=88, h=28, label="Flat", radius=8, style="flat"
++    )
++    flat.add_event_cb(pd.events.MOUSEBUTTONDOWN, lambda s, e: None)
++    pd.Label(screen, x=140, y=168, value="raised")
++    raised = pd.Button(
++        screen, x=196, y=160, w=88, h=28, label="Raised", radius=8, style="raised"
++    )
++    raised.add_event_cb(pd.events.MOUSEBUTTONDOWN, lambda s, e: None)
++    pd.Chip(screen, x=4, y=196, label="Chip", value=True, style="raised")
+     pd.CheckBox(screen, x=140, y=4)
+     pd.ToggleButton(screen, x=140, y=44)
+     grp = pd.RadioGroup(screen)
+     pd.RadioButton(screen, group=grp, x=140, y=84, value=True)
+     pd.RadioButton(screen, group=grp, x=140, y=124)
+-    pd.Slider(screen, x=4, y=180, w=200, h=18, value=0.4)
+-    pd.ProgressBar(screen, x=4, y=210, w=200, h=18, value=0.6)
+-    pd.Label(screen, x=4, y=240, value="Hello pdwidgets")
+-    pd.DigitalClock(screen, x=4, y=270)
++    pd.Slider(screen, x=4, y=230, w=200, h=18, value=0.4)
++    pd.ProgressBar(screen, x=4, y=260, w=200, h=18, value=0.6)
++    pd.Label(screen, x=4, y=290, value="Hello pdwidgets")
++    pd.DigitalClock(screen, x=4, y=320)
+ 
+-    box = pd.Widget(screen, x=4, y=300, w=120, h=80, bg=screen.color_theme.primary)
++    box = pd.Widget(screen, x=4, y=350, w=120, h=80, bg=screen.color_theme.primary)
+     pct_w = pct.Width(50, box)
+     pct_h = pct.Height(50, box)
+-    pd.Button(box, w=pct_w, h=pct_h, align=pd.ALIGN.CENTER)
++    pd.Button(box, w=pct_w, h=pct_h, align=pd.ALIGN.CENTER, style="raised", radius=6)
+ 
+     screen.visible = True
+     return display, screen, box, pct_w, pct_h
+@@ -92,7 +108,9 @@ def main():
+         screen.invalidate()
+         display.tick()
+ 
+-    motion = pd.events.Motion(pd.events.MOUSEMOTION, (60, 200), (1, 1), (0, 0, 0), False, 0)
++    motion = pd.events.Motion(
++        pd.events.MOUSEMOTION, (60, 200), (1, 1), (0, 0, 0), False, 0
++    )
+ 
+     def dispatch():
+         screen.handle_event(motion)
+-- 
+2.43.0
+

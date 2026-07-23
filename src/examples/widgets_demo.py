@@ -55,7 +55,13 @@ align_names = [
 ]
 
 anchor = pd.Button(
-    main, w=main.width // 3, h=48, align=pd.ALIGN.CENTER, label="anchor", radius=8
+    main,
+    w=main.width // 3,
+    h=48,
+    align=pd.ALIGN.CENTER,
+    label="anchor",
+    radius=8,
+    style="raised",
 )
 for name, align in zip(align_names, aligns):
     if align == pd.ALIGN.CENTER:
