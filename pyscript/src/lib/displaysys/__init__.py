@@ -419,6 +419,10 @@ class DisplayDriver:
     """
 
     needs_refresh = False
+    # True when setting ``rotation`` remaps pixels in hardware (MADCTL) or the
+    # desktop compositor (SDL/PG). False for framebuffer/RGB scanout — LVGL
+    # software-rotates flush tiles instead (see add_ons/display_driver.py).
+    supports_hw_rotation = False
 
     def __init__(self, *, quiet=False):
         self._quiet = quiet

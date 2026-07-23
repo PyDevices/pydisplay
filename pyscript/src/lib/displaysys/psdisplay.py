@@ -10,9 +10,8 @@ from js import console, document
 from pyscript.ffi import create_proxy
 
 from displaysys import DisplayDriver, color_rgb
-from eventsys.keys import default_quit_chord
 from eventsys import events
-from eventsys.keys import Keys, dom_key_scrolls_page, key_to_keycode, mod_mask
+from eventsys.keys import Keys, default_quit_chord, dom_key_scrolls_page, key_to_keycode, mod_mask
 
 try:  # Gamepad polling is optional and only available in a browser.
     from js import navigator
@@ -267,6 +266,8 @@ class PSDevices:
 
 class PSDisplay(DisplayDriver):
     needs_refresh = True
+    # rotation setter → init() resizes canvas/offscreen buffer to logical WxH.
+    supports_hw_rotation = True
 
     """
     A class to emulate a display on PyScript.

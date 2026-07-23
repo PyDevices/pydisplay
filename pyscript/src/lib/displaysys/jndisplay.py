@@ -12,9 +12,8 @@ from IPython.display import display, update_display
 from PIL import Image, ImageDraw
 
 from displaysys import DisplayDriver, color_rgb
-from eventsys.keys import default_quit_chord
 from eventsys import events
-from eventsys.keys import Keys, key_to_keycode, mod_mask
+from eventsys.keys import Keys, default_quit_chord, key_to_keycode, mod_mask
 
 _JN_DEPS = "pip install ipywidgets ipyevents"
 
@@ -268,6 +267,8 @@ class JNDevices:
 
 class JNDisplay(DisplayDriver):
     needs_refresh = True
+    # rotation setter → init() recreates the PIL buffer at logical WxH.
+    supports_hw_rotation = True
 
     """
     A class to emulate a display on Jupyter Notebook.

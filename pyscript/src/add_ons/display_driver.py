@@ -349,15 +349,33 @@ class _TouchState:
     pressed = False
 
 
+def _physical_to_logical(x, y):
+    """Map native-panel touch coords to LVGL logical coords (software rotation)."""
+    drv = _driver_ref
+    if drv is None or not getattr(drv, "_sw_rotate", False):
+        return x, y
+    rot = drv._lv_rotation
+    # Stored create() size (physical); matches lv_display_rotate_point inverse.
+    hor = drv._phys_hor
+    ver = drv._phys_ver
+    if rot == lv.DISPLAY_ROTATION._90:
+        return y, ver - x - 1
+    if rot == lv.DISPLAY_ROTATION._180:
+        return hor - x - 1, ver - y - 1
+    if rot == lv.DISPLAY_ROTATION._270:
+        return hor - y - 1, x
+    return x, y
+
+
 def _touch_cb(event, indev, data):
     if event is not None:
         if event.type == events.MOUSEBUTTONDOWN and event.button == 1:
-            _TouchState.x, _TouchState.y = event.pos
+            _TouchState.x, _TouchState.y = _physical_to_logical(*event.pos)
             _TouchState.pressed = True
         elif event.type == events.MOUSEMOTION and event.buttons[0]:
-            _TouchState.x, _TouchState.y = event.pos
+            _TouchState.x, _TouchState.y = _physical_to_logical(*event.pos)
         elif event.type == events.MOUSEBUTTONUP and event.button == 1:
-            _TouchState.x, _TouchState.y = event.pos
+            _TouchState.x, _TouchState.y = _physical_to_logical(*event.pos)
             _TouchState.pressed = False
     data.point = lv.point_t({"x": _TouchState.x, "y": _TouchState.y})
     data.state = lv.INDEV_STATE.PRESSED if _TouchState.pressed else lv.INDEV_STATE.RELEASED
@@ -422,6 +440,17 @@ def create_devices(devs, lv_display, virtual_devices=None):
     return virtual_devices
 
 
+def _lv_rotation_from_degrees(degrees):
+    """Map display_drv.rotation degrees to lv.DISPLAY_ROTATION enum."""
+    idx = (int(degrees) // 90) % 4
+    return (
+        lv.DISPLAY_ROTATION._0,
+        lv.DISPLAY_ROTATION._90,
+        lv.DISPLAY_ROTATION._180,
+        lv.DISPLAY_ROTATION._270,
+    )[idx]
+
+
 class DisplayDriver:
     def __init__(
         self,
@@ -439,15 +468,34 @@ class DisplayDriver:
             self._needs_swap = False
         self._color_size = lv.color_format_get_size(color_format)
         self._blocking = blocking
+        self._color_format = color_format
+        self._scratch = None
 
-        self._draw_buf1 = lv.draw_buf_create(
-            display_drv.width, display_drv.height // 10, color_format, 0
-        )
-        self._draw_buf2 = lv.draw_buf_create(
-            display_drv.width, display_drv.height // 10, color_format, 0
+        # Native buffer size (ignore logical .width/.height after rotation).
+        self._phys_hor = int(display_drv._width)
+        self._phys_ver = int(display_drv._height)
+        self._lv_rotation = _lv_rotation_from_degrees(getattr(display_drv, "rotation", 0))
+        self._sw_rotate = (
+            not getattr(display_drv, "supports_hw_rotation", False)
+            and self._lv_rotation != lv.DISPLAY_ROTATION._0
         )
 
-        self.lv_display = lv.display_create(display_drv.width, display_drv.height)
+        if self._sw_rotate:
+            self.lv_display = lv.display_create(self._phys_hor, self._phys_ver)
+            # Method API (tools/typings/lvgl.pyi display_t); MP has no
+            # lv.display_set_rotation / display_get_* module wrappers.
+            self.lv_display.set_rotation(self._lv_rotation)
+            buf_w = self.lv_display.get_horizontal_resolution()
+            buf_h = self.lv_display.get_vertical_resolution()
+        else:
+            # MADCTL / SDL / PG: logical size; pixels already match rotation.
+            buf_w = display_drv.width
+            buf_h = display_drv.height
+            self.lv_display = lv.display_create(buf_w, buf_h)
+
+        self._draw_buf1 = lv.draw_buf_create(buf_w, max(1, buf_h // 10), color_format, 0)
+        self._draw_buf2 = lv.draw_buf_create(buf_w, max(1, buf_h // 10), color_format, 0)
+
         self.lv_display.set_flush_cb(self._flush_cb)
         self.lv_display.set_color_format(color_format)
         if not self._blocking:
@@ -456,18 +504,51 @@ class DisplayDriver:
         self.lv_display.set_render_mode(lv.DISPLAY_RENDER_MODE.PARTIAL)
         self.virtual_devices = create_devices(devs, self.lv_display)
 
+    def _ensure_scratch(self, nbytes):
+        if self._scratch is None or len(self._scratch) < nbytes:
+            self._scratch = bytearray(nbytes)
+        return self._scratch
+
     def _flush_cb(self, disp_drv, area, color_p):
         if hasattr(display_drv, "_sdl_active") and not display_drv._sdl_active():
             self.lv_display.flush_ready()
             return
         width = area.x2 - area.x1 + 1
         height = area.y2 - area.y1 + 1
+        px = width * height
 
         if self._needs_swap:
-            lv.draw_sw_rgb565_swap(color_p, width * height)
+            lv.draw_sw_rgb565_swap(color_p, px)
 
-        data = color_p.__dereference__(width * height * self._color_size)
-        display_drv.blit_rect(data, area.x1, area.y1, width, height)
+        data = color_p.__dereference__(px * self._color_size)
+
+        if not self._sw_rotate:
+            display_drv.blit_rect(data, area.x1, area.y1, width, height)
+            if self._blocking:
+                self.lv_display.flush_ready()
+            return
+
+        # Logical dirty rect → physical destination on the native framebuffer.
+        rot_area = lv.area_t({"x1": area.x1, "y1": area.y1, "x2": area.x2, "y2": area.y2})
+        self.lv_display.rotate_area(rot_area)
+        rw = rot_area.x2 - rot_area.x1 + 1
+        rh = rot_area.y2 - rot_area.y1 + 1
+        src_stride = width * self._color_size
+        dest_stride = rw * self._color_size
+        nbytes = rw * rh * self._color_size
+        scratch = self._ensure_scratch(nbytes)
+        lv.draw_sw_rotate(
+            data,
+            scratch,
+            width,
+            height,
+            src_stride,
+            dest_stride,
+            self._lv_rotation,
+            self._color_format,
+        )
+        # Scratch may be larger than this tile (prior flushes); blit needs exact len.
+        display_drv.blit_rect(memoryview(scratch)[:nbytes], rot_area.x1, rot_area.y1, rw, rh)
         if self._blocking:
             self.lv_display.flush_ready()
 
