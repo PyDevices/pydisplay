@@ -54,10 +54,10 @@ pd.DEBUG = False
 
 FRONTEND = "widgets"
 
-# Keep at most this many page panels. MicroPython's heap fragments when every
-# visited page's Button/Label tree stays live; render then dies on a small
-# contiguous alloc even with mem_free reporting hundreds of KB.
-_PAGE_CACHE_MAX = 2
+# Only the remote page is kept across navigations. Devices / Apps / More are
+# built on entry and dropped on leave — MicroPython fragments badly if those
+# trees stay live with raised Buttons.
+_CACHED_PAGES = ("remote",)
 
 
 def _shade(c, factor):
@@ -162,7 +162,6 @@ class _RemoteUI:
         self._press_dev = None
         self._page_panels = {}
         self._page_parent = None
-        self._page_lru = []
 
         self.screen = pd.Screen(self.display, bg=self.BG, visible=False)
         plaque_w = self.W - 2 * self.pad
@@ -535,7 +534,6 @@ class _RemoteUI:
         """Drop all lazy page panels (full reset)."""
         for name in list(self._page_panels.keys()):
             self._drop_page(name)
-        self._page_lru = []
         self.content.invalidate()
 
     def _gc(self):
@@ -549,11 +547,6 @@ class _RemoteUI:
     def _drop_page(self, name):
         """Destroy one cached page panel so the next show rebuilds it."""
         panel = self._page_panels.pop(name, None)
-        if name in self._page_lru:
-            try:
-                self._page_lru.remove(name)
-            except ValueError:
-                pass
         if panel is None:
             return
         if name == "remote":
@@ -572,18 +565,13 @@ class _RemoteUI:
         self._gc()
 
     def _trim_page_cache(self, keep):
-        """LRU-cap live page panels to limit MicroPython heap fragmentation."""
-        lru = self._page_lru
-        if keep in lru:
-            lru.remove(keep)
-        lru.append(keep)
-        while len(lru) > _PAGE_CACHE_MAX:
-            old = lru.pop(0)
-            if old != keep:
-                self._drop_page(old)
+        """Keep ``keep`` plus a hidden ``remote`` panel; drop everything else."""
         for name in list(self._page_panels.keys()):
-            if name not in lru:
-                self._drop_page(name)
+            if name == keep:
+                continue
+            if name in _CACHED_PAGES:
+                continue
+            self._drop_page(name)
 
     def _page_panel(self, name):
         panel = self._page_panels.get(name)
@@ -604,9 +592,11 @@ class _RemoteUI:
         return panel
 
     def _show_page(self, name, rebuild=False):
-        """Show ``name``, building it once (or again when ``rebuild``)."""
+        """Show ``name``; only ``remote`` is retained when navigating away."""
+        cacheable = name in _CACHED_PAGES
         panel = self._page_panels.get(name)
-        need = rebuild or panel is None or not panel.children
+        # Non-cached pages always rebuild so Select/Apps/More never accumulate.
+        need = (not cacheable) or rebuild or panel is None or not panel.children
         if need:
             if panel is not None:
                 self._drop_page(name)
