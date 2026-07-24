@@ -54,6 +54,7 @@ from roku_engine import (  # noqa: E402
     unicast_scan_supported,
 )
 from roku_sim import make_engine  # noqa: E402
+from multimer import ticks_diff, ticks_ms  # noqa: E402
 
 FRONTEND = "lvgl"
 
@@ -852,7 +853,7 @@ class _RokuLvgl:
         # Page swap may change plaque layout; allow status width to refresh.
         self._last_status_text = None
         # #region agent log
-        _t_page = time.ticks_ms()
+        _t_page = ticks_ms()
         # #endregion
 
         # Hide every cached root; show or rebuild the requested one.
@@ -873,7 +874,7 @@ class _RokuLvgl:
                     "page_cache_hit",
                     {
                         "page": page,
-                        "build_ms": int(time.ticks_diff(time.ticks_ms(), _t_page)),
+                        "build_ms": int(ticks_diff(ticks_ms(), _t_page)),
                         "runId": "post-fix",
                     },
                 )
@@ -955,7 +956,7 @@ class _RokuLvgl:
             # Keep Cancel responsive while a scan is already running.
             if not self._scan_busy:
                 try:
-                    self._scan_ignore_until = time.ticks_ms() + 700
+                    self._scan_ignore_until = ticks_ms() + 700
                 except Exception:
                     self._scan_ignore_until = 0
             else:
@@ -969,7 +970,7 @@ class _RokuLvgl:
         self._store_page_bag(page)
         # #region agent log
         try:
-            dt = int(time.ticks_diff(time.ticks_ms(), _t_page))
+            dt = int(ticks_diff(ticks_ms(), _t_page))
             flush = {}
             try:
                 import display_driver as _dd
@@ -2063,7 +2064,7 @@ class _RokuLvgl:
                 # matched "missing" D-pad taps after hit_ok (H4/H22).
                 key = kq.pop(0)
                 ok = False
-                t0 = time.ticks_ms()
+                t0 = ticks_ms()
                 try:
                     ok = bool(self.engine.press(key, timeout=0.25, wait=False))
                 except Exception:
@@ -2076,7 +2077,7 @@ class _RokuLvgl:
                     {
                         "key": key,
                         "ok": ok,
-                        "ms": int(time.ticks_diff(time.ticks_ms(), t0)),
+                        "ms": int(ticks_diff(ticks_ms(), t0)),
                         "qleft": len(kq),
                         "reuse": bool(getattr(self.engine, "_ecp_last_reuse", False)),
                         "conn_close": bool(
@@ -2114,11 +2115,11 @@ class _RokuLvgl:
 
     def _ecp_press_now(self, key):
         """Queue ECP ``/keypress/`` (debounce); drain on pump without blocking PRESSED."""
-        now = time.ticks_ms()
+        now = ticks_ms()
         last = getattr(self, "_ecp_last", None)
         if last is not None:
             try:
-                if last[0] == key and time.ticks_diff(now, last[1]) < 70:
+                if last[0] == key and ticks_diff(now, last[1]) < 70:
                     # #region agent log
                     _dbg_log(
                         "H23",
@@ -2389,7 +2390,7 @@ class _RokuLvgl:
         if not until:
             return False
         try:
-            return time.ticks_diff(time.ticks_ms(), until) < 0
+            return ticks_diff(ticks_ms(), until) < 0
         except Exception:
             return False
 
@@ -2723,7 +2724,7 @@ class _RokuLvgl:
 
             def _work():
                 # #region agent log
-                _t0 = time.ticks_ms()
+                _t0 = ticks_ms()
                 # #endregion
                 try:
                     self.engine.refresh_playback()
@@ -2737,7 +2738,7 @@ class _RokuLvgl:
                         "roku_lvgl.py:_pump:playback",
                         "playback_refresh",
                         {
-                            "ms": int(time.ticks_diff(time.ticks_ms(), _t0)),
+                            "ms": int(ticks_diff(ticks_ms(), _t0)),
                             "page": self.page,
                             "poll_s": int(self.playback_poll_s),
                             "show_progress": bool(self.show_progress),
