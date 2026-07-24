@@ -58,63 +58,6 @@ from multimer import ticks_diff, ticks_ms  # noqa: E402
 
 FRONTEND = "lvgl"
 
-# #region agent log
-# Live path: UDP to host (192.168.1.143:41234) + print. Skip SPI flash on
-# hot-path messages — flash writes stalled taps ~1s. USB CDC (COM50) is optional
-# when Windows enumerates the native USB port.
-_DBG_NO_FLASH = frozenset(
-    (
-        "hit",
-        "hit_ok",
-        "hit_miss",
-        "ecp_press_now",
-        "ecp_drain",
-        "debounce_drop",
-        "touch_down_phys",
-        "short_click",
-    )
-)
-_DBG_UDP_ADDR = ("192.168.1.143", 41234)
-_dbg_udp_sock = None
-
-
-def _dbg_log(hypothesis_id, location, message, data=None):
-    """Emit one NDJSON line (UDP + stdout; flash for coarse events only)."""
-    global _dbg_udp_sock
-    try:
-        import json
-
-        rec = {
-            "sessionId": "4c370d",
-            "runId": "baseline",
-            "hypothesisId": hypothesis_id,
-            "location": location,
-            "message": message,
-            "data": data or {},
-            "timestamp": int(time.time() * 1000),
-        }
-        line = json.dumps(rec)
-        try:
-            print(line)
-        except Exception:
-            pass
-        try:
-            import socket
-
-            if _dbg_udp_sock is None:
-                _dbg_udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            _dbg_udp_sock.sendto((line + "\n").encode(), _DBG_UDP_ADDR)
-        except Exception:
-            pass
-        if message in _DBG_NO_FLASH:
-            return
-        with open("/dbg_roku.ndjson", "a") as f:
-            f.write(line + "\n")
-    except Exception:
-        pass
-
-
-# #endregion
 
 # Museum charcoal chassis + single violet accent.
 _COL = {
@@ -315,8 +258,7 @@ class _RokuLvgl:
         self._last_name_text = None
         self.content = None
         self._ecp_q = []
-        self._remote_dpad = None
-        self._pending_dpad_ring = None
+        self._remote_key_btns = {}
         # Lazy page roots under ``content`` (hide/show instead of destroy/rebuild).
         self._page_roots = {}
         self._page_bags = {}
@@ -528,8 +470,11 @@ class _RokuLvgl:
             self._set_state("")
             self._refresh_playback_bg()
         else:
+            err = (getattr(self.engine, "last_error", None) or "").strip()
             n = len(self.discover_list or [])
-            if n:
+            if err in ("last TV offline", "TV changed"):
+                self._set_status(err)
+            elif n:
                 self._set_status("%d saved" % n)
             else:
                 self._set_status("no TVs - press Scan")
@@ -613,22 +558,19 @@ class _RokuLvgl:
                 style.set_shadow_ofs_y(max(2, self.pad // 2))
         btn.add_style(style, 0)
 
-        # Remote hit-layer mode: keys are visual-only (not clickable), so skip
-        # PRESSED styles — those were the post-tap redraw/flash on slow FB blit.
-        hit_mode = bool(getattr(self, "_remote_hit_mode", False))
-        if not hit_mode:
-            pressed = self._mk_style()
-            pressed.set_bg_color(_hex(_shade(top, 1.25)))
-            pressed.set_bg_opa(lv.OPA.COVER)
-            if round_btn:
-                pressed.set_pad_all(0)
-                if hasattr(pressed, "set_translate_x"):
-                    pressed.set_translate_x(0)
-                if hasattr(pressed, "set_translate_y"):
-                    pressed.set_translate_y(0)
-            elif hasattr(pressed, "set_translate_y"):
-                pressed.set_translate_y(max(1, self.pad // 3))
-            btn.add_style(pressed, lv.STATE.PRESSED)
+        # Native PRESSED style — LVGL owns the face while the finger is down.
+        pressed = self._mk_style()
+        pressed.set_bg_color(_hex(_shade(top, 1.25)))
+        pressed.set_bg_opa(lv.OPA.COVER)
+        if round_btn:
+            pressed.set_pad_all(0)
+            if hasattr(pressed, "set_translate_x"):
+                pressed.set_translate_x(0)
+            if hasattr(pressed, "set_translate_y"):
+                pressed.set_translate_y(0)
+        elif hasattr(pressed, "set_translate_y"):
+            pressed.set_translate_y(max(1, self.pad // 3))
+        btn.add_style(pressed, lv.STATE.PRESSED)
 
         lbl = lv.label(btn)
         lbl.set_text(text)
@@ -657,82 +599,23 @@ class _RokuLvgl:
         # Stash for chrome updates (play/power) without a page rebuild.
         self._last_btn_label = lbl
 
-        if hit_mode and (hold_key is not None or on_click is not None):
-            # Defer input to the remote hit-layer (no per-key PRESSED invalidate).
-            action = hold_key if hold_key is not None else on_click
-            self._pending_remote_hits.append((btn, action))
-        elif hold_key:
-            # PRESSED: one /keypress/ immediately (no keydown/keyup hold protocol).
-            def _press_key(_e, _k=hold_key):
+        if hold_key:
+            # Send on release; PRESSED style is visual only while the finger is down.
+            def _send_key(_e, _k=hold_key):
                 self._ecp_press_now(_k)
 
-            btn.add_event_cb(_press_key, lv.EVENT.PRESSED, None)
-        elif on_long is not None and not self._sw_rotate:
-            # Long-press delete is unreliable under SW-rotate (stalls look like
-            # holds). On those panels, pick is CLICKED only; delete via Scan
-            # after forgetting from prefs/file if needed.
-            long_fired = {"v": False}
-
-            def _pressed(_e, _flag=long_fired):
-                _flag["v"] = False
-
-            def _long(_e, _fn=on_long, _flag=long_fired):
-                _flag["v"] = True
-                # #region agent log
-                _dbg_log(
-                    "H6",
-                    "roku_lvgl.py:_key_button",
-                    "long_pressed",
-                    {"runId": "post-fix"},
-                )
-                # #endregion
-                _fn()
-
-            def _click(_e, _fn=on_click, _flag=long_fired):
-                if _flag["v"]:
-                    _flag["v"] = False
-                    # #region agent log
-                    _dbg_log(
-                        "H6",
-                        "roku_lvgl.py:_key_button",
-                        "click_suppressed_after_long",
-                        {"runId": "post-fix"},
-                    )
-                    # #endregion
-                    return
-                # #region agent log
-                _dbg_log(
-                    "H6",
-                    "roku_lvgl.py:_key_button",
-                    "short_click",
-                    {"runId": "post-fix"},
-                )
-                # #endregion
-                if _fn is not None:
-                    _fn()
-
-            long_ev = getattr(lv.EVENT, "LONG_PRESSED", None)
-            short_ev = getattr(lv.EVENT, "SHORT_CLICKED", None)
-            if short_ev is None:
-                short_ev = getattr(lv.EVENT, "SINGLE_CLICKED", None)
-            btn.add_event_cb(_pressed, lv.EVENT.PRESSED, None)
-            if long_ev is not None:
-                btn.add_event_cb(_long, long_ev, None)
-            if on_click is not None:
-                if short_ev is not None:
-                    btn.add_event_cb(_click, short_ev, None)
-                else:
-                    btn.add_event_cb(_click, lv.EVENT.CLICKED, None)
+            btn.add_event_cb(_send_key, lv.EVENT.RELEASED, None)
+            if isinstance(hold_key, str):
+                btns = getattr(self, "_remote_key_btns", None)
+                if btns is None:
+                    self._remote_key_btns = {}
+                    btns = self._remote_key_btns
+                btns[hold_key] = btn
         elif on_click is not None:
+            # Long-press delete disabled: inject/hold and slow indev drain were
+            # firing LONG_PRESSED and suppressing SHORT_CLICKED (pick stayed on
+            # devices). Use plain CLICKED only. (on_long ignored when passed.)
             def _cb(_e, _fn=on_click):
-                # #region agent log
-                _dbg_log(
-                    "H6",
-                    "roku_lvgl.py:_key_button",
-                    "short_click",
-                    {"runId": "post-fix", "sw_rotate": bool(self._sw_rotate)},
-                )
-                # #endregion
                 _fn()
 
             btn.add_event_cb(_cb, lv.EVENT.CLICKED, None)
@@ -828,10 +711,7 @@ class _RokuLvgl:
         self._power_lbl = bag.get("power_lbl")
         self._page_styles = bag.get("styles") or []
         if page == "remote":
-            self._remote_hits = bag.get("hits") or []
-            self._remote_dpad = bag.get("dpad")
-            self._remote_hit_overlay = bag.get("overlay")
-            self._pending_dpad_ring = bag.get("dpad_ring")
+            self._remote_key_btns = bag.get("key_btns") or {}
 
     def _store_page_bag(self, page):
         bag = {
@@ -840,10 +720,7 @@ class _RokuLvgl:
             "styles": self._page_styles,
         }
         if page == "remote":
-            bag["hits"] = getattr(self, "_remote_hits", None) or []
-            bag["dpad"] = getattr(self, "_remote_dpad", None)
-            bag["overlay"] = getattr(self, "_remote_hit_overlay", None)
-            bag["dpad_ring"] = getattr(self, "_pending_dpad_ring", None)
+            bag["key_btns"] = getattr(self, "_remote_key_btns", None) or {}
         self._page_bags[page] = bag
 
     def _show_page(self, page, force=False):
@@ -852,9 +729,6 @@ class _RokuLvgl:
             return
         # Page swap may change plaque layout; allow status width to refresh.
         self._last_status_text = None
-        # #region agent log
-        _t_page = ticks_ms()
-        # #endregion
 
         # Hide every cached root; show or rebuild the requested one.
         for name, root in self._page_roots.items():
@@ -866,21 +740,6 @@ class _RokuLvgl:
             self._set_hidden(root, False)
             self._page_build_parent = root
             self._restore_page_bag(page)
-            # #region agent log
-            try:
-                _dbg_log(
-                    "H3",
-                    "roku_lvgl.py:_show_page",
-                    "page_cache_hit",
-                    {
-                        "page": page,
-                        "build_ms": int(ticks_diff(ticks_ms(), _t_page)),
-                        "runId": "post-fix",
-                    },
-                )
-            except Exception:
-                pass
-            # #endregion
             return
 
         if root is not None:
@@ -921,30 +780,6 @@ class _RokuLvgl:
         for name, other in self._page_roots.items():
             if name != page:
                 self._set_hidden(other, True)
-        # #region agent log
-        try:
-            raw_w = raw_h = -1
-            try:
-                raw_w = int(self.content.get_width())
-                raw_h = int(self.content.get_height())
-            except Exception:
-                pass
-            _dbg_log(
-                "H3",
-                "roku_lvgl.py:_show_page",
-                "page_root_size",
-                {
-                    "page": page,
-                    "cw": cw,
-                    "ch": ch,
-                    "raw_w": raw_w,
-                    "raw_h": raw_h,
-                    "runId": "post-fix",
-                },
-            )
-        except Exception:
-            pass
-        # #endregion
 
         self._play_lbl = None
         self._power_lbl = None
@@ -968,36 +803,6 @@ class _RokuLvgl:
         else:
             self._build_remote()
         self._store_page_bag(page)
-        # #region agent log
-        try:
-            dt = int(ticks_diff(ticks_ms(), _t_page))
-            flush = {}
-            try:
-                import display_driver as _dd
-
-                drv = getattr(_dd, "_driver_ref", None)
-                if drv is not None and hasattr(drv, "dbg_flush_stats"):
-                    flush = drv.dbg_flush_stats()
-            except Exception:
-                pass
-            _dbg_log(
-                "H3",
-                "roku_lvgl.py:_show_page",
-                "page_build",
-                {
-                    "page": page,
-                    "build_ms": dt,
-                    "flush": flush,
-                    "shadows": bool(self.ui_shadows),
-                    "gradients": bool(self.ui_gradients),
-                    "show_progress": bool(self.show_progress),
-                    "cached": False,
-                    "runId": "post-fix",
-                },
-            )
-        except Exception:
-            pass
-        # #endregion
 
     def _content_metrics(self):
         W = self.W
@@ -1055,208 +860,13 @@ class _RokuLvgl:
         # get_height() before the first layout pass.
         if H < 80:
             H = max(80, self.H - self.plaque_h - 2 * self.pad)
-        self._pending_remote_hits = []
-        self._remote_hits = []
-        self._remote_hit_mode = True
-        try:
-            # Landscape: two columns (nav+D-pad | transport/chrome). Prefer this
-            # on wide panels instead of a tall portrait stack.
-            if W > H:
-                self._build_remote_landscape(W, H, pad, gap)
-            else:
-                self._build_remote_portrait(W, H, pad, gap)
-            self._install_remote_hit_layer(W, H)
-        finally:
-            self._remote_hit_mode = False
-
-    def _install_remote_hit_layer(self, W, H):
-        """One transparent click catcher; keys themselves are not clickable.
-
-        Per-button PRESSED/RELEASED was invalidating ~8k–27k px and costing
-        1–3s of FB blit per tap even with ``sw_rotate=False`` (H20 logs).
-        """
-        pending = getattr(self, "_pending_remote_hits", None) or []
-        self._pending_remote_hits = []
-        parent = self._page_parent()
-        if not pending or parent is None:
-            return
-        try:
-            if hasattr(lv.obj, "update_layout"):
-                lv.obj.update_layout(parent)
-            elif hasattr(parent, "update_layout"):
-                parent.update_layout()
-        except Exception:
-            pass
-
-        dpad_keys = frozenset(("Up", "Down", "Left", "Right", "Select"))
-        ring = getattr(self, "_pending_dpad_ring", None)
-        self._pending_dpad_ring = None
-        self._remote_dpad = None
-        if ring is not None:
-            try:
-                area = lv.area_t()
-                ring.get_coords(area)
-                self._remote_dpad = (
-                    int(area.x1),
-                    int(area.y1),
-                    int(area.x2),
-                    int(area.y2),
-                )
-            except Exception:
-                self._remote_dpad = None
-
-        hits = []
-        clickable = getattr(getattr(lv, "obj", lv), "FLAG", None)
-        click_flag = getattr(clickable, "CLICKABLE", None) if clickable else None
-        for btn, action in pending:
-            try:
-                if click_flag is not None:
-                    if hasattr(btn, "remove_flag"):
-                        btn.remove_flag(click_flag)
-                    elif hasattr(btn, "clear_flag"):
-                        btn.clear_flag(click_flag)
-                # D-pad uses the full ring sector map (avoids dead zones).
-                if action in dpad_keys and self._remote_dpad is not None:
-                    continue
-                area = lv.area_t()
-                btn.get_coords(area)
-                hits.append(
-                    (int(area.x1), int(area.y1), int(area.x2), int(area.y2), action)
-                )
-            except Exception:
-                pass
-        self._remote_hits = hits
-        if not hits and self._remote_dpad is None:
-            return
-
-        ov = lv.obj(parent)
-        ov.set_size(int(W), int(H))
-        ov.set_pos(0, 0)
-        ov_style = self._mk_style()
-        ov_style.set_bg_opa(lv.OPA.TRANSP)
-        ov_style.set_border_width(0)
-        ov_style.set_pad_all(0)
-        ov.add_style(ov_style, 0)
-        _no_scroll(ov)
-        try:
-            if click_flag is not None and hasattr(ov, "add_flag"):
-                ov.add_flag(click_flag)
-            if hasattr(ov, "move_foreground"):
-                ov.move_foreground()
-        except Exception:
-            pass
-
-        def _on_press(_e):
-            # Drop overlay PRESSED style only — never lv.inv_area(disp, None).
-            # Full-screen invalidate (H3: 96000px / 1.5–4s flushes) blocked the
-            # LVGL/timer thread and dropped subsequent D-pad PRESSED events.
-            try:
-                tgt = None
-                if hasattr(_e, "get_target_obj"):
-                    tgt = _e.get_target_obj()
-                st = getattr(lv.STATE, "PRESSED", None)
-                if tgt is not None and st is not None and hasattr(tgt, "remove_state"):
-                    tgt.remove_state(st)
-            except Exception:
-                pass
-            self._remote_hit_press()
-
-        ov.add_event_cb(_on_press, lv.EVENT.PRESSED, None)
-        self._remote_hit_overlay = ov
-        # #region agent log
-        _dbg_log(
-            "H20",
-            "roku_lvgl.py:_install_remote_hit_layer",
-            "hit_layer",
-            {
-                "n": len(hits),
-                "dpad": bool(self._remote_dpad),
-                "W": int(W),
-                "H": int(H),
-                "runId": "post-fix",
-            },
-        )
-        # #endregion
-
-    def _remote_hit_press(self):
-        """Map indev point to a registered remote action."""
-        hits = getattr(self, "_remote_hits", None) or []
-        dpad = getattr(self, "_remote_dpad", None)
-        if not hits and dpad is None:
-            return
-        x = y = None
-        try:
-            indev = None
-            if hasattr(lv, "indev_active"):
-                indev = lv.indev_active()
-            if indev is None and hasattr(lv, "indev_get_act"):
-                indev = lv.indev_get_act()
-            if indev is not None and hasattr(indev, "get_point"):
-                pt = lv.point_t()
-                indev.get_point(pt)
-                x, y = int(pt.x), int(pt.y)
-        except Exception:
-            x = y = None
-        if x is None:
-            return
-        # Sector map over the whole D-pad ring (H21: arrow rects missed taps).
-        if dpad is not None:
-            x1, y1, x2, y2 = dpad
-            if x1 <= x <= x2 and y1 <= y <= y2:
-                cx = (x1 + x2) // 2
-                cy = (y1 + y2) // 2
-                dx = x - cx
-                dy = y - cy
-                rw = max(1, x2 - x1 + 1)
-                ok_r = max(8, rw // 6)
-                if dx * dx + dy * dy <= ok_r * ok_r:
-                    key = "Select"
-                elif abs(dy) >= abs(dx):
-                    key = "Up" if dy < 0 else "Down"
-                else:
-                    key = "Left" if dx < 0 else "Right"
-                # #region agent log
-                _dbg_log(
-                    "H21",
-                    "roku_lvgl.py:_remote_hit_press",
-                    "hit_ok",
-                    {"key": key, "via": "dpad", "x": x, "y": y, "runId": "post-fix"},
-                )
-                # #endregion
-                self._ecp_press_now(key)
-                return
-        for x1, y1, x2, y2, action in hits:
-            if x1 <= x <= x2 and y1 <= y <= y2:
-                # #region agent log
-                _dbg_log(
-                    "H21",
-                    "roku_lvgl.py:_remote_hit_press",
-                    "hit_ok",
-                    {
-                        "key": action if isinstance(action, str) else "fn",
-                        "via": "rect",
-                        "x": x,
-                        "y": y,
-                        "runId": "post-fix",
-                    },
-                )
-                # #endregion
-                if isinstance(action, str):
-                    self._ecp_press_now(action)
-                elif callable(action):
-                    try:
-                        action()
-                    except Exception:
-                        pass
-                return
-        # #region agent log
-        _dbg_log(
-            "H21",
-            "roku_lvgl.py:_remote_hit_press",
-            "hit_miss",
-            {"x": x, "y": y, "n": len(hits), "dpad": bool(dpad), "runId": "post-fix"},
-        )
-        # #endregion
+        self._remote_key_btns = {}
+        # Landscape: two columns (nav+D-pad | transport/chrome). Prefer this
+        # on wide panels instead of a tall portrait stack.
+        if W > H:
+            self._build_remote_landscape(W, H, pad, gap)
+        else:
+            self._build_remote_portrait(W, H, pad, gap)
 
     def _remote_row_bg(self):
         row_bg = self._mk_style()
@@ -1306,8 +916,16 @@ class _RokuLvgl:
             hold_key="Select", round_btn=True, font=font,
         )
         ok.align(lv.ALIGN.CENTER, 0, 0)
-        # Full ring is the hit target; tiny arrow rects left large dead zones.
-        self._pending_dpad_ring = ringobj
+        # Ring chrome must not steal presses from the arrow/OK buttons.
+        try:
+            flag = getattr(getattr(lv, "obj", lv).FLAG, "CLICKABLE", None)
+            if flag is not None:
+                if hasattr(ringobj, "remove_flag"):
+                    ringobj.remove_flag(flag)
+                elif hasattr(ringobj, "clear_flag"):
+                    ringobj.clear_flag(flag)
+        except Exception:
+            pass
         return ringobj
 
     def _build_remote_portrait(self, W, H, pad, gap):
@@ -1466,21 +1084,6 @@ class _RokuLvgl:
             ("SELECT", "ui", self._open_select),
         ], font=font)
 
-        # #region agent log
-        _dbg_log(
-            "H19",
-            "roku_lvgl.py:_build_remote_landscape",
-            "remote_landscape",
-            {
-                "W": int(W),
-                "H": int(H),
-                "col_w": int(col_w),
-                "ring": int(ring),
-                "row_h": int(row_h),
-                "runId": "post-fix",
-            },
-        )
-        # #endregion
 
     def _build_devices(self):
         """Select page: cached TVs + Scan/Full (network discover is explicit only)."""
@@ -1521,17 +1124,14 @@ class _RokuLvgl:
             host = ascii_label((dev.get("host") or "").strip() or "")
             label = name or host or "Roku"
             pick = (lambda d=dev: self._pick_device(d))
-            long_cb = (lambda d=dev: self._arm_delete(d))
             if scanning:
                 pick = lambda: None
-                long_cb = None
             self._key_button(
                 parent, label, x0, y + i * (slot_h + gap), w, slot_h,
                 "accent" if i == 0 else "key",
                 pick,
                 font=self.font,
                 wrap=True,
-                on_long=long_cb,
             )
 
     def _build_apps(self):
@@ -1736,7 +1336,11 @@ class _RokuLvgl:
         if not host:
             self._set_status("pick a TV first")
             return
-        self._show_page("remote")
+        # Leaving apps/more via cache-hit left a blank content pane on MCU
+        # (UDP: page_cache_hit remote after YouTube / REMOTE). Force rebuild
+        # whenever we are not already on remote.
+        force = self.page != "remote"
+        self._show_page("remote", force=force)
         # Replace sticky "N apps" / "N inputs" plaque text with live playback.
         self._refresh_playback_bg()
 
@@ -1914,19 +1518,6 @@ class _RokuLvgl:
                 _apply_font(self.status_lbl, self._status_font(nlines))
                 self.status_lbl.set_text(text)
                 self._last_status_text = text
-            # #region agent log
-            if self.page == "remote":
-                _dbg_log(
-                    "H4",
-                    "roku_lvgl.py:_set_status",
-                    "status_apply",
-                    {
-                        "changed": bool(changed),
-                        "show_progress": bool(self.show_progress),
-                        "runId": "post-fix",
-                    },
-                )
-            # #endregion
         if on_select:
             # Right-side clock / state stay blank on Select — full width for status.
             self._set_time("")
@@ -2001,18 +1592,6 @@ class _RokuLvgl:
         try:
             self.progress_fill.set_width(w)
             self.progress_fill.set_height(self.progress_h)
-            # #region agent log
-            if not hasattr(self, "_dbg_prog_n"):
-                self._dbg_prog_n = 0
-            self._dbg_prog_n += 1
-            if self._dbg_prog_n <= 3 or self._dbg_prog_n % 10 == 0:
-                _dbg_log(
-                    "H5",
-                    "roku_lvgl.py:_update_progress",
-                    "progress_update",
-                    {"w": w, "n": self._dbg_prog_n},
-                )
-            # #endregion
         except Exception:
             pass
 
@@ -2059,36 +1638,21 @@ class _RokuLvgl:
         try:
             kq = getattr(self, "_ecp_q", None)
             if kq:
-                # One fire-and-forget keypress per pump tick. Batching up to 6
-                # TCP connects here blocked LVGL input for hundreds of ms and
-                # matched "missing" D-pad taps after hit_ok (H4/H22).
+                # One fire-and-forget keypress. Usually invoked immediately from
+                # ``_ecp_press_now`` (not the 250ms pump) so tap→wire is ~10ms.
                 key = kq.pop(0)
-                ok = False
-                t0 = ticks_ms()
                 try:
-                    ok = bool(self.engine.press(key, timeout=0.25, wait=False))
+                    self.engine.press(key, timeout=0.25, wait=False)
                 except Exception:
-                    ok = False
-                # #region agent log
-                _dbg_log(
-                    "H4",
-                    "roku_lvgl.py:_drain_bg",
-                    "ecp_drain",
-                    {
-                        "key": key,
-                        "ok": ok,
-                        "ms": int(ticks_diff(ticks_ms(), t0)),
-                        "qleft": len(kq),
-                        "reuse": bool(getattr(self.engine, "_ecp_last_reuse", False)),
-                        "conn_close": bool(
-                            getattr(self.engine, "_ecp_last_conn_close", False)
-                        ),
-                        "err": getattr(self.engine, "last_error", "") or "",
-                        "runId": "post-fix",
-                    },
-                )
-                # #endregion
+                    pass
                 return
+            # Between taps: finish the previous keep-alive response so the next
+            # press is send-only (bench: ~11ms vs drain+send ~60–100ms).
+            try:
+                if self.engine.ecp_idle_drain():
+                    return
+            except Exception:
+                pass
             q = self._bg_q
             if not q:
                 return
@@ -2114,24 +1678,12 @@ class _RokuLvgl:
         self._run_bg(_work)
 
     def _ecp_press_now(self, key):
-        """Queue ECP ``/keypress/`` (debounce); drain on pump without blocking PRESSED."""
-        now = ticks_ms()
-        last = getattr(self, "_ecp_last", None)
-        if last is not None:
-            try:
-                if last[0] == key and ticks_diff(now, last[1]) < 70:
-                    # #region agent log
-                    _dbg_log(
-                        "H23",
-                        "roku_lvgl.py:_ecp_press_now",
-                        "debounce_drop",
-                        {"key": key, "runId": "post-fix"},
-                    )
-                    # #endregion
-                    return
-            except Exception:
-                pass
-        self._ecp_last = (key, now)
+        """Queue ECP ``/keypress/`` and send on this tick (not the 250ms pump).
+
+        Waiting for ``lv.timer`` (250ms) was the dominant tap→TV lag vs the
+        manufacturer app. Call rate is owned by the LVGL button callback
+        (``RELEASED``); no app-side debounce.
+        """
         q = getattr(self, "_ecp_q", None)
         if q is None:
             self._ecp_q = []
@@ -2139,6 +1691,8 @@ class _RokuLvgl:
         if len(q) >= 12:
             q.pop(0)
         q.append(key)
+        # Send on the LVGL callback tick — do not wait for the soft pump.
+        self._drain_bg()
 
     def _ecp_press(self, key):
         """Queue one-shot keypress (non-hold chrome paths)."""
@@ -2190,8 +1744,8 @@ class _RokuLvgl:
             self._cancel_switch()
         app_id = app.get("id", "")
         self.selected_app_id = str(app_id or "")
-        if self.page == "apps":
-            self._show_page("apps", force=True)
+        # Launch then return to remote (force — apps→remote cache-hit was blank).
+        self._show_page("remote", force=True)
 
         def _work():
             self.engine.launch_refresh(app_id)
@@ -2332,14 +1886,6 @@ class _RokuLvgl:
             return
         name = ascii_label(((dev or {}).get("name") or "").strip() or host)
         self._delete_armed = host
-        # #region agent log
-        _dbg_log(
-            "H8",
-            "roku_lvgl.py:_arm_delete",
-            "arm_delete",
-            {"host": host, "name": name, "runId": "post-fix"},
-        )
-        # #endregion
         # Select page: reclaim the blank time column, then fit by pixel width.
         self._layout_status_width(reserve_time=False)
         avail = self._status_avail_width()
@@ -2411,14 +1957,6 @@ class _RokuLvgl:
             return
         host = (dev or {}).get("host") or ""
         name = ((dev or {}).get("name") or "").strip() or host
-        # #region agent log
-        _dbg_log(
-            "H8",
-            "roku_lvgl.py:_pick_device",
-            "pick_device",
-            {"host": host, "name": name, "runId": "post-fix"},
-        )
-        # #endregion
         if not host:
             self._set_status("no host")
             return
@@ -2444,14 +1982,6 @@ class _RokuLvgl:
         self._invalidate_page("apps")
         self._invalidate_page("more")
         self._show_page("remote", force=True)
-        # #region agent log
-        _dbg_log(
-            "H15",
-            "roku_lvgl.py:_pick_device",
-            "remote_shown_no_connect",
-            {"host": host, "runId": "post-fix"},
-        )
-        # #endregion
         # Do NOT connect/query on the soft pump here: that blocked LVGL flushes
         # (Remote stayed half-painted for seconds, then a 4–7s full redraw).
 
@@ -2596,40 +2126,6 @@ class _RokuLvgl:
         # Do not _paint_now() before drain: under SW-rotate that flashed the
         # dirty key for ~4s (queue_ms) before ECP even started.
         self._drain_bg()
-        # #region agent log
-        try:
-            if not hasattr(self, "_dbg_pump_n"):
-                self._dbg_pump_n = 0
-            self._dbg_pump_n += 1
-            # Every ~2s (pump 250ms): flush + playback poll cost sample.
-            if self._dbg_pump_n % 8 == 0:
-                flush = {}
-                try:
-                    import display_driver as _dd
-
-                    drv = getattr(_dd, "_driver_ref", None)
-                    if drv is not None and hasattr(drv, "dbg_flush_stats"):
-                        flush = drv.dbg_flush_stats()
-                except Exception:
-                    pass
-                # Only log windows that actually flushed (NDJSON I/O itself stalls MCU).
-                if int((flush or {}).get("n") or 0) > 0:
-                    _dbg_log(
-                        "H1",
-                        "roku_lvgl.py:_pump",
-                        "flush_window",
-                        {
-                            "page": self.page,
-                            "flush": flush,
-                            "playback_busy": bool(self._playback_busy),
-                            "host": bool((self.engine.host or "").strip()),
-                            "q": len(self._bg_q),
-                            "runId": "post-fix",
-                        },
-                    )
-        except Exception:
-            pass
-        # #endregion
 
         if self._pending_scan:
             if self._scan_yield:
@@ -2674,24 +2170,7 @@ class _RokuLvgl:
                 # only when the host set changes — name-only updates were a full
                 # SW-rotate page flash and killed in-flight taps (wrong TV).
                 if after != before:
-                    # #region agent log
-                    _dbg_log(
-                        "H7",
-                        "roku_lvgl.py:_pump",
-                        "select_rebuild_hosts_changed",
-                        {"before": before, "after": after, "runId": "post-fix"},
-                    )
-                    # #endregion
                     self._show_page("devices", force=True)
-                else:
-                    # #region agent log
-                    _dbg_log(
-                        "H9",
-                        "roku_lvgl.py:_pump",
-                        "select_soft_refresh_skip_rebuild",
-                        {"hosts": after, "runId": "post-fix"},
-                    )
-                    # #endregion
 
         if self._pending_devices and self.page == "devices":
             if self._flush_scan_devices():
@@ -2708,14 +2187,11 @@ class _RokuLvgl:
             self._show_page(self.page, force=True)
 
         self._status_ticks += 1
-        # Prefs ``playback_poll_s`` (default 5); pump period is 250ms.
-        # Without scrub/clock (show_progress=False), skip periodic ECP — each
-        # poll blocks the LVGL pump 1–3s on MCU and reads as a screen flash.
-        # Refresh still runs on connect / key actions / when scrub is enabled.
+        # Prefs ``playback_poll_s`` (default 5); pump period is 250ms → N*4 ticks.
+        # Periodic ECP updates the plaque (app / state / chrome) while on Remote.
         _poll_every = max(1, int(self.playback_poll_s) * 4)
         if (
             self.page == "remote"
-            and self.show_progress
             and (self.engine.host or "").strip()
             and self._status_ticks % _poll_every == 0
             and not self._playback_busy
@@ -2723,31 +2199,11 @@ class _RokuLvgl:
             self._playback_busy = True
 
             def _work():
-                # #region agent log
-                _t0 = ticks_ms()
-                # #endregion
                 try:
                     self.engine.refresh_playback()
                     self._note_playback_chrome()
                 except Exception:
                     pass
-                # #region agent log
-                try:
-                    _dbg_log(
-                        "H4",
-                        "roku_lvgl.py:_pump:playback",
-                        "playback_refresh",
-                        {
-                            "ms": int(ticks_diff(ticks_ms(), _t0)),
-                            "page": self.page,
-                            "poll_s": int(self.playback_poll_s),
-                            "show_progress": bool(self.show_progress),
-                            "runId": "post-fix",
-                        },
-                    )
-                except Exception:
-                    pass
-                # #endregion
                 self._playback_busy = False
 
             self._run_bg(_work)

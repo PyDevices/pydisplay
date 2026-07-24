@@ -40,6 +40,9 @@ class TouchDevice(Device):
             self._data2 = _DEFAULT_TOUCH_ROTATION_TABLE
         self.rotation = self._data.rotation
         self._data.touch_device = self
+        # Synthetic samples in *display* coordinates (rotation already applied).
+        # Each entry is ``(x, y)`` (finger down) or ``None`` (finger up).
+        self._inject_q = []
 
     @property
     def rotation(self):
@@ -58,7 +61,53 @@ class TouchDevice(Device):
     def rotation_table(self, value):
         self._data2 = value
 
+    def inject_clear(self):
+        """Drop pending synthetic samples (does not emit an up)."""
+        self._inject_q = []
+
+    def inject_point(self, xy):
+        """Queue one sample: ``(x, y)`` display coords, or ``None`` for up."""
+        self._inject_q.append(xy)
+
+    def inject_tap(self, x, y, hold_frames=1):
+        """Queue a press/release at display coordinates.
+
+        One down sample + one up is enough for LVGL CLICKED / hit-layer
+        PRESSED. Extra hold frames each need an indev poll and dominated
+        automation timing on slow MCU debug builds.
+        """
+        pt = (int(x), int(y))
+        self._inject_q.append(pt)
+        # Optional extra downs only if explicitly requested (>1).
+        n = max(1, int(hold_frames))
+        for _ in range(n - 1):
+            self._inject_q.append(pt)
+        self._inject_q.append(None)
+
     def _poll(self):
+        if self._inject_q:
+            sample = self._inject_q.pop(0)
+            if sample is not None:
+                x, y = int(sample[0]), int(sample[1])
+                last_pos = self._state
+                self._state = (x, y)
+                if last_pos is not None:
+                    last_x, last_y = last_pos
+                    return events.Motion(
+                        events.MOUSEMOTION,
+                        self._state,
+                        (x - last_x, y - last_y),
+                        (1, 0, 0),
+                        False,
+                        None,
+                    )
+                return events.Button(events.MOUSEBUTTONDOWN, self._state, 1, False, None)
+            if self._state is not None:
+                last_pos = self._state
+                self._state = None
+                return events.Button(events.MOUSEBUTTONUP, last_pos, 1, False, None)
+            return None
+
         try:
             touched = self._read()
         except OSError:

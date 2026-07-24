@@ -2085,6 +2085,10 @@ class RokuEngine:
         # connect (50–450ms) on every D-pad tap on the LVGL pump thread.
         self._ecp_sock = None
         self._ecp_sock_host = ""
+        # After a no-drain send, consume the HTTP response before the next reuse.
+        self._ecp_need_drain = False
+        self._ecp_last_reuse = False
+        self._ecp_last_conn_close = False
 
     def cancel_discover(self):
         """Ask an in-flight :meth:`discover` to stop at the next checkpoint."""
@@ -2094,6 +2098,7 @@ class RokuEngine:
         sock = getattr(self, "_ecp_sock", None)
         self._ecp_sock = None
         self._ecp_sock_host = ""
+        self._ecp_need_drain = False
         if sock is None:
             return
         try:
@@ -2168,7 +2173,20 @@ class RokuEngine:
         sock = getattr(self, "_ecp_sock", None)
         if sock is not None and self._ecp_sock_host == host:
             self._ecp_last_reuse = True
-            return sock
+            # Prior fire-and-forget POST left a response on the wire — clear it
+            # before the next send so keep-alive stays valid. Prefer draining on
+            # the idle pump (see ``ecp_idle_drain``) so tap→send stays ~10ms.
+            if getattr(self, "_ecp_need_drain", False):
+                self._ecp_sock_drain(sock)
+                self._ecp_need_drain = False
+                sock = getattr(self, "_ecp_sock", None)
+                if sock is None:
+                    # Peer closed during drain — fall through to reconnect.
+                    pass
+                else:
+                    return sock
+            else:
+                return sock
         self._ecp_last_reuse = False
         self._ecp_sock_close()
         addr = _sockaddr(host, int(self.port), socket.SOCK_STREAM)
@@ -2182,8 +2200,28 @@ class RokuEngine:
         self._ecp_sock_host = host
         return sock
 
-    def _press_keepalive(self, key, timeout):
-        """POST ``/keypress/`` on a reused TCP socket (MCU tap hot path)."""
+    def ecp_idle_drain(self):
+        """Consume a pending keep-alive response when no tap is in flight.
+
+        Call from the UI soft-pump so the next tap's ``press(wait=False)`` is
+        usually a pure send (~10ms) instead of drain+send (~60–100ms).
+        """
+        if not getattr(self, "_ecp_need_drain", False):
+            return False
+        sock = getattr(self, "_ecp_sock", None)
+        if sock is None:
+            self._ecp_need_drain = False
+            return False
+        self._ecp_sock_drain(sock)
+        self._ecp_need_drain = False
+        return True
+
+    def _press_keepalive(self, key, timeout, drain=True):
+        """POST ``/keypress/`` on a reused TCP socket (MCU tap hot path).
+
+        ``drain=False``: send only (Roku acts on the request). Response is
+        consumed on the next ensure/reuse so tap→wire stays a few ms.
+        """
         path = "/keypress/" + key
         host = (self.host or "").strip()
         host_hdr = host if int(self.port) == 80 else "%s:%d" % (host, int(self.port))
@@ -2200,7 +2238,11 @@ class RokuEngine:
                 if n is None or n <= 0:
                     raise OSError("short send")
                 sent += n
-            self._ecp_sock_drain(sock)
+            if drain:
+                self._ecp_sock_drain(sock)
+                self._ecp_need_drain = False
+            else:
+                self._ecp_need_drain = True
 
         try:
             _send(self._ecp_sock_ensure(timeout))
@@ -2722,10 +2764,11 @@ class RokuEngine:
         return _load_known_hosts()
 
     def resume_last_host(self):
-        """Probe prefs MRU host; connect only when saved serial still matches.
+        """Probe prefs MRU host; connect when reachable (serial must match if set).
 
         ``ROKU_HOST`` (if set) overrides the MRU host and skips the serial check.
         Missing prefs / empty MRU → False (caller opens Select).
+        Offline / serial mismatch → False with ``last_error`` set (Select).
         """
         forced = (ROKU_HOST or "").strip()
         prefs = _load_prefs()
@@ -2733,15 +2776,14 @@ class RokuEngine:
         want_serial = "" if forced else (prefs.get("last_serial") or "").strip()
         if not host:
             return False
-        if not forced and not want_serial:
-            return False
         self.set_host(host)
         info = self.query_device_info()
         if not info:
             self.connected = False
+            self.last_error = "last TV offline"
             return False
         live = (info.get("serial-number") or "").strip()
-        if want_serial and live != want_serial:
+        if want_serial and live and live != want_serial:
             self.connected = False
             self.last_error = "TV changed"
             return False
@@ -2798,8 +2840,9 @@ class RokuEngine:
         Uses the socket HTTP client directly so urequests/urlopen cannot ignore
         short timeouts (ESP32 taps were stalling 3–7s despite timeout=1.5).
 
-        ``wait=False``: fire-and-forget send (MCU remote taps). Roku applies the
-        key on request; skipping the full response keeps the LVGL pump alive.
+        ``wait=False``: send the POST and return without reading the HTTP
+        response (MCU remote taps). Roku applies the key on request; the
+        keep-alive response is drained on the next press.
         """
         if key not in ECP_KEY_SET and not str(key).startswith("Lit_"):
             self.last_error = "unknown key: " + str(key)
@@ -2815,7 +2858,7 @@ class RokuEngine:
             if self._http is not None:
                 status, _ = self._http("POST", url, t, b"")
             elif not wait:
-                return self._press_keepalive(key, t)
+                return self._press_keepalive(key, t, drain=False)
             else:
                 status, _ = _http_request_socket(
                     "POST", url, timeout=t, data=b"", read_response=True
@@ -3064,6 +3107,19 @@ class RokuEngine:
             "true",
             "1",
         ) or self.is_tv()
+
+
+def start_page_for_engine(engine):
+    """Probe MRU via ``engine.resume_last_host`` → ``\"remote\"`` or ``\"devices\"``."""
+    try:
+        if engine is not None and engine.resume_last_host():
+            return "remote"
+    except Exception as exc:
+        try:
+            engine.last_error = "mru: %s" % exc
+        except Exception:
+            pass
+    return "devices"
 
 
 # MicroPython-friendly: avoid dataclass / typing

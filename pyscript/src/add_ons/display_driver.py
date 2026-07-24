@@ -290,13 +290,13 @@ def main():
         if loop_inst is None:
             if runtime is not None:
                 runtime.claim_display_refresh()
-            # Always present after task_handler. mipidsi blit msyncs SPIRAM, but
-            # esp_lcd DPI still needs refresh()/draw_bitmap (FBDisplay.show) or
-            # the panel stays blank after the initial black frame.
+            # PARTIAL: present after every task_handler (blit already wrote the
+            # panel FB). Shared DIRECT: present only from flush_is_last.
+            _share = bool(getattr(_driver_ref, "_share_fb", False))
             loop_inst = event_loop(
                 period_ms=LVGL_PERIOD_MS,
                 asynchronous=runtime.timer_async if runtime is not None else False,
-                refresh_cb=display_drv.show,
+                refresh_cb=None if _share else display_drv.show,
             )
         # Keep HOST/SDL draining on the 10 ms Runtime tick while LVGL task_handler
         # runs only every ~30 ms (claim skips Runtime._service_tick).
@@ -439,22 +439,71 @@ class DisplayDriver:
             self._needs_swap = False
         self._color_size = lv.color_format_get_size(color_format)
         self._blocking = blocking
-
-        self._draw_buf1 = lv.draw_buf_create(
-            display_drv.width, display_drv.height // 10, color_format, 0
-        )
-        self._draw_buf2 = lv.draw_buf_create(
-            display_drv.width, display_drv.height // 10, color_format, 0
-        )
+        self._share_fb = False
+        self._draw_buf1 = None
+        self._draw_buf2 = None
+        # Keep Python refs alive for set_buffers panel views (GC must not free).
+        self._fb_share = None
 
         self.lv_display = lv.display_create(display_drv.width, display_drv.height)
-        self.lv_display.set_flush_cb(self._flush_cb)
         self.lv_display.set_color_format(color_format)
-        if not self._blocking:
-            display_drv.display_bus.register_callback(self.lv_display.flush_ready)
-        self.lv_display.set_draw_buffers(self._draw_buf1, self._draw_buf2)
-        self.lv_display.set_render_mode(lv.DISPLAY_RENDER_MODE.PARTIAL)
+
+        share = bool(getattr(display_drv, "share_framebuffer", False))
+        # Byteswap + shared FB not supported yet — keep PARTIAL blit path.
+        fbs = None
+        if share and not self._needs_swap:
+            try:
+                fbs = display_drv.framebuffers()
+            except Exception:
+                fbs = None
+
+        if fbs is not None:
+            buf1, buf2, nbytes, stride = fbs
+            packed = int(display_drv.width) * self._color_size
+            self._fb_share = (buf1, buf2)
+            self._share_fb = True
+            self.lv_display.set_flush_cb(self._flush_cb_direct)
+            if (
+                stride
+                and int(stride) != packed
+                and hasattr(self.lv_display, "set_buffers_with_stride")
+            ):
+                self.lv_display.set_buffers_with_stride(
+                    buf1, buf2, int(nbytes), int(stride), lv.DISPLAY_RENDER_MODE.DIRECT
+                )
+            else:
+                self.lv_display.set_buffers(buf1, buf2, int(nbytes), lv.DISPLAY_RENDER_MODE.DIRECT)
+        else:
+            self._draw_buf1 = lv.draw_buf_create(
+                display_drv.width, display_drv.height // 10, color_format, 0
+            )
+            self._draw_buf2 = lv.draw_buf_create(
+                display_drv.width, display_drv.height // 10, color_format, 0
+            )
+            self.lv_display.set_flush_cb(self._flush_cb)
+            if not self._blocking:
+                display_drv.display_bus.register_callback(self.lv_display.flush_ready)
+            self.lv_display.set_draw_buffers(self._draw_buf1, self._draw_buf2)
+            self.lv_display.set_render_mode(lv.DISPLAY_RENDER_MODE.PARTIAL)
+
         self.virtual_devices = create_devices(devs, self.lv_display)
+
+    def _flush_cb_direct(self, disp_drv, area, color_p):
+        """DIRECT: LVGL already painted the panel FB; present on last area."""
+        if hasattr(display_drv, "_sdl_active") and not display_drv._sdl_active():
+            self.lv_display.flush_ready()
+            return
+        try:
+            last = self.lv_display.flush_is_last()
+        except Exception:
+            last = True
+        if last:
+            try:
+                display_drv.show()
+            except Exception:
+                pass
+        if self._blocking:
+            self.lv_display.flush_ready()
 
     def _flush_cb(self, disp_drv, area, color_p):
         if hasattr(display_drv, "_sdl_active") and not display_drv._sdl_active():
