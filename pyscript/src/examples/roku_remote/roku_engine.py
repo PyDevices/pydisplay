@@ -12,8 +12,9 @@ Talks HTTP on port 8060 and discovers devices via SSDP (``ST: roku:ecp``),
 with a portable unicast ``:8060`` / ``/query/device-info`` scan fallback when
 multicast is blocked (common on WSL NAT and some host firewalls).
 Prefs are persisted (``~/.roku_prefs`` on desktop, ``/roku_prefs`` on MCU):
-saved TVs, most-recent host/serial, and chosen front end. Missing prefs are
-fine (empty defaults).
+saved TVs, most-recent host/serial, chosen front end, and LVGL chrome knobs
+(``ui_shadows`` / ``ui_gradients`` / ``show_progress`` default off;
+``playback_poll_s`` default 5). Missing prefs are fine (empty defaults).
 Shared by every Roku front end (``roku_graphics``, ``roku_widgets``,
 ``roku_lvgl``, and the ``roku_remote`` launcher): all UI-agnostic ECP,
 discovery, and label/action helpers live here so the display layer is fully
@@ -493,8 +494,13 @@ def _parse_http_url(url):
     return host, port, path
 
 
-def _http_request_socket(method, url, timeout=5.0, data=b""):
-    """Minimal HTTP/1.0 over ``socket`` (no urllib/urequests required)."""
+def _http_request_socket(method, url, timeout=5.0, data=b"", read_response=True):
+    """Minimal HTTP/1.0 over ``socket`` (no urllib/urequests required).
+
+    ``read_response=False``: send the request and close immediately (no recv
+    peek). Roku ECP applies ``/keypress/`` on request; a 120ms peek was adding
+    idle stall to every MCU tap on the LVGL pump thread.
+    """
     host, port, path = _parse_http_url(url)
     if isinstance(data, str):
         data = data.encode("utf-8")
@@ -512,6 +518,7 @@ def _http_request_socket(method, url, timeout=5.0, data=b""):
 
     addr = _sockaddr(host, port, socket.SOCK_STREAM)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    chunks = []
     try:
         try:
             sock.settimeout(timeout)
@@ -526,20 +533,24 @@ def _http_request_socket(method, url, timeout=5.0, data=b""):
                 break
             sent += n
 
-        chunks = []
-        while True:
-            try:
-                chunk = sock.recv(2048)
-            except OSError:
-                break
-            if not chunk:
-                break
-            chunks.append(chunk)
+        if read_response:
+            while True:
+                try:
+                    chunk = sock.recv(2048)
+                except OSError:
+                    break
+                if not chunk:
+                    break
+                chunks.append(chunk)
     finally:
         try:
             sock.close()
         except OSError:
             pass
+
+    if not read_response:
+        # Optimistic OK once the POST bytes were written.
+        return 200, b""
 
     raw = b"".join(chunks) if chunks else b""
     sep = raw.find(b"\r\n\r\n")
@@ -1370,7 +1381,27 @@ def _default_prefs():
         "last_host": "",
         "last_serial": "",
         "devices": [],
+        # LVGL chrome / load (MCU-friendly defaults).
+        "ui_shadows": False,
+        "ui_gradients": False,
+        "show_progress": False,
+        "playback_poll_s": 5,
     }
+
+
+def _as_bool(value, default=False):
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return default
+    if isinstance(value, (int, float)):
+        return bool(value)
+    s = str(value).strip().lower()
+    if s in ("1", "true", "yes", "on"):
+        return True
+    if s in ("0", "false", "no", "off", ""):
+        return False
+    return default
 
 
 def _normalize_prefs(data):
@@ -1383,6 +1414,18 @@ def _normalize_prefs(data):
         out["frontend"] = fe
     out["last_host"] = (data.get("last_host") or "").strip()
     out["last_serial"] = (data.get("last_serial") or "").strip()
+    out["ui_shadows"] = _as_bool(data.get("ui_shadows"), False)
+    out["ui_gradients"] = _as_bool(data.get("ui_gradients"), False)
+    out["show_progress"] = _as_bool(data.get("show_progress"), False)
+    try:
+        poll = int(data.get("playback_poll_s", out["playback_poll_s"]))
+    except (TypeError, ValueError):
+        poll = out["playback_poll_s"]
+    if poll < 1:
+        poll = 1
+    if poll > 60:
+        poll = 60
+    out["playback_poll_s"] = poll
     devices = data.get("devices")
     if isinstance(devices, list):
         clean = []
@@ -1561,6 +1604,39 @@ def set_frontend(name):
         return False
     prefs = _load_prefs()
     prefs["frontend"] = name
+    return _write_prefs(prefs)
+
+
+def get_ui_pref(key, default=None):
+    """Return one UI pref (``ui_shadows``, ``ui_gradients``, …)."""
+    prefs = _load_prefs()
+    if key in prefs:
+        return prefs[key]
+    return default
+
+
+def set_ui_pref(key, value):
+    """Persist one UI pref. Returns True on success."""
+    if key not in (
+        "ui_shadows",
+        "ui_gradients",
+        "show_progress",
+        "playback_poll_s",
+    ):
+        return False
+    prefs = _load_prefs()
+    if key == "playback_poll_s":
+        try:
+            poll = int(value)
+        except (TypeError, ValueError):
+            return False
+        if poll < 1:
+            poll = 1
+        if poll > 60:
+            poll = 60
+        prefs[key] = poll
+    else:
+        prefs[key] = _as_bool(value, False)
     return _write_prefs(prefs)
 
 
@@ -2005,10 +2081,140 @@ class RokuEngine:
         self._discover_cancel = False
         # Optional inject for tests: callable(method, url, timeout, data) -> (status, body)
         self._http = None
+        # Keep-alive TCP for MCU ``press(..., wait=False)`` — avoids a fresh
+        # connect (50–450ms) on every D-pad tap on the LVGL pump thread.
+        self._ecp_sock = None
+        self._ecp_sock_host = ""
 
     def cancel_discover(self):
         """Ask an in-flight :meth:`discover` to stop at the next checkpoint."""
         self._discover_cancel = True
+
+    def _ecp_sock_close(self):
+        sock = getattr(self, "_ecp_sock", None)
+        self._ecp_sock = None
+        self._ecp_sock_host = ""
+        if sock is None:
+            return
+        try:
+            sock.close()
+        except OSError:
+            pass
+
+    def _ecp_sock_drain(self, sock):
+        """Consume one HTTP response so the keep-alive socket stays usable.
+
+        A non-blocking peek left unread bytes / half-closed sockets; the next
+        ``send`` then failed and forced a fresh TCP connect (H4 logs: reuse
+        alternating False/True every tap).
+        """
+        self._ecp_last_conn_close = False
+        buf = b""
+        try:
+            sock.settimeout(0.04)
+        except OSError:
+            pass
+        try:
+            # Headers
+            while b"\r\n\r\n" not in buf and len(buf) < 1536:
+                try:
+                    chunk = sock.recv(256)
+                except OSError:
+                    break
+                if not chunk:
+                    # Peer closed — drop socket so the next ensure reconnects.
+                    self._ecp_sock_close()
+                    return
+                buf += chunk
+            sep = buf.find(b"\r\n\r\n")
+            if sep < 0:
+                return
+            header = buf[:sep]
+            body = buf[sep + 4 :]
+            hdr_l = header.lower()
+            if b"connection: close" in hdr_l:
+                self._ecp_last_conn_close = True
+            clen = 0
+            for line in header.split(b"\r\n")[1:]:
+                if line.lower().startswith(b"content-length:"):
+                    try:
+                        clen = int(line.split(b":", 1)[1].strip())
+                    except (ValueError, IndexError):
+                        clen = 0
+                    break
+            # Body (usually empty for /keypress/)
+            while clen > 0 and len(body) < clen and len(body) < 2048:
+                try:
+                    chunk = sock.recv(256)
+                except OSError:
+                    break
+                if not chunk:
+                    self._ecp_sock_close()
+                    return
+                body += chunk
+            if self._ecp_last_conn_close:
+                self._ecp_sock_close()
+        finally:
+            try:
+                if getattr(self, "_ecp_sock", None) is not None:
+                    sock.settimeout(0.25)
+            except OSError:
+                pass
+
+    def _ecp_sock_ensure(self, timeout):
+        host = (self.host or "").strip()
+        if not host:
+            raise OSError("no host")
+        sock = getattr(self, "_ecp_sock", None)
+        if sock is not None and self._ecp_sock_host == host:
+            self._ecp_last_reuse = True
+            return sock
+        self._ecp_last_reuse = False
+        self._ecp_sock_close()
+        addr = _sockaddr(host, int(self.port), socket.SOCK_STREAM)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            sock.settimeout(timeout)
+        except OSError:
+            pass
+        sock.connect(addr)
+        self._ecp_sock = sock
+        self._ecp_sock_host = host
+        return sock
+
+    def _press_keepalive(self, key, timeout):
+        """POST ``/keypress/`` on a reused TCP socket (MCU tap hot path)."""
+        path = "/keypress/" + key
+        host = (self.host or "").strip()
+        host_hdr = host if int(self.port) == 80 else "%s:%d" % (host, int(self.port))
+        payload = (
+            "POST %s HTTP/1.1\r\nHost: %s\r\nContent-Length: 0\r\n"
+            "Connection: keep-alive\r\n\r\n" % (path, host_hdr)
+        ).encode()
+
+        def _send(sock):
+            view = memoryview(payload)
+            sent = 0
+            while sent < len(payload):
+                n = sock.send(view[sent:])
+                if n is None or n <= 0:
+                    raise OSError("short send")
+                sent += n
+            self._ecp_sock_drain(sock)
+
+        try:
+            _send(self._ecp_sock_ensure(timeout))
+        except Exception:
+            self._ecp_sock_close()
+            try:
+                _send(self._ecp_sock_ensure(timeout))
+            except Exception as e:
+                self._ecp_sock_close()
+                self.last_error = str(e)
+                return False
+        self.connected = True
+        self.last_error = ""
+        return True
 
     def set_host(self, host, port=None):
         self.host = (host or "").strip()
@@ -2016,6 +2222,7 @@ class RokuEngine:
             self.port = int(port)
         self.connected = False
         self.last_error = ""
+        self._ecp_sock_close()
         # Host-specific caches must not survive a TV switch.
         self.apps = []
         self.active_app = {}
@@ -2334,16 +2541,17 @@ class RokuEngine:
             return "offline " + self.host
         return self.playback_status()
 
-    def _request(self, method, path, data=b""):
+    def _request(self, method, path, data=b"", timeout=None):
         if not self.host:
             self.last_error = "no host"
             return 0, b""
         url = self.base_url + path
+        t = self.timeout if timeout is None else float(timeout)
         try:
             if self._http is not None:
-                status, body = self._http(method, url, self.timeout, data)
+                status, body = self._http(method, url, t, data)
             else:
-                status, body = http_request(method, url, timeout=self.timeout, data=data)
+                status, body = http_request(method, url, timeout=t, data=data)
         except Exception as e:
             self.last_error = str(e)
             # Do not clear ``connected`` on transient socket errors — a single
@@ -2584,12 +2792,44 @@ class RokuEngine:
                 pass
         return self.connected
 
-    def press(self, key):
+    def press(self, key, timeout=None, wait=True):
+        """ECP ``/keypress/``. Optional ``timeout`` caps socket wait (MCU taps).
+
+        Uses the socket HTTP client directly so urequests/urlopen cannot ignore
+        short timeouts (ESP32 taps were stalling 3–7s despite timeout=1.5).
+
+        ``wait=False``: fire-and-forget send (MCU remote taps). Roku applies the
+        key on request; skipping the full response keeps the LVGL pump alive.
+        """
         if key not in ECP_KEY_SET and not str(key).startswith("Lit_"):
             self.last_error = "unknown key: " + str(key)
             return False
-        status, _ = self._request("POST", "/keypress/" + key, b"")
-        return 200 <= status < 300 or status == 200
+        if not self.host:
+            self.last_error = "no host"
+            return False
+        t = self.timeout if timeout is None else float(timeout)
+        if t <= 0:
+            t = 1.0
+        url = self.base_url + "/keypress/" + key
+        try:
+            if self._http is not None:
+                status, _ = self._http("POST", url, t, b"")
+            elif not wait:
+                return self._press_keepalive(key, t)
+            else:
+                status, _ = _http_request_socket(
+                    "POST", url, timeout=t, data=b"", read_response=True
+                )
+        except Exception as e:
+            self.last_error = str(e)
+            return False
+        if status and 200 <= status < 400:
+            self.connected = True
+            self.last_error = ""
+            return True
+        if status:
+            self.last_error = "HTTP %d /keypress/%s" % (status, key)
+        return False
 
     def keydown(self, key):
         if key not in ECP_KEY_SET and not str(key).startswith("Lit_"):

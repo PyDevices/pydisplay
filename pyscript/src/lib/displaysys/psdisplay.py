@@ -266,8 +266,6 @@ class PSDevices:
 
 class PSDisplay(DisplayDriver):
     needs_refresh = True
-    # rotation setter → init() resizes canvas/offscreen buffer to logical WxH.
-    supports_hw_rotation = True
 
     """
     A class to emulate a display on PyScript.
