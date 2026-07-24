@@ -267,8 +267,6 @@ class JNDevices:
 
 class JNDisplay(DisplayDriver):
     needs_refresh = True
-    # rotation setter → init() recreates the PIL buffer at logical WxH.
-    supports_hw_rotation = True
 
     """
     A class to emulate a display on Jupyter Notebook.

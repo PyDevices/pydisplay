@@ -29,24 +29,6 @@ Connect LVGL's display flush callback to copy LVGL's draw buffer through `displa
 
 With [`display_driver`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/display_driver.py), LVGL input is wired automatically: each indev `read_cb` polls the runtime's host device via virtual touch/encoder/keypad devices. **Do not call `runtime.poll()` in your LVGL main loop** — `lv.task_handler()` (driven by `display_driver.event_loop` + multimer) already drains input. Calling both competes for the same event queue and breaks clicks. Window-close (`QUIT`) is handled on the same path inside `HostEventsDevice`.
 
-### Display rotation
-
-Set `display_drv.rotation` to `0`, `90`, `180`, or `270` **before** `import display_driver`.
-
-- **Hardware rotation** (`BusDisplay` MADCTL, SDL/PG): `supports_hw_rotation` is true — LVGL uses the logical size; the driver remaps pixels.
-- **Software rotation** (RGB / `FBDisplay` and other framebuffer scanout): LVGL `display_t.set_rotation` plus per-dirty-tile `draw_sw_rotate` in the flush callback. Touch points are mapped to logical coordinates. Cost scales with dirty area size.
-
-Example (portrait UI on a landscape-native RGB panel):
-
-```python
-from board_config import display_drv, runtime
-
-display_drv.rotation = 90
-import display_driver  # noqa: E402
-```
-
-Or set `PYDISPLAY_LV_ROTATION=90` before launch when using `lv_test_timer` (see below).
-
 ### 4. Run the LVGL timer example
 
 Install examples package, then on device:
@@ -94,12 +76,7 @@ Or set `PYDISPLAY_TIMER_ASYNC=1` on the command line when launching the process.
 
 ## Timer test example
 
-[`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py) is a single smoke test that follows **`runtime.timer_async`** via `runtime.run_forever()` (interactive and kit). Set parent-process env before launch:
-
-| Variable | Effect |
-|----------|--------|
-| `PYDISPLAY_TIMER_ASYNC` | Desktop sync/async timers (`board_config`) |
-| `PYDISPLAY_LV_ROTATION` | Optional `0`/`90`/`180`/`270` applied to `display_drv.rotation` before `display_driver` import |
+[`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py) is a single smoke test that follows **`runtime.timer_async`** via `runtime.run_forever()` (interactive and kit). It does **not** read or write environment variables — set `PYDISPLAY_TIMER_ASYNC` in the parent process / shell if you want a specific desktop mode before `board_config` loads.
 
 The UI shows autodetected **runtime**, **OS**, **display** driver class, **timer** backend, **mode** (`sync`/`async`), and **LVGL** version, plus a seconds counter, spinning arc, and tap button.
 
@@ -109,7 +86,6 @@ The UI shows autodetected **runtime**, **OS**, **display** driver class, **timer
 cd src
 PYDISPLAY_TIMER_ASYNC=0 .venv/bin/python examples/lv_test_timer.py kit
 PYDISPLAY_TIMER_ASYNC=1 .venv/bin/python examples/lv_test_timer.py kit
-PYDISPLAY_LV_ROTATION=90 PYDISPLAY_TIMER_ASYNC=0 .venv/bin/python examples/lv_test_timer.py kit
 ```
 
 Kit mode runs a timed LVGL timer + input check, prints a `KIT_RESULT=` JSON line on stdout, then quits. Prefer [`tools/lv_timer_test_kit.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/lv_timer_test_kit.py) to drive sync/async across desktop runtimes.

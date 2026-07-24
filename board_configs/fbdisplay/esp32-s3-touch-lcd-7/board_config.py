@@ -28,8 +28,6 @@ _LCD_RST = 3
 _TP_INT = 4
 
 i2c = I2C(0, sda=Pin(8), scl=Pin(9), freq=400_000)
-print(f"i2c.scan() = {i2c.scan()}")
-
 iox = CH422G(i2c)
 iox.enable_all_io_output()
 iox.digital_write(_LCD_BL, 1)

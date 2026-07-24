@@ -67,8 +67,6 @@ tft_timings = {
 init_sequence = bytes()
 
 i2c = I2C(0, sda=Pin(8), scl=Pin(18), freq=100000)
-print(f"i2c.scan() = {i2c.scan()}")
-
 # Match board.TFT_IO_EXPANDER: address 0x3f (rev B uses 0x38).
 iox = PCA9554(i2c, address=0x3F)
 # pins.c i2c_init_sequence: config=0x78 (clk/cs/reset/mosi out), polarity=0

@@ -133,11 +133,9 @@ class FBDisplay(DisplayDriver):
             # uint16 buffer without byte cast — last-resort element stores.
             if self._auto_byteswap:
                 color = ((color & 0xFF) << 8) | (color >> 8)
-            # Native FB is always physical scanout (no MADCTL); use _width.
             buf = self._buffer
-            stride = self._width
             for _y in range(y, y + h):
-                begin = _y * stride + x
+                begin = _y * self.width + x
                 end = begin + w
                 for i in range(begin, end):
                     buf[i] = color
@@ -152,8 +150,7 @@ class FBDisplay(DisplayDriver):
         # Full-width: contiguous band assigns. A single ``color_bytes * (w*h)`` for
         # 720x720 is ~1MB and can OOM on CircuitPython; chunked bands stay small
         # while avoiding per-row slice assigns (~60ms/row into DotClockFramebuffer).
-        stride = self._width
-        if x == 0 and w == stride:
+        if x == 0 and w == self.width:
             band_rows = min(h, 48)
             block = color_bytes * (w * band_rows)
             y0 = y
@@ -162,7 +159,7 @@ class FBDisplay(DisplayDriver):
                 rows = band_rows if left >= band_rows else left
                 if rows != band_rows:
                     block = color_bytes * (w * rows)
-                begin = y0 * stride * BPP
+                begin = y0 * self.width * BPP
                 dest[begin : begin + len(block)] = block
                 y0 += rows
                 left -= rows
@@ -170,7 +167,7 @@ class FBDisplay(DisplayDriver):
 
         rowbytes = color_bytes * w
         for _y in range(y, y + h):
-            begin = (_y * stride + x) * BPP
+            begin = (_y * self.width + x) * BPP
             end = begin + w * BPP
             dest[begin:end] = rowbytes
         return (x, y, w, h)
@@ -193,10 +190,7 @@ class FBDisplay(DisplayDriver):
             self.byteswap(buf)
 
         BPP = self.color_depth // 8
-        # Buffer geometry is native panel order; logical .width/.height may swap
-        # when rotation is set for touch/LVGL without MADCTL.
-        stride = self._width
-        if x < 0 or y < 0 or x + w > stride or y + h > self._height:
+        if x < 0 or y < 0 or x + w > self.width or y + h > self.height:
             raise ValueError("The provided x, y, w, h values are out of range")
         if len(buf) != w * h * BPP:
             raise ValueError("The source buffer is not the correct size")
@@ -216,7 +210,7 @@ class FBDisplay(DisplayDriver):
                 for col in range(w):
                     i = (row * w + col) * 2
                     color = src[i] | (src[i + 1] << 8)
-                    self._buffer[(y + row) * stride + x + col] = color
+                    self._buffer[(y + row) * self.width + x + col] = color
             return (x, y, w, h)
 
         # Native FB blit (mipidsi on ESP32-P4): Python memoryview row slices into
@@ -229,15 +223,15 @@ class FBDisplay(DisplayDriver):
         # Contiguous copy for full-width strips (and full frames). Per-row
         # memoryview slice assigns into some native FBs (e.g. mipidsi on
         # ESP32-P4 720x720) are ~28ms/row — a height/10 LVGL partial was ~2s.
-        if x == 0 and w == stride:
-            begin = y * stride * BPP
-            dest[begin : begin + h * stride * BPP] = buf
+        if x == 0 and w == self.width:
+            begin = y * self.width * BPP
+            dest[begin : begin + h * self.width * BPP] = buf
             return (x, y, w, h)
 
         for row in range(h):
             source_begin = row * w * BPP
             source_end = source_begin + w * BPP
-            dest_begin = ((y + row) * stride + x) * BPP
+            dest_begin = ((y + row) * self.width + x) * BPP
             dest_end = dest_begin + w * BPP
             dest[dest_begin:dest_end] = buf[source_begin:source_end]
         return (x, y, w, h)

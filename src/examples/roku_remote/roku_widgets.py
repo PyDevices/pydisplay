@@ -730,12 +730,55 @@ class _RemoteUI:
                 return
             self._press_t0 = _now_ms()
             self._press_dev = d
+            # #region agent log
+            try:
+                import json as _json
+                import socket as _socket
+
+                _rec = {
+                    "sessionId": "4c370d",
+                    "hypothesisId": "H31",
+                    "message": "btn_down",
+                    "data": {
+                        "host": (d or {}).get("host"),
+                        "pos": getattr(_event, "pos", None),
+                    },
+                    "timestamp": int(time.ticks_ms()),
+                }
+                _s = _socket.socket(_socket.AF_INET, _socket.SOCK_DGRAM)
+                _s.sendto((_json.dumps(_rec) + "\n").encode(), ("192.168.1.143", 41234))
+                _s.close()
+            except Exception:
+                pass
+            # #endregion
 
         def _up(_sender, _event, d=dev):
             if self._scan_busy:
                 return
             t0 = self._press_t0
             self._press_t0 = 0
+            # #region agent log
+            try:
+                import json as _json
+                import socket as _socket
+
+                _rec = {
+                    "sessionId": "4c370d",
+                    "hypothesisId": "H31",
+                    "message": "btn_up",
+                    "data": {
+                        "host": (d or {}).get("host"),
+                        "pos": getattr(_event, "pos", None),
+                        "matched": self._press_dev is d,
+                    },
+                    "timestamp": int(time.ticks_ms()),
+                }
+                _s = _socket.socket(_socket.AF_INET, _socket.SOCK_DGRAM)
+                _s.sendto((_json.dumps(_rec) + "\n").encode(), ("192.168.1.143", 41234))
+                _s.close()
+            except Exception:
+                pass
+            # #endregion
             if self._press_dev is not d:
                 return
             dt = _now_ms() - t0
@@ -1421,25 +1464,52 @@ class _RemoteUI:
             self._set_status("no host")
             return
         self._delete_armed = None
+        # Drop a late soft-refresh mailbox so it cannot rebuild Select under us.
+        self._pending_select_list = None
         self.engine.set_host(host)
         self.ip_buf = host
         self.app_offset = 0
         self._set_name(name)
         self._set_state("")
+        self._set_status("")
+        # Drop queued ECP/connect so the pump can finish painting Remote.
+        self._bg_q = []
+        self._playback_busy = False
+        try:
+            # Optimistic — keypress does not need device-info first (LVGL H15).
+            self.engine.connected = True
+        except Exception:
+            pass
+        # #region agent log
+        _t_pick = time.ticks_ms()
+        # #endregion
         self.page = "remote"
         self._build_page()
+        self._paint_now()
+        # #region agent log
+        try:
+            import json as _json
+            import socket as _socket
 
-        def _work():
-            ok = self.engine.connect(discover_if_empty=False)
-            if ok:
-                self._queue_playback_plaque()
-            else:
-                self._queue_status(
-                    self.engine.last_error or "unreachable - Scan or delete"
-                )
-            self._pending_rebuild = True
-
-        self._run_bg(_work)
+            _rec = {
+                "sessionId": "4c370d",
+                "hypothesisId": "H32",
+                "message": "pick_remote_built",
+                "data": {
+                    "host": host,
+                    "ms": int(time.ticks_diff(time.ticks_ms(), _t_pick)),
+                },
+                "timestamp": int(time.ticks_ms()),
+            }
+            _s = _socket.socket(_socket.AF_INET, _socket.SOCK_DGRAM)
+            _s.sendto((_json.dumps(_rec) + "\n").encode(), ("192.168.1.143", 41234))
+            _s.close()
+        except Exception:
+            pass
+        # #endregion
+        # Do NOT connect/query on the soft pump here: that blocked LVGL/widgets
+        # flushes (Remote stayed half-painted, then a multi-second freeze that
+        # felt like dead touch).
 
     def _start_scan(self, full=False):
         if self._scan_busy:

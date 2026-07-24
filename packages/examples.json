@@ -57,6 +57,10 @@
       "github:PyDevices/pydisplay/src/examples/console_simpletest.py"
     ],
     [
+      "dbg_touch_coords_udp.py",
+      "github:PyDevices/pydisplay/src/examples/dbg_touch_coords_udp.py"
+    ],
+    [
       "displaybuf_simpletest.py",
       "github:PyDevices/pydisplay/src/examples/displaybuf_simpletest.py"
     ],
@@ -439,6 +443,18 @@
     [
       "roku_remote/__main__.py",
       "github:PyDevices/pydisplay/src/examples/roku_remote/__main__.py"
+    ],
+    [
+      "roku_remote/dbg_probe_hits.py",
+      "github:PyDevices/pydisplay/src/examples/roku_remote/dbg_probe_hits.py"
+    ],
+    [
+      "roku_remote/dbg_s3_frontend.py",
+      "github:PyDevices/pydisplay/src/examples/roku_remote/dbg_s3_frontend.py"
+    ],
+    [
+      "roku_remote/dbg_s3_repl_paste.py",
+      "github:PyDevices/pydisplay/src/examples/roku_remote/dbg_s3_repl_paste.py"
     ],
     [
       "roku_remote/roku_engine.py",

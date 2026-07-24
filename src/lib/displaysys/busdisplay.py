@@ -75,8 +75,6 @@ _MIRRORED_ROTATION_TABLE = (
 
 
 class BusDisplay(DisplayDriver):
-    supports_hw_rotation = True
-
     """
     Base class for displays connected via a bus.
 

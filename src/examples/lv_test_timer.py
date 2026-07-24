@@ -145,10 +145,13 @@ def _timer_type():
 
 
 def get_platform_info():
+    w = int(getattr(display_drv, "width", 0) or 0)
+    h = int(getattr(display_drv, "height", 0) or 0)
     return {
         "runtime": _runtime_label(),
         "os": sys.platform,
         "display": type(display_drv).__name__,
+        "resolution": f"{w}x{h}",
         "timer": _timer_type(),
         "lvgl": _lvgl_label(),
         "mode": _mode_label(),
@@ -165,7 +168,7 @@ def _add_info_labels(scr, info, y_start=26, line_h=16):
         f"Mode: {info['mode']}",
         f"Runtime: {info['runtime']}",
         f"OS: {info['os']}",
-        f"Display: {info['display']}",
+        f"Display: {info['display']} {info.get('resolution', '?')}",
         f"Timer: {info['timer']}",
         f"LVGL: {info['lvgl']}",
         f"Rotation: {info.get('rotation', 0)}",
@@ -188,7 +191,6 @@ def build_ui():
     # Pause shared LVGL task_handler while constructing widgets (not re-entrant).
     import display_driver
 
-
     inst = display_driver.event_loop.current_instance()
     if inst is not None:
         inst.disable()
@@ -201,24 +203,24 @@ def build_ui():
         title.align(lv.ALIGN.TOP_MID, 0, 8)
         _add_info_labels(scr, info)
 
-        seconds_lbl = lv.label(scr)
-        seconds_lbl.set_text("Seconds: 0")
-        seconds_lbl.align(lv.ALIGN.CENTER, 0, -48)
-
-        arc = lv.arc(scr)
-        arc.set_size(80, 80)
-        arc.align(lv.ALIGN.CENTER, 0, 25)
-        arc.set_bg_angles(0, 360)
-        arc.set_angles(0, 0)
-        arc.remove_style(None, lv.PART.KNOB)
-        arc.remove_flag(lv.obj.FLAG.CLICKABLE)
-
         btn = lv.button(scr)
         btn.set_size(120, 50)
         btn.align(lv.ALIGN.BOTTOM_MID, 0, -30)
         btn_lbl = lv.label(btn)
         btn_lbl.set_text("Tap me (0)")
         btn_lbl.center()
+
+        arc = lv.arc(scr)
+        arc.set_size(80, 80)
+        arc.align_to(btn, lv.ALIGN.OUT_TOP_MID, 0, -8)
+        arc.set_bg_angles(0, 360)
+        arc.set_angles(0, 0)
+        arc.remove_style(None, lv.PART.KNOB)
+        arc.remove_flag(lv.obj.FLAG.CLICKABLE)
+
+        seconds_lbl = lv.label(scr)
+        seconds_lbl.set_text("Seconds: 0")
+        seconds_lbl.align_to(arc, lv.ALIGN.OUT_TOP_MID, 0, -4)
 
         def on_seconds_timer(_t):
             global _seconds
