@@ -40,7 +40,11 @@ class FBDisplay(DisplayDriver):
 
     Attributes:
         color_depth (int): The color depth of the display
+        share_framebuffer (bool): True — GUIs may bind panel FBs via
+            :meth:`framebuffers` for direct paint.
     """
+
+    share_framebuffer = True
 
     def __init__(
         self,
@@ -88,6 +92,40 @@ class FBDisplay(DisplayDriver):
                 self._pixel_bytes = None
 
         super().__init__(quiet=quiet)
+
+    def framebuffers(self):
+        """Panel scanout buffer(s) for direct GUI rendering.
+
+        Returns ``(buf1, buf2_or_None, nbytes, stride_bytes)``.
+        Prefers native dual FBs from ``displayif.DotClockFramebuffer.framebuffers``
+        when present; otherwise a single ``memoryview`` of the raw buffer
+        (e.g. mipidsi).
+        """
+        raw = self._raw_buffer
+        bpp = max(1, int(self.color_depth) // 8)
+        stride = getattr(raw, "row_stride", None)
+        stride = int(self._width) * bpp if stride is None else int(stride)
+
+        fbs = getattr(raw, "framebuffers", None)
+        if callable(fbs):
+            try:
+                fbs = fbs()
+            except Exception:
+                fbs = None
+        if fbs is not None:
+            try:
+                n = len(fbs)
+            except TypeError:
+                n = 0
+            if n >= 2:
+                b0, b1 = fbs[0], fbs[1]
+                return b0, b1, len(memoryview(b0)), stride
+            if n == 1:
+                b0 = fbs[0]
+                return b0, None, len(memoryview(b0)), stride
+
+        mv = memoryview(raw)
+        return mv, None, len(mv), stride
 
     ############### Required API Methods ################
 

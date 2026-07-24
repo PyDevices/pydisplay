@@ -54,20 +54,33 @@ import lib.path  # noqa: F401 — adds lib/, add_ons/, examples/
 from displaysys import env_set
 
 # Local desktop test panel — change these and re-run. Must stay above board_config.
-# Match LilyGO T-HMI (ST7789 I80): 240x320.
+# Match LilyGO T-HMI (ST7789 I80): 240x320. Never apply on MCU boards (panel
+# size comes from that board's board_config).
 _WIDTH = 240
 _HEIGHT = 320
 _SCALE = None  # e.g. 1 or 2; None = board_config default + autoscale
-
-env_set("PYDISPLAY_WIDTH", _WIDTH)
-env_set("PYDISPLAY_HEIGHT", _HEIGHT)
-if _SCALE is not None:
-    env_set("PYDISPLAY_SCALE", _SCALE)
+_MCU_PLATFORMS = (
+    "esp32",
+    "esp8266",
+    "rp2",
+    "samd",
+    "nrf",
+    "mimxrt",
+    "renesas-ra",
+    "stm32",
+    "zephyr",
+)
+if getattr(sys, "platform", "") not in _MCU_PLATFORMS:
+    env_set("PYDISPLAY_WIDTH", _WIDTH)
+    env_set("PYDISPLAY_HEIGHT", _HEIGHT)
+    if _SCALE is not None:
+        env_set("PYDISPLAY_SCALE", _SCALE)
 
 import roku_engine  # noqa: E402
 from roku_engine import (  # noqa: E402
     DEFAULT_FRONTEND,
     get_frontend,
+    start_page_for_engine,
 )
 from roku_sim import make_engine  # noqa: E402
 
@@ -130,12 +143,16 @@ def main():
     roku_engine._LAUNCHER_OWNS_RUN = True
 
     engine = make_engine()
-    start_page = "devices"
-    try:
-        if engine.resume_last_host():
-            start_page = "remote"
-    except Exception:
-        start_page = "devices"
+    # Probe prefs MRU (last_host / last_serial): online → REMOTE, else SELECT.
+    start_page = start_page_for_engine(engine)
+    print(
+        "roku_remote: start_page=%s host=%s err=%s"
+        % (
+            start_page,
+            getattr(engine, "host", "") or "",
+            getattr(engine, "last_error", "") or "",
+        )
+    )
 
     preferred = get_frontend()
     fb_ok = None

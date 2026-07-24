@@ -9,18 +9,6 @@
       "./src/examples/roku_remote/__main__.py"
     ],
     [
-      "roku_remote/dbg_probe_hits.py",
-      "./src/examples/roku_remote/dbg_probe_hits.py"
-    ],
-    [
-      "roku_remote/dbg_s3_frontend.py",
-      "./src/examples/roku_remote/dbg_s3_frontend.py"
-    ],
-    [
-      "roku_remote/dbg_s3_repl_paste.py",
-      "./src/examples/roku_remote/dbg_s3_repl_paste.py"
-    ],
-    [
       "roku_remote/roku_engine.py",
       "./src/examples/roku_remote/roku_engine.py"
     ],

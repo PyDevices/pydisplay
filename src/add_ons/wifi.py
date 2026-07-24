@@ -26,12 +26,16 @@ third-party HTTP client instead.
 DHCP assigns a non-zero address.
 """
 
-from time import sleep_ms
+from time import sleep_ms, ticks_diff, ticks_ms
 
 import network
 
-# ESP32-P4 + external C6 (esp-hosted) DHCP can exceed 5s on first join.
-_retries = 150
+# Wall-clock wait for association + DHCP. ESP-IDF *debug* builds are much
+# slower (verbose logging on the same UART as the REPL); a fixed retry count
+# that assumed ~100ms/iter under-counted when each print blocked on logging.
+_CONNECT_TIMEOUT_MS = 45000
+_POLL_MS = 200
+_PROGRESS_MS = 1000
 
 
 def _valid_ipv4(ip):
@@ -43,9 +47,12 @@ class Radio:
         self._wlan = network.WLAN(network.STA_IF)
 
     def _ipv4(self):
-        if not self._wlan.isconnected():
+        # Prefer ifconfig over isconnected(): ESP-IDF "got ip" is ifconfig;
+        # isconnected() can lag on debug builds.
+        try:
+            ip = self._wlan.ifconfig()[0]
+        except Exception:
             return None
-        ip = self._wlan.ifconfig()[0]
         if not _valid_ipv4(ip):
             return None
         return ip
@@ -56,15 +63,29 @@ class Radio:
             return None
 
         self._wlan.active(True)
-        print("Connecting to:", ssid, end=" ")
+        print("Connecting to:", ssid)
         self._wlan.connect(ssid, password)
-        for _ in range(_retries):
-            print(".", end="")
+        t0 = ticks_ms()
+        last_prog = t0
+        while ticks_diff(ticks_ms(), t0) < _CONNECT_TIMEOUT_MS:
             if self._ipv4() is not None:
-                print("\nConnection established.\nNetwork config:", self._wlan.ifconfig(), "\n")
+                print("Connection established.\nNetwork config:", self._wlan.ifconfig(), "\n")
                 return None
-            sleep_ms(100)
-        print("\nFailed to connect.\n")
+            now = ticks_ms()
+            if ticks_diff(now, last_prog) >= _PROGRESS_MS:
+                # Sparse progress — avoid flooding UART alongside ESP_LOG.
+                st = None
+                try:
+                    st = self._wlan.status()
+                except Exception:
+                    pass
+                print("  waiting %ds (status=%s)" % (ticks_diff(now, t0) // 1000, st))
+                last_prog = now
+            sleep_ms(_POLL_MS)
+        if self._ipv4() is not None:
+            print("Connection established.\nNetwork config:", self._wlan.ifconfig(), "\n")
+            return None
+        print("Failed to connect after %ds.\n" % (_CONNECT_TIMEOUT_MS // 1000))
         return None
 
     @property
@@ -83,10 +104,16 @@ def connect_from_secrets(module="secrets"):
     try:
         s = __import__(module)
     except ImportError:
+        print("wifi: no secrets module")
         return False
     ssid = getattr(s, "WIFI_SSID", None) or getattr(s, "ssid", None)
     password = getattr(s, "WIFI_PASSWORD", None) or getattr(s, "password", None)
+    # Already online (e.g. NVS auto-reconnect) — do not call connect() again.
+    if radio.ipv4_address is not None:
+        print("\nAlready connected.\nNetwork config:", radio._wlan.ifconfig(), "\n")
+        return True
     if not ssid:
+        print("wifi: WIFI_SSID missing — edit /secrets.py")
         return False
     radio.connect(ssid, password or "")
     return radio.ipv4_address is not None

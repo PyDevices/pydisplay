@@ -416,9 +416,23 @@ class DisplayDriver:
 
     Periodic presentation when needed is driven by ``eventsys.Runtime`` (see
     ``needs_refresh``).
+
+    ``share_framebuffer``: when True, a GUI may bind the panel scanout
+    buffer(s) from :meth:`framebuffers` for direct rendering (e.g. LVGL
+    ``DISPLAY_RENDER_MODE.DIRECT``). Default False — desktop/bus drivers keep
+    their own draw buffers.
     """
 
     needs_refresh = False
+    share_framebuffer = False
+
+    def framebuffers(self):
+        """Return panel buffers for direct GUI paint, or ``None``.
+
+        When sharing is supported, returns
+        ``(buf1, buf2_or_None, nbytes, stride_bytes)``.
+        """
+        return None
 
     def __init__(self, *, quiet=False):
         self._quiet = quiet
