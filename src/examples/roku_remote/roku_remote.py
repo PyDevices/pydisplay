@@ -56,8 +56,8 @@ from displaysys import env_set
 # Local desktop test panel — change these and re-run. Must stay above board_config.
 # Match LilyGO T-HMI (ST7789 I80): 240x320. Never apply on MCU boards (panel
 # size comes from that board's board_config).
-_WIDTH = 240
-_HEIGHT = 320
+_WIDTH = None
+_HEIGHT = None
 _SCALE = None  # e.g. 1 or 2; None = board_config default + autoscale
 _MCU_PLATFORMS = (
     "esp32",
