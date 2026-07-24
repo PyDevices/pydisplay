@@ -28,6 +28,15 @@ web/pyscript/wheels
 .cursor/*-migration.md
 .cursor/compare_graphics_py/
 .cursor/hinch_pkg_discovery/
+# Local skill symlinks (often absolute paths outside the repo)
+.cursor/skills/
+
+# mpftp local session state (activity log, rpc.port)
+.mpftp/
+
+# Personal / editor throwaways
+*.code-workspace
+Untitled-*
 
 # Local examples (symlinks to sibling repos — see scripts/personal_examples.py)
 src/examples/spotapi
