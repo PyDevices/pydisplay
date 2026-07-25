@@ -338,8 +338,10 @@ These are the first-wave targets — implement under `board_configs/contract_pro
 6. **Graduate + repo split** — **done.** Trees live in
    [`PyDevices/micropython-hardware`](https://github.com/PyDevices/micropython-hardware);
    ten campaign boards graduated to split layout there. pydisplay no longer
-   ships `board_configs/` or `drivers/`. ← **next:** retrofit remaining
-   boards + optional dotgithub matrix.
+   ships `board_configs/` or `drivers/`. Device matrix:
+   [`dotgithub/device-matrix.md`](../../dotgithub/device-matrix.md) /
+   [Pages](https://pydevices.github.io/.github/). ← **next:** retrofit
+   remaining boards.
 
 ## Repo split (later — locked sequencing)
 
