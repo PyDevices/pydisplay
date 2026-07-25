@@ -54,18 +54,15 @@ def update():
             sys.path.insert(0, entry)
             prepended.append(entry)
 
-    try:
-        import sys as _sys
-
-        _prefer_lib = _sys.implementation.name == "micropython"
-    except AttributeError:
-        _prefer_lib = False
-
+    # Always put local ``lib/`` ahead of site-packages. Appending only (old
+    # CPython path) let an installed ``eventsys`` / ``multimer`` shadow the
+    # tree under ``src/lib`` — e.g. missing FINGER* constants so pygame
+    # multitouch never reached VirtualDevices / LVGL.
     added = []
     for directory in directories:
         entry = resolve_entry(directory)
         if entry is not None and entry not in sys.path:
-            if _prefer_lib and directory == "lib":
+            if directory == "lib":
                 sys.path.insert(0, entry)
             else:
                 sys.path.append(entry)

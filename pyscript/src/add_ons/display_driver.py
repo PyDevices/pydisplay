@@ -351,9 +351,15 @@ class _TouchState:
 
 # CPython: module-level lv.indev_gesture_recognizers_*; MP/CP: indev methods.
 _GESTURE_UPDATE = hasattr(lv, "indev_touch_data_t")
-_MAX_GESTURE_TOUCHES = 10
+# LVGL ``LV_GESTURE_MAX_POINTS`` is 2; finger id is stored as int8_t (-1 = free).
+_MAX_GESTURE_TOUCHES = 2
+# Windows/pygame often flickers or renumbers finger_id mid-pinch. Track by
+# position → stable LVGL slots 0/1, and hold a slot briefly after the OS drops it
+# so LVGL does not cancel ONGOING pinch (requires finger_cnt == 2).
+_GESTURE_STICKY_MS = 250
 _gesture_touches = None
-_gesture_prev_ids = {}  # id(device) -> frozenset of contact ids
+# id(device) -> {slot: (x, y, last_ms)}
+_gesture_slots = {}
 
 
 def _gesture_tick_ms():
@@ -363,13 +369,72 @@ def _gesture_tick_ms():
         return 0
 
 
-def _gesture_point_id(point, index):
-    if len(point) > 2:
-        try:
-            return int(point[2]) & 0xFF
-        except (TypeError, ValueError):
-            pass
-    return int(index) & 0xFF
+def _gesture_dist2(a, b):
+    dx = a[0] - b[0]
+    dy = a[1] - b[1]
+    return dx * dx + dy * dy
+
+
+def _gesture_track_slots(dev_key, points, now):
+    """Map live contacts to stable slots 0..1 by nearest prior position.
+
+    Returns (pressed dict slot→(x,y), released slot list).
+    """
+    live = [(int(pt[0]), int(pt[1])) for pt in points]
+    prev = _gesture_slots.get(dev_key) or {}
+    new_slots = {}
+    assigned_live = set()
+
+    # Match against last-known positions (ignore OS finger_id churn).
+    if live and prev:
+        slot_ids = list(prev.keys())
+        if len(live) == 2 and len(slot_ids) == 2:
+            s0, s1 = slot_ids[0], slot_ids[1]
+            d_same = _gesture_dist2(live[0], prev[s0][:2]) + _gesture_dist2(live[1], prev[s1][:2])
+            d_swap = _gesture_dist2(live[0], prev[s1][:2]) + _gesture_dist2(live[1], prev[s0][:2])
+            if d_same <= d_swap:
+                new_slots[s0] = (live[0][0], live[0][1], now)
+                new_slots[s1] = (live[1][0], live[1][1], now)
+            else:
+                new_slots[s1] = (live[0][0], live[0][1], now)
+                new_slots[s0] = (live[1][0], live[1][1], now)
+            assigned_live = {0, 1}
+        else:
+            pairs = []
+            for li, xy in enumerate(live):
+                for s, (sx, sy, _) in prev.items():
+                    pairs.append((_gesture_dist2(xy, (sx, sy)), li, s))
+            pairs.sort()
+            used_s = set()
+            for _, li, s in pairs:
+                if li in assigned_live or s in used_s:
+                    continue
+                assigned_live.add(li)
+                used_s.add(s)
+                x, y = live[li]
+                new_slots[s] = (x, y, now)
+
+    for li, xy in enumerate(live):
+        if li in assigned_live:
+            continue
+        for s in range(_MAX_GESTURE_TOUCHES):
+            if s not in new_slots:
+                new_slots[s] = (xy[0], xy[1], now)
+                assigned_live.add(li)
+                break
+
+    # Hold dropped contacts briefly so LVGL keeps finger_cnt == 2.
+    for s, (x, y, t) in prev.items():
+        if s in new_slots:
+            continue
+        age = (now - t) & 0xFFFFFFFF
+        if age <= _GESTURE_STICKY_MS and len(new_slots) < _MAX_GESTURE_TOUCHES:
+            new_slots[s] = (x, y, t)
+
+    released = [s for s in prev if s not in new_slots]
+    _gesture_slots[dev_key] = new_slots
+    pressed = {s: (xy[0], xy[1]) for s, xy in new_slots.items()}
+    return pressed, released
 
 
 def _gesture_recognizers_update(indev, touches, touch_cnt):
@@ -388,6 +453,43 @@ def _gesture_recognizers_set_data(indev, data):
         indev.gesture_recognizers_set_data(data)
 
 
+def _configure_gesture_recognizers(indev):
+    """Tune LVGL multitouch recognizers so pinch is not stolen.
+
+    Upstream ``lv_indev_gesture_detect_rotation`` zero-inits its config; with
+    ``rotation_angle_rad_threshold == 0``, any tiny twist becomes RECOGNIZED
+    and ``recognizers_update`` resets the still-ONGOING pinch. Two-finger
+    swipe can steal the same way once the contact center moves
+    ``gesture_min_distance`` pixels.
+    """
+    if not _GESTURE_UPDATE:
+        return
+
+    set_rot = getattr(lv, "indev_set_rotation_rad_threshold", None)
+    if set_rot is not None:
+        set_rot(indev, 3.5)
+    elif hasattr(indev, "set_rotation_rad_threshold"):
+        indev.set_rotation_rad_threshold(3.5)
+
+    set_md = getattr(lv, "indev_set_gesture_min_distance", None)
+    if set_md is not None:
+        set_md(indev, 255)
+    elif hasattr(indev, "set_gesture_min_distance"):
+        indev.set_gesture_min_distance(255)
+
+    # Laptop touchscreens rarely hit the stock 0.75 / 1.5 pinch gates cleanly.
+    set_down = getattr(lv, "indev_set_pinch_down_threshold", None)
+    set_up = getattr(lv, "indev_set_pinch_up_threshold", None)
+    if set_down is not None:
+        set_down(indev, 0.92)
+    elif hasattr(indev, "set_pinch_down_threshold"):
+        indev.set_pinch_down_threshold(0.92)
+    if set_up is not None:
+        set_up(indev, 1.12)
+    elif hasattr(indev, "set_pinch_up_threshold"):
+        indev.set_pinch_up_threshold(1.12)
+
+
 def _gesture_feed(indev, data, device):
     """Feed multipoint contacts into LVGL gesture recognizers when available."""
     global _gesture_touches
@@ -398,26 +500,22 @@ def _gesture_feed(indev, data, device):
     if not points:
         points = ((_TouchState.x, _TouchState.y),) if _TouchState.pressed else ()
 
-    pressed = {}
-    for i, pt in enumerate(points):
-        pressed[_gesture_point_id(pt, i)] = (int(pt[0]), int(pt[1]))
-
     dev_key = id(device)
-    prev = _gesture_prev_ids.get(dev_key, frozenset())
-    released = prev - frozenset(pressed)
+    now = _gesture_tick_ms()
+    pressed, released = _gesture_track_slots(dev_key, points or (), now)
+
     count = len(pressed) + len(released)
     if _gesture_touches is None:
         _gesture_touches = lv.indev_touch_data_t(_MAX_GESTURE_TOUCHES)
 
     if count == 0:
-        _gesture_prev_ids[dev_key] = frozenset()
+        _gesture_slots[dev_key] = {}
         _gesture_recognizers_update(indev, _gesture_touches, 0)
         _gesture_recognizers_set_data(indev, data)
         return
 
     n = count if count <= _MAX_GESTURE_TOUCHES else _MAX_GESTURE_TOUCHES
-
-    ts = _gesture_tick_ms()
+    ts = now
     idx = 0
     for contact_id, (x, y) in pressed.items():
         if idx >= n:
@@ -432,7 +530,6 @@ def _gesture_feed(indev, data, device):
         if idx >= n:
             break
         t = _gesture_touches[idx]
-        # Last known coords are optional; recognizers key on id/state.
         t.point = lv.point_t({"x": 0, "y": 0})
         t.state = lv.INDEV_STATE.RELEASED
         t.id = contact_id
@@ -441,9 +538,7 @@ def _gesture_feed(indev, data, device):
 
     _gesture_recognizers_update(indev, _gesture_touches, idx)
     _gesture_recognizers_set_data(indev, data)
-    # Keep primary click coords; set_data owns pressed/released from contacts.
     data.point = lv.point_t({"x": _TouchState.x, "y": _TouchState.y})
-    _gesture_prev_ids[dev_key] = frozenset(pressed)
 
 
 def _touch_cb(event, indev, data):
@@ -494,6 +589,7 @@ def create_devices(devs, lv_display, virtual_devices=None):
                 event_cb = _touch_cb
                 device.subscribe(event_cb)
                 indev.set_type(lv.INDEV_TYPE.POINTER)
+                _configure_gesture_recognizers(indev)
             elif device.type == eventsys.ENCODER:
                 event_cb = _encoder_cb
                 device.subscribe(event_cb)
