@@ -173,7 +173,7 @@ Shared helper: [`src/lib/boarddev.py`](../src/lib/boarddev.py). Production trees
 ## Follow-ups (out of this plan)
 
 - Fill remaining MicroPython `NotImplementedError` factories (CLUE IMU/humidity/mic, CoreS3/Tab5 codecs/camera, …).
-- Optional MP Feather RP2040 DVI `board_config` when picodvi/displayif path is ready.
+- Optional real MP Feather RP2040 DVI implementation if a low-RAM path becomes viable (stub at `fbdisplay/adafruit_feather_rp2040_dvi_320x240` raises today).
 - Personal backlog: LVGL gesture UX polish (`dotgithub/NOTES.md`).
 
 ## Out of scope (completed-plan boundaries)
