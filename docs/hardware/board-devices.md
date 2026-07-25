@@ -149,12 +149,12 @@ single-file `board_config.py` until retrofitted.
 | In micropython-hardware now | Still to do |
 |-----------------------------|-------------|
 | End-device names `touch` / `encoder`; infra buses | Split layout for non-campaign boards |
-| Campaign boards: `DEVICES` + lazy factories | Mass retrofit of remaining configs |
-| Sequence-preserving `touch_read` | Optional inventory matrix in `.github` |
+| Campaign boards: `DEVICES` + lazy factories | Fill remaining lazy factories |
+| Sequence-preserving `touch_read` | Mass retrofit of remaining configs |
 
-Sibling inventory notes:
-[PyDevices/.github](https://github.com/PyDevices/.github)
-(`board-inventory.md`, `firmware-fixtures.md`, `pydisplay-display-boards.md`).
+Sibling inventory / matrix notes:
+[micropython-hardware/docs](https://github.com/PyDevices/micropython-hardware/tree/main/docs)
+and [device matrix](https://pydevices.github.io/micropython-hardware/).
 
 ## See also
 

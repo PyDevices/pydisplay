@@ -28,7 +28,7 @@ todos:
 
 # Board_config end-device contract
 
-Locked plan for a stable `board_config` end-device surface (CircuitPython-like discovery), proven before production retrofit. Implementation may be picked up later (including via cloud agent). Sibling inventory notes live under `~/gh/pydevices/dotgithub/` (`board-inventory.md`, `firmware-fixtures.md`, `pydisplay-display-boards.md`).
+Locked plan for a stable `board_config` end-device surface (CircuitPython-like discovery), proven before production retrofit. Implementation may be picked up later (including via cloud agent). Sibling inventory notes live under `~/gh/pydevices/micropython-hardware/docs/` (`board-inventory.md`, `firmware-fixtures.md`, `pydisplay-display-boards.md`).
 
 ## Decisions (from discussion)
 
@@ -323,7 +323,7 @@ These are the first-wave targets — implement under `board_configs/contract_pro
 ## Documentation deliverables
 
 1. **Normative:** `docs/hardware/board-devices.md` — role table, `DEVICES`, lazy pattern, bus ownership, duck-types, proof-directory pointer. Update `docs/concepts/runtime.md` and `docs/hardware/board-configs.md` for renames; note production configs are rename-only until proof graduates.
-2. **Inventory:** in sibling `dotgithub/`, device matrix linking fixture # ↔ product ↔ planned `DEVICES` roles; keep display quirks vs Detect fixtures separated (`board-inventory.md`, `firmware-fixtures.md`, `pydisplay-display-boards.md`).
+2. **Inventory:** in sibling `micropython-hardware/docs/`, device matrix linking fixture # ↔ product ↔ planned `DEVICES` roles; keep display quirks vs Detect fixtures separated (`board-inventory.md`, `firmware-fixtures.md`, `pydisplay-display-boards.md`).
 
 ## Implementation phases
 
