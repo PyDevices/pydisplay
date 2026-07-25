@@ -1,6 +1,6 @@
 ---
 name: Board device contract
-overview: Board devices contract complete for MicroPython. Campaign + Planned product boards in micropython-hardware use board_config + board_devices. CircuitPython cp/ twins remain deferred. Further work is factory fill-ins and optional CP parity, not structural contract work.
+overview: Board devices contract complete. MicroPython uses board_config + board_devices. CircuitPython cp/ twins are eager-UI only (display_drv/runtime/touch/keypad/encoder/joystick) — no board_devices; non-UI stays on native board. Further work is MP factory fill-ins.
 status: complete
 todos:
   - id: lvgl-touch-design
@@ -160,10 +160,19 @@ Shared helper: [`src/lib/boarddev.py`](../src/lib/boarddev.py). Production trees
    (no MP config). CircuitPython `cp/` twins deferred. Some lazy factories still
    raise until chip drivers are filled — that is factory work, not contract work.
 
+## CircuitPython policy (locked)
+
+- **No** `board_devices.py` / `DEVICES` / `setup_devices` under `board_configs/cp/`.
+- **No** `from board_config import …` inside CP configs.
+- CP `board_config.py` implements eager UI only: `display_drv`, `runtime`, and
+  inputs that wire into `runtime` (`touch`, `keypad`, `encoder`, `joystick`)
+  with the same contract names as MicroPython.
+- Non-UI peripherals (sensors, SD, WLAN, …) use CircuitPython’s native `board`
+  + libraries — not a pydisplay lazy layer.
+
 ## Follow-ups (out of this plan)
 
-- Fill remaining `NotImplementedError` factories (CLUE IMU/humidity/mic, CoreS3/Tab5 codecs/camera, …).
-- Optional CircuitPython `board_configs/cp/` twin parity.
+- Fill remaining MicroPython `NotImplementedError` factories (CLUE IMU/humidity/mic, CoreS3/Tab5 codecs/camera, …).
 - Optional MP Feather RP2040 DVI `board_config` when picodvi/displayif path is ready.
 - Personal backlog: LVGL gesture UX polish (`dotgithub/NOTES.md`).
 

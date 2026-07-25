@@ -19,6 +19,12 @@ pydisplay works with CircuitPython using Adafruit bus drivers and `framebufferio
 
 CircuitPython configs live under [`board_configs/cp/`](https://github.com/PyDevices/micropython-hardware/tree/main/board_configs/cp) in micropython-hardware. MicroPython configs stay at the top level of `board_configs/` (not under an `mp/` folder).
 
+CP configs do **not** ship `board_devices.py` or lazy `DEVICES` — CircuitPython’s
+native `board` module covers pins/buses. Each CP `board_config.py` provides
+`display_drv`, `runtime`, and eager runtime-wired inputs only (`touch`,
+`keypad`, `encoder`, `joystick` when present), using the same contract names as
+MicroPython.
+
 ## BusDisplay on CircuitPython
 
 SPI and I80 displays use `displaysys.busdisplay.BusDisplay` with Adafruit FourWire / ParallelBus drivers.
