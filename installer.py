@@ -68,25 +68,11 @@ Includes 2 functions that install from different sources:
         - Additional packages:
             - /packages/add_ons.json
             - /packages/examples.json
-            - /packages/spibus.json
-            - /packages/i80bus.json
-        - Board package files for MicroPython boards from the 'board_configs' directory.
-          Note: pointing to a directory implies using a package.json file in that directory.
-            - These install:
-                - a custom board_config.py for the specified board
-                - any required display, touch or encoder drivers
-                - the spibus or i80bus driver if required
-            - Examples:
-                - /board_configs/busdisplay/i80/wt32sc01-plus
-                - /board_configs/busdisplay/spi/t-display-s3-pro
-                - /board_configs/fbdisplay/qualia_tl040hds20
+        - Board configs, hardware drivers, and bus/touch MIP packages live in
+          PyDevices/micropython-hardware (install with full github: URLs via mip,
+          not via this helper's pydisplay-prefixed paths).
         - Can be used to get non-packaged files from the repository, useful for getting:
             - /src/lib/board_config.py - The default board configuration file - for desktop environments.
-            - A board-specific board_config.py without using the package to get the drivers:
-                - /board_configs/busdisplay/i80/wt32sc01-plus/board_config.py
-            - Note: there aren't any package files for individual drivers since they may be
-              retrieved directly, for example:
-                - /drivers/display/gc9a01.py
 - Since micropython-lib packages will never have a '/' in their name and the PyDevices/pydisplay
   repository packages always have a '/', there is a third function that will determine which of the
   2 installers to use.  It is simply called `install`.
@@ -180,13 +166,10 @@ install("/packages/add_ons.json", target="./add_ons")
 
 ## Additional packages:
 install("/packages/examples.json", target="./examples")
-install("/packages/spibus.json")
-install("/packages/i80bus.json")
 
-## Board package files for MicroPython boards from the 'board_configs' directory.  For example:
-install("/board_configs/busdisplay/i80/wt32sc01-plus", target="./")
-install("/board_configs/busdisplay/spi/t-display-s3-pro", tartget="./")
-install("/board_configs/fbdisplay/qualia_tl040hds20", target="./")
+## Hardware (boards / drivers / bus packages) — use mip against micropython-hardware:
+# mip.install("github:PyDevices/micropython-hardware/packages/spibus.json")
+# mip.install("github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/wt32sc01-plus")
 
 ## Non-packaged files from the repository:
 ##### For example, the default board configuration file for desktop environments

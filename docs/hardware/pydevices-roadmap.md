@@ -6,7 +6,7 @@ MicroPython hardware gaps surfaced by pydisplay board configs. See also [display
 
 | Module | Repo target | Unblocks |
 |--------|-------------|----------|
-| `i2cbus` | displayif / pydisplay | **Done in pydisplay** (`drivers/bus/i2cbus.py`) — OLED MP configs |
+| `i2cbus` | displayif / micropython-hardware | **Done** (`drivers/bus/i2cbus.py`) — OLED MP configs |
 | `rgbframebuffer` | displayif | `qualia_tl040hds20`, RGB parallel (RGB666) panels |
 
 ## P1 — LED matrix and fast parallel
@@ -33,11 +33,11 @@ MicroPython hardware gaps surfaced by pydisplay board configs. See also [display
 
 ## pydisplay-side work (no cmod required)
 
-- [x] `i2cbus` for MicroPython OLED (`drivers/bus/i2cbus.py`)
+- [x] `i2cbus` for MicroPython OLED (now `micropython-hardware/drivers/bus/i2cbus.py`)
 - [x] `EPaperDisplay.show()` — displayio push on CP; `bus.send` fallback on MP
 - [x] `board.DISPLAY` adapter (`displaysys.boarddisplay.BoardDisplay`) — optional CP helper; board configs use explicit wiring for teaching
 - [x] `epaperdisplay_chip` + `digitalio` shims for MP e-paper chip drivers
-- [x] MIP package manifests for `tt21100`, `stmpe610`, `keypad_shift`, `i2cbus`, `epaper_chip`, `rgbframebuffer`
+- [x] MIP package manifests for `tt21100`, `stmpe610`, `keypad_shift`, `i2cbus`, `epaper_chip` (in `micropython-hardware/packages/`)
 - [x] E-paper board configs for all vendored chip drivers
 - [x] `EPaperDisplay` packed 2/4bpp buffers and tri-color plane push
 - [x] ST7701 bit-bang init + LilyGO T-RGB `fbdisplay/t-rgb_480` config

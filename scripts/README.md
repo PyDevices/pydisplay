@@ -119,11 +119,16 @@ python scripts/install_sync_framebuf.py --check    # CI freshness (also run via 
 
 `manifestfile.py` is a shared library for the publish scripts (not prefixed).
 
-Manual packages (not generated): `packages/i80bus.json`, `packages/spibus.json`, `packages/i2cbus.json`, `packages/epaper_chip.json`, `packages/pixeldisplay.json`, `packages/epaperdisplay.json`, `packages/displayif.json`, `packages/tt21100.json`, `packages/stmpe610.json`, `packages/keypad_shift.json`.
+Manual packages (not generated) still in this repo: `packages/pixeldisplay.json`,
+`packages/epaperdisplay.json`, `packages/displayif.json`, `packages/mipidsi.json`,
+`packages/picodvi.json`. Bus/touch/chip helper manifests (`spibus`, `i80bus`,
+`i2cbus`, `epaper_chip`, `tt21100`, `stmpe610`, `keypad_shift`) live in sibling
+`micropython-hardware/packages/`.
 
 ### Board configs
 
-Hardware board configs live under `board_configs/` and are edited in place.
+Hardware board configs live in sibling
+[`micropython-hardware`](https://github.com/PyDevices/micropython-hardware).
 CI audits MicroPython / CircuitPython sibling pairs with:
 
 ```bash

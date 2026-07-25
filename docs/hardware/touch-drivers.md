@@ -25,8 +25,8 @@ See any working board config (e.g. `wokwi_ili9341_ft6x36_esp32s3` or
 Board packages include the touch driver when needed. Individual install:
 
 ```python
-mip.install("github:PyDevices/pydisplay/packages/tt21100.json", target="./")
-mip.install("github:PyDevices/pydisplay/packages/stmpe610.json", target="./")
+mip.install("github:PyDevices/micropython-hardware/packages/tt21100.json", target="./")
+mip.install("github:PyDevices/micropython-hardware/packages/stmpe610.json", target="./")
 mip.install("github:PyDevices/micropython-hardware/drivers/touch/ft6x36.py", target="./drivers/touch")
 ```
 

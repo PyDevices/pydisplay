@@ -1,13 +1,14 @@
 # drivers — moved
 
-Hardware drivers live in the sibling repo
+Hardware drivers and their MIP package manifests live in the sibling repo
 **[PyDevices/micropython-hardware](https://github.com/PyDevices/micropython-hardware)**
-(`drivers/`).
+(`drivers/`, `packages/`).
 
 ```text
 ~/gh/pydevices/micropython-hardware/drivers/
+~/gh/pydevices/micropython-hardware/packages/   # spibus, i80bus, tt21100, …
 ```
 
-MIP package manifests under pydisplay `packages/` (e.g. `spibus.json`,
-`tt21100.json`) still install from here for convenience; their `urls` point at
-`micropython-hardware`.
+```python
+mip.install("github:PyDevices/micropython-hardware/packages/spibus.json")
+```

@@ -153,18 +153,12 @@ for package_path, deps, extra_files in packages:
 
 # Write the package .json files
 manual_package_stems = {
-    "i80bus",
-    "spibus",
-    "i2cbus",
-    "epaper_chip",
+    # Driver MIP packages live in micropython-hardware/packages/.
     "pixeldisplay",
     "epaperdisplay",
     "displayif",
     "mipidsi",
     "picodvi",
-    "tt21100",
-    "stmpe610",
-    "keypad_shift",
     "micropython-micro-gui",
     "micropython-nano-gui",
     "micropython-touch",

@@ -40,14 +40,16 @@ Manifests live in the [`packages/`](https://github.com/PyDevices/pydisplay/tree/
 | multimer | `packages/multimer.json` |
 | add_ons | `packages/add_ons.json` |
 | examples | `packages/examples.json` |
-| spibus | `packages/spibus.json` |
-| i80bus | `packages/i80bus.json` |
 
 Example:
 
 ```python
 mip.install("github:PyDevices/pydisplay/packages/displaysys.json")
 ```
+
+Bus / touch / chip-helper MIP packages (`spibus`, `i80bus`, `i2cbus`,
+`epaper_chip`, `tt21100`, …) live in
+[`micropython-hardware/packages/`](https://github.com/PyDevices/micropython-hardware/tree/main/packages).
 
 ## Board configs
 
@@ -71,5 +73,5 @@ mip.install("github:PyDevices/micropython-hardware/drivers/display/st7789.py", t
 ## Notes
 
 - Packages use **source** `.py` files (not `.mpy` bytecode).
-- `spibus` and `i80bus` use `@micropython.viper` and are only available via GitHub, not micropython-lib.
+- `spibus` and `i80bus` (in micropython-hardware) use `@micropython.viper` and are only available via GitHub, not micropython-lib.
 - After install, import `path.py` unless everything lives under `lib/` on the path.
