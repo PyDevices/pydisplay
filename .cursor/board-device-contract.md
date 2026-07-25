@@ -1,6 +1,6 @@
 ---
 name: Board device contract
-overview: Board devices contract landed. Campaign boards graduated into PyDevices/micropython-hardware (board_configs + drivers extracted from pydisplay). Remaining work optional dotgithub matrix + retrofit non-campaign boards in micropython-hardware.
+overview: Board devices contract landed. Campaign boards graduated into PyDevices/micropython-hardware. Device matrix (campaign + planned research) lives in micropython-hardware/docs/device-matrix.md. Remaining work — MP-only retrofit of non-campaign boards (CircuitPython cp/ twins deferred).
 status: locked
 todos:
   - id: lvgl-touch-design
@@ -18,11 +18,17 @@ todos:
   - id: proof-directory
     content: "board_configs/contract_proof/<campaign-board>/ — board_config + board_devices using the locked touch duck-type (raw multi-touch where hardware supports it; no per-board multi→single rewrite unless Runtime still requires it centrally)"
     status: completed
-  - id: dotgithub-matrix
-    content: Add/merge dotgithub device matrix linking inventory/fixtures/display-boards to planned DEVICES roles (research table; not wired into production configs yet)
-    status: pending
+  - id: device-matrix
+    content: "Expand micropython-hardware/docs/device-matrix.md — campaign (wired) + planned research rows linking inventory/fixtures to DEVICES roles (not in dotgithub; CP twins deferred)"
+    status: completed
   - id: smoke-proof
     content: "Smoke contract_proof campaign boards on available runtimes; gate production-path retrofit on this proof (unit + on-device confirmed 2026-07-24)"
+    status: completed
+  - id: retrofit-mp
+    content: "Retrofit non-campaign MicroPython board_configs with board_devices/DEVICES per device-matrix Planned rows (skip board_configs/cp/ twins)"
+    status: in_progress
+  - id: retrofit-mp-wave1
+    content: "Wave 1 MP retrofit: FunHouse, PyGamer, MagTag, Clue, PyBadge, PyPortal(+Titano)"
     status: completed
 ---
 
@@ -53,7 +59,7 @@ Locked plan for a stable `board_config` end-device surface (CircuitPython-like d
 - **No temporary aliases:** `touch_drv` → `touch`, `encoder_drv` → `encoder` (breaking; sole-user window).
 - **Init (target):** eager for display/runtime/input wired to runtime; lazy for everything else in `board_devices`.
 - **Touch duck-type (depends on LVGL multi-touch design):** `board_config.touch` is the **driver object** used when wiring `Runtime` (may report multiple points); apps interact via `runtime.touch_dev` / LVGL, not the raw driver. Per-board multi→single collapse (`touch_read_func` / `_touch_read` that only returns `points[0]`) is **not** the long-term contract — adapters belong in `eventsys` / LVGL runtime if single-point is still needed. Personal backlog (not blocking this whole plan): facilitate LVGL gestures (`dotgithub/NOTES.md` under LVGL).
-- **Docs:** normative contract in pydisplay; inventory/device matrix in dotgithub.
+- **Docs:** normative contract in micropython-hardware `docs/board-devices.md` (pydisplay concepts remain on RTD); inventory + device matrix in micropython-hardware `docs/` (not dotgithub).
 - **`usb_device`:** optional lazy role for non-tooling native USB via [`machine.USBDevice`](https://docs.micropython.org/en/latest/library/machine.USBDevice.html); tooling USB / UART bridge out of contract.
 - **Wireless (in contract):** `wlan`, `ble`, `bt` (BT Classic) as optional lazy capability handles — omit when the silicon/board cannot provide that link type. Names chosen to avoid clashing with high-level `wifi` / `bluetooth` modules. Co-processor objects remain **`radio`** (AirLift, C6, …) and may coexist with `wlan`/`ble` when the co-proc is the path that provides them.
 
@@ -304,7 +310,9 @@ Mechanical renames (`touch_drv`→`touch`, buses) and dropping remaining collaps
 
 ## Campaign boards in `contract_proof/` (in scope)
 
-These are the first-wave targets — implement under `board_configs/contract_proof/…`, not by editing production dirs. Full table also lives in dotgithub after merge.
+These are the first-wave targets — implemented under production paths in
+micropython-hardware after proof. Full table (campaign + planned): 
+[`docs/device-matrix.md`](https://github.com/PyDevices/micropython-hardware/blob/main/docs/device-matrix.md).
 
 | Board | Eager (typical) | Lazy candidates |
 |-------|-----------------|-----------------|
@@ -323,7 +331,7 @@ These are the first-wave targets — implement under `board_configs/contract_pro
 ## Documentation deliverables
 
 1. **Normative:** `micropython-hardware/docs/board-devices.md` (Pages) — role table, `DEVICES`, lazy pattern, bus ownership, duck-types. Update `docs/concepts/runtime.md` and board-configs docs for renames.
-2. **Inventory:** in sibling `micropython-hardware/docs/`, device matrix linking fixture # ↔ product ↔ planned `DEVICES` roles; keep display quirks vs Detect fixtures separated (`board-inventory.md`, `firmware-fixtures.md`, `pydisplay-display-boards.md`).
+2. **Inventory / matrix:** in `micropython-hardware/docs/` — `device-matrix.md` (campaign wired + planned research), plus `board-inventory.md`, `firmware-fixtures.md`, `pydisplay-display-boards.md`. Not under `dotgithub/`.
 
 ## Implementation phases
 
@@ -338,10 +346,11 @@ These are the first-wave targets — implement under `board_configs/contract_pro
 6. **Graduate + repo split** — **done.** Trees live in
    [`PyDevices/micropython-hardware`](https://github.com/PyDevices/micropython-hardware);
    ten campaign boards graduated to split layout there. pydisplay no longer
-   ships `board_configs/` or `drivers/`. Device matrix:
-   [`micropython-hardware/device-matrix.md`](https://github.com/PyDevices/micropython-hardware/blob/main/device-matrix.md)
-   / [Pages](https://pydevices.github.io/micropython-hardware/). ← **next:**
-   retrofit remaining boards.
+   ships `board_configs/` or `drivers/`.
+7. **Device matrix (research)** — **done.** Campaign + Planned tables in
+   [`docs/device-matrix.md`](https://github.com/PyDevices/micropython-hardware/blob/main/docs/device-matrix.md)
+   ([Pages](https://pydevices.github.io/micropython-hardware/device-matrix.html)).
+   ← **next:** MP-only retrofit of Planned rows (`board_configs/cp/` deferred).
 
 ## Repo split (later — locked sequencing)
 
