@@ -1,3 +1,0 @@
-[submodule "drivers/encoder/micropython-rotary"]
-	path = drivers/encoder/micropython-rotary
-	url = https://github.com/miketeachman/micropython-rotary
