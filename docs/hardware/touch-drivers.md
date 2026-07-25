@@ -2,7 +2,7 @@
 
 Touch controller helpers for `board_config.py`.
 
-Source: [`drivers/touch/`](https://github.com/PyDevices/pydisplay/tree/main/drivers/touch)
+Source: [`drivers/touch/`](https://github.com/PyDevices/micropython-hardware/tree/main/drivers/touch)
 
 ## board_config.py contract
 

@@ -19,7 +19,7 @@ for _pkg in ("displaysys", "eventsys", "graphics", "multimer"):
 # mip.install("github:PyDevices/pydisplay/packages/add_ons.json", target="./add_ons")
 # mip.install("github:PyDevices/pydisplay/packages/examples.json", target="./examples")
 mip.install(
-    "github:PyDevices/pydisplay/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3",
+    "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3",
     target=".",
 )  # last — root board_config.py
 mip.install(

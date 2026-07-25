@@ -5,7 +5,7 @@ Install source `.py` files directly from the pydisplay GitHub repository using M
 ## Core install (recommended)
 
 Install the four core libraries (and `path.py` from the displaysys package).
-Board-specific `board_config.py` comes from a [`board_configs/`](https://github.com/PyDevices/pydisplay/tree/main/board_configs) package, not from displaysys:
+Board-specific `board_config.py` comes from a [`board_configs/`](https://github.com/PyDevices/micropython-hardware/tree/main/board_configs) package, not from displaysys:
 
 ```python
 import mip

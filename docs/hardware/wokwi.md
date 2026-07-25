@@ -20,7 +20,7 @@ Technical reference for the in-repo Wokwi project. For setup steps, see **[Wokwi
 
 ### Pin wiring
 
-Matches [`wokwi_ili9341_ft6x36_esp32s3/board_config.py`](https://github.com/PyDevices/pydisplay/blob/main/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/board_config.py):
+Matches [`wokwi_ili9341_ft6x36_esp32s3/board_config.py`](https://github.com/PyDevices/micropython-hardware/blob/main/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/board_config.py):
 
 | Signal | GPIO | `diagram.json` part / pin |
 |--------|------|---------------------------|

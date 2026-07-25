@@ -25,12 +25,12 @@ The [installer.py](installer.md) script combines GitHub and micropython-lib inst
 
 - `add_ons` — optional extensions (framebuf shim, console, displaybuf, tft_config, …); [`palettes`](guis/palettes.md) and [`pdwidgets`](guis/pywidgets.md) are separate packages
 - `examples` — demo scripts
-- `spibus` / `i80bus` — MicroPython bus drivers (viper; GitHub only)
+- Bus/touch helpers — see [micropython-hardware packages](https://github.com/PyDevices/micropython-hardware/tree/main/packages)
 
-**Board support:**
+**Board support** ([micropython-hardware](https://github.com/PyDevices/micropython-hardware)):
 
 - `board_config.py` per hardware — see [board configs](../hardware/board-configs.md)
-- Display and touch drivers from `drivers/`
+- Display and touch drivers under that repo’s `drivers/`
 
 ## PyPI / pip (TestPyPI)
 

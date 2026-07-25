@@ -3,11 +3,11 @@
 Normative end-device surface for `board_config` — CircuitPython-like discovery,
 stable role names, and a clear split between eager UI devices and lazy extras.
 
-This is the **target** contract. Production configs under `board_configs/` are
-still catching up (renames and the multi-file split land later). Structural
-proof trees live under `micropython-hardware/board_configs/` (graduated) when present — do not
-add `board_devices.py` / `DEVICES` to production campaign dirs until a proof
-board graduates.
+This is the **target** contract. Board configs and drivers live in
+[`micropython-hardware`](https://github.com/PyDevices/micropython-hardware);
+campaign boards there use the split layout, while many others are still
+single-file. Prefer graduating new split boards in that repo rather than
+adding `board_devices.py` ad hoc.
 
 Planning notes (agent/internal): [`.cursor/board-device-contract.md`](../../.cursor/board-device-contract.md).
 

@@ -337,9 +337,9 @@ These are the first-wave targets — implement under `board_configs/contract_pro
 5. **Gate** — **done (2026-07-24).** On-device smoke confirmed; proof accepted.
 6. **Graduate + repo split** — **done.** Trees live in
    [`PyDevices/micropython-hardware`](https://github.com/PyDevices/micropython-hardware);
-   ten campaign boards graduated to split layout there. pydisplay keeps
-   pointer READMEs under `board_configs/` / `drivers/`. ← **next:** retrofit
-   remaining boards + optional dotgithub matrix.
+   ten campaign boards graduated to split layout there. pydisplay no longer
+   ships `board_configs/` or `drivers/`. ← **next:** retrofit remaining
+   boards + optional dotgithub matrix.
 
 ## Repo split (later — locked sequencing)
 

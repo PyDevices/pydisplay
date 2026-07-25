@@ -2,15 +2,15 @@
 
 MicroPython display controller drivers for use with `displaysys.busdisplay.BusDisplay`.
 
-Source: [`drivers/display/`](https://github.com/PyDevices/pydisplay/tree/main/drivers/display)
+Source: [`drivers/display/`](https://github.com/PyDevices/micropython-hardware/tree/main/drivers/display)
 
 ## Init sequence formats
 
 Three formats are supported:
 
-1. **CircuitPython DisplayIO bytearray** — e.g. [`gc9a01.py`](https://github.com/PyDevices/pydisplay/blob/main/drivers/display/gc9a01.py)
-2. **List of tuples** — e.g. [`st7789.py`](https://github.com/PyDevices/pydisplay/blob/main/drivers/display/st7789.py)
-3. **Manual init sequence** — e.g. [`st7796.py`](https://github.com/PyDevices/pydisplay/blob/main/drivers/display/st7796.py)
+1. **CircuitPython DisplayIO bytearray** — e.g. [`gc9a01.py`](https://github.com/PyDevices/micropython-hardware/blob/main/drivers/display/gc9a01.py)
+2. **List of tuples** — e.g. [`st7789.py`](https://github.com/PyDevices/micropython-hardware/blob/main/drivers/display/st7789.py)
+3. **Manual init sequence** — e.g. [`st7796.py`](https://github.com/PyDevices/micropython-hardware/blob/main/drivers/display/st7796.py)
 
 ## Constructor API
 

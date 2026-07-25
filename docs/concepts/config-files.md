@@ -1,10 +1,10 @@
 # Config files
 
-Templates for GUI libraries and ported examples live in [`src/add_ons/`](https://github.com/PyDevices/pydisplay/tree/main/src/add_ons/). Board-specific setup uses [`board_configs/`](https://github.com/PyDevices/pydisplay/tree/main/board_configs) or `src/lib/board_config.py`.
+Templates for GUI libraries and ported examples live in [`src/add_ons/`](https://github.com/PyDevices/pydisplay/tree/main/src/add_ons/). Board-specific setup uses [`micropython-hardware` `board_configs/`](https://github.com/PyDevices/micropython-hardware/tree/main/board_configs) or `src/lib/board_config.py`.
 
 | File | Location | Required for |
 |------|----------|--------------|
-| `board_config.py` | `board_configs/` or `src/lib/` | **Always** — display, touch, runtime, setup |
+| `board_config.py` | micropython-hardware `board_configs/` or `src/lib/` | **Always** — display, touch, runtime, setup |
 | `path.py` | `src/lib/` | Development layout — adds `lib/`, `add_ons/`, `examples/` to path |
 | `color_setup.py` | `src/add_ons/` | [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui) — fetch + `ssd` |
 | `hardware_setup.py` | `src/add_ons/` | [Micro-GUI](https://github.com/peterhinch/micropython-micro-gui) — fetch + button/encoder `Display` |
