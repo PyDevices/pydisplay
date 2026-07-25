@@ -3,7 +3,7 @@ Combination board configuration for desktop, pyscript and jupyter notebook platf
 If you are running pydisplay on a microcontroller, you will need to get or create a
 board_config.py file that is specific to your hardware from:
 
-https://github.com/PyDevices/pydisplay/tree/main/board_configs
+https://github.com/PyDevices/micropython-hardware/tree/main/board_configs
 
 Desktop size / timer overrides (process env or ``displaysys.env_set`` before import)::
 
@@ -66,7 +66,7 @@ def _warn_embedded_default_board():
             "On a microcontroller, copy a board_config.py for your hardware "
             "into the current working directory (the parent of lib/).\n"
             "Download board configs from:\n"
-            "  https://github.com/PyDevices/pydisplay/tree/main/board_configs"
+            "  https://github.com/PyDevices/micropython-hardware/tree/main/board_configs"
         )
 
 
