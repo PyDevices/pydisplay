@@ -15,7 +15,7 @@ See [Architecture](architecture.md) for how drivers connect to `board_config.py`
 | Jupyter notebook | `JNDisplay` | `board_configs/jndisplay/` |
 | PyScript browser | `PSDisplay` | `board_configs/psdisplay/` |
 
-Install the matching [board config](../hardware/board-configs.md) — it constructs the driver for you.
+Install the matching [board config](https://pydevices.github.io/micropython-hardware/board-configs.html) — it constructs the driver for you.
 
 ## Display classes
 
@@ -182,7 +182,7 @@ Known issues: Unix SDL rotation clears the screen; scrolling while rotated has e
 - [Display backend internals](display-backends.md) — GRAM/present model, 565 API, color conversion per backend
 - [Events](events.md)
 - [Drawing and fonts](drawing-and-fonts.md)
-- [Display drivers (chips)](../hardware/display-drivers.md)
+- [Display drivers (chips)](https://pydevices.github.io/micropython-hardware/display-drivers.html)
 
 ## API reference
 

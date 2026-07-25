@@ -75,7 +75,7 @@ nav:
 - User guide:
   - Try pydisplay:
     - Overview: try/index.md
-    - Wokwi details: hardware/wokwi.md
+    - Wokwi details: https://pydevices.github.io/micropython-hardware/wokwi.html
   - Quick start:
     - Router: getting-started.md
     - ESP32 / MicroPython board: guides/esp32-board.md
@@ -91,13 +91,7 @@ nav:
     - GitHub MIP: installation/mip-github.md
     - micropython-lib MIP: installation/mip-micropython-lib.md
   - Hardware setup:
-    - Board configs: hardware/board-configs.md
-    - Board devices: hardware/board-devices.md
-    - Display interfaces: hardware/display-interfaces.md
-    - Driver inventory: hardware/driver-inventory.md
-    - pydevices roadmap: hardware/pydevices-roadmap.md
-    - Display drivers: hardware/display-drivers.md
-    - Touch drivers: hardware/touch-drivers.md
+    - Overview (micropython-hardware): hardware/index.md
   - Learn:
     - Architecture: concepts/architecture.md
     - Displays: concepts/displays.md

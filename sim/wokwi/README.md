@@ -2,7 +2,7 @@
 
 Browser project for [wokwi.com](https://wokwi.com): core packages + Wokwi board config + [`testris`](../src/examples/testris.py) (a touch + joystick Tetris demo).
 
-**Guide:** [Wokwi simulator](../docs/guides/wokwi.md) · **Hardware:** [Wokwi reference](../docs/hardware/wokwi.md)
+**Guide:** [Wokwi simulator](../docs/guides/wokwi.md) · **Hardware:** [Wokwi reference](https://pydevices.github.io/micropython-hardware/wokwi.html)
 
 Board config: [`wokwi_ili9341_ft6x36_esp32s3`](../board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/)
 

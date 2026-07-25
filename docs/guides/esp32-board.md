@@ -6,13 +6,13 @@
 
 ## 1. Pick a board config
 
-Find your hardware in [board configs](../hardware/board-configs.md). Example for WT32-SC01 Plus:
+Find your hardware in [board configs](https://pydevices.github.io/micropython-hardware/board-configs.html). Example for WT32-SC01 Plus:
 
 ```
 board_configs/busdisplay/i80/wt32sc01-plus
 ```
 
-Don't see your board? Use the closest match or [contribute a config](../hardware/board-configs.md).
+Don't see your board? Use the closest match or [contribute a config](https://pydevices.github.io/micropython-hardware/board-configs.html).
 
 ## 2. Install packages
 

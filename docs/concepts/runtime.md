@@ -42,7 +42,7 @@ runtime = eventsys.Runtime(
 ```
 
 Apps discover touch through `runtime.touch_dev`, not by importing the driver
-from `board_config`. See [Board devices](../hardware/board-devices.md).
+from `board_config`. See [Board devices](https://pydevices.github.io/micropython-hardware/board-devices.html).
 
 ## Quick start — display-only MCU
 
@@ -103,7 +103,7 @@ in the process environment before `board_config` is imported on desktop hosts
 that have `getenv`, or prefer test-kit / matrix `--timer-async` (wrapper
 `env_set`) so Windows PE under WSL works. MCU board configs and PyScript /
 Jupyter use their platform defaults without shell env. See
-[`displaysys.env_bool`](../../src/lib/displaysys/__init__.py) and [Board configs — default](../hardware/board-configs.md#default-config).
+[`displaysys.env_bool`](../../src/lib/displaysys/__init__.py) and [Board configs — default](https://pydevices.github.io/micropython-hardware/board-configs.html#default-config).
 
 On SDL2 / Win32 sync timer hosts (`micropython.exe`, and similar), display
 refresh is **deferred until the first `runtime.poll()`** so importing
@@ -137,7 +137,7 @@ from that method when documenting a new driver (it is ambiguous with “one
 2-tuple point” vs “two ints”). Coordinates are in **panel / pre-rotation**
 pixel space; `TouchDevice` applies `touch_rotation_table=` (4-tuple of rotation
 masks, one per 90° step). See [Events — touch](events.md#built-in-devices) and
-[Board devices — touch duck-type](../hardware/board-devices.md#touch-duck-type).
+[Board devices — touch duck-type](https://pydevices.github.io/micropython-hardware/board-devices.html#touch-duck-type).
 
 Touch drivers live under `drivers/touch/`. OSError from `touch_read` is treated
 as no touch for that poll.
@@ -173,4 +173,4 @@ On `QUIT`, the runtime runs (in order): `before_quit` hook (if set) → `display
 - **eventsys** owns `DEFAULT_REFRESH_MS` and the shared timer; duck-types `display` without importing displaysys.
 - **board_config** is the only place that names both packages together.
 
-See also: [Events](events.md), [Architecture](architecture.md), [Board configs](../hardware/board-configs.md).
+See also: [Events](events.md), [Architecture](architecture.md), [Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html).

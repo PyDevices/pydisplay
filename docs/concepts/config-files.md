@@ -17,7 +17,7 @@ Install add-on templates with [add_ons package](../installation/mip-github.md) o
 
 ## board_config.py
 
-Install per-board packages from [board configs](../hardware/board-configs.md) or copy from the closest match.
+Install per-board packages from [board configs](https://pydevices.github.io/micropython-hardware/board-configs.html) or copy from the closest match.
 
 The default desktop config is `src/lib/board_config.py`.
 

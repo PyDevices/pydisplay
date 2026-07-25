@@ -35,7 +35,7 @@ PYTHONPATH=../board_configs/sdldisplay:lib micropython -i lib/path.py
 >>> import pydisplay_demo
 ```
 
-On MCU, install the matching [board config](../hardware/board-configs.md), copy or symlink it as `board_config.py`, and run the script from `main.py` or the REPL the same way.
+On MCU, install the matching [board config](https://pydevices.github.io/micropython-hardware/board-configs.html), copy or symlink it as `board_config.py`, and run the script from `main.py` or the REPL the same way.
 
 **Interact:** tap or click **Rotate** and **Color** in the top bar. The tips list in the middle scrolls automatically.
 
@@ -247,7 +247,7 @@ desktop, PyScript, and Jupyter (`runtime.timer_async` is handled inside Runtime)
 
 ## Related docs
 
-- [Board configs](../hardware/board-configs.md) — choose and customize `board_config.py`
+- [Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html) — choose and customize `board_config.py`
 - [Events](../concepts/events.md) — `runtime.poll()` and device types
 - [Displays](../concepts/displays.md) — driver overview and rotation notes
 - [Examples catalog](index.md) — full list of scripts

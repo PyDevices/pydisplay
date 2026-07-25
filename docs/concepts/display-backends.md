@@ -6,8 +6,8 @@ and browser simulators, **color conversion** strategies, and why each backend
 chose its implementation pattern.
 
 For a shorter “which driver do I pick?” guide, see [Displays](displays.md). For
-chip wiring and board configs, see [Board configs](../hardware/board-configs.md)
-and [Display interfaces](../hardware/display-interfaces.md).
+chip wiring and board configs, see [Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html)
+and [Display interfaces](https://pydevices.github.io/micropython-hardware/display-interfaces.html).
 
 ## The DisplayDriver API contract
 
@@ -203,7 +203,7 @@ display_drv = PixelDisplay(_pixel_framebuf)
 
 **Use `display_drv` for all app drawing.** `_pixel_framebuf` is prefixed to
 discourage bypassing the DisplayDriver API (see
-[Board configs — Pixel configs](../hardware/board-configs.md#pixel--addressable-led-configs)).
+[Board configs — Pixel configs](https://pydevices.github.io/micropython-hardware/board-configs.html#pixel--addressable-led-configs)).
 
 `PixelDisplay` exposes the usual **565 `DisplayDriver` API** (`color_depth=16`).
 The inner `PixelFramebuffer` stays **RGB888** for the strip; `fill_rect`,
@@ -247,5 +247,5 @@ Internal buffer format may remain 565 (SDL), RGB (JN), RGBA (PS), or RGB888
 - [Displays](displays.md) — pick a driver, input, scroll overview
 - [pydisplay_demo](../examples/pydisplay_demo.md) — scroll bands and redraw rules
 - [Architecture](architecture.md) — how `board_config` wires drivers
-- [Display interfaces](../hardware/display-interfaces.md) — hardware taxonomy
+- [Display interfaces](https://pydevices.github.io/micropython-hardware/display-interfaces.html) — hardware taxonomy
 - `tests/test_color.py` — `color_rgb` / `color565` contract tests

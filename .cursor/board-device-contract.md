@@ -322,13 +322,13 @@ These are the first-wave targets — implement under `board_configs/contract_pro
 
 ## Documentation deliverables
 
-1. **Normative:** `docs/hardware/board-devices.md` — role table, `DEVICES`, lazy pattern, bus ownership, duck-types, proof-directory pointer. Update `docs/concepts/runtime.md` and `docs/hardware/board-configs.md` for renames; note production configs are rename-only until proof graduates.
+1. **Normative:** `micropython-hardware/docs/board-devices.md` (Pages) — role table, `DEVICES`, lazy pattern, bus ownership, duck-types. Update `docs/concepts/runtime.md` and board-configs docs for renames.
 2. **Inventory:** in sibling `micropython-hardware/docs/`, device matrix linking fixture # ↔ product ↔ planned `DEVICES` roles; keep display quirks vs Detect fixtures separated (`board-inventory.md`, `firmware-fixtures.md`, `pydisplay-display-boards.md`).
 
 ## Implementation phases
 
 1. **LVGL touch design (gate)** — **done.** Duck-type + adapter ownership proven (`lv_gestures` pinch on P4 campaign board).
-2. **Contract + helper** — **done.** Normative [`docs/hardware/board-devices.md`](../docs/hardware/board-devices.md); `src/lib/boarddev.py` + unit test.
+2. **Contract + helper** — **done.** Normative [`board-devices.md`](https://pydevices.github.io/micropython-hardware/board-devices.html); `src/lib/boarddev.py` + unit test.
 3. **Mechanical rename sweep** — **done.** `touch` / `encoder` / `display_bus` / `io_expander`; collapses → `_touch_points` / `_map_touch_points` / direct `read_points`.
 4. **Campaign boards in `contract_proof/`** — **done.** Ten boards graduated into
    [`micropython-hardware` board_configs](https://github.com/PyDevices/micropython-hardware/tree/main/board_configs)

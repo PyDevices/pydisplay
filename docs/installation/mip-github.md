@@ -59,7 +59,7 @@ Each board directory includes a `package.json` that installs `board_config.py`, 
 mip.install("github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/wt32sc01-plus")
 ```
 
-See the [board config index](../hardware/board-configs.md) for all paths.
+See the [board config index](https://pydevices.github.io/micropython-hardware/board-configs.html) for all paths.
 
 ## Single files
 

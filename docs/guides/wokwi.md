@@ -51,7 +51,7 @@ The `testris` game appears and responds to the on-screen touch keypad; serial ha
 | `board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3` | FT6X36 (default) |
 | `board_configs/busdisplay/spi/wokwi_ili9341_esp32s3_no_touch` | None — use if touch is not wired |
 
-Hardware details: [Wokwi reference](../hardware/wokwi.md).
+Hardware details: [Wokwi reference](https://pydevices.github.io/micropython-hardware/wokwi.html).
 
 ---
 

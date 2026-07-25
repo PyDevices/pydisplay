@@ -29,7 +29,7 @@ The [installer.py](installer.md) script combines GitHub and micropython-lib inst
 
 **Board support** ([micropython-hardware](https://github.com/PyDevices/micropython-hardware)):
 
-- `board_config.py` per hardware — see [board configs](../hardware/board-configs.md)
+- `board_config.py` per hardware — see [board configs](https://pydevices.github.io/micropython-hardware/board-configs.html)
 - Display and touch drivers under that repo’s `drivers/`
 
 ## PyPI / pip (TestPyPI)

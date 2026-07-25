@@ -39,7 +39,7 @@ flowchart TB
 
 | Piece | Role |
 |-------|------|
-| **`board_config.py`** | Selects display class, wires pins, creates `display_drv` and optional `runtime`. One file per hardware target. End-device roles and lazy extras: [Board devices](../hardware/board-devices.md). |
+| **`board_config.py`** | Selects display class, wires pins, creates `display_drv` and optional `runtime`. One file per hardware target. End-device roles and lazy extras: [Board devices](https://pydevices.github.io/micropython-hardware/board-devices.html). |
 | **`boarddev`** | Shared lazy-bind helper for optional `board_devices` modules (proof / graduated boards). |
 | **`displaysys`** | Display backends (`BusDisplay`, `SDLDisplay`, `PGDisplay`, `PSDisplay`, `JNDisplay`, `FBDisplay`) with a unified drawing API. |
 | **`eventsys`** | `Runtime` pumps input and dispatches PyGame/SDL2-style events to callbacks; prefer `runtime.on(...)` + `runtime.run_forever()`. |
@@ -78,5 +78,5 @@ For a complete minimal app using this pattern (plus scrolling and timers), see [
 - [Displays](displays.md) — pick a display driver class
 - [Runtime](runtime.md) — board_config contract, auto-refresh, quit lifecycle
 - [Events](events.md) — devices, subscribe, `run_forever`
-- [Board configs](../hardware/board-configs.md) — find or add hardware wiring
+- [Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html) — find or add hardware wiring
 - [API reference (core)](../reference/) — method signatures

@@ -126,7 +126,7 @@ mip.install("github:PyDevices/pydisplay/installer.py")
 import installer   # runs the default install
 ```
 
-Then pick a [board config](https://pydisplay.readthedocs.io/en/latest/hardware/board-configs/) for your hardware and follow the [ESP32 board guide](https://pydisplay.readthedocs.io/en/latest/guides/esp32-board/).
+Then pick a [board config](https://pydevices.github.io/micropython-hardware/board-configs.html) for your hardware and follow the [ESP32 board guide](https://pydisplay.readthedocs.io/en/latest/guides/esp32-board/).
 
 ## 4. Installation
 
@@ -193,7 +193,7 @@ Everything lives in one place — the **[documentation site](https://pydisplay.r
 | First steps | [Getting started](https://pydisplay.readthedocs.io/en/latest/getting-started/) |
 | Where it runs | [Portability & platforms](https://pydisplay.readthedocs.io/en/latest/platforms/) |
 | Core concepts | [Architecture](https://pydisplay.readthedocs.io/en/latest/concepts/architecture/), [Displays](https://pydisplay.readthedocs.io/en/latest/concepts/displays/), [Events](https://pydisplay.readthedocs.io/en/latest/concepts/events/), [multimer](https://pydisplay.readthedocs.io/en/latest/concepts/multimer/) |
-| Hardware | [Board configs](https://pydisplay.readthedocs.io/en/latest/hardware/board-configs/) |
+| Hardware | [Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html) |
 | Examples | [Examples catalog](https://pydisplay.readthedocs.io/en/latest/examples/) |
 | GUI libraries | [GUI integration](https://pydisplay.readthedocs.io/en/latest/guis/lvgl/) |
 | API | [API reference](https://pydisplay.readthedocs.io/en/latest/reference/) |

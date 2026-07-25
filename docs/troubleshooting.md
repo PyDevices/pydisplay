@@ -18,7 +18,7 @@ Common problems when installing, importing, or running pydisplay.
 
 **Cause:** No `board_config.py` for your hardware.
 
-**Fix:** Install a [board config package](hardware/board-configs.md) or copy one into `lib/`:
+**Fix:** Install a [board config package](https://pydevices.github.io/micropython-hardware/board-configs.html) or copy one into `lib/`:
 
 ```python
 import mip
@@ -55,8 +55,8 @@ mip.install("github:PyDevices/micropython-hardware/board_configs/sdldisplay")  #
 
 **Fix:**
 
-1. Verify the correct [board config](hardware/board-configs.md) for your wiring.
-2. Check `requires_byteswap` / `BusDisplay.disable_auto_byteswap()` — see [display drivers](hardware/display-drivers.md).
+1. Verify the correct [board config](https://pydevices.github.io/micropython-hardware/board-configs.html) for your wiring.
+2. Check `requires_byteswap` / `BusDisplay.disable_auto_byteswap()` — see [display drivers](https://pydevices.github.io/micropython-hardware/display-drivers.html).
 3. Confirm SPI/I80 pins match your schematic.
 
 ### Touch coordinates wrong or inverted

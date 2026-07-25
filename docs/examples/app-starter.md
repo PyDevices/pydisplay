@@ -9,7 +9,7 @@ Copy one of the scripts below to start your first pydisplay app. Each is a singl
 
 ## Prerequisites
 
-- A working [board config](../hardware/board-configs.md) on your path (from a [full clone](../installation/full-clone.md) or MIP install).
+- A working [board config](https://pydevices.github.io/micropython-hardware/board-configs.html) on your path (from a [full clone](../installation/full-clone.md) or MIP install).
 - In a development clone, use `import lib.path` before importing your script so `lib/` and `examples/` are on `sys.path`.
 
 Save the boilerplate as `main.py` (or any name you prefer) and run it from the REPL or as your device's entry point.
@@ -114,7 +114,7 @@ cd src
 PYTHONPATH=../board_configs/sdldisplay:lib micropython -i lib/path.py
 ```
 
-On MCU, install the matching [board config](../hardware/board-configs.md), copy or symlink it as `board_config.py`, and run `main.py` from flash or the REPL.
+On MCU, install the matching [board config](https://pydevices.github.io/micropython-hardware/board-configs.html), copy or symlink it as `board_config.py`, and run `main.py` from flash or the REPL.
 
 **Interact:** tap or click the centered rectangle — it toggles between red and green.
 
@@ -153,7 +153,7 @@ defaults to sync unless `PYDISPLAY_TIMER_ASYNC=1` is set before `board_config` l
 
 ## Related docs
 
-- [Board configs](../hardware/board-configs.md) — choose and customize `board_config.py`
+- [Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html) — choose and customize `board_config.py`
 - [Architecture](../concepts/architecture.md) — how board_config, displaysys, and eventsys fit together
 - [pydisplay_demo](pydisplay_demo.md) — flagship feature demo (rotation, scroll, buffered text)
 - [Examples catalog](index.md) — full list of scripts
