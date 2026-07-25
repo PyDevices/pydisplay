@@ -17,9 +17,11 @@ Edit the 'directories' tuple to include the directories you want to add to the p
 Only directories that already exist in the current working directory will be added to the path.
 """
 
+__all__ = ["RELPATH", "add", "directories", "update"]
+
 # Edit this list to include the directories you want to add to the path.
 directories = ["lib", "add_ons", "examples"]
-prepend_directories = []
+_prepend_directories = []
 
 # Set to True to use relative paths instead of absolute paths.
 RELPATH = True
@@ -48,7 +50,7 @@ def update():
         cwd += "/"
 
     prepended = []
-    for directory in prepend_directories:
+    for directory in _prepend_directories:
         entry = resolve_entry(directory)
         if entry is not None and entry not in sys.path:
             sys.path.insert(0, entry)
@@ -90,10 +92,26 @@ def add(directory, first=False):
     so game-local modules (e.g. ``board_config.py``) shadow ``lib/`` defaults.
     """
     if first:
-        prepend_directories.append(directory)
+        _prepend_directories.append(directory)
     else:
         directories.append(directory)
     update()
 
 
 update()
+
+if __name__ == "__main__":
+    # Interactive bootstrap (``python -i lib/path.py``): path is already
+    # applied — drop this file's names so they do not pollute the REPL.
+    # Use ``import lib.path`` later if you need ``add`` / ``update``.
+    for _name in (
+        "directories",
+        "_prepend_directories",
+        "RELPATH",
+        "update",
+        "add",
+        "_quiet",
+        "__all__",
+    ):
+        globals().pop(_name, None)
+    del _name
