@@ -1,8 +1,6 @@
 [tool.ruff]
 # Exclude some code from linting and formatting
 exclude = [
-  "drivers/encoder/**",
-  "drivers/io_expander/**",
   "assets/icons/**",
   "src/add_ons/png.py",
   "src/examples/**",

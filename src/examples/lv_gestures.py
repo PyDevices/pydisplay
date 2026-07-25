@@ -10,26 +10,31 @@ LVGL multi-touch gesture smoke example (pinch scale).
 
 Requires LVGL built with ``LV_USE_FLOAT`` + ``LV_USE_GESTURE_RECOGNITION``
 (feature-detected; falls back to a single-touch label if missing).
+
+Interactive (same as ``lv_test_timer``)::
+
+    python -i lib/path.py
+    import lv_gestures
 """
 
 import sys
 
 _file = __file__.replace("\\", "/").split("/")
-if len(_file) >= 2 and _file[-2] == "examples":
+if len(_file) >= 2 and _file[-2] == "examples":  # noqa: SIM108
     _src = "/".join(_file[:-2]) or "."
 else:
     _src = "."
 if _src not in sys.path:
     sys.path.insert(0, _src)
 
-import lib.path  # noqa: F401 — must be first
+from board_config import display_drv, runtime  # noqa: E402
 
-from board_config import display_drv, runtime
+import lib.path  # noqa: E402, F401
 
 if runtime is not None and "display_driver" not in sys.modules:
     runtime.stop_timer()
 
-import lvgl as lv
+import lvgl as lv  # noqa: E402
 
 # Struct present when LV_USE_GESTURE_RECOGNITION is on (all ports).
 _GESTURE_OK = hasattr(lv, "indev_touch_data_t") and hasattr(lv, "INDEV_GESTURE")
@@ -50,9 +55,9 @@ def _event_pinch_scale(e):
 
 
 def build_ui():
-    import display_driver
+    import display_driver as dd
 
-    inst = display_driver.event_loop.current_instance()
+    inst = dd.event_loop.current_instance()
     if inst is not None:
         inst.disable()
     try:
@@ -74,6 +79,14 @@ def build_ui():
         scale_lbl.set_text("scale: 1.00")
         scale_lbl.align(lv.ALIGN.TOP_MID, 0, 48)
 
+        contact_lbl = lv.label(scr)
+        contact_lbl.set_text("contacts: 0  max: 0  dual: 0ms")
+        contact_lbl.align(lv.ALIGN.TOP_MID, 0, 68)
+
+        hint = lv.label(scr)
+        hint.set_text("Need 2 fingers on touchscreen (not OS trackpad pinch)")
+        hint.align(lv.ALIGN.TOP_MID, 0, 88)
+
         box = lv.obj(scr)
         box.set_size(120, 120)
         box.center()
@@ -82,7 +95,71 @@ def build_ui():
 
         base_w = 120
         base_h = 120
-        state = {"scale": 1.0}
+        state = {
+            "scale": 1.0,
+            "max_contacts": 0,
+            "dual_ms": 0,
+            "dual_max_ms": 0,
+            "gestures": 0,
+            "_dual_since": None,
+        }
+
+        def _pointer_dev():
+            import eventsys
+
+            drv = getattr(dd, "_driver_ref", None)
+            if drv is not None:
+                for vd in getattr(drv, "virtual_devices", ()) or ():
+                    for d in getattr(vd, "devices", ()) or ():
+                        if getattr(d, "type", None) == eventsys.POINTER:
+                            return d
+            if runtime is not None and getattr(runtime, "touch_dev", None) is not None:
+                return runtime.touch_dev
+            return None
+
+        def _ease_pinch_thresholds():
+            # Defaults (0.75 / 1.5) need a large motion; ease for laptop touchscreens.
+            drv = getattr(dd, "_driver_ref", None)
+            if drv is None:
+                return
+            for vd in getattr(drv, "virtual_devices", ()) or ():
+                for d in getattr(vd, "devices", ()) or ():
+                    indev = getattr(d, "user_data", None)
+                    if indev is None:
+                        continue
+                    set_down = getattr(lv, "indev_set_pinch_down_threshold", None)
+                    set_up = getattr(lv, "indev_set_pinch_up_threshold", None)
+                    if set_down is not None:
+                        set_down(indev, 0.92)
+                    elif hasattr(indev, "set_pinch_down_threshold"):
+                        indev.set_pinch_down_threshold(0.92)
+                    if set_up is not None:
+                        set_up(indev, 1.12)
+                    elif hasattr(indev, "set_pinch_up_threshold"):
+                        indev.set_pinch_up_threshold(1.12)
+
+        def _on_contact_timer(_t):
+            dev = _pointer_dev()
+            pts = getattr(dev, "points", ()) or ()
+            n = len(pts)
+            state["max_contacts"] = max(state["max_contacts"], n)
+            now = lv.tick_get()
+            if n >= 2:
+                if state["_dual_since"] is None:
+                    state["_dual_since"] = now
+                state["dual_ms"] = (now - state["_dual_since"]) & 0xFFFFFFFF
+                state["dual_max_ms"] = max(state["dual_max_ms"], state["dual_ms"])
+            else:
+                state["_dual_since"] = None
+                state["dual_ms"] = 0
+            contact_lbl.set_text(
+                "contacts: {}  max: {}  dual: {}ms  g: {}".format(
+                    n,
+                    state["max_contacts"],
+                    state["dual_max_ms"],
+                    state["gestures"],
+                )
+            )
 
         def _on_gesture(e):
             if not _GESTURE_OK:
@@ -100,6 +177,7 @@ def build_ui():
             if scale <= 0:
                 return
             state["scale"] = scale
+            state["gestures"] = state["gestures"] + 1
             w = max(40, min(280, int(base_w * scale)))
             h = max(40, min(280, int(base_h * scale)))
             box.set_size(w, h)
@@ -108,6 +186,8 @@ def build_ui():
 
         if _GESTURE_OK:
             scr.add_event_cb(_on_gesture, lv.EVENT.GESTURE, None)
+            _ease_pinch_thresholds()
+        lv.timer_create(_on_contact_timer, 50, None)
 
         btn = lv.button(scr)
         btn.set_size(100, 40)
@@ -129,11 +209,10 @@ def build_ui():
             inst.enable()
 
 
-def main():
-    build_ui()
-    if runtime is not None:
-        runtime.run_forever()
-
-
-if __name__ == "__main__":
-    main()
+# Canonical interactive entry - no app loop here. build_ui imports
+# display_driver (wires LVGL into the shared runtime); run_forever keeps
+# the app alive or returns immediately on an interactive REPL with a
+# self-driving timer.
+build_ui()
+if runtime is not None:
+    runtime.run_forever()

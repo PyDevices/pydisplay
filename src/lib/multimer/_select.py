@@ -56,12 +56,25 @@ if _async_only_runtime():
     Timer = AsyncTimer
 else:
     if sys.platform == "win32":
-        try:
-            from ._backends import win32
+        # CPython 3.14: win32 QueueUserAPC + ctypes trampoline into LVGL/extension
+        # code fatals with ``_PyThreadState_Attach: non-NULL old thread state``
+        # (seen on touch → indev read_cb). Prefer the threading backend, which
+        # only ``schedule()``s from the worker and drains on the main pump.
+        # Keep win32 APC for MicroPython Windows and as CPython fallback.
+        if getattr(sys.implementation, "name", "") == "cpython":
+            try:
+                from ._backends import threading
 
-            _set_backend(win32)
-        except ImportError:
-            pass
+                _set_backend(threading)
+            except ImportError:
+                pass
+        if Timer is None:
+            try:
+                from ._backends import win32
+
+                _set_backend(win32)
+            except ImportError:
+                pass
     elif sys.platform in ("linux", "unix"):
         try:
             from ._backends import librt

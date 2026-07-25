@@ -117,7 +117,8 @@ class TouchDevice(Device):
         if self._mask & REVERSE_Y:
             y = self._data.height - y - 1
         if len(point) > 2:
-            return (x, y, *tuple(point[2:]))
+            # MicroPython: no starred expressions in tuple displays.
+            return (x, y) + tuple(point[2:])  # noqa: RUF005
         return (x, y)
 
     def _emit_primary(self, x, y):

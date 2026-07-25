@@ -117,6 +117,15 @@ class VirtualDevices:
                 self._callback(event, *args)
 
         def add_event(self, event):
+            # Coalesce pointer motion: host_pump + high-rate FINGERMOTION otherwise
+            # fill the fifo faster than LVGL's one-event-per-read drain.
+            if (
+                event.type == events.MOUSEMOTION
+                and self._fifo
+                and self._fifo[-1].type == events.MOUSEMOTION
+            ):
+                self._fifo[-1] = event
+                return
             self._fifo.append(event)
 
         def _set_finger(self, finger_id, xy):

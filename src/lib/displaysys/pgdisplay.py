@@ -102,6 +102,17 @@ def _pg_key_name(key):
         return str(key)
 
 
+_pg_displays = []
+
+
+def _panel_size():
+    """Logical panel size for normalizing pygame finger coords (0..1 → pixels)."""
+    if _pg_displays:
+        d = _pg_displays[0]
+        return int(d.width), int(d.height)
+    return 320, 240
+
+
 def _convert(e):
     """Convert a pygame event to an eventsys namedtuple."""
     t = e.type
@@ -124,6 +135,14 @@ def _convert(e):
             bool(getattr(e, "touch", False)),
             getattr(e, "window", None),
         )
+    if t in (pg.FINGERDOWN, pg.FINGERUP, pg.FINGERMOTION):
+        # Real OS multitouch (touchscreen). Same contract as sdldisplay SDL_FINGER*.
+        # Not mouse-chord inject — trackpad OS-pinch still will not appear here.
+        w, h = _panel_size()
+        fx = float(getattr(e, "x", 0.0))
+        fy = float(getattr(e, "y", 0.0))
+        fid = int(getattr(e, "finger_id", getattr(e, "finger", 0)))
+        return events.Finger(t, (int(fx * w), int(fy * h)), fid, None)
     if t == pg.MOUSEWHEEL:
         return events.Wheel(
             t,
@@ -286,6 +305,8 @@ class PGDisplay(DisplayDriver):
         # DisplayDriver.__init__ used to reset touch_scale to 1.0; keep window scale
         # so HostEventsDevice maps pygame coords into panel space.
         self.touch_scale = self._scale
+        if self not in _pg_displays:
+            _pg_displays.append(self)
 
     ############### Required API Methods ################
 
@@ -541,6 +562,10 @@ class PGDisplay(DisplayDriver):
     def _deinit(self) -> None:
         """Release pygame resources."""
         self.close_frame_recorder()
+        try:
+            _pg_displays.remove(self)
+        except ValueError:
+            pass
         global _joysticks
         try:
             pg.joystick.quit()

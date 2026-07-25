@@ -4,9 +4,12 @@
 """
 Windows kernel32 timer backend (waitable timer + QueueUserAPC).
 
-Timer callbacks are queued to the thread that created the timer (the main
-thread) and run during alertable waits (``SleepEx``). Host display poll or
-asyncio can provide alertable waits.
+Timer firings are queued to the thread that created the timer (the main
+thread) via APC during alertable waits (``SleepEx``). App callbacks are
+*not* run inside the ctypes APC trampoline — they run after ``SleepEx``
+returns to Python. Running LVGL/CPython extension code inside
+``WINFUNCTYPE`` APC handlers fataled on Python 3.14 with
+``_PyThreadState_Attach: non-NULL old thread state``.
 """
 
 import sys
@@ -38,6 +41,8 @@ _active = False
 _registry = {}
 _next_token = 1
 _registry_lock = None
+_pending = []
+_flushing = False
 
 
 def _make_lock():
@@ -50,16 +55,33 @@ def is_active():
     return _active
 
 
+def _flush_pending():
+    """Run timer deliveries queued by APC, outside the ctypes trampoline."""
+    global _flushing
+    if _flushing:
+        return
+    _flushing = True
+    try:
+        while _pending:
+            timer = _pending.pop(0)
+            if timer is not None and timer._running:
+                timer._deliver()
+    finally:
+        _flushing = False
+
+
 def process_apcs():
     """Process pending APCs on the main thread (non-blocking)."""
     if _main_thread_handle:
         kernel32.SleepEx(0, True)
+    _flush_pending()
 
 
 def sleep_ex(ms):
-    """Alertable sleep — timer APCs may run during the wait."""
+    """Alertable sleep — timer APCs may queue during the wait."""
     ms = max(ms, 0)
     kernel32.SleepEx(int(ms), True)
+    _flush_pending()
 
 
 def _backend_drain():
@@ -99,10 +121,13 @@ def _free_token(token):
 
 @_APCPROC
 def _apc_entry(param):
+    # Keep this trampoline minimal: only enqueue. Delivering soft timers here
+    # runs app/LVGL callbacks inside ctypes APC on the main thread and can
+    # fatal CPython 3.14 (non-NULL old thread state).
     timer = _registry.get(int(param))
     if timer is None or not timer._running:
         return
-    timer._deliver()
+    _pending.append(timer)
 
 
 def _spawn(fn):
