@@ -39,7 +39,8 @@ flowchart TB
 
 | Piece | Role |
 |-------|------|
-| **`board_config.py`** | Selects display class, wires pins, creates `display_drv` and optional `runtime`. One file per hardware target. |
+| **`board_config.py`** | Selects display class, wires pins, creates `display_drv` and optional `runtime`. One file per hardware target. End-device roles and lazy extras: [Board devices](../hardware/board-devices.md). |
+| **`boarddev`** | Shared lazy-bind helper for optional `board_devices` modules (proof / graduated boards). |
 | **`displaysys`** | Display backends (`BusDisplay`, `SDLDisplay`, `PGDisplay`, `PSDisplay`, `JNDisplay`, `FBDisplay`) with a unified drawing API. |
 | **`eventsys`** | `Runtime` pumps input and dispatches PyGame/SDL2-style events to callbacks; prefer `runtime.on(...)` + `runtime.run_forever()`. |
 | **`graphics`** | Optional helpers on top of `framebuf` (rounded rects, gradients, `Area` bounding boxes). |

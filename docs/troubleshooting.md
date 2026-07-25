@@ -22,7 +22,7 @@ Common problems when installing, importing, or running pydisplay.
 
 ```python
 import mip
-mip.install("github:PyDevices/pydisplay/board_configs/sdldisplay")  # desktop SDL2
+mip.install("github:PyDevices/micropython-hardware/board_configs/sdldisplay")  # desktop SDL2
 ```
 
 ### `ImportError: multimer is required for auto_refresh`

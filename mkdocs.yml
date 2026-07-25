@@ -92,6 +92,7 @@ nav:
     - micropython-lib MIP: installation/mip-micropython-lib.md
   - Hardware setup:
     - Board configs: hardware/board-configs.md
+    - Board devices: hardware/board-devices.md
     - Display interfaces: hardware/display-interfaces.md
     - Driver inventory: hardware/driver-inventory.md
     - pydevices roadmap: hardware/pydevices-roadmap.md

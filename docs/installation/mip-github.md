@@ -54,7 +54,7 @@ mip.install("github:PyDevices/pydisplay/packages/displaysys.json")
 Each board directory includes a `package.json` that installs `board_config.py`, required drivers, and bus drivers:
 
 ```python
-mip.install("github:PyDevices/pydisplay/board_configs/busdisplay/i80/wt32sc01-plus")
+mip.install("github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/wt32sc01-plus")
 ```
 
 See the [board config index](../hardware/board-configs.md) for all paths.
@@ -65,7 +65,7 @@ See the [board config index](../hardware/board-configs.md) for all paths.
 
 ```python
 mip.install("github:PyDevices/pydisplay/src/lib/path.py", target=".")
-mip.install("github:PyDevices/pydisplay/drivers/display/st7789.py", target="./drivers/display")
+mip.install("github:PyDevices/micropython-hardware/drivers/display/st7789.py", target="./drivers/display")
 ```
 
 ## Notes

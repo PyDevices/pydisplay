@@ -66,7 +66,7 @@ python3 -i path.py
 Or install via MIP on MicroPython Unix:
 
 ```python
-mip.install("github:PyDevices/pydisplay/board_configs/pgdisplay")
+mip.install("github:PyDevices/micropython-hardware/board_configs/pgdisplay")
 ```
 
 | Config path | Display class |
@@ -99,7 +99,7 @@ For embedded Linux **without** X11/Wayland (Pi console, kiosk, headless HDMI), u
 ```bash
 # Install the KMS config (clone or MIP), then run as usual from src/
 cp ../board_configs/sdldisplay/linux_kms/board_config.py lib/board_config.py
-# or: mip.install("github:PyDevices/pydisplay/board_configs/sdldisplay/linux_kms")
+# or: mip.install("github:PyDevices/micropython-hardware/board_configs/sdldisplay/linux_kms")
 cd pydisplay/src
 python3 -i path.py
 ```

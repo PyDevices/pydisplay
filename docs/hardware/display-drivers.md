@@ -21,7 +21,7 @@ Drivers follow CircuitPython DisplayIO conventions, including rotation as `0`, `
 Board config packages install the drivers they need. To install individually:
 
 ```python
-mip.install("github:PyDevices/pydisplay/drivers/display/st7789.py", target="./drivers/display")
+mip.install("github:PyDevices/micropython-hardware/drivers/display/st7789.py", target="./drivers/display")
 ```
 
 Precompiled drivers are also on the [micropython-lib index](../installation/mip-micropython-lib.md) (e.g. `mip.install("st7789", index=...)`).

@@ -6,12 +6,19 @@ Source: [`drivers/touch/`](https://github.com/PyDevices/pydisplay/tree/main/driv
 
 ## board_config.py contract
 
-pydisplay expects the touch section of `board_config.py` to provide:
+Target wiring (see [Board devices — touch duck-type](board-devices.md#touch-duck-type)):
 
-- `touch_read_func` — callable returning touch coordinates
-- `touch_rotation_table` — maps display rotation to touch orientation
+- `touch` — driver object with `read_points()` → `()` when up, else a sequence of
+  `(x, y[, id[, …]])`
+- `runtime = eventsys.Runtime(..., touch_read=touch.read_points, …)`
+- optional `touch_rotation_table` — maps display rotation to touch orientation
 
-See any working board config (e.g. `wokwi_ili9341_ft6x36_esp32s3`) for a complete example.
+Apps use `runtime.touch_dev` (and `.points` for multipoint), not the raw driver.
+Do not collapse multi-touch to `points[0]` in the board file — return the full
+`read_points()` sequence (or a sequence-preserving map).
+
+See any working board config (e.g. `wokwi_ili9341_ft6x36_esp32s3` or
+`fbdisplay/esp32-p4-wifi6-touch-lcd-4b`) for a complete example.
 
 ## Installing drivers
 
@@ -20,7 +27,7 @@ Board packages include the touch driver when needed. Individual install:
 ```python
 mip.install("github:PyDevices/pydisplay/packages/tt21100.json", target="./")
 mip.install("github:PyDevices/pydisplay/packages/stmpe610.json", target="./")
-mip.install("github:PyDevices/pydisplay/drivers/touch/ft6x36.py", target="./drivers/touch")
+mip.install("github:PyDevices/micropython-hardware/drivers/touch/ft6x36.py", target="./drivers/touch")
 ```
 
 Micropython-lib index packages: `ft6x36`, `xpt2046`, `cst226`, `tt21100`, `stmpe610`, etc.

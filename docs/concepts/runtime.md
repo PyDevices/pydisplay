@@ -33,13 +33,16 @@ from machine import I2C, Pin
 from ft6x36 import FT6x36
 from st7796 import ST7796
 
-# ... bus, display_drv, touch_drv setup ...
+# ... bus, display_drv, touch setup ...
 
 runtime = eventsys.Runtime(
     display=display_drv,
-    touch_read=touch_drv.get_positions,
+    touch_read=touch.read_points,
 )
 ```
+
+Apps discover touch through `runtime.touch_dev`, not by importing the driver
+from `board_config`. See [Board devices](../hardware/board-devices.md).
 
 ## Quick start — display-only MCU
 
@@ -118,20 +121,23 @@ Bare `Runtime()` with no arguments is valid for tests and custom wiring via `reg
 
 ## Touch read contract
 
-Pass a callable as `touch_read=` (typically the touch driver's
-`get_positions`). Each poll, the runtime calls it once and maps the result to
-mouse events.
+Pass a callable as `touch_read=` (typically `touch.read_points`). Each poll,
+the runtime calls it once. `TouchDevice` maps the **primary** contact to
+`MOUSE*` events and exposes **all** rotated contacts as `runtime.touch_dev.points`
+(for LVGL gestures and other multipoint consumers).
 
 | Return value | Meaning |
 |---|---|
 | falsy (`None`, `()`, `[]`) | no touch — emits `MOUSEBUTTONUP` if a press was active |
-| `(x, y)` | touch at pixel coordinates |
-| `(x, y, pressed)` | same; extra fields ignored |
-| `[(x, y), …]` | first point used (multi-touch not surfaced yet) |
+| sequence of `(x, y[, id[, …]])` | contacts; empty sequence means up |
+| legacy bare `(x, y[, …])` with int first element | treated as a single point (compat) |
 
-Coordinates are in **display pixel space** before rotation mapping. When the
-default table is wrong for your panel, pass `touch_rotation_table=` — a
-4-tuple of rotation masks (one per 90° step). See [Events — touch](events.md#built-in-devices).
+Prefer the sequence shape from `read_points()` — never return a bare `(x, y)`
+from that method when documenting a new driver (it is ambiguous with “one
+2-tuple point” vs “two ints”). Coordinates are in **panel / pre-rotation**
+pixel space; `TouchDevice` applies `touch_rotation_table=` (4-tuple of rotation
+masks, one per 90° step). See [Events — touch](events.md#built-in-devices) and
+[Board devices — touch duck-type](../hardware/board-devices.md#touch-duck-type).
 
 Touch drivers live under `drivers/touch/`. OSError from `touch_read` is treated
 as no touch for that poll.

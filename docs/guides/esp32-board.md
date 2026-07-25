@@ -23,7 +23,7 @@ Follow [installer.py](../installation/installer.md) on the device or via `mpremo
 **Option B — MIP from your PC:**
 
 ```bash
-mpremote mip install "github:PyDevices/pydisplay/board_configs/busdisplay/i80/wt32sc01-plus"
+mpremote mip install "github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/wt32sc01-plus"
 for pkg in displaysys eventsys graphics multimer; do
   mpremote mip install "github:PyDevices/pydisplay/packages/${pkg}.json"
 done

@@ -39,6 +39,7 @@ toml_exclude = ["examples"]
 # MCU installs get board_config from board_configs/*/package.json instead.
 toml_only_mounts = [
     ("src/lib/board_config.py", "/lib/"),
+    ("src/lib/boarddev.py", "/lib/"),
 ]
 
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}

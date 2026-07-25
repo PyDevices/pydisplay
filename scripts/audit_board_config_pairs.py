@@ -11,7 +11,10 @@ import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-BOARD_ROOT = ROOT / "board_configs"
+# Board configs live in sibling micropython-hardware (fallback: local stub).
+BOARD_ROOT = ROOT.parent / "micropython-hardware" / "board_configs"
+if not BOARD_ROOT.is_dir():
+    BOARD_ROOT = ROOT / "board_configs"
 
 
 def _pairs(root: Path) -> list[tuple[Path, Path]]:
@@ -36,7 +39,7 @@ def _has_runtime(text: str) -> bool:
 
 
 def _touch_kind(text: str) -> str:
-    if "touch_read_func" in text or "touch_read=" in text:
+    if "touch_read=" in text or re.search(r"\btouch\s*=", text):
         return "touch"
     if "add_keypad" in text:
         return "keypad"

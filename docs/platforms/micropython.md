@@ -17,7 +17,7 @@ See [ESP32 board guide](../guides/esp32-board.md) for the full install and hello
 Brief version from the repo `src/` directory:
 
 ```bash
-mpremote mip install "github:PyDevices/pydisplay/board_configs/busdisplay/i80/wt32sc01-plus"
+mpremote mip install "github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/wt32sc01-plus"
 mpremote mount .
 ```
 

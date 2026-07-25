@@ -37,12 +37,13 @@ Touch controllers live in `drivers/touch/`. CircuitPython shims are under `drive
 ```python
 runtime = eventsys.Runtime(
     display=display_drv,
-    touch_read=touch_drv.get_positions,
+    touch_read=touch.read_points,
     touch_rotation_table=touch_rotation_table,  # when default mapping is wrong
 )
 ```
 
-See [Runtime — touch read contract](../concepts/runtime.md#touch-read-contract).
+See [Runtime — touch read contract](../concepts/runtime.md#touch-read-contract) and
+[Board devices](board-devices.md).
 
 ## Vendoring drivers
 

@@ -1,6 +1,6 @@
 {
   "urls": [
-    ["tt21100.py", "github:PyDevices/pydisplay/drivers/touch/tt21100.py"]
+    ["tt21100.py", "github:PyDevices/micropython-hardware/drivers/touch/tt21100.py"]
   ],
   "version": "0.1"
 }

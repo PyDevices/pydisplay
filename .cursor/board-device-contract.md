@@ -1,29 +1,29 @@
 ---
 name: Board device contract
-overview: Define the board_config end-device contract (including touch duck-type aligned with LVGL multi-touch/gestures) and prove the multi-file layout under board_configs/contract_proof/. Mechanical renames can proceed early; structural touch rewiring waits on a short LVGL touch-design prerequisite. Extract board_configs+drivers to a sibling repo only after proof is green — not before or interleaved.
+overview: Board devices contract landed. Campaign boards graduated into PyDevices/micropython-hardware (board_configs + drivers extracted from pydisplay). Remaining work optional dotgithub matrix + retrofit non-campaign boards in micropython-hardware.
 status: locked
 todos:
   - id: lvgl-touch-design
-    content: "Prerequisite (design only): LVGL multi-touch / gestures touch duck-type — what board_config.touch exposes; Runtime vs LVGL consumption; which per-board touch_read wrappers go away (full gesture UX can follow later)"
-    status: pending
+    content: "Prerequisite: LVGL multi-touch / gestures touch duck-type locked + proven (P4 WIFI6-Touch-LCD-4B: lv_gestures pinch via GT911 read_points sequence, no multi→single board wrapper)"
+    status: completed
   - id: contract-doc
     content: Write pydisplay board-devices contract doc (role table, DEVICES, touch duck-type from LVGL design, lazy pattern, bus ownership); update runtime.md / board-configs.md
-    status: pending
+    status: completed
   - id: lazy-helper
     content: Add shared boarddev helper under src/lib; board_devices.setup_devices wraps it (board_config only imports DEVICES + setup_devices)
-    status: pending
+    status: completed
   - id: rename-mechanical
-    content: "Mechanical renames only (no touch API rewiring): touch_drv→touch, encoder_drv→encoder; infra buses (i2c, spi, io_expander, display_bus); keep existing touch_read_func/_touch_read collapse wrappers until LVGL touch design lands"
-    status: pending
+    content: "Mechanical renames: touch_drv→touch, encoder_drv→encoder; infra buses (i2c, spi, io_expander, display_bus); drop obsolete touch_read_func/_touch_read multi→single wrappers (gate cleared)"
+    status: completed
   - id: proof-directory
     content: "board_configs/contract_proof/<campaign-board>/ — board_config + board_devices using the locked touch duck-type (raw multi-touch where hardware supports it; no per-board multi→single rewrite unless Runtime still requires it centrally)"
-    status: pending
+    status: completed
   - id: dotgithub-matrix
     content: Add/merge dotgithub device matrix linking inventory/fixtures/display-boards to planned DEVICES roles (research table; not wired into production configs yet)
     status: pending
   - id: smoke-proof
-    content: Smoke contract_proof campaign boards on available runtimes; gate production-path retrofit on this proof
-    status: pending
+    content: "Smoke contract_proof campaign boards on available runtimes; gate production-path retrofit on this proof (unit + on-device confirmed 2026-07-24)"
+    status: completed
 ---
 
 # Board_config end-device contract
@@ -194,12 +194,12 @@ display_bus = I80Bus(dc=7, cs=6, wr=8, data=[48, 47, 39, 40, 41, 42, 45, 46])
 display_drv = ST7789(display_bus, width=240, height=320, ...)  # as today
 
 # Touch owns this SPI — UI bus lives here (not in board_devices).
-_touch_spi = SPI(1, baudrate=2_000_000, polarity=0, phase=0, sck=Pin(1), mosi=Pin(3), miso=Pin(4))
-touch = Touch(spi=_touch_spi, cs=Pin(2), int_pin=Pin(9))
+touch_spi = SPI(1, baudrate=2_000_000, polarity=0, phase=0, sck=Pin(1), mosi=Pin(3), miso=Pin(4))
+touch = Touch(spi=touch_spi, cs=Pin(2), int_pin=Pin(9))
 touch.calibrate(...)  # same as production
 
 def _touch_read():
-    ...  # holdoff helper as today
+    ...  # holdoff helper; return () or sequence of points
 
 runtime = eventsys.Runtime(
     display=display_drv,
@@ -268,9 +268,9 @@ End-device and infrastructure names only — still no `board_devices` / `DEVICES
 
 ### End devices (names only in this sweep)
 
-- Replace public `touch_drv` with **`touch`**.
-- Replace public `encoder_drv` with **`encoder`**.
-- **Keep** existing `touch_read` / `touch_read_func` / `_touch_read` collapse helpers for now — do **not** delete or redesign them in the mechanical rename pass. Their removal or centralization waits on the LVGL touch duck-type (below).
+- Replace public `touch_drv` with **`touch`**. **Done.**
+- Replace public `encoder_drv` with **`encoder`**. **Done.**
+- Drop multi→single `touch_read_func` collapses; keep only sequence-preserving maps / holdoff. **Done.**
 
 ### Infrastructure (buses, expanders) — name now for later sharing
 
@@ -291,7 +291,7 @@ Do **not** add `board_devices` / `DEVICES` to production config dirs in this pha
 
 ## Prerequisite: LVGL touch / gestures (design before structural touch edits)
 
-**Yes — flesh out the LVGL multi-touch path far enough to lock the `touch` duck-type before rewriting board touch wiring.** Full gesture UX / demos can come later; the design gate is what boards must export and what may be deleted.
+**Done (2026-07-24).** Duck-type locked and proven on Waveshare ESP32-P4-WIFI6-Touch-LCD-4B: `lv_gestures` pinch works with GT911 multipoint → `TouchDevice.points` → `display_driver` gesture feed. On-device fix was syncing `gt911.read_points()` to the sequence contract and removing the board’s `touch_read_func` multi→single collapse.
 
 **Locked duck-type** (implemented in drivers / eventsys / `display_driver`):
 
@@ -300,7 +300,7 @@ Do **not** add `board_devices` / `DEVICES` to production config dirs in this pha
 3. **Wrappers:** delete `n, points = …; return points[0]` board helpers. Keep only thin board-specific maps (e.g. non-square diagonal rescale on S3 4.3″) that transform the **whole sequence**.
 4. **PGDisplay** stays single-touch (mouse). Real SDL multitouch uses `SDL_FINGER*` via usdl2 → `sdldisplay` → `VirtualDevices.points`.
 
-Mechanical renames (`touch_drv`→`touch`, buses) **may run in parallel**; production configs should pass `touch_read=touch.read_points` (or a sequence-preserving map).
+Mechanical renames (`touch_drv`→`touch`, buses) and dropping remaining collapse wrappers may proceed; production configs should pass `touch_read=touch.read_points` (or a sequence-preserving map).
 
 ## Campaign boards in `contract_proof/` (in scope)
 
@@ -327,12 +327,19 @@ These are the first-wave targets — implement under `board_configs/contract_pro
 
 ## Implementation phases
 
-1. **LVGL touch design (gate)** — duck-type + adapter ownership for multi-touch / gestures; enough to know which board wrappers disappear. (Gesture feature completion can lag.)
-2. **Contract + helper** — docs (including locked touch duck-type) + `boarddev` in `src/lib/` (stays in pydisplay).
-3. **Mechanical rename sweep** — `touch` / `encoder` / infra bus names on production tree; **keep** existing touch_read collapse helpers until (1) is applied.
-4. **Campaign boards in `contract_proof/`** — full split + touch wiring per locked duck-type; smoke lazy construct + `runtime.touch_dev` (etc.) present when expected.
-5. **Gate** — proof accepted; drop obsolete per-board multi→single wrappers as part of graduation or a focused follow-up.
-6. **Repo split (after proof, before mass retrofit)** — move `board_configs/` + `drivers/` together to a sibling hardware repo; graduate production configs / remaining boards there. Do **not** extract before or interleaved with phases 1–4. Do **not** wait until all ~146 boards have `board_devices`.
+1. **LVGL touch design (gate)** — **done.** Duck-type + adapter ownership proven (`lv_gestures` pinch on P4 campaign board).
+2. **Contract + helper** — **done.** Normative [`docs/hardware/board-devices.md`](../docs/hardware/board-devices.md); `src/lib/boarddev.py` + unit test.
+3. **Mechanical rename sweep** — **done.** `touch` / `encoder` / `display_bus` / `io_expander`; collapses → `_touch_points` / `_map_touch_points` / direct `read_points`.
+4. **Campaign boards in `contract_proof/`** — **done.** Ten boards graduated into
+   [`micropython-hardware` board_configs](https://github.com/PyDevices/micropython-hardware/tree/main/board_configs)
+   (split `board_config` + `board_devices`); `tests/test_contract_proof.py`
+   resolves the sibling checkout for structural + `boarddev` smoke.
+5. **Gate** — **done (2026-07-24).** On-device smoke confirmed; proof accepted.
+6. **Graduate + repo split** — **done.** Trees live in
+   [`PyDevices/micropython-hardware`](https://github.com/PyDevices/micropython-hardware);
+   ten campaign boards graduated to split layout there. pydisplay keeps
+   pointer READMEs under `board_configs/` / `drivers/`. ← **next:** retrofit
+   remaining boards + optional dotgithub matrix.
 
 ## Repo split (later — locked sequencing)
 

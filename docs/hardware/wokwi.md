@@ -62,7 +62,7 @@ import mip
 for pkg in ("displaysys", "eventsys", "graphics", "multimer"):
     mip.install(f"github:PyDevices/pydisplay/packages/{pkg}.json", target=".")
 mip.install(
-    "github:PyDevices/pydisplay/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3",
+    "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3",
     target=".",
 )  # last — installs root board_config.py
 mip.install(
@@ -80,7 +80,7 @@ import testris
 
 ```python
 mip.install(
-    "github:PyDevices/pydisplay/board_configs/busdisplay/spi/wokwi_ili9341_esp32s3_no_touch"
+    "github:PyDevices/micropython-hardware/board_configs/busdisplay/spi/wokwi_ili9341_esp32s3_no_touch"
 )
 ```
 
