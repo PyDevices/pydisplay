@@ -107,6 +107,9 @@ SDL_MOUSEMOTION = const(0x400)  # Mouse moved
 SDL_MOUSEBUTTONDOWN = const(0x401)  # Mouse button pressed
 SDL_MOUSEBUTTONUP = const(0x402)  # Mouse button released
 SDL_MOUSEWHEEL = const(0x403)  # Mouse wheel motion
+SDL_FINGERDOWN = const(0x700)  # Finger touched
+SDL_FINGERUP = const(0x701)  # Finger lifted
+SDL_FINGERMOTION = const(0x702)  # Finger moved
 SDL_JOYAXISMOTION = const(0x600)  # Joystick axis motion
 SDL_JOYBALLMOTION = const(0x601)  # Joystick trackball motion
 SDL_JOYHATMOTION = const(0x602)  # Joystick hat position change
@@ -339,6 +342,14 @@ def _f32(data, off):
     return struct.unpack_from("<f", data, off)[0]
 
 
+def _i64(data, off):
+    return struct.unpack_from("<q", data, off)[0]
+
+
+def _is_finger_event(event_type):
+    return event_type in (SDL_FINGERDOWN, SDL_FINGERUP, SDL_FINGERMOTION)
+
+
 class _SubView:
     """
     A view into an SDL_Event's 8-byte-aligned union payload.
@@ -355,7 +366,10 @@ class _SubView:
 
     @property
     def windowID(self):
-        return _u32(self._event._data, self._base + 0)
+        data = self._event._data
+        if _is_finger_event(_u32(data, 0)):
+            return _u32(data, self._base + 36)
+        return _u32(data, self._base + 0)
 
     @property
     def which(self):
@@ -364,6 +378,14 @@ class _SubView:
         if _is_joystick_event(event_type):
             return _i32(data, self._base + 0)
         return _u32(data, self._base + 4)
+
+    @property
+    def touchId(self):
+        return _i64(self._event._data, self._base + 0)
+
+    @property
+    def fingerId(self):
+        return _i64(self._event._data, self._base + 8)
 
     @property
     def state(self):
@@ -377,11 +399,29 @@ class _SubView:
 
     @property
     def x(self):
-        return _i32(self._event._data, self._base + 12)
+        data = self._event._data
+        if _is_finger_event(_u32(data, 0)):
+            return _f32(data, self._base + 16)
+        return _i32(data, self._base + 12)
 
     @property
     def y(self):
-        return _i32(self._event._data, self._base + 16)
+        data = self._event._data
+        if _is_finger_event(_u32(data, 0)):
+            return _f32(data, self._base + 20)
+        return _i32(data, self._base + 16)
+
+    @property
+    def dx(self):
+        return _f32(self._event._data, self._base + 24)
+
+    @property
+    def dy(self):
+        return _f32(self._event._data, self._base + 28)
+
+    @property
+    def pressure(self):
+        return _f32(self._event._data, self._base + 32)
 
     @property
     def xrel(self):
@@ -512,6 +552,7 @@ class SDL_Event:
     jball = motion
     jhat = motion
     jbutton = motion
+    tfinger = motion
 
 
 ###############################################################################

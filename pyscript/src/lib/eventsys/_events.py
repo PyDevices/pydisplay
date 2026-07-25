@@ -28,6 +28,10 @@ class events:
     JOYHATMOTION = const(0x602)
     JOYBUTTONDOWN = const(0x603)
     JOYBUTTONUP = const(0x604)
+    # SDL2 touch-finger events (SDL_FINGERDOWN/UP/MOTION).
+    FINGERDOWN = const(0x700)
+    FINGERUP = const(0x701)
+    FINGERMOTION = const(0x702)
     _USER_TYPE_BASE = 0x8000
 
     filter = [
@@ -43,6 +47,9 @@ class events:
         JOYHATMOTION,
         JOYBUTTONDOWN,
         JOYBUTTONUP,
+        FINGERDOWN,
+        FINGERUP,
+        FINGERMOTION,
     ]
 
     Unknown = namedtuple("Unknown", "type")  # noqa: PYI024
@@ -57,6 +64,7 @@ class events:
     JoyButtonDown = namedtuple("JoyButtonDown", "type instance_id button")  # noqa: PYI024
     JoyHatMotion = namedtuple("JoyHatMotion", "type instance_id hat value")  # noqa: PYI024
     JoyBallMotion = namedtuple("JoyBallMotion", "type instance_id ball rel")  # noqa: PYI024
+    Finger = namedtuple("Finger", "type pos finger_id window")  # noqa: PYI024
 
 
 def _normalize_type_items(types):

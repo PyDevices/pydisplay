@@ -21,8 +21,29 @@ REVERSE_X = const(0b010)
 REVERSE_Y = const(0b100)
 
 
+def _normalize_points(sample):
+    """Coerce a ``touch_read`` sample to a tuple of ``(x, y[, ...])`` points.
+
+    Accepted shapes:
+    - ``()`` / ``[]`` / ``None`` / falsy → no contacts
+    - sequence of point tuples → as-is (empty or more)
+    - legacy single ``(x, y, ...)`` where the first element is an int → one point
+    """
+    if not sample:
+        return ()
+    first = sample[0]
+    if isinstance(first, int):
+        return (tuple(sample),)
+    return tuple(tuple(p) for p in sample)
+
+
 class TouchDevice(Device):
-    """Touchscreen mapped to mouse button and motion events."""
+    """Touchscreen mapped to mouse button and motion events.
+
+    ``touch_read`` should return the driver ``read_points()`` shape: a sequence
+    of ``(x, y[, id[, …]])`` (empty when up). Primary contact (index 0) drives
+    MOUSE* events; all rotated contacts are exposed as :attr:`points` for LVGL.
+    """
 
     type = types.POINTER
     responses = (events.MOUSEMOTION, events.MOUSEBUTTONDOWN, events.MOUSEBUTTONUP)
@@ -43,6 +64,8 @@ class TouchDevice(Device):
         # Synthetic samples in *display* coordinates (rotation already applied).
         # Each entry is ``(x, y)`` (finger down) or ``None`` (finger up).
         self._inject_q = []
+        # Last multipoint sample after rotation: tuple of (x, y[, id…]).
+        self.points = ()
 
     @property
     def rotation(self):
@@ -84,60 +107,60 @@ class TouchDevice(Device):
             self._inject_q.append(pt)
         self._inject_q.append(None)
 
-    def _poll(self):
-        if self._inject_q:
-            sample = self._inject_q.pop(0)
-            if sample is not None:
-                x, y = int(sample[0]), int(sample[1])
-                last_pos = self._state
-                self._state = (x, y)
-                if last_pos is not None:
-                    last_x, last_y = last_pos
-                    return events.Motion(
-                        events.MOUSEMOTION,
-                        self._state,
-                        (x - last_x, y - last_y),
-                        (1, 0, 0),
-                        False,
-                        None,
-                    )
-                return events.Button(events.MOUSEBUTTONDOWN, self._state, 1, False, None)
-            if self._state is not None:
-                last_pos = self._state
-                self._state = None
-                return events.Button(events.MOUSEBUTTONUP, last_pos, 1, False, None)
-            return None
+    def _map_point(self, point):
+        x = int(point[0])
+        y = int(point[1])
+        if self._mask & SWAP_XY:
+            x, y = y, x
+        if self._mask & REVERSE_X:
+            x = self._data.width - x - 1
+        if self._mask & REVERSE_Y:
+            y = self._data.height - y - 1
+        if len(point) > 2:
+            return (x, y, *tuple(point[2:]))
+        return (x, y)
 
-        try:
-            touched = self._read()
-        except OSError:
-            return None
-        if touched:
-            (x, y, *_) = touched if isinstance(touched[0], int) else touched[0]
-            if self._mask & SWAP_XY:
-                x, y = y, x
-            if self._mask & REVERSE_X:
-                x = self._data.width - x - 1
-            if self._mask & REVERSE_Y:
-                y = self._data.height - y - 1
-            last_pos = self._state
-            self._state = (x, y)
-            if last_pos is not None:
-                last_x, last_y = last_pos
-                return events.Motion(
-                    events.MOUSEMOTION,
-                    self._state,
-                    (x - last_x, y - last_y),
-                    (1, 0, 0),
-                    False,
-                    None,
-                )
-            return events.Button(events.MOUSEBUTTONDOWN, self._state, 1, False, None)
+    def _emit_primary(self, x, y):
+        last_pos = self._state
+        self._state = (x, y)
+        if last_pos is not None:
+            last_x, last_y = last_pos
+            return events.Motion(
+                events.MOUSEMOTION,
+                self._state,
+                (x - last_x, y - last_y),
+                (1, 0, 0),
+                False,
+                None,
+            )
+        return events.Button(events.MOUSEBUTTONDOWN, self._state, 1, False, None)
+
+    def _emit_up(self):
         if self._state is not None:
             last_pos = self._state
             self._state = None
             return events.Button(events.MOUSEBUTTONUP, last_pos, 1, False, None)
         return None
+
+    def _poll(self):
+        if self._inject_q:
+            sample = self._inject_q.pop(0)
+            if sample is not None:
+                x, y = int(sample[0]), int(sample[1])
+                self.points = ((x, y),)
+                return self._emit_primary(x, y)
+            self.points = ()
+            return self._emit_up()
+
+        try:
+            raw = self._read()
+        except OSError:
+            return None
+        mapped = tuple(self._map_point(p) for p in _normalize_points(raw))
+        self.points = mapped
+        if mapped:
+            return self._emit_primary(int(mapped[0][0]), int(mapped[0][1]))
+        return self._emit_up()
 
 
 register_device_class(types.POINTER, TouchDevice)

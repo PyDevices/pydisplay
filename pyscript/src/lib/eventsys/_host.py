@@ -62,6 +62,7 @@ class HostEventsDevice(Device):
                         events.MOUSEBUTTONUP,
                     ):
                         # Prefer live display.touch_scale (PGDisplay window scale).
+                        # Finger events are already panel-normalized in sdldisplay.
                         scale = getattr(self._data, "touch_scale", None)
                         if scale is None:
                             scale = self.scale
@@ -102,6 +103,9 @@ class VirtualDevices:
             self.user_data = None
             self._fifo = []
             self._callback = None
+            # Multipoint snapshot for LVGL gestures (SDL fingers / etc.).
+            self.points = ()
+            self._fingers = {}  # finger_id -> (x, y)
 
         def subscribe(self, callback):
             self._callback = callback
@@ -115,6 +119,13 @@ class VirtualDevices:
         def add_event(self, event):
             self._fifo.append(event)
 
+        def _set_finger(self, finger_id, xy):
+            if xy is None:
+                self._fingers.pop(finger_id, None)
+            else:
+                self._fingers[finger_id] = xy
+            self.points = tuple((pos[0], pos[1], fid) for fid, pos in self._fingers.items())
+
     def __init__(self, host_device):
         self._host_device = host_device
         self._vd_pointer = self.VirtualDevice(self, types.POINTER)
@@ -124,11 +135,47 @@ class VirtualDevices:
 
     def poll_host_device(self):
         for e in self._host_device.poll():
-            if (
+            if e.type in (events.FINGERDOWN, events.FINGERMOTION):
+                self._vd_pointer._set_finger(e.finger_id, e.pos)
+                # Primary-finger mouse synth for existing POINTER path / clicks.
+                # Prefer the lowest finger id as primary.
+                if self._vd_pointer._fingers:
+                    primary_id = min(self._vd_pointer._fingers)
+                    px, py = self._vd_pointer._fingers[primary_id]
+                    if e.finger_id == primary_id:
+                        if e.type == events.FINGERDOWN:
+                            self._vd_pointer.add_event(
+                                events.Button(events.MOUSEBUTTONDOWN, (px, py), 1, True, e.window)
+                            )
+                        else:
+                            self._vd_pointer.add_event(
+                                events.Motion(
+                                    events.MOUSEMOTION,
+                                    (px, py),
+                                    (0, 0),
+                                    (1, 0, 0),
+                                    True,
+                                    e.window,
+                                )
+                            )
+            elif e.type == events.FINGERUP:
+                was_primary = self._vd_pointer._fingers and e.finger_id == min(
+                    self._vd_pointer._fingers
+                )
+                last = self._vd_pointer._fingers.get(e.finger_id, e.pos)
+                self._vd_pointer._set_finger(e.finger_id, None)
+                if was_primary:
+                    self._vd_pointer.add_event(
+                        events.Button(events.MOUSEBUTTONUP, last, 1, True, e.window)
+                    )
+            elif (
                 e.type == events.MOUSEBUTTONDOWN
                 or e.type == events.MOUSEBUTTONUP
                 or (e.type == events.MOUSEMOTION and e.buttons[0])
             ):
+                # Ignore OS touch→mouse synth when we already track fingers.
+                if getattr(e, "touch", False) and self._vd_pointer._fingers:
+                    continue
                 self._vd_pointer.add_event(e)
             elif e.type == events.MOUSEWHEEL:
                 self._vd_encoder.add_event(e)
