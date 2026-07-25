@@ -18,12 +18,20 @@ if not BOARD_ROOT.is_dir():
 
 
 def _pairs(root: Path) -> list[tuple[Path, Path]]:
+    """MP configs stay under ``board_configs/<bus>/…``; CP siblings live under
+    ``board_configs/cp/<bus>/…/<name>/`` (same relative path, no ``cp_`` prefix).
+    """
     pairs: list[tuple[Path, Path]] = []
+    cp_root = root / "cp"
     for mp_config in sorted(root.rglob("board_config.py")):
         mp_dir = mp_config.parent
-        if mp_dir.name.startswith("cp_"):
+        try:
+            rel = mp_dir.relative_to(root)
+        except ValueError:
             continue
-        cp_dir = mp_dir.parent / f"cp_{mp_dir.name}"
+        if rel.parts and rel.parts[0] == "cp":
+            continue
+        cp_dir = cp_root / rel
         cp_config = cp_dir / "board_config.py"
         if cp_config.is_file():
             pairs.append((mp_config, cp_config))
@@ -124,18 +132,16 @@ def main() -> int:
         help="board_configs subtree to scan (default: busdisplay, epaperdisplay, fbdisplay)",
     )
     args = parser.parse_args()
-    roots = [
-        BOARD_ROOT / name for name in (args.root or ["busdisplay", "epaperdisplay", "fbdisplay"])
-    ]
+    subtrees = args.root or ["busdisplay", "epaperdisplay", "fbdisplay"]
 
     all_issues: list[str] = []
     pair_count = 0
-    for root in roots:
-        if not root.is_dir():
+    for mp_path, cp_path in _pairs(BOARD_ROOT):
+        rel = mp_path.parent.relative_to(BOARD_ROOT)
+        if rel.parts[0] not in subtrees:
             continue
-        for mp_path, cp_path in _pairs(root):
-            pair_count += 1
-            all_issues.extend(audit_pair(mp_path, cp_path))
+        pair_count += 1
+        all_issues.extend(audit_pair(mp_path, cp_path))
 
     if all_issues:
         for issue in all_issues:

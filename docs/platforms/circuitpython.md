@@ -10,14 +10,14 @@ pydisplay works with CircuitPython using Adafruit bus drivers and `framebufferio
 
 | Config | Use case |
 |--------|----------|
-| `board_configs/fbdisplay/cp_usb_video/` | USB Video (webcam-style output) |
-| `board_configs/fbdisplay/cp_qualia_tl040hds20/` | Qualia RGB display |
-| `board_configs/busdisplay/spi/cp_ili9341_eyespi_qtpy_esp32s3/` | EyeSPI ILI9341 on QT Py ESP32-S3 |
-| `board_configs/pixeldisplay/cp_neopixel_8x4/` | NeoPixel 8×4 grid |
-| `board_configs/pixeldisplay/cp_dotstar_12x6/` | DotStar 12×6 grid |
-| `board_configs/epaperdisplay/cp_magtag/` | MagTag E-Ink |
+| `board_configs/cp/fbdisplay/usb_video` | USB Video (webcam-style output) |
+| `board_configs/cp/fbdisplay/qualia_tl040hds20` | Qualia RGB display |
+| `board_configs/cp/busdisplay/spi/ili9341_eyespi_qtpy_esp32s3` | EyeSPI ILI9341 on QT Py ESP32-S3 |
+| `board_configs/cp/pixeldisplay/neopixel_8x4` | NeoPixel 8×4 grid |
+| `board_configs/cp/pixeldisplay/dotstar_12x6` | DotStar 12×6 grid |
+| `board_configs/cp/epaperdisplay/magtag` | MagTag E-Ink |
 
-There is no top-level `board_configs/circuitpython/` directory; per-board configs live alongside MicroPython ones under `board_configs/`.
+CircuitPython configs live under [`board_configs/cp/`](https://github.com/PyDevices/micropython-hardware/tree/main/board_configs/cp) in micropython-hardware. MicroPython configs stay at the top level of `board_configs/` (not under an `mp/` folder).
 
 ## BusDisplay on CircuitPython
 
@@ -108,4 +108,4 @@ CircuitPython `circup` packages are not published yet. Copy files manually from 
 
 ## USB Video note
 
-`board_configs/fbdisplay/cp_usb_video/` lets a board appear as a USB webcam streaming the framebuffer. Works on some hosts (e.g. ChromeOS); Windows may not recognize the device. See `assets/screenshots/circuitpython_usb_video_chromebook.gif` in the repo.
+`board_configs/cp/fbdisplay/usb_video` lets a board appear as a USB webcam streaming the framebuffer. Works on some hosts (e.g. ChromeOS); Windows may not recognize the device. See `assets/screenshots/circuitpython_usb_video_chromebook.gif` in the repo.
