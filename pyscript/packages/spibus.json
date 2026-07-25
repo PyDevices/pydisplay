@@ -1,9 +1,0 @@
-{
-    "urls": [
-        [
-            "spibus.py",
-            "github:PyDevices/micropython-hardware/drivers/bus/spibus.py"
-        ]
-    ],
-    "version": "0.1"
-}
