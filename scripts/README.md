@@ -106,6 +106,9 @@ python scripts/gallery_generator.py --check    # CI freshness
 # After editing src/add_ons/framebuf.py:
 python scripts/install_sync_framebuf.py            # regenerate src/lib/graphics/framebuf.py
 python scripts/install_sync_framebuf.py --check    # CI freshness (also run via tests/test_framebuf_sync.py)
+
+# After public-API changes in displaysys / eventsys / graphics / multimer:
+./scripts/gen_package_pyi.sh                       # regenerate tools/typings/<pkg>/ stubs
 ```
 
 ## By prefix
@@ -113,6 +116,7 @@ python scripts/install_sync_framebuf.py --check    # CI freshness (also run via 
 | Prefix | Scripts | When to run |
 |--------|---------|-------------|
 | `install_` | `install_gen_manifests.py`, `install_refresh_manifests.sh`, `install_sync_framebuf.py` | `src/` tree changes → updates `packages/*.json`, `web/pyscript/micropython.toml`; `src/add_ons/framebuf.py` changes → regenerates gitignored `src/lib/graphics/framebuf.py` |
+| `gen_` | `gen_package_pyi.sh` | Core package API changes → regenerates `tools/typings/{displaysys,eventsys,graphics,multimer}/` |
 | `pyscript_` | `gallery_generator.py` | Gallery cards in `web/pyscript/index.html` |
 | `mkdocs_` | `mkdocs_gen_ref_pages.py`, `mkdocs_gen_notebook_pages.py` | Automatically on `mkdocs build` |
 | `publish_` | `publish_sync_packages.sh`, `publish_release_tag.sh`, `build.py`, `publish_mip_ghpages.sh`, `publish_make_pyproject.py` | Tag push → CI release; or local / manual workflow |

@@ -1,0 +1,3 @@
+from micropython import schedule as schedule
+
+def schedule(cb, arg) -> None: ...

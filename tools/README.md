@@ -120,26 +120,16 @@ Installs `displaysys`, `usdl2`, `graphics-cmod`, and `lvgl-cpython` (no version 
 | [`test_keypad_*_sim.py`](test_keypad_click_sim.py) | Keypad simulation |
 | [`quit_inject.py`](quit_inject.py) | Inject quit into running examples |
 | [`pydisplay_test_mode.py`](pydisplay_test_mode.py) | Test-mode env for examples |
-| [`typings/`](typings/) | MicroPython + LVGL type stubs (see below) |
+| [`typings/`](typings/) | MicroPython stdlib stubs + core package `.pyi` (see below) |
 
 ### IDE typings (`tools/typings/`)
 
-Pylance needs stubs for the installed `lvgl-cpython` binary (`.so` has no Python source).
+`stubPath` for Pylance / pyright ([`.vscode/settings.json`](../.vscode/settings.json), [`pyrightconfig.json`](../pyrightconfig.json)):
 
-| File | Purpose |
-|------|---------|
-| [`.vscode/settings.json`](../.vscode/settings.json) | `python.analysis.stubPath`, `extraPaths`, Pylance |
-| [`pyrightconfig.json`](../pyrightconfig.json) | Shared stub/extraPaths (also read by Pylance) |
-| [`typings/lvgl/__init__.pyi`](typings/lvgl/__init__.pyi) | Symlink → `../lvgl.pyi` (Pylance package layout) |
+| Content | Source |
+|---------|--------|
+| MicroPython stdlib stubs | committed under `tools/typings/` |
+| `displaysys` / `eventsys` / `graphics` / `multimer` | committed package trees; regenerate with [`../scripts/gen_package_pyi.sh`](../scripts/gen_package_pyi.sh) |
+| `lvgl` | **`lvgl-cpython`** installs `lvgl.pyi` next to the extension — not in-tree |
 
-After `pip install` / reinstall of `lvgl-cpython`, refresh the venv symlink:
-
-```bash
-./tools/link_lvgl_stubs.sh
-```
-
-Then **Reload Window** and confirm **Python: Select Interpreter** → `.venv/bin/python`.
-
-Use the **Pylance** language server (`.vscode/settings.json` sets `"python.languageServer": "Pylance"`). Disable or uninstall the **BasedPyright** extension if installed — it conflicts with Pylance. Remove any `"python.languageServer": "None"` from user settings.
-
-**Go to Definition** on `import lvgl` should open `tools/typings/lvgl.pyi`. If not, check **Output → Pylance** for stub-path warnings.
+Confirm **Python: Select Interpreter** → `.venv/bin/python`. Use **Pylance** (disable BasedPyright if it conflicts).

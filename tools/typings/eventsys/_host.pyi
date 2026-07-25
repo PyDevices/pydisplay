@@ -1,0 +1,23 @@
+from ._device import Device as Device, register_device_class as register_device_class, types as types
+from ._events import events as events
+from .keys import Keys as Keys, key_triggers_quit as key_triggers_quit
+from _typeshed import Incomplete
+
+class HostEventsDevice(Device):
+    type: Incomplete
+    responses: Incomplete
+    scale: Incomplete
+    def __init__(self, read=None, data=None, data2=None, *, host_read=None, display=None, event_filter=None) -> None: ...
+
+class VirtualDevices:
+    class VirtualDevice:
+        type: Incomplete
+        user_data: Incomplete
+        points: Incomplete
+        def __init__(self, virtual_devices, device_type) -> None: ...
+        def subscribe(self, callback) -> None: ...
+        def poll(self, *args) -> None: ...
+        def add_event(self, event) -> None: ...
+    devices: Incomplete
+    def __init__(self, host_device) -> None: ...
+    def poll_host_device(self) -> None: ...

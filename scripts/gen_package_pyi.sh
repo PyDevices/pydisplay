@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# Regenerate IDE type stubs for the four core pydisplay packages into tools/typings/.
+#
+# Usage:
+#   ./scripts/gen_package_pyi.sh
+#   ./scripts/gen_package_pyi.sh --help
+#
+# Requires the repo-root .venv (mypy / stubgen). Output is committed under
+# tools/typings/{displaysys,eventsys,graphics,multimer}/ for stubPath.
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+PACKAGES=(displaysys eventsys graphics multimer)
+OUT=tools/typings
+STUBGEN="${ROOT}/.venv/bin/stubgen"
+PYTHON="${ROOT}/.venv/bin/python"
+
+usage() {
+    cat <<'EOF'
+Usage: ./scripts/gen_package_pyi.sh
+
+Regenerate mypy stubgen .pyi trees for displaysys, eventsys, graphics, and
+multimer into tools/typings/ (Pylance / pyright stubPath).
+
+Requires .venv with mypy (stubgen). Drops graphics/framebuf.pyi if produced
+(source is gitignored; public API is graphics.FrameBuffer).
+EOF
+}
+
+case "${1:-}" in
+    --help|-h)
+        usage
+        exit 0
+        ;;
+    "")
+        ;;
+    *)
+        echo "Unknown option: $1" >&2
+        usage >&2
+        exit 1
+        ;;
+esac
+
+if [[ ! -x "$STUBGEN" ]]; then
+    echo "error: missing $STUBGEN — create .venv and pip install mypy" >&2
+    exit 1
+fi
+
+for pkg in "${PACKAGES[@]}"; do
+    rm -rf "${OUT}/${pkg}"
+done
+
+export PYTHONPATH="${ROOT}/src/lib:${ROOT}/src/add_ons${PYTHONPATH:+:$PYTHONPATH}"
+
+echo "Running stubgen → ${OUT}/ …"
+"$STUBGEN" --ignore-errors -o "$OUT" \
+    -p displaysys -p eventsys -p graphics -p multimer
+
+# Gitignored generated module; public FrameBuffer lives in _framebuf_plus.
+rm -f "${OUT}/graphics/framebuf.pyi"
+
+# stubgen misses lazy ``multimer.asyncio`` (``__getattr__``); declare it explicitly.
+MULTIMER_INIT="${OUT}/multimer/__init__.pyi"
+if [[ -f "$MULTIMER_INIT" ]] && ! grep -q '^asyncio:' "$MULTIMER_INIT"; then
+    "$PYTHON" - "$MULTIMER_INIT" <<'PY'
+from pathlib import Path
+import sys
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+needle = "sleep_ms: Incomplete"
+if "asyncio: Incomplete" not in text and needle in text:
+    text = text.replace(needle, "asyncio: Incomplete\n" + needle, 1)
+text = "\n".join(
+    line
+    for line in text.splitlines()
+    if line.strip() not in ("# Names in __all__ with no definition:", "#   asyncio")
+) + ("\n" if text.endswith("\n") else "")
+path.write_text(text, encoding="utf-8")
+PY
+fi
+
+echo
+echo "Updated:"
+for pkg in "${PACKAGES[@]}"; do
+    count="$("$PYTHON" -c "from pathlib import Path; print(sum(1 for _ in Path('${OUT}/${pkg}').rglob('*.pyi')))")"
+    echo "  ${OUT}/${pkg}/ (${count} .pyi)"
+done
