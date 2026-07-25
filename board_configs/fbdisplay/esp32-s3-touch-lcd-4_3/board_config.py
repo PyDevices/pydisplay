@@ -91,11 +91,15 @@ def touch_read_func():
     Plain eventsys SWAP_XY is not enough on a non-square panel — rescale
     after the swap so coords stay in 0..width / 0..height.
     """
-    n, points = touch_drv.read_points()
-    if not n:
-        return None
-    x, y = points[0][0], points[0][1]
-    return y * _W // _H, x * _H // _W
+    points = touch_drv.read_points()
+    if not points:
+        return ()
+    out = []
+    for p in points:
+        x, y = p[0], p[1]
+        mapped = (y * _W // _H, x * _H // _W, *tuple(p[2:]))
+        out.append(mapped)
+    return tuple(out)
 
 
 touch_rotation_table = (0, 0, 0, 0)

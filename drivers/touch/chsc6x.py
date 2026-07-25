@@ -46,6 +46,11 @@ class CHSC6X:
             return results[2], results[4]
         return None
 
+    def read_points(self):
+        """Return contacts as ``((x, y),)`` or ``()`` when up."""
+        point = self.touch_read()
+        return (point,) if point is not None else ()
+
 
 def main():
     print("Started...")

@@ -90,19 +90,12 @@ touch_drv = GT911(
 )
 
 
-def touch_read_func():
-    n, points = touch_drv.read_points()
-    if n:
-        return points[0][0], points[0][1]
-    return None
-
-
 touch_rotation_table = (0, 0, 0, 0)
 
 display_drv = FBDisplay(fb)
 
 runtime = eventsys.Runtime(
     display=display_drv,
-    touch_read=touch_read_func,
+    touch_read=touch_drv.read_points,
     touch_rotation_table=touch_rotation_table,
 )

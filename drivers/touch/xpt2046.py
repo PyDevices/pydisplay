@@ -139,3 +139,8 @@ class Touch(object):
         if not self.cal:
             return 0, 0
         return self._map_raw(xraw, yraw, clip=clip)
+
+    def read_points(self, clip=True):
+        """Return contacts as ``((x, y),)`` or ``()`` when up."""
+        point = self.read_point(clip=clip)
+        return (point,) if point is not None else ()

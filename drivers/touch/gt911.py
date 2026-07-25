@@ -19,9 +19,8 @@ from machine import I2C
 touch = GT911(I2C(1, freq=400_000), reset_pin="P1", irq_pin="P2", touch_points=5)
 
 while True:
-    n, points = touch.read_points()
-    for i in range(0, n):
-        print(f"id {points[i][3]} x {points[i][0]} y {points[i][1]} size {points[i][2]}")
+    for x, y, size, track_id in touch.read_points():
+        print(f"id {track_id} x {x} y {y} size {size}")
     time.sleep_ms(100)
 """
 
@@ -141,7 +140,7 @@ class GT911:
         return self._read_reg(0x8140, 4)
 
     def read_points(self):
-        """Return ``(n, points)`` only when the GT911 buffer-ready bit is set.
+        """Return contacts as ``((x, y, size, id), ...)`` or ``()`` when up.
 
         Matching Espressif ``esp_lcd_touch_gt911``: ignore the point-count
         nibble unless bit 0x80 is set. Returning a stale nibble without a fresh
@@ -150,19 +149,21 @@ class GT911:
         """
         status = self._read_reg(_DATA_BUFFER)[0]
         if not (status & 0x80):
-            return 0, self.points_data
+            return ()
         n_points = status & 0x0F
         if n_points == 0 or n_points > 5:
             self._write_reg(_DATA_BUFFER, 0)
-            return 0, self.points_data
+            return ()
         # One contiguous read: status is at 0x814E; points follow at 0x814F.
         buf = self._read_reg(_POINT_DATA_START, n_points * 8)
+        out = []
         for i in range(n_points):
             o = i * 8
             # Packed: track_id, x_lo, x_hi, y_lo, y_hi, size_lo, size_hi, reserved
             x = buf[o + 1] | (buf[o + 2] << 8)
             y = buf[o + 3] | (buf[o + 4] << 8)
             size = buf[o + 5] | (buf[o + 6] << 8)
+            track_id = buf[o]
             if not self._hw_axis_config:
                 if self.reverse_axis:
                     x, y = y, x
@@ -173,9 +174,10 @@ class GT911:
             self.points_data[i][0] = x
             self.points_data[i][1] = y
             self.points_data[i][2] = size
-            self.points_data[i][3] = buf[o]
+            self.points_data[i][3] = track_id
+            out.append((x, y, size, track_id))
         self._write_reg(_DATA_BUFFER, 0)
-        return n_points, self.points_data
+        return tuple(out)
 
     def reset(self):
         if self.irq_pin is not None:

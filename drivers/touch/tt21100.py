@@ -47,3 +47,7 @@ class TT21100:
                 }
             )
         return points
+
+    def read_points(self):
+        """Return contacts as ``((x, y, id, pressure), ...)`` or ``()`` when up."""
+        return tuple((t["x"], t["y"], t["id"], t["pressure"]) for t in self.touches)

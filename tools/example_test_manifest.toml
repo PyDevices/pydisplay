@@ -142,6 +142,17 @@ deps = ["lvgl"]
 duration_s = 5
 timeout_s = 45
 
+# Interactive pinch demo; matrix would only prove single-touch UI (no 2-finger inject).
+[examples.lv_gestures]
+import = "lv_gestures"
+script = "examples/lv_gestures.py"
+kind = "lvgl"
+quit = "inject"
+deps = ["lvgl"]
+matrix = false
+duration_s = 5
+timeout_s = 45
+
 # --- displaysys harness scripts (matrix) ---
 
 [examples.displaysys_block_test]

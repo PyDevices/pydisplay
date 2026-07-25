@@ -79,18 +79,10 @@ touch_drv = GT911(
 )
 
 
-def touch_read_func():
-    """GT911 reports panel coords directly on the 7″ (unlike the 4.3″ diagonal map)."""
-    n, points = touch_drv.read_points()
-    if not n:
-        return None
-    return points[0][0], points[0][1]
-
-
 touch_rotation_table = (0, 0, 0, 0)
 
 runtime = eventsys.Runtime(
     display=display_drv,
-    touch_read=touch_read_func,
+    touch_read=touch_drv.read_points,
     touch_rotation_table=touch_rotation_table,
 )

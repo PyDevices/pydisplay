@@ -89,9 +89,14 @@ class CST8XX:
         return (x, y)
 
     def get_positions(self):
-        """Return ``[(x, y)]`` or ``[]`` — eventsys ``touch_read`` shape."""
+        """Return ``[(x, y)]`` or ``[]``."""
         point = self.get_point()
         return [point] if point else []
+
+    def read_points(self):
+        """Return contacts as ``((x, y),)`` or ``()`` when up."""
+        point = self.get_point()
+        return (point,) if point else ()
 
     def get_gestures(self):
         if not self.touched():

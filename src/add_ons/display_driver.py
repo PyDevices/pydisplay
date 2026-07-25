@@ -349,6 +349,103 @@ class _TouchState:
     pressed = False
 
 
+# CPython: module-level lv.indev_gesture_recognizers_*; MP/CP: indev methods.
+_GESTURE_UPDATE = hasattr(lv, "indev_touch_data_t")
+_MAX_GESTURE_TOUCHES = 10
+_gesture_touches = None
+_gesture_prev_ids = {}  # id(device) -> frozenset of contact ids
+
+
+def _gesture_tick_ms():
+    try:
+        return int(lv.tick_get())
+    except Exception:
+        return 0
+
+
+def _gesture_point_id(point, index):
+    if len(point) > 2:
+        try:
+            return int(point[2]) & 0xFF
+        except (TypeError, ValueError):
+            pass
+    return int(index) & 0xFF
+
+
+def _gesture_recognizers_update(indev, touches, touch_cnt):
+    fn = getattr(lv, "indev_gesture_recognizers_update", None)
+    if fn is not None:
+        fn(indev, touches, touch_cnt)
+    else:
+        indev.gesture_recognizers_update(touches, touch_cnt)
+
+
+def _gesture_recognizers_set_data(indev, data):
+    fn = getattr(lv, "indev_gesture_recognizers_set_data", None)
+    if fn is not None:
+        fn(indev, data)
+    else:
+        indev.gesture_recognizers_set_data(data)
+
+
+def _gesture_feed(indev, data, device):
+    """Feed multipoint contacts into LVGL gesture recognizers when available."""
+    global _gesture_touches
+    if not _GESTURE_UPDATE:
+        return
+
+    points = getattr(device, "points", None)
+    if not points:
+        points = ((_TouchState.x, _TouchState.y),) if _TouchState.pressed else ()
+
+    pressed = {}
+    for i, pt in enumerate(points):
+        pressed[_gesture_point_id(pt, i)] = (int(pt[0]), int(pt[1]))
+
+    dev_key = id(device)
+    prev = _gesture_prev_ids.get(dev_key, frozenset())
+    released = prev - frozenset(pressed)
+    count = len(pressed) + len(released)
+    if _gesture_touches is None:
+        _gesture_touches = lv.indev_touch_data_t(_MAX_GESTURE_TOUCHES)
+
+    if count == 0:
+        _gesture_prev_ids[dev_key] = frozenset()
+        _gesture_recognizers_update(indev, _gesture_touches, 0)
+        _gesture_recognizers_set_data(indev, data)
+        return
+
+    n = count if count <= _MAX_GESTURE_TOUCHES else _MAX_GESTURE_TOUCHES
+
+    ts = _gesture_tick_ms()
+    idx = 0
+    for contact_id, (x, y) in pressed.items():
+        if idx >= n:
+            break
+        t = _gesture_touches[idx]
+        t.point = lv.point_t({"x": x, "y": y})
+        t.state = lv.INDEV_STATE.PRESSED
+        t.id = contact_id
+        t.timestamp = ts
+        idx += 1
+    for contact_id in released:
+        if idx >= n:
+            break
+        t = _gesture_touches[idx]
+        # Last known coords are optional; recognizers key on id/state.
+        t.point = lv.point_t({"x": 0, "y": 0})
+        t.state = lv.INDEV_STATE.RELEASED
+        t.id = contact_id
+        t.timestamp = ts
+        idx += 1
+
+    _gesture_recognizers_update(indev, _gesture_touches, idx)
+    _gesture_recognizers_set_data(indev, data)
+    # Keep primary click coords; set_data owns pressed/released from contacts.
+    data.point = lv.point_t({"x": _TouchState.x, "y": _TouchState.y})
+    _gesture_prev_ids[dev_key] = frozenset(pressed)
+
+
 def _touch_cb(event, indev, data):
     if event is not None:
         if event.type == events.MOUSEBUTTONDOWN and event.button == 1:
@@ -412,6 +509,8 @@ def create_devices(devs, lv_display, virtual_devices=None):
             def _read_cb(indev_obj, data, _dev=device, _cb=event_cb):
                 _dev.poll(indev_obj, data)
                 _cb(None, indev_obj, data)
+                if _dev.type == eventsys.POINTER:
+                    _gesture_feed(indev_obj, data, _dev)
 
             indev.set_group(lv.group_get_default())
             indev.set_read_cb(_read_cb)

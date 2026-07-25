@@ -100,6 +100,10 @@ class FT6x36:
             positions.append(self._get_p2())
         return positions
 
+    def read_points(self):
+        """Return contacts as ``((x, y), ...)`` or ``()`` when up."""
+        return tuple(self.get_positions())
+
     @property
     def theshold(self) -> int:
         """

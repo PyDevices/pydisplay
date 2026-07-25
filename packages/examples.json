@@ -129,6 +129,10 @@
       "github:PyDevices/pydisplay/src/examples/logo.py"
     ],
     [
+      "lv_gestures.py",
+      "github:PyDevices/pydisplay/src/examples/lv_gestures.py"
+    ],
+    [
       "lv_test_timer.py",
       "github:PyDevices/pydisplay/src/examples/lv_test_timer.py"
     ],

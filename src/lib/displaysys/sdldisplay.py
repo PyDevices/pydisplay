@@ -177,6 +177,14 @@ def _flush_pending_displays():
             display._flush_pending_show()
 
 
+def _panel_size():
+    """Logical panel size for normalizing SDL finger coords (0..1 → pixels)."""
+    if _displays:
+        d = _displays[0]
+        return int(d.width), int(d.height)
+    return 320, 240
+
+
 def _convert(e):
     # Convert an SDL event to a Pygame event
     if e.type == usdl2.SDL_MOUSEMOTION:
@@ -198,6 +206,16 @@ def _convert(e):
             e.button.button,
             e.button.which != 0,
             e.button.windowID,
+        )
+    elif e.type in (usdl2.SDL_FINGERDOWN, usdl2.SDL_FINGERUP, usdl2.SDL_FINGERMOTION):
+        w, h = _panel_size()
+        fx = e.tfinger.x
+        fy = e.tfinger.y
+        evt = events.Finger(
+            e.type,
+            (int(fx * w), int(fy * h)),
+            int(e.tfinger.fingerId),
+            int(e.tfinger.windowID),
         )
     elif e.type == usdl2.SDL_MOUSEWHEEL:
         evt = events.Wheel(

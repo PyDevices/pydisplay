@@ -32,12 +32,13 @@ class ST7123:
         return self.bus.readfrom_mem(self.address, reg, size, addrsize=16)
 
     def read_points(self):
+        """Return contacts as ``((x, y, area, id), ...)`` or ``()`` when up."""
         adv = self._read_reg(_REG_ADV_INFO)[0]
         if not (adv & 0x08):  # with_coord
-            return 0, ()
+            return ()
         max_touches = self._read_reg(_REG_MAX_TOUCHES)[0]
         if max_touches == 0:
-            return 0, ()
+            return ()
         nbytes = max_touches * _REPORT_SIZE
         raw = self._read_reg(_REG_REPORT_0, nbytes)
         points = []
@@ -50,4 +51,4 @@ class ST7123:
             y = raw[off + 2] << 8 | raw[off + 3]
             area = raw[off + 4]
             points.append((x, y, area, i))
-        return len(points), tuple(points)
+        return tuple(points)

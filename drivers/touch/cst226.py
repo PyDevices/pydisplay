@@ -98,6 +98,13 @@ class CST226:
     def get_points(self):
         raise NotImplementedError("get_points() not implemented (yet)")
 
+    def read_points(self):
+        """Return contacts as ``((x, y), ...)`` or ``()`` when up."""
+        points = self.get_point()
+        if not points or points == 0:
+            return ()
+        return tuple(points)
+
     def reset(self):
         if self.rst:
             self.rst(0)
