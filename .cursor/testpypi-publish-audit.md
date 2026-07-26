@@ -76,9 +76,9 @@ Both use the same shape: matrix `ubuntu-latest` + `windows-latest`, plus a dedic
 | **spotapi** | unrelated client lib | no TestPyPI workflow in tree |
 | **micropython-lib** (fork) | MIP host | CI builds index on push when org var set; pydisplay release owns PyDevices MIP publish |
 
-## Gap analysis vs NOTES todos
+## Gap analysis
 
-### “Wheels for unix, windows, and Android”
+### Wheels for unix, windows, and Android
 
 | Category | Status |
 |----------|--------|
