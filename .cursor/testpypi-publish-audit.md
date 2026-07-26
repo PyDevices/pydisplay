@@ -61,7 +61,7 @@ Both use the same shape: matrix `ubuntu-latest` + `windows-latest`, plus a dedic
   `publish-micropython-lib.yml` (TestPyPI `usdl2-py` + MIP)
 - **Native package:** platform wheels (`manylinux`, `win_amd64`, `android_21_*`) —
   CPython extension + MicroPython/CircuitPython usermod
-- **Pure Python:** `usdl2-py` / MIP `usdl2` from `lib/usdl2/` (ctypes/ffi fallback);
+- **Pure Python:** `usdl2-py` / MIP `usdl2` from `lib/usdl2.py` (ctypes/ffi fallback);
   same `vX.Y.Z` as native
 - **Tags on GitHub:** semver release tags (`v*.*.*`) exist; **no GitHub Release** objects
 
