@@ -34,7 +34,6 @@ dist/
 src/add_ons/gui
 web/pyscript/wheels
 
-.mpftp/
 *.code-workspace
 Untitled-*
 
