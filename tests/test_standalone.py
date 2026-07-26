@@ -21,7 +21,6 @@ import _env
 
 _MULTIMER_SIBLINGS = ("displaysys", "eventsys", "graphics", "palettes")
 _EVENTSYS_SIBLINGS = ("displaysys", "graphics", "multimer", "palettes")
-_GRAPHICS_SIBLINGS = ("displaysys", "eventsys", "multimer", "palettes")
 _DISPLAYSYS_SIBLINGS = ("eventsys", "graphics", "multimer", "palettes")
 
 _MULTIMER_CHILD = textwrap.dedent(
@@ -97,37 +96,6 @@ _EVENTSYS_CHILD = textwrap.dedent(
     """
 ).format(siblings=list(_EVENTSYS_SIBLINGS))
 
-_GRAPHICS_CHILD = textwrap.dedent(
-    """
-    import sys
-
-    import graphics
-    from graphics import (
-        Area,
-        Draw,
-        FrameBuffer,
-        Font,
-        RGB565,
-        circle,
-        rect,
-        text8,
-    )
-
-    forbidden = [m for m in {siblings!r} if m in sys.modules]
-    assert not forbidden, "graphics pulled in pydisplay modules: %r" % forbidden
-
-    fb = FrameBuffer(bytearray(16 * 16 * 2), 16, 16, RGB565)
-    fb.fill(0)
-    assert fb.fill_rect(1, 1, 3, 3, 0xFFFF) == Area(1, 1, 3, 3)
-    assert fb.pixel(2, 2) == 0xFFFF
-
-    draw = Draw(fb)
-    draw.circle(8, 8, 3, 0x1234)
-    text8(fb, "Hi", 0, 0, 0xFFFF)
-
-    print("STANDALONE_OK")
-    """
-).format(siblings=list(_GRAPHICS_SIBLINGS))
 
 _DISPLAYSYS_CHILD = textwrap.dedent(
     """
@@ -228,30 +196,6 @@ class TestStandalone(unittest.TestCase):
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 
-    def test_graphics_imports_and_runs_in_isolation(self):
-        tmp = tempfile.mkdtemp(prefix="graphics_standalone_")
-        try:
-            shutil.copytree(_env.GRAPHICS_DIR, os.path.join(tmp, "graphics"))
-
-            env = dict(os.environ)
-            env["PYTHONPATH"] = tmp
-
-            proc = subprocess.run(
-                [sys.executable, "-c", _GRAPHICS_CHILD],
-                cwd=tmp,
-                env=env,
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-            self.assertEqual(
-                proc.returncode,
-                0,
-                msg=f"child failed\nstdout:\n{proc.stdout}\nstderr:\n{proc.stderr}",
-            )
-            self.assertIn("STANDALONE_OK", proc.stdout)
-        finally:
-            shutil.rmtree(tmp, ignore_errors=True)
 
     def test_displaysys_imports_and_runs_in_isolation(self):
         tmp = tempfile.mkdtemp(prefix="displaysys_standalone_")

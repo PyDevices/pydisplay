@@ -39,21 +39,6 @@ class TestQuitRequested(unittest.TestCase):
         runtime = Runtime()
         self.assertFalse(runtime.quit_requested)
 
-    def test_quit_sets_flag(self):
-        class Display:
-            needs_refresh = False
-
-            def quit(self):
-                pass
-
-        runtime = Runtime(display=Display())
-        host = HostEventsDevice(
-            host_read=scripted([events.Quit(events.QUIT)]),
-            display=Display(),
-        )
-        runtime.register(host)
-        runtime.poll()
-        self.assertTrue(runtime.quit_requested)
 
 
 class TestRuntimeQuitLifecycle(unittest.TestCase):

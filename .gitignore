@@ -214,3 +214,7 @@ cython_debug/
 
 .ruff_cache/
 
+
+# CI / local sibling checkouts inside this workspace
+graphics/
+micropython-hardware/
