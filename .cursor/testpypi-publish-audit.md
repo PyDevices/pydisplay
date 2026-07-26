@@ -1,20 +1,21 @@
 # TestPyPI and release automation audit
 
-Inventory of PyDevices repos that publish to **TestPyPI** or **micropython-lib / MIP**, what each workflow builds, and gaps vs the goals in `docs/NOTES.md` (GitHub release assets per tag; linux + windows + Android wheels where applicable).
+Inventory of PyDevices repos that publish to **TestPyPI** or **micropython-lib / MIP**,
+and what each workflow builds (linux / windows / Android wheels where applicable).
 
 Audited **2026-07-08** from local clones under `~/github/cmods` and `~/github/pydisplay`, plus live TestPyPI JSON and `gh` API.
 
 ## Summary
 
-| Repo | Workflow | Trigger | TestPyPI | MIP / micropython-lib | GH release assets |
-|------|----------|---------|----------|----------------------|-------------------|
-| **pydisplay** | [`publish-micropython-lib.yml`](../.github/workflows/publish-micropython-lib.yml) | tag `v*.*.*` | yes (pure-Python wheels) | yes (sync + gh-pages MIP) | **no** |
-| **usdl2** | `publish-testpypi.yml` | tag `v*.*.*` | yes (`py3-none-any`) | no | **no** (tags only) |
-| **graphics** | `publish-testpypi.yml` | tag `v*.*.*` | yes (cibuildwheel) | frozen via `cmods/manifest.py` | **no** (tags only) |
-| **lv_cpython_mod** | `publish-testpypi.yml` + `sync-and-release.yml` | tag / dispatch | yes (cibuildwheel) | no (CPython binding) | **no** (tags only) |
-| **lv_bindings** | `trigger-lv-cpython-mod-release.yml` | push to `generated/` | indirect | no | **no** |
+| Repo | Workflow | Trigger | TestPyPI | MIP / micropython-lib |
+|------|----------|---------|----------|----------------------|
+| **pydisplay** | [`publish-micropython-lib.yml`](../.github/workflows/publish-micropython-lib.yml) | tag `v*.*.*` | yes (pure-Python wheels) | yes (sync + gh-pages MIP) |
+| **usdl2** | `publish-testpypi.yml` | tag `v*.*.*` | yes (`py3-none-any`) | no |
+| **graphics** | `publish-testpypi.yml` | tag `v*.*.*` | yes (cibuildwheel) | frozen via `cmods/manifest.py` |
+| **lv_cpython_mod** | `publish-testpypi.yml` + `sync-and-release.yml` | tag / dispatch | yes (cibuildwheel) | no (CPython binding) |
+| **lv_bindings** | `trigger-lv-cpython-mod-release.yml` | push to `generated/` | indirect | no |
 
-**No PyDevices publish workflow currently creates a GitHub Release or attaches build artifacts.** Tag pushes upload to TestPyPI (and pydisplay also updates micropython-lib + MIP gh-pages).
+Tag pushes upload to TestPyPI (and pydisplay also updates micropython-lib + MIP gh-pages).
 
 ## pydisplay → micropython-lib + TestPyPI
 
@@ -34,10 +35,9 @@ Audited **2026-07-08** from local clones under `~/github/cmods` and `~/github/py
 
 **Linux / Windows / Android:** universal `none-any` wheels install on all three; no per-OS wheel matrix is required for these packages.
 
-**micropython-lib / MIP:** same workflow runs [`scripts/publish_mip_ghpages.sh`](../scripts/publish_mip_ghpages.sh) — compiles `.mpy` index to the `gh-pages` branch (`mip/PyDevices/…`). That index is **not** attached to GitHub Releases either.
+**micropython-lib / MIP:** same workflow runs [`scripts/publish_mip_ghpages.sh`](../scripts/publish_mip_ghpages.sh) — compiles `.mpy` index to the `gh-pages` branch (`mip/PyDevices/…`).
 
 **Secrets:** `MICROPYTHON_LIB_DEPLOY_TOKEN`, `TESTPYPI_API_TOKEN`.
-
 ## Native extension repos (cibuildwheel)
 
 Both use the same shape: matrix `ubuntu-latest` + `windows-latest`, plus a dedicated Android job (`CIBW_PLATFORM=android`), then merge artifacts and `twine upload`.
@@ -63,7 +63,6 @@ Both use the same shape: matrix `ubuntu-latest` + `windows-latest`, plus a dedic
   CPython extension + MicroPython/CircuitPython usermod
 - **Pure Python:** `usdl2-py` / MIP `usdl2` from `lib/usdl2.py` (ctypes/ffi fallback);
   same `vX.Y.Z` as native
-- **Tags on GitHub:** semver release tags (`v*.*.*`) exist; **no GitHub Release** objects
 
 ## Repos without TestPyPI automation
 
@@ -108,19 +107,6 @@ After a pydisplay tag publish, run the desktop stack smoke test (headless in CI 
 ```bash
 ./tools/test_testpypi_desktop.sh --headless
 ```
-
-### “GitHub release assets per tag”
-
-**Universal gap:** every publisher uploads to TestPyPI only. Release tags exist on each repo but:
-
-- `gh release list` shows **no releases** (or empty asset lists) for usdl2, graphics, lv_cpython_mod, and typical pydisplay tags
-
-**Suggested implementation pattern** (not done yet):
-
-1. After `twine upload`, add a job that runs `gh release create` (or `softprops/action-gh-release`) with `dist/*.whl` (and optionally MIP index zip / `latest.json` bundle for pydisplay).
-2. For **lv_cpython_mod**, reuse downloaded cibuildwheel artifacts before upload (or re-download from TestPyPI — worse).
-3. For **pydisplay MIP**, attach a tarball of `mip/PyDevices/` or link to gh-pages commit in release notes.
-4. Use `contents: write` + `GITHUB_TOKEN` or a release PAT; keep `RELEASE_WORKFLOW_TOKEN` pattern where tag-created-by-bot must trigger downstream workflows.
 
 ## Related docs
 
