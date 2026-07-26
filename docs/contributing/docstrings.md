@@ -38,10 +38,11 @@ See also: https://pydisplay.readthedocs.io/en/latest/concepts/displays/
 
 ## pydisplay-specific notes
 
-- **`Area` returns:** Many `pygraphics` methods return an `Area` (`x`, `y`, `w`, `h`) for partial refresh.
+- **`Area` returns:** Drawing helpers that return dirty regions use `pygraphics.Area` (`x`, `y`, `w`, `h`).
 - **Runtime:** Document poll/subscribe patterns; link to [Events concept](../concepts/events.md).
-- **Delegates:** `Draw` and `FrameBuffer` shape methods delegate to `pygraphics._shapes` — signatures must match.
 - **Private API:** Names starting with `_` are excluded from mkdocstrings output; minimal or no docstrings are fine.
+  Document public methods that live on private implementation bases when they surface via inheritance
+  (e.g. `multimer.Timer` ← `_TimerCore.init` / `deinit` with `inherited_members: true`).
 
 ## Verification
 
@@ -57,8 +58,8 @@ Griffe warnings mean a docstring parameter does not appear in the signature — 
 
 | Tier | Modules |
 |------|---------|
-| P0 | `displaysys`, `eventsys`, `pygraphics.FrameBuffer`, `pygraphics._shapes` |
-| P1 | `pygraphics.Draw`, `displaybuf`, `eventsys` helpers |
-| P2 | ✅ `pdwidgets` — done: Google-style docstrings on all public classes/methods (lifecycle `Display.tick`/`render`/event registration + every widget) |
+| P0 | `displaysys`, `eventsys`, `multimer` |
+| P1 | `displaybuf`, `display_driver`, `console`, other `add_ons` |
+| P2 | Sibling packages document their own APIs: [pygraphics](https://pygraphics.readthedocs.io), [pdwidgets](https://pdwidgets.readthedocs.io), [palettes](https://palettes.readthedocs.io) |
 
 See [Contributing](../contributing.md) for the PR workflow.

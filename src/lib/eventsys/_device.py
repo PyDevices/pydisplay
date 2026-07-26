@@ -37,6 +37,14 @@ class Device:
     responses = events.filter
 
     def __init__(self, read=None, data=None, read2=None, data2=None):
+        """Create a device with optional read callables and opaque data slots.
+
+        Args:
+            read: Primary poll callable (subclass-specific return shape).
+            data: Opaque primary data (often a display reference).
+            read2: Optional secondary poll callable.
+            data2: Opaque secondary data (e.g. touch rotation table).
+        """
         self._event_callbacks = {}
         self._read = read if read else lambda: None
         self._data = data
@@ -63,6 +71,16 @@ class Device:
         return eventlist
 
     def subscribe(self, callback, event_types=None):
+        """Subscribe ``callback`` to events this device can emit.
+
+        Args:
+            callback: Callable ``callback(event, *poll_args)``.
+            event_types: Iterable of event types; defaults to :attr:`responses`.
+
+        Raises:
+            ValueError: ``callback`` not callable, or an event type not in
+                :attr:`responses`.
+        """
         event_types = event_types or self.responses
         if not callable(callback):
             raise ValueError("callback is not callable.")
@@ -74,6 +92,12 @@ class Device:
             self._event_callbacks[event_type] = callback_set
 
     def unsubscribe(self, callback, event_types=None):
+        """Remove ``callback`` from the given event types (default: all responses).
+
+        Args:
+            callback: Previously registered callable.
+            event_types: Iterable of event types; defaults to :attr:`responses`.
+        """
         event_types = event_types or self.responses
         for event_type in event_types:
             if callback_set := self._event_callbacks.get(event_type):
@@ -81,6 +105,7 @@ class Device:
 
     @property
     def runtime(self):
+        """Owning :class:`Runtime`, or ``None`` when not registered."""
         return self._runtime
 
     @runtime.setter
@@ -89,6 +114,7 @@ class Device:
 
     @property
     def user_data(self):
+        """Application-owned opaque value (unused by eventsys itself)."""
         return self._user_data
 
     @user_data.setter

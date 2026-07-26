@@ -215,26 +215,29 @@ def _init_joysticks() -> None:
 
 
 class PGDisplay(DisplayDriver):
-    needs_refresh = True
+    """Emulate an LCD window with pygame-ce.
 
-    """
-    A class to emulate an LCD using pygame.
-    Provides scrolling and rotation functions similar to an LCD.  The .texture
-    object functions as the LCD's internal memory.
+    Provides scrolling and rotation similar to a panel driver. The off-screen
+    ``.texture`` / surface acts as the LCD's internal memory. Scale is reduced
+    automatically when the window would not fit the desktop work area.
 
     Args:
-        width (int, optional): The width of the display. Defaults to 320.
-        height (int, optional): The height of the display. Defaults to 240.
-        rotation (int, optional): The rotation of the display. Defaults to 0.
-        color_depth (int, optional): The color depth of the display. Defaults to 16.
-        title (str, optional): The title of the display window. Defaults to "displaysys".
-        scale (float, optional): The scale of the display. Defaults to 1.0.
-        window_flags (int, optional): The flags for creating the display window. Defaults to pg.SHOWN
+        width (int, optional): Panel width in pixels. Defaults to 320.
+        height (int, optional): Panel height in pixels. Defaults to 240.
+        rotation (int, optional): Rotation in degrees. Defaults to 0.
+        color_depth (int, optional): Bits per pixel. Defaults to 16.
+        title (str, optional): Window title. Defaults to ``"displaysys"``.
+        scale (float, optional): Window scale factor. Defaults to 1.0.
+        window_flags (int, optional): pygame display flags. Defaults to ``pg.SHOWN``.
+        quiet (bool): Suppress init chatter when True.
 
     Attributes:
-        color_depth (int): The color depth of the display.
-        touch_scale (float): The touch scale of the display.
+        color_depth (int): Bits per pixel.
+        touch_scale (float): Scale used to map host pointer coords into panel space.
+        needs_refresh (bool): True — ``eventsys.Runtime`` drives periodic ``show()``.
     """
+
+    needs_refresh = True
 
     def __init__(
         self,

@@ -1,6 +1,6 @@
 # Drawing and fonts
 
-**Start here for the `pygraphics` library:** [graphics](pygraphics.md) — quick start, FrameBuffer vs Draw, Area bounds, fonts, and loaders.
+**Start here for the `pygraphics` library:** [graphics](graphics.md) — quick start, FrameBuffer vs Draw, Area bounds, fonts, and loaders.
 
 This page covers how `pygraphics` fits into the wider pydisplay stack.
 
@@ -8,7 +8,7 @@ This page covers how `pygraphics` fits into the wider pydisplay stack.
 
 | Need | Use |
 |------|-----|
-| Buffer + shapes + Area bounds | [`pygraphics`](pygraphics.md) — `FrameBuffer` or `Draw` |
+| Buffer + shapes + Area bounds | [`pygraphics`](graphics.md) — `FrameBuffer` or `Draw` |
 | Basic pixels on a display | `framebuf` API on display or buffer |
 | Peter Hinch scrollable buffer | `add_ons/displaybuf.DisplayBuffer` |
 | CPython without importing add-ons | `pygraphics` (bundles pure-Python framebuf) |
@@ -25,15 +25,15 @@ Use `Draw(canvas)` when you prefer a separate drawer object over subclassing.
 
 | Mechanism | Source | Notes |
 |-----------|--------|-------|
-| `pygraphics.text8` / `text14` / `text16` | Embedded romfont in `pygraphics` (`_font_8x*.py`) | Default; transparent; per-pixel on canvas — [patterns](pygraphics.md#choosing-a-font-rendering-pattern) |
-| `pygraphics.Font(path, height)` | Romfont [`.bin` on disk](pygraphics.md#loading-romfont-bin-files-from-the-filesystem) | Optional; use with any pattern below |
+| `pygraphics.text8` / `text14` / `text16` | Embedded romfont in `pygraphics` (`_font_8x*.py`) | Default; transparent; per-pixel on canvas — [patterns](graphics.md#choosing-a-font-rendering-pattern) |
+| `pygraphics.Font(path, height)` | Romfont [`.bin` on disk](graphics.md#loading-romfont-bin-files-from-the-filesystem) | Optional; use with any pattern below |
 | `pygraphics.Font(height=8)` | Embedded romfont for that height | Same bytes as `text8` / `text14` / `text16` |
 | String FB + `blit_rect` | [`font_simpletest.py`](../examples/font_simpletest.py) (`string_blit` phase) | Opaque bg; low RAM; one blit per string — good desktop + tight MCU RAM |
 | `Font.text(display_drv, …)` | [`font_simpletest.py`](../examples/font_simpletest.py) (`per_pixel` phase) | Transparent; lowest RAM; slowest on SPI |
 | `DisplayBuffer` + `show(dirty)` | [`font_simpletest.py`](../examples/font_simpletest.py) (`displaybuf` phase) | Transparent; full-screen RAM; fastest repeated text on MCU |
 | `tft_text.text()` | @russhughes text_font_converter | Width 8 or 16, height multiples of 8 |
 | `tft_write.write()` | @russhughes write_font_converter | Proportional fonts |
-| `framebuf.text()` | Damien `font_petme128_8x8` | MP framebuf API only; not romfont — see [Fonts in graphics](pygraphics.md#not-the-same-as-framebuftext) |
+| `framebuf.text()` | Damien `font_petme128_8x8` | MP framebuf API only; not romfont — see [Fonts in graphics](graphics.md#not-the-same-as-framebuftext) |
 
 Peter Hinch's **Writer** (MicroPython-Touch) may be used on MicroPython but does not return Area objects.
 

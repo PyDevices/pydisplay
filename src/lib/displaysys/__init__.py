@@ -42,10 +42,13 @@ __all__ = [
     "color565",
     "color565_swapped",
     "color_rgb",
+    "desktop_work_area",
     "env_bool",
     "env_get",
     "env_int",
     "env_set",
+    "fit_scale_to_desktop",
+    "notify_board_config_scale_override",
 ]
 
 _DEFAULT_AUTO_REFRESH_PERIOD = 33
@@ -233,7 +236,14 @@ def fit_scale_to_desktop(
 
 
 def notify_board_config_scale_override(driver_name, requested, fitted, *, quiet=False):
-    """Tell the user when a desktop driver reduces board_config scale to fit the screen."""
+    """Tell the user when a desktop driver reduces board_config scale to fit the screen.
+
+    Args:
+        driver_name: Display class name for the log line (e.g. ``"SDLDisplay"``).
+        requested: Scale requested by board_config / constructor.
+        fitted: Scale after :func:`fit_scale_to_desktop`.
+        quiet: When True, skip printing.
+    """
     if quiet or fitted == requested:
         return
     print(
@@ -435,6 +445,11 @@ class DisplayDriver:
         return None
 
     def __init__(self, *, quiet=False):
+        """Initialize shared display state and call subclass :meth:`init`.
+
+        Args:
+            quiet: When True, suppress init / rotation chatter.
+        """
         self._quiet = quiet
         if not self._quiet:
             print(f"Initializing {self.__class__.__name__}...")
@@ -722,9 +737,19 @@ class DisplayDriver:
         return x, y
 
     def scroll_by(self, value):
+        """Scroll vertically by ``value`` pixels relative to the current offset.
+
+        Args:
+            value: Signed pixel delta applied to :attr:`vscroll`.
+        """
         self.vscroll += value
 
     def scroll_to(self, value):
+        """Set the absolute vertical scroll offset.
+
+        Args:
+            value: New :attr:`vscroll` position.
+        """
         self.vscroll = value
 
     @property

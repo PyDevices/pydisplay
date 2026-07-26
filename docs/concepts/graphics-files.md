@@ -4,7 +4,7 @@ Two layers: **pygraphics package loaders** (eager, full image in RAM) and **pydi
 
 ## pygraphics package loaders
 
-Built into [`pygraphics`](pygraphics.md):
+Built into [`pygraphics`](graphics.md):
 
 | Function | Format |
 |----------|--------|

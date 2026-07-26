@@ -16,20 +16,45 @@ except ImportError:
 
 
 class Keys:
-    """
-    A container for key codes and names.  Similar to a C enum and struct.
+    """Container for SDL-style key codes, names, and modifier masks.
+
+    Provides ``K_*`` key constants, ``KMOD_*`` modifiers, and lookup helpers.
     """
 
     def keyname(x):
+        """Return the human-readable name for key code ``x``."""
         return Keys._keytable.get(x, "Unknown")
 
     def key(x):
+        """Return the key code whose name is ``x``.
+
+        Args:
+            x: A name from :meth:`keyname` (e.g. ``"Return"``).
+
+        Returns:
+            int: Matching ``Keys.K_*`` code.
+
+        Raises:
+            ValueError: When ``x`` is not a known key name.
+        """
         return list(Keys._keytable.keys())[list(Keys._keytable.values()).index(x)]
 
     def modname(x):
+        """Return the human-readable name for modifier mask ``x``."""
         return Keys._modtable.get(x, "Unknown")
 
     def mod(x):
+        """Return the modifier mask whose name is ``x``.
+
+        Args:
+            x: A name from :meth:`modname` (e.g. ``"Ctrl"``).
+
+        Returns:
+            int: Matching ``Keys.KMOD_*`` mask.
+
+        Raises:
+            ValueError: When ``x`` is not a known modifier name.
+        """
         return list(Keys._modtable.keys())[list(Keys._modtable.values()).index(x)]
 
     K_UNKNOWN = _const(0)

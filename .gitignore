@@ -71,3 +71,4 @@ htmlcov/
 .ipynb_checkpoints
 docs/_build/
 /site
+.cache/

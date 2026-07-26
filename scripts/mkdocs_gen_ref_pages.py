@@ -10,12 +10,13 @@ nav = mkdocs_gen_files.Nav()
 root = Path(__file__).parent.parent
 
 # (source tree, output prefix under reference/, nav prefix, extra sys.path entries)
+# pygraphics lives in the sibling PyDevices/pygraphics repo — not under src/lib.
 SOURCE_TREES = (
     (
         root / "src/lib",
         Path("reference"),
         (),
-        ("", "displaysys", "eventsys", "pygraphics", "multimer"),
+        ("", "displaysys", "eventsys", "multimer"),
     ),
     (
         root / "src/add_ons",
@@ -30,13 +31,18 @@ SKIP_DIR_NAMES = {"__pycache__", "fonts"}
 ADD_ONS_SKIP_DIR_NAMES = {"gui"}
 
 
-def _should_skip(path: Path, parts: tuple[str, ...]) -> bool:
+def _should_skip(parts: tuple[str, ...]) -> bool:
+    """Skip private modules/packages and non-documentable names."""
+    if not parts:
+        return True
     if any(part in SKIP_DIR_NAMES for part in parts):
         return True
     if any(part.endswith(".bak") for part in parts):
         return True
-    name = parts[-1]
-    return name == "__main__" or name.startswith("_")
+    # Any underscore path segment is private (e.g. multimer/_backends/…).
+    if any(part.startswith("_") for part in parts):
+        return True
+    return parts[-1] == "__main__"
 
 
 for src, ref_prefix, nav_prefix, path_entries in SOURCE_TREES:
@@ -62,7 +68,8 @@ for src, ref_prefix, nav_prefix, path_entries in SOURCE_TREES:
             parts = parts[:-1]
             doc_path = doc_path.with_name("index.md")
             full_doc_path = full_doc_path.with_name("index.md")
-        elif _should_skip(path, parts):
+
+        if _should_skip(parts):
             continue
 
         nav[nav_prefix + parts] = full_doc_path.relative_to("reference").as_posix()

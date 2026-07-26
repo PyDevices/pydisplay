@@ -73,6 +73,14 @@ def _asyncio_loop_running():
 
 
 class event_loop:
+    """LVGL task loop driven by ``eventsys.Runtime.on_tick``.
+
+    One instance may be active at a time. Sync mode runs ``lv.task_handler``
+    from the shared timer; async mode signals an asyncio refresh task.
+    Prefer ``import display_driver`` (module ``main()``) over constructing this
+    by hand unless you need custom ``freq`` / ``asynchronous`` settings.
+    """
+
     _current_instance = None
 
     def __init__(
@@ -84,6 +92,22 @@ class event_loop:
         exception_sink=None,
         period_ms=None,
     ):
+        """Create and register the LVGL event loop.
+
+        Args:
+            freq: Desired Hz when ``period_ms`` is omitted (period = ``1000 // freq``).
+            max_scheduled: Kept for lv_utils API parity (unused).
+            refresh_cb: Optional zero-arg callable after each successful
+                ``lv.task_handler()``.
+            asynchronous: When True, drive LVGL via an asyncio refresh task.
+            exception_sink: Callable receiving exceptions from task handling;
+                defaults to :meth:`default_exception_sink`.
+            period_ms: Explicit tick period in milliseconds (overrides ``freq``).
+
+        Raises:
+            RuntimeError: Another loop is already running, ``runtime`` is
+                missing, or async mode is requested without asyncio.
+        """
         if self.is_running():
             raise RuntimeError("Event loop is already running!")
 
@@ -150,6 +174,7 @@ class event_loop:
         self._timer_sub = runtime.on_tick(self.timer_cb, period=self.delay, async_=True)
 
     def deinit(self):
+        """Stop the tick subscription / async task and clear the singleton."""
         if getattr(self, "_timer_sub", None) is not None:
             self._timer_sub.deinit()
             self._timer_sub = None
@@ -160,10 +185,12 @@ class event_loop:
         event_loop._current_instance = None
 
     def disable(self):
+        """Pause LVGL task handling (re-entrant; pair with :meth:`enable`)."""
         # Pause LVGL task handling (e.g. while building the UI). Re-entrant.
         self._pause += 1
 
     def enable(self):
+        """Resume LVGL task handling after :meth:`disable`; arms the sync timer."""
         if self._pause > 0:
             self._pause -= 1
         if self._pause == 0:
@@ -171,13 +198,16 @@ class event_loop:
 
     @staticmethod
     def is_running():
+        """True when an :class:`event_loop` instance is currently registered."""
         return event_loop._current_instance is not None
 
     @staticmethod
     def current_instance():
+        """Return the active :class:`event_loop`, or ``None``."""
         return event_loop._current_instance
 
     def task_handler(self, _=None):
+        """Run ``lv.task_handler()`` once when not paused and not nested."""
         if self._in_task or self._pause > 0:
             return
         self._in_task = True
@@ -193,9 +223,11 @@ class event_loop:
             self._in_task = False
 
     def tick(self):
+        """Manually invoke the timer callback once (same path as the shared timer)."""
         self.timer_cb(None)
 
     def run(self):
+        """Blocking forever-tick loop (macOS only; prefer ``runtime.run_forever()``)."""
         if sys.platform == "darwin":
             while True:
                 self.tick()
@@ -214,6 +246,11 @@ class event_loop:
         self._next_ok_ms = ticks_add(ticks_ms(), self.delay)
 
     def timer_cb(self, t):
+        """Shared-timer callback: advance LVGL time and run/signal task handling.
+
+        Args:
+            t: Timer instance (ignored; may be ``None`` from :meth:`tick`).
+        """
         # Called from the runtime's shared timer (on the main thread).
         # In async mode the AsyncTimer fires from inside the running asyncio
         # loop, so we can safely arm (create the refresh task) on the first
@@ -244,6 +281,7 @@ class event_loop:
             self._arm_gate()
 
     async def async_refresh(self):
+        """Asyncio task body: wait for refresh signals and run ``lv.task_handler``."""
         while True:
             await self.refresh_event.wait()
             if lv._nesting.value == 0:
@@ -258,10 +296,16 @@ class event_loop:
                 self._arm_gate()
 
     def default_exception_sink(self, e):
+        """Print ``e`` with traceback to stderr (default :attr:`exception_sink`)."""
         sys.print_exception(e)
 
 
 def main():
+    """Initialize LVGL, wire :class:`DisplayDriver`, and enable the event loop.
+
+    Called automatically on ``import display_driver`` when ``board_config``
+    provides ``display_drv`` / ``runtime``.
+    """
     global _driver_ref, _host_pump_sub
     gc.collect()
     if not lv.is_initialized():
@@ -578,6 +622,17 @@ def _keypad_cb(event, indev, data):
 
 
 def create_devices(devs, lv_display, virtual_devices=None):
+    """Register eventsys devices as LVGL indevs (pointer / encoder / keypad).
+
+    Args:
+        devs: Iterable of eventsys devices from ``runtime.devices``.
+        lv_display: LVGL display object to attach indevs to.
+        virtual_devices: Optional list mutated when expanding :class:`HostEventsDevice`
+            into virtual pointer/keypad devices.
+
+    Returns:
+        list: Accumulated virtual devices (for host expansion).
+    """
     if virtual_devices is None:
         virtual_devices = []
     for device in devs:
@@ -618,6 +673,13 @@ def create_devices(devs, lv_display, virtual_devices=None):
 
 
 class DisplayDriver:
+    """Bridge a displaysys driver to an LVGL display + input devices.
+
+    Creates the LVGL display, chooses DIRECT (shared framebuffer) or PARTIAL
+    render mode, installs flush callbacks, and wires eventsys devices via
+    :func:`create_devices`.
+    """
+
     def __init__(
         self,
         display_drv,
@@ -625,6 +687,14 @@ class DisplayDriver:
         color_format=lv.COLOR_FORMAT.RGB565,
         blocking=True,
     ):
+        """Create LVGL display buffers and register input devices.
+
+        Args:
+            display_drv: displaysys driver (BusDisplay, SDLDisplay, FBDisplay, …).
+            devs: Iterable of eventsys devices to register as LVGL indevs.
+            color_format: LVGL color format (default RGB565).
+            blocking: When False, register a bus flush-ready callback for async blit.
+        """
         if devs is None:
             devs = []
         gc.collect()

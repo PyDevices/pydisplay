@@ -265,16 +265,19 @@ class PSDevices:
 
 
 class PSDisplay(DisplayDriver):
-    needs_refresh = True
-
-    """
-    A class to emulate a display on PyScript.
+    """Emulate a display on a PyScript HTML canvas.
 
     Args:
-        id (str): The id of the canvas element.
-        width (int, optional): The width of the display. Defaults to None.
-        height (int, optional): The height of the display. Defaults to None.
+        id (str): DOM id of the canvas element.
+        width (int, optional): Panel width; defaults to the canvas width.
+        height (int, optional): Panel height; defaults to the canvas height.
+        quiet (bool): Suppress init chatter when True.
+
+    Attributes:
+        needs_refresh (bool): True — ``eventsys.Runtime`` drives periodic ``show()``.
     """
+
+    needs_refresh = True
 
     def __init__(self, id, width=None, height=None, *, quiet=False):
         self._canvas = document.getElementById(id)
@@ -395,10 +398,12 @@ class PSDisplay(DisplayDriver):
     ############### Scrolling (ILI9341-style, like SDLDisplay / PGDisplay) ################
 
     def vscrdef(self, tfa: int, vsa: int, bfa: int) -> None:
+        """Set vertical scroll bands and re-render the canvas."""
         super().vscrdef(tfa, vsa, bfa)
         self.render()
 
     def vscsad(self, vssa=None) -> int:
+        """Get or set the vertical scroll start address and re-render when set."""
         if vssa is not None:
             super().vscsad(vssa)
             self.render()
@@ -434,6 +439,7 @@ class PSDisplay(DisplayDriver):
             vis.drawImage(buf, 0, tfa + vsa, w, bfa, 0, tfa + vsa, w, bfa)
 
     def show(self, _timer=None) -> None:
+        """Present the offscreen canvas (alias of :meth:`render`)."""
         self.render()
 
     def _pointer_scale(self):

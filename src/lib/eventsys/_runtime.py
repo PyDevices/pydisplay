@@ -169,6 +169,26 @@ class Runtime:
         refresh_period=None,
         timer_async=False,
     ):
+        """Create a board runtime and optionally wire host/touch devices.
+
+        Args:
+            display: displaysys driver used for refresh, quit, and touch mapping.
+            host_read: Callable returning host events (mouse/keyboard); requires
+                ``display``.
+            touch_read: Callable returning touch points; requires ``display``.
+            touch_rotation_table: Optional 4-item rotation mask table for touch.
+            refresh_period: Milliseconds between ``display.show()`` ticks. ``None``
+                uses :data:`DEFAULT_REFRESH_MS` when ``display.needs_refresh``.
+                ``0`` or negative disables periodic refresh.
+            timer_async: When ``True``, use :class:`multimer.AsyncTimer` and
+                asyncio-oriented entry (:meth:`run` / :meth:`run_forever`).
+
+        Raises:
+            TypeError: ``host_read`` / ``touch_read`` not callable, or invalid
+                ``touch_rotation_table`` type.
+            ValueError: ``host_read`` / ``touch_read`` without ``display``, or
+                ``touch_rotation_table`` length not 4.
+        """
         self.devices = []
         self._event_callbacks = {}
         self._device_callbacks = {}
@@ -235,6 +255,7 @@ class Runtime:
 
     @property
     def timer_async(self):
+        """Whether this runtime uses async timers (``AsyncTimer`` / asyncio)."""
         return self._timer_async
 
     @staticmethod
@@ -394,6 +415,7 @@ class Runtime:
 
     @property
     def quit_requested(self):
+        """True after a QUIT event or :meth:`request_quit` (teardown pending/done)."""
         return self._quit_requested
 
     def request_quit(self, code=None):
@@ -420,6 +442,10 @@ class Runtime:
 
     @property
     def before_quit(self):
+        """Optional callable invoked once during teardown, before ``display.quit``.
+
+        Set to a zero-arg callable (e.g. ``lv.deinit``) or ``None``.
+        """
         return self._before_quit
 
     @before_quit.setter
@@ -430,6 +456,7 @@ class Runtime:
 
     @property
     def display_refresh(self):
+        """Subscription handle for the periodic ``display.show`` tick, or ``None``."""
         return self._refresh_subscription
 
     def on(self, event_type, callback):
@@ -478,6 +505,17 @@ class Runtime:
             self._event_callbacks[event_type] = callback_set
 
     def unsubscribe(self, callback, event_types=None, device_types=None):
+        """Remove ``callback`` from event-type or device-type subscriptions.
+
+        Args:
+            callback: Previously registered callable.
+            event_types: Iterable of event type constants to unsubscribe from.
+            device_types: Iterable of device type constants; mutually exclusive
+                with ``event_types``.
+
+        Raises:
+            ValueError: Both or neither of ``event_types`` / ``device_types`` set.
+        """
         if device_types is not None:
             if event_types is not None:
                 raise ValueError("set one of device_types or event_types but not both.")
@@ -502,12 +540,30 @@ class Runtime:
             dev.runtime = None
 
     def add_keypad(self, read):
+        """Create, register, and return a :class:`KeypadDevice`.
+
+        Args:
+            read: Callable returning the current pressed-key collection.
+
+        Returns:
+            KeypadDevice: The registered device (also stored as ``keypad_dev``).
+        """
         _validate_callable(read, "read")
         self.keypad_dev = KeypadDevice(read=read)
         self.register(self.keypad_dev)
         return self.keypad_dev
 
     def add_encoder(self, read, *, button_read=None, button=2):
+        """Create, register, and return an :class:`EncoderDevice`.
+
+        Args:
+            read: Callable returning encoder position / delta.
+            button_read: Optional callable for a push-button state.
+            button: Mouse button index used when synthesizing button events.
+
+        Returns:
+            EncoderDevice: The registered device (also stored as ``encoder_dev``).
+        """
         _validate_callable(read, "read")
         if button_read is not None:
             _validate_callable(button_read, "button_read")
@@ -516,6 +572,16 @@ class Runtime:
         return self.encoder_dev
 
     def add_joystick(self, *, joystick_driver=None, **kwargs):
+        """Create, register, and return a :class:`JoystickDevice`.
+
+        Args:
+            joystick_driver: Object implementing :class:`JoystickDriver`.
+            **kwargs: Extra :class:`JoystickDevice` options (e.g.
+                ``emulate_digital``, ``digital_threshold``).
+
+        Returns:
+            JoystickDevice: The registered device (also stored as ``joystick_dev``).
+        """
         self.joystick_dev = JoystickDevice(joystick_driver=joystick_driver, **kwargs)
         self.register(self.joystick_dev)
         return self.joystick_dev

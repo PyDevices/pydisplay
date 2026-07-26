@@ -27,8 +27,9 @@ Usage:
 import gc
 import sys
 
-from displaysys import alloc_buffer, color332, color565, color565_swapped
 import pygraphics
+
+from displaysys import alloc_buffer, color332, color565, color565_swapped
 
 _has_viper_tools = False
 if sys.implementation.name == "micropython":
@@ -161,6 +162,7 @@ class DisplayBuffer(pygraphics.FrameBuffer):
 
     @property
     def color_palette(self):
+        """Registered RGB888 palette used with GS4_HMSB / Nano-GUI color helpers."""
         return self._color_palette
 
     @color_palette.setter
@@ -267,17 +269,35 @@ class DisplayBuffer(pygraphics.FrameBuffer):
 
 
 class BoolPalette(pygraphics.FrameBuffer):
-    # This is a 2-value color palette for rendering monochrome glyphs to color
-    # FrameBuffer instances. Supports destinations with up to 16 bit color.
+    """Two-entry palette for blitting monochrome glyphs into a color framebuffer.
+
+    Supports destinations with up to 16-bit color. Used as
+    ``DisplayBuffer.palette`` with ``ssd.blit(glyph, x, y, key=-1, palette=…)``.
+    """
 
     # Copyright (c) Peter Hinch 2021
     # Released under the MIT license see LICENSE
     def __init__(self, format):
+        """Allocate a 2x1 framebuffer in ``format`` for fg/bg colors.
+
+        Args:
+            format: A ``pygraphics`` framebuf format constant (e.g. ``RGB565``).
+        """
         buf = bytearray(4)  # OK for <= 16 bit color
         super().__init__(buf, 2, 1, format)
 
-    def fg(self, color):  # Set foreground color
+    def fg(self, color):
+        """Set the foreground (glyph-on) color.
+
+        Args:
+            color: Destination pixel value in the palette's format.
+        """
         self.pixel(1, 0, color)
 
     def bg(self, color):
+        """Set the background (glyph-off) color.
+
+        Args:
+            color: Destination pixel value in the palette's format.
+        """
         self.pixel(0, 0, color)
