@@ -61,7 +61,7 @@ Locked plan for a stable `board_config` end-device surface (CircuitPython-like d
   - Buses shared only among **non-UI** devices may live in **`board_devices`** (e.g. an SPI bus shared by `sdcard` and `radio`, with no display/touch on that bus).
 - **No temporary aliases:** `touch_drv` → `touch`, `encoder_drv` → `encoder` (breaking; sole-user window).
 - **Init (target):** eager for display/runtime/input wired to runtime; lazy for everything else in `board_devices`.
-- **Touch duck-type (depends on LVGL multi-touch design):** `board_config.touch` is the **driver object** used when wiring `Runtime` (may report multiple points); apps interact via `runtime.touch_dev` / LVGL, not the raw driver. Per-board multi→single collapse (`touch_read_func` / `_touch_read` that only returns `points[0]`) is **not** the long-term contract — adapters belong in `eventsys` / LVGL runtime if single-point is still needed. Personal backlog (not blocking this whole plan): facilitate LVGL gestures (`dotgithub/NOTES.md` under LVGL).
+- **Touch duck-type (depends on LVGL multi-touch design):** `board_config.touch` is the **driver object** used when wiring `Runtime` (may report multiple points); apps interact via `runtime.touch_dev` / LVGL, not the raw driver. Per-board multi→single collapse (`touch_read_func` / `_touch_read` that only returns `points[0]`) is **not** the long-term contract — adapters belong in `eventsys` / LVGL runtime if single-point is still needed. Personal backlog (not blocking this whole plan): facilitate LVGL gestures (`dotgithub/docs/NOTES.md` under LVGL).
 - **Docs:** normative contract in micropython-hardware `docs/board-devices.md` (pydisplay concepts remain on RTD); inventory + device matrix in micropython-hardware `docs/` (not dotgithub).
 - **`usb_device`:** optional lazy role for non-tooling native USB via [`machine.USBDevice`](https://docs.micropython.org/en/latest/library/machine.USBDevice.html); tooling USB / UART bridge out of contract.
 - **Wireless (in contract):** `wlan`, `ble`, `bt` (BT Classic) as optional lazy capability handles — omit when the silicon/board cannot provide that link type. Names chosen to avoid clashing with high-level `wifi` / `bluetooth` modules. Co-processor objects remain **`radio`** (AirLift, C6, …) and may coexist with `wlan`/`ble` when the co-proc is the path that provides them.
@@ -174,7 +174,7 @@ Shared helper: [`src/lib/boarddev.py`](../src/lib/boarddev.py). Production trees
 
 - Fill remaining MicroPython `NotImplementedError` factories (camera on P4/CoreS3/Tab5, …).
 - Optional real MP Feather RP2040 DVI implementation if a low-RAM path becomes viable (stub at `fbdisplay/adafruit_feather_rp2040_dvi_320x240` raises today).
-- Personal backlog: LVGL gesture UX polish (`dotgithub/NOTES.md`).
+- Personal backlog: LVGL gesture UX polish (`dotgithub/docs/NOTES.md`).
 
 ## Out of scope (completed-plan boundaries)
 
