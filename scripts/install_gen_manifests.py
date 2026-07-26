@@ -21,7 +21,10 @@ packages_dir = "packages/"
 toml_full_path = output_dir + "web/pyscript/micropython.toml"
 pyodide_toml_path = output_dir + "web/pyscript/pyodide.toml"
 
-# list of package directories, dependencies and extra files in that package
+# list of package directories, dependencies and extra files in that package.
+# Core libs (displaysys/eventsys/multimer/graphics/usdl2) install from the
+# micropython-lib MIP index — do not emit packages/<name>.json for those.
+# They still appear here so PyScript micropython.toml mounts stay generated.
 packages = [
     ["add_ons", [], []],
     ["examples", [], []],
@@ -31,7 +34,7 @@ packages = [
 ]
 
 # Pure-Python graphics lives in sibling PyDevices/graphics (lib/graphics/).
-# packages/graphics.json is maintained there / by hand; PyScript mounts below.
+# PyScript mounts below; MIP installs use the micropython-lib index.
 GRAPHICS_SIBLING_MOUNT = "/lib/graphics/"
 GRAPHICS_SIBLING_FILES = [
     "__init__.py",
@@ -49,6 +52,10 @@ GRAPHICS_SIBLING_FILES = [
     "_shapes.py",
     "framebuf.py",
 ]
+
+# Emit packages/*.json only for GitHub-MIP / PyScript demo bundles.
+# These names stay in `packages` for toml mounts but must not get a JSON file.
+MIP_INDEX_ONLY = frozenset({"displaysys", "eventsys", "multimer"})
 
 # Packages omitted from web/pyscript/micropython.toml (PyScript mounts add_ons for browser examples).
 toml_exclude = ["examples"]
@@ -170,21 +177,20 @@ for package_path, deps, extra_files in packages:
     if package_name not in toml_exclude:
         master_toml.append("")
 
-# Write the package .json files
+# Write the package .json files (GitHub MIP only — not micropython-lib cores).
 manual_package_stems = {
-    # Driver MIP packages live in micropython-hardware/packages/.
-    "pixeldisplay",
-    "epaperdisplay",
-    "displayif",
-    "mipidsi",
-    "picodvi",
     "micropython-micro-gui",
     "micropython-nano-gui",
     "micropython-touch",
 }
-reserved_package_names = set(package_dicts) | manual_package_stems
+reserved_package_names = set(package_dicts) | manual_package_stems | set(MIP_INDEX_ONLY)
 for package_name, contents in package_dicts.items():
     package_file = output_dir + packages_dir + package_name + ".json"
+    if package_name in MIP_INDEX_ONLY:
+        if os.path.isfile(package_file):
+            os.remove(package_file)
+            print(f"removed packages/{package_name}.json (use micropython-lib MIP index)")
+        continue
     with open(package_file, "w") as f:
         json.dump(contents, f, indent=2)
 

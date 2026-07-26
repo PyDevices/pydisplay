@@ -60,12 +60,7 @@ Includes 2 functions that install from different sources:
     - Can retrieve any file from the repository, not just packages.
     - Retrieves files as is, without precompilation (no .mpy files).
     - Includes:
-        - Core packages:
-            - /packages/displaysys.json (includes display backends and default board_config.py)
-            - /packages/eventsys.json
-            - /packages/graphics.json
-            - /packages/multimer.json
-        - Additional packages:
+        - GitHub-only packages:
             - /packages/add_ons.json
             - /packages/examples.json
         - Board configs, hardware drivers, and bus/touch MIP packages live in
@@ -157,14 +152,8 @@ install("xpt2046")
 # Repository packages - contains no precompiled bytecode (.mpy) files
 ####################################################################################################
 """
-## Core packages (source .py; displaysys includes backends and default board_config.py):
-install("/packages/displaysys.json")
-install("/packages/eventsys.json")
-install("/packages/graphics.json")
-install("/packages/multimer.json")
+## GitHub-only packages (source .py; not on the micropython-lib index):
 install("/packages/add_ons.json", target="./add_ons")
-
-## Additional packages:
 install("/packages/examples.json", target="./examples")
 
 ## Hardware (boards / drivers / bus packages) — use mip against micropython-hardware:
