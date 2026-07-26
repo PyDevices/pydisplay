@@ -108,7 +108,7 @@ frozen asyncio still uses `adafruit_ticks` internally unless the build is custom
 
 CircuitPython lacks MicroPython-compatible `framebuf`. Use the `framebuf` module
 from [PyDevices/graphics](https://github.com/PyDevices/graphics)
-(`lib/graphics/framebuf.py`, MIP `graphics` / TestPyPI `graphics-py`).
+(`lib/graphics/framebuf.py`, MIP `graphics` / TestPyPI `pydisplay-graphics`).
 
 ## Installers
 
