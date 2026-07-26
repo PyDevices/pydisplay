@@ -218,3 +218,62 @@ async def _sleep_ms_async(ms):
 # rebinds the public ``sleep_ms`` per active backend (signal / pump / async).
 sleep_ms = _sleep_ms_pump
 _sleep_ms = _sleep_ms_pump
+
+# Ensure public helpers always carry Google-style docs for mkdocstrings, even
+# when the binding came from a host ``time``/``supervisor`` symbol without one.
+if not getattr(ticks_ms, "__doc__", None):
+    ticks_ms.__doc__ = """Return a wrapping millisecond tick counter (period ``2**29`` ms).
+
+    Compatible with MicroPython ``time.ticks_ms`` / CircuitPython
+    ``supervisor.ticks_ms``. Pair with :func:`ticks_diff` and :func:`ticks_add`.
+
+    Returns:
+        int: Milliseconds since an arbitrary epoch, masked to 29 bits.
+    """
+
+if not getattr(monotonic, "__doc__", None):
+    monotonic.__doc__ = """Return a monotonic clock in seconds (float).
+
+    Prefer this over wall-clock ``time.time()`` for intervals. On CircuitPython
+    with ``supervisor.ticks_ms``, returns ``ticks_ms() / 1000``.
+
+    Returns:
+        float: Seconds since an arbitrary epoch (monotonic).
+    """
+
+if not getattr(sleep_ms, "__doc__", None):
+    sleep_ms.__doc__ = """Sleep for ``ms`` milliseconds, pumping timers when the backend requires it.
+
+    Signal backends (librt / ``machine.Timer``) sleep without an extra pump.
+    Pump backends (win32 APC, SDL2, threading) drain the cooperative scheduler
+    and backend event queue around the wait. Async-only hosts expose an
+    awaitable variant.
+
+    Args:
+        ms: Duration to sleep, in milliseconds.
+    """
+
+if not getattr(ticks_add, "__doc__", None):
+    ticks_add.__doc__ = """Add a delta to a ticks value with wraparound at ``2**29`` ms.
+
+    Args:
+        ticks: Base ticks value from :func:`ticks_ms`.
+        delta: Signed offset in milliseconds (must fit in half the ticks period).
+
+    Returns:
+        int: ``(ticks + delta)`` wrapped to the ticks period.
+
+    Raises:
+        OverflowError: When ``delta`` is outside ``(-2**28, 2**28)``.
+    """
+
+if not getattr(ticks_diff, "__doc__", None):
+    ticks_diff.__doc__ = """Compute the signed difference between two ticks values.
+
+    Args:
+        ticks1: Later (or minuend) ticks value.
+        ticks2: Earlier (or subtrahend) ticks value.
+
+    Returns:
+        int: Signed ``ticks1 - ticks2`` in milliseconds, handling wraparound.
+    """

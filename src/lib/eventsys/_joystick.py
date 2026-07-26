@@ -11,30 +11,55 @@ class JoystickDriver:
     """PyGame/SDL-style joystick polling interface."""
 
     def get_instance_id(self):
+        """Return the SDL/PyGame instance id for this joystick."""
         raise NotImplementedError("JoystickDriver.get_instance_id() not implemented")
 
     def get_numaxes(self):
+        """Return the number of axes."""
         raise NotImplementedError("JoystickDriver.get_numaxes() not implemented")
 
     def get_axis(self, axis):
+        """Return the axis value in ``[-1.0, 1.0]``.
+
+        Args:
+            axis: Zero-based axis index.
+        """
         raise NotImplementedError("JoystickDriver.get_axis() not implemented")
 
     def get_numballs(self):
+        """Return the number of trackballs."""
         raise NotImplementedError("JoystickDriver.get_numballs() not implemented")
 
     def get_ball(self, ball):
+        """Return ``(dx, dy)`` relative motion for a trackball.
+
+        Args:
+            ball: Zero-based trackball index.
+        """
         raise NotImplementedError("JoystickDriver.get_ball() not implemented")
 
     def get_numbuttons(self):
+        """Return the number of buttons."""
         raise NotImplementedError("JoystickDriver.get_numbuttons() not implemented")
 
     def get_button(self, button):
+        """Return whether a button is pressed.
+
+        Args:
+            button: Zero-based button index.
+        """
         raise NotImplementedError("JoystickDriver.get_button() not implemented")
 
     def get_numhats(self):
+        """Return the number of hats (D-pads)."""
         raise NotImplementedError("JoystickDriver.get_numhats() not implemented")
 
     def get_hat(self, hat):
+        """Return ``(x, y)`` hat position with each component in ``{-1, 0, 1}``.
+
+        Args:
+            hat: Zero-based hat index.
+        """
         raise NotImplementedError("JoystickDriver.get_hat() not implemented")
 
 
@@ -58,6 +83,16 @@ class JoystickDevice(Device):
         digital_threshold: float = 0.5,
         **kwargs,
     ):
+        """Create a joystick device backed by ``joystick_driver``.
+
+        Args:
+            *args: Forwarded to :class:`Device`.
+            joystick_driver: Object implementing :class:`JoystickDriver`.
+            emulate_digital: Optional sequence of ``(axis_x, axis_y)`` pairs to
+                synthesize extra hat events from analog axes.
+            digital_threshold: Absolute axis magnitude for :meth:`emulate`.
+            **kwargs: Forwarded to :class:`Device`.
+        """
         super().__init__(*args, **kwargs)
         self.joystick_driver = joystick_driver
         self.emulate_digital = emulate_digital
@@ -72,6 +107,14 @@ class JoystickDevice(Device):
             self._state.append([0] * len(self.emulate_digital))
 
     def emulate(self, value):
+        """Map an analog axis value to ``-1``, ``0``, or ``1`` by threshold.
+
+        Args:
+            value: Axis sample in approximately ``[-1.0, 1.0]``.
+
+        Returns:
+            int: Digitized hat component.
+        """
         return (
             -1 if value < -self.digital_threshold else 1 if value > self.digital_threshold else 0
         )
