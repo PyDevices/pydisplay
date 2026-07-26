@@ -96,6 +96,4 @@ interpreter = "./vendor/pyodide/pyodide.mjs"
 "../pygraphics/lib/pygraphics/_framebuf_plus.py" = "/lib/pygraphics/"
 "../pygraphics/lib/pygraphics/_shapes.py" = "/lib/pygraphics/"
 "../pygraphics/lib/pygraphics/framebuf.py" = "/lib/pygraphics/"
-
-"../lv_bindings/python/display_driver.py" = "/add_ons/"
 "./src/add_ons/ps_loader.py" = "/"

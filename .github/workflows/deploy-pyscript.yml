@@ -50,9 +50,6 @@ jobs:
           cp web/landing/index.html _site/index.html
           cp web/landing/site.css _site/site.css
           cp .nojekyll _site/
-          # display_driver SoT is lv_bindings; toml mounts ../lv_bindings/python/…
-          mkdir -p _site/lv_bindings/python
-          curl -fSL -o _site/lv_bindings/python/display_driver.py             "https://raw.githubusercontent.com/PyDevices/lv_bindings/main/python/display_driver.py"
           # Stamp CACHE_NAME from a hash of the PWA shell (STATIC_ASSETS + sw.js).
           # Example/src churn alone does not change the id — installed apps are
           # only prompted when the offline shell actually changes.

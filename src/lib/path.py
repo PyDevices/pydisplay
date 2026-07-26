@@ -21,12 +21,7 @@ __all__ = ["RELPATH", "add", "directories", "update"]
 
 # Edit this list to include the directories you want to add to the path.
 directories = ["lib", "add_ons", "examples"]
-# Host multi-repo layouts: display_driver.py lives in lv_bindings/python (MCU
-# builds freeze it instead; missing paths are skipped).
-_prepend_directories = [
-    "../lv_bindings/python",
-    "../cmods/lv_bindings/python",
-]
+_prepend_directories = []
 
 # Set to True to use relative paths instead of absolute paths.
 RELPATH = True

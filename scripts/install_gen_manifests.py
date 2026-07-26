@@ -76,10 +76,6 @@ PACKAGE_SKIP_DIRS = {
     "add_ons": {"gui"},
     "examples": set(PERSONAL_EXAMPLE_DIRS),
 }
-# Owned by lv_bindings (not under this repo).
-PACKAGE_SKIP_FILES = {
-    "add_ons": {"display_driver.py"},
-}
 
 
 def should_include_file(filename):
@@ -159,11 +155,8 @@ for package_path, deps, extra_files in packages:
     for root, dirs, files in os.walk(full_path):
         dirs[:] = sorted(d for d in dirs if d not in SKIP_DIR_NAMES and d not in package_skip)
         # Iterate over the sorted files list
-        package_skip_files = PACKAGE_SKIP_FILES.get(package_name, set())
         for f in sorted(files):
             if not should_include_file(f):
-                continue
-            if f in package_skip_files:
                 continue
             # Add the file to the package
             full_file_path = os.path.join(root, f)
@@ -249,48 +242,6 @@ for name in GRAPHICS_SIBLING_FILES:
     master_toml.append(
         f'"../pygraphics/lib/pygraphics/{name}" = "{GRAPHICS_SIBLING_MOUNT}"'
     )
-
-# LVGL display_driver — SoT in lv_bindings. Local serve uses web/lv_bindings
-# symlink (created below); GitHub Pages copies the file into _site/lv_bindings/.
-master_toml.append("")
-master_toml.append(
-    '"../lv_bindings/python/display_driver.py" = "/add_ons/"'
-)
-
-def _ensure_web_lv_bindings_link() -> None:
-    """Symlink web/lv_bindings → sibling lv_bindings for PyScript local serve."""
-    link = Path(repo_dir) / "web" / "lv_bindings"
-    candidates = [
-        Path(repo_dir) / ".." / "lv_bindings",
-        Path(repo_dir) / ".." / "cmods" / "lv_bindings",
-        Path("/agent/repos/lv_bindings"),
-        Path.home() / "gh" / "pydevices" / "cmods" / "lv_bindings",
-    ]
-    target = None
-    for c in candidates:
-        try:
-            resolved = c.resolve()
-        except OSError:
-            continue
-        if (resolved / "python" / "display_driver.py").is_file():
-            target = resolved
-            break
-    if target is None:
-        print(
-            "warning: lv_bindings/python/display_driver.py not found; "
-            "PyScript display_driver mount may 404 until the sibling is available"
-        )
-        return
-    if link.is_symlink():
-        if link.resolve() == target:
-            return
-        link.unlink()
-    elif link.exists():
-        raise SystemExit(f"{link} exists and is not a symlink")
-    link.symlink_to(target)
-    print(f"symlinked web/lv_bindings -> {target}")
-
-_ensure_web_lv_bindings_link()
 
 # Gallery loaders use `import ps_loader` (top-level); also mount at VFS root.
 master_toml.append(pyscript_toml_file_entry("src/add_ons/ps_loader.py", "/"))

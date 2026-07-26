@@ -171,35 +171,6 @@ def discover_sibling_srcs(repo_root=None, tools_dir=None):
     return found
 
 
-def discover_lv_bindings_python(repo_root=None, tools_dir=None):
-    """Return ``lv_bindings/python`` (holds ``display_driver.py``), or ``None``.
-
-    Search order:
-      1. ``PYDISPLAY_LV_BINDINGS_PYTHON``
-      2. ``/agent/repos/lv_bindings/python``
-      3. ``~/gh/pydevices/cmods/lv_bindings/python``
-      4. ``<repo_root>/../lv_bindings/python``
-      5. ``<repo_root>/../cmods/lv_bindings/python``
-    """
-    override = _env_get("PYDISPLAY_LV_BINDINGS_PYTHON")
-    if override:
-        path = _normpath(_expanduser(override))
-        return path if _is_dir(path) else None
-
-    root = repo_root if repo_root is not None else _repo_root(tools_dir)
-    candidates = [
-        _join("/agent/repos", "lv_bindings", "python"),
-        _expanduser(_join("~", "gh", "pydevices", "cmods", "lv_bindings", "python")),
-        _normpath(_join(root, "..", "lv_bindings", "python")),
-        _normpath(_join(root, "..", "cmods", "lv_bindings", "python")),
-    ]
-    for candidate in candidates:
-        path = _normpath(candidate)
-        if _is_dir(path):
-            return path
-    return None
-
-
 def apply_sibling_env(env, repo_root=None, tools_dir=None, prepend_paths=None):
     """Record discovered siblings in *env* and prepend them to ``PYTHONPATH``."""
     paths = []
@@ -209,11 +180,6 @@ def apply_sibling_env(env, repo_root=None, tools_dir=None, prepend_paths=None):
         if path:
             paths.append(path)
             env[_ENV_KEYS[package]] = path
-
-    lv_python = discover_lv_bindings_python(repo_root=root, tools_dir=tools_dir)
-    if lv_python:
-        paths.append(lv_python)
-        env["PYDISPLAY_LV_BINDINGS_PYTHON"] = lv_python
 
     ordered = list(paths)
     if prepend_paths:
@@ -231,11 +197,7 @@ def prepend_sibling_sys_path(repo_root=None, tools_dir=None):
     import sys
 
     added = []
-    paths = list(discover_sibling_srcs(repo_root=repo_root, tools_dir=tools_dir))
-    lv_python = discover_lv_bindings_python(repo_root=repo_root, tools_dir=tools_dir)
-    if lv_python:
-        paths.append(lv_python)
-    for path in reversed(paths):
+    for path in reversed(discover_sibling_srcs(repo_root=repo_root, tools_dir=tools_dir)):
         if path not in sys.path:
             sys.path.insert(0, path)
             added.append(path)

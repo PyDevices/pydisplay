@@ -73,5 +73,3 @@ docs/_build/
 /site
 .cache/
 
-# Local symlink to sibling lv_bindings for PyScript display_driver mount
-web/lv_bindings
