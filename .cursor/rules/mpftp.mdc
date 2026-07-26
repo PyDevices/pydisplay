@@ -14,7 +14,7 @@ Extension must be loaded (this Cursor window). Share the UI serial session.
 State is under **`~/.mpftp/`** only (never written into the repo):
 
 ```bash
-mpftp status          # ~/.mpftp/rpc.port, usually 127.0.0.1:7430
+mpftp status          # ~/.mpftp/rpc.port, usually 127.0.0.1:7429
 mpftp ports
 mpftp connect COM4
 mpftp ls /
