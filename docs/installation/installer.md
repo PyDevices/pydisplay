@@ -52,7 +52,7 @@ https://PyDevices.github.io/micropython-lib/mip/PyDevices
 
 ## Wokwi demo
 
-See the installer in action: uncomment the `add_ons` / `examples` lines in [`wokwi/main.py`](https://github.com/PyDevices/pydisplay/blob/main/sim/wokwi/main.py) ([Wokwi guide](../guides/wokwi.md)).
+See the installer in action: uncomment the `add_ons` / `examples` lines in [`wokwi/main.py`](https://github.com/PyDevices/pydisplay/blob/main/web/sim/wokwi/main.py) ([Wokwi guide](../guides/wokwi.md)).
 
 ## Custom installs
 

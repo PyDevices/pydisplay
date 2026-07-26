@@ -1,10 +1,10 @@
 # pydisplay on Wokwi (ESP32-S3 + ILI9341 touch)
 
-Browser project for [wokwi.com](https://wokwi.com): core packages + Wokwi board config + [`testris`](../src/examples/testris.py) (a touch + joystick Tetris demo).
+Browser project for [wokwi.com](https://wokwi.com): core packages + Wokwi board config + [`testris`](../../../src/examples/testris.py) (a touch + joystick Tetris demo).
 
-**Guide:** [Wokwi simulator](../docs/guides/wokwi.md) · **Hardware:** [Wokwi reference](https://pydevices.github.io/micropython-hardware/wokwi.html)
+**Guide:** [Wokwi simulator](../../../docs/guides/wokwi.md) · **Hardware:** [Wokwi reference](https://pydevices.github.io/micropython-hardware/wokwi.html)
 
-Board config: [`wokwi_ili9341_ft6x36_esp32s3`](../board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/)
+Board config: [`wokwi_ili9341_ft6x36_esp32s3`](../../../board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/)
 
 ## Files
 
@@ -41,4 +41,4 @@ Enables the full example catalog (`hello.py`, `bmp565_*`, `pydisplay_demo`, LVGL
 | Touch I2C SDA | 7 |
 | Touch I2C SCL | 6 |
 
-Matches [`wokwi_ili9341_ft6x36_esp32s3/board_config.py`](../board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/board_config.py).
+Matches [`wokwi_ili9341_ft6x36_esp32s3/board_config.py`](../../../board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/board_config.py).

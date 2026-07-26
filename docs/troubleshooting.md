@@ -81,7 +81,7 @@ mip.install("github:PyDevices/micropython-hardware/board_configs/sdldisplay")  #
 
 ### Simulation starts but display stays blank
 
-**Fix:** Use files from [`wokwi/`](../sim/wokwi/). Confirm `main.py` installs the core packages and the Wokwi board config before `import testris`.
+**Fix:** Use files from [`wokwi/`](../../web/sim/wokwi/). Confirm `main.py` installs the core packages and the Wokwi board config before `import testris`.
 
 ### `IndexError` on last keypad row (`TouchKeypad`)
 
