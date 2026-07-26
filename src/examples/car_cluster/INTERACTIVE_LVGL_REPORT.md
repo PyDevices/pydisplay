@@ -18,7 +18,7 @@ The soak harness is not part of the product fix. It lives in:
 These files existed before the car cluster example work and affect pydisplay
 behavior beyond this one example.
 
-### `src/add_ons/display_driver.py`
+### `display_driver` (lv_bindings `python/display_driver.py`)
 
 The temporary `lvgl_event_loop_probe.py` was folded back into `display_driver`.
 The `event_loop` class now directly contains the proven pacing behavior:
