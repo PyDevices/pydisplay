@@ -6,7 +6,7 @@ Private design scratchpad (not for RTD).
 
 - [ ] Warn users where downloads come from: PyDevices micropython-lib MIP index (`https://PyDevices.github.io/micropython-lib/mip/PyDevices`), not the [official MicroPython micropython-lib](https://github.com/micropython/micropython-lib) package index — **maintainer-published**, not an endorsed upstream source (show URL on first run / in GUI)
 - [ ] Freeze a small bootstrap module into desktop MicroPython builds so `from <xyz> import <clever_install_fn>` works out of the box
-- [ ] Install or refresh all 4 core modules (`displaysys`, `eventsys`, `graphics`, `multimer`) via `mip` / `lib_install`-style fetch (skip re-download when up to date?)
+- [ ] Install or refresh all 3 core modules (`displaysys`, `eventsys`, `graphics`, `multimer`) via `mip` / `lib_install`-style fetch (skip re-download when up to date?)
 - [ ] Post-install GUI (TBD: terminal menu vs minimal on-display UI): download more files, system/platform info, `lv_test_timer_*`-style sanity checks, link to `spotapi_remote` / spotapi
 - [ ] Flesh out scope, module name, and UX (name the import, entry points, error handling offline)
 

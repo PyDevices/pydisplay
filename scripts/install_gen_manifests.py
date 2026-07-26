@@ -27,8 +27,27 @@ packages = [
     ["examples", [], []],
     ["lib/displaysys", [], ["path.py"]],
     ["lib/eventsys", [], []],
-    ["lib/graphics", [], []],
     ["lib/multimer", [], []],
+]
+
+# Pure-Python graphics lives in sibling PyDevices/graphics (lib/graphics/).
+# packages/graphics.json is maintained there / by hand; PyScript mounts below.
+GRAPHICS_SIBLING_MOUNT = "/lib/graphics/"
+GRAPHICS_SIBLING_FILES = [
+    "__init__.py",
+    "_area.py",
+    "_blit_hooks.py",
+    "_bmp565.py",
+    "_clip.py",
+    "_draw.py",
+    "_files.py",
+    "_font.py",
+    "_font_8x14.py",
+    "_font_8x16.py",
+    "_font_8x8.py",
+    "_framebuf_plus.py",
+    "_shapes.py",
+    "framebuf.py",
 ]
 
 # Packages omitted from web/pyscript/micropython.toml (PyScript mounts add_ons for browser examples).
@@ -210,6 +229,13 @@ for entry in sorted(os.listdir(examples_root)):
     with open(package_file, "w") as f:
         json.dump({"urls": urls, "version": package_ver}, f, indent=2)
     example_package_names.append(entry)
+
+# Sibling graphics package (not under this repo's src/).
+master_toml.append("")
+for name in GRAPHICS_SIBLING_FILES:
+    master_toml.append(
+        f'"../graphics/lib/graphics/{name}" = "{GRAPHICS_SIBLING_MOUNT}"'
+    )
 
 # Gallery loaders use `import ps_loader` (top-level); also mount at VFS root.
 master_toml.append(pyscript_toml_file_entry("src/add_ons/ps_loader.py", "/"))

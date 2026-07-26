@@ -4,7 +4,9 @@ Install source `.py` files directly from the pydisplay GitHub repository using M
 
 ## Core install (recommended)
 
-Install the four core libraries (and `path.py` from the displaysys package).
+Install the three core libraries (`displaysys`, `eventsys`, `multimer`) plus
+`graphics` (manifest still under `packages/graphics.json`, files hosted in
+[PyDevices/graphics](https://github.com/PyDevices/graphics)).
 Board-specific `board_config.py` comes from a [`board_configs/`](https://github.com/PyDevices/micropython-hardware/tree/main/board_configs) package, not from displaysys:
 
 ```python
@@ -19,6 +21,12 @@ With `mpremote`:
 for pkg in displaysys eventsys graphics multimer; do
   mpremote mip install --target "." "github:PyDevices/pydisplay/packages/${pkg}.json"
 done
+```
+
+Or install `graphics` from the MIP index published by the graphics repo:
+
+```python
+mip.install("graphics", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
 ```
 
 Add examples and add_ons separately:
@@ -36,7 +44,7 @@ Manifests live in the [`packages/`](https://github.com/PyDevices/pydisplay/tree/
 |---------|----------|
 | displaysys | `packages/displaysys.json` |
 | eventsys | `packages/eventsys.json` |
-| graphics | `packages/graphics.json` |
+| graphics | `packages/graphics.json` (sources in PyDevices/graphics) |
 | multimer | `packages/multimer.json` |
 | add_ons | `packages/add_ons.json` |
 | examples | `packages/examples.json` |

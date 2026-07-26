@@ -13,7 +13,7 @@ One of three interchangeable Roku front ends (``roku_graphics``,
 and is what ``roku_remote`` launches.
 
 Shares :class:`roku_engine.RokuEngine` for ECP over the LAN (SSDP discover +
-HTTP keypress / apps / queries). Uses only the four core pydisplay packages
+HTTP keypress / apps / queries). Uses only the three core pydisplay packages
 (``graphics``, ``displaysys`` via ``board_config``, ``eventsys``, ``multimer``).
 
 Geometry scales from a 320x480 reference up through tall phone portraits.

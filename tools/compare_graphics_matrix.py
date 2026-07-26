@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Cross-runtime matrix: native ``graphics`` cmod vs ``src/lib/graphics``.
+"""Cross-runtime matrix: native ``graphics`` cmod vs ``../graphics/lib/graphics``.
 
 From repo root::
 
@@ -123,7 +123,7 @@ def ensure_graphics_cmod(python_exe: str, *, verbose: bool) -> tuple[bool, str]:
     impl = _graphics_impl(python_exe)
     if impl == "native_cmod":
         return True, "graphics-cmod already active"
-    if impl == "pydisplay_python":
+    if impl == "graphics_python":
         if verbose:
             print(
                 "Installing graphics-cmod from TestPyPI for {}...".format(python_exe),

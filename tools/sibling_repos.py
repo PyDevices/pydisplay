@@ -1,21 +1,30 @@
 """
-Discover palettes / pdwidgets sibling repo ``src`` directories for the example harness.
+Discover palettes / pdwidgets / graphics sibling repo ``lib`` directories for the
+example harness.
 
 Search order per package:
-  1. ``PYDISPLAY_PALETTES_SRC`` / ``PYDISPLAY_PDWIDGETS_SRC`` (optional override)
-  2. ``/agent/repos/<pkg>/src``
-  3. ``~/gh/pydevices/<pkg>/src``
-  4. ``<repo_root>/../<pkg>/src``
+  1. ``PYDISPLAY_<PKG>_LIB`` (optional override; ``PYDISPLAY_PALETTES_SRC`` etc.
+     still accepted as aliases)
+  2. ``/agent/repos/<pkg>/lib``
+  3. ``~/gh/pydevices/<pkg>/lib``
+  4. ``<repo_root>/../<pkg>/lib``
 
 MicroPython-safe (no ``os.path`` / pathlib) so ``example_test_wrapper.py`` can import it.
 """
 
 import os
 
-_SIBLING_PACKAGES = ("palettes", "pdwidgets")
+_SIBLING_PACKAGES = ("palettes", "pdwidgets", "graphics")
 _ENV_KEYS = {
-    "palettes": "PYDISPLAY_PALETTES_SRC",
-    "pdwidgets": "PYDISPLAY_PDWIDGETS_SRC",
+    "palettes": "PYDISPLAY_PALETTES_LIB",
+    "pdwidgets": "PYDISPLAY_PDWIDGETS_LIB",
+    "graphics": "PYDISPLAY_GRAPHICS_LIB",
+}
+# Backward-compatible aliases (older harness / docs used *_SRC).
+_ENV_ALIASES = {
+    "palettes": ("PYDISPLAY_PALETTES_SRC",),
+    "pdwidgets": ("PYDISPLAY_PDWIDGETS_SRC",),
+    "graphics": ("PYDISPLAY_GRAPHICS_SRC",),
 }
 _PATHSEP = getattr(os, "pathsep", ":")
 
@@ -115,17 +124,25 @@ def _repo_root(tools_dir=None):
 
 def _candidates(package, repo_root):
     return [
-        _join("/agent/repos", package, "src"),
-        _expanduser(_join("~", "gh", "pydevices", package, "src")),
-        _normpath(_join(repo_root, "..", package, "src")),
+        _join("/agent/repos", package, "lib"),
+        _expanduser(_join("~", "gh", "pydevices", package, "lib")),
+        _normpath(_join(repo_root, "..", package, "lib")),
     ]
 
 
 def discover_sibling_src(package, repo_root=None, tools_dir=None):
-    """Return an existing sibling ``src`` path for *package*, or ``None``."""
+    """Return an existing sibling ``lib`` path for *package*, or ``None``.
+
+    Name kept for call-site compatibility; the directory is now ``lib/``.
+    """
     env_key = _ENV_KEYS.get(package)
     if env_key:
         override = _env_get(env_key)
+        if override:
+            path = _normpath(_expanduser(override))
+            return path if _is_dir(path) else None
+    for alias in _ENV_ALIASES.get(package, ()):
+        override = _env_get(alias)
         if override:
             path = _normpath(_expanduser(override))
             return path if _is_dir(path) else None
@@ -139,7 +156,7 @@ def discover_sibling_src(package, repo_root=None, tools_dir=None):
 
 
 def discover_sibling_srcs(repo_root=None, tools_dir=None):
-    """Return existing sibling ``src`` paths in package order."""
+    """Return existing sibling ``lib`` paths in package order."""
     found = []
     for package in _SIBLING_PACKAGES:
         path = discover_sibling_src(package, repo_root=repo_root, tools_dir=tools_dir)
@@ -170,7 +187,7 @@ def apply_sibling_env(env, repo_root=None, tools_dir=None, prepend_paths=None):
 
 
 def prepend_sibling_sys_path(repo_root=None, tools_dir=None):
-    """Insert discovered sibling ``src`` dirs at the front of ``sys.path``."""
+    """Insert discovered sibling ``lib`` dirs at the front of ``sys.path``."""
     import sys
 
     added = []

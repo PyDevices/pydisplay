@@ -76,7 +76,8 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   `~/gh/pydevices/`); if that clone is missing, clone
   `github.com/PyDevices/{palettes,pdwidgets}` into a writable dir and put their
   `src` dirs on the venv path (e.g. a `*.pth` in `.venv/lib/*/site-packages`
-  listing `<repo>/palettes/src` and `<repo>/pdwidgets/src`, or `PYTHONPATH`).
+  listing `<repo>/palettes/lib`, `<repo>/pdwidgets/lib`, and
+  `<repo>/graphics/lib`, or `PYTHONPATH`).
   Quick setup: `bash scripts/setup_sibling_repos.sh` (clones current `main` and
   writes `.pth` files). The example harness (`tools/sibling_repos.py`) auto-discovers
   the same paths for matrix runs.

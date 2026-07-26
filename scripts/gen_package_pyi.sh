@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# Regenerate IDE type stubs for the four core pydisplay packages into tools/typings/.
+# Regenerate IDE type stubs for the three core pydisplay packages into tools/typings/.
 #
 # Usage:
 #   ./scripts/gen_package_pyi.sh
 #   ./scripts/gen_package_pyi.sh --help
 #
 # Requires the repo-root .venv (mypy / stubgen). Output is committed under
-# tools/typings/{displaysys,eventsys,graphics,multimer}/ for stubPath.
+# tools/typings/{displaysys,eventsys,multimer}/ for stubPath.
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-PACKAGES=(displaysys eventsys graphics multimer)
+PACKAGES=(displaysys eventsys multimer)
 OUT=tools/typings
 STUBGEN="${ROOT}/.venv/bin/stubgen"
 PYTHON="${ROOT}/.venv/bin/python"
@@ -22,10 +22,9 @@ usage() {
     cat <<'EOF'
 Usage: ./scripts/gen_package_pyi.sh
 
-Regenerate mypy stubgen .pyi trees for displaysys, eventsys, graphics, and
+Regenerate mypy stubgen .pyi trees for displaysys, eventsys, and
 multimer into tools/typings/ (Pylance / pyright stubPath).
 
-Requires .venv with mypy (stubgen). Drops graphics/framebuf.pyi if produced
 (source is gitignored; public API is graphics.FrameBuffer).
 EOF
 }
@@ -57,10 +56,9 @@ export PYTHONPATH="${ROOT}/src/lib:${ROOT}/src/add_ons${PYTHONPATH:+:$PYTHONPATH
 
 echo "Running stubgen → ${OUT}/ …"
 "$STUBGEN" --ignore-errors -o "$OUT" \
-    -p displaysys -p eventsys -p graphics -p multimer
+    -p displaysys -p eventsys -p multimer
 
 # Gitignored generated module; public FrameBuffer lives in _framebuf_plus.
-rm -f "${OUT}/graphics/framebuf.pyi"
 
 # stubgen misses lazy ``multimer.asyncio`` (``__getattr__``); declare it explicitly.
 MULTIMER_INIT="${OUT}/multimer/__init__.pyi"
