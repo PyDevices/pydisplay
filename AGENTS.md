@@ -20,10 +20,10 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 - Use the repo-root virtualenv at `.venv` for all Python tooling
   (`.venv/bin/python`, `.venv/bin/ruff`). The system `python3` has no project
   dependencies installed.
-- Only the `cpython-venv` runtime is available here. `micropython`,
-  `micropython.exe`, `circuitpython`, and `python.exe` are installed on the system path, so
-  cross-runtime matrices can exercise all 5.  ./tools/jupyter.sh and ./tools/pyscript.sh aid
-  development in Jupyter Notebook and PyScript respectively.
+- Desktop matrices use repo `.venv` (`cpython-venv`) plus interpreters on
+  `PATH` / `bin/` (`micropython`, `circuitpython`, and when present
+  `micropython.exe` / `python.exe`). `./tools/jupyter.sh` and
+  `./tools/pyscript.sh` aid Jupyter and PyScript development.
 - The desktop display backend on CPython on Windows is `PGDisplay` (pygame-ce; `import pygame`).
   `pygame-ce` is installed on top of `requirements-dev.txt` (it is intentionally
   not listed there — SDL2 is the documented primary and pygame-ce is the fallback).
