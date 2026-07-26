@@ -33,5 +33,5 @@ Active objectives for pydisplay + `cmods/pygraphics` work. Complements global `f
 
 ## Repos
 
-- **graphics fixes:** `~/github/cmods/pygraphics` (commit; push when Brad asks).
+- **pygraphics fixes:** `~/github/cmods/pygraphics` (commit; push when Brad asks).
 - **pydisplay runtime/examples:** `~/github/pydisplay` (`multimer`, `eventsys`, `board_config`, example loop patterns).
