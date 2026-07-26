@@ -5,7 +5,7 @@ from board_config import display_drv
 from palettes import get_palette
 import tft_text
 
-from graphics import Draw
+from pygraphics import Draw
 
 sep = os.sep if hasattr(os, "sep") else "/"  # PyScipt doesn't have os.sep
 

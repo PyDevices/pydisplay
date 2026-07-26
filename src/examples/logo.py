@@ -17,7 +17,7 @@ import math
 
 from board_config import display_drv
 from displaysys import color565
-import graphics
+import pygraphics
 
 
 def _channels(c):
@@ -36,7 +36,7 @@ def _gradient_round_rect(canvas, x, y, w, h, r, c1, c2):
     Vertical-gradient fill of a rounded rect, top to bottom. Works out the
     same per-row inset round_rect()'s Bresenham corners produce (solved
     directly here, since only the footprint is needed) and blends the row's
-    color with the same channel math graphics.gradient_rect() uses --
+    color with the same channel math pygraphics.gradient_rect() uses --
     gradient_rect() alone only knows about plain rectangles.
     """
     r = max(0, min(r, w // 2, h // 2))
@@ -49,7 +49,7 @@ def _gradient_round_rect(canvas, x, y, w, h, r, c1, c2):
             d = 0
         inset = r - int(math.sqrt(max(0, r * r - d * d))) if d else 0
         t = j / (h - 1) if h > 1 else 0
-        graphics.fill_rect(canvas, x + inset, y + j, w - 2 * inset, 1, _lerp_color(c1, c2, t))
+        pygraphics.fill_rect(canvas, x + inset, y + j, w - 2 * inset, 1, _lerp_color(c1, c2, t))
 
 
 def main():
@@ -58,7 +58,7 @@ def main():
     GRADIENT_BOTTOM = color565(0xF5, 0x4E, 0x00)  # #f54e00 / site's --accent
     WHITE = color565(0xFF, 0xF9, 0xF4)  # site's --accent-ink
 
-    graphics.fill(display_drv, BG)
+    pygraphics.fill(display_drv, BG)
 
     SIZE = min(display_drv.width, display_drv.height)
     SCALE = SIZE / 64
@@ -89,7 +89,7 @@ def main():
     # is the outer edge of the screen outline's 3.4-wide stroke
     # (x=14 y=16 w=36 h=24 r=3.5, offset by +/-1.7 on each side)
     body_x, body_y, body_w, body_h = rect(12.3, 14.3, 39.4, 27.4)
-    graphics.round_rect(display_drv, body_x, body_y, body_w, body_h, s(5.2), WHITE, True)
+    pygraphics.round_rect(display_drv, body_x, body_y, body_w, body_h, s(5.2), WHITE, True)
 
     # Screen: rounded rect stacked on top of the body, sampling the badge's
     # own gradient at this y-range so it reads as "seeing through" the
@@ -107,11 +107,11 @@ def main():
     stroke = max(1, s(3.4))
     neck_x, neck_y0 = pt(32, 40)
     _, neck_y1 = pt(32, 48)
-    graphics.fill_rect(display_drv, neck_x - stroke // 2, neck_y0, stroke, neck_y1 - neck_y0, WHITE)
+    pygraphics.fill_rect(display_drv, neck_x - stroke // 2, neck_y0, stroke, neck_y1 - neck_y0, WHITE)
 
     base_x0, base_y = pt(24, 48)
     base_x1, _ = pt(40, 48)
-    graphics.round_rect(
+    pygraphics.round_rect(
         display_drv,
         base_x0,
         base_y - stroke // 2,
@@ -126,7 +126,7 @@ def main():
     dot_r = max(1, s(2.4))
     for dot_x in (23.5, 32, 40.5):
         dx, dy = pt(dot_x, 28)
-        graphics.circle(display_drv, dx, dy, dot_r, WHITE, True)
+        pygraphics.circle(display_drv, dx, dy, dot_r, WHITE, True)
 
 
 main()

@@ -5,18 +5,18 @@ Cross-platform 2D drawing: framebuf-compatible buffers, shape primitives that re
 ## Quick start
 
 ```python
-import graphics
+import pygraphics
 
 w, h = 16, 16
-fb = graphics.FrameBuffer(bytearray(w * h * 2), w, h, graphics.RGB565)
+fb = pygraphics.FrameBuffer(bytearray(w * h * 2), w, h, pygraphics.RGB565)
 fb.fill(0)
 fb.fill_rect(1, 1, 6, 6, 0xFFFF)
 fb.circle(8, 8, 3, 0x1234)
-graphics.text8(fb, "Hi", 0, 0, 0xFFFF)
+pygraphics.text8(fb, "Hi", 0, 0, 0xFFFF)
 ```
 
-`graphics` bundles its own pure-Python `framebuf` implementation (`graphics.framebuf`, MP-parity
-with `modframebuf.c`) and always builds `graphics.FrameBuffer` on top of it — the same code path
+`pygraphics` bundles its own pure-Python `framebuf` implementation (`pygraphics.framebuf`, MP-parity
+with `modframebuf.c`) and always builds `pygraphics.FrameBuffer` on top of it — the same code path
 runs on MicroPython, CircuitPython, and CPython, so there is no native-vs-pure-Python backend to
 inspect or branch on.
 
@@ -24,12 +24,12 @@ inspect or branch on.
 
 | Style | When to use |
 |-------|-------------|
-| **`graphics.FrameBuffer`** | Default — own a buffer; get `.buffer`, `.width`, save/load, all shape methods |
-| **`graphics.Draw(canvas)`** | Draw on a display driver or third-party object with `pixel` / `hline` / … |
-| **Module functions** (`graphics.circle(fb, …)`) | Short scripts; same primitives as `FrameBuffer` methods |
+| **`pygraphics.FrameBuffer`** | Default — own a buffer; get `.buffer`, `.width`, save/load, all shape methods |
+| **`pygraphics.Draw(canvas)`** | Draw on a display driver or third-party object with `pixel` / `hline` / … |
+| **Module functions** (`pygraphics.circle(fb, …)`) | Short scripts; same primitives as `FrameBuffer` methods |
 
 ```python
-draw = graphics.Draw(display_drv)
+draw = pygraphics.Draw(display_drv)
 draw.round_rect(5, 5, 50, 30, 4, 0xF800)
 
 with draw.clip(10, 20, 100, 60):
@@ -64,28 +64,28 @@ display_drv.blit_rect(fb.buffer, dirty.x, dirty.y, dirty.w, dirty.h)
 ## Fonts
 
 Text helpers (`text8`, `text14`, `text16`, `text`, and `FrameBuffer.text`) use **embedded
-romfont** data shipped inside the `graphics` package (`_font_8x8.py`, `_font_8x14.py`,
+romfont** data shipped inside the `pygraphics` package (`_font_8x8.py`, `_font_8x14.py`,
 `_font_8x16.py` — derived from [spacerace/romfont](https://github.com/spacerace/romfont)).
 No font files on the filesystem are required for the built-in heights.
 
 ```python
-graphics.text8(fb, "Hello", 0, 0, 0xFFFF)
-graphics.text14(fb, "Tall", 0, 16, 0xF800)
-graphics.text16(fb, "Big", 0, 32, 0x07E0)
+pygraphics.text8(fb, "Hello", 0, 0, 0xFFFF)
+pygraphics.text14(fb, "Tall", 0, 16, 0xF800)
+pygraphics.text16(fb, "Big", 0, 32, 0x07E0)
 ```
 
 ### Loading romfont `.bin` files from the filesystem
 
-To use a custom or packaged romfont binary, pass a **file path** to `graphics.Font`.
+To use a custom or packaged romfont binary, pass a **file path** to `pygraphics.Font`.
 The file is opened on MicroPython, CircuitPython, and CPython like any other readable path
 (relative paths are resolved from the process working directory).
 
 ```python
-f = graphics.Font("assets/font_8x14.bin", 14)
+f = pygraphics.Font("assets/font_8x14.bin", 14)
 f.text(fb, "From disk", 0, 48, 0xFFFF)
 
 # Height can be inferred from names like font_8x16.bin when omitted:
-f16 = graphics.Font("/sd/fonts/font_8x16.bin")
+f16 = pygraphics.Font("/sd/fonts/font_8x16.bin")
 ```
 
 By default (`cached=True`) the entire file is read into RAM when the `Font` is constructed.
@@ -114,9 +114,9 @@ already in RAM (frozen module, `bytes` literal, mmap, and so on).
 
 ### Not the same as `framebuf.text`
 
-`graphics.framebuf.FrameBuffer.text()` (and MicroPython's built-in `framebuf` module) use a
+`pygraphics.framebuf.FrameBuffer.text()` (and MicroPython's built-in `framebuf` module) use a
 **different** built-in 8×8 font (Damien George's `font_petme128_8x8`). For romfont appearance
-and heights 8/14/16, use `graphics.text8` / `text14` / `text16` or `graphics.Font` as above.
+and heights 8/14/16, use `pygraphics.text8` / `text14` / `text16` or `pygraphics.Font` as above.
 
 ### Choosing a font rendering pattern
 
@@ -130,7 +130,7 @@ cycles different targets in one run. [`pydisplay_demo`](../examples/pydisplay_de
 
 | Pattern | Example | Background | Extra RAM | What hits the display | Typical sweet spot |
 |---------|---------|------------|-----------|----------------------|-------------------|
-| **Module helpers on canvas** | `graphics.text8(display_drv, …)` | Transparent (foreground pixels only) | None | One small `fill_rect` per lit pixel | Short labels, minimum RAM |
+| **Module helpers on canvas** | `pygraphics.text8(display_drv, …)` | Transparent (foreground pixels only) | None | One small `fill_rect` per lit pixel | Short labels, minimum RAM |
 | **String FB → one blit** | [`font_simpletest.py`](../examples/font_simpletest.py) (`string_blit`) | **Opaque** — `fb.fill(bg)` before `font.text` | One buffer sized to the string (reusable slice is better; see pydisplay_demo) | **One** `blit_rect` per string | Desktop/SDL (batch then `show()`), SPI panels when RAM is tight |
 | **Draw on `display_drv`** | [`font_simpletest.py`](../examples/font_simpletest.py) (`per_pixel`) | Transparent | None | One `fill_rect` per lit pixel on the live driver | Simplest code path; **slowest** on MCU and desktop |
 | **Full-screen `DisplayBuffer` + dirty blit** | [`font_simpletest.py`](../examples/font_simpletest.py) (`displaybuf`) | Transparent over existing buffer contents | **Full panel** `DisplayBuffer` | `display.show(dirty)` — one row `blit_rect` per dirty scanline | MCUs with enough RAM; many text updates; fastest of the three modes |
@@ -142,8 +142,8 @@ Draw directly on any canvas (`FrameBuffer`, `display_drv`, `DisplayBuffer`, …)
 foreground pixels are written — the background is left unchanged (**transparent** text).
 
 ```python
-graphics.text8(fb, "Hi", x, y, fg_color)
-area = graphics.text16(display_drv, "Status", 4, 4, 0xFFFF)  # returns Area bounds
+pygraphics.text8(fb, "Hi", x, y, fg_color)
+area = pygraphics.text16(display_drv, "Status", 4, 4, 0xFFFF)  # returns Area bounds
 ```
 
 Lowest memory overhead; fine for a few characters. On SPI TFTs without a compositing layer,
@@ -156,7 +156,7 @@ Compose the whole string in a small off-screen `FrameBuffer`, then upload it onc
 ```python
 w, h = len(s) * font.width * scale, font.height * scale
 buf = bytearray(w * h * 2)
-fb = graphics.FrameBuffer(buf, w, h, graphics.RGB565)
+fb = pygraphics.FrameBuffer(buf, w, h, pygraphics.RGB565)
 fb.fill(bg_color)          # opaque background
 font.text(fb, s, 0, 0, fg_color, scale)
 display_drv.blit_rect(buf, x, y, w, h)
@@ -225,25 +225,25 @@ PyScript and the gallery load the same `.bin` assets from `src/examples/assets/`
 
 ## Image loaders
 
-Eager loaders in the `graphics` package (full image in RAM):
+Eager loaders in the `pygraphics` package (full image in RAM):
 
 ```python
-fb = graphics.bmp_to_framebuffer("sprite.bmp")
-fb = graphics.pbm_to_framebuffer("icon.pbm")
-fb = graphics.pgm_to_framebuffer("gray.pgm")
-fb = graphics.load_image("image.bmp")  # or FrameBuffer.from_file(...)
+fb = pygraphics.bmp_to_framebuffer("sprite.bmp")
+fb = pygraphics.pbm_to_framebuffer("icon.pbm")
+fb = pygraphics.pgm_to_framebuffer("gray.pgm")
+fb = pygraphics.load_image("image.bmp")  # or FrameBuffer.from_file(...)
 ```
 
 `save_image(fb, path)` and `FrameBuffer.save()` write PBM/PGM/BMP for the formats in [Graphics files](graphics-files.md). Other framebuffer formats raise `ValueError`.
 
 ## Blit fast paths
 
-`graphics.blit()`, `Draw.blit()`, and `blit_rect()` dispatch to faster implementations when available:
+`pygraphics.blit()`, `Draw.blit()`, and `blit_rect()` dispatch to faster implementations when available:
 
 | Destination | Fast path |
 |-------------|-----------|
 | Display driver (`blit_rect` / `blit_transparent`) | SPI/SDL/pygame bulk copy |
-| `FrameBuffer` | `graphics.framebuf`'s `blit()` (same implementation on every runtime) |
+| `FrameBuffer` | `pygraphics.framebuf`'s `blit()` (same implementation on every runtime) |
 
 Use `Draw(display_drv).blit(sprite_fb, x, y)` instead of a per-pixel loop — it routes to `display_drv.blit_rect` for RGB565 sprites.
 
@@ -257,7 +257,7 @@ with draw.clip(10, 10, 50, 40):
     draw.text8("Panel", 0, 0, 0xFFFF)
 ```
 
-For streaming/large BMP assets, use `graphics.BMP565` (sliceable, optional streaming reads) — see [Graphics files](graphics-files.md).
+For streaming/large BMP assets, use `pygraphics.BMP565` (sliceable, optional streaming reads) — see [Graphics files](graphics-files.md).
 
 ## pydisplay integration
 
@@ -265,16 +265,16 @@ For streaming/large BMP assets, use `graphics.BMP565` (sliceable, optional strea
 |------|-----|
 | Scrollable full-screen buffer | `add_ons/displaybuf.DisplayBuffer` |
 | TFT proportional fonts | `tft_text` / `tft_write` add-ons |
-| Large BMP sprites | `graphics.BMP565` |
+| Large BMP sprites | `pygraphics.BMP565` |
 
 See [Drawing and fonts](drawing-and-fonts.md) for the wider pydisplay drawing stack.
 
 ## FAQ
 
-**Draw method returned nothing?** — Use `graphics.FrameBuffer` or `Draw`; the bare `graphics.framebuf.FrameBuffer` base methods do not return `Area`.
+**Draw method returned nothing?** — Use `pygraphics.FrameBuffer` or `Draw`; the bare `pygraphics.framebuf.FrameBuffer` base methods do not return `Area`.
 
 ## Next
 
 - [Graphics files](graphics-files.md) — loaders and BMP565
 - [Displays](displays.md)
-- [API reference](../reference/) → `graphics`
+- [API reference](../reference/) → `pygraphics`

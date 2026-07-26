@@ -7,7 +7,7 @@
 # Shows both blit styles: a full-window slice, then ``bmp[:]`` with a
 # short pause between (same patterns formerly in bmp565_blit.py).
 from board_config import display_drv
-from graphics import BMP565, hline
+from pygraphics import BMP565, hline
 from multimer import sleep_ms
 
 

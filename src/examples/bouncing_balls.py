@@ -5,7 +5,7 @@ bouncing_balls.py
 Animate colored balls bouncing inside the display.
 
 Inspired by Pimoroni's ``balls_demo.py``, adapted for pydisplay's
-``board_config.display_drv`` and ``graphics`` module so the same script runs on
+``board_config.display_drv`` and ``pygraphics`` module so the same script runs on
 desktop (SDL/Pygame), MCU, and PyScript.
 
 .. note:: This example requires the following modules:
@@ -14,7 +14,7 @@ desktop (SDL/Pygame), MCU, and PyScript.
     :columns: 3
 
     - `displaysys`
-    - `graphics`
+    - `pygraphics`
     - `multimer`
 
 """
@@ -22,7 +22,7 @@ desktop (SDL/Pygame), MCU, and PyScript.
 from random import getrandbits
 
 from board_config import display_drv, runtime
-import graphics
+import pygraphics
 
 WIDTH = display_drv.width
 HEIGHT = display_drv.height
@@ -92,10 +92,10 @@ balls = make_balls()
 
 
 def _tick(_=None):
-    graphics.fill(display_drv, BG)
+    pygraphics.fill(display_drv, BG)
     for ball in balls:
         step(ball)
-        graphics.circle(display_drv, int(ball.x), int(ball.y), ball.r, ball.color, True)
+        pygraphics.circle(display_drv, int(ball.x), int(ball.y), ball.r, ball.color, True)
     display_drv.show()
 
 

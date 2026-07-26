@@ -5,7 +5,7 @@
 """
 displaysys.pixeldisplay — addressable LED grids (NeoPixel, DotStar, etc.).
 
-MicroPython: ``PixelFramebuffer`` (``graphics.FrameBuffer`` + grid map) and
+MicroPython: ``PixelFramebuffer`` (``pygraphics.FrameBuffer`` + grid map) and
 ``PixelDisplay`` live here.  CircuitPython board configs use
 ``adafruit_pixel_framebuf.PixelFramebuffer`` with pydisplay ``PixelDisplay``.
 """
@@ -19,7 +19,7 @@ except ImportError:
 
 
 from displaysys import DisplayDriver, color_rgb
-import graphics
+import pygraphics
 
 
 def _color888_from_565(c):
@@ -106,7 +106,7 @@ def _build_grid_mapper(
     return grid_width, grid_height, indices
 
 
-class PixelFramebuffer(graphics.FrameBuffer):
+class PixelFramebuffer(pygraphics.FrameBuffer):
     """
     NeoPixel / DotStar grid framebuffer for MicroPython.
 
@@ -142,7 +142,7 @@ class PixelFramebuffer(graphics.FrameBuffer):
         self._height = grid_height
         buf = bytearray(grid_width * grid_height * 3)
         self._double_buffer = bytearray(grid_width * grid_height * 3)
-        super().__init__(buf, grid_width, grid_height, graphics.RGB888)
+        super().__init__(buf, grid_width, grid_height, pygraphics.RGB888)
         self.rotation = rotation
 
     @property

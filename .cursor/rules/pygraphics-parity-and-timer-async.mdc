@@ -1,17 +1,17 @@
 ---
-description: Graphics-cmod parity and timer_async matrix goals for pydisplay (no workarounds)
+description: pygraphics-cmod parity and timer_async matrix goals for pydisplay (no workarounds)
 alwaysApply: true
 ---
 
-# Graphics parity and cross-runtime examples
+# pygraphics parity and cross-runtime examples
 
-Active objectives for pydisplay + `cmods/graphics` work. Complements global `fix-not-workaround` rule.
+Active objectives for pydisplay + `cmods/pygraphics` work. Complements global `fix-not-workaround` rule.
 
-## Graphics-cmod ↔ sibling `graphics/lib/graphics`
+## pygraphics-cmod ↔ sibling `pygraphics/lib/pygraphics`
 
-- **Goal:** 100% behavioral parity with [PyDevices/graphics](https://github.com/PyDevices/graphics) `lib/graphics/` (API, kwargs, duck typing, BMP565, Draw, Font, file I/O).
+- **Goal:** 100% behavioral parity with [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics) `lib/pygraphics/` (API, kwargs, duck typing, BMP565, Draw, Font, file I/O).
 - When a difference is found (matrix failure, code review, or side-by-side with Python), **fix it in the cmod immediately** — do not defer or patch callers in pydisplay examples.
-- Reference implementation is the pure-Python package under `graphics/lib/graphics/`; cmod must match the contract, not a subset.
+- Reference implementation is the pure-Python package under `pygraphics/lib/pygraphics/`; cmod must match the contract, not a subset.
 - MP and CP share bindings (`gfx_bindings_mp.c`, `gfx_module_mp.c`); fix both runtimes when the gap is in shared code.
 - Rebuild MP/CP after cmod changes; re-run affected examples before moving on.
 
@@ -33,5 +33,5 @@ Active objectives for pydisplay + `cmods/graphics` work. Complements global `fix
 
 ## Repos
 
-- **graphics fixes:** `~/github/cmods/graphics` (commit; push when Brad asks).
+- **pygraphics fixes:** `~/github/cmods/pygraphics` (commit; push when Brad asks).
 - **pydisplay runtime/examples:** `~/github/pydisplay` (`multimer`, `eventsys`, `board_config`, example loop patterns).

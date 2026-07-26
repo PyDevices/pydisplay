@@ -71,23 +71,23 @@ class UrlMakerTests(unittest.TestCase):
         )
 
     def test_graphics_prefers_cmod_wheel(self):
-        self.assertEqual(rewrite_wheel("graphics"), "graphics-cmod")
-        self.assertEqual(rewrite_mip("graphics"), "graphics")
+        self.assertEqual(rewrite_wheel("pygraphics"), "pygraphics-cmod")
+        self.assertEqual(rewrite_mip("pygraphics"), "pygraphics")
         # pyscript profiles skip graphics (mounted)
-        out = urls_from_deps(modules=("x",), deps=("graphics",), runtime=None)
+        out = urls_from_deps(modules=("x",), deps=("pygraphics",), runtime=None)
         self.assertEqual(out["micropython"], "?modules=x")
         self.assertEqual(out["pyodide"], "?modules=x")
-        # empty-skip profile emits graphics-cmod on pyodide
+        # empty-skip profile emits pygraphics-cmod on pyodide
         q = url(
             modules=("x",),
-            deps=("graphics",),
+            deps=("pygraphics",),
             runtime="pyodide",
             profile="bare",
         )
-        self.assertEqual(q, "?modules=x&deps=graphics-cmod")
+        self.assertEqual(q, "?modules=x&deps=pygraphics-cmod")
         q = url(
             modules=("x",),
-            deps=("graphics",),
+            deps=("pygraphics",),
             runtime="micropython",
             profile="firmware-cmods",
         )

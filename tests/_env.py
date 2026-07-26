@@ -5,7 +5,7 @@
 
 Puts ``src/lib`` (displaysys, eventsys, multimer) and ``src/add_ons`` on
 ``sys.path`` without installing anything. Does **not** require sibling git
-checkouts or optional packages such as ``graphics`` / ``usdl2``.
+checkouts or optional packages such as ``pygraphics`` / ``usdl2``.
 
     import _env  # noqa: F401
     import multimer

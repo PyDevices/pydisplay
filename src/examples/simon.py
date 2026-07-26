@@ -2,7 +2,7 @@
 """
 Simon — classic memory game for round (and rectangular) displays.
 
-Uses pydisplay ``graphics`` (not LVGL) plus ``eventsys`` touch. Designed as a
+Uses pydisplay ``pygraphics`` (not LVGL) plus ``eventsys`` touch. Designed as a
 light-RAM display/touch driver demo: draws directly to the bus display with no
 full-frame buffer.
 
@@ -18,7 +18,7 @@ from random import getrandbits
 from time import sleep_ms
 
 import eventsys
-import graphics
+import pygraphics
 
 try:
     from multimer import ticks_diff, ticks_ms
@@ -110,9 +110,9 @@ def _hub_text(msg, sub=""):
     x = CX - HUB_TEXT_W // 2
     # Clear glyph rows then draw — spaces alone may not erase prior pixels.
     display_drv.fill_rect(x, HUB_Y0, HUB_TEXT_W, 8, BLACK)
-    graphics.text(display_drv, line0, x, HUB_Y0, WHITE)
+    pygraphics.text(display_drv, line0, x, HUB_Y0, WHITE)
     display_drv.fill_rect(x, HUB_Y1, HUB_TEXT_W, 8, BLACK)
-    graphics.text(display_drv, line1, x, HUB_Y1, GREY)
+    pygraphics.text(display_drv, line1, x, HUB_Y1, GREY)
 
 
 def _hub(msg, sub=""):

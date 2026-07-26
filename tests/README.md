@@ -1,7 +1,7 @@
 # Tests
 
 Self-contained tests for in-tree [`multimer`](../src/lib/multimer),
-[`eventsys`](../src/lib/eventsys), [`graphics`](https://github.com/PyDevices/graphics) (sibling `lib/graphics`), and
+[`eventsys`](../src/lib/eventsys), [`pygraphics`](https://github.com/PyDevices/pygraphics) (sibling `lib/pygraphics`), and
 [`displaysys`](../src/lib/displaysys) packages.
 
 They use only the Python standard library (`unittest`) — no third-party test
@@ -9,8 +9,8 @@ runner or build step is required. The shared bootstrap in
 [`_env.py`](_env.py) puts `src/lib` on `sys.path`, so nothing needs to be
 installed first.
 
-`graphics.FrameBuffer` always builds on the bundled pure-Python
-`graphics.framebuf` module (never the native `framebuf` module compiled into
+`pygraphics.FrameBuffer` always builds on the bundled pure-Python
+`pygraphics.framebuf` module (never the native `framebuf` module compiled into
 MicroPython/CircuitPython firmware), so the same implementation is exercised
 on every runtime.
 
@@ -44,7 +44,7 @@ python tests/test_multimer.py
 | `test_clip.py` | clip helpers and ``ClippedCanvas`` |
 | `test_framebuf.py` | the MP-parity `add_ons/framebuf` module (pixels, fill, scroll, text, blit, poly) |
 | `test_framebuf_sync.py` | generated `graphics/framebuf.py` matches canonical `add_ons/framebuf.py` |
-| `test_framebuf_plus.py` | the exported `graphics.FrameBuffer` (properties + `Area` returns) |
+| `test_framebuf_plus.py` | the exported `pygraphics.FrameBuffer` (properties + `Area` returns) |
 | `test_shapes.py` | the drawing primitives (`line`, `rect`, `circle`, `poly`, `blit`, ...) |
 | `test_font.py` | `Font` and the `text` / `text8` / `text14` / `text16` helpers |
 | `test_files.py` | `save` / `from_file` and the PBM/PGM converters |
@@ -65,7 +65,7 @@ identically on every host without any hardware.
 
 Graphics tests exercise every `framebuf` format (`MONO_VLSB`, `MONO_HLSB`,
 `MONO_HMSB`, `RGB565`, `GS2_HMSB`, `GS4_HMSB`, `GS8`) against the single
-bundled `graphics.framebuf` implementation, which is verified byte-for-byte
+bundled `pygraphics.framebuf` implementation, which is verified byte-for-byte
 against the real MicroPython `framebuf` C module (fuzz-tested; see
 `test_framebuf.py`).
 

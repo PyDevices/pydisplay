@@ -21,7 +21,7 @@ Application and example code assume a **16-bit RGB565** surface:
 - `blit_transparent` key colors as 2-byte 565 values
 
 Every concrete backend must implement the **drawing** and **lifecycle** methods
-below. Application code, `graphics`, and examples assume they exist — not only
+below. Application code, `pygraphics`, and examples assume they exist — not only
 `show()` and `quit()`:
 
 | Method | Role |
@@ -52,7 +52,7 @@ API** and convert at draw time via `color_rgb` (or backend-specific blit paths).
 | White | `0xFFFF` | `0xFFFFFF` |
 | Red | `0xF800` | `0xFF0000` |
 
-RGB888 unpack (used by `PixelFramebuffer` and `graphics.RGB888`) treats the int
+RGB888 unpack (used by `PixelFramebuffer` and `pygraphics.RGB888`) treats the int
 as `0xRRGGBB`. Passing `0xFFFF` (565 white) through that path yields cyan
 (R=0, G=255, B=255), not white.
 

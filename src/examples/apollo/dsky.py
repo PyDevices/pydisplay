@@ -7,7 +7,7 @@ Image source:  https://commons.wikimedia.org/wiki/File:Apollo_DSKY_interface.svg
 
 from board_config import display_drv, runtime
 from eventsys.touch_keypad import TouchKeypad
-from graphics import Area, BMP565
+from pygraphics import Area, BMP565
 
 try:
     from os import sep

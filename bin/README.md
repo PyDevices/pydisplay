@@ -2,7 +2,7 @@
 
 Committed copies of the desktop MicroPython/CircuitPython (and Windows
 MicroPython, for completeness) unix executables built with pydisplay's
-required native modules (notably [graphics](https://github.com/PyDevices/graphics)).
+required native modules (notably [pygraphics](https://github.com/PyDevices/pygraphics)).
 They exist so that environments without a local firmware build — most
 importantly **Cursor Cloud agents** — can run the example test matrix without
 compiling MicroPython/CircuitPython from source.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Clone palettes / pdwidgets / graphics / usdl2 siblings for local dev and example tests.
+# Clone palettes / pdwidgets / pygraphics / usdl2 siblings for local dev and example tests.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -22,22 +22,22 @@ clone_or_update() {
 
 PALETTES="$(clone_or_update palettes)"
 PDWIDGETS="$(clone_or_update pdwidgets)"
-GRAPHICS="$(clone_or_update graphics)"
+GRAPHICS="$(clone_or_update pygraphics)"
 USDL2="$(clone_or_update usdl2)"
 
 SITE="$("$ROOT/.venv/bin/python" -c 'import site; print(site.getsitepackages()[0])')"
 echo "$PALETTES/lib" >"$SITE/palettes.pth"
 echo "$PDWIDGETS/lib" >"$SITE/pdwidgets.pth"
-echo "$GRAPHICS/lib" >"$SITE/graphics.pth"
+echo "$GRAPHICS/lib" >"$SITE/pygraphics.pth"
 echo "$USDL2/lib" >"$SITE/usdl2.pth"
 
 export PYDISPLAY_PALETTES_LIB="$PALETTES/lib"
 export PYDISPLAY_PDWIDGETS_LIB="$PDWIDGETS/lib"
-export PYDISPLAY_GRAPHICS_LIB="$GRAPHICS/lib"
+export PYDISPLAY_PYGRAPHICS_LIB="$GRAPHICS/lib"
 export PYDISPLAY_USDL2_LIB="$USDL2/lib"
 
 echo "palettes:  $PALETTES/lib"
 echo "pdwidgets: $PDWIDGETS/lib"
-echo "graphics:  $GRAPHICS/lib"
+echo "pygraphics:  $GRAPHICS/lib"
 echo "usdl2:     $USDL2/lib"
 echo "CPython .pth files written under $SITE"

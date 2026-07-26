@@ -17,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT / "src" / "lib"))
 
-from graphics._bmp565 import write_bmp565_file  # noqa: E402
+from pygraphics._bmp565 import write_bmp565_file  # noqa: E402
 
 OUT = Path(__file__).resolve().parent
 REF_W = 320

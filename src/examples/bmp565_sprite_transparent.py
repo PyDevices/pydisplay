@@ -11,7 +11,7 @@ except ImportError:
 
 from board_config import runtime
 from color_setup import ssd as canvas
-from graphics import BMP565
+from pygraphics import BMP565
 
 image = BMP565("examples/assets/warrior.bmp", streamed=True)
 print(f"\n{image.width=}, {image.height=}, {image.bpp=}")

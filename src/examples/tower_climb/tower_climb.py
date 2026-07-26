@@ -26,7 +26,7 @@ if _PKG_DIR not in sys.path:
 from board_config import display_drv, runtime
 from displaysys import color565
 from eventsys.keys import Keys
-from graphics import BMP565, FrameBuffer, RGB565, rect, text8
+from pygraphics import BMP565, FrameBuffer, RGB565, rect, text8
 import _cfg as cfg
 from _paths import asset_path
 from tower_climb_trace import open_trace

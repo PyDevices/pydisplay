@@ -29,7 +29,7 @@ Tag pushes upload to TestPyPI (and pydisplay also updates micropython-lib + MIP 
 | `displaysys` | `displaysys-0.0.7-py2.py3-none-any.whl` | universal; full tree + `board_config.py` |
 | `eventsys` | `eventsys-0.0.7-py2.py3-none-any.whl` | universal |
 | `multimer` | `multimer-0.0.7-py2.py3-none-any.whl` | universal |
-| `pydisplay-graphics` | `pydisplay_graphics-0.0.7-py2.py3-none-any.whl` | universal (PyPI name mapped from `graphics`) |
+| `pygraphics` | `pydisplay_graphics-0.0.7-py2.py3-none-any.whl` | universal (PyPI name mapped from `pygraphics`) |
 
 **Layout:** `displaysys` is the full package (all modules under `src/lib/displaysys/` plus `board_config.py`). Per-backend `displaysys-*` packages are **not** published. Published packages do not include `examples/` trees.
 
@@ -42,7 +42,7 @@ Tag pushes upload to TestPyPI (and pydisplay also updates micropython-lib + MIP 
 
 Both use the same shape: matrix `ubuntu-latest` + `windows-latest`, plus a dedicated Android job (`CIBW_PLATFORM=android`), then merge artifacts and `twine upload`.
 
-### graphics (`graphics-cmod`)
+### graphics (`pygraphics-cmod`)
 
 - **Workflow:** `graphics/.github/workflows/publish-testpypi.yml`
 - **TestPyPI:** verified `0.0.1` — 14 wheels: `manylinux` + `win_amd64` for cp310–cp314, `android_21_arm64_v8a` + `android_21_x86_64` for cp313–cp314
@@ -82,8 +82,8 @@ Both use the same shape: matrix `ubuntu-latest` + `windows-latest`, plus a dedic
 
 | Category | Status |
 |----------|--------|
-| **Native CPython extensions** (`lvgl-cpython`, `graphics-cmod`) | **Met** — CI builds linux + windows + android wheels |
-| **Pure pydisplay libs** (`displaysys`, `eventsys`, `multimer`, `pydisplay-graphics`) | **Met by design** — universal wheels; manifest `require()` graph in § Pip dependency graph |
+| **Native CPython extensions** (`lvgl-cpython`, `pygraphics-cmod`) | **Met** — CI builds linux + windows + android wheels |
+| **Pure pydisplay libs** (`displaysys`, `eventsys`, `multimer`, `pygraphics`) | **Met by design** — universal wheels; manifest `require()` graph in § Pip dependency graph |
 | **usdl2** | **Met for CPython shim** — universal wheel; MP cmod is separate |
 | **displayif** | **N/A** — firmware-only user C module, not a pip/MIP package |
 | **displaysys-* backends** | **Removed** — use full `displaysys` only |

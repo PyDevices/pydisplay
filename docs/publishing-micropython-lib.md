@@ -57,7 +57,7 @@ Tags must match `v*.*.*` (e.g. `v0.0.5`, not `0.0.5`).
 Pushing the tag starts [**Publish micropython-lib**](https://github.com/PyDevices/pydisplay/actions/workflows/publish-micropython-lib.yml), which:
 
 1. Syncs `src/lib/*` into [micropython-lib](https://github.com/PyDevices/micropython-lib) (`PyDevices` branch) at version `X.Y.Z`
-2. Uploads CPython wheels to TestPyPI (`displaysys`, `eventsys`, `multimer`, …). Pure-Python `graphics` publishes from [PyDevices/graphics](https://github.com/PyDevices/graphics) as `pydisplay-graphics`.
+2. Uploads CPython wheels to TestPyPI (`displaysys`, `eventsys`, `multimer`, …). Pure-Python `pygraphics` publishes from [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics) as `pygraphics`.
 3. Rebuilds the [MIP index](https://PyDevices.github.io/micropython-lib/mip/PyDevices) on micropython-lib `gh-pages`
 
 Typical runtime: **~10–20 minutes**.
@@ -76,7 +76,7 @@ Typical runtime: **~10–20 minutes**.
     displaysys
   ```
 
-  Fuller desktop stack smoke test (`displaysys`, `usdl2`, `graphics-cmod`, `lvgl-cpython`, `board_config` draw):
+  Fuller desktop stack smoke test (`displaysys`, `usdl2`, `pygraphics-cmod`, `lvgl-cpython`, `board_config` draw):
 
   ```bash
   ./tools/test_testpypi_desktop.sh --headless
@@ -192,9 +192,9 @@ Or `mpremote mip install --index "https://PyDevices.github.io/micropython-lib/mi
 
 ### TestPyPI
 
-PyDevices CPython wheels are published to [TestPyPI](https://test.pypi.org) only (not production PyPI). Browse package names there (`displaysys`, `eventsys`, `multimer`, `pydisplay-graphics`, …).
+PyDevices CPython wheels are published to [TestPyPI](https://test.pypi.org) only (not production PyPI). Browse package names there (`displaysys`, `eventsys`, `multimer`, `pygraphics`, …).
 
-**Naming:** MIP package names (e.g. `graphics`) may differ from the pip/TestPyPI project name when the MIP name is already taken on pypi.org. The mapping lives in `pypi_publish_name()` in [`publish_sync_packages.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_sync_packages.sh).
+**Naming:** MIP package names (e.g. `pygraphics`) may differ from the pip/TestPyPI project name when the MIP name is already taken on pypi.org. The mapping lives in `pypi_publish_name()` in [`publish_sync_packages.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_sync_packages.sh).
 
 #### Two-index `pip install` (required)
 
@@ -268,7 +268,7 @@ Script options: `./scripts/publish_sync_packages.sh --help`
 |--------|------------|
 | Version already exists | Push a **new tag** with a higher semver — TestPyPI rejects duplicate versions |
 | Upload fails mid-run | Partial uploads may succeed; fix the error, bump the tag, push again |
-| `graphics` packaging | Pure-Python `graphics` / `pydisplay-graphics` is published from [PyDevices/graphics](https://github.com/PyDevices/graphics), not this repo. |
+| `pygraphics` packaging | Pure-Python `pygraphics` / `pygraphics` is published from [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics), not this repo. |
 | Slow | Normal — each lib package gets hatch build + twine upload |
 | Not for devices | Boards use the **MIP index**, not TestPyPI |
 

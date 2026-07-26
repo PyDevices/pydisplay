@@ -13,7 +13,7 @@ Cycles three rendering paths in succession (no env vars):
 
 from board_config import display_drv, runtime
 from random import getrandbits
-from graphics import Font, FrameBuffer, RGB565
+from pygraphics import Font, FrameBuffer, RGB565
 from palettes import get_palette
 
 MODES = ("string_blit", "per_pixel", "displaybuf")

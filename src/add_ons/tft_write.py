@@ -35,7 +35,7 @@ https://github.com/devbis/st7789py_mpy.
 
 from micropython import const
 
-from graphics import Area
+from pygraphics import Area
 
 WHITE = const(0xFFFF)
 BLACK = const(0x0000)

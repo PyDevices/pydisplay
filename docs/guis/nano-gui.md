@@ -2,7 +2,7 @@
 
 [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui) by Peter Hinch — lightweight GUI for memory-constrained MicroPython boards.
 
-pydisplay does **not** vendor Nano-GUI in the git repo. [`color_setup.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/color_setup.py) calls [`fetch_ph_gui`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/fetch_ph_gui.py) to install the `gui/` tree into `add_ons/` and patch `graphics.FrameBuffer` isinstance checks. Display wiring uses [`displaybuf.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/displaybuf.py).
+pydisplay does **not** vendor Nano-GUI in the git repo. [`color_setup.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/color_setup.py) calls [`fetch_ph_gui`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/fetch_ph_gui.py) to install the `gui/` tree into `add_ons/` and patch `pygraphics.FrameBuffer` isinstance checks. Display wiring uses [`displaybuf.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/displaybuf.py).
 
 ## Requirements
 

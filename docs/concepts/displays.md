@@ -153,7 +153,7 @@ Anything you can draw on implements the framebuf API:
 
 - The display itself
 - `framebuf` bytearrays
-- `graphics.BMP565` bitmap files
+- `pygraphics.BMP565` bitmap files
 - `displaybuf.DisplayBuffer` (see [add-ons](../add-ons.md))
 
 ## Timing

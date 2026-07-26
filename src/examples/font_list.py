@@ -11,7 +11,7 @@ The rendered font is then displayed on the display driver.
 """
 
 from board_config import display_drv
-from graphics import Font, FrameBuffer, RGB565
+from pygraphics import Font, FrameBuffer, RGB565
 import os
 
 
