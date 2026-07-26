@@ -45,6 +45,7 @@ Manifests live in the [`packages/`](https://github.com/PyDevices/pydisplay/tree/
 | displaysys | `packages/displaysys.json` |
 | eventsys | `packages/eventsys.json` |
 | graphics | `packages/graphics.json` (sources in PyDevices/graphics) |
+| usdl2 | `packages/usdl2.json` (sources in PyDevices/usdl2) |
 | multimer | `packages/multimer.json` |
 | add_ons | `packages/add_ons.json` |
 | examples | `packages/examples.json` |

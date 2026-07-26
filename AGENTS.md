@@ -67,17 +67,15 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 - Known pre-existing example failures on CPython (not environment issues to
   "fix"): `nano_gui_simpletest` needs the matching Hinch `gui/` package.
   `tools/png_test.py` in **pdwidgets** (PNG probe) needs `PDWIDGETS_PNG_DIR` / material-design-icons and a sibling pydisplay checkout.
-- **`palettes` / `pdwidgets` sibling repos** (`hello`, `color_test`, `feathers`,
-  `graphics_simpletest`, `palettes_demo`, `widgets_*`, … import `palettes` and/or
-  `pdwidgets`). These are source-only PyDevices repos, **not** pip packages — the
-  PyPI project literally named `palettes` is an unrelated "random hex color"
-  library, so do **not** `pip install palettes`. They normally arrive as
-  repositoryDependencies under `/agent/repos/{palettes,pdwidgets}` (symlinked into
-  `~/gh/pydevices/`); if that clone is missing, clone
-  `github.com/PyDevices/{palettes,pdwidgets}` into a writable dir and put their
-  `src` dirs on the venv path (e.g. a `*.pth` in `.venv/lib/*/site-packages`
-  listing `<repo>/palettes/lib`, `<repo>/pdwidgets/lib`, and
-  `<repo>/graphics/lib`, or `PYTHONPATH`).
+- **Sibling pure-Python repos** (`palettes`, `pdwidgets`, `graphics`, `usdl2`
+  under `lib/`). Examples that `import palettes` / `pdwidgets` / `graphics` /
+  the ctypes `usdl2` fallback need those `lib/` dirs on path. The PyPI project
+  literally named `palettes` is an unrelated "random hex color" library — do
+  **not** `pip install palettes`. Prefer native TestPyPI wheels for `graphics`
+  (`graphics-cmod`) and `usdl2` when available. Clones normally live under
+  `/agent/repos/{…}` (symlinked into `~/gh/pydevices/`); if missing, clone
+  `github.com/PyDevices/<name>` and put `<repo>/lib` on the venv path
+  (`.pth` / `PYTHONPATH`).
   Quick setup: `bash scripts/setup_sibling_repos.sh` (clones current `main` and
   writes `.pth` files). The example harness (`tools/sibling_repos.py`) auto-discovers
   the same paths for matrix runs.

@@ -1,6 +1,6 @@
 """
-Discover palettes / pdwidgets / graphics sibling repo ``lib`` directories for the
-example harness.
+Discover palettes / pdwidgets / graphics / usdl2 sibling repo ``lib`` directories
+for the example harness.
 
 Search order per package:
   1. ``PYDISPLAY_<PKG>_LIB`` (optional override; ``PYDISPLAY_PALETTES_SRC`` etc.
@@ -14,17 +14,19 @@ MicroPython-safe (no ``os.path`` / pathlib) so ``example_test_wrapper.py`` can i
 
 import os
 
-_SIBLING_PACKAGES = ("palettes", "pdwidgets", "graphics")
+_SIBLING_PACKAGES = ("palettes", "pdwidgets", "graphics", "usdl2")
 _ENV_KEYS = {
     "palettes": "PYDISPLAY_PALETTES_LIB",
     "pdwidgets": "PYDISPLAY_PDWIDGETS_LIB",
     "graphics": "PYDISPLAY_GRAPHICS_LIB",
+    "usdl2": "PYDISPLAY_USDL2_LIB",
 }
 # Backward-compatible aliases (older harness / docs used *_SRC).
 _ENV_ALIASES = {
     "palettes": ("PYDISPLAY_PALETTES_SRC",),
     "pdwidgets": ("PYDISPLAY_PDWIDGETS_SRC",),
     "graphics": ("PYDISPLAY_GRAPHICS_SRC",),
+    "usdl2": ("PYDISPLAY_USDL2_SRC",),
 }
 _PATHSEP = getattr(os, "pathsep", ":")
 

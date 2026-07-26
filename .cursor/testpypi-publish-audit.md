@@ -57,9 +57,12 @@ Both use the same shape: matrix `ubuntu-latest` + `windows-latest`, plus a dedic
 
 ## usdl2
 
-- **Workflow:** `usdl2/.github/workflows/publish-testpypi.yml`
-- **Package:** pure-Python ctypes shim (`py3-none-any`); native code is the **MicroPython user C module** built into firmware, not a CPython wheel
-- **Linux / Windows / Android:** one universal wheel is intentional — Android/desktop load `libSDL2.so` / `SDL2.dll` at runtime via ctypes
+- **Workflows:** `usdl2/.github/workflows/publish-testpypi.yml` (native cibuildwheel);
+  `publish-micropython-lib.yml` (TestPyPI `usdl2-py` + MIP)
+- **Native package:** platform wheels (`manylinux`, `win_amd64`, `android_21_*`) —
+  CPython extension + MicroPython/CircuitPython usermod
+- **Pure Python:** `usdl2-py` / MIP `usdl2` from `lib/usdl2/` (ctypes/ffi fallback);
+  same `vX.Y.Z` as native
 - **Tags on GitHub:** semver release tags (`v*.*.*`) exist; **no GitHub Release** objects
 
 ## Repos without TestPyPI automation
