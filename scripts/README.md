@@ -120,11 +120,12 @@ python scripts/gallery_generator.py --check    # CI freshness
 
 `manifestfile.py` is a shared library for the publish scripts (not prefixed).
 
-Manual packages (not generated) still in this repo: `packages/pixeldisplay.json`,
-`packages/epaperdisplay.json`, `packages/displayif.json`, `packages/mipidsi.json`,
-`packages/picodvi.json`. Bus/touch/chip helper manifests (`spibus`, `i80bus`,
-`i2cbus`, `epaper_chip`, `tt21100`, `stmpe610`, `keypad_shift`) live in sibling
-`micropython-hardware/packages/`.
+Manual packages (not generated) still in this repo:
+`packages/micropython-{micro-gui,nano-gui,touch}.json`. Core libs
+(`displaysys`, `eventsys`, `multimer`, `graphics`, `usdl2`) have no
+`packages/*.json` — use the micropython-lib MIP index. Bus/touch/chip helper
+manifests (`spibus`, `i80bus`, `i2cbus`, `epaper_chip`, `tt21100`, `stmpe610`,
+`keypad_shift`) live in sibling `micropython-hardware/packages/`.
 
 ### Board configs
 

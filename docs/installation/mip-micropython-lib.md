@@ -57,4 +57,6 @@ import displaysys
 print(displaysys)
 ```
 
-If the index is unreachable, fall back to [GitHub MIP](mip-github.md) source packages.
+If the index is unreachable, use a [full clone](full-clone.md) or install individual
+source files via GitHub paths (see [GitHub MIP](mip-github.md)). Core libraries are
+not published as `packages/*.json` fallbacks.

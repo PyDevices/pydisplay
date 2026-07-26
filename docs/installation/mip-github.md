@@ -2,38 +2,23 @@
 
 Install source `.py` files directly from the pydisplay GitHub repository using MicroPython's `mip` module.
 
-## Core install (recommended)
+Core libraries (`displaysys`, `eventsys`, `multimer`, `graphics`, `usdl2`,
+`palettes`, `pdwidgets`) are **not** published as `packages/*.json` here —
+use the [micropython-lib MIP index](mip-micropython-lib.md) instead.
 
-Install the three core libraries (`displaysys`, `eventsys`, `multimer`) plus
-`graphics` (manifest still under `packages/graphics.json`, files hosted in
-[PyDevices/graphics](https://github.com/PyDevices/graphics)).
-Board-specific `board_config.py` comes from a [`board_configs/`](https://github.com/PyDevices/micropython-hardware/tree/main/board_configs) package, not from displaysys:
+## What remains on GitHub MIP
 
 ```python
 import mip
-for pkg in ("displaysys", "eventsys", "graphics", "multimer"):
-    mip.install(f"github:PyDevices/pydisplay/packages/{pkg}.json", target=".")
+mip.install("github:PyDevices/pydisplay/packages/examples.json", target=".")
+mip.install("github:PyDevices/pydisplay/packages/add_ons.json", target="./add_ons")
 ```
 
 With `mpremote`:
 
 ```bash
-for pkg in displaysys eventsys graphics multimer; do
-  mpremote mip install --target "." "github:PyDevices/pydisplay/packages/${pkg}.json"
-done
-```
-
-Or install `graphics` from the MIP index published by the graphics repo:
-
-```python
-mip.install("graphics", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
-```
-
-Add examples and add_ons separately:
-
-```python
-mip.install("github:PyDevices/pydisplay/packages/examples.json", target=".")
-mip.install("github:PyDevices/pydisplay/packages/add_ons.json", target="./add_ons")
+mpremote mip install --target "." "github:PyDevices/pydisplay/packages/examples.json"
+mpremote mip install --target "./add_ons" "github:PyDevices/pydisplay/packages/add_ons.json"
 ```
 
 ## Individual packages
@@ -42,18 +27,15 @@ Manifests live in the [`packages/`](https://github.com/PyDevices/pydisplay/tree/
 
 | Package | Manifest |
 |---------|----------|
-| displaysys | `packages/displaysys.json` |
-| eventsys | `packages/eventsys.json` |
-| graphics | `packages/graphics.json` (sources in PyDevices/graphics) |
-| usdl2 | `packages/usdl2.json` (sources in PyDevices/usdl2) |
-| multimer | `packages/multimer.json` |
 | add_ons | `packages/add_ons.json` |
 | examples | `packages/examples.json` |
+| Per-demo bundles | `packages/<example>.json` (PyScript `?manifests=`) |
+| Hinch GUI mirrors | `packages/micropython-{nano-gui,micro-gui,touch}.json` |
 
 Example:
 
 ```python
-mip.install("github:PyDevices/pydisplay/packages/displaysys.json")
+mip.install("github:PyDevices/pydisplay/packages/add_ons.json", target="./add_ons")
 ```
 
 Bus / touch / chip-helper MIP packages (`spibus`, `i80bus`, `i2cbus`,
