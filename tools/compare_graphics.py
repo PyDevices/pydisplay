@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Compare native ``graphics`` cmod to staged ``src/lib/graphics`` (``graphics_py``).
+"""Compare native ``graphics`` cmod to staged ``../graphics/lib/graphics`` (``graphics_py``).
 
 Loads both implementations in one interpreter: ``import graphics`` (native cmod)
 and a copy of the pure-Python tree under ``.cursor/compare_graphics_py/graphics_py``.
@@ -221,7 +221,7 @@ def _skip_unless_draw(rep, native, py, name):
 
 
 def stage_python_graphics(repo: str):
-    src = repo + "/src/lib/graphics"
+    src = repo + "/../graphics/lib/graphics"
     staging = repo + "/.cursor/compare_graphics_py"
     pkg_dir = staging + "/graphics_py"
     _makedirs(pkg_dir)
@@ -268,8 +268,8 @@ def _check_exports(rep: _Reporter, native, py) -> None:
         rep.fail("python implementation(): {}".format(exc))
         p_impl = None
     else:
-        if p_impl != "pydisplay_python":
-            rep.fail("python implementation: {!r} (expected 'pydisplay_python')".format(p_impl))
+        if p_impl != "graphics_python":
+            rep.fail("python implementation: {!r} (expected 'graphics_python')".format(p_impl))
         else:
             rep.ok("python implementation")
 
@@ -776,7 +776,7 @@ def main(argv=None):
     if opts.get("help"):
         print(
             "Usage: compare_graphics_run.py [--repo PATH] [--quiet]\n"
-            "Compare native graphics cmod vs staged src/lib/graphics."
+            "Compare native graphics cmod vs staged ../graphics/lib/graphics."
         )
         return 0
 
@@ -792,7 +792,7 @@ def main(argv=None):
         print()
         if result["status"] == "ok":
             print(
-                "All checks passed ({} ok, native graphics cmod vs src/lib/graphics).".format(
+                "All checks passed ({} ok, native graphics cmod vs ../graphics/lib/graphics).".format(
                     result["checks_passed"]
                 )
             )

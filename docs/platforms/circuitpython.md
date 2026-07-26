@@ -104,9 +104,11 @@ directory exists. See [lv_circuitpython_mod README](https://github.com/PyDevices
 `multimer` supplies Adafruit-compatible `ticks_*` helpers for application code;
 frozen asyncio still uses `adafruit_ticks` internally unless the build is customized.
 
-## framebuf shim
+## framebuf
 
-CircuitPython lacks MicroPython-compatible `framebuf`. Install `add_ons/framebuf.py` or copy it to your `lib/` folder.
+CircuitPython lacks MicroPython-compatible `framebuf`. Use the `framebuf` module
+from [PyDevices/graphics](https://github.com/PyDevices/graphics)
+(`lib/graphics/framebuf.py`, MIP `graphics` / TestPyPI `graphics-py`).
 
 ## Installers
 

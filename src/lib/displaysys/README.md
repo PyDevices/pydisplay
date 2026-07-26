@@ -13,7 +13,7 @@ pip install \
   displaysys
 ```
 
-For desktop SDL, also install `usdl2` (same two-index pattern). For PyGame, install `pygame-ce` from PyPI (`import pygame`).
+For desktop SDL, also install native `usdl2` (or pure-Python `usdl2-py`) with the same two-index pattern. For PyGame, install `pygame-ce` from PyPI (`import pygame`).
 
 ### MicroPython (MIP)
 
@@ -47,7 +47,7 @@ Desktop input backends use [eventsys](https://test.pypi.org/project/eventsys/) a
 - [Documentation — Displays](https://pydisplay.readthedocs.io/en/latest/concepts/displays/)
 - [Source](https://github.com/PyDevices/pydisplay)
 - [Issues](https://github.com/PyDevices/pydisplay/issues)
-- Related: [eventsys](https://test.pypi.org/project/eventsys/), [multimer](https://test.pypi.org/project/multimer/), [pydisplay-graphics](https://test.pypi.org/project/pydisplay-graphics/), [usdl2](https://test.pypi.org/project/usdl2/)
+- Related: [eventsys](https://test.pypi.org/project/eventsys/), [multimer](https://test.pypi.org/project/multimer/), [graphics-py](https://test.pypi.org/project/graphics-py/), [usdl2](https://test.pypi.org/project/usdl2/), [usdl2-py](https://test.pypi.org/project/usdl2-py/)
 
 ## License
 

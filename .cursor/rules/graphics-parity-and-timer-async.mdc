@@ -7,11 +7,11 @@ alwaysApply: true
 
 Active objectives for pydisplay + `cmods/graphics` work. Complements global `fix-not-workaround` rule.
 
-## Graphics-cmod ↔ `src/lib/graphics`
+## Graphics-cmod ↔ sibling `graphics/lib/graphics`
 
-- **Goal:** 100% behavioral parity with `src/lib/graphics` (API, kwargs, duck typing, BMP565, Draw, Font, file I/O).
+- **Goal:** 100% behavioral parity with [PyDevices/graphics](https://github.com/PyDevices/graphics) `lib/graphics/` (API, kwargs, duck typing, BMP565, Draw, Font, file I/O).
 - When a difference is found (matrix failure, code review, or side-by-side with Python), **fix it in the cmod immediately** — do not defer or patch callers in pydisplay examples.
-- Reference implementation is Python under `src/lib/graphics/`; cmod must match the contract, not a subset.
+- Reference implementation is the pure-Python package under `graphics/lib/graphics/`; cmod must match the contract, not a subset.
 - MP and CP share bindings (`gfx_bindings_mp.c`, `gfx_module_mp.c`); fix both runtimes when the gap is in shared code.
 - Rebuild MP/CP after cmod changes; re-run affected examples before moving on.
 

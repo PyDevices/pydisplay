@@ -28,7 +28,7 @@ Audited **2026-07-08** from local clones under `~/github/cmods` and `~/github/py
 | `displaysys` | `displaysys-0.0.7-py2.py3-none-any.whl` | universal; full tree + `board_config.py` |
 | `eventsys` | `eventsys-0.0.7-py2.py3-none-any.whl` | universal |
 | `multimer` | `multimer-0.0.7-py2.py3-none-any.whl` | universal |
-| `pydisplay-graphics` | `pydisplay_graphics-0.0.7-py2.py3-none-any.whl` | universal (PyPI name mapped from `graphics`) |
+| `graphics-py` | `pydisplay_graphics-0.0.7-py2.py3-none-any.whl` | universal (PyPI name mapped from `graphics`) |
 
 **Layout:** `displaysys` is the full package (all modules under `src/lib/displaysys/` plus `board_config.py`). Per-backend `displaysys-*` packages are **not** published. Published packages do not include `examples/` trees.
 
@@ -57,9 +57,12 @@ Both use the same shape: matrix `ubuntu-latest` + `windows-latest`, plus a dedic
 
 ## usdl2
 
-- **Workflow:** `usdl2/.github/workflows/publish-testpypi.yml`
-- **Package:** pure-Python ctypes shim (`py3-none-any`); native code is the **MicroPython user C module** built into firmware, not a CPython wheel
-- **Linux / Windows / Android:** one universal wheel is intentional — Android/desktop load `libSDL2.so` / `SDL2.dll` at runtime via ctypes
+- **Workflows:** `usdl2/.github/workflows/publish-testpypi.yml` (native cibuildwheel);
+  `publish-micropython-lib.yml` (TestPyPI `usdl2-py` + MIP)
+- **Native package:** platform wheels (`manylinux`, `win_amd64`, `android_21_*`) —
+  CPython extension + MicroPython/CircuitPython usermod
+- **Pure Python:** `usdl2-py` / MIP `usdl2` from `lib/usdl2.py` (ctypes/ffi fallback);
+  same `vX.Y.Z` as native
 - **Tags on GitHub:** semver release tags (`v*.*.*`) exist; **no GitHub Release** objects
 
 ## Repos without TestPyPI automation
@@ -81,7 +84,7 @@ Both use the same shape: matrix `ubuntu-latest` + `windows-latest`, plus a dedic
 | Category | Status |
 |----------|--------|
 | **Native CPython extensions** (`lvgl-cpython`, `graphics-cmod`) | **Met** — CI builds linux + windows + android wheels |
-| **Pure pydisplay libs** (`displaysys`, `eventsys`, `multimer`, `pydisplay-graphics`) | **Met by design** — universal wheels; manifest `require()` graph in § Pip dependency graph |
+| **Pure pydisplay libs** (`displaysys`, `eventsys`, `multimer`, `graphics-py`) | **Met by design** — universal wheels; manifest `require()` graph in § Pip dependency graph |
 | **usdl2** | **Met for CPython shim** — universal wheel; MP cmod is separate |
 | **displayif** | **N/A** — firmware-only user C module, not a pip/MIP package |
 | **displaysys-* backends** | **Removed** — use full `displaysys` only |

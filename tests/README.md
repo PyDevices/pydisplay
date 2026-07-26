@@ -1,7 +1,7 @@
 # Tests
 
 Self-contained tests for in-tree [`multimer`](../src/lib/multimer),
-[`eventsys`](../src/lib/eventsys), [`graphics`](../src/lib/graphics), and
+[`eventsys`](../src/lib/eventsys), [`graphics`](https://github.com/PyDevices/graphics) (sibling `lib/graphics`), and
 [`displaysys`](../src/lib/displaysys) packages.
 
 They use only the Python standard library (`unittest`) — no third-party test

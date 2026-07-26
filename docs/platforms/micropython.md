@@ -60,9 +60,9 @@ Use `board_configs/sdldisplay/` or the default `src/lib/board_config.py` for SDL
 
 For best SDL2 performance on MicroPython Unix, CircuitPython Unix, and `micropython.exe`, build with the optional native **`usdl2`** module from [PyDevices/usdl2](https://github.com/PyDevices/usdl2). It provides the SDL2 subset used by **`SDLDisplay`** and, when the host selects the SDL timer backend, **`multimer._sdl2`**.
 
-Without **`usdl2`**, `SDLDisplay` falls back to pure-Python ffi/ctypes bindings; timer selection is unchanged (`multimer` still picks `_librt` or threading backends first on each platform).
+Without the native module, `SDLDisplay` falls back to pure-Python ffi/ctypes bindings from the same repo (`usdl2-py` on TestPyPI / MIP `usdl2`); timer selection is unchanged (`multimer` still picks `_librt` or threading backends first on each platform).
 
-On **CPython** desktop, the ctypes shim is published on TestPyPI as package **`usdl2`** (install with the [two-index pip pattern](../publishing-micropython-lib.md#two-index-pip-install-required); install it alongside `displaysys` when using `SDLDisplay` — it is not a MIP/`require()` dependency).
+On **CPython** desktop, prefer the native TestPyPI wheel **`usdl2`**; the ctypes fallback is **`usdl2-py`** (same import name). Install either with the [two-index pip pattern](../publishing-micropython-lib.md#two-index-pip-install-required) alongside `displaysys` when using `SDLDisplay`.
 
 ## Frozen firmware
 

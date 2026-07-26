@@ -106,7 +106,7 @@ Installs `displaysys`, `usdl2`, `graphics-cmod`, and `lvgl-cpython` (no version 
 
 | Script | Purpose |
 |--------|---------|
-| [`test_testpypi_standalone.sh`](test_testpypi_standalone.sh) | Per-package TestPyPI venv import smoke (`multimer`, `displaysys`, `eventsys`, `pydisplay-graphics`; `--desktop` adds backend stacks) |
+| [`test_testpypi_standalone.sh`](test_testpypi_standalone.sh) | Per-package TestPyPI venv import smoke (`multimer`, `displaysys`, `eventsys`, `graphics-py`; `--desktop` adds backend stacks) |
 
 ```bash
 ./tools/test_testpypi_standalone.sh

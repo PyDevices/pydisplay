@@ -1,7 +1,5 @@
 src/add_ons/gui
 
-# Generated from src/add_ons/framebuf.py (scripts/install_sync_framebuf.py; publish + tests)
-src/lib/graphics/framebuf.py
 
 # Optional local/dev copy of LVGL wasm wheels (not required; pyodide uses TestPyPI)
 web/pyscript/wheels
@@ -216,3 +214,7 @@ cython_debug/
 
 .ruff_cache/
 
+
+# CI / local sibling checkouts inside this workspace
+graphics/
+micropython-hardware/

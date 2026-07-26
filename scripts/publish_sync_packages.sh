@@ -117,9 +117,6 @@ if [[ -z "$VERSION" ]]; then
 fi
 echo "Release version: $VERSION"
 
-# graphics.framebuf is generated from add_ons/framebuf.py before packaging.
-"$SOURCE_REPO/scripts/install_sync_framebuf.py"
-
 AUTHOR="Brad Barnett <contact@pydevices.com>"
 LICENSE="MIT"
 
@@ -152,14 +149,11 @@ should_skip_name() {
     esac
 }
 
-# MIP package names (eventsys, graphics, …) may differ from PyPI project names.
-# TestPyPI rejects sdists for names already registered on pypi.org (e.g. graphics).
+# MIP package names may differ from PyPI project names when needed.
+# graphics publishes from PyDevices/graphics (graphics-py), not this repo.
 # Convention: .cursor/testpypi-naming-convention.md
 pypi_publish_name() {
-    case "$1" in
-        graphics) echo "pydisplay-graphics" ;;
-        *) echo "$1" ;;
-    esac
+    echo "$1"
 }
 
 # Short PyPI summary (one line) — not the monorepo tagline.
@@ -173,9 +167,6 @@ package_summary() {
             ;;
         multimer)
             echo "Cross-platform machine.Timer-style and asyncio timers for MicroPython and CPython"
-            ;;
-        graphics)
-            echo "Pure-Python graphics for pydisplay (FrameBuffer, Draw, fonts); import as graphics"
             ;;
         *)
             echo "PyDisplay $1"

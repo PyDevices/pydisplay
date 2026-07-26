@@ -5,7 +5,7 @@ PyDevices publishes **CPython wheels to TestPyPI only** (not production PyPI). E
 | Role | Example | Used by |
 |------|---------|---------|
 | **MIP / micropython-lib** | `graphics` | `mip.install("graphics", index=…)`, manifest `package("graphics")` |
-| **pip / TestPyPI project** | `pydisplay-graphics` | `pip install … pydisplay-graphics`, hatch `[project].name` |
+| **pip / TestPyPI project** | `graphics-py` | `pip install … graphics-py`, hatch `[project].name` |
 | **Python import** | `graphics` | `import graphics` in application code |
 
 MIP names stay short. pip project names must **not collide with [pypi.org](https://pypi.org)** — TestPyPI rejects sdists when the normalized name is already registered there (wheels may still upload; treat collisions as errors).
@@ -29,7 +29,7 @@ When the MIP name is **taken on pypi.org**, prefix with `pydisplay-`:
 
 | MIP name | pip / TestPyPI | Import | Why |
 |----------|----------------|--------|-----|
-| `graphics` | **`pydisplay-graphics`** | `graphics` | [pypi.org/project/graphics](https://pypi.org/project/graphics) exists |
+| `graphics` | **`graphics-py`** | `graphics` | [pypi.org/project/graphics](https://pypi.org/project/graphics) exists |
 
 Mapping lives in `pypi_publish_name()` in [`scripts/publish_sync_packages.sh`](../scripts/publish_sync_packages.sh). MIP and source trees keep the short name `graphics/`.
 
@@ -44,7 +44,7 @@ Use a **repo-specific suffix** so pip names are unique and intent is obvious:
 
 Do **not** publish as bare `lvgl` — [pypi.org/project/lvgl](https://pypi.org/project/lvgl) exists.
 
-`graphics-cmod` and `pydisplay-graphics` both provide `import graphics`; prefer **`graphics-cmod`** on desktop/Android when the native wheel matches the platform, and **`pydisplay-graphics`** for pure-Python-only or cross-check installs.
+`graphics-cmod` and `graphics-py` (both from [PyDevices/graphics](https://github.com/PyDevices/graphics)) provide `import graphics`; prefer **`graphics-cmod`** on desktop/Android when the native wheel matches the platform, and **`graphics-py`** for pure-Python-only or cross-check installs.
 
 ### 4. displaysys is one package
 
@@ -82,7 +82,7 @@ After a version is on TestPyPI, **do not rename** the project (TestPyPI rejects 
 | `displaysys` | `displaysys` | `displaysys`, `board_config` | free |
 | `eventsys` | `eventsys` | `eventsys` | free |
 | `multimer` | `multimer` | `multimer` | free |
-| `graphics` | **`pydisplay-graphics`** | `graphics` | **taken** → mapped |
+| `graphics` | **`graphics-py`** | `graphics` | **taken** → mapped |
 
 ### Sibling repos (own workflows)
 
