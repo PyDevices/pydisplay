@@ -21,9 +21,9 @@ and returns.
 import math
 from random import getrandbits
 
-import graphics
+import pygraphics
 from displaysys import color565
-from graphics import RGB565, FrameBuffer, text8
+from pygraphics import RGB565, FrameBuffer, text8
 from multimer import ticks_add, ticks_diff, ticks_ms
 from palettes import get_palette
 # Uncomment one and only one of the following two lines
@@ -109,11 +109,11 @@ _scroll_dest = FrameBuffer(bytearray(GRID_W * GRID_H * 2), GRID_W, GRID_H, RGB56
 
 
 def _scroll_gradient_scene():
-    graphics.gradient_rect(_scroll_dest, 0, 0, GRID_W, GRID_H, _SKY_TOP, _SKY_BOTTOM, vertical=True)
+    pygraphics.gradient_rect(_scroll_dest, 0, 0, GRID_W, GRID_H, _SKY_TOP, _SKY_BOTTOM, vertical=True)
     r = max(2, min(GRID_W, GRID_H) // 4)
     cx, cy = GRID_W // 2, GRID_H // 2
-    graphics.circle(_scroll_dest, cx, cy, r, _SUN, f=True)
-    graphics.circle(_scroll_dest, cx, cy, r, _SUN_EDGE)
+    pygraphics.circle(_scroll_dest, cx, cy, r, _SUN, f=True)
+    pygraphics.circle(_scroll_dest, cx, cy, r, _SUN_EDGE)
 
 
 def scroll_main():

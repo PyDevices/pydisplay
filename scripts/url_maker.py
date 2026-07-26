@@ -35,7 +35,7 @@ PROFILES: dict[str, frozenset[str]] = {
     # Browser MP: src/lib + add_ons mounted; do not auto-install core libs.
     "pyscript-mp": frozenset(
         {
-            "graphics",
+            "pygraphics",
             "displaysys",
             "multimer",
             "eventsys",
@@ -44,7 +44,7 @@ PROFILES: dict[str, frozenset[str]] = {
     ),
     "pyscript-pyodide": frozenset(
         {
-            "graphics",
+            "pygraphics",
             "displaysys",
             "multimer",
             "eventsys",
@@ -52,20 +52,20 @@ PROFILES: dict[str, frozenset[str]] = {
         }
     ),
     # Firmware with cmods compiled in — omit those from install lists.
-    "firmware-cmods": frozenset({"graphics", "lvgl"}),
+    "firmware-cmods": frozenset({"pygraphics", "lvgl"}),
 }
 
 # Runtime-aware rewrites: logical name → install name (or None to omit).
 _MIP_REWRITE: dict[str, str | None] = {
     "lvgl": None,  # C-only; no MIP package
     "lvgl-cpython": None,
-    "graphics-cmod": "graphics",  # mip ships pure graphics
+    "pygraphics-cmod": "pygraphics",  # mip ships pure graphics
 }
 
 _WHEEL_REWRITE: dict[str, str | None] = {
     "lvgl": "lvgl-cpython",
     "lvglcpython": "lvgl-cpython",
-    "graphics": "graphics-cmod",  # prefer native cmod wheel
+    "pygraphics": "pygraphics-cmod",  # prefer native cmod wheel
 }
 
 

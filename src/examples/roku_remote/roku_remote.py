@@ -14,7 +14,7 @@ when its serial still matches, then starts the chosen front end:
 * :mod:`roku_sim`      -- offline / PyScript stand-in (``make_engine``)
 * :mod:`roku_lvgl`     -- LVGL front end (default)
 * :mod:`roku_widgets`  -- ``pdwidgets`` front end
-* :mod:`roku_graphics` -- ``graphics.FrameBuffer`` front end
+* :mod:`roku_graphics` -- ``pygraphics.FrameBuffer`` front end
 
 Switching front ends from MORE writes prefs then calls
 :func:`roku_engine.restart_app` (MCU ``reset``, else exit ``42`` after clean
@@ -86,7 +86,7 @@ from roku_sim import make_engine  # noqa: E402
 
 
 # Front ends that allocate a full-panel Python ``bytearray`` (RGB565).
-_PYTHON_FB_FRONTENDS = ("widgets", "graphics")
+_PYTHON_FB_FRONTENDS = ("widgets", "pygraphics")
 
 
 def _import_frontend(name):
@@ -107,7 +107,7 @@ def _import_frontend(name):
 def _frontend_candidates(preferred):
     """Preferred first, then defaults — session fallbacks never rewrite prefs."""
     ordered = []
-    for name in (preferred, DEFAULT_FRONTEND, "lvgl", "graphics", "widgets"):
+    for name in (preferred, DEFAULT_FRONTEND, "lvgl", "pygraphics", "widgets"):
         if name and name not in ordered:
             ordered.append(name)
     return ordered

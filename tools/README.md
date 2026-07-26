@@ -65,9 +65,9 @@ X11/SDL window without a logged-in display, agents may wrap with `xvfb-run -a`
 | Script | Purpose |
 |--------|---------|
 | [`compare_framebuf_mp.py`](compare_framebuf_mp.py) | Compare built-in C ``framebuf`` vs ``src/add_ons/framebuf.py`` on-device |
-| [`compare_graphics.py`](compare_graphics.py) | Shared compare engine (native ``graphics`` cmod vs staged ``src/lib/graphics``) |
+| [`compare_graphics.py`](compare_graphics.py) | Shared compare engine (native ``pygraphics`` cmod vs staged ``src/lib/pygraphics``) |
 | [`compare_graphics_run.py`](compare_graphics_run.py) | Single-runtime subprocess entry (prints ``GRAPHICS_COMPARE_RESULT=`` JSON) |
-| [`compare_graphics_matrix.py`](compare_graphics_matrix.py) | Cross-runtime matrix (MP, CP, CPython; installs ``graphics-cmod`` from TestPyPI for CPython) |
+| [`compare_graphics_matrix.py`](compare_graphics_matrix.py) | Cross-runtime matrix (MP, CP, CPython; installs ``pygraphics-cmod`` from TestPyPI for CPython) |
 
 ```bash
 # One runtime
@@ -78,7 +78,7 @@ python tools/compare_graphics_matrix.py
 python tools/compare_graphics_matrix.py --only-runtime micropython,cpython-venv
 ```
 
-Expanded coverage includes ``FrameBuffer`` shape ops, module-level helpers, ``Draw`` (clip, text8), and per-glyph font probes (ASCII 32–126) to catch romfont mapping bugs in ``graphics-cmod``.
+Expanded coverage includes ``FrameBuffer`` shape ops, module-level helpers, ``Draw`` (clip, text8), and per-glyph font probes (ASCII 32–126) to catch romfont mapping bugs in ``pygraphics-cmod``.
 
 Results JSON: ``.cursor/compare_graphics_results.json``. Exit 0 when all runtimes pass; exit 1 on any mismatch or setup failure.
 
@@ -102,11 +102,11 @@ Results JSON: ``.cursor/compare_graphics_results.json``. Exit 0 when all runtime
 ./tools/test_testpypi_desktop.sh --headless   # CI / SSH without DISPLAY
 ```
 
-Installs `displaysys`, `usdl2`, `graphics-cmod`, and `lvgl-cpython` (no version pins). See [Publishing micropython-lib — verify after publish](../docs/publishing-micropython-lib.md#4-verify).
+Installs `displaysys`, `usdl2`, `pygraphics-cmod`, and `lvgl-cpython` (no version pins). See [Publishing micropython-lib — verify after publish](../docs/publishing-micropython-lib.md#4-verify).
 
 | Script | Purpose |
 |--------|---------|
-| [`test_testpypi_standalone.sh`](test_testpypi_standalone.sh) | Per-package TestPyPI venv import smoke (`multimer`, `displaysys`, `eventsys`, `pydisplay-graphics`; `--desktop` adds backend stacks) |
+| [`test_testpypi_standalone.sh`](test_testpypi_standalone.sh) | Per-package TestPyPI venv import smoke (`multimer`, `displaysys`, `eventsys`, `pygraphics`; `--desktop` adds backend stacks) |
 
 ```bash
 ./tools/test_testpypi_standalone.sh
@@ -129,7 +129,7 @@ Installs `displaysys`, `usdl2`, `graphics-cmod`, and `lvgl-cpython` (no version 
 | Content | Source |
 |---------|--------|
 | MicroPython stdlib stubs | committed under `tools/typings/` |
-| `displaysys` / `eventsys` / `graphics` / `multimer` | committed package trees; regenerate with [`../scripts/gen_package_pyi.sh`](../scripts/gen_package_pyi.sh) |
+| `displaysys` / `eventsys` / `pygraphics` / `multimer` | committed package trees; regenerate with [`../scripts/gen_package_pyi.sh`](../scripts/gen_package_pyi.sh) |
 | `lvgl` | **`lvgl-cpython`** installs `lvgl.pyi` next to the extension — not in-tree |
 
 Confirm **Python: Select Interpreter** → `.venv/bin/python`. Use **Pylance** (disable BasedPyright if it conflicts).

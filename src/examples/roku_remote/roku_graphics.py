@@ -5,7 +5,7 @@
 """
 roku_graphics
 ====================================================
-Portrait Roku remote drawn with ``graphics.FrameBuffer``.
+Portrait Roku remote drawn with ``pygraphics.FrameBuffer``.
 
 One of three interchangeable Roku front ends (``roku_graphics``,
 ``roku_widgets``, ``roku_lvgl``) that all drive the same
@@ -14,7 +14,7 @@ and is what ``roku_remote`` launches.
 
 Shares :class:`roku_engine.RokuEngine` for ECP over the LAN (SSDP discover +
 HTTP keypress / apps / queries). Uses only the three core pydisplay packages
-(``graphics``, ``displaysys`` via ``board_config``, ``eventsys``, ``multimer``).
+(``pygraphics``, ``displaysys`` via ``board_config``, ``eventsys``, ``multimer``).
 
 Geometry scales from a 320x480 reference up through tall phone portraits.
 Remote chrome matches ``roku_lvgl``: utility, D-pad, options (replay / info /
@@ -38,7 +38,7 @@ if _EXAMPLES not in sys.path:
 
 from board_config import display_drv, runtime
 from eventsys.keys import Keys
-from graphics import RGB565, Area, FrameBuffer
+from pygraphics import RGB565, Area, FrameBuffer
 from multimer import Timer
 from roku_engine import (
     FRONTEND_BUTTONS,

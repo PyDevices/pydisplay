@@ -38,9 +38,9 @@ See also: https://pydisplay.readthedocs.io/en/latest/concepts/displays/
 
 ## pydisplay-specific notes
 
-- **`Area` returns:** Many `graphics` methods return an `Area` (`x`, `y`, `w`, `h`) for partial refresh.
+- **`Area` returns:** Many `pygraphics` methods return an `Area` (`x`, `y`, `w`, `h`) for partial refresh.
 - **Runtime:** Document poll/subscribe patterns; link to [Events concept](../concepts/events.md).
-- **Delegates:** `Draw` and `FrameBuffer` shape methods delegate to `graphics._shapes` — signatures must match.
+- **Delegates:** `Draw` and `FrameBuffer` shape methods delegate to `pygraphics._shapes` — signatures must match.
 - **Private API:** Names starting with `_` are excluded from mkdocstrings output; minimal or no docstrings are fine.
 
 ## Verification
@@ -57,8 +57,8 @@ Griffe warnings mean a docstring parameter does not appear in the signature — 
 
 | Tier | Modules |
 |------|---------|
-| P0 | `displaysys`, `eventsys`, `graphics.FrameBuffer`, `graphics._shapes` |
-| P1 | `graphics.Draw`, `displaybuf`, `eventsys` helpers |
+| P0 | `displaysys`, `eventsys`, `pygraphics.FrameBuffer`, `pygraphics._shapes` |
+| P1 | `pygraphics.Draw`, `displaybuf`, `eventsys` helpers |
 | P2 | ✅ `pdwidgets` — done: Google-style docstrings on all public classes/methods (lifecycle `Display.tick`/`render`/event registration + every widget) |
 
 See [Contributing](../contributing.md) for the PR workflow.

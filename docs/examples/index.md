@@ -106,7 +106,7 @@ board_config.runtime.run_forever()
 
 ### Notes
 
-- `font_simpletest.py` — cycles `string_blit` → `per_pixel` → `displaybuf` in one run (see [Font rendering patterns](../concepts/graphics.md#choosing-a-font-rendering-pattern)).
+- `font_simpletest.py` — cycles `string_blit` → `per_pixel` → `displaybuf` in one run (see [Font rendering patterns](../concepts/pygraphics.md#choosing-a-font-rendering-pattern)).
 - `nano_gui_simpletest.py` / `micro_gui_simpletest.py` / `touch_gui_simpletest.py` need the matching Peter Hinch `gui/` in `add_ons/` (via `fetch_ph_gui` / mip).
 **Legend:** Platforms = CPython · MCU · PyScript · Wokwi · Packages = core · add_ons · LVGL
 
@@ -155,7 +155,7 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | Script | Description | Platforms | Packages |
 |--------|-------------|-----------|----------|
 | `framebuf_simpletest.py` | framebuf API | CPython · MCU | core |
-| `graphics_simpletest.py` | graphics module | CPython · MCU | core |
+| `graphics_simpletest.py` | pygraphics module | CPython · MCU | core |
 | `font_simpletest.py` | Font: cycles `string_blit` / `per_pixel` / `displaybuf` | CPython · MCU | add_ons |
 | `font_list.py` | List / preview `.bin` fonts from a directory | CPython · MCU | core |
 | `fonts.py` | Page through fonts | CPython · MCU | core |

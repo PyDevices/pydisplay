@@ -25,7 +25,7 @@ Usage: ./scripts/gen_package_pyi.sh
 Regenerate mypy stubgen .pyi trees for displaysys, eventsys, and
 multimer into tools/typings/ (Pylance / pyright stubPath).
 
-(source is gitignored; public API is graphics.FrameBuffer).
+(source is gitignored; public API is pygraphics.FrameBuffer).
 EOF
 }
 

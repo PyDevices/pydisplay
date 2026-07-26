@@ -3,7 +3,7 @@
 """
 calc_graphics
 ====================================================
-Dark-theme pocket calculator drawn with ``graphics.FrameBuffer``.
+Dark-theme pocket calculator drawn with ``pygraphics.FrameBuffer``.
 
 Shares :class:`calc_engine.CalcEngine` with the pdwidgets and LVGL front ends.
 All geometry (padding, button size, font scale, display band) is derived from
@@ -20,7 +20,7 @@ if _EXAMPLES not in sys.path:
 from board_config import display_drv, runtime
 from calc_engine import CalcEngine
 from eventsys.keys import Keys
-from graphics import RGB565, FrameBuffer
+from pygraphics import RGB565, FrameBuffer
 from multimer import Timer
 from palettes import get_palette
 from eventsys.touch_keypad import TouchKeypad

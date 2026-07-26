@@ -7,7 +7,7 @@ Then it prints the touch_rotation_table that should be set in board_config.py.
 
 from board_config import display_drv, runtime
 import eventsys
-from graphics import round_rect, text16
+from pygraphics import round_rect, text16
 
 demo = False
 

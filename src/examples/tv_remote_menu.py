@@ -16,7 +16,7 @@ from board_config import display_drv, runtime
 
 from displaysys import color565
 from eventsys.keys import Keys
-from graphics import RGB565, Font, FrameBuffer
+from pygraphics import RGB565, Font, FrameBuffer
 
 # Why tall rows: 10-foot UI — readable labels and large focus highlight.
 ROW_H = 48

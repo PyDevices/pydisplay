@@ -33,9 +33,9 @@ packages = [
     ["lib/multimer", [], []],
 ]
 
-# Pure-Python graphics lives in sibling PyDevices/graphics (lib/graphics/).
+# Pure-Python graphics lives in sibling PyDevices/pygraphics (lib/pygraphics/).
 # PyScript mounts below; MIP installs use the micropython-lib index.
-GRAPHICS_SIBLING_MOUNT = "/lib/graphics/"
+GRAPHICS_SIBLING_MOUNT = "/lib/pygraphics/"
 GRAPHICS_SIBLING_FILES = [
     "__init__.py",
     "_area.py",
@@ -107,7 +107,7 @@ PYODIDE_INTERPRETER = "./vendor/pyodide/pyodide.mjs"
 
 
 def pyscript_toml_file_entry(repo_relative_path: str, mount: str) -> str:
-    """repo_relative_path e.g. src/lib/path.py; mount e.g. /lib/ or /lib/graphics/."""
+    """repo_relative_path e.g. src/lib/path.py; mount e.g. /lib/ or /lib/pygraphics/."""
     return f'"{PYSCRIPT_TOML_SRC_PREFIX}{repo_relative_path}" = "{mount}"'
 
 
@@ -240,7 +240,7 @@ for entry in sorted(os.listdir(examples_root)):
 master_toml.append("")
 for name in GRAPHICS_SIBLING_FILES:
     master_toml.append(
-        f'"../graphics/lib/graphics/{name}" = "{GRAPHICS_SIBLING_MOUNT}"'
+        f'"../pygraphics/lib/pygraphics/{name}" = "{GRAPHICS_SIBLING_MOUNT}"'
     )
 
 # Gallery loaders use `import ps_loader` (top-level); also mount at VFS root.

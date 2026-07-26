@@ -15,7 +15,7 @@ SOURCE_TREES = (
         root / "src/lib",
         Path("reference"),
         (),
-        ("", "displaysys", "eventsys", "graphics", "multimer"),
+        ("", "displaysys", "eventsys", "pygraphics", "multimer"),
     ),
     (
         root / "src/add_ons",

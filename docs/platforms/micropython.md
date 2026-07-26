@@ -70,7 +70,7 @@ The repo-root `manifest.py` lists packages for frozen MicroPython builds and
 **freezes `asyncio` on unix and windows ports** (required for `multimer.AsyncTimer`).
 
 Clone this repo as a sibling of `micropython/` (and any native usermods such as
-[usdl2](https://github.com/PyDevices/usdl2) / [graphics](https://github.com/PyDevices/graphics)),
+[usdl2](https://github.com/PyDevices/usdl2) / [pygraphics](https://github.com/PyDevices/pygraphics)),
 then point `FROZEN_MANIFEST` at this file. On **Make** ports,
 `USER_C_MODULES` is the workspace parent; build Windows with a variant that
 enables `MICROPY_PY_ASYNCIO` and `select` (e.g. `dev`):

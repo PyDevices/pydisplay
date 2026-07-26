@@ -9,7 +9,7 @@ Setup + callbacks, then ``runtime.run_forever()``. Uses only src/lib modules
 from board_config import display_drv, runtime
 
 from displaysys import color565
-from graphics import RGB565, Area, Font, FrameBuffer
+from pygraphics import RGB565, Area, Font, FrameBuffer
 
 TOP, BOT = 36, 20
 ROW, ACCENT = 20, 4

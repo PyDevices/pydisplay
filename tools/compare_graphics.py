@@ -1,10 +1,10 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Compare native ``graphics`` cmod to staged ``../graphics/lib/graphics`` (``graphics_py``).
+"""Compare native ``pygraphics`` cmod to staged ``../pygraphics/lib/pygraphics`` (``pygraphics_py``).
 
-Loads both implementations in one interpreter: ``import graphics`` (native cmod)
-and a copy of the pure-Python tree under ``.cursor/compare_graphics_py/graphics_py``.
+Loads both implementations in one interpreter: ``import pygraphics`` (native cmod)
+and a copy of the pure-Python tree under ``.cursor/compare_graphics_py/pygraphics_py``.
 Paired ``FrameBuffer`` draws are compared byte-for-byte.
 
 Used by ``compare_graphics_run.py`` (single runtime) and
@@ -221,9 +221,9 @@ def _skip_unless_draw(rep, native, py, name):
 
 
 def stage_python_graphics(repo: str):
-    src = repo + "/../graphics/lib/graphics"
+    src = repo + "/../pygraphics/lib/pygraphics"
     staging = repo + "/.cursor/compare_graphics_py"
-    pkg_dir = staging + "/graphics_py"
+    pkg_dir = staging + "/pygraphics_py"
     _makedirs(pkg_dir)
 
     framebuf_src = repo + "/src/add_ons/framebuf.py"
@@ -239,15 +239,15 @@ def stage_python_graphics(repo: str):
             f.write(code)
 
     for key in list(sys.modules):
-        if key == "graphics_py" or key.startswith("graphics_py."):
+        if key == "pygraphics_py" or key.startswith("pygraphics_py."):
             del sys.modules[key]
 
     if staging not in sys.path:
         sys.path.insert(0, staging)
 
-    import graphics_py
+    import pygraphics_py
 
-    return graphics_py
+    return pygraphics_py
 
 
 def _check_exports(rep: _Reporter, native, py) -> None:
@@ -268,8 +268,8 @@ def _check_exports(rep: _Reporter, native, py) -> None:
         rep.fail("python implementation(): {}".format(exc))
         p_impl = None
     else:
-        if p_impl != "graphics_python":
-            rep.fail("python implementation: {!r} (expected 'graphics_python')".format(p_impl))
+        if p_impl != "pygraphics_python":
+            rep.fail("python implementation: {!r} (expected 'pygraphics_python')".format(p_impl))
         else:
             rep.ok("python implementation")
 
@@ -708,9 +708,9 @@ def run_compare(repo, *, verbose=True):
     }
 
     try:
-        import graphics as native
+        import pygraphics as native
     except ImportError as exc:
-        result["error"] = "import graphics failed: {}".format(exc)
+        result["error"] = "import pygraphics failed: {}".format(exc)
         return result
 
     try:
@@ -776,7 +776,7 @@ def main(argv=None):
     if opts.get("help"):
         print(
             "Usage: compare_graphics_run.py [--repo PATH] [--quiet]\n"
-            "Compare native graphics cmod vs staged ../graphics/lib/graphics."
+            "Compare native graphics cmod vs staged ../pygraphics/lib/pygraphics."
         )
         return 0
 
@@ -792,7 +792,7 @@ def main(argv=None):
         print()
         if result["status"] == "ok":
             print(
-                "All checks passed ({} ok, native graphics cmod vs ../graphics/lib/graphics).".format(
+                "All checks passed ({} ok, native graphics cmod vs ../pygraphics/lib/pygraphics).".format(
                     result["checks_passed"]
                 )
             )

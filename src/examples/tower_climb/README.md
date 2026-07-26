@@ -174,7 +174,7 @@ game does not need layout changes when art is regenerated.
 These pieces live in the main pydisplay tree and are **dependencies** if you
 extract only `tower_climb/`:
 
-- `board_config`, `displaysys`, `eventsys`, `graphics`, `multimer`
+- `board_config`, `displaysys`, `eventsys`, `pygraphics`, `multimer`
 - `FFmpegFrameRecorder` / `PGDisplay.open_frame_recorder` (recording)
 - `tools/example_test_manifest.toml` entry for CI smoke tests
 - `tests/test_pgdisplay_frame_recorder.py`

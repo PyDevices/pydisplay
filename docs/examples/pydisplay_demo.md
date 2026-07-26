@@ -8,7 +8,7 @@
 It demonstrates:
 
 - **Display** — drawing through `board_config.display_drv`
-- **Input** — touch or mouse clicks via `eventsys` and `graphics.Area`
+- **Input** — touch or mouse clicks via `eventsys` and `pygraphics.Area`
 - **Rotation** — `display_drv.rotation` in 90° steps
 - **Hardware-style scrolling** — fixed top/bottom chrome with a scrolling middle panel
 - **Timers** — `multimer.Timer` with a `run_forever` / poll main loop
@@ -66,8 +66,8 @@ Constants in the script: `TOP = 36`, `BOT = 20`, `ROW = 20` (height of each tip 
 | `board_config.display_drv` | Platform display driver (SDL, BusDisplay, …) |
 | `board_config.runtime` | Input event runtime (touch / mouse) |
 | `displaysys.color565` | RGB → RGB565 color values |
-| `graphics.Area` | Rectangle hit-testing for buttons |
-| `graphics.Font`, `FrameBuffer`, `RGB565` | Text rendered in RAM, blitted once |
+| `pygraphics.Area` | Rectangle hit-testing for buttons |
+| `pygraphics.Font`, `FrameBuffer`, `RGB565` | Text rendered in RAM, blitted once |
 | `multimer.Timer`, `run_forever`, `sleep_ms` | Periodic scroll + main loop |
 
 ## Code walkthrough
@@ -105,7 +105,7 @@ def blit_text(s, x, y, fg, bg):
     display_drv.blit_rect(buf, x, y, w, h)
 ```
 
-`Font(height=16)` uses the built-in 8×16 romfont from `graphics` — no extra font files required.
+`Font(height=16)` uses the built-in 8×16 romfont from `pygraphics` — no extra font files required.
 
 ### `redraw()` — full paint pass
 

@@ -10,7 +10,7 @@ except ImportError:
 
 
 from board_config import display_drv, runtime
-from graphics import BMP565
+from pygraphics import BMP565
 
 image = BMP565("examples/assets/warrior.bmp", streamed=True)
 print(f"\n{image.width=}, {image.height=}, {image.bpp=}")

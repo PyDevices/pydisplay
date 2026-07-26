@@ -13,7 +13,7 @@ cd "$ROOT"
 
 MICROPYTHON_TOML=web/pyscript/micropython.toml
 
-# Core libs (displaysys/eventsys/multimer/graphics/usdl2) are micropython-lib only.
+# Core libs (displaysys/eventsys/multimer/pygraphics/usdl2) are micropython-lib only.
 GENERATED_LIB_PACKAGES=(
     packages/add_ons.json
     packages/examples.json

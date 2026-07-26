@@ -54,5 +54,5 @@ if _port.endswith("/unix") or _port.endswith("/windows"):
 
 package("displaysys", base_path="./src/lib", opt=3)
 package("eventsys", base_path="./src/lib", opt=3)
-package("graphics", base_path="./src/lib", opt=3)
+package("pygraphics", base_path="./src/lib", opt=3)
 package("multimer", base_path="./src/lib", opt=3)

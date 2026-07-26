@@ -42,7 +42,7 @@ Poll idiom (legacy)::
 from ._events import events
 
 try:
-    from graphics import Area
+    from pygraphics import Area
 except ImportError:
     print("eventsys.touch_keypad: graphics not found; TouchKeypad.areas unavailable.")
     Area = None

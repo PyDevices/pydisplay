@@ -43,7 +43,7 @@ Includes 2 functions that install from different sources:
         - Core packages:
             - displaysys (full package — all backends)
             - eventsys
-            - graphics
+            - pygraphics
             - multimer
         - Display drivers, for example:
             - gc9a01
@@ -134,7 +134,7 @@ def install(package, **kwargs):
 ## Core packages:
 install("displaysys")
 install("eventsys")
-install("graphics")
+install("pygraphics")
 install("multimer")
 
 ## Display drivers, for example:
@@ -172,7 +172,7 @@ install("/src/lib/board_config.py", target="./")
 
 install("displaysys")
 install("eventsys")
-install("graphics")
+install("pygraphics")
 install("multimer")
 install("/packages/add_ons.json", target="./add_ons")
 install("/packages/examples.json", target="./examples")

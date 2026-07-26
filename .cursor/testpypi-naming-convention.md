@@ -4,9 +4,9 @@ PyDevices publishes **CPython wheels to TestPyPI only** (not production PyPI). E
 
 | Role | Example | Used by |
 |------|---------|---------|
-| **MIP / micropython-lib** | `graphics` | `mip.install("graphics", index=…)`, manifest `package("graphics")` |
-| **pip / TestPyPI project** | `pydisplay-graphics` | `pip install … pydisplay-graphics`, hatch `[project].name` |
-| **Python import** | `graphics` | `import graphics` in application code |
+| **MIP / micropython-lib** | `pygraphics` | `mip.install("pygraphics", index=…)`, manifest `package("pygraphics")` |
+| **pip / TestPyPI project** | `pygraphics` | `pip install … pygraphics`, hatch `[project].name` |
+| **Python import** | `pygraphics` | `import pygraphics` in application code |
 
 MIP names stay short. pip project names must **not collide with [pypi.org](https://pypi.org)** — TestPyPI rejects sdists when the normalized name is already registered there (wheels may still upload; treat collisions as errors).
 
@@ -29,15 +29,15 @@ When the MIP name is **taken on pypi.org**, prefix with `pydisplay-`:
 
 | MIP name | pip / TestPyPI | Import | Why |
 |----------|----------------|--------|-----|
-| `graphics` | **`pydisplay-graphics`** | `graphics` | [pypi.org/project/graphics](https://pypi.org/project/graphics) exists |
+| `pygraphics` | **`pygraphics`** | `pygraphics` | [pypi.org/project/graphics](https://pypi.org/project/graphics) exists |
 
-Mapping lives in the owning repo’s publish script (graphics: `PYPI_NAME` in
-[`publish_micropython_lib.sh`](https://github.com/PyDevices/graphics/blob/main/scripts/publish_micropython_lib.sh)).
-MIP and source trees keep the short name `graphics/`.
+Mapping lives in the owning repo’s publish script (pygraphics: `PYPI_NAME` in
+[`publish_micropython_lib.sh`](https://github.com/PyDevices/pygraphics/blob/main/scripts/publish_micropython_lib.sh)).
+MIP and source trees use the name `pygraphics/`.
 
 **PEP 503:** pip normalizes `-`, `_`, and `.` to `-`. Never use a `*-py`
-suffix when a `*.py` project exists on pypi.org — `graphics-py` collides with
-[graphics.py](https://pypi.org/project/graphics.py/) (Zelle), so a two-index
+suffix when a `*.py` project exists on pypi.org — `graphics-py` would collide with
+[pygraphics.py](https://pypi.org/project/pygraphics.py/) (Zelle), so a two-index
 install can pull the wrong package. Do not revive `graphics-py`.
 
 ### 3. Native CPython extensions (separate repos): suffix disambiguation
@@ -46,12 +46,12 @@ Use a **repo-specific suffix** so pip names are unique and intent is obvious:
 
 | Pattern | pip / TestPyPI | Import | Repo |
 |---------|----------------|--------|------|
-| `*-cmod` | `graphics-cmod` | `graphics` | [graphics](https://github.com/PyDevices/graphics) — native FrameBuffer |
+| `*-cmod` | `pygraphics-cmod` | `pygraphics` | [pygraphics](https://github.com/PyDevices/pygraphics) — native FrameBuffer |
 | `*-cpython` | `lvgl-cpython` | `lvgl` | [lv_cpython_mod](https://github.com/PyDevices/lv_cpython_mod) |
 
 Do **not** publish as bare `lvgl` — [pypi.org/project/lvgl](https://pypi.org/project/lvgl) exists.
 
-`graphics-cmod` and `pydisplay-graphics` (both from [PyDevices/graphics](https://github.com/PyDevices/graphics)) provide `import graphics`; prefer **`graphics-cmod`** on desktop/Android when the native wheel matches the platform, and **`pydisplay-graphics`** for pure-Python-only or cross-check installs.
+`pygraphics-cmod` and `pygraphics` (both from [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics)) provide `import pygraphics`; prefer **`pygraphics-cmod`** on desktop/Android when the native wheel matches the platform, and **`pygraphics`** for pure-Python-only or cross-check installs.
 
 ### 4. displaysys is one package
 
@@ -89,13 +89,13 @@ After a version is on TestPyPI, **do not rename** the project (TestPyPI rejects 
 | `displaysys` | `displaysys` | `displaysys`, `board_config` | free |
 | `eventsys` | `eventsys` | `eventsys` | free |
 | `multimer` | `multimer` | `multimer` | free |
-| `graphics` | **`pydisplay-graphics`** | `graphics` | **taken** → mapped |
+| `pygraphics` | **`pygraphics`** | `pygraphics` | **taken** → mapped |
 
 ### Sibling repos (own workflows)
 
 | pip / TestPyPI | Import | pypi.org | Notes |
 |----------------|--------|----------|--------|
-| `graphics-cmod` | `graphics` | free | cibuildwheel; linux + windows + android |
+| `pygraphics-cmod` | `pygraphics` | free | cibuildwheel; linux + windows + android |
 | `lvgl-cpython` | `lvgl` | free (`lvgl` taken) | cibuildwheel; LVGL version in tag (e.g. 9.5.6) |
 | `usdl2` | `usdl2` | free | pure-Python ctypes SDL2 shim |
 | `pdwidgets` | `pdwidgets` | free | separate repo |

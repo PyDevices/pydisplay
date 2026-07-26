@@ -122,7 +122,7 @@ python scripts/gallery_generator.py --check    # CI freshness
 
 Manual packages (not generated) still in this repo:
 `packages/micropython-{micro-gui,nano-gui,touch}.json`. Core libs
-(`displaysys`, `eventsys`, `multimer`, `graphics`, `usdl2`) have no
+(`displaysys`, `eventsys`, `multimer`, `pygraphics`, `usdl2`) have no
 `packages/*.json` — use the micropython-lib MIP index. Bus/touch/chip helper
 manifests (`spibus`, `i80bus`, `i2cbus`, `epaper_chip`, `tt21100`, `stmpe610`,
 `keypad_shift`) live in sibling `micropython-hardware/packages/`.

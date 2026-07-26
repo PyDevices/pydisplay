@@ -17,7 +17,7 @@
 |:--:|:--:|
 | @peterhinch's `active.py` | @russhughes's `tiny_toasters.py` |
 
-PyDisplay is the portable foundation layer for Python graphics. It gives you **display drivers, unified input events, drawing primitives, fonts, palettes, and cross-platform timers** behind a single API — so the same drawing code runs unchanged on a $4 microcontroller, on your desktop, in a web browser, and even inside a Jupyter Notebook.
+PyDisplay is the portable foundation layer for Python pygraphics. It gives you **display drivers, unified input events, drawing primitives, fonts, palettes, and cross-platform timers** behind a single API — so the same drawing code runs unchanged on a $4 microcontroller, on your desktop, in a web browser, and even inside a Jupyter Notebook.
 
 ### It really does run everywhere
 
@@ -72,7 +72,7 @@ PyDisplay is a **foundation layer**, not a GUI toolkit. It provides:
 
 - **`displaysys`** — display backends (`BusDisplay`, `SDLDisplay`, `PGDisplay`, `PSDisplay`, `JNDisplay`, `FBDisplay`) with a unified drawing API.
 - **`eventsys`** — a `Runtime` that turns touch, mouse, keyboards, keypads, encoders, and joysticks into uniform PyGame/SDL2-style events.
-- **`graphics`** — a portable `framebuf`-compatible drawing surface plus shapes, fonts, bitmap loaders, and `Area` helpers.
+- **`pygraphics`** — a portable `framebuf`-compatible drawing surface plus shapes, fonts, bitmap loaders, and `Area` helpers.
 - **`multimer`** — cross-platform periodic timers (sync, threaded, polled, and `asyncio`) with a `machine.Timer`-style API.
 
 Use it directly for simple UIs, or as the backend for a full widget library.

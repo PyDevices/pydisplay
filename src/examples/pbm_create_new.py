@@ -1,5 +1,5 @@
 from board_config import display_drv
-from graphics import Draw, FrameBuffer, MONO_HLSB, RGB565
+from pygraphics import Draw, FrameBuffer, MONO_HLSB, RGB565
 
 
 def draw_logo(logo):

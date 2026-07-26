@@ -30,7 +30,7 @@ and eventsys only.
 """
 
 from board_config import display_drv, runtime
-from graphics import Area
+from pygraphics import Area
 
 # --- customize: colors and layout ---
 BG = 0
@@ -62,11 +62,11 @@ runtime.on(runtime.events.MOUSEBUTTONDOWN, on_click)
 runtime.run_forever()
 ```
 
-## Hit testing and `graphics.Area`
+## Hit testing and `pygraphics.Area`
 
-The boilerplate imports `Area` from `graphics` **only for hit-testing**. `display_drv.fill_rect(...)` returns an `(x, y, w, h)` tuple; wrapping it in `Area` lets you write `button.contains(e.pos)` instead of inline coordinate math.
+The boilerplate imports `Area` from `pygraphics` **only for hit-testing**. `display_drv.fill_rect(...)` returns an `(x, y, w, h)` tuple; wrapping it in `Area` lets you write `button.contains(e.pos)` instead of inline coordinate math.
 
-`displaysys` and `eventsys` do not depend on `graphics`. If you want a stack with no `graphics` import — or you install only those packages — keep the tuple from `fill_rect` and test clicks directly:
+`displaysys` and `eventsys` do not depend on `pygraphics`. If you want a stack with no `pygraphics` import — or you install only those packages — keep the tuple from `fill_rect` and test clicks directly:
 
 ```python
 # displaysys + eventsys only — no graphics import
@@ -96,7 +96,7 @@ def handle_event(e):
             redraw()
 ```
 
-Stick with `from graphics import Area` when you also use rectangle helpers from `graphics` — union (`area1 + area2`), clip, inset, or dirty rects returned by `graphics` draw functions. See [Drawing and fonts](../concepts/drawing-and-fonts.md).
+Stick with `from pygraphics import Area` when you also use rectangle helpers from `pygraphics` — union (`area1 + area2`), clip, inset, or dirty rects returned by `pygraphics` draw functions. See [Drawing and fonts](../concepts/drawing-and-fonts.md).
 
 ## Run it
 

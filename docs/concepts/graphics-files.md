@@ -1,23 +1,23 @@
 # Graphics files
 
-Two layers: **graphics package loaders** (eager, full image in RAM) and **pydisplay add-ons** (streaming and TFT-specific helpers).
+Two layers: **pygraphics package loaders** (eager, full image in RAM) and **pydisplay add-ons** (streaming and TFT-specific helpers).
 
-## graphics package loaders
+## pygraphics package loaders
 
-Built into [`graphics`](graphics.md):
+Built into [`pygraphics`](pygraphics.md):
 
 | Function | Format |
 |----------|--------|
-| `graphics.bmp_to_framebuffer(path)` | Windows BMP → `FrameBuffer` |
-| `graphics.pbm_to_framebuffer(path)` | PBM (1-bit) |
-| `graphics.pgm_to_framebuffer(path)` | PGM (grayscale) |
-| `graphics.load_image(path)` | Auto-detect PBM/PGM/BMP from header |
-| `graphics.save_image(fb, path)` | Write PBM/PGM/BMP for supported formats |
-| `graphics.FrameBuffer.from_file(path)` | Same as `load_image` |
-| `graphics.FrameBuffer.save(path)` | Same as `save_image` |
-| `graphics.FrameBuffer.export(path)` / `export_framebuffer` | Write importable `.py` module (`BITMAP = bytearray(...)`) |
-| `graphics.FrameBuffer.from_bitmap(buf, w, h, fmt)` | Wrap buffer; zero-copy when `buf` is a writable `bytearray` |
-| `graphics.FrameBuffer.from_module(mod)` | Same using `mod.WIDTH` / `HEIGHT` / `FORMAT` / `BITMAP` |
+| `pygraphics.bmp_to_framebuffer(path)` | Windows BMP → `FrameBuffer` |
+| `pygraphics.pbm_to_framebuffer(path)` | PBM (1-bit) |
+| `pygraphics.pgm_to_framebuffer(path)` | PGM (grayscale) |
+| `pygraphics.load_image(path)` | Auto-detect PBM/PGM/BMP from header |
+| `pygraphics.save_image(fb, path)` | Write PBM/PGM/BMP for supported formats |
+| `pygraphics.FrameBuffer.from_file(path)` | Same as `load_image` |
+| `pygraphics.FrameBuffer.save(path)` | Same as `save_image` |
+| `pygraphics.FrameBuffer.export(path)` / `export_framebuffer` | Write importable `.py` module (`BITMAP = bytearray(...)`) |
+| `pygraphics.FrameBuffer.from_bitmap(buf, w, h, fmt)` | Wrap buffer; zero-copy when `buf` is a writable `bytearray` |
+| `pygraphics.FrameBuffer.from_module(mod)` | Same using `mod.WIDTH` / `HEIGHT` / `FORMAT` / `BITMAP` |
 
 ### Memory notes
 
@@ -40,7 +40,7 @@ Use these for icons and sprites that fit in RAM on MCU or desktop.
 
 ## BMP565 (streaming)
 
-`graphics.BMP565` reads/writes Windows BMP files in RGB565 format (export from GIMP). Shared header/row logic also powers `bmp_to_framebuffer` and `FrameBuffer.save()` for RGB565.
+`pygraphics.BMP565` reads/writes Windows BMP files in RGB565 format (export from GIMP). Shared header/row logic also powers `bmp_to_framebuffer` and `FrameBuffer.save()` for RGB565.
 
 Features:
 

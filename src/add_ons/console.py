@@ -35,7 +35,7 @@ import io
 from multimer import Timer
 
 try:
-    import graphics as framebuf
+    import pygraphics as framebuf
 except ImportError:
     import framebuf
 

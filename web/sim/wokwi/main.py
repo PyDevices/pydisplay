@@ -14,7 +14,7 @@ print(" Connected!")
 
 import mip  # noqa: E402
 
-for _pkg in ("displaysys", "eventsys", "graphics", "multimer"):
+for _pkg in ("displaysys", "eventsys", "pygraphics", "multimer"):
     mip.install(f"github:PyDevices/pydisplay/packages/{_pkg}.json", target=".")
 # mip.install("github:PyDevices/pydisplay/packages/add_ons.json", target="./add_ons")
 # mip.install("github:PyDevices/pydisplay/packages/examples.json", target="./examples")

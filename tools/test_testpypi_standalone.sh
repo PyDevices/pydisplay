@@ -91,7 +91,7 @@ r.start_timer()
 print('eventsys', type(r).__name__)
 "
 
-test_package pydisplay-graphics "import graphics; print('graphics', graphics.implementation())"
+test_package pygraphics "import pygraphics; print('pygraphics', pygraphics.implementation())"
 
 if [[ "$DESKTOP" -eq 1 ]]; then
     # usdl2 / pygame-ce are runtime deps, not pip requires of the displaysys wheel.
