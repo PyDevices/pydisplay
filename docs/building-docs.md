@@ -136,13 +136,12 @@ Sibling docs projects on the same app: **pydisplay**, **pygraphics**,
 
 ### Migrating a legacy (webhook) project to the GitHub App
 
-Older imports still use a per-repo webhook under GitHub **Settings → Webhooks**.
-After the org app is installed, migrate those projects from
-
-[https://app.readthedocs.org/accounts/migrate-to-github-app/](https://app.readthedocs.org/accounts/migrate-to-github-app/)
-
-then delete any remaining `*/api/v2/webhook/...` hooks on the GitHub repo so
-builds are not double-triggered.
+Older imports used a per-repo webhook under GitHub **Settings → Webhooks**.
+Those PyDevices docs projects (**pydisplay**, **palettes**, **pdwidgets**) have
+been migrated to the org GitHub App via
+[Migrate to GitHub App](https://app.readthedocs.org/accounts/migrate-to-github-app/);
+legacy webhooks are removed. New projects should use the App from the start
+(no manual webhook).
 
 ### Ongoing
 
