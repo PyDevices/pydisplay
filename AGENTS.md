@@ -139,7 +139,7 @@ that call `show()` themselves avoid a competing SDL refresh timer.
   refresh when `display_drv.needs_refresh` is true. `displaysys` drivers only
   `show()`/`deinit()` and declare `needs_refresh`; `multimer` stays
   display-agnostic. GUI layers claim presentation via
-  `runtime.claim_display_refresh()` (LVGL via `add_ons/display_driver.py`).
+  `runtime.claim_display_refresh()` (LVGL via frozen/bundled `display_driver`).
 
 ### MCU: no `_thread` for network / blocking work
 
@@ -162,9 +162,11 @@ any port with a similarly small `_thread` stack). Do not “fix” this in
 - Install the CPython LVGL binding from TestPyPI (import name `lvgl`):
   `.venv/bin/pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ lvgl-cpython`
   (see https://github.com/PyDevices/lv_cpython_mod). The update script installs it.
-- `add_ons/display_driver.py` owns the LVGL `event_loop` (tick via
-  `runtime.on_tick`, `asyncio` from `multimer`) and claims runtime display
-  refresh so LVGL presents frames from `task_handler`.
+- `display_driver` (frozen in MP/CP LVGL firmwares; bundled with `lvgl-cpython`)
+  owns the LVGL `event_loop` (tick via `runtime.on_tick`, `asyncio` from
+  `multimer`) and claims runtime display refresh so LVGL presents frames from
+  `task_handler`. SoT: [lv_bindings](https://github.com/PyDevices/lv_bindings)
+  `python/display_driver.py` — not shipped from this repo.
 - Test LVGL timers with `tools/lv_timer_test_kit.py` (modes: `sync`, `async`).
   Headless: `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/lv_timer_test_kit.py --only cpython-venv`.
 - Non-obvious: the sync `multimer.Timer` backend on CPython/Linux delivers via a

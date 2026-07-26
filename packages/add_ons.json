@@ -13,10 +13,6 @@
       "github:PyDevices/pydisplay/src/add_ons/console.py"
     ],
     [
-      "display_driver.py",
-      "github:PyDevices/pydisplay/src/add_ons/display_driver.py"
-    ],
-    [
       "displaybuf.py",
       "github:PyDevices/pydisplay/src/add_ons/displaybuf.py"
     ],

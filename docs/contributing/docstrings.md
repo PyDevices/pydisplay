@@ -59,7 +59,7 @@ Griffe warnings mean a docstring parameter does not appear in the signature — 
 | Tier | Modules |
 |------|---------|
 | P0 | `displaysys`, `eventsys`, `multimer` |
-| P1 | `displaybuf`, `display_driver`, `console`, other `add_ons` |
+| P1 | `displaybuf`, `console`, other `add_ons` |
 | P2 | Sibling packages document their own APIs: [pygraphics](https://pygraphics.readthedocs.io), [pdwidgets](https://pdwidgets.readthedocs.io), [palettes](https://palettes.readthedocs.io) |
 
 See [Contributing](../contributing.md) for the PR workflow.
