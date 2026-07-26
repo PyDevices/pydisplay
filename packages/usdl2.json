@@ -1,8 +1,8 @@
 {
   "urls": [
     [
-      "usdl2/__init__.py",
-      "github:PyDevices/usdl2/lib/usdl2/__init__.py"
+      "usdl2.py",
+      "github:PyDevices/usdl2/lib/usdl2.py"
     ]
   ],
   "deps": [],

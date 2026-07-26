@@ -66,7 +66,7 @@ interpreter = "./vendor/micropython/micropython.mjs"
 "./src/lib/eventsys/keys.py" = "/lib/eventsys/"
 "./src/lib/eventsys/touch_keypad.py" = "/lib/eventsys/"
 
-"../usdl2/lib/usdl2/__init__.py" = "/lib/usdl2/"
+"../usdl2/lib/usdl2.py" = "/lib/"
 "../graphics/lib/graphics/__init__.py" = "/lib/graphics/"
 "../graphics/lib/graphics/_area.py" = "/lib/graphics/"
 "../graphics/lib/graphics/_blit_hooks.py" = "/lib/graphics/"
