@@ -99,32 +99,54 @@ Harmless for now — RTD pauses search indexing on inactive projects. After docs
 
 The public docs URL is **https://pydisplay.readthedocs.io**. ReadTheDocs reads [`.readthedocs.yaml`](https://github.com/PyDevices/pydisplay/blob/main/.readthedocs.yaml) from the repo and runs the same MkDocs build as locally.
 
-### First-time setup
+### Org GitHub App (required)
 
-1. Go to [readthedocs.org](https://readthedocs.org) and sign in with **GitHub** (same account that owns `PyDevices/pydisplay`).
+PyDevices uses the
+[Read the Docs Community GitHub App](https://github.com/apps/read-the-docs-community)
+installed on the org with access to **all repositories** (see
+[org installation](https://github.com/organizations/PyDevices/settings/installations/149173814)).
+That app delivers push/PR events to RTD — do **not** add a manual
+`readthedocs.org/api/v2/webhook/...` hook on the repo.
 
-2. Open the [Read the Docs dashboard](https://app.readthedocs.org/dashboard/) and click **Add project**.
+Sibling docs projects on the same app: **pydisplay**, **pygraphics**,
+**palettes**, **pdwidgets**.
 
+### First-time setup (new project)
+
+1. Go to [readthedocs.org](https://readthedocs.org) and sign in with **GitHub**
+   (an account that can see `PyDevices/pydisplay`).
+2. Open the [Read the Docs dashboard](https://app.readthedocs.org/dashboard/)
+   and click **Add project**.
 3. Search for **`PyDevices/pydisplay`** and import it.
-   - If the repo does not appear, install the [Read the Docs GitHub App](https://github.com/apps/readthedocs) on the `PyDevices` org or your fork, then retry.
-
+   - If the repo does not appear, confirm the
+     [GitHub App installation](https://github.com/organizations/PyDevices/settings/installations/149173814)
+     includes this repository, then use **Refresh your repositories** on RTD.
 4. On the setup form, confirm:
    - **Documentation type:** MkDocs (auto-detected from `.readthedocs.yaml`)
    - **Configuration file:** `.readthedocs.yaml`
    - Click **Next**, then **This file exists** (the config is already in the repo).
-
 5. **Build `latest` (tracks `main`):**
    - Go to **Admin** → **Versions**.
    - Ensure **`latest`** is **Active** and set as the **default version**.
-   - Click **Build** on `latest` (or wait for the webhook after pushing to `main`).
-
-6. Check the **Builds** tab. A successful build ends with `Documentation built successfully`. The site appears at:
+   - Click **Build** on `latest` (or wait for the next push to `main`).
+6. Check the **Builds** tab. A successful build ends with
+   `Documentation built successfully`. The site appears at:
    - `https://pydisplay.readthedocs.io/en/latest/`
    - `https://pydisplay.readthedocs.io/` when `latest` is the default
 
+### Migrating a legacy (webhook) project to the GitHub App
+
+Older imports still use a per-repo webhook under GitHub **Settings → Webhooks**.
+After the org app is installed, migrate those projects from
+
+[https://app.readthedocs.org/accounts/migrate-to-github-app/](https://app.readthedocs.org/accounts/migrate-to-github-app/)
+
+then delete any remaining `*/api/v2/webhook/...` hooks on the GitHub repo so
+builds are not double-triggered.
+
 ### Ongoing
 
-1. RTD rebuilds automatically when you push to `main`.
+1. RTD rebuilds automatically when you push to `main` (via the GitHub App).
 2. Optionally disable obsolete version slugs under **Admin** → **Versions** if any remain from earlier experiments.
 3. Enable **search indexing** under **Settings** once the site is live.
 
