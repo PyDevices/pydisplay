@@ -26,7 +26,7 @@ class FBDisplay(DisplayDriver):
 
     Args:
         buffer (FrameBuffer): The CircuitPython FrameBuffer object
-            (e.g. ``displayif.DotClockFramebuffer`` / CP ``dotclockframebuffer``, already in PSRAM).
+            (e.g. ``dotclockframebuffer.DotClockFramebuffer``, already in PSRAM).
         width (int, optional): The width of the display. Defaults to None.
         height (int, optional): The height of the display. Defaults to None.
         reverse_bytes_in_word (bool, optional): Whether to reverse the bytes in a word. Defaults to False.
@@ -97,7 +97,7 @@ class FBDisplay(DisplayDriver):
         """Panel scanout buffer(s) for direct GUI rendering.
 
         Returns ``(buf1, buf2_or_None, nbytes, stride_bytes)``.
-        Prefers native dual FBs from ``displayif.DotClockFramebuffer.framebuffers``
+        Prefers native dual FBs from ``dotclockframebuffer.DotClockFramebuffer.framebuffers``
         when present; otherwise a single ``memoryview`` of the raw buffer
         (e.g. mipidsi).
         """
@@ -157,7 +157,7 @@ class FBDisplay(DisplayDriver):
             bt.fill_region(self._bitmap, x, y, x + w, y + h, color)
             return (x, y, w, h)
 
-        # Native FB fill (displayif.DotClockFramebuffer on ESP32-S3): Python band assigns into
+        # Native FB fill (dotclockframebuffer.DotClockFramebuffer on ESP32-S3): Python band assigns into
         # PSRAM are hundreds of ms for 720x720; C fill is a few ms.
         native_fill = getattr(self._raw_buffer, "fill_rect", None)
         if native_fill is not None:
@@ -296,7 +296,7 @@ class FBDisplay(DisplayDriver):
 
         Present the frame. Drivers with ``auto_refresh=True`` (CP Qualia
         ``FramebufferDisplay``) already composite into the scanned buffer —
-        skip here. MP ``displayif.DotClockFramebuffer`` uses double panel FBs
+        skip here. MicroPython ``dotclockframebuffer.DotClockFramebuffer`` uses double panel FBs
         with ``auto_refresh=False``, so ``show()`` must call ``refresh()`` to
         promote the back buffer (LVGL wires this as ``refresh_cb``).
         """
