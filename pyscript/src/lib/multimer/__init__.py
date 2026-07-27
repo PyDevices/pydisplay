@@ -12,7 +12,9 @@ Public surface::
 ``Timer`` selects a platform backend (librt, win32 APC, SDL2, threading, or
 ``machine.Timer``). On async-only hosts (PyScript / Jupyter), ``Timer`` is an
 alias of :class:`AsyncTimer`. Soft callbacks (``hard=False``) use
-:func:`schedule`. See also: https://pydisplay.readthedocs.io/en/latest/concepts/multimer/
+:func:`schedule`; on signal backends that already deliver on main, soft does
+not postpone the callback (coalesce/gap still apply). See also:
+https://pydisplay.readthedocs.io/en/latest/concepts/multimer/
 """
 
 from ._async_timer import AsyncTimer
@@ -59,7 +61,6 @@ if not getattr(sleep_ms, "__doc__", None):
     Args:
         ms: Duration to sleep, in milliseconds.
     """
-
 
 
 def uses_signals():
