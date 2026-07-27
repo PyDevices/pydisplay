@@ -35,8 +35,7 @@ card = pd.Card(
 )
 
 y = 28
-# ListTile is an alias of FormRow — name must appear for coverage.
-row_wifi = pd.ListTile(card, label="Wi-Fi", y=y, w=card.width - 8, x=4)
+row_wifi = pd.FormRow(card, label="Wi-Fi", y=y, w=card.width - 8, x=4)
 wifi = pd.Switch(row_wifi, value=True)
 
 y += row_wifi.height + 4

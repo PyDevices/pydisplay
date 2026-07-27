@@ -51,8 +51,6 @@ tv = pd.TabView(
     h=root.height - root_bar.height,
     tabs=[("Home", home), ("Log", log), ("About", about)],
 )
-# TabBar is an alias of TabView — name must appear for coverage.
-_ = pd.TabBar
 
 detail_bar = pd.AppBar(detail, title="Detail", on_back=go_back)
 pd.Label(detail, value="Detail page", y=detail_bar.height + 20, align=pd.ALIGN.CENTER, scale=2)

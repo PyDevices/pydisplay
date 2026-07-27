@@ -39,8 +39,7 @@ img = pd.Image(
     value=pd.icon_theme.home(pd.ICON_SIZE.XLARGE),
 )
 
-# BusyIndicator is an alias of Spinner — name must appear for coverage.
-spinner = pd.BusyIndicator(card, align=pd.ALIGN.CENTER, visible=False)
+spinner = pd.Spinner(card, align=pd.ALIGN.CENTER, visible=False)
 load_btn = pd.Button(card, label="Load", align=pd.ALIGN.BOTTOM, y=-12, radius=6)
 
 _task = {"t": None, "n": 0}

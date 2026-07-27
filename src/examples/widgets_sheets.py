@@ -3,8 +3,8 @@
 widgets_sheets
 ====================================================
 Showcase :class:`~pdwidgets.Drawer`, :class:`~pdwidgets.BottomSheet`,
-:class:`~pdwidgets.Accordion` / :class:`~pdwidgets.ExpansionPanel`,
-:class:`~pdwidgets.ScrollView`, :class:`~pdwidgets.Grid`,
+:class:`~pdwidgets.Accordion`, :class:`~pdwidgets.ScrollView`,
+:class:`~pdwidgets.Grid`,
 :class:`~pdwidgets.PasswordField`, :class:`~pdwidgets.PinPad`, and
 :class:`~pdwidgets.Form`.
 """
@@ -43,13 +43,11 @@ pd.Button(screen, label="Sheet", x=86, y=bar.height + 8, w=70, h=28).add_event_c
     pd.events.MOUSEBUTTONDOWN, show_sheet
 )
 
-# Accordion (+ ExpansionPanel alias)
 acc = pd.Accordion(screen, x=8, y=bar.height + 44, w=screen.width - 16, h=90)
 body1 = pd.Label(screen, value="Section A body", visible=False, w=100, h=20)
 body2 = pd.Label(screen, value="Section B body", visible=False, w=100, h=20)
 acc.add_panel("Section A", body1, open_=True)
 acc.add_panel("Section B", body2)
-_ = pd.ExpansionPanel
 
 # ScrollView with overflowing labels
 sv = pd.ScrollView(

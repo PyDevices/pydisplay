@@ -2,8 +2,7 @@
 """
 widgets_actions
 ====================================================
-Showcase :class:`~pdwidgets.Menu` / :class:`~pdwidgets.ContextMenu`,
-:class:`~pdwidgets.Chip` / :class:`~pdwidgets.Tag`,
+Showcase :class:`~pdwidgets.Menu`, :class:`~pdwidgets.Chip`,
 :class:`~pdwidgets.SegmentedControl`, and :class:`~pdwidgets.ListView`.
 
 AppBar plus a Menu trigger; Chip filters sit above a ListView; SegmentedControl
@@ -21,7 +20,7 @@ theme = display.color_theme
 screen = pd.Screen(display, bg=theme.background, visible=False)
 
 toast = pd.Toast(screen)
-menu = pd.ContextMenu(
+menu = pd.Menu(
     screen,
     items=[
         ("Refresh", lambda: toast.show("Refresh")),
@@ -55,8 +54,9 @@ y += seg.height + 8
 
 chip_row_y = y
 for i, name in enumerate(("All", "New", "Star")):
-    cls = pd.Chip if i < 2 else pd.Tag
-    cls(screen, label=name, x=8 + i * 64, y=chip_row_y, value=(i == 0), style="raised")
+    pd.Chip(
+        screen, label=name, x=8 + i * 64, y=chip_row_y, value=(i == 0), style="raised"
+    )
 
 y = chip_row_y + 32
 lv = pd.ListView(screen, x=8, y=y, w=screen.width - 40, h=screen.height - y - 8)
