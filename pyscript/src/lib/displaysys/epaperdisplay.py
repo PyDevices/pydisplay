@@ -25,13 +25,20 @@ _ACEP_PALETTE_RGB = (
 
 
 class EPaperDisplay(DisplayDriver):
-    """
-    ``DisplayDriver`` wrapper around a CircuitPython ``EPaperDisplay`` chip driver.
+    """``DisplayDriver`` wrapper around a CircuitPython ``EPaperDisplay`` chip driver.
 
     Packed buffer depths:
     - ``color_depth=1`` — monochrome (1 bit per pixel)
     - ``color_depth=2`` — tri-color or 4-gray (2 bits per pixel: 0=white, 1=black, 2=accent)
     - ``color_depth=4`` — ACeP / advanced color (4 bits per pixel, 2 per byte)
+
+    Args:
+        epaper: CircuitPython ``EPaperDisplay`` (or compatible) chip driver.
+        width: Panel width; defaults to ``epaper.width``.
+        height: Panel height; defaults to ``epaper.height``.
+        buffer: Optional preallocated RAM buffer; allocated when depth ≤ 8.
+        color_depth: Bits per pixel; defaults to ``epaper.color_depth`` or 1.
+        quiet: Suppress init chatter when True.
     """
 
     def __init__(
@@ -104,9 +111,24 @@ class EPaperDisplay(DisplayDriver):
         return int.from_bytes(self._buffer[begin : begin + bpp], "little")
 
     def init(self) -> None:
-        pass
+        """No-op init hook (epaper chip drivers are already initialized)."""
 
     def fill_rect(self, x, y, w, h, c):
+        """Fill a rectangle in the RAM buffer.
+
+        Args:
+            x: Left edge.
+            y: Top edge.
+            w: Width in pixels.
+            h: Height in pixels.
+            c: Packed color value for the configured ``color_depth``.
+
+        Returns:
+            tuple: ``(x, y, w, h)`` of the filled area.
+
+        Raises:
+            NotImplementedError: When no RAM buffer is allocated.
+        """
         if self._buffer is None:
             raise NotImplementedError("EPaperDisplay requires a RAM buffer")
         if self.color_depth <= 4:
@@ -125,6 +147,21 @@ class EPaperDisplay(DisplayDriver):
         return (x, y, w, h)
 
     def blit_rect(self, buf, x, y, w, h):
+        """Blit packed pixel bytes into the RAM buffer.
+
+        Args:
+            buf: Source buffer matching ``color_depth`` packing.
+            x: Destination left edge.
+            y: Destination top edge.
+            w: Width in pixels.
+            h: Height in pixels.
+
+        Returns:
+            tuple: ``(x, y, w, h)`` of the blitted area.
+
+        Raises:
+            NotImplementedError: When no RAM buffer is allocated.
+        """
         if self._buffer is None:
             raise NotImplementedError("EPaperDisplay requires a RAM buffer")
         if self.color_depth == 1:
@@ -156,6 +193,16 @@ class EPaperDisplay(DisplayDriver):
         return (x, y, w, h)
 
     def pixel(self, x, y, c):
+        """Set a single pixel in the RAM buffer.
+
+        Args:
+            x: X coordinate.
+            y: Y coordinate.
+            c: Packed color value.
+
+        Returns:
+            tuple: ``(x, y, 1, 1)``.
+        """
         return self.fill_rect(x, y, 1, 1, c)
 
     def _panel_buffer(self):
@@ -276,6 +323,11 @@ class EPaperDisplay(DisplayDriver):
         return True
 
     def show(self, _timer=None) -> None:
+        """Push the RAM buffer to the panel and call ``epaper.refresh()``.
+
+        Prefers a displayio root-group path; falls back to ``bus.send`` when
+        displayio is unavailable.
+        """
         if self._buffer is not None:
             try:
                 self._push_buffer_displayio()

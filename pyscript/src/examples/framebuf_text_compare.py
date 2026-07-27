@@ -11,7 +11,7 @@ Run from ``src/``::
     ┌─────────────────┬─────────────────┐
     │ C framebuf      │ add_ons/framebuf│  top
     ├─────────────────┼─────────────────┤
-    │ graphics cmod   │ lib/graphics    │  bottom
+    │ graphics cmod   │ lib/pygraphics    │  bottom
     └─────────────────┴─────────────────┘
 """
 
@@ -26,7 +26,7 @@ import lib.path  # noqa: F401
 
 from board_config import display_drv, runtime
 import framebuf as native_fb
-import graphics as gfx_native
+import pygraphics as gfx_native
 
 _GRAPHICS_PY_FILES = (
     "__init__.py",
@@ -85,7 +85,7 @@ def _dirname(path):
 
 def _stage_graphics_py():
     repo = _dirname(_src) if _basename(_src) == "src" else _src
-    gfx_src = _src + "/lib/graphics"
+    gfx_src = _src + "/lib/pygraphics"
     staging = repo + "/.cursor/compare_graphics_py"
     pkg_dir = staging + "/graphics_py"
     _makedirs(pkg_dir)
@@ -108,7 +108,7 @@ def _stage_graphics_py():
     if staging not in sys.path:
         sys.path.insert(0, staging)
 
-    import graphics_py
+    import pygraphics_py
 
     return graphics_py
 
@@ -156,7 +156,7 @@ fb_python, buf_python = _make_fb(PyFB, HALF_W, HALF_H, native_fb.RGB565)
 _draw_framebuf_panel(fb_native, "C framebuf", FB_STRINGS)
 _draw_framebuf_panel(fb_python, "py framebuf", FB_STRINGS)
 
-# --- graphics: cmod vs staged lib/graphics ---
+# --- graphics: cmod vs staged lib/pygraphics ---
 gfx_python = _stage_graphics_py()
 buf_gfx_native = _draw_graphics_panel(gfx_native, "gfx cmod")
 buf_gfx_python = _draw_graphics_panel(gfx_python, "gfx python")
@@ -178,7 +178,7 @@ print("text compare (2x2)")
 print("  top-left     = C framebuf")
 print("  top-right    = add_ons/framebuf.py")
 print("  bottom-left  = graphics cmod (text8/14/16, text, FB.text)")
-print("  bottom-right = lib/graphics (same APIs)")
+print("  bottom-right = lib/pygraphics (same APIs)")
 print("Close the window or press Ctrl+C here.")
 
 

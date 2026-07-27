@@ -8,7 +8,7 @@ number and the color of the display background.
 """
 
 from board_config import display_drv, runtime
-from graphics import Draw, text16
+from pygraphics import Draw, text16
 from palettes import get_palette
 
 pal = get_palette()

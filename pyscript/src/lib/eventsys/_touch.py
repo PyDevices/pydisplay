@@ -51,6 +51,20 @@ class TouchDevice(Device):
     def __init__(
         self, *args, read=None, data=None, data2=None, display=None, rotation_table=None, **kwargs
     ):
+        """Create a touch device bound to a display.
+
+        Args:
+            *args: Optional positional ``read`` as the first argument.
+            read: Callable returning touch points (see class docstring).
+            data: Alternate for ``display`` (display object).
+            data2: Alternate for ``rotation_table``.
+            display: Display providing ``width``, ``height``, and ``rotation``.
+            rotation_table: 4-item mask table for 0/90/180/270°; default is built-in.
+            **kwargs: Forwarded to :class:`Device`.
+
+        Raises:
+            ValueError: When no display is provided.
+        """
         read = read if read is not None else (args[0] if args else None)
         data = display if display is not None else data
         data2 = rotation_table if rotation_table is not None else data2
@@ -69,6 +83,7 @@ class TouchDevice(Device):
 
     @property
     def rotation(self):
+        """Display rotation in degrees (``0``, ``90``, ``180``, or ``270``)."""
         return self._rotation
 
     @rotation.setter
@@ -78,6 +93,7 @@ class TouchDevice(Device):
 
     @property
     def rotation_table(self):
+        """Four-entry table of bitmasks selecting swap/reverse for each quadrant."""
         return self._data2
 
     @rotation_table.setter

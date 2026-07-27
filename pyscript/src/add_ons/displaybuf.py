@@ -27,8 +27,9 @@ Usage:
 import gc
 import sys
 
+import pygraphics
+
 from displaysys import alloc_buffer, color332, color565, color565_swapped
-import graphics
 
 _has_viper_tools = False
 if sys.implementation.name == "micropython":
@@ -64,7 +65,7 @@ _display_drv_get_attrs = {
 _display_drv_set_attrs = {"vscroll"}
 
 
-class DisplayBuffer(graphics.FrameBuffer):
+class DisplayBuffer(pygraphics.FrameBuffer):
     """
     Wrap a displaysys driver with a framebuf-compatible logical framebuffer.
 
@@ -75,11 +76,11 @@ class DisplayBuffer(graphics.FrameBuffer):
     rgb = None  # Function to convert r, g, b to a color value; used by Nano-GUI and Micro-GUI.
     colors_registered = 0  # For .color().  Not used in Nano-GUI or Micro-GUI.
 
-    RGB565 = graphics.RGB565
-    GS8 = graphics.GS8
-    GS4_HMSB = graphics.GS4_HMSB
+    RGB565 = pygraphics.RGB565
+    GS8 = pygraphics.GS8
+    GS4_HMSB = pygraphics.GS4_HMSB
 
-    def __init__(self, display_drv, format=graphics.RGB565, stride=8):
+    def __init__(self, display_drv, format=pygraphics.RGB565, stride=8):
         """
         Allocate a logical framebuffer backed by ``display_drv``.
 
@@ -157,10 +158,11 @@ class DisplayBuffer(graphics.FrameBuffer):
 
     def blit_transparent(self, buf, x, y, w, h, key):
         """Key-color blit into the logical framebuffer (returns dirty Area)."""
-        return graphics.blit_transparent(self, buf, x, y, w, h, key)
+        return pygraphics.blit_transparent(self, buf, x, y, w, h, key)
 
     @property
     def color_palette(self):
+        """Registered RGB888 palette used with GS4_HMSB / Nano-GUI color helpers."""
         return self._color_palette
 
     @color_palette.setter
@@ -266,18 +268,36 @@ class DisplayBuffer(graphics.FrameBuffer):
             self.display_drv.blit_rect(bb, 0, chunks * lines, wd, remainder)
 
 
-class BoolPalette(graphics.FrameBuffer):
-    # This is a 2-value color palette for rendering monochrome glyphs to color
-    # FrameBuffer instances. Supports destinations with up to 16 bit color.
+class BoolPalette(pygraphics.FrameBuffer):
+    """Two-entry palette for blitting monochrome glyphs into a color framebuffer.
+
+    Supports destinations with up to 16-bit color. Used as
+    ``DisplayBuffer.palette`` with ``ssd.blit(glyph, x, y, key=-1, palette=…)``.
+    """
 
     # Copyright (c) Peter Hinch 2021
     # Released under the MIT license see LICENSE
     def __init__(self, format):
+        """Allocate a 2x1 framebuffer in ``format`` for fg/bg colors.
+
+        Args:
+            format: A ``pygraphics`` framebuf format constant (e.g. ``RGB565``).
+        """
         buf = bytearray(4)  # OK for <= 16 bit color
         super().__init__(buf, 2, 1, format)
 
-    def fg(self, color):  # Set foreground color
+    def fg(self, color):
+        """Set the foreground (glyph-on) color.
+
+        Args:
+            color: Destination pixel value in the palette's format.
+        """
         self.pixel(1, 0, color)
 
     def bg(self, color):
+        """Set the background (glyph-off) color.
+
+        Args:
+            color: Destination pixel value in the palette's format.
+        """
         self.pixel(0, 0, color)

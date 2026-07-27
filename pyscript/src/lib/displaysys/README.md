@@ -47,7 +47,7 @@ Desktop input backends use [eventsys](https://test.pypi.org/project/eventsys/) a
 - [Documentation — Displays](https://pydisplay.readthedocs.io/en/latest/concepts/displays/)
 - [Source](https://github.com/PyDevices/pydisplay)
 - [Issues](https://github.com/PyDevices/pydisplay/issues)
-- Related: [eventsys](https://test.pypi.org/project/eventsys/), [multimer](https://test.pypi.org/project/multimer/), [pydisplay-graphics](https://test.pypi.org/project/pydisplay-graphics/), [usdl2](https://test.pypi.org/project/usdl2/), [usdl2-py](https://test.pypi.org/project/usdl2-py/)
+- Related: [eventsys](https://test.pypi.org/project/eventsys/), [multimer](https://test.pypi.org/project/multimer/), [pygraphics](https://test.pypi.org/project/pygraphics/), [usdl2](https://test.pypi.org/project/usdl2/), [usdl2-py](https://test.pypi.org/project/usdl2-py/)
 
 ## License
 

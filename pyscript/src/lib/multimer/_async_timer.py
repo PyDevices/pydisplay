@@ -29,7 +29,27 @@ def _loop_running(aio):
 
 
 class AsyncTimer(_TimerCore):
+    """``asyncio``-backed timer with the same API as ``machine.Timer`` / :class:`Timer`.
+
+    Use when ``runtime.timer_async`` is True (PyScript, Jupyter, desktop async).
+    :meth:`init` requires a running event loop — prefer constructing at import
+    time and calling :meth:`init` (or passing kwargs) only after the loop starts,
+    or let ``eventsys.Runtime`` defer arming via ``arm_async_refresh``.
+
+    Inherited: :attr:`ONE_SHOT`, :attr:`PERIODIC`, :meth:`init`, :meth:`deinit`.
+    """
+
     def __init__(self, id=-1, **kwargs):
+        """Create an async timer, optionally calling :meth:`init` when kwargs are given.
+
+        Args:
+            id: Timer id (kept for API parity; async tasks are not hardware-bound).
+            **kwargs: Forwarded to :meth:`init` when non-empty.
+
+        Raises:
+            ImportError: No ``asyncio`` / ``uasyncio`` available.
+            RuntimeError: :meth:`init` called with no running event loop.
+        """
         self._running = False
         self._task = None
         super().__init__(id, **kwargs)

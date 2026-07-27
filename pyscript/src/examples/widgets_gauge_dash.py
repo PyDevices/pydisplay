@@ -2,9 +2,8 @@
 """
 widgets_gauge_dash
 ====================================================
-Showcase :class:`~pdwidgets.Gauge` / :class:`~pdwidgets.Arc`,
-:class:`~pdwidgets.FormRow`, :class:`~pdwidgets.Chart`, and
-:class:`~pdwidgets.Toast`.
+Showcase :class:`~pdwidgets.Gauge`, :class:`~pdwidgets.FormRow`,
+:class:`~pdwidgets.Chart`, and :class:`~pdwidgets.Toast`.
 
 A compact instrument dashboard: gauges driven by a slider; Chart below;
 Toast when a threshold is crossed.
@@ -35,7 +34,7 @@ g2 = pd.Gauge(
     fg=theme.secondary_variant,
     label="GPU",
 )
-g3 = pd.Arc(
+g3 = pd.Gauge(
     screen,
     w=size,
     h=size,

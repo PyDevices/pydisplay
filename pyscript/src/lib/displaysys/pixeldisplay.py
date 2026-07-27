@@ -5,7 +5,7 @@
 """
 displaysys.pixeldisplay — addressable LED grids (NeoPixel, DotStar, etc.).
 
-MicroPython: ``PixelFramebuffer`` (``graphics.FrameBuffer`` + grid map) and
+MicroPython: ``PixelFramebuffer`` (``pygraphics.FrameBuffer`` + grid map) and
 ``PixelDisplay`` live here.  CircuitPython board configs use
 ``adafruit_pixel_framebuf.PixelFramebuffer`` with pydisplay ``PixelDisplay``.
 """
@@ -18,8 +18,9 @@ except ImportError:
         return x
 
 
+import pygraphics
+
 from displaysys import DisplayDriver, color_rgb
-import graphics
 
 
 def _color888_from_565(c):
@@ -106,7 +107,7 @@ def _build_grid_mapper(
     return grid_width, grid_height, indices
 
 
-class PixelFramebuffer(graphics.FrameBuffer):
+class PixelFramebuffer(pygraphics.FrameBuffer):
     """
     NeoPixel / DotStar grid framebuffer for MicroPython.
 
@@ -127,6 +128,20 @@ class PixelFramebuffer(graphics.FrameBuffer):
         bottom=0,
         rotation=0,
     ):
+        """Build a grid framebuffer mapped onto an addressable LED strip.
+
+        Args:
+            pixels: NeoPixel / DotStar-like object with ``__setitem__`` and ``show()``.
+            width: Logical grid width.
+            height: Logical grid height.
+            orientation: :data:`HORIZONTAL` or :data:`VERTICAL` strip layout.
+            alternating: Zigzag rows/columns when True.
+            reverse_x: Mirror X before mapping.
+            reverse_y: Mirror Y before mapping.
+            top: Optional ``(x, y)`` origin of the active sub-grid.
+            bottom: Optional ``(x, y)`` exclusive end of the active sub-grid.
+            rotation: Stored rotation attribute (degrees).
+        """
         self._pixels = pixels
         grid_width, grid_height, self._indices = _build_grid_mapper(
             width,
@@ -142,14 +157,16 @@ class PixelFramebuffer(graphics.FrameBuffer):
         self._height = grid_height
         buf = bytearray(grid_width * grid_height * 3)
         self._double_buffer = bytearray(grid_width * grid_height * 3)
-        super().__init__(buf, grid_width, grid_height, graphics.RGB888)
+        super().__init__(buf, grid_width, grid_height, pygraphics.RGB888)
         self.rotation = rotation
 
     @property
     def stride(self):
+        """Pixels per row in the logical framebuffer."""
         return self._width
 
     def blit(self):
+        """Not implemented — use :meth:`display` to flush the strip."""
         raise NotImplementedError
 
     def display(self) -> None:
@@ -188,12 +205,39 @@ class PixelDisplay(DisplayDriver):
         super().__init__(quiet=quiet)
 
     def init(self) -> None:
-        pass
+        """No-op init hook (LED strip is already configured)."""
 
     def fill_rect(self, x, y, w, h, c):
+        """Fill a rectangle with an RGB565 color (converted to RGB888).
+
+        Args:
+            x: Left edge.
+            y: Top edge.
+            w: Width.
+            h: Height.
+            c: RGB565 color.
+
+        Returns:
+            Result of the inner framebuffer ``fill_rect``.
+        """
         return self._raw_buffer.fill_rect(x, y, w, h, _color888_from_565(c))
 
     def blit_rect(self, buf, x, y, w, h):
+        """Blit RGB565 bytes into the LED framebuffer.
+
+        Args:
+            buf: Source buffer of ``w * h * 2`` bytes.
+            x: Destination left edge.
+            y: Destination top edge.
+            w: Width in pixels.
+            h: Height in pixels.
+
+        Returns:
+            tuple: ``(x, y, w, h)``.
+
+        Raises:
+            ValueError: When ``buf`` length does not match dimensions.
+        """
         bpp = self.color_depth // 8
         expected = w * h * bpp
         if len(buf) != expected:
@@ -209,7 +253,18 @@ class PixelDisplay(DisplayDriver):
         return (x, y, w, h)
 
     def pixel(self, x, y, c):
+        """Set a single RGB565 pixel (converted to RGB888).
+
+        Args:
+            x: X coordinate.
+            y: Y coordinate.
+            c: RGB565 color.
+
+        Returns:
+            Result of the inner framebuffer ``pixel``.
+        """
         return self._raw_buffer.pixel(x, y, _color888_from_565(c))
 
     def show(self, _timer=None) -> None:
+        """Flush dirty pixels to the LED strip via ``pixel_buffer.display()``."""
         self._raw_buffer.display()

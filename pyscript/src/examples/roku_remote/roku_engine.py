@@ -67,11 +67,11 @@ _PREFS_HOME_NAME = ".roku_prefs"
 _PREFS_MCU_NAME = "/roku_prefs"
 
 # Front-end ids stored in prefs / offered on the MORE switcher.
-FRONTEND_IDS = ("lvgl", "widgets", "graphics")
+FRONTEND_IDS = ("lvgl", "widgets", "pygraphics")
 FRONTEND_LABELS = {
     "lvgl": "lvgl",
     "widgets": "widgets",
-    "graphics": "graphics",
+    "graphics": "pygraphics",
 }
 FRONTEND_BUTTONS = {
     "lvgl": "LVGL",

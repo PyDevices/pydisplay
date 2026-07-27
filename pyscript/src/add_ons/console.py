@@ -35,7 +35,7 @@ import io
 from multimer import Timer
 
 try:
-    import graphics as framebuf
+    import pygraphics as framebuf
 except ImportError:
     import framebuf
 
@@ -85,6 +85,25 @@ class Console(io.IOBase):
         timer_period=1000,  # Timer period for status bar
         readobj=None,  # Object to read from, such as a keyboard queue
     ):
+        """Create a scrolling text console on ``display_drv``.
+
+        Args:
+            display_drv: Display with ``vscrdef`` / ``vscsad`` / ``fill_rect`` /
+                ``blit_rect`` (or a custom ``char_writer``).
+            char_writer: Optional ``(char, x, y, fg, bg)`` glyph writer.
+            title: Title-bar text.
+            left: Left status-bar text (or callable returning text).
+            middle: Middle status-bar text (or callable).
+            right: Right status-bar text (or callable).
+            cwidth: Character cell width in pixels.
+            lheight: Line / cell height in pixels.
+            bgcolor: Background color.
+            fgcolor: Foreground color.
+            tfa: Top fixed area height (default ``lheight``).
+            bfa: Bottom fixed area height (default ``lheight``).
+            timer_period: Milliseconds between status-bar refreshes.
+            readobj: Optional object with ``read`` / ``readinto`` for dupterm.
+        """
         self.display_drv = display_drv
         self._cwidth = cwidth
         self._lheight = lheight
@@ -134,6 +153,7 @@ class Console(io.IOBase):
         self.show()
 
     def show(self):
+        """Lay out title/status bars, enable vertical scroll, and clear the text area."""
         self.width = self.display_drv.width
         self.height = self.display_drv.height
         self._vsa = self.height - self._tfa - self._bfa  # Vertical scroll area
@@ -155,6 +175,7 @@ class Console(io.IOBase):
         self.cls()
 
     def cls(self):
+        """Clear the scrollable text area and reset the cursor."""
         self.x = 0
         self.y = 0
         self.y_end = 0
@@ -163,12 +184,21 @@ class Console(io.IOBase):
         self.display_drv.fill_rect(0, self._tfa, self.width, self._vsa, self.bgcolor)
 
     def hide(self):
+        """Stop the status timer and blank the whole display."""
         if self._timer:
             self._timer.deinit()
         self.display_drv.vscsad(0)
         self.display_drv.fill_rect(0, 0, self.width, self.height, 0)
 
     def label(self, pos, param, fg=0, bg=-1):
+        """Set a title or status-bar label.
+
+        Args:
+            pos: :attr:`TITLE`, :attr:`LEFT`, :attr:`MIDDLE`, or :attr:`RIGHT`.
+            param: String text, or a zero-arg callable returning text.
+            fg: Foreground color for the label.
+            bg: Background color for the label band.
+        """
         self._labels[pos] = (param, fg, bg)
         if isinstance(param, str):
             self._write_label(pos, param, fg, bg)
@@ -236,6 +266,15 @@ class Console(io.IOBase):
             return b""
 
     def readinto(self, buf, nbytes=0):
+        """Read bytes into ``buf`` (dupterm / ``io.IOBase`` interface).
+
+        Args:
+            buf: Destination bytearray / memoryview.
+            nbytes: Max bytes to read; ``0`` means ``len(buf)``.
+
+        Returns:
+            int: Number of bytes written into ``buf``.
+        """
         if self._readobj is not None and hasattr(self._readobj, "readinto"):
             return self._readobj.readinto(buf, nbytes)
         data = self.read(nbytes or len(buf))
@@ -246,6 +285,16 @@ class Console(io.IOBase):
         return n
 
     def write(self, buf, fg=None, bg=None):
+        """Write bytes or text to the console (supports a few ANSI escapes).
+
+        Args:
+            buf: ``bytes``, ``bytearray``, or ``str``.
+            fg: Optional foreground color override.
+            bg: Optional background color override.
+
+        Returns:
+            int: Number of bytes consumed from ``buf``.
+        """
         fg = self.fgcolor if fg is None else fg
         bg = self.bgcolor if bg is None else bg
         if isinstance(buf, str):

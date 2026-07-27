@@ -37,7 +37,7 @@ from sys import implementation
 
 from micropython import const
 
-from graphics import Area
+from pygraphics import Area
 
 _viper = False
 if implementation.name == "micropython":

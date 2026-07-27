@@ -2,7 +2,7 @@
 pixel_sim — desktop simulator for addressable-LED matrices (NeoPixel / DotStar).
 
 Develop a pixeldisplay app without hardware.  ``PixelDisplay`` draws into a
-``graphics.FrameBuffer`` (RGB888, one cell per LED); on ``show()`` that
+``pygraphics.FrameBuffer`` (RGB888, one cell per LED); on ``show()`` that
 framebuffer is scaled up and painted as an LED matrix onto the shared desktop /
 PyScript / notebook display from ``lib/board_config.py``.
 
@@ -26,7 +26,7 @@ import board_config as _host  # noqa: E402
 
 from displaysys import color565, color_rgb
 from displaysys.pixeldisplay import PixelDisplay
-import graphics
+import pygraphics
 
 
 def _env_int(name, default):
@@ -66,7 +66,7 @@ def _rgb888_from_565(c):
     return r, g, b
 
 
-class SimPixelFramebuffer(graphics.FrameBuffer):
+class SimPixelFramebuffer(pygraphics.FrameBuffer):
     """RGB888 grid framebuffer that renders scaled LED blocks to a desktop display.
 
     A drop-in for the ``pixel_buffer`` that :class:`PixelDisplay` wraps: it
@@ -85,7 +85,7 @@ class SimPixelFramebuffer(graphics.FrameBuffer):
     def __init__(self, width, height, backend):
         self._backend = backend
         buf = bytearray(width * height * 3)
-        super().__init__(buf, width, height, graphics.RGB888)
+        super().__init__(buf, width, height, pygraphics.RGB888)
         self.rotation = 0
         self._block = max(1, min(backend.width // width, backend.height // height))
         self._gap = max(1, self._block // 8)
@@ -102,7 +102,7 @@ class SimPixelFramebuffer(graphics.FrameBuffer):
         nbytes = pw * ph * 2
         if self._panel_buf is None or len(self._panel_buf) != nbytes:
             self._panel_buf = bytearray(nbytes)
-            self._panel_fb = graphics.FrameBuffer(self._panel_buf, pw, ph, graphics.RGB565)
+            self._panel_fb = pygraphics.FrameBuffer(self._panel_buf, pw, ph, pygraphics.RGB565)
         return self._panel_fb, pw, ph
 
     def blit_rgb565_rect(self, buf, x, y, w, h):

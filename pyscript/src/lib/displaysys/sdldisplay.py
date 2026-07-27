@@ -341,25 +341,30 @@ def _hard_process_exit(code: int = 0) -> None:
 
 
 class SDLDisplay(DisplayDriver):
-    needs_refresh = True
+    """Emulate an LCD window with SDL2 (via ``usdl2``).
 
-    """
-    A class to emulate an LCD using SDL2.
-    Provides scrolling and rotation functions similar to an LCD.  The .texture
-    object functions as the LCD's internal memory.
+    Provides scrolling and rotation similar to a panel driver. The SDL texture
+    acts as the LCD's internal memory. Scale is reduced automatically when the
+    window would not fit the desktop work area.
 
     Args:
-        width (int, optional): The width of the display. Defaults to 320.
-        height (int, optional): The height of the display. Defaults to 240.
-        rotation (int, optional): The rotation of the display. Defaults to 0.
-        color_depth (int, optional): The color depth of the display. Defaults to 16.
-        title (str, optional): The title of the display window. Defaults to "SDL2 Display".
-        scale (float, optional): The scale of the display. Defaults to 1.0.
-        window_flags (int, optional): The flags for creating the display window. Defaults to SDL_WINDOW_SHOWN.
-        render_flags (int, optional): The flags for creating the renderer. Defaults to SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC.
-        x (int, optional): The x-coordinate of the display window's position. Defaults to SDL_WINDOWPOS_CENTERED.
-        y (int, optional): The y-coordinate of the display window's position. Defaults to SDL_WINDOWPOS_CENTERED.
+        width (int, optional): Panel width in pixels. Defaults to 320.
+        height (int, optional): Panel height in pixels. Defaults to 240.
+        rotation (int, optional): Rotation in degrees. Defaults to 0.
+        color_depth (int, optional): Bits per pixel (16/24/32). Defaults to 16.
+        title (str, optional): Window title. Defaults to ``"SDL2 Display"``.
+        scale (float, optional): Window scale factor. Defaults to 1.0.
+        window_flags (int, optional): ``SDL_WINDOW_*`` flags.
+        render_flags (int, optional): ``SDL_RENDERER_*`` flags.
+        x (int, optional): Window X (default centered).
+        y (int, optional): Window Y (default centered).
+        quiet (bool): Suppress init chatter when True.
+
+    Attributes:
+        needs_refresh (bool): True — ``eventsys.Runtime`` drives periodic ``show()``.
     """
+
+    needs_refresh = True
 
     def __init__(
         self,

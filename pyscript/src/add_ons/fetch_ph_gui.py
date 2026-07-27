@@ -101,12 +101,12 @@ def _gui_exists():
 
 
 def _patch_writer():
-    """Accept graphics.FrameBuffer where writer._get_id checks builtin framebuf."""
+    """Accept pygraphics.FrameBuffer where writer._get_id checks builtin framebuf."""
     try:
         import framebuf
         import gui.core.writer as wr
 
-        from graphics import FrameBuffer as GfxFrameBuffer
+        from pygraphics import FrameBuffer as GfxFrameBuffer
     except ImportError:
         return
     if getattr(wr, "_pydisplay_fb_patch", False):
@@ -122,12 +122,12 @@ def _patch_writer():
 
 
 def _patch_nanogui_refresh():
-    """Accept graphics.FrameBuffer where nanogui.refresh checks builtin framebuf."""
+    """Accept pygraphics.FrameBuffer where nanogui.refresh checks builtin framebuf."""
     try:
         import framebuf
         import gui.core.nanogui as ng
 
-        from graphics import FrameBuffer as GfxFrameBuffer
+        from pygraphics import FrameBuffer as GfxFrameBuffer
     except ImportError:
         return
     if getattr(ng.refresh, "_pydisplay_fb_patch", False):
