@@ -1,17 +1,26 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Compare native ``pygraphics`` cmod to staged ``../pygraphics/lib/pygraphics`` (``pygraphics_py``).
+"""Compare native ``pygraphics`` cmod to staged pure-Python ``pygraphics``.
 
 Loads both implementations in one interpreter: ``import pygraphics`` (native cmod)
 and a copy of the pure-Python tree under ``.cursor/compare_graphics_py/pygraphics_py``.
 Paired ``FrameBuffer`` draws are compared byte-for-byte.
+
+Pure-Python sources are resolved from (first hit wins):
+
+- ``$PYDISPLAY_PYGRAPHICS_LIB/pygraphics`` (and legacy ``PYDISPLAY_GRAPHICS_*``)
+- ``../pygraphics/lib/pygraphics``
+- ``../cmods/graphics/lib/pygraphics`` (day-to-day cmods checkout)
+- ``~/gh/pydevices/pygraphics/lib/pygraphics``
+- ``~/gh/pydevices/cmods/graphics/lib/pygraphics``
 
 Used by ``compare_graphics_run.py`` (single runtime) and
 ``compare_graphics_matrix.py`` (all desktop runtimes).
 """
 
 import json
+import os
 import sys
 
 RESULT_PREFIX = "GRAPHICS_COMPARE_RESULT="
@@ -30,6 +39,7 @@ _GRAPHICS_PY_FILES = (
     "_draw.py",
     "_bmp565.py",
     "_files.py",
+    "framebuf.py",
 )
 
 _PYDISPLAY_ALL = (
@@ -220,17 +230,74 @@ def _skip_unless_draw(rep, native, py, name):
     return False
 
 
+def _env_get(key: str):
+    environ = getattr(os, "environ", None)
+    if environ is not None:
+        try:
+            value = environ.get(key)
+            if value:
+                return value
+        except Exception:
+            pass
+    return None
+
+
+def _expanduser(path: str) -> str:
+    if path.startswith("~/"):
+        home = _env_get("HOME")
+        if home:
+            return home.rstrip("/") + "/" + path[2:]
+    return path
+
+
+def _is_dir(path: str) -> bool:
+    try:
+        os.listdir(path)
+        return True
+    except OSError:
+        return False
+
+
+def resolve_python_graphics_src(repo: str) -> str:
+    """Return the pure-Python ``pygraphics`` package directory."""
+    env_keys = (
+        "PYDISPLAY_PYGRAPHICS_LIB",
+        "PYDISPLAY_GRAPHICS_LIB",
+        "PYDISPLAY_PYGRAPHICS_SRC",
+        "PYDISPLAY_GRAPHICS_SRC",
+    )
+    candidates = []
+    for key in env_keys:
+        override = _env_get(key)
+        if override:
+            path = override.replace("\\", "/").rstrip("/")
+            if path.endswith("/pygraphics"):
+                candidates.append(path)
+            else:
+                candidates.append(path + "/pygraphics")
+
+    candidates.extend(
+        [
+            repo + "/../pygraphics/lib/pygraphics",
+            repo + "/../cmods/graphics/lib/pygraphics",
+            _expanduser("~/gh/pydevices/pygraphics/lib/pygraphics"),
+            _expanduser("~/gh/pydevices/cmods/graphics/lib/pygraphics"),
+        ]
+    )
+
+    for src in candidates:
+        if src and _is_dir(src):
+            return src
+    raise OSError(
+        "pure-Python pygraphics not found (tried sibling pygraphics/ and cmods/graphics/)"
+    )
+
+
 def stage_python_graphics(repo: str):
-    src = repo + "/../pygraphics/lib/pygraphics"
+    src = resolve_python_graphics_src(repo)
     staging = repo + "/.cursor/compare_graphics_py"
     pkg_dir = staging + "/pygraphics_py"
     _makedirs(pkg_dir)
-
-    framebuf_src = repo + "/src/add_ons/framebuf.py"
-    with open(framebuf_src) as f:
-        framebuf_code = f.read()
-    with open(pkg_dir + "/framebuf.py", "w") as f:
-        f.write(framebuf_code)
 
     for name in _GRAPHICS_PY_FILES:
         with open(src + "/" + name) as f:
@@ -776,7 +843,7 @@ def main(argv=None):
     if opts.get("help"):
         print(
             "Usage: compare_graphics_run.py [--repo PATH] [--quiet]\n"
-            "Compare native graphics cmod vs staged ../pygraphics/lib/pygraphics."
+            "Compare native pygraphics cmod vs staged pure-Python pygraphics."
         )
         return 0
 
@@ -792,7 +859,7 @@ def main(argv=None):
         print()
         if result["status"] == "ok":
             print(
-                "All checks passed ({} ok, native graphics cmod vs ../pygraphics/lib/pygraphics).".format(
+                "All checks passed ({} ok, native pygraphics cmod vs pure-Python pygraphics).".format(
                     result["checks_passed"]
                 )
             )

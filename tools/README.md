@@ -65,7 +65,7 @@ X11/SDL window without a logged-in display, agents may wrap with `xvfb-run -a`
 | Script | Purpose |
 |--------|---------|
 | [`compare_framebuf_mp.py`](compare_framebuf_mp.py) | Compare built-in C ``framebuf`` vs ``src/add_ons/framebuf.py`` on-device |
-| [`compare_graphics.py`](compare_graphics.py) | Shared compare engine (native ``pygraphics`` cmod vs staged ``src/lib/pygraphics``) |
+| [`compare_graphics.py`](compare_graphics.py) | Shared compare engine (native ``pygraphics`` cmod vs staged pure-Python ``pygraphics``) |
 | [`compare_graphics_run.py`](compare_graphics_run.py) | Single-runtime subprocess entry (prints ``GRAPHICS_COMPARE_RESULT=`` JSON) |
 | [`compare_graphics_matrix.py`](compare_graphics_matrix.py) | Cross-runtime matrix (MP, CP, CPython; installs ``pygraphics-cmod`` from TestPyPI for CPython) |
 

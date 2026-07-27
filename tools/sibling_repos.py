@@ -129,11 +129,20 @@ def _repo_root(tools_dir=None):
 
 
 def _candidates(package, repo_root):
-    return [
+    paths = [
         _join("/agent/repos", package, "lib"),
         _expanduser(_join("~", "gh", "pydevices", package, "lib")),
         _normpath(_join(repo_root, "..", package, "lib")),
     ]
+    # Day-to-day cmods checkout: pygraphics lives under cmods/graphics.
+    if package == "pygraphics":
+        paths.extend(
+            [
+                _expanduser(_join("~", "gh", "pydevices", "cmods", "graphics", "lib")),
+                _normpath(_join(repo_root, "..", "cmods", "graphics", "lib")),
+            ]
+        )
+    return paths
 
 
 def discover_sibling_src(package, repo_root=None, tools_dir=None):

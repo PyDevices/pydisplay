@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Cross-runtime matrix: native ``pygraphics`` cmod vs ``../pygraphics/lib/pygraphics``.
+"""Cross-runtime matrix: native ``pygraphics`` cmod vs pure-Python ``pygraphics``.
 
 From repo root::
 
