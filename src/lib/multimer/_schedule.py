@@ -89,8 +89,9 @@ if sys.implementation.name in ("cpython", "circuitpython"):
 
         On CPython / CircuitPython: if called off the main thread, append to a
         pending queue drained by the next main-thread :func:`schedule` or by
-        the timer sleep pump. On the main thread, drain pending work then
-        invoke ``cb(arg)`` immediately.
+        the timer sleep pump. On the main thread (including librt RT-signal
+        delivery), drain pending work then invoke ``cb(arg)`` immediately —
+        soft timers do not get an extra deferral hop when already on main.
 
         On MicroPython, this is the built-in ``micropython.schedule``.
 

@@ -73,8 +73,15 @@ class _TimerCore:
             period: Period in milliseconds (used when ``freq`` is not positive).
             callback: Callable invoked as ``callback(timer)`` on each fire.
             hard: When ``True``, call ``callback`` directly from the backend
-                delivery path. When ``False``, deliver via :func:`schedule`
-                (safe for heap-allocating callbacks under locked-heap ISRs).
+                delivery path. When ``False``, deliver via :func:`schedule`.
+                Soft still applies coalesce and inter-tick gap. On signal
+                backends (``uses_signals()`` — librt, ``machine.Timer``),
+                delivery is already on the main thread, so soft invokes the
+                callback immediately there (≈ hard for *when* it runs). Soft
+                only defers to a later main-thread drain when the backend
+                delivers off-main (threading / win32 APC enqueue / polling).
+                On MicroPython, soft uses ``micropython.schedule`` (queue out
+                of a locked-heap ISR).
 
         Raises:
             ValueError: Invalid ``mode``, or neither ``freq`` nor ``period``

@@ -86,9 +86,22 @@ MicroPython-compatible names:
 
 `sleep_ms` is a plain sleep helper. It is **not** an application-facing “drain timers” API.
 
+## `hard` vs soft (`hard=False`)
+
+`Timer.init(..., hard=True|False)` follows MicroPython `machine.Timer` naming:
+
+| `hard` | Path | When the callback runs |
+|--------|------|------------------------|
+| `True` | Backend delivery calls `callback` directly | Immediately on the delivery path |
+| `False` | Delivery goes through `schedule` | Soft coalesce + inter-tick gap always apply |
+
+**Soft only postpones when delivery is off the main thread** (threading backend, win32 APC enqueue, polling worker). On **signal backends** (`multimer.uses_signals()` — Linux librt, on-device `machine.Timer`), the backend already delivers on the main thread; CPython/CircuitPython `schedule` then invokes immediately there. So for *when* the callback runs, soft ≈ hard on librt. Soft still drops piled-up ticks (`_sched_pending` / soft gap). `eventsys.Runtime` ticks use `hard=False` for that coalesce/gap behavior.
+
+On MicroPython, soft uses built-in `micropython.schedule` (queue out of a locked-heap ISR) — that *does* defer relative to a hard ISR callback.
+
 ## `schedule`
 
-`multimer.schedule(callback, arg)` matches `micropython.schedule` semantics where available. On CPython/CircuitPython, callbacks scheduled from a non-main thread are queued and run on the main thread when `schedule` / loop helpers next run pending work. Prefer keeping timer callbacks on the main thread (the default backends aim for that).
+`multimer.schedule(callback, arg)` matches `micropython.schedule` semantics where available. On CPython/CircuitPython, callbacks scheduled from a non-main thread are queued and run on the main thread when `schedule` / loop helpers next run pending work. On the main thread — including librt RT-signal delivery — pending work is drained and `callback(arg)` runs immediately. Prefer keeping timer callbacks on the main thread (the default backends aim for that).
 
 ## Development / troubleshooting — deadline hooks
 
@@ -166,7 +179,7 @@ Backend selection for sync `Timer` (simplified; first usable match wins):
 
 ### librt backend (`_librt`)
 
-Linux **`timer_create`** / **`timer_settime`** with thread-directed signals (`SIGEV_THREAD_ID`). Callbacks run on the main thread.
+Linux **`timer_create`** / **`timer_settime`** with thread-directed signals (`SIGEV_THREAD_ID`). Callbacks run on the main thread (often inside the RT signal handler). Soft (`hard=False`) still runs there via immediate `schedule` — see [hard vs soft](#hard-vs-soft-hardfalse).
 
 ### win32 backend (`_win32`)
 
