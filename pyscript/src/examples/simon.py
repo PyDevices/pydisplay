@@ -1,4 +1,4 @@
-# deps: graphics, eventsys
+# deps: pygraphics
 """
 Simon — classic memory game for round (and rectangular) displays.
 

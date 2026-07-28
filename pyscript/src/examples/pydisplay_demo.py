@@ -1,4 +1,5 @@
 # gallery: featured
+# deps: pygraphics
 """
 pydisplay_demo.py — flagship board_config demo: clicks, rotation, scrolling.
 

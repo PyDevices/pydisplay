@@ -1,4 +1,5 @@
 # gallery: featured
+# deps: pygraphics
 """
 Testris game implemented in MicroPython by Brad Barnett.
 """
