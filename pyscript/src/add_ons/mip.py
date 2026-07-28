@@ -59,10 +59,47 @@ def _default_mpy():
 
 
 def _ensure_dir(path):
-    """Create directory tree for *path* (MIP-friendly; no exist_ok required)."""
-    if not path or path in (".", "/"):
+    """Create directory tree for *path* (MIP-friendly; no exist_ok required).
+
+    Handles Windows UNC targets (``//wsl.localhost/...`` / ``\\\\wsl$\\...``)
+    where a naive split/join would mkdir ``/wsl.localhost/...`` instead of the
+    share root and then fail on open.
+    """
+    if not path or path in (".", "/", "\\"):
         return
-    parts = path.replace("\\", "/").split("/")
+    if hasattr(os, "makedirs"):
+        try:
+            os.makedirs(path, exist_ok=True)
+            return
+        except TypeError:
+            try:
+                os.makedirs(path)
+                return
+            except OSError:
+                return
+        except OSError:
+            return
+
+    norm = path.replace("\\", "/")
+    # UNC: //host/share/rest — keep the double-slash prefix.
+    if norm.startswith("//") and not norm.startswith("///"):
+        parts = [p for p in norm.split("/") if p]
+        if len(parts) < 2:
+            return
+        cur = "//" + parts[0] + "/" + parts[1]
+        try:
+            os.mkdir(cur)
+        except OSError:
+            pass
+        for part in parts[2:]:
+            cur = cur + "/" + part
+            try:
+                os.mkdir(cur)
+            except OSError:
+                pass
+        return
+
+    parts = norm.split("/")
     cur = ""
     for part in parts:
         if not part:
@@ -123,6 +160,9 @@ def _http_get(url):
             mod = __import__(mod_name)
         except ImportError:
             continue
+        except ValueError:
+            # CircuitPython unix: MicroPython-built .mpy of urequests/requests.
+            continue
         resp = mod.get(url)
         try:
             if hasattr(resp, "content"):
@@ -145,8 +185,24 @@ def _http_get(url):
             if callable(close):
                 close()
 
+    # CircuitPython unix coverage has no socket/ssl; host curl works via os.system.
+    if hasattr(os, "system"):
+        tmp = "/tmp/mip_http_" + str(int.from_bytes(os.urandom(4), "big")) + ".bin"
+        # Quote URL for the shell; paths are ASCII package URLs from mip.
+        cmd = 'curl -fsSL "' + url + '" -o "' + tmp + '"'
+        try:
+            rc = os.system(cmd)
+            if rc == 0:
+                with open(tmp, "rb") as f:
+                    return f.read()
+        finally:
+            try:
+                os.remove(tmp)
+            except OSError:
+                pass
+
     raise RuntimeError(
-        "no HTTP client for mip (need pyodide.http, urllib, urequests, or requests)"
+        "no HTTP client for mip (need pyodide.http, urllib, urequests, requests, or curl)"
     )
 
 

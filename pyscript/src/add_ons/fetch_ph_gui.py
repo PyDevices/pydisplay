@@ -25,30 +25,64 @@ _PACKAGES = {
     "micropython-touch": "github:PyDevices/pydisplay/packages/micropython-touch.json",
 }
 
+# colors.py imports SSD from color_setup, which re-enters fetch_ph_gui while
+# gui.core.* is mid-import during patching. Treat nested calls as success.
+_IN_FETCH = False
+
 
 def _add_ons_dir():
+    # CPython (esp. Windows PE under WSL UNC) needs native separators so mip
+    # can mkdir/open install targets. MP/CP have no ``os.path``.
+    import sys
+
+    if sys.implementation.name == "cpython":
+        import os
+
+        return os.path.dirname(__file__)
     return __file__.replace("\\", "/").rsplit("/", 1)[0]
 
 
 def _gui_dir():
+    import sys
+
+    if sys.implementation.name == "cpython":
+        import os
+
+        return os.path.join(_add_ons_dir(), "gui")
     return _add_ons_dir() + "/gui"
 
 
 def _core_path(which):
+    import sys
+
+    if sys.implementation.name == "cpython":
+        import os
+
+        return os.path.join(_gui_dir(), "core", _CORE_FILES[which])
     return _gui_dir() + "/core/" + _CORE_FILES[which]
 
 
 def _detect_core():
     """Return which repo name is installed, or None. Uses files only (no import)."""
     import os
+    import sys
 
     found = []
-    for which, fname in _CORE_FILES.items():
-        try:
-            os.stat(_gui_dir() + "/core/" + fname)
-            found.append(which)
-        except OSError:
-            pass
+    if sys.implementation.name == "cpython":
+        core = os.path.join(_gui_dir(), "core")
+        for which, fname in _CORE_FILES.items():
+            try:
+                os.stat(os.path.join(core, fname))
+                found.append(which)
+            except OSError:
+                pass
+    else:
+        for which, fname in _CORE_FILES.items():
+            try:
+                os.stat(_gui_dir() + "/core/" + fname)
+                found.append(which)
+            except OSError:
+                pass
     if len(found) == 1:
         return found[0]
     return None
@@ -348,33 +382,42 @@ def fetch_ph_gui(which, apply_patches=True):
     Uses ``mip.install`` (firmware on MicroPython; portable ``add_ons/mip.py``
     on CPython / Pyodide / CircuitPython).
     """
+    global _IN_FETCH
+
     if which not in _CORE_FILES:
         raise ValueError(
             "which must be micropython-nano-gui, micropython-micro-gui, or micropython-touch"
         )
 
-    present = _detect_core()
-    if present == which:
-        if apply_patches:
-            _apply_patches(which)
-        return True
+    if _IN_FETCH:
+        return _detect_core() == which
 
-    if present is not None or _gui_exists():
-        _empty_gui()
-
+    _IN_FETCH = True
     try:
-        import mip
-    except ImportError:
-        return False
+        present = _detect_core()
+        if present == which:
+            if apply_patches:
+                _apply_patches(which)
+            return True
 
-    try:
-        mip.install(_PACKAGES[which], target=_add_ons_dir(), mpy=False)
-    except Exception:
-        return False
+        if present is not None or _gui_exists():
+            _empty_gui()
 
-    _purge_gui_modules()
-    if _detect_core() == which:
-        if apply_patches:
-            _apply_patches(which)
-        return True
-    return False
+        try:
+            import mip
+        except ImportError:
+            return False
+
+        try:
+            mip.install(_PACKAGES[which], target=_add_ons_dir(), mpy=False)
+        except Exception:
+            return False
+
+        _purge_gui_modules()
+        if _detect_core() == which:
+            if apply_patches:
+                _apply_patches(which)
+            return True
+        return False
+    finally:
+        _IN_FETCH = False
