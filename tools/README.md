@@ -32,8 +32,7 @@ See [Run the notebook interactively](../docs/platforms/jupyter-run.md) and [PySc
 | Script | Purpose |
 |--------|---------|
 | [`ps_debug.py`](ps_debug.py) | CDP console + network probe for an embed/load URL |
-| [`ps_screenshot.py`](ps_screenshot.py) | Timed screenshot; console via CDP (avoids `evaluate` during WASM sleep) |
-| [`ps_shot.py`](ps_shot.py) | Screenshot with a hard kill if Chromium stalls |
+| [`ps_shot.py`](ps_shot.py) | Timed screenshot with a hard kill if Chromium stalls |
 
 Agent-oriented guide: [PyScript troubleshooting](../.cursor/pyscript-troubleshooting.md).
 
@@ -117,8 +116,7 @@ Installs `displaysys`, `usdl2`, `pygraphics-cmod`, and `lvgl-cpython` (no versio
 
 | Script | Purpose |
 |--------|---------|
-| [`test_keypad_*_sim.py`](test_keypad_click_sim.py) | Keypad simulation |
-| [`quit_inject.py`](quit_inject.py) | Inject quit into running examples |
+| [`quit_inject.py`](quit_inject.py) | Inject quit into running examples (used by the example harness) |
 | [`pydisplay_test_mode.py`](pydisplay_test_mode.py) | Test-mode env for examples |
 | [`typings/`](typings/) | MicroPython stdlib stubs + core package `.pyi` (see below) |
 

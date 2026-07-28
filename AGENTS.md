@@ -110,10 +110,9 @@ board_config (and test harnesses that call `displaysys.env_set`).
 before `board_config` is imported. Truthy: `1`, `true`, `yes`, `on`. Falsey:
 `0`, `false`, `no`, `off`. Helper: `displaysys.env_bool`.
 
-**Preferred for agents / matrix:** pass wrapper `--timer-async` (the kit and
-`run_desktop_matrix_concurrent.py` do this). That uses `env_set` and works for
-Windows PE under WSL without relying on OS environ. Shell export remains a
-valid host shortcut:
+**Preferred for agents / matrix:** pass wrapper `--timer-async` (the example
+kit does this). That uses `env_set` and works for Windows PE under WSL without
+relying on OS environ. Shell export remains a valid host shortcut:
 
 ```bash
 # kit inherits host env and forwards --timer-async for PE/WSL

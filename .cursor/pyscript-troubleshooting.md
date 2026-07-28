@@ -62,8 +62,7 @@ process timeout.
 | Script | Purpose |
 |--------|---------|
 | [`ps_debug.py`](../tools/ps_debug.py) | Headless navigate + CDP console/log/network; good first probe |
-| [`ps_screenshot.py`](../tools/ps_screenshot.py) | Wait N seconds, screenshot; CDP console only (avoids `evaluate` during sleep) |
-| [`ps_shot.py`](../tools/ps_shot.py) | Screenshot with a hard kill timer if the browser stalls |
+| [`ps_shot.py`](../tools/ps_shot.py) | Wait N seconds, screenshot; hard-kills Chromium if it stalls |
 
 ```bash
 # Server must already be up
