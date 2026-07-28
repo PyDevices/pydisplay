@@ -17,85 +17,149 @@ _TICKS_PERIOD = const(1 << 29)
 _TICKS_MAX = const(_TICKS_PERIOD - 1)
 _TICKS_HALFPERIOD = const(_TICKS_PERIOD // 2)
 
-_needs_software_ticks_math = True
+# Platform detection binds private callables; public API below is always a
+# Python ``def`` with a real docstring (never a host-function alias).
+_impl_ticks_ms = None
+_impl_monotonic = None
+_impl_ticks_add = None
+_impl_ticks_diff = None
 
 try:
     from supervisor import ticks_ms as _supervisor_ticks_ms
 
-    def ticks_ms():
+    def _cp_ticks_ms():
         return _supervisor_ticks_ms()
 
-    def monotonic():
+    def _cp_monotonic():
         return _supervisor_ticks_ms() / 1000
+
+    _impl_ticks_ms = _cp_ticks_ms
+    _impl_monotonic = _cp_monotonic
 
 except (ImportError, NameError):
     import time
 
     if _time_monotonic := getattr(time, "monotonic", None):
-
-        def monotonic():
-            return _time_monotonic()
-
+        _impl_monotonic = _time_monotonic
     elif _time_monotonic_ns := getattr(time, "monotonic_ns", None):
 
-        def monotonic():
+        def _monotonic_from_ns():
             return _time_monotonic_ns() / 1_000_000_000
+
+        _impl_monotonic = _monotonic_from_ns
 
     if _time_ticks_ms := getattr(time, "ticks_ms", None):
         if getattr(time, "ticks_add", None) and getattr(time, "ticks_diff", None):
-            ticks_ms = _time_ticks_ms
-            ticks_add = time.ticks_add
-            ticks_diff = time.ticks_diff
-            _needs_software_ticks_math = False
+            _impl_ticks_ms = _time_ticks_ms
+            _impl_ticks_add = time.ticks_add
+            _impl_ticks_diff = time.ticks_diff
         else:
 
-            def ticks_ms():
+            def _masked_host_ticks_ms():
                 return _time_ticks_ms() & _TICKS_MAX
 
+            _impl_ticks_ms = _masked_host_ticks_ms
     else:
         try:
             from time import monotonic_ns as _monotonic_ns
 
             _monotonic_ns()
 
-            def ticks_ms():
+            def _ticks_from_monotonic_ns():
                 return (_monotonic_ns() // 1_000_000) & _TICKS_MAX
 
-            if "monotonic" not in globals():
+            _impl_ticks_ms = _ticks_from_monotonic_ns
+            if _impl_monotonic is None:
 
-                def monotonic():
+                def _monotonic_from_monotonic_ns():
                     return _monotonic_ns() / 1_000_000_000
 
+                _impl_monotonic = _monotonic_from_monotonic_ns
         except (ImportError, NameError, NotImplementedError):
             from time import monotonic as _monotonic
 
-            def ticks_ms():
+            def _ticks_from_monotonic():
                 return int(_monotonic() * 1000) & _TICKS_MAX
 
-            if "monotonic" not in globals():
+            _impl_ticks_ms = _ticks_from_monotonic
+            if _impl_monotonic is None:
+                _impl_monotonic = _monotonic
 
-                def monotonic():
-                    return _monotonic()
+    if _impl_monotonic is None:
 
-    if "monotonic" not in globals():
-
-        def monotonic():
+        def _monotonic_from_ticks_ms():
             return _time_ticks_ms() / 1000
 
+        _impl_monotonic = _monotonic_from_ticks_ms
 
-if _needs_software_ticks_math:
 
-    def ticks_add(ticks, delta):
-        """Add a delta to a base number of ticks, performing wraparound at 2**29ms."""
+if _impl_ticks_add is None:
+
+    def _software_ticks_add(ticks, delta):
         if -_TICKS_HALFPERIOD < delta < _TICKS_HALFPERIOD:
             return (ticks + delta) % _TICKS_PERIOD
         raise OverflowError("ticks interval overflow")
 
-    def ticks_diff(ticks1, ticks2):
-        """Compute the signed difference between two ticks values."""
+    def _software_ticks_diff(ticks1, ticks2):
         diff = (ticks1 - ticks2) & _TICKS_MAX
         diff = ((diff + _TICKS_HALFPERIOD) & _TICKS_MAX) - _TICKS_HALFPERIOD
         return diff
+
+    _impl_ticks_add = _software_ticks_add
+    _impl_ticks_diff = _software_ticks_diff
+
+
+def ticks_ms():
+    """Return a wrapping millisecond tick counter (period ``2**29`` ms).
+
+    Compatible with MicroPython ``time.ticks_ms`` / CircuitPython
+    ``supervisor.ticks_ms``. Pair with :func:`ticks_diff` and :func:`ticks_add`.
+
+    Returns:
+        int: Milliseconds since an arbitrary epoch, masked to 29 bits.
+    """
+    return _impl_ticks_ms()
+
+
+def monotonic():
+    """Return a monotonic clock in seconds (float).
+
+    Prefer this over wall-clock ``time.time()`` for intervals. On CircuitPython
+    with ``supervisor.ticks_ms``, returns ``ticks_ms() / 1000``.
+
+    Returns:
+        float: Seconds since an arbitrary epoch (monotonic).
+    """
+    return _impl_monotonic()
+
+
+def ticks_add(ticks, delta):
+    """Add a delta to a ticks value with wraparound at ``2**29`` ms.
+
+    Args:
+        ticks: Base ticks value from :func:`ticks_ms`.
+        delta: Signed offset in milliseconds (must fit in half the ticks period).
+
+    Returns:
+        int: ``(ticks + delta)`` wrapped to the ticks period.
+
+    Raises:
+        OverflowError: When ``delta`` is outside ``(-2**28, 2**28)``.
+    """
+    return _impl_ticks_add(ticks, delta)
+
+
+def ticks_diff(ticks1, ticks2):
+    """Compute the signed difference between two ticks values.
+
+    Args:
+        ticks1: Later (or minuend) ticks value.
+        ticks2: Earlier (or subtrahend) ticks value.
+
+    Returns:
+        int: Signed ``ticks1 - ticks2`` in milliseconds, handling wraparound.
+    """
+    return _impl_ticks_diff(ticks1, ticks2)
 
 
 def ticks_less(ticks1, ticks2):
@@ -218,62 +282,3 @@ async def _sleep_ms_async(ms):
 # rebinds the public ``sleep_ms`` per active backend (signal / pump / async).
 sleep_ms = _sleep_ms_pump
 _sleep_ms = _sleep_ms_pump
-
-# Ensure public helpers always carry Google-style docs for mkdocstrings, even
-# when the binding came from a host ``time``/``supervisor`` symbol without one.
-if not getattr(ticks_ms, "__doc__", None):
-    ticks_ms.__doc__ = """Return a wrapping millisecond tick counter (period ``2**29`` ms).
-
-    Compatible with MicroPython ``time.ticks_ms`` / CircuitPython
-    ``supervisor.ticks_ms``. Pair with :func:`ticks_diff` and :func:`ticks_add`.
-
-    Returns:
-        int: Milliseconds since an arbitrary epoch, masked to 29 bits.
-    """
-
-if not getattr(monotonic, "__doc__", None):
-    monotonic.__doc__ = """Return a monotonic clock in seconds (float).
-
-    Prefer this over wall-clock ``time.time()`` for intervals. On CircuitPython
-    with ``supervisor.ticks_ms``, returns ``ticks_ms() / 1000``.
-
-    Returns:
-        float: Seconds since an arbitrary epoch (monotonic).
-    """
-
-if not getattr(sleep_ms, "__doc__", None):
-    sleep_ms.__doc__ = """Sleep for ``ms`` milliseconds, pumping timers when the backend requires it.
-
-    Signal backends (librt / ``machine.Timer``) sleep without an extra pump.
-    Pump backends (win32 APC, SDL2, threading) drain the cooperative scheduler
-    and backend event queue around the wait. Async-only hosts expose an
-    awaitable variant.
-
-    Args:
-        ms: Duration to sleep, in milliseconds.
-    """
-
-if not getattr(ticks_add, "__doc__", None):
-    ticks_add.__doc__ = """Add a delta to a ticks value with wraparound at ``2**29`` ms.
-
-    Args:
-        ticks: Base ticks value from :func:`ticks_ms`.
-        delta: Signed offset in milliseconds (must fit in half the ticks period).
-
-    Returns:
-        int: ``(ticks + delta)`` wrapped to the ticks period.
-
-    Raises:
-        OverflowError: When ``delta`` is outside ``(-2**28, 2**28)``.
-    """
-
-if not getattr(ticks_diff, "__doc__", None):
-    ticks_diff.__doc__ = """Compute the signed difference between two ticks values.
-
-    Args:
-        ticks1: Later (or minuend) ticks value.
-        ticks2: Earlier (or subtrahend) ticks value.
-
-    Returns:
-        int: Signed ``ticks1 - ticks2`` in milliseconds, handling wraparound.
-    """

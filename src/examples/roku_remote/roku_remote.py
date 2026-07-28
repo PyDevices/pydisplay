@@ -115,7 +115,15 @@ def _frontend_candidates(preferred):
 
 def _panel_fb_bytes():
     """Bytes for one RGB565 panel buffer at the launcher size."""
-    return int(_WIDTH) * int(_HEIGHT) * 2
+    w, h = _WIDTH, _HEIGHT
+    if w is None or h is None:
+        import board_config
+
+        if w is None:
+            w = board_config.width
+        if h is None:
+            h = board_config.height
+    return int(w) * int(h) * 2
 
 
 def _can_alloc_panel_fb():

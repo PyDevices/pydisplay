@@ -61,13 +61,10 @@ class HostEventsDevice(Device):
                         events.MOUSEBUTTONDOWN,
                         events.MOUSEBUTTONUP,
                     ):
-                        # Prefer live display.touch_scale (PGDisplay window scale).
-                        # Finger events are already panel-normalized in sdldisplay.
-                        scale = getattr(self._data, "touch_scale", None)
-                        if scale is None:
-                            scale = self.scale
-                        else:
-                            self.scale = scale
+                        # Prefer the panel for this window (multi-display), else
+                        # the device display. Finger events are already panel-
+                        # normalized in sdldisplay.
+                        scale = self._touch_scale_for(getattr(event, "window", None))
                         if scale and scale != 1:
                             pos = (int(event.pos[0] // scale), int(event.pos[1] // scale))
                             if event.type == events.MOUSEMOTION:
@@ -92,9 +89,32 @@ class HostEventsDevice(Device):
             return eventlist if eventlist else None
         return None
 
+    def _touch_scale_for(self, window_id):
+        """Return ``touch_scale`` for ``window_id``, falling back to ``self._data``."""
+        disp = self._data
+        if window_id is not None and self._runtime is not None:
+            for d in getattr(self._runtime, "displays", ()):
+                if getattr(d, "_window_id", None) == window_id:
+                    disp = d
+                    break
+        scale = getattr(disp, "touch_scale", None) if disp is not None else None
+        if scale is None:
+            scale = self.scale
+        else:
+            self.scale = scale
+        return scale
+
+
+# Peers that share one HostEventsDevice: first polled drains host once and fans out.
+_vd_peers = {}
+
 
 class VirtualDevices:
-    """Fan-out host events into virtual pointer/encoder/keypad devices for LVGL."""
+    """Fan-out host events into virtual pointer/encoder/keypad devices for LVGL.
+
+    Multiple instances may share one :class:`HostEventsDevice` (one per LVGL
+    display). ``window_id`` filters pointer/wheel/key events to that OS window.
+    """
 
     class VirtualDevice:
         def __init__(self, virtual_devices, device_type):
@@ -135,61 +155,82 @@ class VirtualDevices:
                 self._fingers[finger_id] = xy
             self.points = tuple((pos[0], pos[1], fid) for fid, pos in self._fingers.items())
 
-    def __init__(self, host_device):
+    def __init__(self, host_device, window_id=None):
         self._host_device = host_device
+        self._window_id = window_id
         self._vd_pointer = self.VirtualDevice(self, types.POINTER)
         self._vd_encoder = self.VirtualDevice(self, types.ENCODER)
         self._vd_keypad = self.VirtualDevice(self, types.KEYPAD)
         self.devices = [self._vd_pointer, self._vd_encoder, self._vd_keypad]
+        peers = _vd_peers.setdefault(id(host_device), [])
+        peers.append(self)
+        self._peers = peers
+
+    def _accepts_window(self, e):
+        if self._window_id is None:
+            return True
+        wid = getattr(e, "window", None)
+        if wid is None:
+            return True
+        return wid == self._window_id
 
     def poll_host_device(self):
+        # Only the first peer drains the shared host queue.
+        if self._peers and self._peers[0] is not self:
+            return
         for e in self._host_device.poll():
-            if e.type in (events.FINGERDOWN, events.FINGERMOTION):
-                self._vd_pointer._set_finger(e.finger_id, e.pos)
-                # Primary-finger mouse synth for existing POINTER path / clicks.
-                # Prefer the lowest finger id as primary.
-                if self._vd_pointer._fingers:
-                    primary_id = min(self._vd_pointer._fingers)
-                    px, py = self._vd_pointer._fingers[primary_id]
-                    if e.finger_id == primary_id:
-                        if e.type == events.FINGERDOWN:
-                            self._vd_pointer.add_event(
-                                events.Button(events.MOUSEBUTTONDOWN, (px, py), 1, True, e.window)
+            for vd in self._peers:
+                vd._route(e)
+
+    def _route(self, e):
+        if not self._accepts_window(e):
+            return
+        if e.type in (events.FINGERDOWN, events.FINGERMOTION):
+            self._vd_pointer._set_finger(e.finger_id, e.pos)
+            # Primary-finger mouse synth for existing POINTER path / clicks.
+            # Prefer the lowest finger id as primary.
+            if self._vd_pointer._fingers:
+                primary_id = min(self._vd_pointer._fingers)
+                px, py = self._vd_pointer._fingers[primary_id]
+                if e.finger_id == primary_id:
+                    if e.type == events.FINGERDOWN:
+                        self._vd_pointer.add_event(
+                            events.Button(events.MOUSEBUTTONDOWN, (px, py), 1, True, e.window)
+                        )
+                    else:
+                        self._vd_pointer.add_event(
+                            events.Motion(
+                                events.MOUSEMOTION,
+                                (px, py),
+                                (0, 0),
+                                (1, 0, 0),
+                                True,
+                                e.window,
                             )
-                        else:
-                            self._vd_pointer.add_event(
-                                events.Motion(
-                                    events.MOUSEMOTION,
-                                    (px, py),
-                                    (0, 0),
-                                    (1, 0, 0),
-                                    True,
-                                    e.window,
-                                )
-                            )
-            elif e.type == events.FINGERUP:
-                was_primary = self._vd_pointer._fingers and e.finger_id == min(
-                    self._vd_pointer._fingers
+                        )
+        elif e.type == events.FINGERUP:
+            was_primary = self._vd_pointer._fingers and e.finger_id == min(
+                self._vd_pointer._fingers
+            )
+            last = self._vd_pointer._fingers.get(e.finger_id, e.pos)
+            self._vd_pointer._set_finger(e.finger_id, None)
+            if was_primary:
+                self._vd_pointer.add_event(
+                    events.Button(events.MOUSEBUTTONUP, last, 1, True, e.window)
                 )
-                last = self._vd_pointer._fingers.get(e.finger_id, e.pos)
-                self._vd_pointer._set_finger(e.finger_id, None)
-                if was_primary:
-                    self._vd_pointer.add_event(
-                        events.Button(events.MOUSEBUTTONUP, last, 1, True, e.window)
-                    )
-            elif (
-                e.type == events.MOUSEBUTTONDOWN
-                or e.type == events.MOUSEBUTTONUP
-                or (e.type == events.MOUSEMOTION and e.buttons[0])
-            ):
-                # Ignore OS touch→mouse synth when we already track fingers.
-                if getattr(e, "touch", False) and self._vd_pointer._fingers:
-                    continue
-                self._vd_pointer.add_event(e)
-            elif e.type == events.MOUSEWHEEL:
-                self._vd_encoder.add_event(e)
-            elif e.type == events.KEYDOWN or e.type == events.KEYUP:
-                self._vd_keypad.add_event(e)
+        elif (
+            e.type == events.MOUSEBUTTONDOWN
+            or e.type == events.MOUSEBUTTONUP
+            or (e.type == events.MOUSEMOTION and e.buttons[0])
+        ):
+            # Ignore OS touch→mouse synth when we already track fingers.
+            if getattr(e, "touch", False) and self._vd_pointer._fingers:
+                return
+            self._vd_pointer.add_event(e)
+        elif e.type == events.MOUSEWHEEL:
+            self._vd_encoder.add_event(e)
+        elif e.type == events.KEYDOWN or e.type == events.KEYUP:
+            self._vd_keypad.add_event(e)
 
 
 register_device_class(types.HOST, HostEventsDevice)

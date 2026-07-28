@@ -52,16 +52,6 @@ def _select_sleep_ms():
 
 sleep_ms = _select_sleep_ms()
 
-if not getattr(sleep_ms, "__doc__", None):
-    sleep_ms.__doc__ = """Sleep for ``ms`` milliseconds, pumping timers when the backend requires it.
-
-    Signal backends sleep without an extra pump; pump backends drain the
-    cooperative scheduler around the wait. Async-only hosts expose an awaitable.
-
-    Args:
-        ms: Duration to sleep, in milliseconds.
-    """
-
 
 def uses_signals():
     """True when the active sync backend delivers timers without a sleep pump.

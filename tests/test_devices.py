@@ -16,6 +16,7 @@ from eventsys import (
     KeypadDevice,
     Runtime,
     TouchDevice,
+    VirtualDevices,
     events,
     types,
 )
@@ -111,6 +112,28 @@ class TestHostEventsDevice(unittest.TestCase):
         self.assertEqual(out[0].pos, (50, 100))
 
 
+class TestVirtualDevicesMultiWindow(unittest.TestCase):
+    def test_shared_host_routes_by_window(self):
+        host = HostEventsDevice(
+            host_read=scripted(
+                [
+                    events.Button(events.MOUSEBUTTONDOWN, (1, 2), 1, False, 10),
+                    events.Button(events.MOUSEBUTTONDOWN, (3, 4), 1, False, 20),
+                ]
+            )
+        )
+        a = VirtualDevices(host, window_id=10)
+        b = VirtualDevices(host, window_id=20)
+        a.poll_host_device()
+        self.assertEqual(len(a._vd_pointer._fifo), 1)
+        self.assertEqual(a._vd_pointer._fifo[0].pos, (1, 2))
+        self.assertEqual(len(b._vd_pointer._fifo), 1)
+        self.assertEqual(b._vd_pointer._fifo[0].pos, (3, 4))
+        # Non-leader peer must not drain an empty host a second time.
+        b.poll_host_device()
+        self.assertEqual(len(a._vd_pointer._fifo), 1)
+
+
 class TestTouchDevice(unittest.TestCase):
     def test_press_move_release_sequence(self):
         disp = FakeDisplay()
@@ -186,7 +209,7 @@ class TestRuntime(unittest.TestCase):
 
     def test_touch_read_must_be_callable(self):
         with self.assertRaises(TypeError):
-            Runtime(display=FakeDisplay(), touch_read=(lambda: None,))
+            Runtime(displays=[FakeDisplay()], touch_read=(lambda: None,))
 
     def test_add_keypad(self):
         runtime = Runtime()

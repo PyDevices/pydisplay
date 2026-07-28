@@ -33,6 +33,10 @@
       "github:PyDevices/pydisplay/src/add_ons/keypins.py"
     ],
     [
+      "lv_encoder_emu.py",
+      "github:PyDevices/pydisplay/src/add_ons/lv_encoder_emu.py"
+    ],
+    [
       "micropython.py",
       "github:PyDevices/pydisplay/src/add_ons/micropython.py"
     ],

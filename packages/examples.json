@@ -133,6 +133,10 @@
       "github:PyDevices/pydisplay/src/examples/lv_gestures.py"
     ],
     [
+      "lv_multi_display.py",
+      "github:PyDevices/pydisplay/src/examples/lv_multi_display.py"
+    ],
+    [
       "lv_test_timer.py",
       "github:PyDevices/pydisplay/src/examples/lv_test_timer.py"
     ],

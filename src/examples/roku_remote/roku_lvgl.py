@@ -37,6 +37,7 @@ _EXAMPLES = __file__.replace("\\", "/").rsplit("/", 1)[0]
 if _EXAMPLES not in sys.path:
     sys.path.insert(0, _EXAMPLES)
 
+import board_config  # noqa: E402 — before display_driver so LVGL wiring sees it
 import display_driver  # noqa: E402 — wires LVGL display/input into the runtime
 import lvgl as lv  # noqa: E402
 from board_config import display_drv, runtime  # noqa: E402

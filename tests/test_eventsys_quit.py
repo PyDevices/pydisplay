@@ -40,7 +40,6 @@ class TestQuitRequested(unittest.TestCase):
         self.assertFalse(runtime.quit_requested)
 
 
-
 class TestRuntimeQuitLifecycle(unittest.TestCase):
     def test_before_quit_then_display_quit(self):
         order = []
@@ -51,7 +50,7 @@ class TestRuntimeQuitLifecycle(unittest.TestCase):
             def quit(self):
                 order.append("quit")
 
-        runtime = Runtime(display=Display())
+        runtime = Runtime(displays=[Display()])
         runtime.before_quit = lambda: order.append("before")
         runtime._handle_quit()
         self.assertTrue(runtime.quit_requested)

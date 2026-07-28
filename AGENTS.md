@@ -24,9 +24,12 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   `PATH` / `bin/` (`micropython`, `circuitpython`, and when present
   `micropython.exe` / `python.exe`). `./tools/jupyter.sh` and
   `./tools/pyscript.sh` aid Jupyter and PyScript development.
-- The desktop display backend on CPython on Windows is `PGDisplay` (pygame-ce; `import pygame`).
-  `pygame-ce` is installed on top of `requirements-dev.txt` (it is intentionally
-  not listed there — SDL2 is the documented primary and pygame-ce is the fallback).
+- The desktop display backend on CPython on Windows is `PGDisplay` (pygame-ce;
+  `import pygame`). Prefer `python.exe` for PG work. Do **not** install pygame-ce
+  into `.venv` / system `python3` on this laptop — those stay SDL-primary;
+  `board_config` falls back to `SDLDisplay` when pygame-ce's public
+  `pygame.Window` API is missing. `pygame-ce` is intentionally not in
+  `requirements-dev.txt`.
 
 ### Tests and lint
 
@@ -134,7 +137,7 @@ that call `show()` themselves avoid a competing SDL refresh timer.
 
 - The single shared periodic timer is owned by `eventsys.Runtime`
   (`Runtime.on_tick` / `stop_timer`), not by display drivers. `board_config`
-  constructs `eventsys.Runtime(display=display_drv, ...)` which wires periodic
+  constructs `eventsys.Runtime(displays=[display_drv], ...)` which wires periodic
   refresh when `display_drv.needs_refresh` is true. `displaysys` drivers only
   `show()`/`deinit()` and declare `needs_refresh`; `multimer` stays
   display-agnostic. GUI layers claim presentation via
