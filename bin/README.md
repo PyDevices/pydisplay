@@ -28,7 +28,7 @@ workspace (optional convenience):
 
 That refreshes this directory plus
 `web/pyscript/vendor/micropython/` (wasm). Without cmods, build from a sibling
-workspace (`micropython/` + `graphics/`, and for CP `circuitpython/` + patches
+workspace (`micropython/` + `pygraphics/`, and for CP `circuitpython/` + patches
 as in [usdl2](https://github.com/PyDevices/usdl2) /
 [lv_circuitpython_mod](https://github.com/PyDevices/lv_circuitpython_mod)
 docs), then copy here — rename the CircuitPython unix binary to `circuitpython`.

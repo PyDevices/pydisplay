@@ -336,22 +336,22 @@ deps = ["core"]
 [examples.nano_gui_simpletest]
 import = "nano_gui_simpletest"
 script = "examples/nano_gui_simpletest.py"
-kind = "oneshot"
-quit = "native_exit"
+kind = "loop"
+quit = "poll"
 deps = ["micropython-nano-gui"]
 
 [examples.micro_gui_simpletest]
 import = "micro_gui_simpletest"
 script = "examples/micro_gui_simpletest.py"
-kind = "oneshot"
-quit = "native_exit"
+kind = "loop"
+quit = "poll"
 deps = ["micropython-micro-gui"]
 
 [examples.touch_gui_simpletest]
 import = "touch_gui_simpletest"
 script = "examples/touch_gui_simpletest.py"
-kind = "oneshot"
-quit = "native_exit"
+kind = "loop"
+quit = "poll"
 deps = ["micropython-touch"]
 
 [examples.palettes_demo]

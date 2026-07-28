@@ -40,11 +40,12 @@ Includes 2 functions that install from different sources:
 - `lib_install`: Installs from the PyDevices fork of the micropython-lib library.
     - By default, installs all modules as precompiled bytecode (.mpy) files.
     - Includes:
-        - Core packages:
+        - pydisplay core packages:
             - displaysys (full package — all backends)
             - eventsys
-            - pygraphics
             - multimer
+        - Sister packages on the same MIP index (other repos):
+            - pygraphics
         - Display drivers, for example:
             - gc9a01
             - ili9341

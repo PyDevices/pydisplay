@@ -150,7 +150,7 @@ should_skip_name() {
 }
 
 # MIP package names may differ from PyPI project names when needed.
-# graphics publishes from PyDevices/pygraphics (pygraphics), not this repo.
+# pygraphics publishes from PyDevices/pygraphics, not this repo.
 # Convention: .cursor/testpypi-naming-convention.md
 pypi_publish_name() {
     echo "$1"

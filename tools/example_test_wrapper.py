@@ -173,7 +173,11 @@ def _setup_sibling_paths(src):
         sibling_repos = None
 
     if sibling_repos is not None:
-        repo_root = _dir_of(_join(src, ".."))
+        # ``src`` is ``…/pydisplay/src``; repo root is its parent. Do not use
+        # ``_dir_of(_join(src, ".."))`` — that leaves a literal ``..`` segment
+        # and resolves to ``src`` again. Always Unix paths (not WSL UNC / U:).
+        src = sibling_repos.unix_path(src)
+        repo_root = _dir_of(src)
         sibling_repos.prepend_sibling_sys_path(repo_root=repo_root)
         return
 
@@ -570,7 +574,8 @@ def _subprocess_hard_exit(code, *, headless=False):
             try:
                 from board_config import display_drv
 
-                if not display_drv._sdl_active():
+                active = display_drv._sdl_active()
+                if not active:
                     os._exit(code)
             except Exception:
                 pass
@@ -600,6 +605,12 @@ def main(argv=None):
         return 2
 
     src = os.getcwd()
+    try:
+        import sibling_repos as _sibling_repos
+
+        src = _sibling_repos.unix_path(src)
+    except ImportError:
+        src = src.replace("\\", "/")
     if src not in sys.path:
         sys.path.insert(0, src)
     if not _isdir(_join(src, "lib")):
@@ -609,6 +620,12 @@ def main(argv=None):
     script_path = args["script"]
     if not script_path.startswith("/"):
         script_path = _join(src, script_path)
+    try:
+        import sibling_repos as _sibling_repos
+
+        script_path = _sibling_repos.unix_path(script_path)
+    except ImportError:
+        script_path = script_path.replace("\\", "/")
     if not _isfile(script_path):
         payload = {
             "example": args["example"],

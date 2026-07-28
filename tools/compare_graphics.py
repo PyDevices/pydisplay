@@ -11,9 +11,9 @@ Pure-Python sources are resolved from (first hit wins):
 
 - ``$PYDISPLAY_PYGRAPHICS_LIB/pygraphics`` (and legacy ``PYDISPLAY_GRAPHICS_*``)
 - ``../pygraphics/lib/pygraphics``
-- ``../cmods/graphics/lib/pygraphics`` (day-to-day cmods checkout)
+- ``../cmods/pygraphics/lib/pygraphics`` (day-to-day cmods checkout)
 - ``~/gh/pydevices/pygraphics/lib/pygraphics``
-- ``~/gh/pydevices/cmods/graphics/lib/pygraphics``
+- ``~/gh/pydevices/cmods/pygraphics/lib/pygraphics``
 
 Used by ``compare_graphics_run.py`` (single runtime) and
 ``compare_graphics_matrix.py`` (all desktop runtimes).
@@ -290,9 +290,9 @@ def resolve_python_graphics_src(repo: str) -> str:
     candidates.extend(
         [
             repo + "/../pygraphics/lib/pygraphics",
-            repo + "/../cmods/graphics/lib/pygraphics",
+            repo + "/../cmods/pygraphics/lib/pygraphics",
             _expanduser("~/gh/pydevices/pygraphics/lib/pygraphics"),
-            _expanduser("~/gh/pydevices/cmods/graphics/lib/pygraphics"),
+            _expanduser("~/gh/pydevices/cmods/pygraphics/lib/pygraphics"),
         ]
     )
 
@@ -300,7 +300,7 @@ def resolve_python_graphics_src(repo: str) -> str:
         if src and _is_dir(src):
             return src
     raise OSError(
-        "pure-Python pygraphics not found (tried sibling pygraphics/ and cmods/graphics/)"
+        "pure-Python pygraphics not found (tried sibling pygraphics/ and cmods/pygraphics/)"
     )
 
 

@@ -127,7 +127,7 @@ Installs `displaysys`, `usdl2`, `pygraphics-cmod`, and `lvgl-cpython` (no versio
 | Content | Source |
 |---------|--------|
 | MicroPython stdlib stubs | committed under `tools/typings/` |
-| `displaysys` / `eventsys` / `pygraphics` / `multimer` | committed package trees; regenerate with [`../scripts/gen_package_pyi.sh`](../scripts/gen_package_pyi.sh) |
+| `displaysys` / `eventsys` / `multimer` | committed package trees; regenerate with [`../scripts/gen_package_pyi.sh`](../scripts/gen_package_pyi.sh) |
 | `lvgl` | **`lvgl-cpython`** installs `lvgl.pyi` next to the extension — not in-tree |
 
 Confirm **Python: Select Interpreter** → `.venv/bin/python`. Use **Pylance** (disable BasedPyright if it conflicts).

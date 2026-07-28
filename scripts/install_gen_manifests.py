@@ -22,35 +22,17 @@ toml_full_path = output_dir + "web/pyscript/micropython.toml"
 pyodide_toml_path = output_dir + "web/pyscript/pyodide.toml"
 
 # list of package directories, dependencies and extra files in that package.
-# Core libs (displaysys/eventsys/multimer/graphics/usdl2) install from the
-# micropython-lib MIP index — do not emit packages/<name>.json for those.
-# They still appear here so PyScript micropython.toml mounts stay generated.
+# pydisplay core packages (displaysys/eventsys/multimer) install from the
+# micropython-lib MIP index — do not emit packages/<name>.json for those. They
+# still appear here so PyScript micropython.toml mounts stay generated.
+# Sister packages (pygraphics, usdl2, palettes, pdwidgets, lvgl) are not from
+# this repo: frozen in firmware, or TestPyPI / MIP when needed (see url_maker.py).
 packages = [
     ["add_ons", [], []],
     ["examples", [], []],
     ["lib/displaysys", [], ["path.py"]],
     ["lib/eventsys", [], []],
     ["lib/multimer", [], []],
-]
-
-# Pure-Python graphics lives in sibling PyDevices/pygraphics (lib/pygraphics/).
-# PyScript mounts below; MIP installs use the micropython-lib index.
-GRAPHICS_SIBLING_MOUNT = "/lib/pygraphics/"
-GRAPHICS_SIBLING_FILES = [
-    "__init__.py",
-    "_area.py",
-    "_blit_hooks.py",
-    "_bmp565.py",
-    "_clip.py",
-    "_draw.py",
-    "_files.py",
-    "_font.py",
-    "_font_8x14.py",
-    "_font_8x16.py",
-    "_font_8x8.py",
-    "_framebuf_plus.py",
-    "_shapes.py",
-    "framebuf.py",
 ]
 
 # Emit packages/*.json only for GitHub-MIP / PyScript demo bundles.
@@ -107,7 +89,7 @@ PYODIDE_INTERPRETER = "./vendor/pyodide/pyodide.mjs"
 
 
 def pyscript_toml_file_entry(repo_relative_path: str, mount: str) -> str:
-    """repo_relative_path e.g. src/lib/path.py; mount e.g. /lib/ or /lib/pygraphics/."""
+    """repo_relative_path e.g. src/lib/path.py; mount e.g. /lib/."""
     return f'"{PYSCRIPT_TOML_SRC_PREFIX}{repo_relative_path}" = "{mount}"'
 
 
@@ -236,13 +218,6 @@ for entry in sorted(os.listdir(examples_root)):
         json.dump({"urls": urls, "version": package_ver}, f, indent=2)
     example_package_names.append(entry)
 
-# Sibling graphics package (not under this repo's src/).
-master_toml.append("")
-for name in GRAPHICS_SIBLING_FILES:
-    master_toml.append(
-        f'"../pygraphics/lib/pygraphics/{name}" = "{GRAPHICS_SIBLING_MOUNT}"'
-    )
-
 # Gallery loaders use `import ps_loader` (top-level); also mount at VFS root.
 master_toml.append(pyscript_toml_file_entry("src/add_ons/ps_loader.py", "/"))
 
@@ -258,7 +233,9 @@ if os.path.islink(pyscript_packages_link) or os.path.exists(pyscript_packages_li
 else:
     os.symlink("../../packages", pyscript_packages_link)
 
-# Write the master toml files (same [files]; MicroPython vs Pyodide interpreter).
+# Write toml files (same [files]; MicroPython vs Pyodide interpreter).
+# pygraphics is not mounted: MP WASM freezes the cmod; Pyodide installs
+# pygraphics-cmod from TestPyPI via gallery ?deps= (see url_maker.py).
 with open(toml_full_path, "w") as f:
     for line in master_toml:
         f.write(line + "\n")

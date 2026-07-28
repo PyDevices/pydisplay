@@ -14,13 +14,13 @@ from url_maker import rewrite_mip, rewrite_wheel, url, urls_from_deps  # noqa: E
 
 
 class UrlMakerTests(unittest.TestCase):
-    def test_micropython_deps(self):
+    def test_micropython_skips_frozen_palettes(self):
         q = url(
             modules=("hello",),
             deps=("palettes",),
             runtime="micropython",
         )
-        self.assertEqual(q, "?modules=hello&deps=palettes")
+        self.assertEqual(q, "?modules=hello")
 
     def test_pyodide_deps(self):
         q = url(
@@ -28,22 +28,22 @@ class UrlMakerTests(unittest.TestCase):
             deps=("palettes",),
             runtime="pyodide",
         )
-        self.assertEqual(q, "?modules=hello&deps=palettes")
+        self.assertEqual(q, "?modules=hello&deps=palettes,pygraphics-cmod")
 
     def test_runtime_none_returns_both(self):
         out = url(modules=("hello",), deps=("palettes",), runtime=None)
         self.assertEqual(
             out,
             {
-                "micropython": "?modules=hello&deps=palettes",
-                "pyodide": "?modules=hello&deps=palettes",
+                "micropython": "?modules=hello",
+                "pyodide": "?modules=hello&deps=palettes,pygraphics-cmod",
             },
         )
 
     def test_deps_expand_both_channels(self):
         out = urls_from_deps(modules=("hello",), deps=("palettes",), runtime=None)
-        self.assertEqual(out["micropython"], "?modules=hello&deps=palettes")
-        self.assertEqual(out["pyodide"], "?modules=hello&deps=palettes")
+        self.assertEqual(out["micropython"], "?modules=hello")
+        self.assertEqual(out["pyodide"], "?modules=hello&deps=palettes,pygraphics-cmod")
 
     def test_lvgl_rewrite_wheels_omit_mip(self):
         out = urls_from_deps(
@@ -70,21 +70,13 @@ class UrlMakerTests(unittest.TestCase):
             "?manifests=car_cluster&wheels=lvgl-cpython",
         )
 
-    def test_graphics_prefers_cmod_wheel(self):
+    def test_pygraphics_prefers_cmod_wheel(self):
         self.assertEqual(rewrite_wheel("pygraphics"), "pygraphics-cmod")
         self.assertEqual(rewrite_mip("pygraphics"), "pygraphics")
-        # pyscript profiles skip graphics (mounted)
+        # MP skips frozen pygraphics; Pyodide installs pygraphics-cmod from TestPyPI
         out = urls_from_deps(modules=("x",), deps=("pygraphics",), runtime=None)
         self.assertEqual(out["micropython"], "?modules=x")
-        self.assertEqual(out["pyodide"], "?modules=x")
-        # empty-skip profile emits pygraphics-cmod on pyodide
-        q = url(
-            modules=("x",),
-            deps=("pygraphics",),
-            runtime="pyodide",
-            profile="bare",
-        )
-        self.assertEqual(q, "?modules=x&deps=pygraphics-cmod")
+        self.assertEqual(out["pyodide"], "?modules=x&deps=pygraphics-cmod")
         q = url(
             modules=("x",),
             deps=("pygraphics",),
@@ -93,19 +85,16 @@ class UrlMakerTests(unittest.TestCase):
         )
         self.assertEqual(q, "?modules=x")
 
-    def test_pdwidgets_passthrough(self):
+    def test_pdwidgets_mp_frozen_pyodide_wheels(self):
         out = urls_from_deps(
             modules=("calc_widgets", "calc_engine"),
             deps=("pdwidgets",),
             runtime=None,
         )
-        self.assertEqual(
-            out["micropython"],
-            "?modules=calc_widgets,calc_engine&deps=pdwidgets",
-        )
+        self.assertEqual(out["micropython"], "?modules=calc_widgets,calc_engine")
         self.assertEqual(
             out["pyodide"],
-            "?modules=calc_widgets,calc_engine&deps=pdwidgets",
+            "?modules=calc_widgets,calc_engine&deps=pdwidgets,pygraphics-cmod",
         )
 
     def test_manifests_and_modules(self):
@@ -115,7 +104,7 @@ class UrlMakerTests(unittest.TestCase):
             deps=("palettes",),
             runtime="micropython",
         )
-        self.assertEqual(q, "?modules=demo&manifests=alien&deps=palettes")
+        self.assertEqual(q, "?modules=demo&manifests=alien")
 
     def test_unknown_kwarg_errors(self):
         with self.assertRaises(TypeError):
@@ -139,6 +128,15 @@ class UrlMakerTests(unittest.TestCase):
     def test_rewrite_helpers(self):
         self.assertEqual(rewrite_wheel("lvgl"), "lvgl-cpython")
         self.assertIsNone(rewrite_mip("lvgl"))
+        self.assertEqual(rewrite_wheel("display_driver"), "lvgl-cpython")
+        self.assertIsNone(rewrite_mip("display_driver"))
+        self.assertEqual(rewrite_wheel("usdl2-py"), "usdl2")
+        self.assertEqual(rewrite_mip("usdl2-py"), "usdl2")
+
+    def test_usdl2_mp_frozen_pyodide_wheels(self):
+        out = urls_from_deps(modules=("x",), deps=("usdl2",), runtime=None)
+        self.assertEqual(out["micropython"], "?modules=x")
+        self.assertEqual(out["pyodide"], "?modules=x&deps=usdl2")
 
 
 if __name__ == "__main__":

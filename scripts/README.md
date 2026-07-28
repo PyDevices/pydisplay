@@ -105,7 +105,7 @@ python scripts/gallery_generator.py --check    # CI freshness
 
 # After editing src/add_ons/framebuf.py:
 
-# After public-API changes in displaysys / eventsys / graphics / multimer:
+# After public-API changes in displaysys / eventsys / multimer:
 ./scripts/gen_package_pyi.sh                       # regenerate tools/typings/<pkg>/ stubs
 ```
 
@@ -113,7 +113,7 @@ python scripts/gallery_generator.py --check    # CI freshness
 
 | Prefix | Scripts | When to run |
 |--------|---------|-------------|
-| `gen_` | `gen_package_pyi.sh` | Core package API changes → regenerates `tools/typings/{displaysys,eventsys,graphics,multimer}/` |
+| `gen_` | `gen_package_pyi.sh` | Core package API changes → regenerates `tools/typings/{displaysys,eventsys,multimer}/` |
 | `pyscript_` | `gallery_generator.py` | Gallery cards in `web/pyscript/index.html` |
 | `mkdocs_` | `mkdocs_gen_ref_pages.py`, `mkdocs_gen_notebook_pages.py` | Automatically on `mkdocs build` |
 | `publish_` | `publish_sync_packages.sh`, `publish_release_tag.sh`, `build.py`, `publish_mip_ghpages.sh`, `publish_make_pyproject.py` | Tag push → CI release; or local / manual workflow |
@@ -121,9 +121,11 @@ python scripts/gallery_generator.py --check    # CI freshness
 `manifestfile.py` is a shared library for the publish scripts (not prefixed).
 
 Manual packages (not generated) still in this repo:
-`packages/micropython-{micro-gui,nano-gui,touch}.json`. Core libs
-(`displaysys`, `eventsys`, `multimer`, `pygraphics`, `usdl2`) have no
-`packages/*.json` — use the micropython-lib MIP index. Bus/touch/chip helper
+`packages/micropython-{micro-gui,nano-gui,touch}.json`. pydisplay core packages
+(`displaysys`, `eventsys`, `multimer`) have no `packages/*.json` — use the
+micropython-lib MIP index. Sister packages (`pygraphics`, `usdl2`, `palettes`,
+`pdwidgets`, `lvgl`) come from frozen firmware, MIP (where published), or
+TestPyPI — not this repo's `packages/`. Bus/touch/chip helper
 manifests (`spibus`, `i80bus`, `i2cbus`, `epaper_chip`, `tt21100`, `stmpe610`,
 `keypad_shift`) live in sibling `micropython-hardware/packages/`.
 

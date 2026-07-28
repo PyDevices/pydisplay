@@ -12,14 +12,14 @@ With ``shell="run"``, deps are emitted as ``mip=`` (MicroPython) /
     from url_maker import urls_from_deps
 
     urls_from_deps(modules=("hello",), deps=("palettes",), runtime="micropython")
-    # -> '?modules=hello&deps=palettes'
+    # -> '?modules=hello'  (palettes frozen in MP WASM)
 
     urls_from_deps(modules=("hello",), deps=("palettes",), runtime="pyodide")
-    # -> '?modules=hello&deps=palettes'
+    # -> '?modules=hello&deps=palettes,pygraphics-cmod'
 
     urls_from_deps(modules=("hello",), deps=("palettes",), runtime=None)
-    # -> {'micropython': '?modules=hello&deps=palettes',
-    #     'pyodide': '?modules=hello&deps=palettes'}
+    # -> {'micropython': '?modules=hello',
+    #     'pyodide': '?modules=hello&deps=palettes,pygraphics-cmod'}
 """
 
 from __future__ import annotations
@@ -32,7 +32,10 @@ SHELLS = ("chrome", "run")
 # Profiles → logical names already present (frozen, cmod, or toml-mounted).
 # Skip those names when emitting deps for that profile.
 PROFILES: dict[str, frozenset[str]] = {
-    # Browser MP: src/lib + add_ons mounted; do not auto-install core libs.
+    # Browser MP WASM: pydisplay core (displaysys/eventsys/multimer) toml-mounted;
+    # sister/ecosystem libs frozen in the pyscript vendor firmware (lvgl,
+    # display_driver, pygraphics, palettes, pdwidgets, usdl2 when built in).
+    # Do not mip-install those — Pyodide / CPython still get TestPyPI wheels.
     "pyscript-mp": frozenset(
         {
             "pygraphics",
@@ -40,33 +43,63 @@ PROFILES: dict[str, frozenset[str]] = {
             "multimer",
             "eventsys",
             "board_config",
+            "lvgl",
+            "lvgl-cpython",
+            "display_driver",
+            "palettes",
+            "pdwidgets",
+            "usdl2",
+            "usdl2-py",
         }
     ),
+    # Pyodide: pydisplay core toml-mounted. Sister packages (pygraphics-cmod,
+    # usdl2, …) come from TestPyPI via ?deps=.
     "pyscript-pyodide": frozenset(
         {
-            "pygraphics",
             "displaysys",
             "multimer",
             "eventsys",
             "board_config",
         }
     ),
-    # Firmware with cmods compiled in — omit those from install lists.
-    "firmware-cmods": frozenset({"pygraphics", "lvgl"}),
+    # Firmware with sister cmods compiled in — omit those from install lists.
+    "firmware-cmods": frozenset(
+        {
+            "pygraphics",
+            "lvgl",
+            "lvgl-cpython",
+            "display_driver",
+            "palettes",
+            "pdwidgets",
+            "usdl2",
+            "usdl2-py",
+        }
+    ),
 }
 
 # Runtime-aware rewrites: logical name → install name (or None to omit).
 _MIP_REWRITE: dict[str, str | None] = {
     "lvgl": None,  # C-only; no MIP package
     "lvgl-cpython": None,
-    "pygraphics-cmod": "pygraphics",  # mip ships pure graphics
+    "display_driver": None,  # ships with LVGL firmware / lvgl-cpython wheel
+    "pygraphics-cmod": "pygraphics",  # mip ships pure-Python pygraphics
+    "usdl2-py": "usdl2",  # same import name on MIP (PyDevices/usdl2)
 }
 
 _WHEEL_REWRITE: dict[str, str | None] = {
     "lvgl": "lvgl-cpython",
     "lvglcpython": "lvgl-cpython",
+    "display_driver": "lvgl-cpython",  # bundled in the wheel
     "pygraphics": "pygraphics-cmod",  # prefer native cmod wheel
+    "usdl2-py": "usdl2",  # prefer native TestPyPI wheel when available
 }
+
+# Logical deps that need pygraphics at runtime but often omit it from headers.
+_WHEEL_PULLS_PYGRAPHICS = frozenset({"palettes", "pdwidgets"})
+
+
+def _norm_dep(name: str) -> str:
+    return name.strip().lower().replace("_", "-")
 
 
 def _as_tuple(value: Iterable[str] | None) -> tuple[str, ...]:
@@ -115,8 +148,10 @@ def _apply_channel(
     profile: str,
 ) -> list[str]:
     skip = PROFILES.get(profile, frozenset())
+    skip_norm = {_norm_dep(s) for s in skip}
     out: list[str] = []
     seen: set[str] = set()
+    pull_pygraphics = False
     for raw in names:
         logical = str(raw).strip()
         if not logical:
@@ -127,9 +162,9 @@ def _apply_channel(
                 seen.add(logical)
                 out.append(logical)
             continue
-        if logical in skip or logical.lower().replace("_", "-") in {
-            s.lower().replace("_", "-") for s in skip
-        }:
+        if _norm_dep(logical) in _WHEEL_PULLS_PYGRAPHICS:
+            pull_pygraphics = True
+        if logical in skip or _norm_dep(logical) in skip_norm:
             continue
         if channel == "mip":
             resolved = rewrite_mip(logical)
@@ -144,6 +179,9 @@ def _apply_channel(
         if resolved not in seen:
             seen.add(resolved)
             out.append(resolved)
+    # palettes / pdwidgets need pygraphics; prefer the native TestPyPI cmod wheel.
+    if channel == "wheels" and pull_pygraphics and "pygraphics-cmod" not in seen:
+        out.append("pygraphics-cmod")
     return out
 
 

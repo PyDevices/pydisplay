@@ -49,15 +49,42 @@ def _join(*parts):
     return out
 
 
+def unix_path(path):
+    """Map WSL/Windows spellings of a Linux path to a Unix ``/…`` path.
+
+    ``micropython.exe`` under WSL often reports cwd as
+    ``\\\\wsl.localhost\\\\<distro>\\\\home\\\\…`` or ``U:\\\\home\\\\…``.
+    Sibling discovery and ``sys.path`` always use the Unix form so the same
+    tree is visible to PE and native interpreters.
+    """
+    if not path:
+        return path
+    path = str(path).replace("\\", "/")
+    lower = path.lower()
+    for marker in ("//wsl.localhost/", "//wsl$/"):
+        if lower.startswith(marker):
+            rest = path[len(marker) :]
+            slash = rest.find("/")
+            if slash >= 0:
+                return rest[slash:]
+            return "/"
+    if len(path) >= 2 and path[1] == ":" and path[0].isalpha():
+        rest = path[2:]
+        if not rest.startswith("/"):
+            rest = "/" + rest
+        return rest
+    return path
+
+
 def _dir_of(path):
-    path = path.replace("\\", "/")
+    path = unix_path(path)
     if "/" in path:
         return path.rsplit("/", 1)[0]
     return "."
 
 
 def _normpath(path):
-    path = path.replace("\\", "/")
+    path = unix_path(path)
     absolute = path.startswith("/")
     parts = []
     for part in path.split("/"):
@@ -75,20 +102,33 @@ def _normpath(path):
     return "/".join(parts) if parts else "."
 
 
+def _home_from_cwd():
+    """Best-effort ``/home/<user>`` when ``HOME`` is unset (micropython.exe)."""
+    try:
+        cwd = unix_path(os.getcwd())
+    except OSError:
+        return None
+    if cwd.startswith("/home/"):
+        parts = [p for p in cwd.split("/") if p]
+        if len(parts) >= 2:
+            return "/" + parts[0] + "/" + parts[1]
+    return None
+
+
 def _expanduser(path):
     if path.startswith("~/"):
-        home = _env_get("HOME")
+        home = _env_get("HOME") or _home_from_cwd()
         if home:
-            return _join(home.rstrip("/"), path[2:])
+            return _join(unix_path(home).rstrip("/"), path[2:])
     return path
 
 
 def _abspath(path):
-    path = path.replace("\\", "/")
+    path = unix_path(path)
     if path.startswith("/"):
         return _normpath(path)
     try:
-        cwd = os.getcwd()
+        cwd = unix_path(os.getcwd())
     except OSError:
         return _normpath(path)
     if not cwd.endswith("/"):
@@ -134,12 +174,12 @@ def _candidates(package, repo_root):
         _expanduser(_join("~", "gh", "pydevices", package, "lib")),
         _normpath(_join(repo_root, "..", package, "lib")),
     ]
-    # Day-to-day cmods checkout: pygraphics lives under cmods/graphics.
+    # Day-to-day cmods checkout: pygraphics lives under cmods/pygraphics.
     if package == "pygraphics":
         paths.extend(
             [
-                _expanduser(_join("~", "gh", "pydevices", "cmods", "graphics", "lib")),
-                _normpath(_join(repo_root, "..", "cmods", "graphics", "lib")),
+                _expanduser(_join("~", "gh", "pydevices", "cmods", "pygraphics", "lib")),
+                _normpath(_join(repo_root, "..", "cmods", "pygraphics", "lib")),
             ]
         )
     return paths
@@ -162,7 +202,7 @@ def discover_sibling_src(package, repo_root=None, tools_dir=None):
             path = _normpath(_expanduser(override))
             return path if _is_dir(path) else None
 
-    root = repo_root if repo_root is not None else _repo_root(tools_dir)
+    root = unix_path(repo_root) if repo_root is not None else _repo_root(tools_dir)
     for candidate in _candidates(package, root):
         path = _normpath(candidate)
         if _is_dir(path):
@@ -183,7 +223,7 @@ def discover_sibling_srcs(repo_root=None, tools_dir=None):
 def apply_sibling_env(env, repo_root=None, tools_dir=None, prepend_paths=None):
     """Record discovered siblings in *env* and prepend them to ``PYTHONPATH``."""
     paths = []
-    root = repo_root if repo_root is not None else _repo_root(tools_dir)
+    root = unix_path(repo_root) if repo_root is not None else _repo_root(tools_dir)
     for package in _SIBLING_PACKAGES:
         path = discover_sibling_src(package, repo_root=root, tools_dir=tools_dir)
         if path:
@@ -192,8 +232,7 @@ def apply_sibling_env(env, repo_root=None, tools_dir=None, prepend_paths=None):
 
     ordered = list(paths)
     if prepend_paths:
-        ordered = list(prepend_paths) + ordered
-
+        ordered = [unix_path(p) for p in prepend_paths] + ordered
     if ordered:
         prefix = _PATHSEP.join(ordered)
         existing = env.get("PYTHONPATH", "")

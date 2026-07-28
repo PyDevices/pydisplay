@@ -53,7 +53,9 @@ See also [installation/mip-micropython-lib.md](../docs/installation/mip-micropyt
 ### What `cmods/manifest.py` includes
 
 1. **`my-manifest.py`** (optional, same directory) — not present in the default tree; hook for local overrides.
-2. **`package("graphics", base_path="graphics/py", opt=3)`** — all `.py` under [`cmods/pygraphics/py/`](../../cmods/pygraphics/py/), compiled with **`-O3`** and **frozen into firmware** as bytecode (not left as `.py` or loose `.mpy` on the filesystem).
+2. **Per-usermod `manifest.py` files** under cmods siblings (e.g.
+   [`cmods/pygraphics/manifest.py`](../../cmods/pygraphics/manifest.py)) —
+   freeze pure-Python / helper modules for that cmod.
 3. **`lv_micropython_cmod/manifest.py`** (if present) — LVGL bindings/modules for freeze.
 4. **Port/board manifests** from the MicroPython tree (first match):
    - `$(PORT_DIR)/variants/pyscript/manifest.py`
@@ -62,7 +64,9 @@ See also [installation/mip-micropython-lib.md](../docs/installation/mip-micropyt
    - `$(PORT_DIR)/variants/standard/manifest.py`
    - other variant manifests
 
-The pygraphics cmod also ships [`cmods/pygraphics/manifest.py`](../../cmods/pygraphics/manifest.py) with `freeze_as_str` for a subset of pure-Python fallbacks — used when that manifest is included directly, separate from the `package("graphics", …)` line in the root manifest.
+The pygraphics cmod ships [`cmods/pygraphics/manifest.py`](../../cmods/pygraphics/manifest.py)
+with freezes for the importable `pygraphics` package (plus any `freeze_as_str`
+helpers listed there).
 
 ### Summary for frozen builds
 
