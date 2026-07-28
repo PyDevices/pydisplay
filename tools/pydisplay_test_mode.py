@@ -28,6 +28,18 @@ def check_deadline():
         return False
     if _deadline_fired:
         return True
+    # Keep-alive only: do not start or fire the wall-clock deadline while the
+    # app is still importing (mip/fetch) or before ``run`` / ``run_forever``'s
+    # loop is on the stack. Service ticks can interrupt a long install; stopping
+    # the shared timer then wedges the fetch or ``asyncio.run``.
+    try:
+        import board_config
+
+        rt = getattr(board_config, "runtime", None)
+        if rt is not None and not getattr(rt, "_blocking_run_forever", False):
+            return False
+    except Exception:
+        pass
     import time
 
     now = time.time()

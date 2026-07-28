@@ -339,6 +339,8 @@ script = "examples/nano_gui_simpletest.py"
 kind = "loop"
 quit = "poll"
 deps = ["micropython-nano-gui"]
+# Cold mip into add_ons/gui can take well over the default 30s.
+timeout_s = 120
 
 [examples.micro_gui_simpletest]
 import = "micro_gui_simpletest"
@@ -346,6 +348,7 @@ script = "examples/micro_gui_simpletest.py"
 kind = "loop"
 quit = "poll"
 deps = ["micropython-micro-gui"]
+timeout_s = 120
 
 [examples.touch_gui_simpletest]
 import = "touch_gui_simpletest"
@@ -353,6 +356,7 @@ script = "examples/touch_gui_simpletest.py"
 kind = "loop"
 quit = "poll"
 deps = ["micropython-touch"]
+timeout_s = 120
 
 [examples.palettes_demo]
 import = "palettes_demo"
@@ -404,6 +408,7 @@ script = "examples/testris.py"
 kind = "loop"
 quit = "poll"
 duration_s = 8
+timeout_s = 45
 deps = ["core"]
 
 [examples.tiny_hello]

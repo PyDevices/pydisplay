@@ -365,13 +365,17 @@ def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode
     use_poll_deadline = not cooperative and not _has_background_inject()
 
     if use_poll_deadline:
+        # No background thread (e.g. micropython.exe): patch poll + deadline hook.
         _install_poll_deadline_quit(duration_s, injected)
-    elif not cooperative:
+    elif quit_mode == "inject" and not cooperative:
+        # Daemon inject is only for quit=inject. quit=poll must not start it:
+        # on CPython sync/librt, inject_quit from a worker wedges the main
+        # thread so neither Quit delivery nor the deadline hook can run.
         import quit_inject
 
         def delayed_inject():
             touch_delay = _touch_delay_s(duration_s)
-            if quit_mode == "inject" and touch_delay > 0:
+            if touch_delay > 0:
                 _sleep(touch_delay)
                 quit_inject.inject_synthetic_touch(broker_poll=False)
             _sleep(max(0, duration_s - touch_delay))
@@ -388,6 +392,7 @@ def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode
             ):
                 delayed_inject()
     else:
+        # quit=poll (or cooperative LVGL): deadline hook installed in main().
         try:
             import pydisplay_test_mode
 
