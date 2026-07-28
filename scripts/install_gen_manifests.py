@@ -235,7 +235,8 @@ else:
 
 # Write toml files (same [files]; MicroPython vs Pyodide interpreter).
 # pygraphics is not mounted: MP WASM freezes the cmod; Pyodide installs
-# pygraphics-cmod from TestPyPI via gallery ?deps= (see url_maker.py).
+# pygraphics-cmod (pyemscripten wasm) from TestPyPI via gallery ?deps=
+# (see url_maker.py).
 with open(toml_full_path, "w") as f:
     for line in master_toml:
         f.write(line + "\n")

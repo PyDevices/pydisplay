@@ -1,3 +1,4 @@
+# deps: pygraphics
 """
 bouncing_balls.py
 =================

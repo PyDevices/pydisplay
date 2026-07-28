@@ -52,8 +52,8 @@ PROFILES: dict[str, frozenset[str]] = {
             "usdl2-py",
         }
     ),
-    # Pyodide: pydisplay core toml-mounted. Sister packages (pygraphics-cmod,
-    # usdl2, …) come from TestPyPI via ?deps=.
+    # Pyodide: pydisplay core toml-mounted. Sister packages (pygraphics-cmod
+    # pyemscripten wasm, usdl2, …) come from TestPyPI via ?deps=.
     "pyscript-pyodide": frozenset(
         {
             "displaysys",
@@ -90,7 +90,7 @@ _WHEEL_REWRITE: dict[str, str | None] = {
     "lvgl": "lvgl-cpython",
     "lvglcpython": "lvgl-cpython",
     "display_driver": "lvgl-cpython",  # bundled in the wheel
-    "pygraphics": "pygraphics-cmod",  # prefer native cmod wheel
+    "pygraphics": "pygraphics-cmod",  # native + pyemscripten wasm on TestPyPI
     "usdl2-py": "usdl2",  # prefer native TestPyPI wheel when available
 }
 
