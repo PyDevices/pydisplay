@@ -1,9 +1,9 @@
 """
-Simple test example to demonstrate the use of framebuf.FrameBuffer.
+Simple test example to demonstrate pygraphics.FrameBuffer.
 """
 
 from board_config import display_drv
-from framebuf import FrameBuffer, RGB565
+from pygraphics import FrameBuffer, RGB565
 from array import array  # for defining a polygon
 
 # If byte swapping is required and the display bus is capable of having byte swapping disabled,

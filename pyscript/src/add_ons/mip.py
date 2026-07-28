@@ -12,9 +12,11 @@ mpremote transport/CLI removed and local filesystem writes. For:
   - CircuitPython (when urllib, urequests, or requests is available)
   - Pyodide / PyScript (``pyodide.http.open_url`` when urllib is unavailable)
 
-MicroPython ships ``mip`` in firmware. ``lib.path`` appends ``add_ons`` on
-MicroPython (does not prepend), so firmware ``mip`` stays preferred when both
-exist. PyScript gallery loaders call this module on Pyodide via ``ps_loader.py``.
+MicroPython ships ``mip`` in firmware. Use ``import lib.path`` for ``sys.path``
+(do not hardcode ``add_ons`` ahead of ``.frozen``) — ``lib.path`` keeps
+``.frozen`` before ``add_ons`` so this file is never imported when frozen
+``mip`` exists. PyScript gallery loaders call this module on Pyodide via
+``ps_loader.py``.
 
 API (compatible subset of on-device mip)::
 

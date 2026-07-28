@@ -1,7 +1,7 @@
 /*! pydisplay PWA service worker — offline cache + COI headers for PyScript */
 /* CACHE_NAME is stamped at Pages deploy from a hash of STATIC_ASSETS + this
  * file (see scripts/pyscript_stamp_pwa_cache.py). Git keeps -dev for local serve. */
-const CACHE_NAME = 'pydisplay-pwa-d5aa1fcd6cda';
+const CACHE_NAME = 'pydisplay-pwa-16f70523e7bd';
 
 const STATIC_ASSETS = [
   './index.html',

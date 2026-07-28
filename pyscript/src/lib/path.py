@@ -1,129 +1,55 @@
-"""
-path.py
-To run this command when you launch *Python, type the following, substituting 'python' with the name
-of your *Python executable, such as 'python3' or 'micropython':
+"""Put '', .frozen (MP/CP), lib first on sys.path; append _extra_dirs."""
 
-    python -i lib/path.py
+import os
+import sys
 
-Or run an example in one shot:
-
-    python -c "import lib.path; import myexample"
-
-On microcontrollers, you may include it in your boot.py, main.py or code.py, whichever is appropriate:
-
-    import lib.path
-
-Edit the 'directories' tuple to include the directories you want to add to the path.
-Only directories that already exist in the current working directory will be added to the path.
-"""
-
-__all__ = ["RELPATH", "add", "directories", "update"]
-
-# Edit this list to include the directories you want to add to the path.
-directories = ["lib", "add_ons", "examples"]
-_prepend_directories = []
-
-# Set to True to use relative paths instead of absolute paths.
-RELPATH = True
+__all__ = ["add", "cwd", "update"]
+_extra_dirs = ("add_ons", "examples")
 
 
-def update():
-    import os
-    import sys
+def cwd():
+    path = os.getcwd()
+    return path if path[-1] == "/" else path + "/"
 
-    def find_dir(directory):
-        try:
-            os.stat(directory)
-            return True
-        except OSError:
-            return False
 
-    def resolve_entry(directory):
-        is_abs = directory.startswith("/") or (len(directory) > 1 and directory[1] == ":")
-        target = directory if is_abs else cwd + directory
-        if not find_dir(target):
-            return None
-        return target if is_abs or not RELPATH else directory
-
-    cwd = os.getcwd()
-    if cwd[-1] != "/":
-        cwd += "/"
-
-    prepended = []
-    for directory in _prepend_directories:
-        entry = resolve_entry(directory)
-        if entry is not None and entry not in sys.path:
-            sys.path.insert(0, entry)
-            prepended.append(entry)
-
-    # Always put local ``lib/`` ahead of site-packages. Appending only (old
-    # CPython path) let an installed ``eventsys`` / ``multimer`` shadow the
-    # tree under ``src/lib`` — e.g. missing FINGER* constants so pygame
-    # multitouch never reached VirtualDevices / LVGL.
-    added = []
-    for directory in directories:
-        entry = resolve_entry(directory)
-        if entry is not None and entry not in sys.path:
-            if directory == "lib":
-                sys.path.insert(0, entry)
-            else:
-                sys.path.append(entry)
-            added.append(entry)
-
-    # When MICROPYPATH is set (common on Windows hosts), it replaces the
-    # port default path and often omits ``.frozen``. Frozen modules such as
-    # ``display_driver`` are then importable only if ``.frozen`` is restored.
+def _exists(name):
+    if name in ("", ".frozen"):
+        return True
+    path = name if name.startswith("/") else cwd() + name
     try:
-        import micropython  # noqa: F401
-    except ImportError:
-        pass
-    else:
-        if ".frozen" not in sys.path:
-            sys.path.append(".frozen")
-            added.append(".frozen")
-
-    if prepended and not _quiet():
-        print(f"path.py:  Prepended {prepended} to sys.path.")
-    if added and not _quiet():
-        print(f"path.py:  Added {added} to sys.path.")
-
-
-def _quiet():
-    try:
-        import pydisplay_test_mode
-
-        return pydisplay_test_mode.ENABLED
-    except ImportError:
+        os.stat(path)
+        return True
+    except OSError:
         return False
 
 
-def add(directory, first=False):
-    """Register *directory* and call :func:`update`.
-
-    With ``first=True``, the directory is inserted at the front of ``sys.path``
-    so game-local modules (e.g. ``board_config.py``) shadow ``lib/`` defaults.
-    """
-    if first:
-        _prepend_directories.append(directory)
+def add(directory, front=False):
+    if not _exists(directory):
+        return
+    if directory in sys.path:
+        sys.path.remove(directory)
+    if front:
+        sys.path.insert(0, directory)
     else:
-        directories.append(directory)
-    update()
+        sys.path.append(directory)
+
+
+def update():
+    # Prepend in reverse so the final order is '', .frozen, lib.
+    add("lib", front=True)
+    if sys.implementation.name in ("micropython", "circuitpython"):
+        add(".frozen", front=True)
+    add("", front=True)
+    for directory in _extra_dirs:
+        add(directory)
+    try:
+        import pydisplay_test_mode
+
+        quiet = pydisplay_test_mode.ENABLED
+    except ImportError:
+        quiet = False
+    if not quiet:
+        print("path.py:  updated sys.path.")
 
 
 update()
-
-if __name__ == "__main__":
-    # Interactive bootstrap (``python -i lib/path.py``): path is already
-    # applied — drop this file's names so they do not pollute the REPL.
-    # Use ``import lib.path`` later if you need ``add`` / ``update``.
-    for _name in (
-        "directories",
-        "_prepend_directories",
-        "RELPATH",
-        "update",
-        "add",
-        "_quiet",
-        "__all__",
-    ):
-        globals().pop(_name, None)
-    del _name

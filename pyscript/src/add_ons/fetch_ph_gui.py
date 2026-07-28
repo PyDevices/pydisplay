@@ -180,7 +180,13 @@ def _patch_time_ticks():
 
 
 def _patch_machine_pin():
-    """Stub machine.Pin on hosts that lack it (CPython desktop, MicroPython-WASM).
+    """Stub machine.Pin on hosts that lack it.
+
+    Covers CPython desktop, MicroPython-WASM, and unix MicroPython (``machine``
+    exists but has no ``Pin`` — only ``PinBase`` / ``Signal``). Unix MP's
+    native ``machine`` rejects ``setattr`` (``AttributeError``), so when Pin is
+    missing we replace ``sys.modules['machine']`` with a thin proxy that exposes
+    the stub and forwards other attributes.
 
     Uses a plain class instance rather than ``types.ModuleType(name)`` — the
     latter's attribute exists on MicroPython-WASM but its constructor raises
@@ -189,15 +195,6 @@ def _patch_machine_pin():
     caching: ``import machine`` returns whatever is registered there.
     """
     import sys
-
-    if "machine" in sys.modules:
-        return
-    try:
-        import machine  # noqa: F401
-
-        return
-    except ImportError:
-        pass
 
     class Pin:
         IN = 0
@@ -218,12 +215,41 @@ def _patch_machine_pin():
         def irq(self, *args, **kwargs):
             return None
 
+    mod = sys.modules.get("machine")
+    if mod is None:
+        try:
+            import machine as mod  # noqa: F811
+        except ImportError:
+            mod = None
+
+    if mod is not None and hasattr(mod, "Pin"):
+        return
+
+    if mod is not None:
+        try:
+            mod.Pin = Pin
+            if hasattr(mod, "Pin"):
+                return
+        except (AttributeError, TypeError):
+            pass
+
+        class _MachineProxy:
+            def __init__(self, real, pin):
+                self._real = real
+                self.Pin = pin
+
+            def __getattr__(self, name):
+                return getattr(self._real, name)
+
+        sys.modules["machine"] = _MachineProxy(mod, Pin)
+        return
+
     class _FakeMachineModule:
         pass
 
-    mod = _FakeMachineModule()
-    mod.Pin = Pin
-    sys.modules["machine"] = mod
+    fake = _FakeMachineModule()
+    fake.Pin = Pin
+    sys.modules["machine"] = fake
 
 
 def _prime_primitives():

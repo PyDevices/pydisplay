@@ -441,6 +441,16 @@ class Runtime:
         self._arm_lvgl_event_loop()
         while not self._quit_requested:
             await asyncio.sleep(tick_ms / 1000)
+            # Harness deadline hooks (pydisplay_test_mode) run from
+            # multimer.sleep_ms on the sync path; async run_forever must
+            # invoke them here — LVGL claims refresh so auto-service poll
+            # does not. App code should not rely on this hook.
+            try:
+                from multimer import run_deadline_hook
+
+                run_deadline_hook()
+            except ImportError:
+                pass
         # Teardown here runs outside the service tick (this coroutine is a
         # separate task from the AsyncTimer), so stopping the timer is safe.
         self._perform_teardown()
