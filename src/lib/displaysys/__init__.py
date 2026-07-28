@@ -15,12 +15,33 @@ import gc
 import sys
 
 try:
-    from byteswap import byteswap as _byteswap_native
+    import micropython as _mp
+except ImportError:  # bare CPython
+    _mp = None
 
-    byteswap = _byteswap_native
-    _BYTESWAP_BACKEND = "native"
-except ImportError:
 
+def _mp_native(f):
+    """Apply ``@micropython.native`` when the port provides it."""
+    deco = getattr(_mp, "native", None) if _mp is not None else None
+    return deco(f) if deco is not None else f
+
+
+def _install_byteswap():
+    """Prefer GitHub ``add_ons/byteswap`` (numpy/ulab/viper); else portable Python.
+
+    No in-tree ``@viper`` here: micropython-lib MIP packaging compiles every
+    ``.py`` with ``mpy-cross`` without ``-march``, so viper/native emitters in
+    this package would break the index build. Fast swap on SPI boards comes
+    from installing ``add_ons`` (GitHub MIP), not from the displaysys package.
+    """
+    try:
+        from byteswap import byteswap as _byteswap_native
+
+        return _byteswap_native, "native"
+    except ImportError:
+        pass
+
+    @_mp_native
     def byteswap(buf):
         """Swap 16-bit pixel bytes in place (portable fallback)."""
         n = len(buf)
@@ -31,7 +52,10 @@ except ImportError:
             buf[i] = buf[i + 1]
             buf[i + 1] = b0
 
-    _BYTESWAP_BACKEND = "pure_python"
+    return byteswap, "pure_python"
+
+
+byteswap, _BYTESWAP_BACKEND = _install_byteswap()
 
 __all__ = [
     "DisplayDriver",
@@ -415,6 +439,66 @@ def color_rgb(color):
     return (r, g, b)
 
 
+@_mp_native
+def _blit_transparent_rgb565(blit_rect, buf, x, y, w, h, key):
+    """Scan RGB565 runs and blit non-key spans (``@micropython.native`` when available)."""
+    key16 = key & 0xFFFF
+    k0 = key16 & 0xFF
+    k1 = (key16 >> 8) & 0xFF
+    stride = w * 2
+    for j in range(h):
+        rowstart = j * stride
+        colstart = 0
+        while colstart < stride:
+            i = rowstart + colstart
+            if buf[i] != k0 or buf[i + 1] != k1:
+                colend = colstart + 2
+                while colend < stride:
+                    ei = rowstart + colend
+                    if buf[ei] == k0 and buf[ei + 1] == k1:
+                        break
+                    colend += 2
+                blit_rect(
+                    buf[rowstart + colstart : rowstart + colend],
+                    x + (colstart >> 1),
+                    y + j,
+                    (colend - colstart) >> 1,
+                    1,
+                )
+                colstart = colend
+            else:
+                colstart += 2
+
+
+@_mp_native
+def _blit_transparent_generic(blit_rect, buf, x, y, w, h, bpp, key):
+    """Scan packed runs for non-RGB565 depths."""
+    key_bytes = key.to_bytes(bpp, "little")
+    stride = w * bpp
+    for j in range(h):
+        rowstart = j * stride
+        colstart = 0
+        while colstart < stride:
+            startoffset = rowstart + colstart
+            if buf[startoffset : startoffset + bpp] != key_bytes:
+                colend = colstart
+                while colend < stride:
+                    endoffset = rowstart + colend
+                    if buf[endoffset : endoffset + bpp] == key_bytes:
+                        break
+                    colend += bpp
+                blit_rect(
+                    buf[rowstart + colstart : rowstart + colend],
+                    x + colstart // bpp,
+                    y + j,
+                    (colend - colstart) // bpp,
+                    1,
+                )
+                colstart = colend
+            else:
+                colstart += bpp
+
+
 class DisplayDriver:
     """
     Base class for all display backends (BusDisplay, SDLDisplay, PGDisplay, FBDisplay, etc.).
@@ -469,7 +553,15 @@ class DisplayDriver:
         if not self._quiet:
             print(f"{self.__class__.__name__}: initialized.")
             if self.requires_byteswap:
-                print(f"{self.__class__.__name__}: requires_byteswap = True")
+                print(
+                    f"{self.__class__.__name__}: requires_byteswap = True"
+                    f" (byteswap={_BYTESWAP_BACKEND})"
+                )
+                if _BYTESWAP_BACKEND == "pure_python":
+                    print(
+                        f"{self.__class__.__name__}: warning: slow byteswap fallback; "
+                        "install add_ons/byteswap (GitHub MIP) for viper/numpy swap"
+                    )
 
     def __del__(self):
         self.deinit()
@@ -625,35 +717,11 @@ class DisplayDriver:
         Returns:
             (tuple): The x, y, w, h coordinates of the blitted area.
         """
-        BPP = self.color_depth // 8
-        key_bytes = key.to_bytes(BPP, "little")
-        stride = w * BPP
-        for j in range(h):
-            rowstart = j * stride
-            colstart = 0
-            # iterate over each pixel looking for the first non-key pixel
-            while colstart < stride:
-                startoffset = rowstart + colstart
-                if buf[startoffset : startoffset + BPP] != key_bytes:
-                    # found a non-key pixel
-                    # then iterate over each pixel looking for the next key pixel
-                    colend = colstart
-                    while colend < stride:
-                        endoffset = rowstart + colend
-                        if buf[endoffset : endoffset + BPP] == key_bytes:
-                            break
-                        colend += BPP
-                    # blit the non-key pixels
-                    self.blit_rect(
-                        buf[rowstart + colstart : rowstart + colend],
-                        x + colstart // BPP,
-                        y + j,
-                        (colend - colstart) // BPP,
-                        1,
-                    )
-                    colstart = colend
-                else:
-                    colstart += BPP
+        bpp = self.color_depth // 8
+        if bpp == 2:
+            _blit_transparent_rgb565(self.blit_rect, buf, x, y, w, h, key)
+        else:
+            _blit_transparent_generic(self.blit_rect, buf, x, y, w, h, bpp, key)
         return (x, y, w, h)
 
     @property

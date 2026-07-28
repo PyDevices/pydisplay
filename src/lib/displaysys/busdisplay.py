@@ -169,6 +169,10 @@ class BusDisplay(DisplayDriver):
 
         self._param_buf = bytearray(4)
         self._param_mv = memoryview(self._param_buf)
+        # Reused fill_rect strip (grows to max(width, height) * bpp on demand).
+        self._fill_strip_buf = None
+        self._fill_strip_color = None
+        self._fill_strip_valid = 0
 
         self._reset_pin = self._config_output_pin(reset_pin, value=not reset_high)
         self._reset_high = reset_high
@@ -265,6 +269,35 @@ class BusDisplay(DisplayDriver):
         self.send_color(self._write_ram_command, buf)
         return (x, y, w, h)
 
+    def _fill_strip(self, length_px, color_bytes):
+        """Return a memoryview of ``length_px`` RGB565 pixels filled with ``color_bytes``.
+
+        Reuses ``_fill_strip_buf`` across calls so fill_rect does not allocate
+        a new strip buffer every time.
+        """
+        bpp = len(color_bytes)
+        need = length_px * bpp
+        buf = self._fill_strip_buf
+        if buf is None or len(buf) < need:
+            grow = max(need, max(self._width, self._height) * bpp)
+            buf = bytearray(grow)
+            self._fill_strip_buf = buf
+            self._fill_strip_color = None
+            self._fill_strip_valid = 0
+        if self._fill_strip_color != color_bytes:
+            memoryview(buf)[:need] = color_bytes * length_px
+            self._fill_strip_color = color_bytes
+            self._fill_strip_valid = need
+        elif self._fill_strip_valid < need:
+            valid = self._fill_strip_valid
+            mv = memoryview(buf)
+            while valid < need:
+                copy = valid if valid < (need - valid) else (need - valid)
+                mv[valid : valid + copy] = mv[:copy]
+                valid += copy
+            self._fill_strip_valid = need
+        return memoryview(buf)[:need]
+
     def fill_rect(self, x: int, y: int, w: int, h: int, c: int):
         """
         Draw a rectangle at the given location, size and filled with color.
@@ -298,12 +331,12 @@ class BusDisplay(DisplayDriver):
         # SPI buses release CS between sends, and many ST7789 panels ignore 0x3C, which
         # scatters later chunks (dots / misplaced bars). Each strip gets its own window.
         if h > w:
-            buf = memoryview(bytearray(color_bytes * h))
+            buf = self._fill_strip(h, color_bytes)
             for i in range(w):
                 self._set_window(x1 + i, y1, x1 + i, y2)
                 self.send_color(_RAMWR, buf)
         else:
-            buf = memoryview(bytearray(color_bytes * w))
+            buf = self._fill_strip(w, color_bytes)
             for i in range(h):
                 self._set_window(x1, y1 + i, x2, y1 + i)
                 self.send_color(_RAMWR, buf)
@@ -321,15 +354,17 @@ class BusDisplay(DisplayDriver):
         Returns:
             (tuple): A tuple containing the x, y, width, and height of the pixel.
         """
-        color_bytes = (
-            (c & 0xFFFF).to_bytes(2, "big")
-            if self._auto_byteswap
-            else (c & 0xFFFF).to_bytes(2, "little")
-        )
         xpos = x + self.colstart
         ypos = y + self.rowstart
         self._set_window(xpos, ypos, xpos, ypos)
-        self.send(_RAMWR, color_bytes)
+        c16 = c & 0xFFFF
+        if self._auto_byteswap:
+            self._param_buf[0] = (c16 >> 8) & 0xFF
+            self._param_buf[1] = c16 & 0xFF
+        else:
+            self._param_buf[0] = c16 & 0xFF
+            self._param_buf[1] = (c16 >> 8) & 0xFF
+        self.send(_RAMWR, self._param_mv[:2])
         return (x, y, 1, 1)
 
     ############### API Method Overrides ################
