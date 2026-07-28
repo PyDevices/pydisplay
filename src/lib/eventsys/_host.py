@@ -107,6 +107,8 @@ class HostEventsDevice(Device):
 
 # Peers that share one HostEventsDevice: first polled drains host once and fans out.
 _vd_peers = {}
+# Leftover host events when draining one FINGER* per poll (gesture coherence).
+_vd_host_pending = {}
 
 
 class VirtualDevices:
@@ -178,9 +180,22 @@ class VirtualDevices:
         # Only the first peer drains the shared host queue.
         if self._peers and self._peers[0] is not self:
             return
-        for e in self._host_device.poll():
+        key = id(self._host_device)
+        pending = _vd_host_pending.setdefault(key, [])
+        if not pending:
+            batch = self._host_device.poll()
+            if batch:
+                pending.extend(batch)
+        if not pending:
+            return
+        # Mouse/key storms: drain in one poll. Finger updates: one per poll so
+        # LVGL gesture_feed (after read_cb) can observe multipoint between downs.
+        while pending:
+            e = pending.pop(0)
             for vd in self._peers:
                 vd._route(e)
+            if e.type in (events.FINGERDOWN, events.FINGERUP, events.FINGERMOTION):
+                return
 
     def _route(self, e):
         if not self._accepts_window(e):

@@ -84,7 +84,7 @@ def build_ui():
         contact_lbl.align(lv.ALIGN.TOP_MID, 0, 68)
 
         hint = lv.label(scr)
-        hint.set_text("Need 2 fingers on touchscreen (not OS trackpad pinch)")
+        hint.set_text("2-finger pinch on a touchscreen (browser OK)")
         hint.align(lv.ALIGN.TOP_MID, 0, 88)
 
         box = lv.obj(scr)
