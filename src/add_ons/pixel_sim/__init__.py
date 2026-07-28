@@ -114,7 +114,7 @@ class SimPixelFramebuffer(pygraphics.FrameBuffer):
                 f"The source buffer is not the correct size (got {len(buf)} bytes, expected {expected})"
             )
         src = memoryview(buf)
-        dst = self._buffer
+        dst = self.buffer
         stride = self.width
         for row in range(h):
             dst_row = (y + row) * stride
@@ -138,7 +138,7 @@ class SimPixelFramebuffer(pygraphics.FrameBuffer):
         block = self._block
         gap = self._gap
         inner = block - 2 * gap
-        src = self._buffer
+        src = self.buffer
         gw = self.width
         gh = self.height
 
