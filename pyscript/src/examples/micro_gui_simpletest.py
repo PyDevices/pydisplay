@@ -1,3 +1,4 @@
+# deps: pygraphics
 """
 micro_gui_simpletest.py - Smoke test for micropython-micro-gui on pydisplay.
 

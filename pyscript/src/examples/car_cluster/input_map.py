@@ -71,8 +71,8 @@ def capture_virtual_devices():
     VD = eventsys.VirtualDevices
     _orig_init = VD.__init__
 
-    def _wrapped_init(self, host_device):
-        _orig_init(self, host_device)
+    def _wrapped_init(self, host_device, window_id=None):
+        _orig_init(self, host_device, window_id=window_id)
         global _keypad_vdev
         _keypad_vdev = self._vd_keypad
 

@@ -243,6 +243,10 @@ async def _install_wheels_pyodide(names, status):
 
 async def install_pyodide(modules, manifests, wheel_deps, status=None):
     """Async install plan for Pyodide (``mip`` manifests/modules + micropip wheels)."""
+    import asyncio
+
+    # Let the gallery paint "Running…" before sync mip fetches block the thread.
+    await asyncio.sleep(0)
     mip = _import_portable_mip()
 
     _install_manifests_and_modules(

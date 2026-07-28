@@ -40,9 +40,12 @@ class PSDevices:
     into ``eventsys.events`` objects (matching the desktop SDL2 / PyGame event
     stream), drained through :meth:`read`:
 
-    - **Pointer** (mouse, touch and pen via Pointer Events): ``MOUSEMOTION`` on
-      every move, ``MOUSEBUTTONDOWN`` / ``MOUSEBUTTONUP`` for any button, with
-      the ``touch`` flag set for non-mouse pointers.
+    - **Pointer** (mouse via Pointer Events): ``MOUSEMOTION`` /
+      ``MOUSEBUTTONDOWN`` / ``MOUSEBUTTONUP``.
+    - **Touch / pen** (Pointer Events with ``pointerType`` other than
+      ``mouse``): ``FINGERDOWN`` / ``FINGERUP`` / ``FINGERMOTION`` with
+      ``pointerId`` as ``finger_id``, so LVGL gesture recognizers see
+      multipoint contacts (same contract as SDL/pygame fingers).
     - **Wheel**: ``MOUSEWHEEL`` (also consumed by encoder devices).
     - **Keyboard**: ``KEYDOWN`` / ``KEYUP`` with SDL-style key codes, names and
       modifier masks (left/right modifier variants via key location).
@@ -85,6 +88,7 @@ class PSDevices:
         self._proxies = {
             "pointerdown": create_proxy(self._on_pointer_down),
             "pointerup": create_proxy(self._on_pointer_up),
+            "pointercancel": create_proxy(self._on_pointer_up),
             "pointermove": create_proxy(self._on_pointer_move),
             "wheel": create_proxy(self._on_wheel),
             "contextmenu": create_proxy(self._on_contextmenu),
@@ -139,41 +143,80 @@ class PSDevices:
         except Exception:
             return (int(float(dx)), int(float(dy)))
 
+    def _local_xy(self, e):
+        """Element-local CSS pixels (prefer ``client*`` - rect for synthetics)."""
+        try:
+            rect = self.canvas.getBoundingClientRect()
+            return float(e.clientX) - float(rect.left), float(e.clientY) - float(rect.top)
+        except Exception:
+            return float(e.offsetX), float(e.offsetY)
+
+    def _pointer_pos(self, e):
+        """Framebuffer pixels for host scaling / LVGL fingers."""
+        x, y = self._local_xy(e)
+        # Fingers must be panel-normalized (SDL contract); mouse stays CSS and
+        # HostEventsDevice applies ``touch_scale``.
+        if self._is_touch(e) and self._display is not None:
+            try:
+                return self._display.map_pointer(x, y)
+            except Exception:
+                pass
+        return self._map_pos(x, y)
+
+    def _finger_id(self, e):
+        try:
+            return int(e.pointerId)
+        except Exception:
+            return 0
+
     def _on_pointer_down(self, e):
         self._focus_canvas()
         try:
             self.canvas.setPointerCapture(e.pointerId)
         except Exception:
             pass
+        pos = self._pointer_pos(e)
+        if self._is_touch(e):
+            # Multipoint path for LVGL gestures (VirtualDevices tracks fingers).
+            self._queue.append(events.Finger(events.FINGERDOWN, pos, self._finger_id(e), None))
+            return
         self._queue.append(
             events.Button(
                 events.MOUSEBUTTONDOWN,
-                self._map_pos(e.offsetX, e.offsetY),
+                pos,
                 e.button + 1,  # DOM 0/1/2 -> SDL 1/2/3
-                self._is_touch(e),
+                False,
                 None,
             )
         )
 
     def _on_pointer_up(self, e):
+        pos = self._pointer_pos(e)
+        if self._is_touch(e):
+            self._queue.append(events.Finger(events.FINGERUP, pos, self._finger_id(e), None))
+            return
         self._queue.append(
             events.Button(
                 events.MOUSEBUTTONUP,
-                self._map_pos(e.offsetX, e.offsetY),
+                pos,
                 e.button + 1,
-                self._is_touch(e),
+                False,
                 None,
             )
         )
 
     def _on_pointer_move(self, e):
+        pos = self._pointer_pos(e)
+        if self._is_touch(e):
+            self._queue.append(events.Finger(events.FINGERMOTION, pos, self._finger_id(e), None))
+            return
         self._queue.append(
             events.Motion(
                 events.MOUSEMOTION,
-                self._map_pos(e.offsetX, e.offsetY),
+                pos,
                 self._map_rel(e.movementX, e.movementY),
                 _buttons_tuple(e.buttons),
-                self._is_touch(e),
+                False,
                 None,
             )
         )
@@ -454,8 +497,9 @@ class PSDisplay(DisplayDriver):
         """
         Map element-local pointer coordinates to framebuffer ``(x, y)``.
 
-        ``PSDevices`` maps coordinates at capture time when constructed with a
-        ``PSDisplay``; ``QueueDevice`` forwards events unchanged.
+        ``PSDevices`` maps touch/pen to panel pixels at capture (``FINGER*``);
+        mouse coords stay CSS-local and ``HostEventsDevice`` applies
+        ``touch_scale``.
         """
         sx, sy = self._pointer_scale()
         return (int(float(local_x) * sx), int(float(local_y) * sy))
