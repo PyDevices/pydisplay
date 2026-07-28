@@ -7,7 +7,6 @@ displaysys.sdldisplay — SDL2 desktop display driver.
 """
 
 import struct
-from sys import implementation
 
 import usdl2
 
@@ -394,15 +393,6 @@ class SDLDisplay(DisplayDriver):
         self._render_dirty = False
         self._show_pending = False
         self._requires_byteswap = False
-
-        # CircuitPython + usdl2 accelerated GL cannot attach swapped-dimension render
-        # targets during rotation (SetRenderTarget -> glFramebufferTexture2DEXT).
-        if implementation.name == "circuitpython" and (
-            render_flags & usdl2.SDL_RENDERER_ACCELERATED
-        ):
-            render_flags = (
-                render_flags & ~usdl2.SDL_RENDERER_ACCELERATED
-            ) | usdl2.SDL_RENDERER_SOFTWARE
 
         # Determine the pixel format
         if color_depth == 32:
