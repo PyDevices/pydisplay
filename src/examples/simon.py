@@ -11,6 +11,9 @@ calls forming an L that leaves the center hub untouched (fast flashes).
 
 Gameplay (Classic Simon): the device lights a growing sequence of colored pads;
 the player repeats it by tapping. Wrong tap or timeout ends the round.
+
+Timed flashes are tick-driven (no blocking ``sleep_ms``) so they remain visible
+under ``timer_async`` hosts such as PyScript.
 """
 
 from board_config import display_drv, runtime
@@ -20,9 +23,9 @@ import eventsys
 import pygraphics
 
 try:
-    from multimer import sleep_ms, ticks_diff, ticks_ms
+    from multimer import ticks_add, ticks_diff, ticks_ms
 except ImportError:
-    from time import sleep_ms, ticks_diff, ticks_ms  # type: ignore
+    from time import ticks_add, ticks_diff, ticks_ms  # type: ignore
 
 # RGB565 — match other busdisplay examples (driver handles byte order).
 BLACK = 0x0000
@@ -65,6 +68,9 @@ PADS = (
 INPUT_MS = 5000
 FLASH_MS = 280
 GAP_MS = 80
+SHOW_PAUSE_MS = 250
+FAIL_ON_MS = 100
+FAIL_OFF_MS = 60
 MAX_LEN = 20
 
 # Fixed-width hub lines (8px font). Longest labels: "SIMON", "watch", "best 20".
@@ -81,6 +87,9 @@ step = 0
 deadline = 0
 busy = False
 best = 0
+
+# Tick-driven animation: (kind, ...) — see ``_anim_tick``.
+_anim = None
 
 
 def _center_pad(msg, width=HUB_CHARS):
@@ -142,16 +151,6 @@ def draw_board(hub_msg="SIMON", hub_sub="tap"):
     display_drv.show()
 
 
-def flash(i):
-    # Pads leave the hub untouched — no hub refresh required.
-    _pad(i, True)
-    display_drv.show()
-    sleep_ms(FLASH_MS)
-    _pad(i, False)
-    display_drv.show()
-    sleep_ms(GAP_MS)
-
-
 def hit_pad(x, y):
     dx = x - CX
     dy = y - CY
@@ -164,22 +163,39 @@ def hit_pad(x, y):
     return 2 if dx < 0 else 3  # yellow / blue
 
 
-def play_sequence():
-    global state, step, deadline, busy
-    busy = True
-    state = SHOW
-    score = len(sequence)
-    _hub_text(str(score), "watch")
-    display_drv.show()
-    sleep_ms(250)
-    for pad in sequence:
-        flash(pad)
+def _until(ms):
+    return ticks_add(ticks_ms(), ms)
+
+
+def _due(until):
+    return ticks_diff(ticks_ms(), until) >= 0
+
+
+def _enter_input():
+    global state, busy, step, deadline, _anim
     step = 0
-    deadline = ticks_ms() + INPUT_MS
+    deadline = _until(INPUT_MS)
     state = INPUT
-    _hub_text(str(score), "go")
+    _hub_text(str(len(sequence)), "go")
     display_drv.show()
     busy = False
+    _anim = None
+
+
+def _show_lit(index):
+    global _anim
+    _pad(sequence[index], True)
+    display_drv.show()
+    _anim = ("show_lit", index, _until(FLASH_MS))
+
+
+def play_sequence():
+    global state, busy, _anim
+    busy = True
+    state = SHOW
+    _hub_text(str(len(sequence)), "watch")
+    display_drv.show()
+    _anim = ("show_pause", _until(SHOW_PAUSE_MS))
 
 
 def new_game():
@@ -191,28 +207,22 @@ def new_game():
 
 
 def fail():
-    global state, busy, best
+    global state, busy, best, _anim
     busy = True
     state = FAIL
     score = max(0, len(sequence) - 1)
     if score > best:
         best = score
-    for _ in range(2):
-        display_drv.fill_rect(0, 0, W, H, 0x8000)
-        display_drv.show()
-        sleep_ms(100)
-        display_drv.fill_rect(0, 0, W, H, BLACK)
-        display_drv.show()
-        sleep_ms(60)
-    draw_board("OVER", "best %d" % best)
-    state = IDLE
-    busy = False
+    display_drv.fill_rect(0, 0, W, H, 0x8000)
+    display_drv.show()
+    # phase: 0=red shown, 1=black shown; blink twice (4 phases) then settle.
+    _anim = ("fail", 0, _until(FAIL_ON_MS))
 
 
 def advance():
     global sequence, step, deadline, state, best
     step += 1
-    deadline = ticks_ms() + INPUT_MS
+    deadline = _until(INPUT_MS)
     if step < len(sequence):
         _hub_text(str(len(sequence)), "%d/%d" % (step, len(sequence)))
         display_drv.show()
@@ -226,9 +236,67 @@ def advance():
     play_sequence()
 
 
+def _anim_tick():
+    global _anim, busy, state
+    if _anim is None:
+        return
+    kind = _anim[0]
+    if kind == "show_pause":
+        if not _due(_anim[1]):
+            return
+        _show_lit(0)
+    elif kind == "show_lit":
+        _index, until = _anim[1], _anim[2]
+        if not _due(until):
+            return
+        _pad(sequence[_index], False)
+        display_drv.show()
+        _anim = ("show_gap", _index, _until(GAP_MS))
+    elif kind == "show_gap":
+        _index, until = _anim[1], _anim[2]
+        if not _due(until):
+            return
+        nxt = _index + 1
+        if nxt < len(sequence):
+            _show_lit(nxt)
+        else:
+            _enter_input()
+    elif kind == "tap":
+        pad, until, wrong = _anim[1], _anim[2], _anim[3]
+        if not _due(until):
+            return
+        _pad(pad, False)
+        display_drv.show()
+        _anim = None
+        if wrong:
+            fail()
+        else:
+            busy = False
+            advance()
+    elif kind == "fail":
+        phase, until = _anim[1], _anim[2]
+        if not _due(until):
+            return
+        phase += 1
+        if phase >= 4:
+            draw_board("OVER", "best %d" % best)
+            state = IDLE
+            busy = False
+            _anim = None
+            return
+        if phase & 1:
+            display_drv.fill_rect(0, 0, W, H, BLACK)
+            display_drv.show()
+            _anim = ("fail", phase, _until(FAIL_OFF_MS))
+        else:
+            display_drv.fill_rect(0, 0, W, H, 0x8000)
+            display_drv.show()
+            _anim = ("fail", phase, _until(FAIL_ON_MS))
+
+
 def _on_up(e):
-    global busy
-    if busy or state == SHOW or e.button != 1:
+    global busy, _anim
+    if busy or state == SHOW or state == FAIL or e.button != 1:
         return
     x, y = e.pos
     pad = hit_pad(x, y)
@@ -239,23 +307,18 @@ def _on_up(e):
     if state != INPUT or pad < 0:
         return
     busy = True
-    try:
-        flash(pad)
-        if pad != sequence[step]:
-            fail()
-            return
-        advance()
-    finally:
-        if state != FAIL:
-            busy = False
+    _pad(pad, True)
+    display_drv.show()
+    _anim = ("tap", pad, _until(FLASH_MS), pad != sequence[step])
 
 
 def _on_tick(_=None):
-    if state == INPUT and not busy and ticks_diff(ticks_ms(), deadline) > 0:
+    _anim_tick()
+    if state == INPUT and not busy and _due(deadline):
         fail()
 
 
 draw_board()
 runtime.on(eventsys.MOUSEBUTTONUP, _on_up)
-runtime.on_tick(_on_tick, period=50, async_=getattr(runtime, "timer_async", False))
+runtime.on_tick(_on_tick, period=20, async_=getattr(runtime, "timer_async", False))
 runtime.run_forever()
