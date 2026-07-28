@@ -9,8 +9,12 @@
 Swap 16-bit pixel bytes in place. Implementations, in preference order:
 
 - numpy / ulab (CPython, CircuitPython, MicroPython with ulab)
-- inlined MicroPython ``@viper``
 - ``viper_tools.byteswap_viper`` when present
+
+Do not put ``@micropython.viper`` in this file: MicroPython validates that
+decorator at parse time, so a runtime check cannot protect non-viper ports
+(e.g. Windows). Keep viper bodies in :mod:`viper_tools` and import them
+inside ``except Exception`` so ``SyntaxError`` is handled.
 """
 
 try:
@@ -25,30 +29,10 @@ try:
         npbuf.byteswap(inplace=True)
 
 except Exception:
-    _viper_impl = None
     try:
-        import micropython
-
-        if getattr(micropython, "viper", None) is not None:
-
-            @micropython.viper
-            def _byteswap_viper(buf: ptr8, buf_size: int):  # noqa: F821
-                i = 0
-                while i < buf_size:
-                    tmp = buf[i]
-                    buf[i] = buf[i + 1]
-                    buf[i + 1] = tmp
-                    i += 2
-
-            _viper_impl = _byteswap_viper
+        from viper_tools import byteswap_viper as _viper_impl
     except Exception:
-        _viper_impl = None
-
-    if _viper_impl is None:
-        try:
-            from viper_tools import byteswap_viper as _viper_impl
-        except Exception:
-            raise ImportError("No implementation of byteswap available") from None
+        raise ImportError("No implementation of byteswap available") from None
 
     def byteswap(buf):
         """Swap the bytes of a 16-bit buffer in place using viper."""

@@ -49,7 +49,7 @@ def _make_runtime(display, host_read, *, timer_async):
     import eventsys
 
     return eventsys.Runtime(
-        display=display,
+        displays=[display],
         host_read=host_read,
         timer_async=timer_async,
     )

@@ -140,6 +140,64 @@ def _hat_xy(value):
     return (x, y)
 
 
+_SDL_WINDOWEVENT = getattr(usdl2, "SDL_WINDOWEVENT", 0x200)
+_SDL_WINDOWEVENT_CLOSE = getattr(usdl2, "SDL_WINDOWEVENT_CLOSE", 0xE)
+
+
+def _display_for_window_id(window_id):
+    """Return the :class:`SDLDisplay` for ``window_id``, or ``None``."""
+    if window_id is None:
+        return None
+    for display in _displays:
+        if getattr(display, "_window_id", None) == window_id:
+            return display
+    return None
+
+
+def _panel_size(window_id=None):
+    """Logical panel size for normalizing SDL finger coords (0..1 → pixels)."""
+    d = _display_for_window_id(window_id)
+    if d is None and _displays:
+        d = _displays[0]
+    if d is not None:
+        return int(d.width), int(d.height)
+    return 320, 240
+
+
+def _handle_window_event(e):
+    """Handle SDL_WINDOWEVENT; may return an eventsys event or ``None``."""
+    wev = e.window.event
+    if wev != _SDL_WINDOWEVENT_CLOSE:
+        return None
+    wid = int(e.window.windowID)
+    display = _display_for_window_id(wid)
+    if display is None or display is _displays[0] or len(_displays) <= 1:
+        return events.Quit(events.QUIT)
+    runtime = getattr(display, "runtime", None)
+    if runtime is not None and callable(getattr(runtime, "remove_display", None)):
+        runtime.remove_display(display)
+    else:
+        try:
+            display.quit()
+        except Exception:
+            pass
+        try:
+            _displays.remove(display)
+        except ValueError:
+            pass
+    return None
+
+
+def _process_sdl_event(raw):
+    """Convert one polled SDL event to eventsys, or ``None`` to skip."""
+    e = usdl2.SDL_Event(raw)
+    if e.type == _SDL_WINDOWEVENT:
+        return _handle_window_event(e)
+    if e.type in events.filter:
+        return _convert(e)
+    return None
+
+
 def poll_event():
     """
     Poll for one pending event.
@@ -149,8 +207,8 @@ def poll_event():
     """
     global _event
     _flush_pending_displays()
-    if usdl2.SDL_PollEvent(_event) and _event.type in events.filter:
-        return _convert(usdl2.SDL_Event(_event))
+    if usdl2.SDL_PollEvent(_event):
+        return _process_sdl_event(_event)
     return None
 
 
@@ -165,8 +223,9 @@ def get_events():
     _flush_pending_displays()
     eventlist = []
     while usdl2.SDL_PollEvent(_event):
-        if _event.type in events.filter:
-            eventlist.append(_convert(usdl2.SDL_Event(_event)))
+        evt = _process_sdl_event(_event)
+        if evt is not None:
+            eventlist.append(evt)
     return eventlist if len(eventlist) > 0 else None
 
 
@@ -174,14 +233,6 @@ def _flush_pending_displays():
     for display in tuple(_displays):
         if display._show_pending:
             display._flush_pending_show()
-
-
-def _panel_size():
-    """Logical panel size for normalizing SDL finger coords (0..1 → pixels)."""
-    if _displays:
-        d = _displays[0]
-        return int(d.width), int(d.height)
-    return 320, 240
 
 
 def _convert(e):
@@ -207,14 +258,15 @@ def _convert(e):
             e.button.windowID,
         )
     elif e.type in (usdl2.SDL_FINGERDOWN, usdl2.SDL_FINGERUP, usdl2.SDL_FINGERMOTION):
-        w, h = _panel_size()
+        wid = int(e.tfinger.windowID)
+        w, h = _panel_size(wid)
         fx = e.tfinger.x
         fy = e.tfinger.y
         evt = events.Finger(
             e.type,
             (int(fx * w), int(fy * h)),
             int(e.tfinger.fingerId),
-            int(e.tfinger.windowID),
+            wid,
         )
     elif e.type == usdl2.SDL_MOUSEWHEEL:
         evt = events.Wheel(
@@ -435,6 +487,9 @@ class SDLDisplay(DisplayDriver):
         )
         if not self._window:
             raise RuntimeError(f"{usdl2.SDL_GetError()}")
+        get_id = getattr(usdl2, "SDL_GetWindowID", None)
+        self._window_id = int(get_id(self._window)) if get_id is not None else None
+        self.runtime = None
         self._lock_window_size()
         self._renderer = usdl2.SDL_CreateRenderer(self._window, -1, render_flags)
         if not self._renderer and (render_flags & usdl2.SDL_RENDERER_ACCELERATED):
@@ -665,12 +720,11 @@ class SDLDisplay(DisplayDriver):
         self._show_pending = False
 
     def _deinit(self) -> None:
-        """Release SDL resources."""
+        """Release this window; call ``SDL_Quit`` only when no SDLDisplay remains."""
         try:
             _displays.remove(self)
         except ValueError:
             pass
-        _close_joysticks()
         if self._buffer is not None:
             usdl2.SDL_DestroyTexture(self._buffer)
             self._buffer = None
@@ -680,6 +734,13 @@ class SDLDisplay(DisplayDriver):
         if self._window is not None:
             usdl2.SDL_DestroyWindow(self._window)
             self._window = None
+        self._window_id = None
+        self.runtime = None
+        # Keep SDL (and the primary window) alive while other displays remain —
+        # same policy as PGDisplay._deinit.
+        if _displays:
+            return
+        _close_joysticks()
         usdl2.SDL_Quit()
         _restore_tty()
         _ensure_tty_sane()

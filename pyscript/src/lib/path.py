@@ -70,6 +70,18 @@ def update():
                 sys.path.append(entry)
             added.append(entry)
 
+    # When MICROPYPATH is set (common on Windows hosts), it replaces the
+    # port default path and often omits ``.frozen``. Frozen modules such as
+    # ``display_driver`` are then importable only if ``.frozen`` is restored.
+    try:
+        import micropython  # noqa: F401
+    except ImportError:
+        pass
+    else:
+        if ".frozen" not in sys.path:
+            sys.path.append(".frozen")
+            added.append(".frozen")
+
     if prepended and not _quiet():
         print(f"path.py:  Prepended {prepended} to sys.path.")
     if added and not _quiet():
