@@ -231,6 +231,10 @@ class Runtime:
         self._pending_teardown = False
         self._teardown_done = False
         self._teardown_oneshot_armed = False
+        # True while the sync ``run_forever`` keep-alive loop is on the stack.
+        # Timer-callback teardown must not ``stop_timer`` then — it leaves the
+        # blocking ``sleep_ms`` stuck after the shared timer is gone.
+        self._blocking_run_forever = False
         self.host_dev = None
         self.touch_dev = None
         self.keypad_dev = None
@@ -439,18 +443,22 @@ class Runtime:
 
         self.arm_async_refresh()
         self._arm_lvgl_event_loop()
-        while not self._quit_requested:
-            await asyncio.sleep(tick_ms / 1000)
-            # Harness deadline hooks (pydisplay_test_mode) run from
-            # multimer.sleep_ms on the sync path; async run_forever must
-            # invoke them here — LVGL claims refresh so auto-service poll
-            # does not. App code should not rely on this hook.
-            try:
-                from multimer import run_deadline_hook
+        self._blocking_run_forever = True
+        try:
+            while not self._quit_requested:
+                await asyncio.sleep(tick_ms / 1000)
+                # Harness deadline hooks (pydisplay_test_mode) run from
+                # multimer.sleep_ms on the sync path; async run_forever must
+                # invoke them here — LVGL claims refresh so auto-service poll
+                # does not. App code should not rely on this hook.
+                try:
+                    from multimer import run_deadline_hook
 
-                run_deadline_hook()
-            except ImportError:
-                pass
+                    run_deadline_hook()
+                except ImportError:
+                    pass
+        finally:
+            self._blocking_run_forever = False
         # Teardown here runs outside the service tick (this coroutine is a
         # separate task from the AsyncTimer), so stopping the timer is safe.
         self._perform_teardown()
@@ -497,10 +505,12 @@ class Runtime:
         # timer keeps the app live at the REPL; blocking here wedges the session.
         if _is_interactive_session() and multimer.uses_signals():
             return
+        self._blocking_run_forever = True
         try:
             while not self._quit_requested:
                 multimer.sleep_ms(tick_ms)
         finally:
+            self._blocking_run_forever = False
             self._perform_teardown()
         self._raise_exit_code()
 
@@ -839,7 +849,9 @@ class Runtime:
             entry[0](timer_obj)
         # Sync QUIT from inside a service tick sets ``_pending_teardown`` and
         # must run after all tick callbacks (including refresh) for this fire.
-        if self._pending_teardown:
+        # When ``run_forever`` is blocking, leave teardown to its ``finally`` —
+        # stopping the timer here wedges the keep-alive ``sleep_ms``.
+        if self._pending_teardown and not self._blocking_run_forever:
             self._try_perform_teardown()
 
     def on_tick(self, callback, *, period, async_=False):
