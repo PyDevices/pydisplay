@@ -32,6 +32,7 @@ _GRAPHICS_PY_FILES = (
     "_blit_hooks.py",
     "_framebuf_plus.py",
     "_shapes.py",
+    "_trig.py",
     "_font.py",
     "_font_8x8.py",
     "_font_8x14.py",
@@ -165,6 +166,16 @@ def _paired_rgb565(native, py, w: int, h: int):
     pbuf = _rgb565_buf(w, h)
     fb_n = native.FrameBuffer(nbuf, w, h, native.RGB565)
     fb_p = py.FrameBuffer(pbuf, w, h, py.RGB565)
+    return fb_n, fb_p, nbuf, pbuf
+
+
+def _paired_format(native, py, w: int, h: int, fmt_name: str, bpp: int):
+    nbuf = bytearray(w * h * bpp + 16)
+    pbuf = bytearray(w * h * bpp + 16)
+    fmt_n = getattr(native, fmt_name)
+    fmt_p = getattr(py, fmt_name)
+    fb_n = native.FrameBuffer(nbuf, w, h, fmt_n)
+    fb_p = py.FrameBuffer(pbuf, w, h, fmt_p)
     return fb_n, fb_p, nbuf, pbuf
 
 
@@ -474,6 +485,20 @@ def _check_framebuffer_ops(rep: _Reporter, native, py) -> None:
         fb_p.gradient_rect(0, 0, 16, 16, 0xF800, 0x001F)
         _compare_buffers(rep, "FrameBuffer gradient_rect", nbuf, pbuf, length)
 
+        fb_n, fb_p, nbuf, pbuf = _paired_format(native, py, w, h, "GS8", 1)
+        fb_n.fill(0)
+        fb_p.fill(0)
+        fb_n.gradient_rect(0, 0, 16, 16, 0, 255)
+        fb_p.gradient_rect(0, 0, 16, 16, 0, 255)
+        _compare_buffers(rep, "FrameBuffer gradient_rect GS8", nbuf, pbuf, w * h)
+
+        fb_n, fb_p, nbuf, pbuf = _paired_format(native, py, w, h, "RGB888", 3)
+        fb_n.fill(0)
+        fb_p.fill(0)
+        fb_n.gradient_rect(0, 0, 16, 16, 0xFF0000, 0x0000FF)
+        fb_p.gradient_rect(0, 0, 16, 16, 0xFF0000, 0x0000FF)
+        _compare_buffers(rep, "FrameBuffer gradient_rect RGB888", nbuf, pbuf, w * h * 3)
+
     import array
 
     fb_n, fb_p, nbuf, pbuf = _paired_rgb565(native, py, w, h)
@@ -504,6 +529,28 @@ def _check_framebuffer_ops(rep: _Reporter, native, py) -> None:
     fb_n.blit(src_n, 2, 3)
     fb_p.blit(src_p, 2, 3)
     _compare_buffers(rep, "FrameBuffer blit", nbuf, pbuf, length)
+
+    if _skip_unless_framebuffer(rep, native, py, "blit_rect"):
+        sw, sh = 4, 4
+        for fmt_name, bpp, fill in (("GS8", 1, 0xA5), ("RGB888", 3, 0x112233)):
+            fb_n, fb_p, nbuf, pbuf = _paired_format(native, py, w, h, fmt_name, bpp)
+            src = bytearray([fill & 0xFF] * (sw * sh * bpp))
+            if bpp == 3:
+                for i in range(sw * sh):
+                    src[i * 3] = (fill >> 16) & 0xFF
+                    src[i * 3 + 1] = (fill >> 8) & 0xFF
+                    src[i * 3 + 2] = fill & 0xFF
+            fb_n.fill(0)
+            fb_p.fill(0)
+            fb_n.blit_rect(src, 1, 2, sw, sh)
+            fb_p.blit_rect(src, 1, 2, sw, sh)
+            _compare_buffers(
+                rep,
+                "FrameBuffer blit_rect {}".format(fmt_name),
+                nbuf,
+                pbuf,
+                w * h * bpp,
+            )
 
     fb_n, fb_p, nbuf, pbuf = _paired_rgb565(native, py, w, h)
     fb_n.fill(0x1234)
