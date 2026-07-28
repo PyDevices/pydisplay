@@ -464,6 +464,8 @@ missing `STATIC_ASSETS`. Remove the marker when restoring the normal worker.
 | Offline reload fails immediately | Demo never run online | Visit once online; click **Run** to pull runtime + packages |
 | Storage quota errors | Precache list too aggressive | Shrink `STATIC_ASSETS`; rely on fetch-time caching for WASM |
 | Stale content after deploy | Old cache / fixed `CACHE_NAME` | Ensure deploy stamps `CACHE_NAME`; for stuck legacy installs see [Orphaned service workers](#orphaned-service-workers-and-cache-migration) |
+| Stale gallery card `?deps=` on one machine | `index.html` was cache-first while `CACHE_NAME` ignores `GEN:demos` | `index.html` is network-first; hard-reload or clear site data once if still stuck |
+| Pyodide: `Can't find a pure Python 3 wheel` for a cmod | Stale micropip IndexedDB / index metadata from before a wasm wheel existed | Loader resolves `pyemscripten_*_wasm32` via TestPyPI JSON to a direct `.whl` URL; clear site data if an old session still fails |
 | iOS: Install tip but no native prompt | Safari has no `beforeinstallprompt` | Follow **Share → Add to Home Screen**; tip is expected |
 | `micropython.html` 404 on old links | Renamed from `load.html` | Update bookmarks to `micropython.html?modules=…` |
 

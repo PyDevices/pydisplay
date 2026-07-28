@@ -15,6 +15,8 @@ WHEEL_INDEX_URLS = (
     "https://test.pypi.org/simple/",
     "https://pypi.org/simple/",
 )
+# JSON API (not simple) — used to pin pyemscripten wasm wheels by direct URL.
+WHEEL_JSON_URL = "https://test.pypi.org/pypi/{package_name}/json"
 
 
 def parse_names(raw):
@@ -166,6 +168,56 @@ async def _ensure_micropip(status):
     return micropip
 
 
+async def _pyemscripten_wheel_url(spec):
+    """Return TestPyPI URL for a ``pyemscripten_*_wasm32`` wheel, or None.
+
+    Micropip can only load pure-Python or pyemscripten wheels. Resolving the
+    wasm file to a direct ``.whl`` URL avoids stale IndexedDB / simple-index
+    metadata that still lists only manylinux/win builds (common after a
+    package first gained a wasm wheel).
+    """
+    name = str(spec).strip()
+    if not name or name.endswith(".whl") or "://" in name:
+        return None
+    if name.startswith(("github:", "gitlab:", "codeberg:")):
+        return None
+    try:
+        from pyodide.http import pyfetch
+    except ImportError:
+        return None
+    url = WHEEL_JSON_URL.format(package_name=name)
+    try:
+        resp = await pyfetch(url)
+        if resp.status != 200:
+            return None
+        data = await resp.json()
+    except Exception as exc:
+        print("wheel metadata fetch failed:", name, exc)
+        return None
+    candidates = []
+    for entry in data.get("urls") or ():
+        filename = str(entry.get("filename") or "")
+        file_url = entry.get("url")
+        if file_url and "pyemscripten_" in filename and filename.endswith("_wasm32.whl"):
+            candidates.append(str(file_url))
+    if not candidates:
+        # Latest release may lag; scan all versions for a wasm wheel.
+        releases = data.get("releases") or {}
+        for files in releases.values():
+            for entry in files or ():
+                filename = str(entry.get("filename") or "")
+                file_url = entry.get("url")
+                if file_url and "pyemscripten_" in filename and filename.endswith("_wasm32.whl"):
+                    candidates.append(str(file_url))
+    if not candidates:
+        return None
+    # Prefer the ABI pydisplay vendors (pyemscripten_2026_0).
+    for preferred in candidates:
+        if "pyemscripten_2026_0_wasm32" in preferred:
+            return preferred
+    return candidates[0]
+
+
 async def _install_wheels_pyodide(names, status):
     if not names:
         return
@@ -179,6 +231,11 @@ async def _install_wheels_pyodide(names, status):
         if spec.startswith("http://") or spec.startswith("https://"):
             print("micropip.install", spec)
             await micropip.install(spec)
+            continue
+        wheel_url = await _pyemscripten_wheel_url(spec)
+        if wheel_url:
+            print("micropip.install", spec, "→", wheel_url)
+            await micropip.install(wheel_url)
         else:
             print("micropip.install", spec, "indexes=", WHEEL_INDEX_URLS)
             await micropip.install(spec, index_urls=WHEEL_INDEX_URLS)

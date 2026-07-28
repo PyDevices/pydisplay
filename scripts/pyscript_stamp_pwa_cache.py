@@ -39,7 +39,8 @@ ASSET_STRING_RE = re.compile(r"""['"](\./[^'"]+)['"]""")
 PLACEHOLDER_CACHE = "pydisplay-pwa-__SHELL_HASH__"
 MIGRATION_MARKER = "MIGRATION: cache-purge"
 # Gallery cards churn on many pushes; strip generated demos so they don't force
-# installed PWAs to prompt. Stale-while-revalidate still refreshes index.html.
+# installed PWAs to prompt. ``index.html`` is network-first in ``sw.js`` so card
+# ``?deps=`` hrefs still refresh without a cache-id bump.
 GEN_DEMOS_RE = re.compile(
     r"<!-- GEN:demos:start -->.*?<!-- GEN:demos:end -->",
     re.DOTALL,

@@ -22,8 +22,11 @@ const STATIC_ASSETS = [
   './pyodide.toml',
 ];
 
-// Loader HTML changes often; fetch network-first so fixes are not masked by cache.
+// Loader HTML + gallery index change often; fetch network-first so deps/
+// card href fixes are not masked by cache-first (CACHE_NAME deliberately
+// ignores GEN:demos, so gallery-only deploys do not bump the cache id).
 const NETWORK_FIRST_ASSETS = [
+  './index.html',
   './micropython.html',
   './pyodide.html',
   './run.html',
