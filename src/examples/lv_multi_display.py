@@ -1,3 +1,4 @@
+# deps: lvgl
 """
 Multi-display LVGL demo: primary UI + secondary encoder emulator.
 

@@ -1,3 +1,4 @@
+# gallery: skip
 # deps: pygraphics
 """
 Visual text compare: framebuf and graphics, native C vs Python.

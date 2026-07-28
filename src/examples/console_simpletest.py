@@ -1,3 +1,4 @@
+# deps: pygraphics
 """
 console_simpletest.py
 

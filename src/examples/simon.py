@@ -15,15 +15,14 @@ the player repeats it by tapping. Wrong tap or timeout ends the round.
 
 from board_config import display_drv, runtime
 from random import getrandbits
-from time import sleep_ms
 
 import eventsys
 import pygraphics
 
 try:
-    from multimer import ticks_diff, ticks_ms
+    from multimer import sleep_ms, ticks_diff, ticks_ms
 except ImportError:
-    from time import ticks_diff, ticks_ms  # type: ignore
+    from time import sleep_ms, ticks_diff, ticks_ms  # type: ignore
 
 # RGB565 — match other busdisplay examples (driver handles byte order).
 BLACK = 0x0000

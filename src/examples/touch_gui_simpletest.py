@@ -1,3 +1,4 @@
+# deps: pygraphics
 """
 touch_gui_simpletest.py - Smoke test for micropython-touch on pydisplay.
 

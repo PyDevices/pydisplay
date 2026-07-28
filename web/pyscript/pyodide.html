@@ -350,7 +350,25 @@
         def _loader_disabled():
             return bool(_from_window("__pydisplayLoaderDisabled"))
 
-        async def _start(*_):
+        async def _run(modules, manifests, deps, entry):
+            global _started
+            import asyncio
+
+            await asyncio.sleep(0)
+            try:
+                await ps_loader.install_pyodide(modules, manifests, deps, status=_set)
+                _set("Importing " + entry + "…")
+                __import__(entry)
+                _set("")
+            except Exception as e:
+                _log_print("Run failed:", e)
+                _set("Error — see console.")
+                _started = False
+                _btn.disabled = False
+                _btn.textContent = "Run"
+                raise
+
+        def _on_click(*_):
             global _started
             if _started or _loader_disabled():
                 return
@@ -369,24 +387,16 @@
                 _log_print("Missing ?modules= and/or ?manifests= in the URL.")
                 _set("Error — add ?modules= and/or ?manifests=.")
                 return
+            # Sync path: paint Running… before any fetch/install work.
             _started = True
             _btn.disabled = True
             _btn.textContent = "Running…"
-            try:
-                await ps_loader.install_pyodide(modules, manifests, deps, status=_set)
-                _set("Importing " + entry + "…")
-                __import__(entry)
-                _set("")
-            except Exception as e:
-                _log_print("Run failed:", e)
-                _set("Error — see console.")
-                _started = False
-                _btn.disabled = False
-                _btn.textContent = "Run"
-                raise
+            _set("Starting…")
+            import asyncio
+            asyncio.create_task(_run(modules, manifests, deps, entry))
 
         if not _loader_disabled():
-            _btn.addEventListener("click", create_proxy(_start))
+            _btn.addEventListener("click", create_proxy(_on_click))
             _btn.disabled = False
             _set("Runtime ready — click Run.")
             print("Python runtime ready. Click Run to start the demo.")

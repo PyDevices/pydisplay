@@ -376,18 +376,11 @@
         def _loader_disabled():
             return bool(_from_window("__pydisplayLoaderDisabled"))
 
-        async def _start(*_):
+        async def _run(modules, manifests, deps, entry):
             global _started
-            if _started or _loader_disabled():
-                return
-            modules, manifests, deps, entry_kind, entry = _loader_plan()
-            if not entry:
-                _log_print("Missing ?modules= and/or ?manifests= in the URL.")
-                _set("Error — add ?modules= and/or ?manifests=.")
-                return
-            _started = True
-            _btn.disabled = True
-            _btn.textContent = "Running…"
+            import asyncio
+
+            await asyncio.sleep(0)
             try:
                 _set("Installing…")
                 ps_loader.install_micropython(modules, manifests, deps, status=_set)
@@ -402,8 +395,25 @@
                 _btn.textContent = "Run"
                 raise
 
+        def _on_click(*_):
+            global _started
+            if _started or _loader_disabled():
+                return
+            modules, manifests, deps, entry_kind, entry = _loader_plan()
+            if not entry:
+                _log_print("Missing ?modules= and/or ?manifests= in the URL.")
+                _set("Error — add ?modules= and/or ?manifests=.")
+                return
+            # Sync path: paint Running… before any mip install work.
+            _started = True
+            _btn.disabled = True
+            _btn.textContent = "Running…"
+            _set("Starting…")
+            import asyncio
+            asyncio.create_task(_run(modules, manifests, deps, entry))
+
         if not _loader_disabled():
-            _btn.addEventListener("click", create_proxy(_start))
+            _btn.addEventListener("click", create_proxy(_on_click))
             _btn.disabled = False
             _set("Runtime ready — click Run.")
             print("MicroPython runtime ready. Click Run to start the demo.")

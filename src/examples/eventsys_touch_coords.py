@@ -2,10 +2,14 @@
 """Guided touch capture via eventsys (no LVGL). Prints coords on MOUSEBUTTONUP."""
 
 import sys
-from time import sleep_ms
 
 from board_config import display_drv, runtime
 import eventsys
+
+try:
+    from multimer import sleep_ms
+except ImportError:
+    from time import sleep_ms  # type: ignore
 
 FG, BG, ARM = 0xFFFF, 0x0000, 12
 W, H = display_drv.width, display_drv.height
