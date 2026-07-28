@@ -159,6 +159,7 @@
 <script type="mpy" config="./micropython.toml" output="log">
 import builtins
 from js import document
+import os
 import sys
 
 # Loader trace: emits `MARK:<step>` console lines for debugging the PyScript
@@ -440,10 +441,23 @@ def _run():
         _mark("before_mip_manifest", name=name)
         # #endregion
         mip.install(_manifest_url(name), target=MANIFEST_MIP_TARGET)
+        pkg_path = MANIFEST_MIP_TARGET + "/" + name
+        if pkg_path not in sys.path:
+            sys.path.insert(0, pkg_path)
         # #region loader trace
         _mark("after_mip_manifest", name=name)
         # #endregion
     for name in modules:
+        in_pkg = False
+        for m in manifests:
+            try:
+                os.stat(MANIFEST_MIP_TARGET + "/" + m + "/" + name + ".py")
+                in_pkg = True
+                break
+            except OSError:
+                pass
+        if in_pkg:
+            continue
         # #region loader trace
         _mark("before_mip_module", name=name)
         # #endregion

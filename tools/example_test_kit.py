@@ -464,6 +464,17 @@ def pyscript_embed_query(example_id: str, example_meta: dict) -> str:
         pkg = script_path.parent.name
         if (PACKAGES_DIR / f"{pkg}.json").is_file() and (SRC / "examples" / pkg).is_dir():
             manifests = [pkg]
+            # Entry must be the example stem (e.g. roku_lvgl), not a sibling
+            # listed in ``# modules:`` — those live inside the package and are
+            # provided via sys.path after manifest install (see ps_loader).
+            if example_id != pkg:
+                modules = [example_id]
+            # Drop extras that are files inside the package directory.
+            extra_modules = [
+                m
+                for m in extra_modules
+                if m != example_id and not (script_path.parent / f"{m}.py").is_file()
+            ]
         else:
             modules = [example_id]
     else:

@@ -57,6 +57,9 @@ def module_url(name):
 
 
 def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url_base=None):
+    import os
+    import sys
+
     manifest_kw = {"target": MANIFEST_MIP_TARGET}
     if url_base is not None:
         manifest_kw["url_base"] = url_base
@@ -64,7 +67,23 @@ def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url
         if status:
             status("Installing manifest " + name + "…")
         mip_mod.install(manifest_url(name), **manifest_kw)
+        # Flat sibling imports (``import roku_engine``) match desktop wrapper,
+        # which puts ``examples/<pkg>/`` on ``sys.path``.
+        pkg_path = MANIFEST_MIP_TARGET + "/" + name
+        if pkg_path not in sys.path:
+            sys.path.insert(0, pkg_path)
     for name in modules:
+        # Skip top-level fetch when the stem already lives inside a package.
+        in_pkg = False
+        for m in manifests:
+            try:
+                os.stat(MANIFEST_MIP_TARGET + "/" + m + "/" + name + ".py")
+                in_pkg = True
+                break
+            except OSError:
+                pass
+        if in_pkg:
+            continue
         if status:
             status("Fetching " + name + "…")
         mip_mod.install(module_url(name))
