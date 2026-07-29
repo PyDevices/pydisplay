@@ -1,6 +1,6 @@
 # 🚀 Getting started
 
-This page is a **router**. Pick the path that matches how you want to use pydisplay.
+This page is a **router** for the main pydisplay workflows. In every case, the underlying pattern is the same: connect to a display backend through ``board_config``, draw to the frame buffer, subscribe to input events, and keep the runtime alive.
 
 ## Try without installing
 
@@ -24,10 +24,20 @@ This page is a **router**. Pick the path that matches how you want to use pydisp
 
 - [**App starter**](examples/app-starter.md) — copy-paste template for your first app (display, clicks, main loop)
 - [**pydisplay_demo**](examples/pydisplay_demo.md) — feature tour (rotation, scrolling, buffered text, multimer)
-- [Architecture](concepts/architecture.md) — how board_config, displaysys, and eventsys fit together
+- [Architecture](concepts/architecture.md) — how ``board_config``, ``displaysys``, and ``eventsys`` fit together
 - [Portability & platforms](platforms/index.md) — where pydisplay runs and how the backend is chosen
 - [Ecosystem & sister projects](ecosystem.md) — LVGL in Python, GUIs, Jupyter
 - [Installation overview](installation/index.md) — MIP vs full clone vs micropython-lib
+
+A simple app usually follows this shape:
+
+```python
+from board_config import display_drv, runtime
+
+# draw once or on each refresh
+# runtime.on(...)
+runtime.run_forever()
+```
 
 ## Reference
 

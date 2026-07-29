@@ -1,11 +1,18 @@
-"""
-Combination board configuration for desktop, pyscript and jupyter notebook platforms.
-If you are running pydisplay on a microcontroller, you will need to get or create a
-board_config.py file that is specific to your hardware from:
+"""Board-specific runtime setup for pydisplay applications.
 
-https://github.com/PyDevices/micropython-hardware/tree/main/board_configs
+This module is the small bridge between your app and the host platform. In most
+projects you import ``display_drv`` and ``runtime`` from ``board_config`` and
+then build your UI around those objects. The exact backend changes from one
+platform to another, but the app structure stays the same: create or update the
+framebuffer, subscribe to input events, and keep the runtime alive with
+``runtime.run_forever()``.
 
-Desktop size / timer overrides (process env or ``displaysys.env_set`` before import)::
+For desktop development the bundled module selects a windowed display backend
+and a compatible event source. On microcontrollers you typically copy a
+hardware-specific ``board_config.py`` from the micropython-hardware repo instead
+of using the desktop default.
+
+Desktop size / timer overrides (set before importing ``board_config``)::
 
     PYDISPLAY_WIDTH / PYDISPLAY_HEIGHT / PYDISPLAY_SCALE — integer panel size / scale
     PYDISPLAY_TIMER_ASYNC — truthy/falsey timer mode on PG/SDL desktop
