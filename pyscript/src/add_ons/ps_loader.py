@@ -4,7 +4,7 @@
 """PyScript gallery loader install plans (MicroPython WASM + Pyodide).
 
 Consolidates loader install logic for ``micropython.html``, ``pyodide.html``,
-``run.html``, and ``run-pyodide.html``. Gallery pages call ``_ps_loader()`` on
+``mp.html``, and ``py.html``. Gallery pages call ``_ps_loader()`` on
 Run only (``import lib.path`` then ``import ps_loader``). MicroPython WASM uses
 firmware ``mip`` after ``lib.path``; Pyodide uses ``add_ons/mip.py``.
 """

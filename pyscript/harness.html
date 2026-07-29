@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#f54e00">
 <script src="./pwa.js"></script>
 <script type="module" src="./vendor/core.js"></script>
+<script src="./loader-query.js"></script>
 <link rel="stylesheet" href="./vendor/core.css">
 </head>
 <body>
@@ -15,107 +16,10 @@
 <div id="log" style="display:none;white-space:pre-wrap;overflow:auto;max-height:40vh;border:1px solid #888;padding:8px;margin-top:8px;font-family:monospace;font-size:12px"></div>
 <script>
 (function () {
-    var SAFE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-    var SAFE_PACKAGE = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
-
-    function parseList(raw) {
-        return raw.split(',').map(function (s) {
-            s = s.trim();
-            if (s.toLowerCase().endsWith('.py')) {
-                s = s.slice(0, -3);
-            }
-            return s;
-        }).filter(Boolean);
-    }
-
-    function parseQuery(search) {
-        var modules = [];
-        var manifests = [];
-        var packages = [];
-        var deps = [];
-        var entryKind = null;
-        var entryName = null;
-        var debug = false;
-        var autotest = false;
-        var autotestDuration = 5;
-        var raw = search.startsWith('?') ? search.slice(1) : search;
-        raw.split('&').forEach(function (part) {
-            if (!part) {
-                return;
-            }
-            var eq = part.indexOf('=');
-            var key = eq === -1 ? part : decodeURIComponent(part.slice(0, eq));
-            var val = eq === -1 ? '' : decodeURIComponent(part.slice(eq + 1).replace(/\+/g, ' '));
-            if (key === 'modules') {
-                var list = parseList(val);
-                if (!entryKind && list.length) {
-                    entryKind = 'module';
-                    entryName = list[0];
-                }
-                modules.push.apply(modules, list);
-            } else if (key === 'manifests') {
-                var list = parseList(val);
-                if (!entryKind && list.length) {
-                    entryKind = 'manifest';
-                    entryName = list[0];
-                }
-                manifests.push.apply(manifests, list);
-            } else if (key === 'packages') {
-                packages.push.apply(packages, parseList(val));
-            } else if (key === 'deps') {
-                deps.push.apply(deps, parseList(val));
-            } else if (key === 'debug') {
-                debug = val === '' || /^(1|true|yes)$/i.test(val);
-            } else if (key === 'autotest') {
-                autotest = val === '' || /^(1|true|yes)$/i.test(val);
-            } else if (key === 'duration') {
-                var n = parseInt(val, 10);
-                if (!isNaN(n) && n > 0) {
-                    autotestDuration = n;
-                }
-            }
-        });
-        return {
-            modules: modules,
-            manifests: manifests,
-            packages: packages,
-            deps: deps,
-            entryKind: entryKind,
-            entryName: entryName,
-            debug: debug,
-            autotest: autotest,
-            autotestDuration: autotestDuration,
-        };
-    }
-
-    function invalidNames(plan) {
-        var bad = [];
-        plan.modules.forEach(function (name) {
-            if (!SAFE.test(name)) {
-                bad.push(name);
-            }
-        });
-        plan.manifests.forEach(function (name) {
-            if (!SAFE.test(name)) {
-                bad.push(name);
-            }
-        });
-        plan.packages.forEach(function (name) {
-            if (!SAFE_PACKAGE.test(name)) {
-                bad.push(name);
-            }
-        });
-        plan.deps.forEach(function (name) {
-            if (!SAFE_PACKAGE.test(name)) {
-                bad.push(name);
-            }
-        });
-        return bad;
-    }
-
-    var plan = parseQuery(window.location.search);
-    if (invalidNames(plan).length) {
-        window.__pydisplayLoaderDisabled = true;
+    var Q = window.LoaderQuery;
+    var plan = Q.parse(window.location.search);
+    if (Q.invalidNames(plan).length) {
+        window.__loaderDisabled = true;
         return;
     }
 
@@ -124,25 +28,17 @@
         log.style.display = 'block';
     }
 
-    window.__pydisplayModules = plan.modules.join(',');
-    window.__pydisplayManifests = plan.manifests.join(',');
-    window.__pydisplayPackages = plan.packages.join(',');
-    window.__pydisplayDeps = plan.deps.join(',');
-    window.__pydisplayEntryKind = plan.entryKind || '';
-    window.__pydisplayEntry = plan.entryName || '';
-    window.__pydisplayDebug = plan.debug ? '1' : '';
-    window.__pydisplayAutotest = plan.autotest ? '1' : '';
-    window.__pydisplayAutotestDuration = String(plan.autotestDuration);
+    Q.publish(plan);
 
     // Safety-net only: if MicroPython never emits EXAMPLE_RESULT (import hang),
     // report timeout — never status=ok (that masked missing-dep ImportErrors).
     if (plan.autotest && plan.entryName) {
         var safetyMs = Math.max(plan.autotestDuration * 1000 + 45000, 60000);
         setTimeout(function () {
-            if (window.__pydisplayExampleResultSent) {
+            if (window.__loaderExampleResultSent) {
                 return;
             }
-            window.__pydisplayExampleResultSent = true;
+            window.__loaderExampleResultSent = true;
             var payload = {
                 example: plan.entryName,
                 status: 'error',
@@ -169,7 +65,7 @@ def _mark(step, **data):
     try:
         from js import window, console
 
-        flag = str(getattr(window, "__pydisplayDebug", "") or "").strip().lower()
+        flag = str(getattr(window, "__loaderDebug", "") or "").strip().lower()
         if flag not in ("1", "true", "yes"):
             return
         extra = "" if not data else " " + " ".join("%s=%s" % (k, v) for k, v in data.items())
@@ -197,7 +93,7 @@ def _from_window(name, default=""):
     return str(getattr(window, name, default) or default).strip()
 
 def _autotest_enabled():
-    return _from_window("__pydisplayAutotest") in ("1", "true", "yes")
+    return _from_window("__loaderAutotest") in ("1", "true", "yes")
 
 _autotest_sent = [False]
 _import_error = [None]
@@ -205,7 +101,7 @@ _import_error = [None]
 
 def _autotest_duration_s():
     try:
-        return int(_from_window("__pydisplayAutotestDuration", "5"))
+        return int(_from_window("__loaderAutotestDuration", "5"))
     except ValueError:
         return 5
 
@@ -230,7 +126,7 @@ def _print_example_result(payload):
     try:
         from js import window
 
-        window.__pydisplayExampleResultSent = True
+        window.__loaderExampleResultSent = True
     except Exception:
         pass
 
@@ -334,11 +230,11 @@ def _parse_comma(raw):
     return names
 
 def _loader_plan():
-    modules = _parse_comma(_from_window("__pydisplayModules"))
-    manifests = _parse_comma(_from_window("__pydisplayManifests"))
-    packages = _parse_comma(_from_window("__pydisplayPackages"))
-    deps = _parse_comma(_from_window("__pydisplayDeps"))
-    entry = _from_window("__pydisplayEntry")
+    modules = _parse_comma(_from_window("__loaderModules"))
+    manifests = _parse_comma(_from_window("__loaderManifests"))
+    packages = _parse_comma(_from_window("__loaderPackages"))
+    deps = _parse_comma(_from_window("__loaderDeps"))
+    entry = _from_window("__loaderEntry")
     if not entry and modules:
         entry = modules[0]
     elif not entry and manifests:
@@ -423,7 +319,7 @@ def _run():
     # #region loader trace
     _mark("run_start")
     # #endregion
-    if _from_window("__pydisplayLoaderDisabled"):
+    if _from_window("__loaderDisabled"):
         return
     modules, manifests, packages, deps, entry = _loader_plan()
     if not entry:

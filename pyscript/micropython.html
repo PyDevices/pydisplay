@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="./demo.css">
     <link rel="stylesheet" href="./vendor/core.css">
     <script src="./pwa.js"></script>
+    <script src="./loader-query.js"></script>
     <script type="module" src="./vendor/core.js"></script>
     <script src="https://pydevices.github.io/assets/js/theme-toggle.js" defer></script>
 </head>
@@ -92,7 +93,7 @@
             <div class="display-column">
                 <div class="device">
                     <canvas id="display_canvas" width="320" height="480" tabindex="0"></canvas>
-                    <canvas id="aux_canvas" width="240" height="80" tabindex="0" style="display:block;margin-top:8px;"></canvas>
+                    <canvas id="aux_canvas" width="1" height="1" tabindex="0"></canvas>
                 </div>
             </div>
 
@@ -138,86 +139,7 @@
 
     <script>
         (function () {
-            var SAFE_LOADER_NAME = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-            // Package stems may include hyphens (e.g. micropython-nano-gui).
-            var SAFE_PACKAGE_NAME = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
-
-            function parseCommaList(raw) {
-                return raw.split(',').map(function (s) {
-                    s = s.trim();
-                    if (s.toLowerCase().endsWith('.py')) {
-                        s = s.slice(0, -3);
-                    }
-                    return s;
-                }).filter(Boolean);
-            }
-
-            function titleCaseStem(stem) {
-                return stem.replace(/_/g, ' ').replace(/\b\w/g, function (c) {
-                    return c.toUpperCase();
-                });
-            }
-
-            function parseLoaderQuery(search) {
-                const modules = [];
-                const manifests = [];
-                const deps = [];
-                let entryKind = null;
-                let entryName = null;
-                const raw = search.startsWith('?') ? search.slice(1) : search;
-                for (const part of raw.split('&')) {
-                    if (!part) {
-                        continue;
-                    }
-                    const eq = part.indexOf('=');
-                    const key = eq === -1 ? part : decodeURIComponent(part.slice(0, eq));
-                    const val = eq === -1 ? '' : decodeURIComponent(part.slice(eq + 1).replace(/\+/g, ' '));
-                    if (key === 'modules') {
-                        const list = parseCommaList(val);
-                        if (entryKind === null && list.length) {
-                            entryKind = 'module';
-                            entryName = list[0];
-                        }
-                        modules.push.apply(modules, list);
-                    } else if (key === 'manifests') {
-                        const list = parseCommaList(val);
-                        if (entryKind === null && list.length) {
-                            entryKind = 'manifest';
-                            entryName = list[0];
-                        }
-                        manifests.push.apply(manifests, list);
-                    } else if (key === 'deps') {
-                        deps.push.apply(deps, parseCommaList(val));
-                    }
-                }
-                return {
-                    modules: modules,
-                    manifests: manifests,
-                    deps: deps,
-                    entryKind: entryKind,
-                    entryName: entryName,
-                };
-            }
-
-            function invalidLoaderNames(plan) {
-                var bad = [];
-                plan.modules.forEach(function (name) {
-                    if (!SAFE_LOADER_NAME.test(name)) {
-                        bad.push(name);
-                    }
-                });
-                plan.manifests.forEach(function (name) {
-                    if (!SAFE_LOADER_NAME.test(name)) {
-                        bad.push(name);
-                    }
-                });
-                plan.deps.forEach(function (name) {
-                    if (!SAFE_PACKAGE_NAME.test(name)) {
-                        bad.push(name);
-                    }
-                });
-                return bad;
-            }
+            var Q = window.LoaderQuery;
 
             function abortLoader(bad) {
                 var main = document.querySelector('main.loader-main');
@@ -231,53 +153,47 @@
                     main.innerHTML =
                         '<div class="loader-head"><h1>Invalid query</h1></div>' +
                         '<div class="panel">' +
-                        '<p>Unsafe <code>?modules=</code> or <code>?manifests=</code> value(s): ' +
-                        names + '.</p>' +
-                        '<p>Names must be simple identifiers (letters, digits, underscore; ' +
-                        'no slashes or dots).</p>' +
+                        '<p>Unsafe loader query value(s): ' + names + '.</p>' +
+                        '<p>Module/manifest names must be identifiers; ' +
+                        '<code>?deps=</code> may be package names, <code>github:</code> paths, or <code>.whl</code> URLs.</p>' +
                         '<p><a class="btn" href="./index.html">Back to demos</a></p>' +
                         '</div>';
                 }
-                window.__pydisplayLoaderDisabled = true;
+                window.__loaderDisabled = true;
             }
 
-            const plan = parseLoaderQuery(window.location.search);
-            const badNames = invalidLoaderNames(plan);
+            var plan = Q.parse(window.location.search);
+            var badNames = Q.invalidNames(plan);
             if (badNames.length) {
                 abortLoader(badNames);
                 return;
             }
 
-            window.__pydisplayLoaderReady = true;
-            window.__pydisplayModules = plan.modules.join(',');
-            window.__pydisplayManifests = plan.manifests.join(',');
-            window.__pydisplayDeps = plan.deps.join(',');
-            window.__pydisplayEntryKind = plan.entryKind || '';
-            window.__pydisplayEntry = plan.entryName || '';
+            Q.publish(plan, { ready: true });
 
-            const paramEl = document.getElementById('loader-param');
+            var paramEl = document.getElementById('loader-param');
             if (paramEl) {
                 paramEl.textContent = window.location.search;
             }
 
             function updateMeta() {
-                const entry = plan.entryName;
+                var entry = plan.entryName;
                 if (!entry) {
                     return;
                 }
-                const label = titleCaseStem(entry);
+                var label = Q.titleCaseStem(entry);
                 document.title = label + ' — pydisplay MicroPython';
-                const meta = document.querySelector('meta[name="description"]');
+                var meta = document.querySelector('meta[name="description"]');
                 if (meta) {
                     meta.content = label + ': a pydisplay demo running in the browser via PyScript.';
                 }
-                const crumb = document.getElementById('crumb-name');
-                const title = document.getElementById('loader-title');
-                const lede = document.getElementById('loader-lede');
-                const metaEntry = document.getElementById('meta-entry');
-                const metaSource = document.getElementById('meta-source');
-                const metaInstall = document.getElementById('meta-install');
-                const sourceLink = document.getElementById('source-link');
+                var crumb = document.getElementById('crumb-name');
+                var title = document.getElementById('loader-title');
+                var lede = document.getElementById('loader-lede');
+                var metaEntry = document.getElementById('meta-entry');
+                var metaSource = document.getElementById('meta-source');
+                var metaInstall = document.getElementById('meta-install');
+                var sourceLink = document.getElementById('source-link');
                 if (crumb) crumb.textContent = label;
                 if (title) title.textContent = label;
                 if (metaEntry) {
@@ -285,7 +201,7 @@
                         ? 'import ' + entry
                         : 'import ' + entry + ' (module)';
                 }
-                const installParts = [];
+                var installParts = [];
                 if (plan.modules.length) {
                     installParts.push(plan.modules.length + ' module(s)');
                 }
@@ -360,11 +276,11 @@
             return str(val or default).strip()
 
         def _loader_plan():
-            modules = ps_loader.parse_names(_from_window("__pydisplayModules"))
-            manifests = ps_loader.parse_names(_from_window("__pydisplayManifests"))
-            deps = ps_loader.parse_names(_from_window("__pydisplayDeps"))
-            entry_kind = _from_window("__pydisplayEntryKind")
-            entry = _from_window("__pydisplayEntry")
+            modules = ps_loader.parse_names(_from_window("__loaderModules"))
+            manifests = ps_loader.parse_names(_from_window("__loaderManifests"))
+            deps = ps_loader.parse_names(_from_window("__loaderDeps"))
+            entry_kind = _from_window("__loaderEntryKind")
+            entry = _from_window("__loaderEntry")
             if not entry and modules:
                 entry_kind = entry_kind or "module"
                 entry = modules[0]
@@ -374,7 +290,7 @@
             return modules, manifests, deps, entry_kind, entry
 
         def _loader_disabled():
-            return bool(_from_window("__pydisplayLoaderDisabled"))
+            return bool(_from_window("__loaderDisabled"))
 
         async def _run(modules, manifests, deps, entry):
             global _started

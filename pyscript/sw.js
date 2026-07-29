@@ -1,13 +1,15 @@
 /*! pydisplay PWA service worker — offline cache + COI headers for PyScript */
 /* CACHE_NAME is stamped at Pages deploy from a hash of STATIC_ASSETS + this
  * file (see scripts/pyscript_stamp_pwa_cache.py). Git keeps -dev for local serve. */
-const CACHE_NAME = 'pydisplay-pwa-a042be640b88';
+const CACHE_NAME = 'pydisplay-pwa-ba9192850baa';
 
 const STATIC_ASSETS = [
   './index.html',
   './micropython.html',
   './pyodide.html',
-  './simple.html',
+  './editor.html',
+  './async.html',
+  './dom.html',
   './repl.html',
   './manifest.json',
   './icon-192.png',
@@ -17,6 +19,7 @@ const STATIC_ASSETS = [
   './pwa.css',
   './pwa.js',
   './loader-ready.js',
+  './loader-query.js',
   './mini-coi-fd.js',
   './micropython.toml',
   './pyodide.toml',
@@ -29,8 +32,8 @@ const NETWORK_FIRST_ASSETS = [
   './index.html',
   './micropython.html',
   './pyodide.html',
-  './run.html',
-  './run-pyodide.html',
+  './mp.html',
+  './py.html',
 ];
 
 const RUNTIME_ORIGINS = [
