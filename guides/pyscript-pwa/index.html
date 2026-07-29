@@ -1,0 +1,5169 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://pydisplay.readthedocs.io/guides/pyscript-pwa/">
+      
+      
+        <link rel="prev" href="../pyscript-asyncio/">
+      
+      
+        <link rel="next" href="../../installation/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>PyScript PWA - pydisplay</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#make-your-pyscript-app-a-progressive-web-app-pwa" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="pydisplay" class="md-header__button md-logo" aria-label="pydisplay" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            pydisplay
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              PyScript PWA
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/PyDevices/pydisplay/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../try/" class="md-tabs__link">
+          
+  
+  
+  User guide
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/overviews/displaysys/" class="md-tabs__link">
+          
+  
+  
+  API reference
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="pydisplay" class="md-nav__button md-logo" aria-label="pydisplay" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    pydisplay
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/PyDevices/pydisplay/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Try pydisplay
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Try pydisplay
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../try/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://pydevices.github.io/micropython-hardware/wokwi.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Wokwi details
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick start
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Quick start
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Router
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../esp32-board/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ESP32 / MicroPython board
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../desktop-cpython/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Desktop CPython
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wokwi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Wokwi simulator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pyscript/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyScript
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pyscript-asyncio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyScript asyncio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyScript PWA
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyScript PWA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-a-pwa-is-and-what-python-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a PWA is (and what Python does)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyscript-specific-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PyScript-specific constraints
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PyScript-specific constraints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sharedarraybuffer-needs-cross-origin-isolation-coi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SharedArrayBuffer needs Cross-Origin Isolation (COI)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#register-the-worker-before-pyscript-boots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Register the worker before PyScript boots
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#offline-caching-is-large" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Offline caching is large
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#files-you-need" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files you need
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-create-manifestjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1 — Create manifest.json
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1 — Create manifest.json">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gallery-app-many-demos-one-install-icon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gallery app (many demos, one install icon)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#single-demo-app-one-install-icon-opens-one-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single-demo app (one install icon opens one module)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#icons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Icons
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-create-swjs-service-worker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2 — Create sw.js (service worker)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2 — Create sw.js (service worker)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#minimal-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Minimal structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coi-header-helper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        COI header helper
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#caching-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Caching strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cache_name-stamping-at-deploy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CACHE_NAME stamping at deploy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-link-the-manifest-and-register-the-worker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3 — Link the manifest and register the worker
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3 — Link the manifest and register the worker">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-button-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install button (optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#offline-toast-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Offline toast (optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-deploy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4 — Deploy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4 — Deploy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#github-pages-this-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub Pages (this repo)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-hosts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other hosts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-test-installability-and-offline-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5 — Test installability and offline use
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5 — Test installability and offline use">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-urls-live-gallery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example URLs (live gallery)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adapting-for-your-own-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adapting for your own project
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Adapting for your own project">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fork-or-copy-the-pwa-bundle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fork or copy the PWA bundle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#minimal-pyscript-page-no-gallery-chrome" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Minimal PyScript page (no gallery chrome)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parametric-loader-micropythonhtml-pyodidehtml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parametric loader (micropython.html / pyodide.html)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#orphaned-service-workers-and-cache-migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Orphaned service workers and cache migration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Orphaned service workers and cache migration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-we-did-july-2026" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What we did (July 2026)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-you-need-this-again" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If you need this again
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related docs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reference-source-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reference (source files)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Installation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a method
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/full-clone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Full clone
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/installer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    installer.py
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/mip-github/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub MIP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/mip-micropython-lib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    micropython-lib MIP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hardware setup
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Hardware setup
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview (micropython-hardware)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learn
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Learn
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/displays/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Displays
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/multimer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    multimer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/drawing-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Drawing and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/graphics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Graphics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/graphics-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Graphics files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/config-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Config files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portability & platforms
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portability & platforms
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../platforms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../platforms/micropython/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroPython
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../platforms/circuitpython/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CircuitPython
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../platforms/cpython-desktop/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CPython desktop
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../platforms/android/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Android
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../platforms/pwa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Progressive Web Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../platforms/jupyter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jupyter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../platforms/jupyter-run/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run interactively
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../platforms/jupyter-notebook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    pydisplay in Jupyter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../platforms/pyscript/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyScript
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/app-starter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    App starter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/pydisplay_demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    pydisplay_demo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/live-demos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live demos
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ecosystem & GUIs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ecosystem & GUIs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ecosystem & sister projects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guis/lvgl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LVGL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guis/micropython-touch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroPython-Touch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guis/nano-gui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nano-GUI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guis/tft-gui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TFT / st7789py ports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guis/pywidgets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyWidgets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../add-ons/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add-ons
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/docstrings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docstring conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../building-docs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building docs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../publishing-micropython-lib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Publishing micropython-lib
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-help/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting help
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Package overviews
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Package overviews
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/overviews/displaysys/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    displaysys
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/overviews/eventsys/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    eventsys
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/overviews/graphics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    graphics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/overviews/multimer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    multimer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core modules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core modules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/board_config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    board_config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/boarddev/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    boarddev
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../reference/displaysys/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    displaysys
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_2_3" id="__nav_3_2_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    displaysys
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/displaysys/busdisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    busdisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/displaysys/epaperdisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    epaperdisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/displaysys/fbdisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fbdisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/displaysys/jndisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    jndisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/displaysys/pgdisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    pgdisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/displaysys/pixeldisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    pixeldisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/displaysys/psdisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    psdisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/displaysys/sdldisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    sdldisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../reference/eventsys/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    eventsys
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_2_4" id="__nav_3_2_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    eventsys
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/eventsys/joystick_keys/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    joystick_keys
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/eventsys/keys/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    keys
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/eventsys/touch_keypad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    touch_keypad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/multimer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    multimer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/path/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    path
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2_7" id="__nav_3_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    add_ons
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    add_ons
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/byteswap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    byteswap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/color_setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    color_setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/console/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    console
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/displaybuf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    displaybuf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/fetch_ph_gui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fetch_ph_gui
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/framebuf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    framebuf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/hardware_setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    hardware_setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/itertools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    itertools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/keypins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    keypins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/lv_encoder_emu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    lv_encoder_emu
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/micropython/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    micropython
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/mip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mip
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_7_13" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../reference/add_ons/pixel_sim/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    pixel_sim
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_2_7_13" id="__nav_3_2_7_13_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_3_2_7_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_7_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    pixel_sim
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/pixel_sim/board_config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    board_config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/png/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    png
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/ps_loader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ps_loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/tft_bitmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    tft_bitmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/tft_config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    tft_config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/tft_text/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    tft_text
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/tft_write/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    tft_write
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/touch_setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    touch_setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/uctypes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uctypes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/viper_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    viper_tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/add_ons/wifi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    wifi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+
+
+                  
+
+
+  
+  
+
+
+<h1 id="make-your-pyscript-app-a-progressive-web-app-pwa">Make your PyScript app a Progressive Web App (PWA)<a class="headerlink" href="#make-your-pyscript-app-a-progressive-web-app-pwa" title="Permanent link">&para;</a></h1>
+<p><strong>Who:</strong> You host a pydisplay (or other PyScript) demo on GitHub Pages — or any HTTPS origin — and want users to install it like a native app and run it offline after the first visit.</p>
+<p><strong>Where PWAs run:</strong> Platform notes — host matrix, install UX, PWA vs Android APK — live in <a href="../../platforms/pwa/">Progressive Web Apps</a>. This guide is the <strong>how-to</strong> (manifest, service worker, deploy).</p>
+<p><strong>Prerequisites:</strong> A working PyScript HTML shell (see <a href="../pyscript/">PyScript guide</a>). Basic familiarity with browser DevTools.</p>
+<p><strong>Live reference:</strong> The <a href="https://pydevices.github.io/pydisplay/pyscript/">pydisplay PyScript gallery</a> is a PWA. Open DevTools → <strong>Application</strong> to inspect its manifest and service worker, or click <strong>Install app</strong> in the header.</p>
+<hr />
+<h2 id="what-a-pwa-is-and-what-python-does">What a PWA is (and what Python does)<a class="headerlink" href="#what-a-pwa-is-and-what-python-does" title="Permanent link">&para;</a></h2>
+<p>A <strong>Progressive Web App</strong> is still a website. Browsers treat it as installable when three pieces are in place:</p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HTTPS</strong> (or <code>localhost</code> for dev)</td>
+<td>Secure origin; required for service workers</td>
+</tr>
+<tr>
+<td><strong>Web app manifest</strong> (<code>manifest.json</code>)</td>
+<td>Name, icons, theme colors, launch URL, display mode</td>
+</tr>
+<tr>
+<td><strong>Service worker</strong> (<code>sw.js</code>)</td>
+<td>Background script that can cache assets and enable offline use</td>
+</tr>
+</tbody>
+</table>
+<p>Python runs <strong>inside</strong> the page via PyScript/Pyodide. It does not replace the manifest or service worker — those are standard web files served alongside your HTML.</p>
+<div class="highlight"><pre><span></span><code>flowchart LR
+  subgraph browser [Browser]
+    HTML[HTML shell]
+    Manifest[manifest.json]
+    SW[sw.js service worker]
+    PyScript[PyScript / Pyodide runtime]
+    App[Your Python example]
+  end
+  HTML --&gt; PyScript --&gt; App
+  HTML --&gt; Manifest
+  HTML --&gt; SW
+  SW --&gt;|cache| HTML
+  SW --&gt;|cache| PyScript
+</code></pre></div>
+<hr />
+<h2 id="pyscript-specific-constraints">PyScript-specific constraints<a class="headerlink" href="#pyscript-specific-constraints" title="Permanent link">&para;</a></h2>
+<p>PyScript demos are heavier than typical static sites. Plan for these up front.</p>
+<h3 id="sharedarraybuffer-needs-cross-origin-isolation-coi">SharedArrayBuffer needs Cross-Origin Isolation (COI)<a class="headerlink" href="#sharedarraybuffer-needs-cross-origin-isolation-coi" title="Permanent link">&para;</a></h3>
+<p>MicroPython and Pyodide in the browser often need <code>SharedArrayBuffer</code>. That requires <strong>cross-origin isolated</strong> pages (<code>Cross-Origin-Opener-Policy</code> and <code>Cross-Origin-Embedder-Policy</code> headers).</p>
+<p>GitHub Pages does <strong>not</strong> send those headers by default. The pydisplay gallery solves this in <strong>one</strong> service worker (<code>web/pyscript/sw.js</code>) that:</p>
+<ol>
+<li>Intercepts fetches and adds COI headers to responses.</li>
+<li>Caches gallery assets for offline use.</li>
+</ol>
+<div class="admonition important">
+<p class="admonition-title">One service worker per scope</p>
+<p>A given URL path can only have <strong>one</strong> active service worker. If you already register a worker (for example <code>mini-coi-fd.js</code> for COI), merge COI and PWA caching into a single <code>sw.js</code> instead of registering two scripts.</p>
+</div>
+<h3 id="register-the-worker-before-pyscript-boots">Register the worker before PyScript boots<a class="headerlink" href="#register-the-worker-before-pyscript-boots" title="Permanent link">&para;</a></h3>
+<p>COI must be active before the runtime tries to allocate <code>SharedArrayBuffer</code>. Load <code>pwa.js</code> <strong>synchronously in <code>&lt;head&gt;</code></strong>, before <code>vendor/core.js</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;./pwa.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;module&quot;</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;./vendor/core.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</code></pre></div>
+<p>Do <strong>not</strong> use <code>defer</code> on <code>pwa.js</code> for loader pages (<code>micropython.html</code>, <code>pyodide.html</code>).</p>
+<h3 id="offline-caching-is-large">Offline caching is large<a class="headerlink" href="#offline-caching-is-large" title="Permanent link">&para;</a></h3>
+<p>A first online visit downloads PyScript/Pyodide <code>.wasm</code> bundles and any packages your demo imports from CDNs. The service worker caches those on the fly. Storage can reach tens to hundreds of MB per demo.</p>
+<p>Use <strong>stale-while-revalidate</strong> (serve cache immediately, refresh in background) rather than precaching every runtime file at install time — precaching everything often hits browser storage limits on first load.</p>
+<hr />
+<h2 id="files-you-need">Files you need<a class="headerlink" href="#files-you-need" title="Permanent link">&para;</a></h2>
+<p>For a pydisplay-style deployment under <code>web/pyscript/</code>, these are the PWA files in this repository:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/manifest.json"><code>manifest.json</code></a></td>
+<td>Install metadata</td>
+</tr>
+<tr>
+<td><a href="https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/sw.js"><code>sw.js</code></a></td>
+<td>COI headers + offline cache</td>
+</tr>
+<tr>
+<td><a href="https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/pwa.js"><code>pwa.js</code></a></td>
+<td>Register <code>sw.js</code>, install button, offline toast</td>
+</tr>
+<tr>
+<td><a href="https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/pwa.css"><code>pwa.css</code></a></td>
+<td>Styles for install button and toast</td>
+</tr>
+<tr>
+<td><code>icon-192.png</code>, <code>icon-512.png</code></td>
+<td>Launcher icons (PNG; manifest requires raster icons)</td>
+</tr>
+</tbody>
+</table>
+<p>Gallery pages that include the full PWA UI: <code>index.html</code>, <code>micropython.html</code>, <code>pyodide.html</code>. Minimal shells (<code>editor.html</code>, <code>repl.html</code>, <code>async.html</code>, <code>dom.html</code>, <code>harness.html</code>) link the manifest and load <code>pwa.js</code> without the install button.</p>
+<hr />
+<h2 id="step-1-create-manifestjson">Step 1 — Create <code>manifest.json</code><a class="headerlink" href="#step-1-create-manifestjson" title="Permanent link">&para;</a></h2>
+<p>Place <code>manifest.json</code> next to your HTML entry point (same directory or adjust paths).</p>
+<h3 id="gallery-app-many-demos-one-install-icon">Gallery app (many demos, one install icon)<a class="headerlink" href="#gallery-app-many-demos-one-install-icon" title="Permanent link">&para;</a></h3>
+<p>Use when users install the <strong>whole demo hub</strong> and pick a demo from the grid:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PyDevices pydisplay&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;short_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pydisplay&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cross-platform display and event drivers — PyScript demos in your browser.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;start_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;./index.html&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;standalone&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;launch_handler&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;client_mode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;navigate-existing&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;background_color&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#100e0b&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;theme_color&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#f54e00&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;icons&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;src&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;icon-192.png&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;sizes&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;192x192&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;image/png&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;purpose&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;any&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;src&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;icon-512.png&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;sizes&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;512x512&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;image/png&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;purpose&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;any&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;src&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;icon-512.png&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;sizes&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;512x512&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;image/png&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;purpose&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;maskable&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="single-demo-app-one-install-icon-opens-one-module">Single-demo app (one install icon opens one module)<a class="headerlink" href="#single-demo-app-one-install-icon-opens-one-module" title="Permanent link">&para;</a></h3>
+<p>Use when the installed app should <strong>always</strong> launch the same demo, including query parameters:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pydisplay demo&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;short_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Demo&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Flagship pydisplay board_config demo in the browser.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;start_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;./micropython.html?modules=pydisplay_demo&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;standalone&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;launch_handler&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;client_mode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;navigate-existing&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;background_color&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#100e0b&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;theme_color&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#f54e00&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;icons&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;src&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;icon-192.png&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;sizes&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;192x192&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;image/png&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;src&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;icon-512.png&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;sizes&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;512x512&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;image/png&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title"><code>start_url</code> and <code>scope</code></p>
+<ul>
+<li><strong><code>scope</code></strong> — URL prefix the PWA owns. Usually <code>"./"</code> for everything under <code>web/pyscript/</code>.</li>
+<li><strong><code>start_url</code></strong> — page opened when the user taps the home-screen icon. Include <code>?modules=</code> or <code>?manifests=</code> when you want a fixed entry demo.</li>
+<li>Paths are relative to the manifest file location.</li>
+</ul>
+</div>
+<h3 id="icons">Icons<a class="headerlink" href="#icons" title="Permanent link">&para;</a></h3>
+<p>Provide at least <strong>192×192</strong> and <strong>512×512</strong> PNG files. Maskable icons (safe zone in the center) improve Android adaptive icons.</p>
+<p>You can adapt the <a href="https://github.com/PyDevices/pydisplay/blob/main/web/vendor/pydevices-chrome/logo.svg">PyDevices logo SVG</a> or export PNGs from any design tool. The gallery icons live at <code>web/pyscript/icon-192.png</code> and <code>web/pyscript/icon-512.png</code>.</p>
+<hr />
+<h2 id="step-2-create-swjs-service-worker">Step 2 — Create <code>sw.js</code> (service worker)<a class="headerlink" href="#step-2-create-swjs-service-worker" title="Permanent link">&para;</a></h2>
+<p>The service worker runs in the background. It can cache responses and, for PyScript, inject COI headers.</p>
+<h3 id="minimal-structure">Minimal structure<a class="headerlink" href="#minimal-structure" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong><code>install</code></strong> — precache a small <strong>shell</strong> of HTML/CSS/JS you control (not the entire Pyodide tree).</li>
+<li><strong><code>activate</code></strong> — delete caches from older versions when you bump <code>CACHE_NAME</code>.</li>
+<li><strong><code>fetch</code></strong> — cache-first with background revalidation for your origin and known CDN hosts; add COI headers where needed.</li>
+</ol>
+<p>Key constants from the pydisplay worker:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">CACHE_NAME</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;pydisplay-pwa-dev&#39;</span><span class="p">;</span><span class="w">  </span><span class="c1">// stamped at Pages deploy (see below)</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">STATIC_ASSETS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="s1">&#39;./index.html&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="s1">&#39;./micropython.html&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="s1">&#39;./manifest.json&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="s1">&#39;./icon-192.png&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="s1">&#39;./icon-512.png&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="s1">&#39;./site.css&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="s1">&#39;./pwa.js&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="c1">// add your shell files; avoid listing every vendor/*.js</span>
+<span class="p">];</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">RUNTIME_ORIGINS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="s1">&#39;pyscript.net&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="s1">&#39;cdn.jsdelivr.net&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="s1">&#39;pyodide.org&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="s1">&#39;pydevices.github.io&#39;</span><span class="p">,</span>
+<span class="p">];</span>
+</code></pre></div>
+<h3 id="coi-header-helper">COI header helper<a class="headerlink" href="#coi-header-helper" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">withCoiHeaders</span><span class="p">(</span><span class="nx">response</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">body</span><span class="p">,</span><span class="w"> </span><span class="nx">status</span><span class="p">,</span><span class="w"> </span><span class="nx">statusText</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">response</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">status</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">status</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">399</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">response</span><span class="p">;</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">headers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Headers</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">headers</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">headers</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;Cross-Origin-Opener-Policy&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;same-origin&#39;</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">headers</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;Cross-Origin-Embedder-Policy&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;require-corp&#39;</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">headers</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;Cross-Origin-Resource-Policy&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;cross-origin&#39;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Response</span><span class="p">(</span><span class="nx">status</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mf">204</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">body</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">status</span><span class="p">,</span><span class="w"> </span><span class="nx">statusText</span><span class="p">,</span><span class="w"> </span><span class="nx">headers</span><span class="w"> </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Apply <code>withCoiHeaders</code> to <strong>same-origin</strong> responses (and shell assets) so <code>SharedArrayBuffer</code> works after the worker controls the page.</p>
+<h3 id="caching-strategy">Caching strategy<a class="headerlink" href="#caching-strategy" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Asset type</th>
+<th>Strategy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Your HTML, CSS, <code>manifest.json</code>, icons</td>
+<td>Precache in <code>install</code> + stale-while-revalidate</td>
+</tr>
+<tr>
+<td><code>vendor/</code> PyScript bundles</td>
+<td>Cache on first network fetch; do not <code>cache.addAll</code> the whole tree</td>
+</tr>
+<tr>
+<td>CDN packages (jsDelivr, pyscript.net, …)</td>
+<td>Stale-while-revalidate per request URL</td>
+</tr>
+<tr>
+<td>POST / non-GET</td>
+<td>Do not cache</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cache_name-stamping-at-deploy"><code>CACHE_NAME</code> stamping at deploy<a class="headerlink" href="#cache_name-stamping-at-deploy" title="Permanent link">&para;</a></h3>
+<p>Git keeps <code>CACHE_NAME = 'pydisplay-pwa-dev'</code> in <code>web/pyscript/sw.js</code>. The
+<a href="https://github.com/PyDevices/pydisplay/blob/main/.github/workflows/deploy-pyscript.yml">Deploy PyScript site to GitHub Pages</a>
+workflow runs <a href="https://github.com/PyDevices/pydisplay/blob/main/scripts/pyscript_stamp_pwa_cache.py"><code>scripts/pyscript_stamp_pwa_cache.py</code></a>
+on the assembled <code>_site/pyscript/</code> tree <strong>before</strong> publishing to <code>gh-pages</code>. The
+script hashes <code>STATIC_ASSETS</code> plus the service-worker source and rewrites
+<code>CACHE_NAME</code> to <code>pydisplay-pwa-&lt;hash&gt;</code> (12 hex chars).</p>
+<p>That means:</p>
+<ul>
+<li><strong>Shell changes</strong> (HTML/CSS/PWA files listed in <code>STATIC_ASSETS</code>, or <code>sw.js</code>
+  logic) produce a new cache id → <code>activate</code> deletes older caches → installed
+  PWAs see fresh shell content and <code>pwa.js</code> can prompt <strong>Reload</strong>.</li>
+<li><strong>Example / <code>src/</code> churn alone</strong> does <strong>not</strong> change the hash — gallery card
+  updates do not nag installed users on every push. Stale-while-revalidate still
+  refreshes pages in the background.</li>
+</ul>
+<p>Local <code>python tools/serve.py</code> uses the git copy (<code>pydisplay-pwa-dev</code>); only the
+Pages artifact is stamped.</p>
+<p>See the full implementation: <a href="https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/sw.js"><code>web/pyscript/sw.js</code></a>.</p>
+<hr />
+<h2 id="step-3-link-the-manifest-and-register-the-worker">Step 3 — Link the manifest and register the worker<a class="headerlink" href="#step-3-link-the-manifest-and-register-the-worker" title="Permanent link">&para;</a></h2>
+<p>In every HTML page that should participate in the PWA, add to <code>&lt;head&gt;</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;manifest&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;./manifest.json&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;theme-color&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;#f54e00&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;apple-touch-icon&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;./icon-192.png&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;./pwa.css&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;./pwa.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</code></pre></div>
+<p><code>pwa.js</code> registers <code>./sw.js</code> immediately (required for COI) and wires optional UI when elements exist.</p>
+<p>Gallery demo cards intentionally omit <code>target="_blank"</code>. Chromium treats same-scope <code>_blank</code> navigations from an installed PWA as a <strong>new app window</strong>; same-tab links keep demos in one window (browser or installed app). The manifest also sets <code>launch_handler.client_mode</code> to <code>navigate-existing</code> so captured launches reuse the recent PWA window. <code>pwa.js</code> still rewrites any leftover same-origin <code>_blank</code> clicks to in-place navigation. External links (Docs, GitHub, …) may keep <code>_blank</code>.</p>
+<h3 id="install-button-optional">Install button (optional)<a class="headerlink" href="#install-button-optional" title="Permanent link">&para;</a></h3>
+<p>Add a button anywhere in your layout (the gallery puts it in the header):</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">button</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;button&quot;</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;pwa-install-btn&quot;</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;pwa-install-btn&quot;</span><span class="p">&gt;</span>Install app<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+</code></pre></div>
+<p><code>pwa.js</code> shows the button when Chromium fires <code>beforeinstallprompt</code>, or on iOS (Safari and other WebKit browsers) when the page is not already running as a home-screen app. Chromium then calls <code>prompt()</code>; on iOS the button opens a short <strong>Share → Add to Home Screen</strong> tip (Safari has no programmatic install API).</p>
+<h3 id="offline-toast-optional">Offline toast (optional)<a class="headerlink" href="#offline-toast-optional" title="Permanent link">&para;</a></h3>
+<p>No extra HTML is required. <code>pwa.js</code> creates a <code>#pwa-toast</code> element on first use and shows messages when:</p>
+<ul>
+<li>the service worker finishes its first activation;</li>
+<li>the browser goes online or offline.</li>
+</ul>
+<p>Styles are in <a href="https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/pwa.css"><code>pwa.css</code></a>.</p>
+<hr />
+<h2 id="step-4-deploy">Step 4 — Deploy<a class="headerlink" href="#step-4-deploy" title="Permanent link">&para;</a></h2>
+<h3 id="github-pages-this-repo">GitHub Pages (this repo)<a class="headerlink" href="#github-pages-this-repo" title="Permanent link">&para;</a></h3>
+<p>Pushes to <code>main</code> that touch <code>web/**</code> or <code>src/**</code> run <a href="https://github.com/PyDevices/pydisplay/blob/main/.github/workflows/deploy-pyscript.yml">Deploy PyScript site to GitHub Pages</a>. The workflow:</p>
+<ol>
+<li>Verifies generated manifests are fresh (<code>install_refresh_manifests.sh --audit</code>, <code>gallery_generator.py --check</code>).</li>
+<li>Copies <code>web/pyscript/*</code> into <code>_site/pyscript/</code>.</li>
+<li>Copies <code>src/lib</code>, <code>src/add_ons</code>, and examples into <code>_site/pyscript/src/</code>.</li>
+<li>Stamps <code>CACHE_NAME</code> in <code>_site/pyscript/sw.js</code> from shell content
+   (<code>pyscript_stamp_pwa_cache.py</code>).</li>
+<li>Publishes to the <code>gh-pages</code> branch.</li>
+</ol>
+<p>Before pushing PWA changes, refresh gallery metadata locally:</p>
+<div class="highlight"><pre><span></span><code>./scripts/install_refresh_manifests.sh
+python<span class="w"> </span>scripts/gallery_generator.py
+</code></pre></div>
+<p>Commit any updated <code>packages/*.json</code> files the scripts produce.</p>
+<h3 id="other-hosts">Other hosts<a class="headerlink" href="#other-hosts" title="Permanent link">&para;</a></h3>
+<p>Any static host works if:</p>
+<ul>
+<li>HTTPS is enabled (Let's Encrypt, Cloudflare, GitHub Pages, etc.).</li>
+<li><code>manifest.json</code>, <code>sw.js</code>, and icons are served from the same scope as your HTML.</li>
+<li><code>sw.js</code> is served with <code>Content-Type: application/javascript</code> (default on most hosts).</li>
+</ul>
+<hr />
+<h2 id="step-5-test-installability-and-offline-use">Step 5 — Test installability and offline use<a class="headerlink" href="#step-5-test-installability-and-offline-use" title="Permanent link">&para;</a></h2>
+<p>Use Chrome or Edge on desktop, Chrome on Android, or Safari on iOS. On iOS the <strong>Install app</strong> button explains <strong>Share → Add to Home Screen</strong> (Safari never fires <code>beforeinstallprompt</code>).</p>
+<h3 id="checklist">Checklist<a class="headerlink" href="#checklist" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Manifest</strong></li>
+<li>DevTools → <strong>Application</strong> → <strong>Manifest</strong></li>
+<li>
+<p>No errors; icons and <code>start_url</code> resolve.</p>
+</li>
+<li>
+<p><strong>Service worker</strong></p>
+</li>
+<li>DevTools → <strong>Application</strong> → <strong>Service Workers</strong></li>
+<li>
+<p><code>sw.js</code> is activated and controls the page (may require one reload on first visit for COI).</p>
+</li>
+<li>
+<p><strong>Install</strong></p>
+</li>
+<li>Look for the install icon in the address bar, or your <strong>Install app</strong> button.</li>
+<li>
+<p>If you tested an install earlier, <strong>uninstall</strong> the PWA first — browsers suppress <code>beforeinstallprompt</code> for already-installed origins.</p>
+</li>
+<li>
+<p><strong>Offline</strong></p>
+</li>
+<li>Open your demo <strong>once online</strong> and click <strong>Run</strong> so Pyodide/MicroPython and packages download.</li>
+<li>DevTools → <strong>Network</strong> → enable <strong>Offline</strong>.</li>
+<li>
+<p>Reload. The shell and cached runtime should still load; uncached assets fail until you go back online.</p>
+</li>
+<li>
+<p><strong>COI / SharedArrayBuffer</strong></p>
+</li>
+<li>DevTools → <strong>Console</strong>: no <code>SharedArrayBuffer</code> errors after the COI reload cycle.</li>
+<li><strong>Application</strong> → check that cross-origin isolation is active (or verify <code>crossOriginIsolated === true</code> in the console).</li>
+</ol>
+<h3 id="example-urls-live-gallery">Example URLs (live gallery)<a class="headerlink" href="#example-urls-live-gallery" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gallery (PWA home)</td>
+<td><a href="https://pydevices.github.io/pydisplay/pyscript/">pyscript/</a></td>
+</tr>
+<tr>
+<td>Flagship demo</td>
+<td><a href="https://pydevices.github.io/pydisplay/pyscript/micropython.html?modules=pydisplay_demo">micropython.html?modules=pydisplay_demo</a></td>
+</tr>
+<tr>
+<td>Calculator</td>
+<td><a href="https://pydevices.github.io/pydisplay/pyscript/micropython.html?modules=calc_graphics,calc_engine">micropython.html?modules=calc_graphics,calc_engine</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="adapting-for-your-own-project">Adapting for your own project<a class="headerlink" href="#adapting-for-your-own-project" title="Permanent link">&para;</a></h2>
+<h3 id="fork-or-copy-the-pwa-bundle">Fork or copy the PWA bundle<a class="headerlink" href="#fork-or-copy-the-pwa-bundle" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Copy <code>manifest.json</code>, <code>sw.js</code>, <code>pwa.js</code>, <code>pwa.css</code>, and icon PNGs into your <code>web/pyscript/</code> tree (or equivalent).</li>
+<li>Edit <code>manifest.json</code> — name, colors, <code>start_url</code>.</li>
+<li>Edit <code>STATIC_ASSETS</code> in <code>sw.js</code> — list only pages and styles <strong>you</strong> ship.</li>
+<li>Add the <code>&lt;head&gt;</code> links and <code>pwa.js</code> script to your HTML shells.</li>
+<li>Optionally add <code>#pwa-install-btn</code> to your layout.</li>
+</ol>
+<h3 id="minimal-pyscript-page-no-gallery-chrome">Minimal PyScript page (no gallery chrome)<a class="headerlink" href="#minimal-pyscript-page-no-gallery-chrome" title="Permanent link">&para;</a></h3>
+<p>For a single-file demo like <a href="https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/editor.html"><code>editor.html</code></a>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;manifest&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;./manifest.json&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;theme-color&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;#f54e00&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;./pwa.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;module&quot;</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;./vendor/core.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+</code></pre></div>
+<p>Point <code>start_url</code> at that page (or at a parametric loader URL with your module query).</p>
+<h3 id="parametric-loader-micropythonhtml-pyodidehtml">Parametric loader (<code>micropython.html</code> / <code>pyodide.html</code>)<a class="headerlink" href="#parametric-loader-micropythonhtml-pyodidehtml" title="Permanent link">&para;</a></h3>
+<p>The gallery loader accepts:</p>
+<ul>
+<li><code>?modules=stem1,stem2</code> — install <code>.py</code> files from <code>src/examples/</code></li>
+<li><code>?manifests=name</code> — install a MIP JSON manifest from <code>packages/</code> (via <code>web/pyscript/packages</code>)</li>
+</ul>
+<p>For a dedicated PWA around one module, set:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;start_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;./micropython.html?modules=your_module&quot;</span>
+</code></pre></div>
+<p>Users who install get that module every time. To ship multiple installable apps from one repo, use separate manifest files in subfolders (each with its own <code>scope</code>) or separate GitHub Pages projects.</p>
+<hr />
+<h2 id="orphaned-service-workers-and-cache-migration">Orphaned service workers and cache migration<a class="headerlink" href="#orphaned-service-workers-and-cache-migration" title="Permanent link">&para;</a></h2>
+<h3 id="the-problem">The problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h3>
+<p>Early pydisplay PWAs used a <strong>fixed</strong> <code>CACHE_NAME</code> (<code>pydisplay-pwa-dev</code>) that never
+changed between deploys. The <code>activate</code> handler only deletes caches whose names
+<strong>differ</strong> from the current <code>CACHE_NAME</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">key</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="nx">CACHE_NAME</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">caches</span><span class="p">.</span><span class="ow">delete</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>So when the same name is reused forever, stale shell assets can sit in Cache
+Storage indefinitely. Worse, after we moved to <strong>deploy-time hashing</strong>, clients
+still on the old worker kept the same cache name and never picked up the new
+stamped worker — a classic <strong>orphaned service worker</strong> loop.</p>
+<h3 id="what-we-did-july-2026">What we did (July 2026)<a class="headerlink" href="#what-we-did-july-2026" title="Permanent link">&para;</a></h3>
+<p>We shipped a <strong>one-deploy migration</strong> worker in place of the normal offline
+<code>sw.js</code>. That temporary script:</p>
+<ol>
+<li>On <code>install</code> — <code>skipWaiting()</code> immediately.</li>
+<li>On <code>activate</code> — <code>caches.delete()</code> for <strong>every</strong> cache name (not just
+   mismatched ones), <code>clients.claim()</code>, then <code>client.navigate()</code> on all open
+   tabs so the next load is network-fresh.</li>
+<li>On <code>fetch</code> — network only, but still injects COI headers so PyScript keeps
+   working during the migration visit.</li>
+</ol>
+<p>The deploy workflow detected a <code>MIGRATION: cache-purge</code> marker in <code>sw.js</code> and
+skipped <code>CACHE_NAME</code> stamping for that deploy
+(<code>pyscript_stamp_pwa_cache.py</code>). A follow-up deploy restored the normal offline
+worker; stamping resumed and legacy clients received a hashed cache id.</p>
+<h3 id="if-you-need-this-again">If you need this again<a class="headerlink" href="#if-you-need-this-again" title="Permanent link">&para;</a></h3>
+<p>Keep a copy of the full offline worker (or restore from git history), replace
+<code>sw.js</code> with a purge-only worker for <strong>one</strong> Pages deploy, then restore. The
+migration worker must:</p>
+<ul>
+<li>Change <code>sw.js</code> bytes so browsers install an update.</li>
+<li>Delete <strong>all</strong> caches unconditionally.</li>
+<li>Preserve COI on fetches during the purge visit.</li>
+</ul>
+<p>Add <code>MIGRATION: cache-purge</code> to the migration source so the stamp script skips
+missing <code>STATIC_ASSETS</code>. Remove the marker when restoring the normal worker.</p>
+<hr />
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No install prompt / button never appears</td>
+<td>Already installed, or manifest/SW invalid</td>
+<td>Uninstall PWA; fix manifest errors in DevTools</td>
+</tr>
+<tr>
+<td><code>SharedArrayBuffer</code> error</td>
+<td>COI not active</td>
+<td>Ensure one <code>sw.js</code> adds COI headers; reload after first SW install</td>
+</tr>
+<tr>
+<td>Offline reload fails immediately</td>
+<td>Demo never run online</td>
+<td>Visit once online; click <strong>Run</strong> to pull runtime + packages</td>
+</tr>
+<tr>
+<td>Storage quota errors</td>
+<td>Precache list too aggressive</td>
+<td>Shrink <code>STATIC_ASSETS</code>; rely on fetch-time caching for WASM</td>
+</tr>
+<tr>
+<td>Stale content after deploy</td>
+<td>Old cache / fixed <code>CACHE_NAME</code></td>
+<td>Ensure deploy stamps <code>CACHE_NAME</code>; for stuck legacy installs see <a href="#orphaned-service-workers-and-cache-migration">Orphaned service workers</a></td>
+</tr>
+<tr>
+<td>Stale gallery card <code>?deps=</code> on one machine</td>
+<td><code>index.html</code> was cache-first while <code>CACHE_NAME</code> ignores <code>GEN:demos</code></td>
+<td><code>index.html</code> is network-first; hard-reload or clear site data once if still stuck</td>
+</tr>
+<tr>
+<td>Pyodide: <code>Can't find a pure Python 3 wheel</code> for a cmod</td>
+<td>Stale micropip IndexedDB / index metadata from before a wasm wheel existed</td>
+<td>Loader resolves <code>pyemscripten_*_wasm32</code> via TestPyPI JSON to a direct <code>.whl</code> URL; clear site data if an old session still fails</td>
+</tr>
+<tr>
+<td>iOS: Install tip but no native prompt</td>
+<td>Safari has no <code>beforeinstallprompt</code></td>
+<td>Follow <strong>Share → Add to Home Screen</strong>; tip is expected</td>
+</tr>
+<tr>
+<td><code>micropython.html</code> 404 on old links</td>
+<td>Renamed from <code>load.html</code></td>
+<td>Update bookmarks to <code>micropython.html?modules=…</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-docs">Related docs<a class="headerlink" href="#related-docs" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../platforms/pwa/">Where PWAs run</a> — host matrix and install UX (platform story)</li>
+<li><a href="../pyscript/">PyScript local development</a> — run the gallery locally, gallery markers, deploy overview</li>
+<li><a href="../pyscript-asyncio/">PyScript asyncio porting</a> — make examples work under PyScript's event loop</li>
+<li><a href="../../platforms/pyscript/">PyScript platform notes</a> — board config and contribution pointers</li>
+<li><a href="../../try/">Try pydisplay</a> — live demo links</li>
+</ul>
+<h2 id="reference-source-files">Reference (source files)<a class="headerlink" href="#reference-source-files" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Manifest</td>
+<td><code>web/pyscript/manifest.json</code></td>
+</tr>
+<tr>
+<td>Service worker</td>
+<td><code>web/pyscript/sw.js</code></td>
+</tr>
+<tr>
+<td>Client bootstrap + UI</td>
+<td><code>web/pyscript/pwa.js</code>, <code>web/pyscript/pwa.css</code></td>
+</tr>
+<tr>
+<td>Deploy workflow</td>
+<td><code>.github/workflows/deploy-pyscript.yml</code></td>
+</tr>
+<tr>
+<td><code>CACHE_NAME</code> stamp script</td>
+<td><code>scripts/pyscript_stamp_pwa_cache.py</code></td>
+</tr>
+<tr>
+<td>Gallery generator</td>
+<td><code>scripts/gallery_generator.py</code></td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2024, Brad Barnett
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "search.suggest", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

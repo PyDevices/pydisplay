@@ -1,0 +1,5500 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://pydisplay.readthedocs.io/reference/add_ons/png/">
+      
+      
+        <link rel="prev" href="../pixel_sim/board_config/">
+      
+      
+        <link rel="next" href="../ps_loader/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>png - pydisplay</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#png" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="pydisplay" class="md-header__button md-logo" aria-label="pydisplay" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            pydisplay
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              png
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/PyDevices/pydisplay/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../try/" class="md-tabs__link">
+          
+  
+  
+  User guide
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../overviews/displaysys/" class="md-tabs__link">
+          
+  
+  
+  API reference
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="pydisplay" class="md-nav__button md-logo" aria-label="pydisplay" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    pydisplay
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/PyDevices/pydisplay/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Try pydisplay
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Try pydisplay
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../try/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://pydevices.github.io/micropython-hardware/wokwi.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Wokwi details
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick start
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Quick start
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Router
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/esp32-board/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ESP32 / MicroPython board
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/desktop-cpython/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Desktop CPython
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/wokwi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Wokwi simulator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/pyscript/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyScript
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/pyscript-asyncio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyScript asyncio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/pyscript-pwa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyScript PWA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Installation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a method
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../installation/full-clone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Full clone
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../installation/installer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    installer.py
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../installation/mip-github/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub MIP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../installation/mip-micropython-lib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    micropython-lib MIP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hardware setup
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Hardware setup
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview (micropython-hardware)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learn
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Learn
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/displays/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Displays
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/multimer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    multimer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/drawing-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Drawing and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/graphics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Graphics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/graphics-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Graphics files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/config-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Config files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portability & platforms
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Portability & platforms
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platforms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platforms/micropython/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroPython
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platforms/circuitpython/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CircuitPython
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platforms/cpython-desktop/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CPython desktop
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platforms/android/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Android
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platforms/pwa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Progressive Web Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platforms/jupyter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jupyter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platforms/jupyter-run/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run interactively
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platforms/jupyter-notebook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    pydisplay in Jupyter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../platforms/pyscript/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyScript
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/app-starter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    App starter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/pydisplay_demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    pydisplay_demo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/live-demos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live demos
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ecosystem & GUIs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ecosystem & GUIs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ecosystem & sister projects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guis/lvgl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LVGL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guis/micropython-touch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroPython-Touch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guis/nano-gui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nano-GUI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guis/tft-gui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TFT / st7789py ports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guis/pywidgets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyWidgets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../add-ons/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add-ons
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contributing/docstrings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docstring conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../building-docs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building docs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../publishing-micropython-lib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Publishing micropython-lib
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-help/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting help
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Package overviews
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Package overviews
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overviews/displaysys/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    displaysys
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overviews/eventsys/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    eventsys
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overviews/graphics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    graphics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overviews/multimer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    multimer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core modules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core modules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../board_config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    board_config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../boarddev/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    boarddev
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../displaysys/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    displaysys
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_2_3" id="__nav_3_2_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    displaysys
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../displaysys/busdisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    busdisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../displaysys/epaperdisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    epaperdisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../displaysys/fbdisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fbdisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../displaysys/jndisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    jndisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../displaysys/pgdisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    pgdisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../displaysys/pixeldisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    pixeldisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../displaysys/psdisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    psdisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../displaysys/sdldisplay/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    sdldisplay
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../eventsys/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    eventsys
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_2_4" id="__nav_3_2_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    eventsys
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../eventsys/joystick_keys/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    joystick_keys
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../eventsys/keys/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    keys
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../eventsys/touch_keypad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    touch_keypad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../multimer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    multimer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../path/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    path
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_2_7" id="__nav_3_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    add_ons
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    add_ons
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../byteswap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    byteswap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../color_setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    color_setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../console/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    console
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../displaybuf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    displaybuf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fetch_ph_gui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fetch_ph_gui
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../framebuf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    framebuf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware_setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    hardware_setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../itertools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    itertools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../keypins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    keypins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lv_encoder_emu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    lv_encoder_emu
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../micropython/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    micropython
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mip
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_7_13" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../pixel_sim/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    pixel_sim
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_2_7_13" id="__nav_3_2_7_13_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_3_2_7_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_7_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    pixel_sim
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pixel_sim/board_config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    board_config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    png
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    png
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#png" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        png
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="png">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#png--a-note-on-spelling-and-terminology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A note on spelling and terminology
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png--a-note-on-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A note on formats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png--and-now-my-famous-members" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        And now, my famous members
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Classes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reader
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reader">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methods:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.chunk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        chunk
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.chunks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        chunks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.undo_filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        undo_filter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.deinterlace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        deinterlace
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.iterboxed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iterboxed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.serialtoflat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        serialtoflat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.iterstraight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iterstraight
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.validate_signature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        validate_signature
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.preamble" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        preamble
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.chunklentype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        chunklentype
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.process_chunk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        process_chunk
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.read" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.read_flat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_flat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.palette" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        palette
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.asDirect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        asDirect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.asRGB8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        asRGB8
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.asRGBA8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        asRGBA8
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.asRGB" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        asRGB
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.Reader.asRGBA" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        asRGBA
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.pngfilters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pngfilters
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pngfilters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#png.pngfilters-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methods:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#png.pngfilters.undo_filter_sub" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        undo_filter_sub
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.pngfilters.undo_filter_up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        undo_filter_up
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.pngfilters.undo_filter_average" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        undo_filter_average
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.pngfilters.undo_filter_paeth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        undo_filter_paeth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.pngfilters.convert_l_to_rgba" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        convert_l_to_rgba
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png.pngfilters.convert_rgb_to_rgba" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        convert_rgb_to_rgba
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#png-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Functions:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#png.check_bitdepth_colortype" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        check_bitdepth_colortype
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ps_loader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ps_loader
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tft_bitmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    tft_bitmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tft_config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    tft_config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tft_text/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    tft_text
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tft_write/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    tft_write
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../touch_setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    touch_setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../uctypes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    uctypes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../viper_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    viper_tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wifi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    wifi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+
+
+                  
+
+
+  
+  
+
+
+  <h1>png</h1>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="png" class="doc doc-heading">
+            <span class="doc doc-object-name doc-module-name">png</span>
+
+
+<a href="#png" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>Pure Python PNG Reader/Writer</p>
+<p>This Python module implements support for PNG images (see PNG
+specification at http://www.w3.org/TR/2003/REC-PNG-20031110/ ). It reads
+and writes PNG files with all allowable bit depths
+(1/2/4/8/16/24/32/48/64 bits per pixel) and colour combinations:
+greyscale (1/2/4/8/16 bit); RGB, RGBA, LA (greyscale with alpha) with
+8/16 bits per channel; colour mapped images (1/2/4/8 bit).
+Adam7 interlacing is supported for reading and
+writing.  A number of optional chunks can be specified (when writing)
+and understood (when reading): <code>tRNS</code>, <code>bKGD</code>, <code>gAMA</code>.</p>
+<p>For help, type <code>import png; help(png)</code> in your python interpreter.</p>
+<p>A good place to start is the :class:<code>Reader</code> and :class:<code>Writer</code>
+classes.</p>
+<p>Requires Python 2.3.  Limited support is available for Python 2.2, but
+not everything works.  Best with Python 2.4 and higher.  Installation is
+trivial, but see the <code>README.txt</code> file (with the source distribution)
+for details.</p>
+<p>This file can also be used as a command-line utility to convert
+<code>Netpbm &lt;http://netpbm.sourceforge.net/&gt;</code>_ PNM files to PNG, and the
+reverse conversion from PNG to PNM. The interface is similar to that
+of the <code>pnmtopng</code> program from Netpbm.  Type <code>python png.py --help</code>
+at the shell prompt for usage and a list of options.</p>
+<h4 id="png--a-note-on-spelling-and-terminology">A note on spelling and terminology<a class="headerlink" href="#png--a-note-on-spelling-and-terminology" title="Permanent link">&para;</a></h4>
+<p>Generally British English spelling is used in the documentation.  So
+that's "greyscale" and "colour".  This not only matches the author's
+native language, it's also used by the PNG specification.</p>
+<p>The major colour models supported by PNG (and hence by PyPNG) are:
+greyscale, RGB, greyscale--alpha, RGB--alpha.  These are sometimes
+referred to using the abbreviations: L, RGB, LA, RGBA.  In this case
+each letter abbreviates a single channel: <em>L</em> is for Luminance or Luma
+or Lightness which is the channel used in greyscale images; <em>R</em>, <em>G</em>,
+<em>B</em> stand for Red, Green, Blue, the components of a colour image; <em>A</em>
+stands for Alpha, the opacity channel (used for transparency effects,
+but higher values are more opaque, so it makes sense to call it
+opacity).</p>
+<h4 id="png--a-note-on-formats">A note on formats<a class="headerlink" href="#png--a-note-on-formats" title="Permanent link">&para;</a></h4>
+<p>When getting pixel data out of this module (reading) and presenting
+data to this module (writing) there are a number of ways the data could
+be represented as a Python value.  Generally this module uses one of
+three formats called "flat row flat pixel", "boxed row flat pixel", and
+"boxed row boxed pixel".  Basically the concern is whether each pixel
+and each row comes in its own little tuple (box), or not.</p>
+<p>Consider an image that is 3 pixels wide by 2 pixels high, and each pixel
+has RGB components:</p>
+<p>Boxed row flat pixel::</p>
+<p>list([R,G,B, R,G,B, R,G,B],
+       [R,G,B, R,G,B, R,G,B])</p>
+<p>Each row appears as its own list, but the pixels are flattened so
+that three values for one pixel simply follow the three values for
+the previous pixel.  This is the most common format used, because it
+provides a good compromise between space and convenience.  PyPNG regards
+itself as at liberty to replace any sequence type with any sufficiently
+compatible other sequence type; in practice each row is an array (from
+the array module), and the outer list is sometimes an iterator rather
+than an explicit list (so that streaming is possible).</p>
+<p>Flat row flat pixel::</p>
+<p>[R,G,B, R,G,B, R,G,B,
+   R,G,B, R,G,B, R,G,B]</p>
+<p>The entire image is one single giant sequence of colour values.
+Generally an array will be used (to save space), not a list.</p>
+<p>Boxed row boxed pixel::</p>
+<p>list([ (R,G,B), (R,G,B), (R,G,B) ],
+       [ (R,G,B), (R,G,B), (R,G,B) ])</p>
+<p>Each row appears in its own list, but each pixel also appears in its own
+tuple.  A serious memory burn in Python.</p>
+<p>In all cases the top row comes first, and for each row the pixels are
+ordered from left-to-right.  Within a pixel the values appear in the
+order, R-G-B-A (or L-A for greyscale--alpha).</p>
+<p>There is a fourth format, mentioned because it is used internally,
+is close to what lies inside a PNG file itself, and has some support
+from the public API.  This format is called packed.  When packed,
+each row is a sequence of bytes (integers from 0 to 255), just as
+it is before PNG scanline filtering is applied.  When the bit depth
+is 8 this is essentially the same as boxed row flat pixel; when the
+bit depth is less than 8, several pixels are packed into each byte;
+when the bit depth is 16 (the only value more than 8 that is supported
+by the PNG image format) each pixel value is decomposed into 2 bytes
+(and <code>packed</code> is a misnomer).  This format is used by the
+:meth:<code>Writer.write_packed</code> method.  It isn't usually a convenient
+format, but may be just right if the source data for the PNG image
+comes from something that uses a similar format (for example, 1-bit
+BMPs, or another PNG file).</p>
+<h4 id="png--and-now-my-famous-members">And now, my famous members<a class="headerlink" href="#png--and-now-my-famous-members" title="Permanent link">&para;</a></h4>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<h3 id="png-classes">Classes<a href="#png-classes" class="headerlink" title="Permanent link">&para;</a></h3>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h4 id="png.Reader" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">Reader</span>
+
+
+<a href="#png.Reader" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">Reader</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>PNG decoder in pure Python.</p>
+
+        <p>Create a PNG decoder object.</p>
+<p>The constructor expects exactly one keyword argument.  You can
+choose among the following keyword arguments:</p>
+<p>filename
+  Name of input file (a PNG file).
+file
+  A file-like object (object with a read() method).
+bytes
+  <code>array</code> or <code>string</code> with PNG data.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+<h5 id="png.Reader-functions">Methods:<a href="#png.Reader-functions" class="headerlink" title="Permanent link">&para;</a></h5>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.chunk" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">chunk</span>
+
+
+<a href="#png.Reader.chunk" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">chunk</span><span class="p">(</span><span class="n">seek</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Read the next PNG chunk from the input file; returns a
+(<em>type</em>, <em>data</em>) tuple.  <em>type</em> is the chunk's type as a
+byte string (all PNG chunk types are 4 bytes long).
+<em>data</em> is the chunk's data content, as a byte string.</p>
+<p>If the optional <code>seek</code> argument is
+specified then it will keep reading chunks until it either runs
+out of file or finds the type specified by the argument.  Note
+that in general the order of chunks in PNGs is unspecified, so
+using <code>seek</code> can cause you to miss chunks.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.chunks" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">chunks</span>
+
+
+<a href="#png.Reader.chunks" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">chunks</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return an iterator that will yield each chunk as a
+(<em>chunktype</em>, <em>content</em>) pair.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.undo_filter" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">undo_filter</span>
+
+
+<a href="#png.Reader.undo_filter" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">undo_filter</span><span class="p">(</span><span class="n">filter_type</span><span class="p">,</span> <span class="n">scanline</span><span class="p">,</span> <span class="n">previous</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Undo the filter for a scanline.  <code>scanline</code> is a sequence of
+bytes that does not include the initial filter type byte.
+<code>previous</code> is decoded previous scanline (for straightlaced
+images this is the previous pixel row, but for interlaced
+images, it is the previous scanline in the reduced image, which
+in general is not the previous pixel row in the final image).
+When there is no previous scanline (the first row of a
+straightlaced image, or the first row in one of the passes in an
+interlaced image), then this argument should be <code>None</code>.</p>
+<p>The scanline will have the effects of filtering removed, and the
+result will be returned as a fresh sequence of bytes.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.deinterlace" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">deinterlace</span>
+
+
+<a href="#png.Reader.deinterlace" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">deinterlace</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Read raw pixel data, undo filters, deinterlace, and flatten.
+Return in flat row flat pixel format.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.iterboxed" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">iterboxed</span>
+
+
+<a href="#png.Reader.iterboxed" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">iterboxed</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Iterator that yields each scanline in boxed row flat pixel
+format.  <code>rows</code> should be an iterator that yields the bytes of
+each row in turn.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.serialtoflat" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">serialtoflat</span>
+
+
+<a href="#png.Reader.serialtoflat" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">serialtoflat</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Convert serial format (byte stream) pixel data to flat row
+flat pixel.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.iterstraight" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">iterstraight</span>
+
+
+<a href="#png.Reader.iterstraight" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">iterstraight</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Iterator that undoes the effect of filtering, and yields
+each row in serialised format (as a sequence of bytes).
+Assumes input is straightlaced.  <code>raw</code> should be an iterable
+that yields the raw bytes in chunks of arbitrary size.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.validate_signature" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">validate_signature</span>
+
+
+<a href="#png.Reader.validate_signature" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_signature</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>If signature (header) has not been read then read and
+validate it; otherwise do nothing.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.preamble" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">preamble</span>
+
+
+<a href="#png.Reader.preamble" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">preamble</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Extract the image metadata by reading the initial part of
+the PNG file up to the start of the <code>IDAT</code> chunk.  All the
+chunks that precede the <code>IDAT</code> chunk are read and either
+processed for metadata or discarded.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.chunklentype" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">chunklentype</span>
+
+
+<a href="#png.Reader.chunklentype" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">chunklentype</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Reads just enough of the input to determine the next
+chunk's length and type, returned as a (<em>length</em>, <em>type</em>) pair
+where <em>type</em> is a string.  If there are no more chunks, <code>None</code>
+is returned.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.process_chunk" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">process_chunk</span>
+
+
+<a href="#png.Reader.process_chunk" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">process_chunk</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Process the next chunk and its data.  This only processes the
+following chunk types, all others are ignored: <code>IHDR</code>,
+<code>PLTE</code>, <code>bKGD</code>, <code>tRNS</code>, <code>gAMA</code>, <code>sBIT</code>, <code>pHYs</code>.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.read" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">read</span>
+
+
+<a href="#png.Reader.read" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Read the PNG file and decode it.  Returns (<code>width</code>, <code>height</code>,
+<code>pixels</code>, <code>metadata</code>).</p>
+<p>May use excessive memory.</p>
+<p><code>pixels</code> are returned in boxed row flat pixel format.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.read_flat" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">read_flat</span>
+
+
+<a href="#png.Reader.read_flat" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_flat</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Read a PNG file and decode it into flat row flat pixel format.
+Returns (<em>width</em>, <em>height</em>, <em>pixels</em>, <em>metadata</em>).</p>
+<p>May use excessive memory.</p>
+<p><code>pixels</code> are returned in flat row flat pixel format.</p>
+<p>See also the :meth:<code>read</code> method which returns pixels in the
+more stream-friendly boxed row flat pixel format.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.palette" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">palette</span>
+
+
+<a href="#png.Reader.palette" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">palette</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Returns a palette that is a sequence of 3-tuples or 4-tuples,
+synthesizing it from the <code>PLTE</code> and <code>tRNS</code> chunks.  These
+chunks should have already been processed (for example, by
+calling the :meth:<code>preamble</code> method).  All the tuples are the
+same size: 3-tuples if there is no <code>tRNS</code> chunk, 4-tuples when
+there is a <code>tRNS</code> chunk.  Assumes that the image is colour type
+3 and therefore a <code>PLTE</code> chunk is required.</p>
+<p>If the <code>alpha</code> argument is <code>True</code> then an alpha channel is
+always added, forcing the result to be a sequence of 4-tuples.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.asDirect" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">asDirect</span>
+
+
+<a href="#png.Reader.asDirect" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">asDirect</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Returns the image data as a direct representation of an
+<code>x * y * planes</code> array.  This method is intended to remove the
+need for callers to deal with palettes and transparency
+themselves.  Images with a palette (colour type 3)
+are converted to RGB or RGBA; images with transparency (a
+<code>tRNS</code> chunk) are converted to LA or RGBA as appropriate.
+When returned in this format the pixel values represent the
+colour value directly without needing to refer to palettes or
+transparency information.</p>
+<p>Like the :meth:<code>read</code> method this method returns a 4-tuple:</p>
+<p>(<em>width</em>, <em>height</em>, <em>pixels</em>, <em>meta</em>)</p>
+<p>This method normally returns pixel values with the bit depth
+they have in the source image, but when the source PNG has an
+<code>sBIT</code> chunk it is inspected and can reduce the bit depth of
+the result pixels; pixel values will be reduced according to
+the bit depth specified in the <code>sBIT</code> chunk (PNG nerds should
+note a single result bit depth is used for all channels; the
+maximum of the ones specified in the <code>sBIT</code> chunk.  An RGB565
+image will be rescaled to 6-bit RGB666).</p>
+<p>The <em>meta</em> dictionary that is returned reflects the <code>direct</code>
+format and not the original source image.  For example, an RGB
+source image with a <code>tRNS</code> chunk to represent a transparent
+colour, will have <code>planes=3</code> and <code>alpha=False</code> for the
+source image, but the <em>meta</em> dictionary returned by this method
+will have <code>planes=4</code> and <code>alpha=True</code> because an alpha
+channel is synthesized and added.</p>
+<p><em>pixels</em> is the pixel data in boxed row flat pixel format (just
+like the :meth:<code>read</code> method).</p>
+<p>All the other aspects of the image data are not changed.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.asRGB8" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">asRGB8</span>
+
+
+<a href="#png.Reader.asRGB8" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">asRGB8</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return the image data as an RGB pixels with 8-bits per
+sample.  This is like the :meth:<code>asRGB</code> method except that
+this method additionally rescales the values so that they
+are all between 0 and 255 (8-bit).  In the case where the
+source image has a bit depth &lt; 8 the transformation preserves
+all the information; where the source image has bit depth</p>
+<blockquote>
+<p>8, then rescaling to 8-bit values loses precision.  No
+dithering is performed.  Like :meth:<code>asRGB</code>, an alpha channel
+in the source image will raise an exception.</p>
+</blockquote>
+<p>This function returns a 4-tuple:
+(<em>width</em>, <em>height</em>, <em>pixels</em>, <em>metadata</em>).
+<em>width</em>, <em>height</em>, <em>metadata</em> are as per the
+:meth:<code>read</code> method.</p>
+<p><em>pixels</em> is the pixel data in boxed row flat pixel format.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.asRGBA8" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">asRGBA8</span>
+
+
+<a href="#png.Reader.asRGBA8" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">asRGBA8</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return the image data as RGBA pixels with 8-bits per
+sample.  This method is similar to :meth:<code>asRGB8</code> and
+:meth:<code>asRGBA</code>:  The result pixels have an alpha channel, <em>and</em>
+values are rescaled to the range 0 to 255.  The alpha channel is
+synthesized if necessary (with a small speed penalty).</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.asRGB" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">asRGB</span>
+
+
+<a href="#png.Reader.asRGB" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">asRGB</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return image as RGB pixels.  RGB colour images are passed
+through unchanged; greyscales are expanded into RGB
+triplets (there is a small speed overhead for doing this).</p>
+<p>An alpha channel in the source image will raise an
+exception.</p>
+<p>The return values are as for the :meth:<code>read</code> method
+except that the <em>metadata</em> reflect the returned pixels, not the
+source image.  In particular, for this method
+<code>metadata['greyscale']</code> will be <code>False</code>.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.Reader.asRGBA" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">asRGBA</span>
+
+
+<a href="#png.Reader.asRGBA" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">asRGBA</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return image as RGBA pixels.  Greyscales are expanded into
+RGB triplets; an alpha channel is synthesized if necessary.
+The return values are as for the :meth:<code>read</code> method
+except that the <em>metadata</em> reflect the returned pixels, not the
+source image.  In particular, for this method
+<code>metadata['greyscale']</code> will be <code>False</code>, and
+<code>metadata['alpha']</code> will be <code>True</code>.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h4 id="png.pngfilters" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">pngfilters</span>
+
+
+<a href="#png.pngfilters" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+<h5 id="png.pngfilters-functions">Methods:<a href="#png.pngfilters-functions" class="headerlink" title="Permanent link">&para;</a></h5>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.pngfilters.undo_filter_sub" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">undo_filter_sub</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+<a href="#png.pngfilters.undo_filter_sub" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">undo_filter_sub</span><span class="p">(</span><span class="n">filter_unit</span><span class="p">,</span> <span class="n">scanline</span><span class="p">,</span> <span class="n">previous</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Undo sub filter.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.pngfilters.undo_filter_up" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">undo_filter_up</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+<a href="#png.pngfilters.undo_filter_up" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">undo_filter_up</span><span class="p">(</span><span class="n">filter_unit</span><span class="p">,</span> <span class="n">scanline</span><span class="p">,</span> <span class="n">previous</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Undo up filter.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.pngfilters.undo_filter_average" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">undo_filter_average</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+<a href="#png.pngfilters.undo_filter_average" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">undo_filter_average</span><span class="p">(</span>
+    <span class="n">filter_unit</span><span class="p">,</span> <span class="n">scanline</span><span class="p">,</span> <span class="n">previous</span><span class="p">,</span> <span class="n">result</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Undo up filter.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.pngfilters.undo_filter_paeth" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">undo_filter_paeth</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+<a href="#png.pngfilters.undo_filter_paeth" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">undo_filter_paeth</span><span class="p">(</span><span class="n">filter_unit</span><span class="p">,</span> <span class="n">scanline</span><span class="p">,</span> <span class="n">previous</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Undo Paeth filter.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.pngfilters.convert_l_to_rgba" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">convert_l_to_rgba</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+<a href="#png.pngfilters.convert_l_to_rgba" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">convert_l_to_rgba</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Convert a grayscale image to RGBA. This method assumes
+the alpha channel in result is already correctly
+initialized.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="png.pngfilters.convert_rgb_to_rgba" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">convert_rgb_to_rgba</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+<a href="#png.pngfilters.convert_rgb_to_rgba" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">convert_rgb_to_rgba</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Convert an RGB image to RGBA. This method assumes the
+alpha channel in result is already correctly initialized.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+<h3 id="png-functions">Functions:<a href="#png-functions" class="headerlink" title="Permanent link">&para;</a></h3>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="png.check_bitdepth_colortype" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">check_bitdepth_colortype</span>
+
+
+<a href="#png.check_bitdepth_colortype" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">check_bitdepth_colortype</span><span class="p">(</span><span class="n">bitdepth</span><span class="p">,</span> <span class="n">colortype</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Check that <code>bitdepth</code> and <code>colortype</code> are both valid,
+and specified in a valid combination. Returns if valid,
+raise an Exception if not valid.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2024, Brad Barnett
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "search.suggest", "content.code.copy", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

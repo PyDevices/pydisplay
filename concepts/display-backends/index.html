@@ -8,29 +8,27 @@
       
       
       
-        <link rel="canonical" href="https://pydisplay.readthedocs.io/">
+        <link rel="canonical" href="https://pydisplay.readthedocs.io/concepts/display-backends/">
       
       
-      
-        <link rel="next" href="try/">
       
       
         
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>pydisplay</title>
+        <title>Display backend internals - pydisplay</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -49,11 +47,11 @@
       
     
     
-      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -78,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#pydisplay" class="md-skip">
+        <a href="#display-backend-internals" class="md-skip">
           Skip to content
         </a>
       
@@ -94,7 +92,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="pydisplay" class="md-header__button md-logo" aria-label="pydisplay" data-md-component="logo">
+    <a href="../.." title="pydisplay" class="md-header__button md-logo" aria-label="pydisplay" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -114,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              Display backend internals
             
           </span>
         </div>
@@ -219,11 +217,9 @@
   
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="." class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -251,7 +247,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="try/" class="md-tabs__link">
+        <a href="../../try/" class="md-tabs__link">
           
   
   
@@ -281,7 +277,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="reference/overviews/displaysys/" class="md-tabs__link">
+        <a href="../../reference/overviews/displaysys/" class="md-tabs__link">
           
   
   
@@ -326,7 +322,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="pydisplay" class="md-nav__button md-logo" aria-label="pydisplay" data-md-component="logo">
+    <a href="../.." title="pydisplay" class="md-nav__button md-logo" aria-label="pydisplay" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -353,37 +349,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Home
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -399,81 +368,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#it-runs-everywhere" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        It runs everywhere
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#get-started" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🚀 Get started
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#key-features" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Key features
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#build-guis-on-top-of-it" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Build GUIs on top of it
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-links" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quick links
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -589,7 +483,7 @@
   
   
     <li class="md-nav__item">
-      <a href="try/" class="md-nav__link">
+      <a href="../../try/" class="md-nav__link">
         
   
   
@@ -705,7 +599,7 @@
   
   
     <li class="md-nav__item">
-      <a href="getting-started/" class="md-nav__link">
+      <a href="../../getting-started/" class="md-nav__link">
         
   
   
@@ -733,7 +627,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/esp32-board/" class="md-nav__link">
+      <a href="../../guides/esp32-board/" class="md-nav__link">
         
   
   
@@ -761,7 +655,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/desktop-cpython/" class="md-nav__link">
+      <a href="../../guides/desktop-cpython/" class="md-nav__link">
         
   
   
@@ -789,7 +683,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/wokwi/" class="md-nav__link">
+      <a href="../../guides/wokwi/" class="md-nav__link">
         
   
   
@@ -817,7 +711,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/pyscript/" class="md-nav__link">
+      <a href="../../guides/pyscript/" class="md-nav__link">
         
   
   
@@ -845,7 +739,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/pyscript-asyncio/" class="md-nav__link">
+      <a href="../../guides/pyscript-asyncio/" class="md-nav__link">
         
   
   
@@ -873,7 +767,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/pyscript-pwa/" class="md-nav__link">
+      <a href="../../guides/pyscript-pwa/" class="md-nav__link">
         
   
   
@@ -961,7 +855,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/" class="md-nav__link">
+      <a href="../../installation/" class="md-nav__link">
         
   
   
@@ -989,7 +883,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/full-clone/" class="md-nav__link">
+      <a href="../../installation/full-clone/" class="md-nav__link">
         
   
   
@@ -1017,7 +911,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/installer/" class="md-nav__link">
+      <a href="../../installation/installer/" class="md-nav__link">
         
   
   
@@ -1045,7 +939,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/mip-github/" class="md-nav__link">
+      <a href="../../installation/mip-github/" class="md-nav__link">
         
   
   
@@ -1073,7 +967,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/mip-micropython-lib/" class="md-nav__link">
+      <a href="../../installation/mip-micropython-lib/" class="md-nav__link">
         
   
   
@@ -1161,7 +1055,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/" class="md-nav__link">
+      <a href="../../hardware/" class="md-nav__link">
         
   
   
@@ -1249,7 +1143,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/architecture/" class="md-nav__link">
+      <a href="../architecture/" class="md-nav__link">
         
   
   
@@ -1277,7 +1171,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/displays/" class="md-nav__link">
+      <a href="../displays/" class="md-nav__link">
         
   
   
@@ -1305,7 +1199,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/events/" class="md-nav__link">
+      <a href="../events/" class="md-nav__link">
         
   
   
@@ -1333,7 +1227,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/runtime/" class="md-nav__link">
+      <a href="../runtime/" class="md-nav__link">
         
   
   
@@ -1361,7 +1255,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/multimer/" class="md-nav__link">
+      <a href="../multimer/" class="md-nav__link">
         
   
   
@@ -1389,7 +1283,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/drawing-and-fonts/" class="md-nav__link">
+      <a href="../drawing-and-fonts/" class="md-nav__link">
         
   
   
@@ -1417,7 +1311,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/graphics/" class="md-nav__link">
+      <a href="../graphics/" class="md-nav__link">
         
   
   
@@ -1445,7 +1339,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/graphics-files/" class="md-nav__link">
+      <a href="../graphics-files/" class="md-nav__link">
         
   
   
@@ -1473,7 +1367,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/config-files/" class="md-nav__link">
+      <a href="../config-files/" class="md-nav__link">
         
   
   
@@ -1561,7 +1455,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/" class="md-nav__link">
+      <a href="../../platforms/" class="md-nav__link">
         
   
   
@@ -1589,7 +1483,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/micropython/" class="md-nav__link">
+      <a href="../../platforms/micropython/" class="md-nav__link">
         
   
   
@@ -1617,7 +1511,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/circuitpython/" class="md-nav__link">
+      <a href="../../platforms/circuitpython/" class="md-nav__link">
         
   
   
@@ -1645,7 +1539,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/cpython-desktop/" class="md-nav__link">
+      <a href="../../platforms/cpython-desktop/" class="md-nav__link">
         
   
   
@@ -1673,7 +1567,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/android/" class="md-nav__link">
+      <a href="../../platforms/android/" class="md-nav__link">
         
   
   
@@ -1701,7 +1595,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/pwa/" class="md-nav__link">
+      <a href="../../platforms/pwa/" class="md-nav__link">
         
   
   
@@ -1729,7 +1623,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/jupyter/" class="md-nav__link">
+      <a href="../../platforms/jupyter/" class="md-nav__link">
         
   
   
@@ -1757,7 +1651,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/jupyter-run/" class="md-nav__link">
+      <a href="../../platforms/jupyter-run/" class="md-nav__link">
         
   
   
@@ -1785,7 +1679,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/jupyter-notebook/" class="md-nav__link">
+      <a href="../../platforms/jupyter-notebook/" class="md-nav__link">
         
   
   
@@ -1813,7 +1707,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/pyscript/" class="md-nav__link">
+      <a href="../../platforms/pyscript/" class="md-nav__link">
         
   
   
@@ -1901,7 +1795,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/app-starter/" class="md-nav__link">
+      <a href="../../examples/app-starter/" class="md-nav__link">
         
   
   
@@ -1929,7 +1823,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/pydisplay_demo/" class="md-nav__link">
+      <a href="../../examples/pydisplay_demo/" class="md-nav__link">
         
   
   
@@ -1957,7 +1851,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/" class="md-nav__link">
+      <a href="../../examples/" class="md-nav__link">
         
   
   
@@ -1985,7 +1879,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/live-demos/" class="md-nav__link">
+      <a href="../../examples/live-demos/" class="md-nav__link">
         
   
   
@@ -2073,7 +1967,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ecosystem/" class="md-nav__link">
+      <a href="../../ecosystem/" class="md-nav__link">
         
   
   
@@ -2101,7 +1995,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guis/lvgl/" class="md-nav__link">
+      <a href="../../guis/lvgl/" class="md-nav__link">
         
   
   
@@ -2129,7 +2023,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guis/micropython-touch/" class="md-nav__link">
+      <a href="../../guis/micropython-touch/" class="md-nav__link">
         
   
   
@@ -2157,7 +2051,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guis/nano-gui/" class="md-nav__link">
+      <a href="../../guis/nano-gui/" class="md-nav__link">
         
   
   
@@ -2185,7 +2079,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guis/tft-gui/" class="md-nav__link">
+      <a href="../../guis/tft-gui/" class="md-nav__link">
         
   
   
@@ -2213,7 +2107,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guis/pywidgets/" class="md-nav__link">
+      <a href="../../guis/pywidgets/" class="md-nav__link">
         
   
   
@@ -2249,7 +2143,7 @@
   
   
     <li class="md-nav__item">
-      <a href="add-ons/" class="md-nav__link">
+      <a href="../../add-ons/" class="md-nav__link">
         
   
   
@@ -2329,7 +2223,7 @@
   
   
     <li class="md-nav__item">
-      <a href="contributing/" class="md-nav__link">
+      <a href="../../contributing/" class="md-nav__link">
         
   
   
@@ -2357,7 +2251,7 @@
   
   
     <li class="md-nav__item">
-      <a href="contributing/docstrings/" class="md-nav__link">
+      <a href="../../contributing/docstrings/" class="md-nav__link">
         
   
   
@@ -2385,7 +2279,7 @@
   
   
     <li class="md-nav__item">
-      <a href="building-docs/" class="md-nav__link">
+      <a href="../../building-docs/" class="md-nav__link">
         
   
   
@@ -2413,7 +2307,7 @@
   
   
     <li class="md-nav__item">
-      <a href="publishing-micropython-lib/" class="md-nav__link">
+      <a href="../../publishing-micropython-lib/" class="md-nav__link">
         
   
   
@@ -2441,7 +2335,7 @@
   
   
     <li class="md-nav__item">
-      <a href="getting-help/" class="md-nav__link">
+      <a href="../../getting-help/" class="md-nav__link">
         
   
   
@@ -2469,7 +2363,7 @@
   
   
     <li class="md-nav__item">
-      <a href="troubleshooting/" class="md-nav__link">
+      <a href="../../troubleshooting/" class="md-nav__link">
         
   
   
@@ -2616,7 +2510,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/overviews/displaysys/" class="md-nav__link">
+      <a href="../../reference/overviews/displaysys/" class="md-nav__link">
         
   
   
@@ -2644,7 +2538,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/overviews/eventsys/" class="md-nav__link">
+      <a href="../../reference/overviews/eventsys/" class="md-nav__link">
         
   
   
@@ -2672,7 +2566,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/overviews/graphics/" class="md-nav__link">
+      <a href="../../reference/overviews/graphics/" class="md-nav__link">
         
   
   
@@ -2700,7 +2594,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/overviews/multimer/" class="md-nav__link">
+      <a href="../../reference/overviews/multimer/" class="md-nav__link">
         
   
   
@@ -2788,7 +2682,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/board_config/" class="md-nav__link">
+      <a href="../../reference/board_config/" class="md-nav__link">
         
   
   
@@ -2816,7 +2710,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/boarddev/" class="md-nav__link">
+      <a href="../../reference/boarddev/" class="md-nav__link">
         
   
   
@@ -2861,7 +2755,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="reference/displaysys/" class="md-nav__link ">
+            <a href="../../reference/displaysys/" class="md-nav__link ">
               
   
   
@@ -2903,7 +2797,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/busdisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/busdisplay/" class="md-nav__link">
         
   
   
@@ -2931,7 +2825,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/epaperdisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/epaperdisplay/" class="md-nav__link">
         
   
   
@@ -2959,7 +2853,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/fbdisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/fbdisplay/" class="md-nav__link">
         
   
   
@@ -2987,7 +2881,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/jndisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/jndisplay/" class="md-nav__link">
         
   
   
@@ -3015,7 +2909,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/pgdisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/pgdisplay/" class="md-nav__link">
         
   
   
@@ -3043,7 +2937,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/pixeldisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/pixeldisplay/" class="md-nav__link">
         
   
   
@@ -3071,7 +2965,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/psdisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/psdisplay/" class="md-nav__link">
         
   
   
@@ -3099,7 +2993,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/sdldisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/sdldisplay/" class="md-nav__link">
         
   
   
@@ -3152,7 +3046,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="reference/eventsys/" class="md-nav__link ">
+            <a href="../../reference/eventsys/" class="md-nav__link ">
               
   
   
@@ -3194,7 +3088,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/eventsys/joystick_keys/" class="md-nav__link">
+      <a href="../../reference/eventsys/joystick_keys/" class="md-nav__link">
         
   
   
@@ -3222,7 +3116,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/eventsys/keys/" class="md-nav__link">
+      <a href="../../reference/eventsys/keys/" class="md-nav__link">
         
   
   
@@ -3250,7 +3144,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/eventsys/touch_keypad/" class="md-nav__link">
+      <a href="../../reference/eventsys/touch_keypad/" class="md-nav__link">
         
   
   
@@ -3286,7 +3180,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/multimer/" class="md-nav__link">
+      <a href="../../reference/multimer/" class="md-nav__link">
         
   
   
@@ -3314,7 +3208,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/path/" class="md-nav__link">
+      <a href="../../reference/path/" class="md-nav__link">
         
   
   
@@ -3394,7 +3288,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/byteswap/" class="md-nav__link">
+      <a href="../../reference/add_ons/byteswap/" class="md-nav__link">
         
   
   
@@ -3422,7 +3316,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/color_setup/" class="md-nav__link">
+      <a href="../../reference/add_ons/color_setup/" class="md-nav__link">
         
   
   
@@ -3450,7 +3344,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/console/" class="md-nav__link">
+      <a href="../../reference/add_ons/console/" class="md-nav__link">
         
   
   
@@ -3478,7 +3372,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/displaybuf/" class="md-nav__link">
+      <a href="../../reference/add_ons/displaybuf/" class="md-nav__link">
         
   
   
@@ -3506,7 +3400,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/fetch_ph_gui/" class="md-nav__link">
+      <a href="../../reference/add_ons/fetch_ph_gui/" class="md-nav__link">
         
   
   
@@ -3534,7 +3428,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/framebuf/" class="md-nav__link">
+      <a href="../../reference/add_ons/framebuf/" class="md-nav__link">
         
   
   
@@ -3562,7 +3456,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/hardware_setup/" class="md-nav__link">
+      <a href="../../reference/add_ons/hardware_setup/" class="md-nav__link">
         
   
   
@@ -3590,7 +3484,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/itertools/" class="md-nav__link">
+      <a href="../../reference/add_ons/itertools/" class="md-nav__link">
         
   
   
@@ -3618,7 +3512,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/keypins/" class="md-nav__link">
+      <a href="../../reference/add_ons/keypins/" class="md-nav__link">
         
   
   
@@ -3646,7 +3540,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/lv_encoder_emu/" class="md-nav__link">
+      <a href="../../reference/add_ons/lv_encoder_emu/" class="md-nav__link">
         
   
   
@@ -3674,7 +3568,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/micropython/" class="md-nav__link">
+      <a href="../../reference/add_ons/micropython/" class="md-nav__link">
         
   
   
@@ -3702,7 +3596,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/mip/" class="md-nav__link">
+      <a href="../../reference/add_ons/mip/" class="md-nav__link">
         
   
   
@@ -3747,7 +3641,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="reference/add_ons/pixel_sim/" class="md-nav__link ">
+            <a href="../../reference/add_ons/pixel_sim/" class="md-nav__link ">
               
   
   
@@ -3789,7 +3683,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/pixel_sim/board_config/" class="md-nav__link">
+      <a href="../../reference/add_ons/pixel_sim/board_config/" class="md-nav__link">
         
   
   
@@ -3825,7 +3719,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/png/" class="md-nav__link">
+      <a href="../../reference/add_ons/png/" class="md-nav__link">
         
   
   
@@ -3853,7 +3747,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/ps_loader/" class="md-nav__link">
+      <a href="../../reference/add_ons/ps_loader/" class="md-nav__link">
         
   
   
@@ -3881,7 +3775,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/tft_bitmap/" class="md-nav__link">
+      <a href="../../reference/add_ons/tft_bitmap/" class="md-nav__link">
         
   
   
@@ -3909,7 +3803,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/tft_config/" class="md-nav__link">
+      <a href="../../reference/add_ons/tft_config/" class="md-nav__link">
         
   
   
@@ -3937,7 +3831,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/tft_text/" class="md-nav__link">
+      <a href="../../reference/add_ons/tft_text/" class="md-nav__link">
         
   
   
@@ -3965,7 +3859,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/tft_write/" class="md-nav__link">
+      <a href="../../reference/add_ons/tft_write/" class="md-nav__link">
         
   
   
@@ -3993,7 +3887,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/touch_setup/" class="md-nav__link">
+      <a href="../../reference/add_ons/touch_setup/" class="md-nav__link">
         
   
   
@@ -4021,7 +3915,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/uctypes/" class="md-nav__link">
+      <a href="../../reference/add_ons/uctypes/" class="md-nav__link">
         
   
   
@@ -4049,7 +3943,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/viper_tools/" class="md-nav__link">
+      <a href="../../reference/add_ons/viper_tools/" class="md-nav__link">
         
   
   
@@ -4077,7 +3971,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/wifi/" class="md-nav__link">
+      <a href="../../reference/add_ons/wifi/" class="md-nav__link">
         
   
   
@@ -4143,144 +4037,411 @@
   
 
 
-<h1 id="pydisplay">PyDisplay<a class="headerlink" href="#pydisplay" title="Permanent link">&para;</a></h1>
-<p><strong>Write your graphics code once. Run it everywhere Python runs.</strong></p>
-<p>PyDisplay is the portable foundation layer for Python graphics — <strong>display drivers, unified input events, drawing primitives, fonts, palettes, and cross-platform timers</strong> behind a single API. The same drawing code runs unchanged on a microcontroller, on your desktop, in a web browser, and inside a Jupyter Notebook.</p>
-<p>The mental model is simple: import <code>board_config</code> for <code>display_drv</code> and <code>runtime</code>, draw into the display using the usual framebuffer-style calls, handle input with the shared runtime, and keep the app alive with <code>runtime.run_forever()</code>. That pattern scales from a one-file demo to a larger widget stack.</p>
-<p>PyDisplay is a <em>foundation</em>, not a GUI toolkit. Use it directly for simple UIs, or as the backend for <a href="guis/lvgl/">LVGL</a>, <a href="guis/nano-gui/">Nano-GUI</a>, <a href="guis/micro-gui/">Micro-GUI</a>, <a href="guis/micropython-touch/">MicroPython-Touch</a>, <a href="guis/pywidgets/">pdwidgets</a>, or your own widget library.</p>
-<div class="admonition warning">
-<p class="admonition-title">Alpha quality</p>
-<p>PyDisplay is under active development. APIs and documentation are still evolving. <a href="contributing/">Feedback and pull requests</a> are welcome.</p>
-</div>
-<table>
-<thead>
-<tr>
-<th style="text-align: center;"><img alt="active" src="https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/active.gif" /></th>
-<th style="text-align: center;"><img alt="tiny_toasters" src="https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/tiny_toasters.gif" /></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;"><code>active.py</code></td>
-<td style="text-align: center;"><code>tiny_toasters.py</code></td>
-</tr>
-</tbody>
-</table>
-<p>More in the <a href="try/#screenshot-gallery">screenshot gallery</a>.</p>
-<h2 id="it-runs-everywhere">It runs everywhere<a class="headerlink" href="#it-runs-everywhere" title="Permanent link">&para;</a></h2>
-<p>Portability is PyDisplay's headline feature:</p>
-<table>
-<thead>
-<tr>
-<th>Runtime</th>
-<th style="text-align: center;">Microcontrollers</th>
-<th style="text-align: center;">Unix / Linux</th>
-<th style="text-align: center;">Windows</th>
-<th style="text-align: center;">Browser</th>
-<th style="text-align: center;">Jupyter</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>MicroPython</strong></td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅ PyScript · Wokwi</td>
-<td style="text-align: center;">—</td>
-</tr>
-<tr>
-<td><strong>CircuitPython</strong></td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">—</td>
-</tr>
-<tr>
-<td><strong>CPython</strong></td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">✅</td>
-</tr>
-</tbody>
-</table>
-<p>Develop on your laptop with a mouse, then deploy the <em>same</em> code to a touchscreen on an ESP32. See <strong><a href="platforms/">Portability &amp; platforms</a></strong> for the full story.</p>
-<h2 id="get-started">🚀 Get started<a class="headerlink" href="#get-started" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>I want to…</th>
-<th>Start here</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Try it with no install</td>
-<td><a href="try/">Try PyDisplay</a></td>
-</tr>
-<tr>
-<td>Install the browser gallery as an app</td>
-<td><a href="platforms/pwa/">Where PWAs run</a></td>
-</tr>
-<tr>
-<td>Run on an ESP32 / MicroPython board</td>
-<td><a href="guides/esp32-board/">ESP32 board guide</a></td>
-</tr>
-<tr>
-<td>Develop on desktop (CPython)</td>
-<td><a href="guides/desktop-cpython/">Desktop CPython guide</a></td>
-</tr>
-<tr>
-<td>See every starting path</td>
-<td><a href="getting-started/">Getting started</a></td>
-</tr>
-<tr>
-<td>Understand the design</td>
-<td><a href="concepts/architecture/">Architecture</a></td>
-</tr>
-</tbody>
-</table>
-<h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
+<h1 id="display-backend-internals">Display backend internals<a class="headerlink" href="#display-backend-internals" title="Permanent link">&para;</a></h1>
+<p>This document explains how pydisplay <strong>display drivers</strong> relate to each other: the
+shared <strong>565 API contract</strong>, the <strong>two-stage draw/present</strong> model used by desktop
+and browser simulators, <strong>color conversion</strong> strategies, and why each backend
+chose its implementation pattern.</p>
+<p>For a shorter “which driver do I pick?” guide, see <a href="../displays/">Displays</a>. For
+chip wiring and board configs, see <a href="https://pydevices.github.io/micropython-hardware/board-configs.html">Board configs</a>
+and <a href="https://pydevices.github.io/micropython-hardware/display-interfaces.html">Display interfaces</a>.</p>
+<h2 id="the-displaydriver-api-contract">The DisplayDriver API contract<a class="headerlink" href="#the-displaydriver-api-contract" title="Permanent link">&para;</a></h2>
+<p>Application and example code assume a <strong>16-bit RGB565</strong> surface:</p>
 <ul>
-<li><strong>One API, every platform</strong> — <code>framebuf</code>-compatible drawing on MicroPython, CircuitPython, and CPython.</li>
-<li><strong>Unified input</strong> — touch, mouse, keyboard, keypad, rotary encoder, and joystick all arrive as the same PyGame/SDL2-style <a href="concepts/events/">events</a>.</li>
-<li><strong>Cross-platform timers</strong> — <a href="concepts/multimer/"><code>multimer</code></a> gives you <code>machine.Timer</code>-style and <code>asyncio</code> timers even on hosts that have neither.</li>
-<li><strong>Installable browser apps</strong> — the <a href="https://PyDevices.github.io/pydisplay/pyscript/">PyScript gallery</a> is a <a href="platforms/pwa/">Progressive Web App</a> (desktop, Android Chrome, iOS home screen).</li>
-<li><strong>Batteries included</strong> — 30 board configs, 60+ <a href="examples/">examples</a>, a <a href="https://PyDevices.github.io/pydisplay/pyscript/">browser demo</a>, and a <a href="guides/wokwi/">Wokwi</a> project.</li>
-<li><strong>Flexible install</strong> — <a href="installation/full-clone/">full clone</a>, one-line <a href="installation/mip-github/">MIP packages</a>, or precompiled <code>.mpy</code> bytecode.</li>
+<li><code>display_drv.color_depth == 16</code> (bits per pixel)</li>
+<li>Color literals like <code>0xFFFF</code>, <code>0xF800</code>, and helpers like <code>color565(r, g, b)</code></li>
+<li>Scratch buffers: <code>FrameBuffer(..., RGB565)</code> and
+  <code>BPP = display_drv.color_depth // 8</code> (2 bytes per pixel)</li>
+<li><code>blit_rect</code> source buffers sized <code>w * h * 2</code></li>
+<li><code>blit_transparent</code> key colors as 2-byte 565 values</li>
 </ul>
-<h2 id="build-guis-on-top-of-it">Build GUIs on top of it<a class="headerlink" href="#build-guis-on-top-of-it" title="Permanent link">&para;</a></h2>
-<p>PyDisplay is the graphics, input, and timing backend for a growing family of LVGL bindings — <a href="https://github.com/PyDevices/lv_micropython_cmod">lv_micropython_cmod</a>, <a href="https://github.com/PyDevices/lv_circuitpython_mod">lv_circuitpython_mod</a>, and <a href="https://github.com/PyDevices/lv_cpython_mod">lv_cpython_mod</a>. You can build an LVGL app in pure Python, <strong>develop it interactively in a Jupyter Notebook</strong>, and run the identical code on a microcontroller. See <a href="ecosystem/">Ecosystem &amp; sister projects</a>.</p>
-<h2 id="quick-links">Quick links<a class="headerlink" href="#quick-links" title="Permanent link">&para;</a></h2>
+<p>Every concrete backend must implement the <strong>drawing</strong> and <strong>lifecycle</strong> methods
+below. Application code, <code>pygraphics</code>, and examples assume they exist — not only
+<code>show()</code> and <code>quit()</code>:</p>
 <table>
 <thead>
 <tr>
-<th>Resource</th>
-<th>URL</th>
+<th>Method</th>
+<th>Role</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Browser demo</td>
-<td><a href="https://PyDevices.github.io/pydisplay/pyscript/">PyDevices.github.io/pydisplay/pyscript/</a></td>
+<td><code>blit_rect(buffer, x, y, w, h)</code></td>
+<td>Copy a 565 buffer region into the driver's logical framebuffer</td>
 </tr>
 <tr>
-<td>Source</td>
-<td><a href="https://github.com/PyDevices/pydisplay">github.com/PyDevices/pydisplay</a></td>
+<td><code>fill_rect(x, y, w, h, color)</code></td>
+<td>Fill a rectangle with a 565 color</td>
 </tr>
 <tr>
-<td>MIP package index</td>
-<td><a href="https://PyDevices.github.io/micropython-lib/mip/PyDevices">PyDevices micropython-lib</a></td>
+<td><code>pixel(x, y, color)</code></td>
+<td>Set one pixel (often implemented via a 1×1 <code>blit_rect</code>)</td>
 </tr>
 <tr>
-<td>Issues &amp; roadmap</td>
-<td><a href="https://github.com/PyDevices/pydisplay/issues">GitHub Issues</a></td>
+<td><code>show()</code></td>
+<td>Present the logical framebuffer (immediate on MCU buses; batched on SDL/pygame until <code>show()</code> on desktop)</td>
+</tr>
+<tr>
+<td><code>quit(code=0, force=False)</code></td>
+<td>Release native resources; <code>Runtime</code> calls this on app quit</td>
 </tr>
 </tbody>
 </table>
+<p>Optional but common: <code>deinit()</code> (called from <code>quit()</code>), scroll helpers (<code>vscroll</code>,
+<code>set_vscroll</code>), <code>blit_transparent</code>, and <code>needs_refresh</code> for runtime-driven
+presentation on hosted backends.</p>
+<p><strong>BusDisplay</strong>, <strong>FBDisplay</strong>, and most TFT paths are <strong>565 end-to-end</strong> — the
+API matches the hardware framebuffer.</p>
+<p>Other backends store pixels in a <strong>deeper native format</strong> (RGB888 strip buffer,
+PIL RGB, canvas RGBA, SDL texture at 24/32 bpp). They still expose the <strong>565
+API</strong> and convert at draw time via <code>color_rgb</code> (or backend-specific blit paths).</p>
+<h3 id="color-encoding-trap">Color encoding trap<a class="headerlink" href="#color-encoding-trap" title="Permanent link">&para;</a></h3>
+<p>565 and 888 use <strong>different integer layouts</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Meaning</th>
+<th>RGB565 int</th>
+<th>RGB888 int</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>White</td>
+<td><code>0xFFFF</code></td>
+<td><code>0xFFFFFF</code></td>
+</tr>
+<tr>
+<td>Red</td>
+<td><code>0xF800</code></td>
+<td><code>0xFF0000</code></td>
+</tr>
+</tbody>
+</table>
+<p>RGB888 unpack (used by <code>PixelFramebuffer</code> and <code>pygraphics.RGB888</code>) treats the int
+as <code>0xRRGGBB</code>. Passing <code>0xFFFF</code> (565 white) through that path yields cyan
+(R=0, G=255, B=255), not white.</p>
+<p>The shared expand helper is <strong><code>color_rgb()</code></strong> in <code>displaysys/__init__.py</code>: 565
+int or 2-byte little-endian slice → <code>(r, g, b)</code> with 5/6/5 bit expansion. Tests
+live in <code>tests/test_color.py</code>.</p>
+<h2 id="two-stage-architecture-logical-gram-present">Two-stage architecture: logical GRAM + present<a class="headerlink" href="#two-stage-architecture-logical-gram-present" title="Permanent link">&para;</a></h2>
+<p>Four simulators — <strong>SDLDisplay</strong>, <strong>PGDisplay</strong>, <strong>PSDisplay</strong>, <strong>JNDisplay</strong>
+— mimic an <strong>ILI9341-style</strong> panel:</p>
+<div class="highlight"><pre><span></span><code>  App draw API                Present path
+  ─────────────               ──────────────
+  fill_rect / blit_rect  →    self._buffer   (logical GRAM)
+                              render()       (scroll bands, scale, …)
+                              show()         (flip / widget / canvas)
+</code></pre></div>
+<ol>
+<li><strong><code>self._buffer</code></strong> — offscreen memory at logical <code>width × height</code> (PG calls
+   this “the LCD’s internal memory”).</li>
+<li><strong>Draw methods</strong> — write only into that buffer.</li>
+<li><strong><code>render()</code></strong> — composes the buffer to the visible surface, including
+   <strong>vertical scroll</strong> (top fixed / scroll area / bottom fixed).</li>
+<li><strong><code>show()</code></strong> — pushes frames to the OS window, browser canvas, or Jupyter
+   widget.</li>
+</ol>
+<p>Scroll emulation <strong>requires</strong> this split: you cannot draw directly on the window
+and still implement <code>vscroll</code> / <code>set_vscroll</code> correctly. See
+<a href="../../examples/pydisplay_demo/">pydisplay_demo</a> for the redraw-at-<code>vscroll=0</code>
+rule.</p>
+<p><strong>PixelDisplay</strong> is different: there is no ILI9341 scroll model. Drawing updates
+an RGB888 grid buffer; <code>show()</code> diff-flushes to the LED strip.</p>
+<h3 id="vertical-scroll-shared-by-sdl-pg-ps-jn">Vertical scroll (shared by SDL / PG / PS / JN)<a class="headerlink" href="#vertical-scroll-shared-by-sdl-pg-ps-jn" title="Permanent link">&para;</a></h3>
+<p>All four implement the same band compositing in <code>render()</code>:</p>
+<ul>
+<li><strong>TFA</strong> — top fixed area (pinned rows)</li>
+<li><strong>VSA</strong> — vertical scroll area (content that moves)</li>
+<li><strong>BFA</strong> — bottom fixed area</li>
+</ul>
+<p><code>display_drv.set_vscroll(tfa, bfa)</code> and the <code>vscroll</code> property map to the
+controller-style <code>vscsad</code> address. On <strong>SDLDisplay</strong>, <code>render()</code> uses multiple
+<code>SDL_RenderCopy</code> bands (a single full-frame copy was disabled due to platform
+issues). <strong>PGDisplay</strong> and <strong>PSDisplay</strong> use the same four-step blit/drawImage
+layout when scrolled.</p>
+<h3 id="rotation">Rotation<a class="headerlink" href="#rotation" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Buffer rotation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SDLDisplay</strong></td>
+<td><code>_rotation_helper</code> — new SDL texture + <code>SDL_RenderCopyEx</code></td>
+</tr>
+<tr>
+<td><strong>PGDisplay</strong></td>
+<td><code>_rotation_helper</code> — <code>pg.transform.rotate</code> on <code>_buffer</code></td>
+</tr>
+<tr>
+<td><strong>PSDisplay</strong></td>
+<td><code>_rotation</code> tracked; <strong>no</strong> <code>_rotation_helper</code> (surface dims swap only)</td>
+</tr>
+<tr>
+<td><strong>JNDisplay</strong></td>
+<td>Same as PS — property only, no pixel rotation</td>
+</tr>
+<tr>
+<td><strong>PixelDisplay</strong></td>
+<td><code>rotation</code> on inner framebuf (grid wiring), not LCD-style</td>
+</tr>
+</tbody>
+</table>
+<p>Full rotation matters for <strong>SDL/PG</strong> desktop LCD simulation. Browser and notebook
+backends document that rotation reshapes the surface but does not rotate pointer
+coordinates — see <a href="../displays/#browser--notebook-pyscript-jupyter">Displays — Browser / notebook</a>.</p>
+<h3 id="scaling">Scaling<a class="headerlink" href="#scaling" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PGDisplay</strong></td>
+<td>Constructor <code>scale</code>; <code>pg.transform.scale_by</code> at present; <code>touch_scale = scale</code></td>
+</tr>
+<tr>
+<td><strong>SDLDisplay</strong></td>
+<td>Window size <code>width * scale</code>; <code>SDL_RenderSetLogicalSize</code> for logical coords</td>
+</tr>
+<tr>
+<td><strong>PSDisplay</strong></td>
+<td>CSS layout vs canvas pixel size; <code>_pointer_scale()</code> / <code>touch_scale</code></td>
+</tr>
+<tr>
+<td><strong>JNDisplay</strong></td>
+<td>1:1 (<code>touch_scale = 1.0</code>)</td>
+</tr>
+<tr>
+<td><strong>PixelDisplay</strong></td>
+<td>N/A (tiny physical grid)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="why-each-backend-exists-runtime">Why each backend exists (runtime)<a class="headerlink" href="#why-each-backend-exists-runtime" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Typical runtime</th>
+<th>Why it exists</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SDLDisplay</strong></td>
+<td>CPython, MicroPython Unix, CircuitPython Unix</td>
+<td>Native SDL2 / <code>usdl2</code>; default on MP Unix</td>
+</tr>
+<tr>
+<td><strong>PGDisplay</strong></td>
+<td>CPython desktop</td>
+<td>Easier install on Windows; avoids some SDL glitches on Chromebooks; default in <code>lib/board_config.py</code> when pygame imports</td>
+</tr>
+<tr>
+<td><strong>PSDisplay</strong></td>
+<td>PyScript</td>
+<td>HTML Canvas 2D; no SDL/pygame in the browser</td>
+</tr>
+<tr>
+<td><strong>JNDisplay</strong></td>
+<td>Jupyter</td>
+<td><code>ipywidgets</code> / PNG refresh; interactive <code>JNDevices</code></td>
+</tr>
+<tr>
+<td><strong>PixelDisplay</strong></td>
+<td>MCU / CP</td>
+<td>NeoPixel / DotStar grids via <code>displaysys.pixeldisplay</code></td>
+</tr>
+</tbody>
+</table>
+<p>CircuitPython Unix <strong>SDLDisplay</strong> forces <strong>software rendering</strong> when accelerated
+GL cannot attach rotated render targets (see comment in <code>sdldisplay.py</code>).
+MicroPython SDL <strong><code>show()</code></strong> may defer present on <code>MemoryError</code> when the heap is
+locked during scroll rendering.</p>
+<h2 id="color-conversion-toolbox">Color conversion toolbox<a class="headerlink" href="#color-conversion-toolbox" title="Permanent link">&para;</a></h2>
+<p>Backends use several patterns to map <strong>565 API input</strong> to <strong>native storage</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Where</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bitwise expand</strong></td>
+<td><code>color_rgb()</code></td>
+<td>Per-color 565 → <code>(r,g,b)</code>; fills and single pixels</td>
+</tr>
+<tr>
+<td><strong>LUT-assisted loop</strong></td>
+<td><strong>PSDisplay</strong></td>
+<td>65536 × 4 byte table; blit loop indexes LUT → RGBA for <code>putImageData</code></td>
+</tr>
+<tr>
+<td><strong>Python pixel loop</strong></td>
+<td><strong>PGDisplay</strong> blit, <strong>JNDisplay</strong> blit</td>
+<td>Per pixel: read 2 bytes → <code>color_rgb</code> → <code>set_at</code> / PIL <code>point</code></td>
+</tr>
+<tr>
+<td><strong>Zero-copy passthrough</strong></td>
+<td><strong>SDLDisplay</strong> at 16 bpp</td>
+<td><code>SDL_UpdateTexture</code> with 565 pitch — buffer format matches texture</td>
+</tr>
+<tr>
+<td><strong>Raw 565 pack</strong></td>
+<td><strong>BusDisplay</strong>, <strong>FBDisplay</strong></td>
+<td><code>(c &amp; 0xFFFF).to_bytes(2, …)</code> — no expand</td>
+</tr>
+</tbody>
+</table>
+<p>Not yet centralized in <code>displaysys</code>, but useful for future shared helpers:</p>
+<ul>
+<li><strong><code>frombuffer</code> + blit</strong> (Pygame) — <code>pg.image.frombuffer(buf, (w,h), "RGB565")</code>
+  then <code>dest.blit(src, (x,y))</code> for <strong>16-in / 16-stored</strong> without a Python loop</li>
+<li><strong>Row expand</strong> — convert one row of 565 to RGB/RGBA, bulk-write</li>
+<li><strong>Component mini-LUTs</strong> — small 5/6/5-bit tables (~128 bytes) instead of 256 KB</li>
+</ul>
+<h3 id="per-backend-blit-strategy-today">Per-backend blit strategy (today)<a class="headerlink" href="#per-backend-blit-strategy-today" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Native sink</th>
+<th>Blit path</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SDLDisplay</strong> (16)</td>
+<td>RGB565 texture</td>
+<td>Zero-copy upload</td>
+<td>Throughput on large blits; matches app buffers</td>
+</tr>
+<tr>
+<td><strong>SDLDisplay</strong> fill</td>
+<td>Same texture</td>
+<td><code>color_rgb</code> → SDL RGB draw</td>
+<td>Draw API expects 8-bit RGB</td>
+</tr>
+<tr>
+<td><strong>PGDisplay</strong></td>
+<td>Pygame surface (default 16)</td>
+<td>Per-pixel <code>set_at</code> loop</td>
+<td>Simple; partial <code>renderRect</code>; room to switch to <code>frombuffer</code>+<code>blit</code></td>
+</tr>
+<tr>
+<td><strong>PSDisplay</strong></td>
+<td>Canvas RGBA</td>
+<td>LUT → <code>ImageData</code></td>
+<td>Browser API requires RGBA bytes; large blits</td>
+</tr>
+<tr>
+<td><strong>JNDisplay</strong></td>
+<td>PIL RGB</td>
+<td>Loop → <code>pixel</code></td>
+<td>Present is PNG-bound; blit speed secondary</td>
+</tr>
+<tr>
+<td><strong>PixelDisplay</strong></td>
+<td>RGB888 strip buf</td>
+<td>565 in → <code>color_rgb</code> → inner 888</td>
+<td>Tiny grids; standard DisplayDriver API</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sdl-vs-pygame-fast-path">SDL vs Pygame “fast path”<a class="headerlink" href="#sdl-vs-pygame-fast-path" title="Permanent link">&para;</a></h3>
+<p><strong>SDL</strong> at <code>color_depth=16</code> is true <strong>16-in / 16-stored</strong> for blits: the app’s
+565 buffer is uploaded directly into a RGB565 render-target texture.</p>
+<p><strong>Pygame</strong> can match that intent (not the same mechanism) by keeping a 16-bit
+surface and using <strong><code>frombuffer</code> + <code>blit</code></strong> once per <code>blit_rect</code> call instead of
+<code>set_at</code> per pixel. The current PG implementation still expands each pixel to
+RGB for <code>set_at</code>, which quantizes back to 565 on a 16-bit surface — correct but
+slow at 320×480.</p>
+<h3 id="lut-size-and-mcus">LUT size and MCUs<a class="headerlink" href="#lut-size-and-mcus" title="Permanent link">&para;</a></h3>
+<p><strong>PSDisplay</strong> allocates <strong>65536 × 4 ≈ 256 KB</strong> for <code>_rgba_lut</code> — appropriate
+in PyScript, <strong>not</strong> on typical MCUs (e.g. RP2040 has 264 KB SRAM total).</p>
+<p>For <strong>PixelDisplay</strong> (8×4, 12×6, …), a <strong><code>color_rgb</code> loop</strong> over tens or hundreds
+of pixels is negligible. A full 565→888 LUT (~192 KB for 3-byte entries) would
+cost more RAM than the grid itself.</p>
+<h2 id="pixeldisplay-specifics">PixelDisplay specifics<a class="headerlink" href="#pixeldisplay-specifics" title="Permanent link">&para;</a></h2>
+<p>Addressable LED boards wire:</p>
+<div class="highlight"><pre><span></span><code><span class="n">_pixel_framebuf</span> <span class="o">=</span> <span class="n">PixelFramebuffer</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># internal; RGB888 grid + strip map</span>
+<span class="n">display_drv</span> <span class="o">=</span> <span class="n">PixelDisplay</span><span class="p">(</span><span class="n">_pixel_framebuf</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Use <code>display_drv</code> for all app drawing.</strong> <code>_pixel_framebuf</code> is prefixed to
+discourage bypassing the DisplayDriver API (see
+<a href="https://pydevices.github.io/micropython-hardware/board-configs.html#pixel--addressable-led-configs">Board configs — Pixel configs</a>).</p>
+<p><code>PixelDisplay</code> exposes the usual <strong>565 <code>DisplayDriver</code> API</strong> (<code>color_depth=16</code>).
+The inner <code>PixelFramebuffer</code> stays <strong>RGB888</strong> for the strip; <code>fill_rect</code>,
+<code>pixel</code>, and <code>blit_rect</code> expand via <code>color_rgb</code> before writing the inner buffer.</p>
+<p>MicroPython uses <code>displaysys.pixeldisplay.PixelFramebuffer</code>; CircuitPython uses
+Adafruit <code>adafruit_pixel_framebuf</code> behind the same <code>PixelDisplay</code> wrapper.</p>
+<h2 id="hardware-drivers-brief">Hardware drivers (brief)<a class="headerlink" href="#hardware-drivers-brief" title="Permanent link">&para;</a></h2>
+<p>These follow the 565 API without a separate “present” stage in the same sense:</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Storage</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BusDisplay</strong></td>
+<td>Panel GRAM via SPI/I80</td>
+<td>Optional byteswap; true 565</td>
+</tr>
+<tr>
+<td><strong>FBDisplay</strong></td>
+<td>CircuitPython framebuf</td>
+<td>RAM mirror + <code>refresh()</code></td>
+</tr>
+<tr>
+<td><strong>EPaperDisplay</strong></td>
+<td>1/2/4 bpp packed</td>
+<td><code>color_depth</code> matches panel</td>
+</tr>
+</tbody>
+</table>
+<h2 id="consolidation-direction">Consolidation direction<a class="headerlink" href="#consolidation-direction" title="Permanent link">&para;</a></h2>
+<p>Goals discussed for displaysys maintenance:</p>
+<ol>
+<li><strong>One API</strong> — all <code>DisplayDriver</code> instances report <code>color_depth=16</code> and accept
+   565 colors and blit buffers unless the hardware is genuinely sub-16-bit
+   (e-paper).</li>
+<li><strong>Shared conversion helpers</strong> in <code>displaysys/__init__.py</code> — <code>color_rgb</code>
+   (exists), plus swappable <strong>loop</strong> vs <strong>LUT</strong> blit writers for benchmarking.</li>
+<li><strong>Keep backend-specific fast paths</strong> where they matter:</li>
+<li>SDL: zero-copy 565 blit</li>
+<li>PS: LUT for RGBA canvas</li>
+<li>PG: consider <code>frombuffer</code>+<code>blit</code> for 565 surfaces</li>
+<li>PixelDisplay: loop expand (tiny grids)</li>
+<li><strong>Lazy LUT</strong> — build only on CPython / desktop unless explicitly enabled, so
+   MCUs never allocate 256 KB silently.</li>
+</ol>
+<p>Internal buffer format may remain 565 (SDL), RGB (JN), RGBA (PS), or RGB888
+(strip) as long as the <strong>public</strong> contract stays 565.</p>
+<h2 id="related-reading">Related reading<a class="headerlink" href="#related-reading" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../displays/">Displays</a> — pick a driver, input, scroll overview</li>
+<li><a href="../../examples/pydisplay_demo/">pydisplay_demo</a> — scroll bands and redraw rules</li>
+<li><a href="../architecture/">Architecture</a> — how <code>board_config</code> wires drivers</li>
+<li><a href="https://pydevices.github.io/micropython-hardware/display-interfaces.html">Display interfaces</a> — hardware taxonomy</li>
+<li><code>tests/test_color.py</code> — <code>color_rgb</code> / <code>color565</code> contract tests</li>
+</ul>
 
 
 
@@ -4341,10 +4502,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "search.suggest", "content.code.copy", "toc.integrate"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "search.suggest", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

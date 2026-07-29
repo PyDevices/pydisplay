@@ -8,29 +8,31 @@
       
       
       
-        <link rel="canonical" href="https://pydisplay.readthedocs.io/">
+        <link rel="canonical" href="https://pydisplay.readthedocs.io/reference/multimer/">
       
       
+        <link rel="prev" href="../eventsys/touch_keypad/">
       
-        <link rel="next" href="try/">
+      
+        <link rel="next" href="../path/">
       
       
         
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>pydisplay</title>
+        <title>multimer - pydisplay</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -49,11 +51,11 @@
       
     
     
-      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -78,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#pydisplay" class="md-skip">
+        <a href="#multimer" class="md-skip">
           Skip to content
         </a>
       
@@ -94,7 +96,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="pydisplay" class="md-header__button md-logo" aria-label="pydisplay" data-md-component="logo">
+    <a href="../.." title="pydisplay" class="md-header__button md-logo" aria-label="pydisplay" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -114,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              multimer
             
           </span>
         </div>
@@ -219,11 +221,9 @@
   
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="." class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -251,7 +251,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="try/" class="md-tabs__link">
+        <a href="../../try/" class="md-tabs__link">
           
   
   
@@ -270,6 +270,8 @@
   
   
   
+    
+  
   
     
     
@@ -277,11 +279,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="reference/overviews/displaysys/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../overviews/displaysys/" class="md-tabs__link">
           
   
   
@@ -326,7 +330,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="pydisplay" class="md-nav__button md-logo" aria-label="pydisplay" data-md-component="logo">
+    <a href="../.." title="pydisplay" class="md-nav__button md-logo" aria-label="pydisplay" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -353,37 +357,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Home
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -399,81 +376,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#it-runs-everywhere" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        It runs everywhere
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#get-started" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🚀 Get started
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#key-features" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Key features
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#build-guis-on-top-of-it" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Build GUIs on top of it
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-links" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quick links
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -589,7 +491,7 @@
   
   
     <li class="md-nav__item">
-      <a href="try/" class="md-nav__link">
+      <a href="../../try/" class="md-nav__link">
         
   
   
@@ -705,7 +607,7 @@
   
   
     <li class="md-nav__item">
-      <a href="getting-started/" class="md-nav__link">
+      <a href="../../getting-started/" class="md-nav__link">
         
   
   
@@ -733,7 +635,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/esp32-board/" class="md-nav__link">
+      <a href="../../guides/esp32-board/" class="md-nav__link">
         
   
   
@@ -761,7 +663,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/desktop-cpython/" class="md-nav__link">
+      <a href="../../guides/desktop-cpython/" class="md-nav__link">
         
   
   
@@ -789,7 +691,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/wokwi/" class="md-nav__link">
+      <a href="../../guides/wokwi/" class="md-nav__link">
         
   
   
@@ -817,7 +719,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/pyscript/" class="md-nav__link">
+      <a href="../../guides/pyscript/" class="md-nav__link">
         
   
   
@@ -845,7 +747,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/pyscript-asyncio/" class="md-nav__link">
+      <a href="../../guides/pyscript-asyncio/" class="md-nav__link">
         
   
   
@@ -873,7 +775,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/pyscript-pwa/" class="md-nav__link">
+      <a href="../../guides/pyscript-pwa/" class="md-nav__link">
         
   
   
@@ -961,7 +863,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/" class="md-nav__link">
+      <a href="../../installation/" class="md-nav__link">
         
   
   
@@ -989,7 +891,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/full-clone/" class="md-nav__link">
+      <a href="../../installation/full-clone/" class="md-nav__link">
         
   
   
@@ -1017,7 +919,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/installer/" class="md-nav__link">
+      <a href="../../installation/installer/" class="md-nav__link">
         
   
   
@@ -1045,7 +947,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/mip-github/" class="md-nav__link">
+      <a href="../../installation/mip-github/" class="md-nav__link">
         
   
   
@@ -1073,7 +975,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/mip-micropython-lib/" class="md-nav__link">
+      <a href="../../installation/mip-micropython-lib/" class="md-nav__link">
         
   
   
@@ -1161,7 +1063,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/" class="md-nav__link">
+      <a href="../../hardware/" class="md-nav__link">
         
   
   
@@ -1249,7 +1151,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/architecture/" class="md-nav__link">
+      <a href="../../concepts/architecture/" class="md-nav__link">
         
   
   
@@ -1277,7 +1179,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/displays/" class="md-nav__link">
+      <a href="../../concepts/displays/" class="md-nav__link">
         
   
   
@@ -1305,7 +1207,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/events/" class="md-nav__link">
+      <a href="../../concepts/events/" class="md-nav__link">
         
   
   
@@ -1333,7 +1235,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/runtime/" class="md-nav__link">
+      <a href="../../concepts/runtime/" class="md-nav__link">
         
   
   
@@ -1361,7 +1263,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/multimer/" class="md-nav__link">
+      <a href="../../concepts/multimer/" class="md-nav__link">
         
   
   
@@ -1389,7 +1291,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/drawing-and-fonts/" class="md-nav__link">
+      <a href="../../concepts/drawing-and-fonts/" class="md-nav__link">
         
   
   
@@ -1417,7 +1319,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/graphics/" class="md-nav__link">
+      <a href="../../concepts/graphics/" class="md-nav__link">
         
   
   
@@ -1445,7 +1347,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/graphics-files/" class="md-nav__link">
+      <a href="../../concepts/graphics-files/" class="md-nav__link">
         
   
   
@@ -1473,7 +1375,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/config-files/" class="md-nav__link">
+      <a href="../../concepts/config-files/" class="md-nav__link">
         
   
   
@@ -1561,7 +1463,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/" class="md-nav__link">
+      <a href="../../platforms/" class="md-nav__link">
         
   
   
@@ -1589,7 +1491,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/micropython/" class="md-nav__link">
+      <a href="../../platforms/micropython/" class="md-nav__link">
         
   
   
@@ -1617,7 +1519,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/circuitpython/" class="md-nav__link">
+      <a href="../../platforms/circuitpython/" class="md-nav__link">
         
   
   
@@ -1645,7 +1547,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/cpython-desktop/" class="md-nav__link">
+      <a href="../../platforms/cpython-desktop/" class="md-nav__link">
         
   
   
@@ -1673,7 +1575,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/android/" class="md-nav__link">
+      <a href="../../platforms/android/" class="md-nav__link">
         
   
   
@@ -1701,7 +1603,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/pwa/" class="md-nav__link">
+      <a href="../../platforms/pwa/" class="md-nav__link">
         
   
   
@@ -1729,7 +1631,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/jupyter/" class="md-nav__link">
+      <a href="../../platforms/jupyter/" class="md-nav__link">
         
   
   
@@ -1757,7 +1659,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/jupyter-run/" class="md-nav__link">
+      <a href="../../platforms/jupyter-run/" class="md-nav__link">
         
   
   
@@ -1785,7 +1687,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/jupyter-notebook/" class="md-nav__link">
+      <a href="../../platforms/jupyter-notebook/" class="md-nav__link">
         
   
   
@@ -1813,7 +1715,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/pyscript/" class="md-nav__link">
+      <a href="../../platforms/pyscript/" class="md-nav__link">
         
   
   
@@ -1901,7 +1803,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/app-starter/" class="md-nav__link">
+      <a href="../../examples/app-starter/" class="md-nav__link">
         
   
   
@@ -1929,7 +1831,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/pydisplay_demo/" class="md-nav__link">
+      <a href="../../examples/pydisplay_demo/" class="md-nav__link">
         
   
   
@@ -1957,7 +1859,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/" class="md-nav__link">
+      <a href="../../examples/" class="md-nav__link">
         
   
   
@@ -1985,7 +1887,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/live-demos/" class="md-nav__link">
+      <a href="../../examples/live-demos/" class="md-nav__link">
         
   
   
@@ -2073,7 +1975,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ecosystem/" class="md-nav__link">
+      <a href="../../ecosystem/" class="md-nav__link">
         
   
   
@@ -2101,7 +2003,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guis/lvgl/" class="md-nav__link">
+      <a href="../../guis/lvgl/" class="md-nav__link">
         
   
   
@@ -2129,7 +2031,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guis/micropython-touch/" class="md-nav__link">
+      <a href="../../guis/micropython-touch/" class="md-nav__link">
         
   
   
@@ -2157,7 +2059,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guis/nano-gui/" class="md-nav__link">
+      <a href="../../guis/nano-gui/" class="md-nav__link">
         
   
   
@@ -2185,7 +2087,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guis/tft-gui/" class="md-nav__link">
+      <a href="../../guis/tft-gui/" class="md-nav__link">
         
   
   
@@ -2213,7 +2115,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guis/pywidgets/" class="md-nav__link">
+      <a href="../../guis/pywidgets/" class="md-nav__link">
         
   
   
@@ -2249,7 +2151,7 @@
   
   
     <li class="md-nav__item">
-      <a href="add-ons/" class="md-nav__link">
+      <a href="../../add-ons/" class="md-nav__link">
         
   
   
@@ -2329,7 +2231,7 @@
   
   
     <li class="md-nav__item">
-      <a href="contributing/" class="md-nav__link">
+      <a href="../../contributing/" class="md-nav__link">
         
   
   
@@ -2357,7 +2259,7 @@
   
   
     <li class="md-nav__item">
-      <a href="contributing/docstrings/" class="md-nav__link">
+      <a href="../../contributing/docstrings/" class="md-nav__link">
         
   
   
@@ -2385,7 +2287,7 @@
   
   
     <li class="md-nav__item">
-      <a href="building-docs/" class="md-nav__link">
+      <a href="../../building-docs/" class="md-nav__link">
         
   
   
@@ -2413,7 +2315,7 @@
   
   
     <li class="md-nav__item">
-      <a href="publishing-micropython-lib/" class="md-nav__link">
+      <a href="../../publishing-micropython-lib/" class="md-nav__link">
         
   
   
@@ -2441,7 +2343,7 @@
   
   
     <li class="md-nav__item">
-      <a href="getting-help/" class="md-nav__link">
+      <a href="../../getting-help/" class="md-nav__link">
         
   
   
@@ -2469,7 +2371,7 @@
   
   
     <li class="md-nav__item">
-      <a href="troubleshooting/" class="md-nav__link">
+      <a href="../../troubleshooting/" class="md-nav__link">
         
   
   
@@ -2509,26 +2411,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   
@@ -2546,7 +2453,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2570,17 +2477,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
         
           
-          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="">
             
   
   
@@ -2616,7 +2526,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/overviews/displaysys/" class="md-nav__link">
+      <a href="../overviews/displaysys/" class="md-nav__link">
         
   
   
@@ -2644,7 +2554,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/overviews/eventsys/" class="md-nav__link">
+      <a href="../overviews/eventsys/" class="md-nav__link">
         
   
   
@@ -2672,7 +2582,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/overviews/graphics/" class="md-nav__link">
+      <a href="../overviews/graphics/" class="md-nav__link">
         
   
   
@@ -2700,7 +2610,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/overviews/multimer/" class="md-nav__link">
+      <a href="../overviews/multimer/" class="md-nav__link">
         
   
   
@@ -2733,26 +2643,31 @@
                 
   
   
+    
   
   
+  
     
     
     
     
       
       
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
             
   
   
@@ -2770,7 +2685,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2788,7 +2703,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/board_config/" class="md-nav__link">
+      <a href="../board_config/" class="md-nav__link">
         
   
   
@@ -2816,7 +2731,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/boarddev/" class="md-nav__link">
+      <a href="../boarddev/" class="md-nav__link">
         
   
   
@@ -2861,7 +2776,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="reference/displaysys/" class="md-nav__link ">
+            <a href="../displaysys/" class="md-nav__link ">
               
   
   
@@ -2903,7 +2818,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/busdisplay/" class="md-nav__link">
+      <a href="../displaysys/busdisplay/" class="md-nav__link">
         
   
   
@@ -2931,7 +2846,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/epaperdisplay/" class="md-nav__link">
+      <a href="../displaysys/epaperdisplay/" class="md-nav__link">
         
   
   
@@ -2959,7 +2874,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/fbdisplay/" class="md-nav__link">
+      <a href="../displaysys/fbdisplay/" class="md-nav__link">
         
   
   
@@ -2987,7 +2902,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/jndisplay/" class="md-nav__link">
+      <a href="../displaysys/jndisplay/" class="md-nav__link">
         
   
   
@@ -3015,7 +2930,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/pgdisplay/" class="md-nav__link">
+      <a href="../displaysys/pgdisplay/" class="md-nav__link">
         
   
   
@@ -3043,7 +2958,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/pixeldisplay/" class="md-nav__link">
+      <a href="../displaysys/pixeldisplay/" class="md-nav__link">
         
   
   
@@ -3071,7 +2986,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/psdisplay/" class="md-nav__link">
+      <a href="../displaysys/psdisplay/" class="md-nav__link">
         
   
   
@@ -3099,7 +3014,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/sdldisplay/" class="md-nav__link">
+      <a href="../displaysys/sdldisplay/" class="md-nav__link">
         
   
   
@@ -3152,7 +3067,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="reference/eventsys/" class="md-nav__link ">
+            <a href="../eventsys/" class="md-nav__link ">
               
   
   
@@ -3194,7 +3109,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/eventsys/joystick_keys/" class="md-nav__link">
+      <a href="../eventsys/joystick_keys/" class="md-nav__link">
         
   
   
@@ -3222,7 +3137,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/eventsys/keys/" class="md-nav__link">
+      <a href="../eventsys/keys/" class="md-nav__link">
         
   
   
@@ -3250,7 +3165,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/eventsys/touch_keypad/" class="md-nav__link">
+      <a href="../eventsys/touch_keypad/" class="md-nav__link">
         
   
   
@@ -3283,10 +3198,35 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="reference/multimer/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    multimer
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -3302,6 +3242,258 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#multimer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        multimer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="multimer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multimer-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Classes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multimer.AsyncTimer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AsyncTimer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="AsyncTimer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multimer.AsyncTimer-attributes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attributes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Attributes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multimer.AsyncTimer.ONE_SHOT" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ONE_SHOT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multimer.AsyncTimer.PERIODIC" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PERIODIC
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multimer.AsyncTimer-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methods:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multimer.AsyncTimer.init" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        init
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multimer.AsyncTimer.deinit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        deinit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multimer-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Functions:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multimer.monotonic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        monotonic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multimer.run_deadline_hook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        run_deadline_hook
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multimer.set_deadline_hook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set_deadline_hook
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multimer.ticks_add" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ticks_add
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multimer.ticks_diff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ticks_diff
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multimer.ticks_less" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ticks_less
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multimer.ticks_ms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ticks_ms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multimer.uses_signals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        uses_signals
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -3314,7 +3506,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/path/" class="md-nav__link">
+      <a href="../path/" class="md-nav__link">
         
   
   
@@ -3394,7 +3586,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/byteswap/" class="md-nav__link">
+      <a href="../add_ons/byteswap/" class="md-nav__link">
         
   
   
@@ -3422,7 +3614,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/color_setup/" class="md-nav__link">
+      <a href="../add_ons/color_setup/" class="md-nav__link">
         
   
   
@@ -3450,7 +3642,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/console/" class="md-nav__link">
+      <a href="../add_ons/console/" class="md-nav__link">
         
   
   
@@ -3478,7 +3670,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/displaybuf/" class="md-nav__link">
+      <a href="../add_ons/displaybuf/" class="md-nav__link">
         
   
   
@@ -3506,7 +3698,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/fetch_ph_gui/" class="md-nav__link">
+      <a href="../add_ons/fetch_ph_gui/" class="md-nav__link">
         
   
   
@@ -3534,7 +3726,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/framebuf/" class="md-nav__link">
+      <a href="../add_ons/framebuf/" class="md-nav__link">
         
   
   
@@ -3562,7 +3754,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/hardware_setup/" class="md-nav__link">
+      <a href="../add_ons/hardware_setup/" class="md-nav__link">
         
   
   
@@ -3590,7 +3782,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/itertools/" class="md-nav__link">
+      <a href="../add_ons/itertools/" class="md-nav__link">
         
   
   
@@ -3618,7 +3810,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/keypins/" class="md-nav__link">
+      <a href="../add_ons/keypins/" class="md-nav__link">
         
   
   
@@ -3646,7 +3838,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/lv_encoder_emu/" class="md-nav__link">
+      <a href="../add_ons/lv_encoder_emu/" class="md-nav__link">
         
   
   
@@ -3674,7 +3866,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/micropython/" class="md-nav__link">
+      <a href="../add_ons/micropython/" class="md-nav__link">
         
   
   
@@ -3702,7 +3894,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/mip/" class="md-nav__link">
+      <a href="../add_ons/mip/" class="md-nav__link">
         
   
   
@@ -3747,7 +3939,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="reference/add_ons/pixel_sim/" class="md-nav__link ">
+            <a href="../add_ons/pixel_sim/" class="md-nav__link ">
               
   
   
@@ -3789,7 +3981,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/pixel_sim/board_config/" class="md-nav__link">
+      <a href="../add_ons/pixel_sim/board_config/" class="md-nav__link">
         
   
   
@@ -3825,7 +4017,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/png/" class="md-nav__link">
+      <a href="../add_ons/png/" class="md-nav__link">
         
   
   
@@ -3853,7 +4045,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/ps_loader/" class="md-nav__link">
+      <a href="../add_ons/ps_loader/" class="md-nav__link">
         
   
   
@@ -3881,7 +4073,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/tft_bitmap/" class="md-nav__link">
+      <a href="../add_ons/tft_bitmap/" class="md-nav__link">
         
   
   
@@ -3909,7 +4101,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/tft_config/" class="md-nav__link">
+      <a href="../add_ons/tft_config/" class="md-nav__link">
         
   
   
@@ -3937,7 +4129,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/tft_text/" class="md-nav__link">
+      <a href="../add_ons/tft_text/" class="md-nav__link">
         
   
   
@@ -3965,7 +4157,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/tft_write/" class="md-nav__link">
+      <a href="../add_ons/tft_write/" class="md-nav__link">
         
   
   
@@ -3993,7 +4185,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/touch_setup/" class="md-nav__link">
+      <a href="../add_ons/touch_setup/" class="md-nav__link">
         
   
   
@@ -4021,7 +4213,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/uctypes/" class="md-nav__link">
+      <a href="../add_ons/uctypes/" class="md-nav__link">
         
   
   
@@ -4049,7 +4241,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/viper_tools/" class="md-nav__link">
+      <a href="../add_ons/viper_tools/" class="md-nav__link">
         
   
   
@@ -4077,7 +4269,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/wifi/" class="md-nav__link">
+      <a href="../add_ons/wifi/" class="md-nav__link">
         
   
   
@@ -4143,144 +4335,808 @@
   
 
 
-<h1 id="pydisplay">PyDisplay<a class="headerlink" href="#pydisplay" title="Permanent link">&para;</a></h1>
-<p><strong>Write your graphics code once. Run it everywhere Python runs.</strong></p>
-<p>PyDisplay is the portable foundation layer for Python graphics — <strong>display drivers, unified input events, drawing primitives, fonts, palettes, and cross-platform timers</strong> behind a single API. The same drawing code runs unchanged on a microcontroller, on your desktop, in a web browser, and inside a Jupyter Notebook.</p>
-<p>The mental model is simple: import <code>board_config</code> for <code>display_drv</code> and <code>runtime</code>, draw into the display using the usual framebuffer-style calls, handle input with the shared runtime, and keep the app alive with <code>runtime.run_forever()</code>. That pattern scales from a one-file demo to a larger widget stack.</p>
-<p>PyDisplay is a <em>foundation</em>, not a GUI toolkit. Use it directly for simple UIs, or as the backend for <a href="guis/lvgl/">LVGL</a>, <a href="guis/nano-gui/">Nano-GUI</a>, <a href="guis/micro-gui/">Micro-GUI</a>, <a href="guis/micropython-touch/">MicroPython-Touch</a>, <a href="guis/pywidgets/">pdwidgets</a>, or your own widget library.</p>
-<div class="admonition warning">
-<p class="admonition-title">Alpha quality</p>
-<p>PyDisplay is under active development. APIs and documentation are still evolving. <a href="contributing/">Feedback and pull requests</a> are welcome.</p>
+  <h1>multimer</h1>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="multimer" class="doc doc-heading">
+            <span class="doc doc-object-name doc-module-name">multimer</span>
+
+
+<a href="#multimer" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>multimer — cross-platform <code>machine.Timer</code> for CPython, MicroPython, and CircuitPython.</p>
+<p>Public surface::</p>
+<pre><code>from multimer import Timer, AsyncTimer, schedule, sleep_ms, ticks_ms
+from multimer import ticks_add, ticks_diff, ticks_less, monotonic, uses_signals
+</code></pre>
+<p><code>Timer</code> selects a platform backend (librt, win32 APC, SDL2, threading, or
+<code>machine.Timer</code>). On async-only hosts (PyScript / Jupyter), <code>Timer</code> is an
+alias of :class:<code>AsyncTimer</code>. Soft callbacks (<code>hard=False</code>) use
+:func:<code>schedule</code>; on signal backends that already deliver on main, soft does
+not postpone the callback (coalesce/gap still apply). See also:
+https://pydisplay.readthedocs.io/en/latest/concepts/multimer/</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<h3 id="multimer-classes">Classes<a href="#multimer-classes" class="headerlink" title="Permanent link">&para;</a></h3>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h4 id="multimer.AsyncTimer" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">AsyncTimer</span>
+
+
+<a href="#multimer.AsyncTimer" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">AsyncTimer</span><span class="p">(</span><span class="nb">id</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+
+        <p><code>asyncio</code>-backed timer with the same API as <code>machine.Timer</code> / :class:<code>Timer</code>.</p>
+<p>Use when <code>runtime.timer_async</code> is True (PyScript, Jupyter, desktop async).
+:meth:<code>init</code> requires a running event loop — prefer constructing at import
+time and calling :meth:<code>init</code> (or passing kwargs) only after the loop starts,
+or let <code>eventsys.Runtime</code> defer arming via <code>arm_async_refresh</code>.</p>
+<p>Inherited: :attr:<code>ONE_SHOT</code>, :attr:<code>PERIODIC</code>, :meth:<code>init</code>, :meth:<code>deinit</code>.</p>
+
+        <p>Create an async timer, optionally calling :meth:<code>init</code> when kwargs are given.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>id</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Timer id (kept for API parity; async tasks are not hardware-bound).</p>
+              </div>
+            </td>
+            <td>
+                  <code>-1</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**kwargs</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Forwarded to :meth:<code>init</code> when non-empty.</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ImportError">ImportError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>No <code>asyncio</code> / <code>uasyncio</code> available.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>:meth:<code>init</code> called with no running event loop.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+<h5 id="multimer.AsyncTimer-attributes">Attributes<a href="#multimer.AsyncTimer-attributes" class="headerlink" title="Permanent link">&para;</a></h5>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h6 id="multimer.AsyncTimer.ONE_SHOT" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">ONE_SHOT</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#multimer.AsyncTimer.ONE_SHOT" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">ONE_SHOT</span> <span class="o">=</span> <span class="n">const</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Fire once then disarm.</p>
+
+    </div>
+
 </div>
-<table>
-<thead>
-<tr>
-<th style="text-align: center;"><img alt="active" src="https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/active.gif" /></th>
-<th style="text-align: center;"><img alt="tiny_toasters" src="https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/tiny_toasters.gif" /></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;"><code>active.py</code></td>
-<td style="text-align: center;"><code>tiny_toasters.py</code></td>
-</tr>
-</tbody>
-</table>
-<p>More in the <a href="try/#screenshot-gallery">screenshot gallery</a>.</p>
-<h2 id="it-runs-everywhere">It runs everywhere<a class="headerlink" href="#it-runs-everywhere" title="Permanent link">&para;</a></h2>
-<p>Portability is PyDisplay's headline feature:</p>
-<table>
-<thead>
-<tr>
-<th>Runtime</th>
-<th style="text-align: center;">Microcontrollers</th>
-<th style="text-align: center;">Unix / Linux</th>
-<th style="text-align: center;">Windows</th>
-<th style="text-align: center;">Browser</th>
-<th style="text-align: center;">Jupyter</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>MicroPython</strong></td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅ PyScript · Wokwi</td>
-<td style="text-align: center;">—</td>
-</tr>
-<tr>
-<td><strong>CircuitPython</strong></td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">—</td>
-</tr>
-<tr>
-<td><strong>CPython</strong></td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">✅</td>
-</tr>
-</tbody>
-</table>
-<p>Develop on your laptop with a mouse, then deploy the <em>same</em> code to a touchscreen on an ESP32. See <strong><a href="platforms/">Portability &amp; platforms</a></strong> for the full story.</p>
-<h2 id="get-started">🚀 Get started<a class="headerlink" href="#get-started" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>I want to…</th>
-<th>Start here</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Try it with no install</td>
-<td><a href="try/">Try PyDisplay</a></td>
-</tr>
-<tr>
-<td>Install the browser gallery as an app</td>
-<td><a href="platforms/pwa/">Where PWAs run</a></td>
-</tr>
-<tr>
-<td>Run on an ESP32 / MicroPython board</td>
-<td><a href="guides/esp32-board/">ESP32 board guide</a></td>
-</tr>
-<tr>
-<td>Develop on desktop (CPython)</td>
-<td><a href="guides/desktop-cpython/">Desktop CPython guide</a></td>
-</tr>
-<tr>
-<td>See every starting path</td>
-<td><a href="getting-started/">Getting started</a></td>
-</tr>
-<tr>
-<td>Understand the design</td>
-<td><a href="concepts/architecture/">Architecture</a></td>
-</tr>
-</tbody>
-</table>
-<h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>One API, every platform</strong> — <code>framebuf</code>-compatible drawing on MicroPython, CircuitPython, and CPython.</li>
-<li><strong>Unified input</strong> — touch, mouse, keyboard, keypad, rotary encoder, and joystick all arrive as the same PyGame/SDL2-style <a href="concepts/events/">events</a>.</li>
-<li><strong>Cross-platform timers</strong> — <a href="concepts/multimer/"><code>multimer</code></a> gives you <code>machine.Timer</code>-style and <code>asyncio</code> timers even on hosts that have neither.</li>
-<li><strong>Installable browser apps</strong> — the <a href="https://PyDevices.github.io/pydisplay/pyscript/">PyScript gallery</a> is a <a href="platforms/pwa/">Progressive Web App</a> (desktop, Android Chrome, iOS home screen).</li>
-<li><strong>Batteries included</strong> — 30 board configs, 60+ <a href="examples/">examples</a>, a <a href="https://PyDevices.github.io/pydisplay/pyscript/">browser demo</a>, and a <a href="guides/wokwi/">Wokwi</a> project.</li>
-<li><strong>Flexible install</strong> — <a href="installation/full-clone/">full clone</a>, one-line <a href="installation/mip-github/">MIP packages</a>, or precompiled <code>.mpy</code> bytecode.</li>
-</ul>
-<h2 id="build-guis-on-top-of-it">Build GUIs on top of it<a class="headerlink" href="#build-guis-on-top-of-it" title="Permanent link">&para;</a></h2>
-<p>PyDisplay is the graphics, input, and timing backend for a growing family of LVGL bindings — <a href="https://github.com/PyDevices/lv_micropython_cmod">lv_micropython_cmod</a>, <a href="https://github.com/PyDevices/lv_circuitpython_mod">lv_circuitpython_mod</a>, and <a href="https://github.com/PyDevices/lv_cpython_mod">lv_cpython_mod</a>. You can build an LVGL app in pure Python, <strong>develop it interactively in a Jupyter Notebook</strong>, and run the identical code on a microcontroller. See <a href="ecosystem/">Ecosystem &amp; sister projects</a>.</p>
-<h2 id="quick-links">Quick links<a class="headerlink" href="#quick-links" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Resource</th>
-<th>URL</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Browser demo</td>
-<td><a href="https://PyDevices.github.io/pydisplay/pyscript/">PyDevices.github.io/pydisplay/pyscript/</a></td>
-</tr>
-<tr>
-<td>Source</td>
-<td><a href="https://github.com/PyDevices/pydisplay">github.com/PyDevices/pydisplay</a></td>
-</tr>
-<tr>
-<td>MIP package index</td>
-<td><a href="https://PyDevices.github.io/micropython-lib/mip/PyDevices">PyDevices micropython-lib</a></td>
-</tr>
-<tr>
-<td>Issues &amp; roadmap</td>
-<td><a href="https://github.com/PyDevices/pydisplay/issues">GitHub Issues</a></td>
-</tr>
-</tbody>
-</table>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h6 id="multimer.AsyncTimer.PERIODIC" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">PERIODIC</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#multimer.AsyncTimer.PERIODIC" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">PERIODIC</span> <span class="o">=</span> <span class="n">const</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Repeat until :meth:<code>deinit</code>.</p>
+
+    </div>
+
+</div>
+
+
+<h5 id="multimer.AsyncTimer-functions">Methods:<a href="#multimer.AsyncTimer-functions" class="headerlink" title="Permanent link">&para;</a></h5>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="multimer.AsyncTimer.init" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">init</span>
+
+
+<a href="#multimer.AsyncTimer.init" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">init</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="n">PERIODIC</span><span class="p">,</span>
+    <span class="n">freq</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">period</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">hard</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Arm or re-arm the timer with MicroPython <code>machine.Timer</code> semantics.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>mode</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>:attr:<code>ONE_SHOT</code> or :attr:<code>PERIODIC</code> (default <code>PERIODIC</code>).</p>
+              </div>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="PERIODIC
+
+
+  
+      class-attribute
+      instance-attribute
+   (multimer._core._TimerCore.PERIODIC)" href="#multimer.AsyncTimer.PERIODIC">PERIODIC</a></code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>freq</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Frequency in Hz. When <code>freq &gt; 0</code>, period is <code>1000 // freq</code> ms.</p>
+              </div>
+            </td>
+            <td>
+                  <code>-1</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>period</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Period in milliseconds (used when <code>freq</code> is not positive).</p>
+              </div>
+            </td>
+            <td>
+                  <code>-1</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>callback</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Callable invoked as <code>callback(timer)</code> on each fire.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>hard</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>When <code>True</code>, call <code>callback</code> directly from the backend
+delivery path. When <code>False</code>, deliver via :func:<code>schedule</code>.
+Soft still applies coalesce and inter-tick gap. On signal
+backends (<code>uses_signals()</code> — librt, <code>machine.Timer</code>),
+delivery is already on the main thread, so soft invokes the
+callback immediately there (≈ hard for <em>when</em> it runs). Soft
+only defers to a later main-thread drain when the backend
+delivers off-main (threading / win32 APC enqueue / polling).
+On MicroPython, soft uses <code>micropython.schedule</code> (queue out
+of a locked-heap ISR).</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Invalid <code>mode</code>, or neither <code>freq</code> nor <code>period</code>
+yields a period of at least 1 ms.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h6 id="multimer.AsyncTimer.deinit" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">deinit</span>
+
+
+<a href="#multimer.AsyncTimer.deinit" class="headerlink" title="Permanent link">&para;</a></h6>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">deinit</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Stop the timer and clear mode, period, and callback.</p>
+<p>Waits until any in-flight callback finishes, then disarms the backend.
+Safe to call repeatedly.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+<h3 id="multimer-functions">Functions:<a href="#multimer-functions" class="headerlink" title="Permanent link">&para;</a></h3>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="multimer.monotonic" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">monotonic</span>
+
+
+<a href="#multimer.monotonic" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">monotonic</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return a monotonic clock in seconds (float).</p>
+<p>Prefer this over wall-clock <code>time.time()</code> for intervals. On CircuitPython
+with <code>supervisor.ticks_ms</code>, returns <code>ticks_ms() / 1000</code>.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>float</code></td>            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Seconds since an arbitrary epoch (monotonic).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="multimer.run_deadline_hook" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">run_deadline_hook</span>
+
+
+<a href="#multimer.run_deadline_hook" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">run_deadline_hook</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Invoke the registered deadline hook, if any (dev/troubleshooting only).</p>
+<p>Returns the hook's result, or <code>False</code> when no hook is registered.
+Prefer leaving this to :func:<code>sleep_ms</code> unless you are writing harness
+code that also polls without sleeping.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="multimer.set_deadline_hook" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">set_deadline_hook</span>
+
+
+<a href="#multimer.set_deadline_hook" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">set_deadline_hook</span><span class="p">(</span><span class="n">hook</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Register or clear a cooperative deadline hook (dev/troubleshooting only).</p>
+<p>This is <strong>not</strong> an application API. Use it only from test harnesses or
+interactive debugging when you need a wall-clock deadline on hosts that
+cannot run a background quit thread (for example browser WASM).</p>
+<p><code>hook</code> is a zero-arg callable, or <code>None</code> to clear. :func:<code>sleep_ms</code>
+calls it before and after sleeping; callers may also invoke
+:func:<code>run_deadline_hook</code> from a poll loop. The hook's return value is
+passed through by :func:<code>run_deadline_hook</code>.</p>
+<p>Example (harness)::</p>
+<pre><code>def on_deadline():
+    runtime.request_quit()
+    return True
+
+multimer.set_deadline_hook(on_deadline)
+# ... run bounded demo ...
+multimer.set_deadline_hook(None)
+</code></pre>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="multimer.ticks_add" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">ticks_add</span>
+
+
+<a href="#multimer.ticks_add" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">ticks_add</span><span class="p">(</span><span class="n">ticks</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Add a delta to a ticks value with wraparound at <code>2**29</code> ms.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>ticks</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Base ticks value from :func:<code>ticks_ms</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>delta</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Signed offset in milliseconds (must fit in half the ticks period).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>int</code></td>            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>(ticks + delta)</code> wrapped to the ticks period.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="OverflowError">OverflowError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>When <code>delta</code> is outside <code>(-2**28, 2**28)</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="multimer.ticks_diff" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">ticks_diff</span>
+
+
+<a href="#multimer.ticks_diff" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">ticks_diff</span><span class="p">(</span><span class="n">ticks1</span><span class="p">,</span> <span class="n">ticks2</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Compute the signed difference between two ticks values.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>ticks1</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Later (or minuend) ticks value.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>ticks2</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Earlier (or subtrahend) ticks value.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>int</code></td>            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Signed <code>ticks1 - ticks2</code> in milliseconds, handling wraparound.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="multimer.ticks_less" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">ticks_less</span>
+
+
+<a href="#multimer.ticks_less" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">ticks_less</span><span class="p">(</span><span class="n">ticks1</span><span class="p">,</span> <span class="n">ticks2</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return True if ticks1 is before ticks2.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="multimer.ticks_ms" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">ticks_ms</span>
+
+
+<a href="#multimer.ticks_ms" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">ticks_ms</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return a wrapping millisecond tick counter (period <code>2**29</code> ms).</p>
+<p>Compatible with MicroPython <code>time.ticks_ms</code> / CircuitPython
+<code>supervisor.ticks_ms</code>. Pair with :func:<code>ticks_diff</code> and :func:<code>ticks_add</code>.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>int</code></td>            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Milliseconds since an arbitrary epoch, masked to 29 bits.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="multimer.uses_signals" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">uses_signals</span>
+
+
+<a href="#multimer.uses_signals" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">uses_signals</span><span class="p">()</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>True when the active sync backend delivers timers without a sleep pump.</p>
+<p>Covers librt POSIX-timer signals and MicroPython <code>machine.Timer</code>: callbacks
+keep firing at an interactive prompt with no <code>run_forever</code> keep-alive loop.
+Pump-based backends (win32 APC, SDL2, threading) and async-only runtimes
+return False. Public accessor so callers (e.g. <code>eventsys.Runtime.run_forever</code>)
+need not reach into <code>multimer._select</code>.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
 
 
 
@@ -4341,10 +5197,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "search.suggest", "content.code.copy", "toc.integrate"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "search.suggest", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

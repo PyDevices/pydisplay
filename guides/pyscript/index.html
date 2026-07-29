@@ -8,29 +8,31 @@
       
       
       
-        <link rel="canonical" href="https://pydisplay.readthedocs.io/">
+        <link rel="canonical" href="https://pydisplay.readthedocs.io/guides/pyscript/">
       
       
+        <link rel="prev" href="../wokwi/">
       
-        <link rel="next" href="try/">
+      
+        <link rel="next" href="../pyscript-asyncio/">
       
       
         
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>pydisplay</title>
+        <title>PyScript - pydisplay</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -49,11 +51,11 @@
       
     
     
-      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -78,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#pydisplay" class="md-skip">
+        <a href="#pyscript-local-development" class="md-skip">
           Skip to content
         </a>
       
@@ -94,7 +96,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="pydisplay" class="md-header__button md-logo" aria-label="pydisplay" data-md-component="logo">
+    <a href="../.." title="pydisplay" class="md-header__button md-logo" aria-label="pydisplay" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -114,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              PyScript
             
           </span>
         </div>
@@ -219,11 +221,9 @@
   
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="." class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -240,6 +240,8 @@
   
   
   
+    
+  
   
     
     
@@ -247,11 +249,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="try/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../try/" class="md-tabs__link">
           
   
   
@@ -281,7 +285,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="reference/overviews/displaysys/" class="md-tabs__link">
+        <a href="../../reference/overviews/displaysys/" class="md-tabs__link">
           
   
   
@@ -326,7 +330,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="pydisplay" class="md-nav__button md-logo" aria-label="pydisplay" data-md-component="logo">
+    <a href="../.." title="pydisplay" class="md-nav__button md-logo" aria-label="pydisplay" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -353,37 +357,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Home
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -399,81 +376,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#it-runs-everywhere" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        It runs everywhere
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#get-started" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🚀 Get started
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#key-features" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Key features
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#build-guis-on-top-of-it" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Build GUIs on top of it
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-links" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quick links
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -482,26 +384,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
             
   
   
@@ -519,7 +426,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -543,17 +450,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
         
           
-          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="">
             
   
   
@@ -589,7 +499,7 @@
   
   
     <li class="md-nav__item">
-      <a href="try/" class="md-nav__link">
+      <a href="../../try/" class="md-nav__link">
         
   
   
@@ -650,26 +560,31 @@
                 
   
   
+    
   
   
+  
     
     
     
     
       
       
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
             
   
   
@@ -687,7 +602,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -705,7 +620,7 @@
   
   
     <li class="md-nav__item">
-      <a href="getting-started/" class="md-nav__link">
+      <a href="../../getting-started/" class="md-nav__link">
         
   
   
@@ -733,7 +648,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/esp32-board/" class="md-nav__link">
+      <a href="../esp32-board/" class="md-nav__link">
         
   
   
@@ -761,7 +676,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/desktop-cpython/" class="md-nav__link">
+      <a href="../desktop-cpython/" class="md-nav__link">
         
   
   
@@ -789,7 +704,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/wokwi/" class="md-nav__link">
+      <a href="../wokwi/" class="md-nav__link">
         
   
   
@@ -814,10 +729,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="guides/pyscript/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyScript
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -833,6 +775,131 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#live-demo-online" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live demo (online)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run locally
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#minimal-teaching-shells" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Minimal teaching shells
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Minimal teaching shells">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#repl-worker-vs-main-thread" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REPL: worker vs main thread
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#asyncio-requirement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        asyncio requirement
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gallery-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gallery examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#board-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Board config
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -845,7 +912,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/pyscript-asyncio/" class="md-nav__link">
+      <a href="../pyscript-asyncio/" class="md-nav__link">
         
   
   
@@ -873,7 +940,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guides/pyscript-pwa/" class="md-nav__link">
+      <a href="../pyscript-pwa/" class="md-nav__link">
         
   
   
@@ -915,17 +982,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
         
           
-          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="">
             
   
   
@@ -961,7 +1031,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/" class="md-nav__link">
+      <a href="../../installation/" class="md-nav__link">
         
   
   
@@ -989,7 +1059,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/full-clone/" class="md-nav__link">
+      <a href="../../installation/full-clone/" class="md-nav__link">
         
   
   
@@ -1017,7 +1087,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/installer/" class="md-nav__link">
+      <a href="../../installation/installer/" class="md-nav__link">
         
   
   
@@ -1045,7 +1115,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/mip-github/" class="md-nav__link">
+      <a href="../../installation/mip-github/" class="md-nav__link">
         
   
   
@@ -1073,7 +1143,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/mip-micropython-lib/" class="md-nav__link">
+      <a href="../../installation/mip-micropython-lib/" class="md-nav__link">
         
   
   
@@ -1115,17 +1185,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
         
           
-          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="">
             
   
   
@@ -1161,7 +1234,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/" class="md-nav__link">
+      <a href="../../hardware/" class="md-nav__link">
         
   
   
@@ -1203,17 +1276,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
         
           
-          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="">
             
   
   
@@ -1249,7 +1325,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/architecture/" class="md-nav__link">
+      <a href="../../concepts/architecture/" class="md-nav__link">
         
   
   
@@ -1277,7 +1353,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/displays/" class="md-nav__link">
+      <a href="../../concepts/displays/" class="md-nav__link">
         
   
   
@@ -1305,7 +1381,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/events/" class="md-nav__link">
+      <a href="../../concepts/events/" class="md-nav__link">
         
   
   
@@ -1333,7 +1409,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/runtime/" class="md-nav__link">
+      <a href="../../concepts/runtime/" class="md-nav__link">
         
   
   
@@ -1361,7 +1437,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/multimer/" class="md-nav__link">
+      <a href="../../concepts/multimer/" class="md-nav__link">
         
   
   
@@ -1389,7 +1465,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/drawing-and-fonts/" class="md-nav__link">
+      <a href="../../concepts/drawing-and-fonts/" class="md-nav__link">
         
   
   
@@ -1417,7 +1493,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/graphics/" class="md-nav__link">
+      <a href="../../concepts/graphics/" class="md-nav__link">
         
   
   
@@ -1445,7 +1521,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/graphics-files/" class="md-nav__link">
+      <a href="../../concepts/graphics-files/" class="md-nav__link">
         
   
   
@@ -1473,7 +1549,7 @@
   
   
     <li class="md-nav__item">
-      <a href="concepts/config-files/" class="md-nav__link">
+      <a href="../../concepts/config-files/" class="md-nav__link">
         
   
   
@@ -1515,17 +1591,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
         
           
-          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="">
             
   
   
@@ -1561,7 +1640,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/" class="md-nav__link">
+      <a href="../../platforms/" class="md-nav__link">
         
   
   
@@ -1589,7 +1668,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/micropython/" class="md-nav__link">
+      <a href="../../platforms/micropython/" class="md-nav__link">
         
   
   
@@ -1617,7 +1696,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/circuitpython/" class="md-nav__link">
+      <a href="../../platforms/circuitpython/" class="md-nav__link">
         
   
   
@@ -1645,7 +1724,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/cpython-desktop/" class="md-nav__link">
+      <a href="../../platforms/cpython-desktop/" class="md-nav__link">
         
   
   
@@ -1673,7 +1752,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/android/" class="md-nav__link">
+      <a href="../../platforms/android/" class="md-nav__link">
         
   
   
@@ -1701,7 +1780,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/pwa/" class="md-nav__link">
+      <a href="../../platforms/pwa/" class="md-nav__link">
         
   
   
@@ -1729,7 +1808,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/jupyter/" class="md-nav__link">
+      <a href="../../platforms/jupyter/" class="md-nav__link">
         
   
   
@@ -1757,7 +1836,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/jupyter-run/" class="md-nav__link">
+      <a href="../../platforms/jupyter-run/" class="md-nav__link">
         
   
   
@@ -1785,7 +1864,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/jupyter-notebook/" class="md-nav__link">
+      <a href="../../platforms/jupyter-notebook/" class="md-nav__link">
         
   
   
@@ -1813,7 +1892,7 @@
   
   
     <li class="md-nav__item">
-      <a href="platforms/pyscript/" class="md-nav__link">
+      <a href="../../platforms/pyscript/" class="md-nav__link">
         
   
   
@@ -1855,17 +1934,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_7" >
         
           
-          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="">
             
   
   
@@ -1901,7 +1983,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/app-starter/" class="md-nav__link">
+      <a href="../../examples/app-starter/" class="md-nav__link">
         
   
   
@@ -1929,7 +2011,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/pydisplay_demo/" class="md-nav__link">
+      <a href="../../examples/pydisplay_demo/" class="md-nav__link">
         
   
   
@@ -1957,7 +2039,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/" class="md-nav__link">
+      <a href="../../examples/" class="md-nav__link">
         
   
   
@@ -1985,7 +2067,7 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/live-demos/" class="md-nav__link">
+      <a href="../../examples/live-demos/" class="md-nav__link">
         
   
   
@@ -2027,17 +2109,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_8" >
         
           
-          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="">
             
   
   
@@ -2073,7 +2158,7 @@
   
   
     <li class="md-nav__item">
-      <a href="ecosystem/" class="md-nav__link">
+      <a href="../../ecosystem/" class="md-nav__link">
         
   
   
@@ -2101,7 +2186,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guis/lvgl/" class="md-nav__link">
+      <a href="../../guis/lvgl/" class="md-nav__link">
         
   
   
@@ -2129,7 +2214,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guis/micropython-touch/" class="md-nav__link">
+      <a href="../../guis/micropython-touch/" class="md-nav__link">
         
   
   
@@ -2157,7 +2242,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guis/nano-gui/" class="md-nav__link">
+      <a href="../../guis/nano-gui/" class="md-nav__link">
         
   
   
@@ -2185,7 +2270,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guis/tft-gui/" class="md-nav__link">
+      <a href="../../guis/tft-gui/" class="md-nav__link">
         
   
   
@@ -2213,7 +2298,7 @@
   
   
     <li class="md-nav__item">
-      <a href="guis/pywidgets/" class="md-nav__link">
+      <a href="../../guis/pywidgets/" class="md-nav__link">
         
   
   
@@ -2249,7 +2334,7 @@
   
   
     <li class="md-nav__item">
-      <a href="add-ons/" class="md-nav__link">
+      <a href="../../add-ons/" class="md-nav__link">
         
   
   
@@ -2283,17 +2368,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_10" >
         
           
-          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_10" id="__nav_2_10_label" tabindex="">
             
   
   
@@ -2329,7 +2417,7 @@
   
   
     <li class="md-nav__item">
-      <a href="contributing/" class="md-nav__link">
+      <a href="../../contributing/" class="md-nav__link">
         
   
   
@@ -2357,7 +2445,7 @@
   
   
     <li class="md-nav__item">
-      <a href="contributing/docstrings/" class="md-nav__link">
+      <a href="../../contributing/docstrings/" class="md-nav__link">
         
   
   
@@ -2385,7 +2473,7 @@
   
   
     <li class="md-nav__item">
-      <a href="building-docs/" class="md-nav__link">
+      <a href="../../building-docs/" class="md-nav__link">
         
   
   
@@ -2413,7 +2501,7 @@
   
   
     <li class="md-nav__item">
-      <a href="publishing-micropython-lib/" class="md-nav__link">
+      <a href="../../publishing-micropython-lib/" class="md-nav__link">
         
   
   
@@ -2441,7 +2529,7 @@
   
   
     <li class="md-nav__item">
-      <a href="getting-help/" class="md-nav__link">
+      <a href="../../getting-help/" class="md-nav__link">
         
   
   
@@ -2469,7 +2557,7 @@
   
   
     <li class="md-nav__item">
-      <a href="troubleshooting/" class="md-nav__link">
+      <a href="../../troubleshooting/" class="md-nav__link">
         
   
   
@@ -2616,7 +2704,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/overviews/displaysys/" class="md-nav__link">
+      <a href="../../reference/overviews/displaysys/" class="md-nav__link">
         
   
   
@@ -2644,7 +2732,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/overviews/eventsys/" class="md-nav__link">
+      <a href="../../reference/overviews/eventsys/" class="md-nav__link">
         
   
   
@@ -2672,7 +2760,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/overviews/graphics/" class="md-nav__link">
+      <a href="../../reference/overviews/graphics/" class="md-nav__link">
         
   
   
@@ -2700,7 +2788,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/overviews/multimer/" class="md-nav__link">
+      <a href="../../reference/overviews/multimer/" class="md-nav__link">
         
   
   
@@ -2788,7 +2876,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/board_config/" class="md-nav__link">
+      <a href="../../reference/board_config/" class="md-nav__link">
         
   
   
@@ -2816,7 +2904,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/boarddev/" class="md-nav__link">
+      <a href="../../reference/boarddev/" class="md-nav__link">
         
   
   
@@ -2861,7 +2949,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="reference/displaysys/" class="md-nav__link ">
+            <a href="../../reference/displaysys/" class="md-nav__link ">
               
   
   
@@ -2903,7 +2991,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/busdisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/busdisplay/" class="md-nav__link">
         
   
   
@@ -2931,7 +3019,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/epaperdisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/epaperdisplay/" class="md-nav__link">
         
   
   
@@ -2959,7 +3047,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/fbdisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/fbdisplay/" class="md-nav__link">
         
   
   
@@ -2987,7 +3075,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/jndisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/jndisplay/" class="md-nav__link">
         
   
   
@@ -3015,7 +3103,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/pgdisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/pgdisplay/" class="md-nav__link">
         
   
   
@@ -3043,7 +3131,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/pixeldisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/pixeldisplay/" class="md-nav__link">
         
   
   
@@ -3071,7 +3159,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/psdisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/psdisplay/" class="md-nav__link">
         
   
   
@@ -3099,7 +3187,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/displaysys/sdldisplay/" class="md-nav__link">
+      <a href="../../reference/displaysys/sdldisplay/" class="md-nav__link">
         
   
   
@@ -3152,7 +3240,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="reference/eventsys/" class="md-nav__link ">
+            <a href="../../reference/eventsys/" class="md-nav__link ">
               
   
   
@@ -3194,7 +3282,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/eventsys/joystick_keys/" class="md-nav__link">
+      <a href="../../reference/eventsys/joystick_keys/" class="md-nav__link">
         
   
   
@@ -3222,7 +3310,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/eventsys/keys/" class="md-nav__link">
+      <a href="../../reference/eventsys/keys/" class="md-nav__link">
         
   
   
@@ -3250,7 +3338,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/eventsys/touch_keypad/" class="md-nav__link">
+      <a href="../../reference/eventsys/touch_keypad/" class="md-nav__link">
         
   
   
@@ -3286,7 +3374,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/multimer/" class="md-nav__link">
+      <a href="../../reference/multimer/" class="md-nav__link">
         
   
   
@@ -3314,7 +3402,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/path/" class="md-nav__link">
+      <a href="../../reference/path/" class="md-nav__link">
         
   
   
@@ -3394,7 +3482,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/byteswap/" class="md-nav__link">
+      <a href="../../reference/add_ons/byteswap/" class="md-nav__link">
         
   
   
@@ -3422,7 +3510,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/color_setup/" class="md-nav__link">
+      <a href="../../reference/add_ons/color_setup/" class="md-nav__link">
         
   
   
@@ -3450,7 +3538,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/console/" class="md-nav__link">
+      <a href="../../reference/add_ons/console/" class="md-nav__link">
         
   
   
@@ -3478,7 +3566,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/displaybuf/" class="md-nav__link">
+      <a href="../../reference/add_ons/displaybuf/" class="md-nav__link">
         
   
   
@@ -3506,7 +3594,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/fetch_ph_gui/" class="md-nav__link">
+      <a href="../../reference/add_ons/fetch_ph_gui/" class="md-nav__link">
         
   
   
@@ -3534,7 +3622,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/framebuf/" class="md-nav__link">
+      <a href="../../reference/add_ons/framebuf/" class="md-nav__link">
         
   
   
@@ -3562,7 +3650,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/hardware_setup/" class="md-nav__link">
+      <a href="../../reference/add_ons/hardware_setup/" class="md-nav__link">
         
   
   
@@ -3590,7 +3678,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/itertools/" class="md-nav__link">
+      <a href="../../reference/add_ons/itertools/" class="md-nav__link">
         
   
   
@@ -3618,7 +3706,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/keypins/" class="md-nav__link">
+      <a href="../../reference/add_ons/keypins/" class="md-nav__link">
         
   
   
@@ -3646,7 +3734,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/lv_encoder_emu/" class="md-nav__link">
+      <a href="../../reference/add_ons/lv_encoder_emu/" class="md-nav__link">
         
   
   
@@ -3674,7 +3762,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/micropython/" class="md-nav__link">
+      <a href="../../reference/add_ons/micropython/" class="md-nav__link">
         
   
   
@@ -3702,7 +3790,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/mip/" class="md-nav__link">
+      <a href="../../reference/add_ons/mip/" class="md-nav__link">
         
   
   
@@ -3747,7 +3835,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="reference/add_ons/pixel_sim/" class="md-nav__link ">
+            <a href="../../reference/add_ons/pixel_sim/" class="md-nav__link ">
               
   
   
@@ -3789,7 +3877,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/pixel_sim/board_config/" class="md-nav__link">
+      <a href="../../reference/add_ons/pixel_sim/board_config/" class="md-nav__link">
         
   
   
@@ -3825,7 +3913,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/png/" class="md-nav__link">
+      <a href="../../reference/add_ons/png/" class="md-nav__link">
         
   
   
@@ -3853,7 +3941,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/ps_loader/" class="md-nav__link">
+      <a href="../../reference/add_ons/ps_loader/" class="md-nav__link">
         
   
   
@@ -3881,7 +3969,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/tft_bitmap/" class="md-nav__link">
+      <a href="../../reference/add_ons/tft_bitmap/" class="md-nav__link">
         
   
   
@@ -3909,7 +3997,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/tft_config/" class="md-nav__link">
+      <a href="../../reference/add_ons/tft_config/" class="md-nav__link">
         
   
   
@@ -3937,7 +4025,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/tft_text/" class="md-nav__link">
+      <a href="../../reference/add_ons/tft_text/" class="md-nav__link">
         
   
   
@@ -3965,7 +4053,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/tft_write/" class="md-nav__link">
+      <a href="../../reference/add_ons/tft_write/" class="md-nav__link">
         
   
   
@@ -3993,7 +4081,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/touch_setup/" class="md-nav__link">
+      <a href="../../reference/add_ons/touch_setup/" class="md-nav__link">
         
   
   
@@ -4021,7 +4109,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/uctypes/" class="md-nav__link">
+      <a href="../../reference/add_ons/uctypes/" class="md-nav__link">
         
   
   
@@ -4049,7 +4137,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/viper_tools/" class="md-nav__link">
+      <a href="../../reference/add_ons/viper_tools/" class="md-nav__link">
         
   
   
@@ -4077,7 +4165,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/add_ons/wifi/" class="md-nav__link">
+      <a href="../../reference/add_ons/wifi/" class="md-nav__link">
         
   
   
@@ -4143,144 +4231,138 @@
   
 
 
-<h1 id="pydisplay">PyDisplay<a class="headerlink" href="#pydisplay" title="Permanent link">&para;</a></h1>
-<p><strong>Write your graphics code once. Run it everywhere Python runs.</strong></p>
-<p>PyDisplay is the portable foundation layer for Python graphics — <strong>display drivers, unified input events, drawing primitives, fonts, palettes, and cross-platform timers</strong> behind a single API. The same drawing code runs unchanged on a microcontroller, on your desktop, in a web browser, and inside a Jupyter Notebook.</p>
-<p>The mental model is simple: import <code>board_config</code> for <code>display_drv</code> and <code>runtime</code>, draw into the display using the usual framebuffer-style calls, handle input with the shared runtime, and keep the app alive with <code>runtime.run_forever()</code>. That pattern scales from a one-file demo to a larger widget stack.</p>
-<p>PyDisplay is a <em>foundation</em>, not a GUI toolkit. Use it directly for simple UIs, or as the backend for <a href="guis/lvgl/">LVGL</a>, <a href="guis/nano-gui/">Nano-GUI</a>, <a href="guis/micro-gui/">Micro-GUI</a>, <a href="guis/micropython-touch/">MicroPython-Touch</a>, <a href="guis/pywidgets/">pdwidgets</a>, or your own widget library.</p>
-<div class="admonition warning">
-<p class="admonition-title">Alpha quality</p>
-<p>PyDisplay is under active development. APIs and documentation are still evolving. <a href="contributing/">Feedback and pull requests</a> are welcome.</p>
-</div>
+<h1 id="pyscript-local-development">PyScript local development<a class="headerlink" href="#pyscript-local-development" title="Permanent link">&para;</a></h1>
+<p><strong>Who:</strong> You run or hack the browser demo locally, or port examples to PyScript.</p>
+<p><strong>Prerequisites:</strong> Python 3 on your PC (for <code>http.server</code> only).</p>
+<h2 id="live-demo-online">Live demo (online)<a class="headerlink" href="#live-demo-online" title="Permanent link">&para;</a></h2>
+<p><a href="https://PyDevices.github.io/pydisplay/pyscript/">PyDevices.github.io/pydisplay/pyscript/</a></p>
 <table>
 <thead>
 <tr>
-<th style="text-align: center;"><img alt="active" src="https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/active.gif" /></th>
-<th style="text-align: center;"><img alt="tiny_toasters" src="https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/tiny_toasters.gif" /></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;"><code>active.py</code></td>
-<td style="text-align: center;"><code>tiny_toasters.py</code></td>
-</tr>
-</tbody>
-</table>
-<p>More in the <a href="try/#screenshot-gallery">screenshot gallery</a>.</p>
-<h2 id="it-runs-everywhere">It runs everywhere<a class="headerlink" href="#it-runs-everywhere" title="Permanent link">&para;</a></h2>
-<p>Portability is PyDisplay's headline feature:</p>
-<table>
-<thead>
-<tr>
-<th>Runtime</th>
-<th style="text-align: center;">Microcontrollers</th>
-<th style="text-align: center;">Unix / Linux</th>
-<th style="text-align: center;">Windows</th>
-<th style="text-align: center;">Browser</th>
-<th style="text-align: center;">Jupyter</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>MicroPython</strong></td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅ PyScript · Wokwi</td>
-<td style="text-align: center;">—</td>
-</tr>
-<tr>
-<td><strong>CircuitPython</strong></td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">—</td>
-</tr>
-<tr>
-<td><strong>CPython</strong></td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">—</td>
-<td style="text-align: center;">✅</td>
-</tr>
-</tbody>
-</table>
-<p>Develop on your laptop with a mouse, then deploy the <em>same</em> code to a touchscreen on an ESP32. See <strong><a href="platforms/">Portability &amp; platforms</a></strong> for the full story.</p>
-<h2 id="get-started">🚀 Get started<a class="headerlink" href="#get-started" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>I want to…</th>
-<th>Start here</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Try it with no install</td>
-<td><a href="try/">Try PyDisplay</a></td>
-</tr>
-<tr>
-<td>Install the browser gallery as an app</td>
-<td><a href="platforms/pwa/">Where PWAs run</a></td>
-</tr>
-<tr>
-<td>Run on an ESP32 / MicroPython board</td>
-<td><a href="guides/esp32-board/">ESP32 board guide</a></td>
-</tr>
-<tr>
-<td>Develop on desktop (CPython)</td>
-<td><a href="guides/desktop-cpython/">Desktop CPython guide</a></td>
-</tr>
-<tr>
-<td>See every starting path</td>
-<td><a href="getting-started/">Getting started</a></td>
-</tr>
-<tr>
-<td>Understand the design</td>
-<td><a href="concepts/architecture/">Architecture</a></td>
-</tr>
-</tbody>
-</table>
-<h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>One API, every platform</strong> — <code>framebuf</code>-compatible drawing on MicroPython, CircuitPython, and CPython.</li>
-<li><strong>Unified input</strong> — touch, mouse, keyboard, keypad, rotary encoder, and joystick all arrive as the same PyGame/SDL2-style <a href="concepts/events/">events</a>.</li>
-<li><strong>Cross-platform timers</strong> — <a href="concepts/multimer/"><code>multimer</code></a> gives you <code>machine.Timer</code>-style and <code>asyncio</code> timers even on hosts that have neither.</li>
-<li><strong>Installable browser apps</strong> — the <a href="https://PyDevices.github.io/pydisplay/pyscript/">PyScript gallery</a> is a <a href="platforms/pwa/">Progressive Web App</a> (desktop, Android Chrome, iOS home screen).</li>
-<li><strong>Batteries included</strong> — 30 board configs, 60+ <a href="examples/">examples</a>, a <a href="https://PyDevices.github.io/pydisplay/pyscript/">browser demo</a>, and a <a href="guides/wokwi/">Wokwi</a> project.</li>
-<li><strong>Flexible install</strong> — <a href="installation/full-clone/">full clone</a>, one-line <a href="installation/mip-github/">MIP packages</a>, or precompiled <code>.mpy</code> bytecode.</li>
-</ul>
-<h2 id="build-guis-on-top-of-it">Build GUIs on top of it<a class="headerlink" href="#build-guis-on-top-of-it" title="Permanent link">&para;</a></h2>
-<p>PyDisplay is the graphics, input, and timing backend for a growing family of LVGL bindings — <a href="https://github.com/PyDevices/lv_micropython_cmod">lv_micropython_cmod</a>, <a href="https://github.com/PyDevices/lv_circuitpython_mod">lv_circuitpython_mod</a>, and <a href="https://github.com/PyDevices/lv_cpython_mod">lv_cpython_mod</a>. You can build an LVGL app in pure Python, <strong>develop it interactively in a Jupyter Notebook</strong>, and run the identical code on a microcontroller. See <a href="ecosystem/">Ecosystem &amp; sister projects</a>.</p>
-<h2 id="quick-links">Quick links<a class="headerlink" href="#quick-links" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Resource</th>
+<th>Page</th>
 <th>URL</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Browser demo</td>
-<td><a href="https://PyDevices.github.io/pydisplay/pyscript/">PyDevices.github.io/pydisplay/pyscript/</a></td>
+<td>Calculator</td>
+<td><a href="https://PyDevices.github.io/pydisplay/pyscript/micropython.html?modules=calc_graphics,calc_engine">pyscript/micropython.html?modules=calc_graphics,calc_engine</a></td>
 </tr>
 <tr>
-<td>Source</td>
-<td><a href="https://github.com/PyDevices/pydisplay">github.com/PyDevices/pydisplay</a></td>
+<td>Editor</td>
+<td><a href="https://PyDevices.github.io/pydisplay/pyscript/editor.html">pyscript/editor.html</a></td>
 </tr>
 <tr>
-<td>MIP package index</td>
-<td><a href="https://PyDevices.github.io/micropython-lib/mip/PyDevices">PyDevices micropython-lib</a></td>
+<td>REPL</td>
+<td><a href="https://PyDevices.github.io/pydisplay/pyscript/repl.html">pyscript/repl.html</a></td>
 </tr>
 <tr>
-<td>Issues &amp; roadmap</td>
-<td><a href="https://github.com/PyDevices/pydisplay/issues">GitHub Issues</a></td>
+<td>Async</td>
+<td><a href="https://PyDevices.github.io/pydisplay/pyscript/async.html">pyscript/async.html</a></td>
+</tr>
+<tr>
+<td>DOM</td>
+<td><a href="https://PyDevices.github.io/pydisplay/pyscript/dom.html">pyscript/dom.html</a></td>
+</tr>
+<tr>
+<td>Pyodide (modules / manifests)</td>
+<td><a href="https://PyDevices.github.io/pydisplay/pyscript/pyodide.html?modules=calc_graphics,calc_engine">pyscript/pyodide.html?modules=calc_graphics,calc_engine</a> · <a href="https://PyDevices.github.io/pydisplay/pyscript/pyodide.html?manifests=chango">manifests=chango</a></td>
 </tr>
 </tbody>
 </table>
+<h2 id="run-locally">Run locally<a class="headerlink" href="#run-locally" title="Permanent link">&para;</a></h2>
+<p>Examples in the <a href="https://PyDevices.github.io/pydisplay/pyscript/">browser gallery</a> are copied to the deploy site and installed from the same origin on GitHub Pages. Locally, <code>tools/serve.py</code> serves your working tree — gallery pages load <code>src/examples/</code> via <code>web/pyscript/micropython.html?modules=…</code> / <code>?manifests=…</code> (MicroPython). Use <code>web/pyscript/pyodide.html</code> with the same query shape for Pyodide smoke tests (MIP JSON under <code>packages/</code> via the <code>web/pyscript/packages</code> symlink; no <code>?packages=</code>); it is not wired into the gallery. Non-gallery pages (<code>repl.html</code>, <code>editor.html</code>, <code>async.html</code>, <code>dom.html</code>) may still use <code>github:</code> installs.</p>
+<h2 id="minimal-teaching-shells">Minimal teaching shells<a class="headerlink" href="#minimal-teaching-shells" title="Permanent link">&para;</a></h2>
+<p>These tiny pages sit beside the gallery loaders and each highlight one PyScript idea:</p>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Feature</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/editor.html"><code>editor.html</code></a></td>
+<td><code>type="mpy-editor"</code> with hidden <code>setup</code> + shared <code>env</code> — editable lesson + Run</td>
+</tr>
+<tr>
+<td><a href="https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/repl.html"><code>repl.html</code></a></td>
+<td><code>terminal worker</code> + <code>code.interact</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/async.html"><code>async.html</code></a></td>
+<td><code>async</code> / <code>await</code> animation that yields to the browser</td>
+</tr>
+<tr>
+<td><a href="https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/dom.html"><code>dom.html</code></a></td>
+<td>HTML button → Python via <code>create_proxy</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="repl-worker-vs-main-thread">REPL: worker vs main thread<a class="headerlink" href="#repl-worker-vs-main-thread" title="Permanent link">&para;</a></h3>
+<p><code>repl.html</code> uses <code>&lt;script type="mpy" … terminal worker&gt;</code>. The <code>worker</code> attribute runs MicroPython off the page's main thread so:</p>
+<ul>
+<li><code>input()</code> works inside the terminal (no browser <code>prompt()</code> dialog)</li>
+<li>Long-running or blocking REPL code does not freeze the tab UI</li>
+</ul>
+<p>Without <code>worker</code>, a MicroPython terminal still works, but <code>input()</code> falls back to the browser's native dialog, and a tight loop can freeze the page. Prefer <code>worker</code> for REPL-style shells unless you have a specific reason to stay on the main thread.</p>
+<p>Gallery loaders and the <code>async.html</code> / <code>dom.html</code> shells stay on the <strong>main thread</strong> because they drive the canvas and DOM listeners directly (same pattern as <code>micropython.html</code>).</p>
+<h2 id="asyncio-requirement">asyncio requirement<a class="headerlink" href="#asyncio-requirement" title="Permanent link">&para;</a></h2>
+<p>PyScript runs on asyncio. Prefer <code>runtime.run_forever()</code> with <code>on</code> / <code>on_tick</code>
+callbacks so demos stay responsive. See <a href="../pyscript-asyncio/">PyScript asyncio guide</a>, or open <a href="https://PyDevices.github.io/pydisplay/pyscript/async.html"><code>async.html</code></a> for a minimal bouncing-square loop.</p>
+<h2 id="gallery-examples">Gallery examples<a class="headerlink" href="#gallery-examples" title="Permanent link">&para;</a></h2>
+<p>Regenerate the card list with <code>python scripts/gallery_generator.py</code>. Every example entry under <code>src/examples/</code> is included by default.</p>
+<table>
+<thead>
+<tr>
+<th>Marker</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code># deps: …</code></td>
+<td>Logical packages → <code>?deps=</code> via <code>url_maker</code> (MIP on MicroPython, micropip on Pyodide)</td>
+</tr>
+<tr>
+<td><code># modules: …</code></td>
+<td>Extra example <code>.py</code> stems</td>
+</tr>
+<tr>
+<td><code># manifests: …</code></td>
+<td>Extra site-served demo bundles (<code>packages/&lt;name&gt;.json</code>)</td>
+</tr>
+<tr>
+<td><code># gallery: featured</code></td>
+<td>Pin to the top (badge)</td>
+</tr>
+<tr>
+<td><code># gallery: skip</code></td>
+<td>Omit from the card grid</td>
+</tr>
+<tr>
+<td><code># gallery: binaries</code></td>
+<td>Omit (needs non-mip assets)</td>
+</tr>
+</tbody>
+</table>
+<p>Hinch GUI smokes (<code>nano_gui_simpletest</code>, <code>micro_gui_simpletest</code>, <code>touch_gui_simpletest</code>) rely on <code>fetch_ph_gui</code> from the matching setup module — no gallery package header. First open needs network; later loads in the same session reuse the VFS until reload.</p>
+<p>Featured starters: <code>pydisplay_demo</code>, <code>testris</code>. See <code>scripts/gallery_generator.py</code> and <a href="../../examples/#pyscript-gallery-markers">examples catalog</a>.</p>
+<h2 id="board-config">Board config<a class="headerlink" href="#board-config" title="Permanent link">&para;</a></h2>
+<p><code>board_configs/psdisplay/</code> — 320×480 canvas with host input via <code>runtime</code>.</p>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../pyscript-pwa/">Make your PyScript app a PWA</a></li>
+<li><a href="../../platforms/pwa/">Where PWAs run</a> — host matrix (desktop, Android, iOS, TVs)</li>
+<li><a href="../pyscript-asyncio/">PyScript asyncio porting</a></li>
+<li><a href="../../try/">Try pydisplay</a></li>
+<li><a href="../../platforms/pyscript/">Platform notes</a></li>
+</ul>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../reference/">API reference (core)</a> → <code>displaysys.psdisplay</code></li>
+</ul>
 
 
 
@@ -4341,10 +4423,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "search.suggest", "content.code.copy", "toc.integrate"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "search.suggest", "content.code.copy", "toc.integrate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

@@ -1,0 +1,56 @@
+/*
+ * PyDevices brand colors for Material for MkDocs.
+ * Tokens mirror https://pydevices.github.io/assets/css/site.css
+ */
+
+:root > * {
+  --md-primary-fg-color: #f54e00;
+  --md-primary-fg-color--light: #ff7a3d;
+  --md-primary-fg-color--dark: #c33f00;
+  --md-primary-bg-color: #fff7f1;
+  --md-primary-bg-color--light: rgba(255, 247, 241, 0.7);
+
+  --md-accent-fg-color: #ff7a3d;
+  --md-accent-fg-color--transparent: rgba(245, 78, 0, 0.1);
+  --md-accent-bg-color: #1a0d05;
+  --md-accent-bg-color--light: rgba(26, 13, 5, 0.7);
+}
+
+[data-md-color-scheme="default"] {
+  --md-default-bg-color: #fbf9f5;
+  --md-default-bg-color--light: #f3eee6;
+  --md-default-bg-color--lighter: #f6f1e9;
+  --md-default-bg-color--lightest: #ffffff;
+  --md-default-fg-color: #201c16;
+  --md-default-fg-color--light: #5b5347;
+  --md-default-fg-color--lighter: #8a8172;
+  --md-default-fg-color--lightest: #c9bfae;
+  --md-typeset-a-color: #c33f00;
+  --md-code-bg-color: #f6f1e9;
+  --md-code-fg-color: #201c16;
+  --md-footer-bg-color: #f3eee6;
+  --md-footer-bg-color--dark: #201c16;
+  --md-footer-fg-color: #201c16;
+  --md-footer-fg-color--light: #5b5347;
+  --md-footer-fg-color--lighter: #8a8172;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-hue: 32;
+  --md-default-bg-color: #100e0b;
+  --md-default-bg-color--light: #17130f;
+  --md-default-bg-color--lighter: #1c1712;
+  --md-default-bg-color--lightest: #241e17;
+  --md-default-fg-color: #f3ecdf;
+  --md-default-fg-color--light: #c9bfae;
+  --md-default-fg-color--lighter: #8f8474;
+  --md-default-fg-color--lightest: #5b5347;
+  --md-typeset-a-color: #ff8a52;
+  --md-code-bg-color: #1c1712;
+  --md-code-fg-color: #f3ecdf;
+  --md-footer-bg-color: #17130f;
+  --md-footer-bg-color--dark: #100e0b;
+  --md-footer-fg-color: #f3ecdf;
+  --md-footer-fg-color--light: #c9bfae;
+  --md-footer-fg-color--lighter: #8f8474;
+}
