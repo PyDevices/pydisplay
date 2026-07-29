@@ -21,7 +21,7 @@ mip.install(
     index=MICROPYTHON_LIB,
     target=TARGET,
 )
-mip.install("pygraphics", index=MICROPYTHON_LIB, target=TARGET)
+# mip.install("pygraphics", index=MICROPYTHON_LIB, target=TARGET)
 mip.install(PYDISPLAY + "/src/examples/testris.py", target=TARGET)
 
 # isort: off

@@ -17,7 +17,7 @@ except ImportError:
         return seq[0]
 from json import load, dump  # For saving the high score
 from sys import exit  # For exiting the game
-from pygraphics import FrameBuffer, RGB565  # For drawing text boxes
+from framebuf import FrameBuffer, RGB565  # For drawing text boxes
 
 try:
     from micropython import const  # For constant values
@@ -613,13 +613,13 @@ def _build_testris():  # noqa: C901, PLR0915
                                         last_drop = ticks_ms()  # Reset the last drop time
                                     elif key == DROP and not collision(grid, current_piece, current_position, 0, 1):
                                         hard_drop = True  # Hard drop the piece
-                                    elif key == CCW and not collision(grid, 
+                                    elif key == CCW and not collision(grid,
                                         current_piece, current_position, 0, 0, ROTCCW
                                     ):
                                         current_piece = rotate(
                                             current_piece, ROTCCW
                                         )  # Rotate the piece counter-clockwise
-                                    elif key == CW and not collision(grid, 
+                                    elif key == CW and not collision(grid,
                                         current_piece, current_position, 0, 0, ROTCW
                                     ):
                                         current_piece = rotate(current_piece, ROTCW)  # Rotate the piece clockwise
@@ -640,7 +640,7 @@ def _build_testris():  # noqa: C901, PLR0915
                                             show_score(state)  # Show the score
 
                         if hard_drop:  # Hard drop the piece
-                            while not collision(grid, 
+                            while not collision(grid,
                                 current_piece, current_position, 0, 1
                             ):  # While the piece hasn't hit bottom
                                 if loop.poll("hard_drop"):
