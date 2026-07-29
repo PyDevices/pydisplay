@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>REPL</title>
+        <link rel="manifest" href="./manifest.json">
+        <meta name="theme-color" content="#f54e00">
+        <script src="./pwa.js"></script>
+        <script type="module" src="./vendor/core.js"></script>
+    </head>
+    <body>
+        <script type="mpy" config="./micropython.toml" terminal worker>
+            import lib.path
+            from pyscript import document
+            term = document.querySelector('script[terminal]').terminal
+            term.resize(99, 24)
+            import code
+            code.interact(local=globals())
+        </script>
+        <canvas id="display_canvas" width="1" height="1" style="background-color: black; border:2px solid black;"></canvas>
+    </body>
+</html>
