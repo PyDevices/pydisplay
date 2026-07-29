@@ -120,7 +120,7 @@
 #     ["target/path.py", "http://url/foo/bar/path.py"],
 #     ...
 #   ],
-#   "deps": [   <-- not used by micropython-lib packages
+#   "deps": [   <-- from manifest require(); files of required packages are omitted
 #     ["name", "version"],
 #     ...
 #   ]
@@ -381,8 +381,17 @@ def build(output_path, hash_prefix_len, mpy_cross_path, lib_dir):
                     "hashes": [],
                     "version": manifest.metadata().version or "",
                 }
+                mip_deps = [[n, v] for n, v in manifest.mip_dependencies()]
+                if mip_deps:
+                    mpy_package_json["deps"] = mip_deps
+                    py_package_json["deps"] = list(mip_deps)
+                    print("  deps:", ", ".join("{}@{}".format(n, v) for n, v in mip_deps))
 
                 for result in manifest.files():
+                    # require() packages are separate MIP installs — do not bundle.
+                    if result.metadata._is_require:
+                        continue
+
                     # This isn't allowed in micropython-lib anyway.
                     if result.file_type != manifestfile.FILE_TYPE_LOCAL:
                         print(

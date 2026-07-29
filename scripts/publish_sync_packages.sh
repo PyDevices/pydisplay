@@ -194,9 +194,13 @@ copy_package_readme() {
 }
 
 # Extra micropython-lib require() lines for top-level pydisplay package manifests.
+# MIP build emits these as package.json "deps" (does not bundle the required files).
 package_manifest_requires() {
     local package="$1"
     case "$package" in
+        displaysys)
+            printf '%s\n' 'require("eventsys")'
+            ;;
         eventsys)
             printf '%s\n' 'require("multimer")'
             ;;
@@ -353,6 +357,7 @@ metadata(
     license="$LICENSE",
     pypi_publish="$(pypi_publish_name "displaysys")",
 )
+require("eventsys")
 package("displaysys")
 EOF
 copy_package_readme "displaysys" "$DEST_DIR/displaysys/displaysys/README.md"

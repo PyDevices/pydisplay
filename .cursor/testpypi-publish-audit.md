@@ -96,9 +96,11 @@ Declared for the next tag publish (MIP + TestPyPI `pyproject.toml`):
 
 | Package | `require()` / PyPI deps |
 |---------|-------------------------|
+| `displaysys` | `eventsys` |
 | `eventsys` | `multimer` |
 | `multimer` | *(none — stdlib backends on CPython; `usdl2` only if sdl2 timer backend is selected at runtime)* |
-| `displaysys` | *(none — install `usdl2` / `pygame-ce` separately for desktop backends)* |
+
+MIP package.json emits these as `"deps"` (required package files are not bundled). Desktop backends still need `usdl2` / `pygame-ce` installed separately.
 
 Install from TestPyPI using the [two-index `pip` command](../docs/publishing-micropython-lib.md#two-index-pip-install-required): TestPyPI as `-i` (PyDevices packages) and PyPI as `--extra-index-url` (deps like `pygame-ce` that are not on TestPyPI).
 

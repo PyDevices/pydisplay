@@ -191,6 +191,9 @@ class ManifestFile:
         self._manifest_files = []
         # List of PyPI dependencies (when mode=MODE_PYPROJECT).
         self._pypi_dependencies = []
+        # Direct require() packages for MIP package.json "deps" (MODE_COMPILE).
+        # Nested requires inside a required package are not recorded here.
+        self._mip_dependencies = []
         # Don't allow including the same file twice.
         self._visited = set()
         # Stack of metadata for each level.
@@ -242,6 +245,10 @@ class ManifestFile:
     def pypi_dependencies(self):
         # In MODE_PYPROJECT, this will return a list suitable for requirements.txt.
         return self._pypi_dependencies
+
+    def mip_dependencies(self):
+        # Direct require() edges for MIP package.json "deps": [["name", "version"], ...].
+        return self._mip_dependencies
 
     def execute(self, manifest_file):
         if manifest_file.endswith(".py"):
@@ -427,6 +434,11 @@ class ManifestFile:
             self._pypi_dependencies.append(pypi)
             return
 
+        def _record_mip_dep():
+            # Direct MIP deps from the root package only (not nested requires).
+            if self._mode == MODE_COMPILE and not self._metadata[-1]._is_require:
+                self._mip_dependencies.append((name, version or "latest"))
+
         if library is not None:
             # Find package in external library.
             if library not in self._libraries:
@@ -434,6 +446,7 @@ class ManifestFile:
             library_path = self._libraries[library]
             # Search for {library_path}/**/{name}/manifest.py.
             if self._require_from_path(library_path, name, version, kwargs):
+                _record_mip_dep()
                 return
             raise ValueError(
                 "Package '{}' not found in external library '{}' ({}).".format(
@@ -444,6 +457,7 @@ class ManifestFile:
         for lib_dir in self._library_dirs:
             # Search for {lib_dir}/**/{name}/manifest.py.
             if self._require_from_path(lib_dir, name, version, kwargs):
+                _record_mip_dep()
                 return
 
         if pypi:

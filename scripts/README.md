@@ -20,7 +20,7 @@ Repo and site maintenance scripts. Each runnable script uses a **domain prefix**
 
 ### Automatic workflows
 
-**Manifest freshness** — runs when `src/`, `packages/`, `web/pyscript/`, `web/sim/wokwi/`, `board_configs/`, `scripts/install_*`, `scripts/gallery_generator.py`, or `scripts/audit_board_config_pairs.py` change:
+**Manifest freshness** — runs when `src/`, `packages/`, `web/pyscript/`, `web/wokwi/`, `board_configs/`, `scripts/install_*`, `scripts/gallery_generator.py`, or `scripts/audit_board_config_pairs.py` change:
 
 - `install_refresh_manifests.sh --audit`
 - `gallery_generator.py --check`
