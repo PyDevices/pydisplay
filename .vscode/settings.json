@@ -43,5 +43,12 @@
     "cursorpyright.analysis.typeCheckingMode": "standard",
     "cursorpyright.analysis.typeshedPaths": [
         "tools/typings"
+    ],
+    "python-envs.pythonProjects": [
+        {
+            "path": ".",
+            "envManager": "ms-python.python:venv",
+            "packageManager": "ms-python.python:pip"
+        }
     ]
 }

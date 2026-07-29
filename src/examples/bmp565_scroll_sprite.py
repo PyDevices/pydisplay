@@ -1,3 +1,4 @@
+# deps: pygraphics
 # gallery: binaries
 from collections import namedtuple
 
