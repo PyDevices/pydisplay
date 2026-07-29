@@ -33,12 +33,13 @@ Enables the full example catalog (`hello.py`, `bmp565_*`, `pydisplay_demo`, LVGL
 
 | Signal | GPIO |
 |--------|------|
-| SPI SCK | 36 |
-| SPI MOSI | 35 |
-| SPI MISO | 37 |
+| SPI SCK | 12 (SPI2 IOMUX) |
+| SPI MOSI | 11 |
+| SPI MISO | 13 |
 | Display D/C | 16 |
 | Display CS | 5 |
+| Display LED / RST | 3V3 |
 | Touch I2C SDA | 7 |
 | Touch I2C SCL | 6 |
 
-Matches [`wokwi_ili9341_ft6x36_esp32s3/board_config.py`](../../board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/board_config.py).
+SPI baudrate **20 MHz**. Matches [`wokwi_ili9341_ft6x36_esp32s3/board_config.py`](https://github.com/PyDevices/micropython-hardware/blob/main/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/board_config.py).
