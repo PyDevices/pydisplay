@@ -57,17 +57,16 @@ class UrlMakerTests(unittest.TestCase):
             "?modules=calc_lvgl,calc_engine&deps=lvgl-cpython",
         )
 
-    def test_run_shell_uses_mip_and_wheels_keys(self):
+    def test_run_shell_also_uses_deps_key(self):
         out = urls_from_deps(
             manifests=("car_cluster",),
             deps=("lvgl",),
             runtime=None,
-            shell="run",
         )
         self.assertEqual(out["micropython"], "?manifests=car_cluster")
         self.assertEqual(
             out["pyodide"],
-            "?manifests=car_cluster&wheels=lvgl-cpython",
+            "?manifests=car_cluster&deps=lvgl-cpython",
         )
 
     def test_pygraphics_prefers_cmod_wheel(self):

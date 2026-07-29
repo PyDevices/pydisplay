@@ -149,6 +149,10 @@ for package_path, deps, extra_files in packages:
             package_dicts[package_name]["urls"].append([dest_file, src_file])
 
             if package_name not in toml_exclude:
+                # Gallery loaders use ``import ps_loader``; mounted at VFS root below.
+                # PyScript rejects the same source key twice in ``[files]``.
+                if package_name == "add_ons" and f == "ps_loader.py":
+                    continue
                 master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
                 toml_dest_dir = "/".join(master_dest_file.split("/")[:-1])
                 if toml_dest_dir == "//":

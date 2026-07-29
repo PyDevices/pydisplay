@@ -11,20 +11,44 @@
 | Page | URL |
 |------|-----|
 | Calculator | [pyscript/micropython.html?modules=calc_graphics,calc_engine](https://PyDevices.github.io/pydisplay/pyscript/micropython.html?modules=calc_graphics,calc_engine) |
-| Simple | [pyscript/simple.html](https://PyDevices.github.io/pydisplay/pyscript/simple.html) |
+| Editor | [pyscript/editor.html](https://PyDevices.github.io/pydisplay/pyscript/editor.html) |
 | REPL | [pyscript/repl.html](https://PyDevices.github.io/pydisplay/pyscript/repl.html) |
+| Async | [pyscript/async.html](https://PyDevices.github.io/pydisplay/pyscript/async.html) |
+| DOM | [pyscript/dom.html](https://PyDevices.github.io/pydisplay/pyscript/dom.html) |
 | Pyodide (modules / manifests) | [pyscript/pyodide.html?modules=calc_graphics,calc_engine](https://PyDevices.github.io/pydisplay/pyscript/pyodide.html?modules=calc_graphics,calc_engine) · [manifests=chango](https://PyDevices.github.io/pydisplay/pyscript/pyodide.html?manifests=chango) |
 
 ## Run locally
 
 --8<-- "_snippets/pyscript-local.md"
 
-Examples in the [browser gallery](https://PyDevices.github.io/pydisplay/pyscript/) are copied to the deploy site and installed from the same origin on GitHub Pages. Locally, `tools/serve.py` serves your working tree — gallery pages load `src/examples/` via `web/pyscript/micropython.html?modules=…` / `?manifests=…` (MicroPython). Use `web/pyscript/pyodide.html` with the same query shape for Pyodide smoke tests (MIP JSON under `packages/` via the `web/pyscript/packages` symlink; no `?packages=`); it is not wired into the gallery. Non-gallery pages (`repl.html`, `simple.html`) may still use `github:` installs.
+Examples in the [browser gallery](https://PyDevices.github.io/pydisplay/pyscript/) are copied to the deploy site and installed from the same origin on GitHub Pages. Locally, `tools/serve.py` serves your working tree — gallery pages load `src/examples/` via `web/pyscript/micropython.html?modules=…` / `?manifests=…` (MicroPython). Use `web/pyscript/pyodide.html` with the same query shape for Pyodide smoke tests (MIP JSON under `packages/` via the `web/pyscript/packages` symlink; no `?packages=`); it is not wired into the gallery. Non-gallery pages (`repl.html`, `editor.html`, `async.html`, `dom.html`) may still use `github:` installs.
+
+## Minimal teaching shells
+
+These tiny pages sit beside the gallery loaders and each highlight one PyScript idea:
+
+| Page | Feature |
+|------|---------|
+| [`editor.html`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/editor.html) | `type="mpy-editor"` with hidden `setup` + shared `env` — editable lesson + Run |
+| [`repl.html`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/repl.html) | `terminal worker` + `code.interact` |
+| [`async.html`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/async.html) | `async` / `await` animation that yields to the browser |
+| [`dom.html`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/dom.html) | HTML button → Python via `create_proxy` |
+
+### REPL: worker vs main thread
+
+`repl.html` uses `<script type="mpy" … terminal worker>`. The `worker` attribute runs MicroPython off the page's main thread so:
+
+- `input()` works inside the terminal (no browser `prompt()` dialog)
+- Long-running or blocking REPL code does not freeze the tab UI
+
+Without `worker`, a MicroPython terminal still works, but `input()` falls back to the browser's native dialog, and a tight loop can freeze the page. Prefer `worker` for REPL-style shells unless you have a specific reason to stay on the main thread.
+
+Gallery loaders and the `async.html` / `dom.html` shells stay on the **main thread** because they drive the canvas and DOM listeners directly (same pattern as `micropython.html`).
 
 ## asyncio requirement
 
 PyScript runs on asyncio. Prefer `runtime.run_forever()` with `on` / `on_tick`
-callbacks so demos stay responsive. See [PyScript asyncio guide](pyscript-asyncio.md).
+callbacks so demos stay responsive. See [PyScript asyncio guide](pyscript-asyncio.md), or open [`async.html`](https://PyDevices.github.io/pydisplay/pyscript/async.html) for a minimal bouncing-square loop.
 
 ## Gallery examples
 

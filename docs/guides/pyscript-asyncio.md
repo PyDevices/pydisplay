@@ -59,6 +59,8 @@ For periodic callbacks, use `multimer.AsyncTimer` inside `async def main()` afte
 
 Try via: `web/pyscript/micropython.html?modules=eventsys_simpletest`
 
+Minimal shell (no query string): open [`async.html`](https://PyDevices.github.io/pydisplay/pyscript/async.html) — a bouncing square that yields with `await multimer.sleep_ms(16)`.
+
 ## Common failures
 
 | Symptom | Cause |

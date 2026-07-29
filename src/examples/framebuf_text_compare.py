@@ -1,7 +1,9 @@
 # gallery: skip
 # deps: pygraphics
 """
-Visual text compare: framebuf and graphics, native C vs Python.
+TEMP troubleshooting tool — delete after the font issue is resolved.
+
+Visual text compare: framebuf and pygraphics, native C vs pure Python.
 
 Run from ``src/``::
 
@@ -13,8 +15,11 @@ Run from ``src/``::
     ┌─────────────────┬─────────────────┐
     │ C framebuf      │ add_ons/framebuf│  top
     ├─────────────────┼─────────────────┤
-    │ graphics cmod   │ lib/pygraphics    │  bottom
+    │ pygraphics cmod │ pure-Python     │  bottom
     └─────────────────┴─────────────────┘
+
+Pure-Python sources are staged from sibling ``cmods/pygraphics/lib/pygraphics``
+(or ``PYDISPLAY_PYGRAPHICS_LIB``) into ``.cursor/compare_graphics_py/pygraphics_py``.
 """
 
 import os
@@ -30,6 +35,7 @@ from board_config import display_drv, runtime
 import framebuf as native_fb
 import pygraphics as gfx_native
 
+# Keep in sync with tools/compare_graphics.py _GRAPHICS_PY_FILES
 _GRAPHICS_PY_FILES = (
     "__init__.py",
     "_area.py",
@@ -37,6 +43,7 @@ _GRAPHICS_PY_FILES = (
     "_blit_hooks.py",
     "_framebuf_plus.py",
     "_shapes.py",
+    "_trig.py",
     "_font.py",
     "_font_8x8.py",
     "_font_8x14.py",
@@ -44,6 +51,7 @@ _GRAPHICS_PY_FILES = (
     "_draw.py",
     "_bmp565.py",
     "_files.py",
+    "framebuf.py",
 )
 
 W = display_drv.width
@@ -85,17 +93,67 @@ def _dirname(path):
     return path[:i]
 
 
-def _stage_graphics_py():
-    repo = _dirname(_src) if _basename(_src) == "src" else _src
-    gfx_src = _src + "/lib/pygraphics"
-    staging = repo + "/.cursor/compare_graphics_py"
-    pkg_dir = staging + "/graphics_py"
-    _makedirs(pkg_dir)
+def _is_dir(path):
+    try:
+        os.listdir(path)
+        return True
+    except OSError:
+        return False
 
-    with open(_src + "/add_ons/framebuf.py") as f:
-        framebuf_code = f.read()
-    with open(pkg_dir + "/framebuf.py", "w") as f:
-        f.write(framebuf_code)
+
+def _env_get(key):
+    environ = getattr(os, "environ", None)
+    if environ is None:
+        return None
+    try:
+        return environ.get(key) or None
+    except Exception:
+        return None
+
+
+def _expanduser(path):
+    if path.startswith("~/"):
+        home = _env_get("HOME")
+        if home:
+            return home.rstrip("/") + "/" + path[2:]
+    return path
+
+
+def _resolve_python_pygraphics(repo):
+    """Locate pure-Python ``lib/pygraphics`` (TEMP: sibling cmods / env override)."""
+    override = _env_get("PYDISPLAY_PYGRAPHICS_LIB") or _env_get("PYDISPLAY_PYGRAPHICS_SRC")
+    candidates = []
+    if override:
+        path = override.replace("\\", "/").rstrip("/")
+        if path.endswith("/pygraphics"):
+            candidates.append(path)
+        else:
+            candidates.append(path + "/pygraphics")
+    candidates.extend(
+        [
+            repo + "/../cmods/pygraphics/lib/pygraphics",
+            repo + "/../pygraphics/lib/pygraphics",
+            _expanduser("~/gh/pydevices/cmods/pygraphics/lib/pygraphics"),
+            _expanduser("~/gh/pydevices/pygraphics/lib/pygraphics"),
+        ]
+    )
+    for src in candidates:
+        if src and _is_dir(src):
+            return src
+    raise OSError(
+        "pure-Python pygraphics not found (set PYDISPLAY_PYGRAPHICS_LIB "
+        "or clone cmods/pygraphics next to pydisplay)"
+    )
+
+
+def _stage_graphics_py():
+    # TEMP workaround: pydisplay no longer vendors lib/pygraphics; stage from
+    # sibling cmods into a uniquely named package so it can coexist with the cmod.
+    repo = _dirname(_src) if _basename(_src) == "src" else _src
+    gfx_src = _resolve_python_pygraphics(repo)
+    staging = repo + "/.cursor/compare_graphics_py"
+    pkg_dir = staging + "/pygraphics_py"
+    _makedirs(pkg_dir)
 
     for name in _GRAPHICS_PY_FILES:
         with open(gfx_src + "/" + name) as f:
@@ -104,7 +162,7 @@ def _stage_graphics_py():
             f.write(code)
 
     for key in list(sys.modules):
-        if key == "graphics_py" or key.startswith("graphics_py."):
+        if key == "pygraphics_py" or key.startswith("pygraphics_py."):
             del sys.modules[key]
 
     if staging not in sys.path:
@@ -112,7 +170,7 @@ def _stage_graphics_py():
 
     import pygraphics_py
 
-    return graphics_py
+    return pygraphics_py
 
 
 def _make_fb(FB, w, h, rgb565):
@@ -158,7 +216,7 @@ fb_python, buf_python = _make_fb(PyFB, HALF_W, HALF_H, native_fb.RGB565)
 _draw_framebuf_panel(fb_native, "C framebuf", FB_STRINGS)
 _draw_framebuf_panel(fb_python, "py framebuf", FB_STRINGS)
 
-# --- graphics: cmod vs staged lib/pygraphics ---
+# --- graphics: cmod vs staged pure-Python pygraphics ---
 gfx_python = _stage_graphics_py()
 buf_gfx_native = _draw_graphics_panel(gfx_native, "gfx cmod")
 buf_gfx_python = _draw_graphics_panel(gfx_python, "gfx python")
@@ -176,11 +234,11 @@ for x in range(W):
 
 display_drv.show()
 
-print("text compare (2x2)")
+print("text compare (2x2)  [TEMP — delete after font fix]")
 print("  top-left     = C framebuf")
 print("  top-right    = add_ons/framebuf.py")
-print("  bottom-left  = graphics cmod (text8/14/16, text, FB.text)")
-print("  bottom-right = lib/pygraphics (same APIs)")
+print("  bottom-left  = pygraphics cmod (text8/14/16, text, FB.text)")
+print("  bottom-right = staged pure-Python pygraphics (cmods sibling)")
 print("Close the window or press Ctrl+C here.")
 
 

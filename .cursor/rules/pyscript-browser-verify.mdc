@@ -15,7 +15,7 @@ When working on the PyScript site (`web/pyscript/`), `tools/serve.py`, or `scrip
 3. **Navigate** to the relevant page:
    - `http://127.0.0.1:8000/web/pyscript/index.html` — gallery
    - `http://127.0.0.1:8000/web/pyscript/micropython.html?modules=calculator` — parametric loader
-   - `http://127.0.0.1:8000/web/pyscript/embed.html?modules=calculator` — embed
+   - `http://127.0.0.1:8000/web/pyscript/harness.html?modules=calculator` — harness
    - `http://127.0.0.1:8000/web/landing/index.html` — marketing landing
 4. **Verify** with snapshot/screenshot and/or `curl`:
    - Page loads (200), COI headers present (`COOP`, `COEP`, `CORP`)
@@ -49,7 +49,7 @@ Read and follow:
 Prefer Playwright helpers:
 
 ```bash
-.venv/bin/python tools/ps_debug.py 'http://127.0.0.1:8000/web/pyscript/embed.html?modules=NAME&autotest=1&duration=5' 20
+.venv/bin/python tools/ps_debug.py 'http://127.0.0.1:8000/web/pyscript/harness.html?modules=NAME&autotest=1&duration=5' 20
 .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime pyscript --only-example NAME
 ```
 

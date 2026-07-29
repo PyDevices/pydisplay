@@ -40,7 +40,7 @@ Usage: ./tools/pyscript.sh [DEMO] [options]
   --module NAME     force micropython.html?modules=… (gallery lookup preferred)
   -p, --port PORT   port (default: 8000)
   --kill-port       kill any existing listener on PORT, then start serve.py
-  --debug           open embed.html with the same query + debug=1
+  --debug           open harness.html with the same query + debug=1
   --autotest        headless Playwright smoke (EXAMPLE_RESULT); implies --no-open.
                     Streams the page #log panel to stdout in real time.
   --auto-test       alias for --autotest
@@ -261,7 +261,7 @@ PAGE_ROOT="${BASE}/web/pyscript"
 if [[ "$DEBUG" -eq 1 ]] || [[ "$AUTOTEST" -eq 1 ]]; then
   case "$REL_PATH" in
     micropython.html\?*)
-      URL="${PAGE_ROOT}/embed.html?${REL_PATH#micropython.html?}"
+      URL="${PAGE_ROOT}/harness.html?${REL_PATH#micropython.html?}"
       ;;
     *.html)
       URL="${PAGE_ROOT}/${REL_PATH}"

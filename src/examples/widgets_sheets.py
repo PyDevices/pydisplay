@@ -61,10 +61,18 @@ sv = pd.ScrollView(
 for i in range(6):
     pd.Label(sv, value=f"Scroll line {i}", y=i * 22, x=4, w=sv.width - 8, h=20)
 
-# Grid of actions
-grid = pd.Grid(screen, x=screen.width // 2 + 4, y=bar.height + 140, w=screen.width // 2 - 12, h=80, columns=2)
+# Grid of actions (leave room for ScrollView's OUTER_RIGHT scrollbar)
+_gx = sv.x + sv.width + pd.ICON_SIZE.SMALL + 4
+grid = pd.Grid(
+    screen,
+    x=_gx,
+    y=bar.height + 140,
+    w=screen.width - _gx - 8,
+    h=80,
+    columns=2,
+)
 for label in ("A", "B", "C", "D"):
-    pd.Button(grid, label=label, h=28)
+    pd.Button(grid, label=label, h=22)
 
 # Form binder + PasswordField + PinPad
 err = pd.Label(screen, value="", y=screen.height - 18, x=8, w=screen.width - 16, h=16, fg=theme.error)

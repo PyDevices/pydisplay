@@ -20,7 +20,7 @@ by ``scripts/install_gen_manifests.py``). PyScript loads them via the
 ``web/pyscript/packages`` symlink as ``?manifests=<name>``.
 
 ``# gallery: nochrome`` keeps the demo in the gallery but links the minimal
-``run.html`` / ``run-pyodide.html`` shells (no gallery chrome) — useful for
+``mp.html`` / ``py.html`` shells (no gallery chrome) — useful for
 large landscape demos.
 
 Then:
@@ -62,11 +62,13 @@ KEEP_HTML = frozenset(
         "index",
         "micropython",
         "repl",
-        "simple",
-        "embed",
+        "editor",
+        "async",
+        "dom",
+        "harness",
         "pyodide",
-        "run",
-        "run-pyodide",
+        "mp",
+        "py",
     }
 )
 
@@ -143,15 +145,14 @@ class Example:
             manifests=self._manifests_for_query(),
             deps=self.deps,
             runtime=None,
-            shell="run" if self.nochrome else "chrome",
         )
 
     def loader_hrefs(self) -> dict[str, str]:
         queries = self.loader_queries()
         if self.nochrome:
             return {
-                "micropython": f"run.html{queries['micropython']}",
-                "pyodide": f"run-pyodide.html{queries['pyodide']}",
+                "micropython": f"mp.html{queries['micropython']}",
+                "pyodide": f"py.html{queries['pyodide']}",
             }
         return {
             "micropython": f"micropython.html{queries['micropython']}",

@@ -14,19 +14,20 @@ Related: [PyScript local development](../docs/guides/pyscript.md),
 
 | Page | Role |
 |------|------|
-| `web/pyscript/embed.html` | **Dev / automation** — auto-imports entry; supports `?autotest=1&duration=N` |
+| `web/pyscript/harness.html` | **Dev / automation** — auto-imports entry; supports `?autotest=1&duration=N` |
 | `web/pyscript/micropython.html` | **Production gallery** — Run-gated; no autotest harness |
+| `web/pyscript/async.html` / `dom.html` / `repl.html` / `editor.html` | **Teaching shells** — one PyScript idea each (see [pyscript.md](../docs/guides/pyscript.md#minimal-teaching-shells)) |
 | `tools/serve.py` | Local server with COI headers (`COOP`/`COEP`) on port **8000** |
 
 Always serve from repo root (`python tools/serve.py`). Confirm
-`http://127.0.0.1:8000/web/pyscript/embed.html` returns 200 before probing.
+`http://127.0.0.1:8000/web/pyscript/harness.html` returns 200 before probing.
 
 Query params:
 
 - `?modules=name` — single-file example under `src/examples/name.py`
 - `?manifests=name` — package / MIP manifest (`packages/name.json` via `web/pyscript/packages`)
-- `?autotest=1&duration=5` — matrix harness (embed only)
-- `?debug=1` — show the `#log` console panel on embed
+- `?autotest=1&duration=5` — matrix harness (`harness.html` only)
+- `?debug=1` — show the `#log` console panel on harness
 
 Wrong `modules=` vs `manifests=` yields import/`mip` 404s — check for a
 matching `.json` under `web/pyscript/` before assuming a library bug.
@@ -67,10 +68,10 @@ process timeout.
 ```bash
 # Server must already be up
 .venv/bin/python tools/ps_debug.py \
-  'http://127.0.0.1:8000/web/pyscript/embed.html?modules=calculator&autotest=1&duration=5' 20
+  'http://127.0.0.1:8000/web/pyscript/harness.html?modules=calculator&autotest=1&duration=5' 20
 
 .venv/bin/python tools/ps_shot.py \
-  'http://127.0.0.1:8000/web/pyscript/embed.html?manifests=tiny_toasters' 6 /tmp/ps.png
+  'http://127.0.0.1:8000/web/pyscript/harness.html?manifests=tiny_toasters' 6 /tmp/ps.png
 ```
 
 Patterns that work well in ad-hoc scripts:

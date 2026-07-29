@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Async</title>
+        <link rel="manifest" href="./manifest.json">
+        <meta name="theme-color" content="#f54e00">
+        <script src="./pwa.js"></script>
+        <script type="module" src="./vendor/core.js"></script>
+    </head>
+    <body>
+        <canvas id="display_canvas" width="1" height="1" style="background-color: black; border:2px solid black;"></canvas>
+        <script type="mpy" config="./micropython.toml">
+            import lib.path
+            from board_config import display_drv, runtime
+            import multimer
+
+            x, y = 20, 20
+            dx, dy = 3, 2
+            size = 24
+            color = 0x07E0
+
+            async def main():
+                global x, y, dx, dy
+                w, h = display_drv.width, display_drv.height
+                while True:
+                    display_drv.fill_rect(x, y, size, size, 0)
+                    x += dx
+                    y += dy
+                    if x <= 0 or x + size >= w:
+                        dx = -dx
+                    if y <= 0 or y + size >= h:
+                        dy = -dy
+                    display_drv.fill_rect(x, y, size, size, color)
+                    display_drv.show()
+                    await multimer.sleep_ms(16)
+
+            runtime.run_async(main)
+        </script>
+    </body>
+</html>

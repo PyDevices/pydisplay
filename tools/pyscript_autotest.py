@@ -2,19 +2,19 @@
 """PyScript example autotest: console watch → Ctrl+Q quit chord → EXAMPLE_RESULT.
 
 Flow:
-  1. Load ``embed.html?...&autotest=1``
+  1. Load ``harness.html?...&autotest=1``
   2. Wait until the demo has imported (``AUTOTEST_READY`` / ``MARK:after_import_entry``)
   3. Soak ``duration_s`` while monitoring console + pageerrors (fail on real errors)
   4. Focus ``#display_canvas`` and send the default quit chord **Ctrl+Q**
-  5. Wait for ``EXAMPLE_RESULT=`` (embed emits it from ``runtime.before_quit``)
+  5. Wait for ``EXAMPLE_RESULT=`` (harness emits it from ``runtime.before_quit``)
 
-Python ``print`` on embed goes to the page ``#log`` panel (not always the
+Python ``print`` on harness goes to the page ``#log`` panel (not always the
 browser console). When ``stream_log=True`` (CLI / ``pyscript.sh --autotest``),
 new ``#log`` lines are mirrored to stdout in real time.
 
 Usage:
   .venv/bin/python tools/pyscript_autotest.py \\
-    'http://127.0.0.1:8000/web/pyscript/embed.html?modules=pydisplay_demo&autotest=1&duration=5'
+    'http://127.0.0.1:8000/web/pyscript/harness.html?modules=pydisplay_demo&autotest=1&duration=5'
 """
 
 from __future__ import annotations
@@ -68,7 +68,7 @@ def example_name_from_url(url: str) -> str:
 
 
 class _LogStreamer:
-    """Poll embed ``#log`` and print new lines to stdout."""
+    """Poll harness ``#log`` and print new lines to stdout."""
 
     def __init__(self, page, *, enabled: bool = True, prefix: str = "[#log] "):
         self._page = page

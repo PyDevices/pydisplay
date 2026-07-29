@@ -4,10 +4,10 @@ Callers pass logical names matching example headers (``# deps:``, ``# modules:``
 ``# manifests:``). This module rewrites deps per runtime, drops builtins for the
 active profile, and emits query-only strings
 (``?modules=…&manifests=…&deps=…``). Prepend ``micropython.html`` /
-``pyodide.html`` (or ``run.html`` / ``run-pyodide.html``) yourself.
+``pyodide.html`` (or ``mp.html`` / ``py.html``) yourself.
 
-With ``shell="run"``, deps are emitted as ``mip=`` (MicroPython) /
-``wheels=`` (Pyodide) for the minimal run pages.
+All shells use the same ``deps=`` key; MicroPython installs via MIP and Pyodide
+via micropip.
 
     from url_maker import urls_from_deps
 
@@ -27,7 +27,6 @@ from __future__ import annotations
 from typing import Iterable
 
 RUNTIMES = ("micropython", "pyodide")
-SHELLS = ("chrome", "run")
 
 # Profiles → logical names already present (frozen, cmod, or toml-mounted).
 # Skip those names when emitting deps for that profile.
@@ -202,16 +201,12 @@ def url(
     deps: Iterable[str] = (),
     runtime: str | None = None,
     profile: str | None = None,
-    shell: str = "chrome",
     **kwargs: object,
 ) -> str | dict[str, str]:
     """Emit a loader query string, or both runtimes when ``runtime`` is None.
 
-    ``shell`` selects the deps query key:
-      - ``chrome`` (default): ``deps=`` for micropython.html / pyodide.html
-      - ``run``: ``mip=`` / ``wheels=`` for run.html / run-pyodide.html
-
-    Unknown keyword arguments raise ``TypeError``.
+    Package installs always use the ``deps=`` query key (MIP on MicroPython,
+    micropip on Pyodide). Unknown keyword arguments raise ``TypeError``.
     """
     if kwargs:
         bad = ", ".join(sorted(kwargs))
@@ -223,28 +218,18 @@ def url(
 
     if runtime is not None and runtime not in RUNTIMES:
         raise ValueError(f"runtime must be one of {RUNTIMES!r} or None, got {runtime!r}")
-    if shell not in SHELLS:
-        raise ValueError(f"shell must be one of {SHELLS!r}, got {shell!r}")
 
     def _one(rt: str) -> str:
         if profile is None:
             prof = "pyscript-mp" if rt == "micropython" else "pyscript-pyodide"
         else:
-            if profile not in PROFILES and profile not in (
-                "pyscript-mp",
-                "pyscript-pyodide",
-                "firmware-cmods",
-            ):
-                # Allow unknown profiles with empty skip set.
-                pass
             prof = profile
 
         channel = "mip" if rt == "micropython" else "wheels"
-        deps_key = ("mip" if rt == "micropython" else "wheels") if shell == "run" else "deps"
         parts: list[tuple[str, list[str]]] = [
             ("modules", modules_t),
             ("manifests", manifests_t),
-            (deps_key, _apply_channel(deps_t, channel=channel, profile=prof)),
+            ("deps", _apply_channel(deps_t, channel=channel, profile=prof)),
         ]
         return _join_query(parts)
 
@@ -260,7 +245,6 @@ def urls_from_deps(
     deps: Iterable[str] = (),
     runtime: str | None = None,
     profile: str | None = None,
-    shell: str = "chrome",
 ) -> str | dict[str, str]:
     """Emit loader queries from logical ``deps`` (rewritten per runtime)."""
     return url(
@@ -269,5 +253,4 @@ def urls_from_deps(
         deps=deps,
         runtime=runtime,
         profile=profile,
-        shell=shell,
     )

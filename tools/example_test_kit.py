@@ -379,7 +379,7 @@ _server_pid: int | None = None
 def _server_ready(port: int = PYSCRIPT_PORT) -> bool:
     try:
         with urllib.request.urlopen(
-            f"http://127.0.0.1:{port}/web/pyscript/embed.html", timeout=2
+            f"http://127.0.0.1:{port}/web/pyscript/harness.html", timeout=2
         ) as resp:
             return resp.status == 200
     except (urllib.error.URLError, TimeoutError, OSError, ConnectionError):
@@ -441,8 +441,8 @@ def pyscript_skips_binaries(example_id: str, example_meta: dict) -> bool:
     return _pyscript_gallery_value(SRC / script) == "binaries"
 
 
-def pyscript_embed_query(example_id: str, example_meta: dict) -> str:
-    """Build loader query via ``url_maker`` (modules/manifests/deps) for embed.html."""
+def pyscript_harness_query(example_id: str, example_meta: dict) -> str:
+    """Build loader query via ``url_maker`` (modules/manifests/deps) for harness.html."""
     scripts_dir = str(REPO / "scripts")
     if scripts_dir not in sys.path:
         sys.path.insert(0, scripts_dir)
@@ -576,8 +576,8 @@ def run_pyscript_case(
         }
 
     ensure_pyscript_server(port)
-    query = pyscript_embed_query(example_id, example_meta)
-    url = f"http://127.0.0.1:{port}/web/pyscript/embed.html?{query}&autotest=1&duration={int(duration)}"
+    query = pyscript_harness_query(example_id, example_meta)
+    url = f"http://127.0.0.1:{port}/web/pyscript/harness.html?{query}&autotest=1&duration={int(duration)}"
 
     try:
         from pyscript_autotest import run_autotest

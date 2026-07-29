@@ -87,7 +87,7 @@ For a pydisplay-style deployment under `web/pyscript/`, these are the PWA files 
 | [`pwa.css`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/pwa.css) | Styles for install button and toast |
 | `icon-192.png`, `icon-512.png` | Launcher icons (PNG; manifest requires raster icons) |
 
-Gallery pages that include the full PWA UI: `index.html`, `micropython.html`, `pyodide.html`. Minimal shells (`simple.html`, `repl.html`, `embed.html`) link the manifest and load `pwa.js` without the install button.
+Gallery pages that include the full PWA UI: `index.html`, `micropython.html`, `pyodide.html`. Minimal shells (`editor.html`, `repl.html`, `async.html`, `dom.html`, `harness.html`) link the manifest and load `pwa.js` without the install button.
 
 ---
 
@@ -374,7 +374,7 @@ Use Chrome or Edge on desktop, Chrome on Android, or Safari on iOS. On iOS the *
 
 ### Minimal PyScript page (no gallery chrome)
 
-For a single-file demo like [`simple.html`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/simple.html):
+For a single-file demo like [`editor.html`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/editor.html):
 
 ```html
 <head>

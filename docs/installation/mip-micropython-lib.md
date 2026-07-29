@@ -15,7 +15,7 @@ import mip
 mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
 ```
 
-On **PyScript MicroPython** (`micropython.html`, `run.html`), `?deps=` / `?mip=` installs
+On **PyScript MicroPython** (`micropython.html`, `mp.html`), `?deps=` installs
 use the **bytecode** channel via ``add_ons/ps_loader.py`` (firmware ``mip`` on
 MicroPython; portable ``mip.py`` on Pyodide for manifests/modules).
 

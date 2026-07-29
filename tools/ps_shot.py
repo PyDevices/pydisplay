@@ -21,7 +21,7 @@ from playwright.sync_api import sync_playwright
 URL = (
     sys.argv[1]
     if len(sys.argv) > 1
-    else "http://127.0.0.1:8000/web/pyscript/embed.html?manifests=tiny_toasters"
+    else "http://127.0.0.1:8000/web/pyscript/harness.html?manifests=tiny_toasters"
 )
 WAIT_SEC = float(sys.argv[2]) if len(sys.argv) > 2 else 6.0
 OUT = sys.argv[3] if len(sys.argv) > 3 else "/tmp/pyscript_shot.png"

@@ -14,15 +14,17 @@ The script runs [`tools/serve.py`](https://github.com/PyDevices/pydisplay/blob/m
 | Calculator | `./tools/pyscript.sh calculator` | Run one example by module name |
 | Chango | `./tools/pyscript.sh chango` | Manifest demo (`packages/chango.json`) |
 | Gallery | `./tools/pyscript.sh` | Example card grid |
-| REPL | open `http://127.0.0.1:8000/web/pyscript/repl.html` | REPL + canvas |
-| Simple | open `http://127.0.0.1:8000/web/pyscript/simple.html` | Minimal PyScript HTML shell |
+| REPL | open `http://127.0.0.1:8000/web/pyscript/repl.html` | REPL + canvas (`terminal worker`) |
+| Editor | open `http://127.0.0.1:8000/web/pyscript/editor.html` | `mpy-editor` with hidden `setup` + editable lesson |
+| Async | open `http://127.0.0.1:8000/web/pyscript/async.html` | Non-blocking animation with `await` |
+| DOM | open `http://127.0.0.1:8000/web/pyscript/dom.html` | HTML button → Python `create_proxy` |
 | Pyodide | open `http://127.0.0.1:8000/web/pyscript/pyodide.html?modules=calc_graphics,calc_engine` or `…/pyodide.html?manifests=chango` | Modules / same MIP manifests as `micropython.html`, under vendored Pyodide (not the gallery) |
 
 Manual URLs (when the server is already running):
 
 | Page | Local URL |
 |------|-----------|
-| Calculator | [127.0.0.1:8000/web/pyscript/embed.html?modules=calc_graphics,calc_engine](http://127.0.0.1:8000/web/pyscript/embed.html?modules=calc_graphics,calc_engine) |
+| Calculator | [127.0.0.1:8000/web/pyscript/harness.html?modules=calc_graphics,calc_engine](http://127.0.0.1:8000/web/pyscript/harness.html?modules=calc_graphics,calc_engine) |
 
 After editing files under `src/`, refresh the PyScript file manifest:
 

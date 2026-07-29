@@ -31,7 +31,7 @@ See [Run the notebook interactively](../docs/platforms/jupyter-run.md) and [PySc
 
 | Script | Purpose |
 |--------|---------|
-| [`ps_debug.py`](ps_debug.py) | CDP console + network probe for an embed/load URL |
+| [`ps_debug.py`](ps_debug.py) | CDP console + network probe for a harness/load URL |
 | [`ps_shot.py`](ps_shot.py) | Timed screenshot with a hard kill if Chromium stalls |
 
 Agent-oriented guide: [PyScript troubleshooting](../.cursor/pyscript-troubleshooting.md).
@@ -39,7 +39,7 @@ Agent-oriented guide: [PyScript troubleshooting](../.cursor/pyscript-troubleshoo
 ```bash
 python tools/serve.py   # separate terminal
 .venv/bin/python tools/ps_debug.py \
-  'http://127.0.0.1:8000/web/pyscript/embed.html?modules=calc_graphics,calc_engine&autotest=1' 20
+  'http://127.0.0.1:8000/web/pyscript/harness.html?modules=calc_graphics,calc_engine&autotest=1' 20
 ```
 
 ## Example test matrix

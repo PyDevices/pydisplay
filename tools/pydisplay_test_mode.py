@@ -1,7 +1,7 @@
 """
 Example-matrix test flag (importable on MicroPython and CPython).
 
-example_test_wrapper.py / PyScript embed.html set ENABLED = True before
+example_test_wrapper.py / PyScript harness.html set ENABLED = True before
 running bounded examples. On single-threaded hosts the harness cannot inject
 quit from another thread; call :func:`install_deadline_hook` so
 ``multimer.sleep_ms`` / ``Runtime.poll`` cooperatively exit after ``DURATION_S``.
