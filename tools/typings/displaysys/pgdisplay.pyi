@@ -1,16 +1,7 @@
 from _typeshed import Incomplete
 from displaysys import DisplayDriver
 
-__all__ = ['FFmpegFrameRecorder', 'poll_event', 'get_events', 'PGDisplay']
-
-class FFmpegFrameRecorder:
-    path: Incomplete
-    width: Incomplete
-    height: Incomplete
-    fps: Incomplete
-    def __init__(self, path, width, height, fps: int = 12) -> None: ...
-    def write(self, rgb_bytes) -> None: ...
-    def close(self): ...
+__all__ = ['poll_event', 'get_events', 'PGDisplay']
 
 def poll_event(): ...
 def get_events(): ...

@@ -87,7 +87,7 @@ class TestFFmpegFrameRecorder(unittest.TestCase):
         self._popen.stop()
 
     def test_write_rejects_bad_frame_size(self):
-        from displaysys.pgdisplay import FFmpegFrameRecorder
+        from frame_recorder import FFmpegFrameRecorder
 
         with tempfile.TemporaryDirectory() as tmp:
             out = os.path.join(tmp, "bad.mp4")

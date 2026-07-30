@@ -41,10 +41,17 @@ class TestEnvBool(unittest.TestCase):
         displaysys.env_set("PYDISPLAY_TEST_ENV_SET", "0")
         self.assertFalse(displaysys.env_bool("PYDISPLAY_TEST_ENV_SET", True))
 
+    def test_env_float(self):
+        displaysys.env_set("PYDISPLAY_TEST_ENV_FLOAT", "1.25")
+        self.assertEqual(displaysys.env_float("PYDISPLAY_TEST_ENV_FLOAT", 2), 1.25)
+        displaysys.env_set("PYDISPLAY_TEST_ENV_FLOAT", "invalid")
+        self.assertEqual(displaysys.env_float("PYDISPLAY_TEST_ENV_FLOAT", 2), 2.0)
+
     def tearDown(self):
         os.environ.pop("PYDISPLAY_TEST_ENV_BOOL", None)
         os.environ.pop("PYDISPLAY_TEST_ENV_SET", None)
         displaysys._overrides.pop("PYDISPLAY_TEST_ENV_BOOL", None)
+        displaysys._overrides.pop("PYDISPLAY_TEST_ENV_FLOAT", None)
         displaysys._overrides.pop("PYDISPLAY_TEST_ENV_SET", None)
 
 

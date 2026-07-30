@@ -34,6 +34,11 @@ class TestScreenshotTool(unittest.TestCase):
             Path("docs/screenshots/logo.png"),
         )
 
+    def test_resolution_and_scale_options(self):
+        args = screenshot._parse_args(["logo", "--resolution", "240X320", "--scale", "1.5"])
+        self.assertEqual(args.resolution, (240, 320))
+        self.assertEqual(args.scale, 1.5)
+
 
 if __name__ == "__main__":
     unittest.main()

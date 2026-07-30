@@ -18,7 +18,7 @@ Desktop size / timer overrides (set before importing ``board_config``)::
     PYDISPLAY_TIMER_ASYNC — truthy/falsey timer mode on PG/SDL desktop
 """
 
-from displaysys import env_bool, env_int
+from displaysys import env_bool, env_float, env_int
 
 # Default timer mode for PG/SDL desktop when PYDISPLAY_TIMER_ASYNC is unset.
 # PyScript and Jupyter always use asyncio timers (see branches below).
@@ -33,7 +33,7 @@ scale = 2
 
 width = env_int("PYDISPLAY_WIDTH", width)
 height = env_int("PYDISPLAY_HEIGHT", height)
-scale = env_int("PYDISPLAY_SCALE", scale)
+scale = env_float("PYDISPLAY_SCALE", scale)
 
 _DESKTOP_PLATFORMS = frozenset(("linux", "darwin", "win32", "unix", "webassembly", "emscripten"))
 

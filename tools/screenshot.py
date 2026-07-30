@@ -4,7 +4,7 @@
 Examples:
     python tools/screenshot.py hello.py
     python tools/screenshot.py bouncing_balls 3
-    python tools/screenshot.py logo --delay 2 --output logo.png
+    python tools/screenshot.py logo --delay 2 --resolution 320x240 --scale 1
 """
 
 import argparse
@@ -14,7 +14,6 @@ from pathlib import Path
 import runpy
 import struct
 import sys
-import threading
 import time
 import zlib
 
@@ -61,6 +60,38 @@ def _resolve_example(example, repo_root):
     return example
 
 
+def _resolution(value):
+    try:
+        width_text, height_text = value.lower().split("x", 1)
+        width, height = int(width_text), int(height_text)
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise argparse.ArgumentTypeError("resolution must be WIDTHxHEIGHT") from exc
+    if width <= 0 or height <= 0:
+        raise argparse.ArgumentTypeError("resolution dimensions must be greater than zero")
+    return width, height
+
+
+def _positive_scale(value):
+    try:
+        scale = float(value)
+    except (TypeError, ValueError) as exc:
+        raise argparse.ArgumentTypeError("scale must be a number") from exc
+    if scale <= 0:
+        raise argparse.ArgumentTypeError("scale must be greater than zero")
+    return scale
+
+
+def _apply_display_overrides(resolution, scale):
+    from displaysys import env_set
+
+    if resolution is not None:
+        width, height = resolution
+        env_set("PYDISPLAY_WIDTH", width)
+        env_set("PYDISPLAY_HEIGHT", height)
+    if scale is not None:
+        env_set("PYDISPLAY_SCALE", scale)
+
+
 def _parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("example", help="example script path or importable module name")
@@ -71,6 +102,17 @@ def _parse_args(argv=None):
         help="seconds to wait before capture (default: 1)",
     )
     parser.add_argument("-d", "--delay", type=float, help="same as positional seconds")
+    parser.add_argument(
+        "--resolution",
+        type=_resolution,
+        metavar="WIDTHxHEIGHT",
+        help="override the logical display resolution",
+    )
+    parser.add_argument(
+        "--scale",
+        type=_positive_scale,
+        help="override the desktop window scale",
+    )
     parser.add_argument("-o", "--output", type=Path, help="output PNG path")
     args = parser.parse_args(argv)
     if args.seconds is not None and args.delay is not None:
@@ -100,54 +142,84 @@ def _run_example(example):
         runpy.run_module(example, run_name="__main__", alter_sys=True)
 
 
-def _capture_after(delay, output, state):
-    time.sleep(delay)
-    try:
-        board_config = sys.modules.get("board_config")
-        if board_config is None:
-            raise RuntimeError("example did not import board_config before the capture deadline")
-        display_drv = board_config.display_drv
+def _capture(output):
+    board_config = sys.modules.get("board_config")
+    if board_config is None:
+        raise RuntimeError("example did not import board_config before the capture deadline")
+    display_drv = board_config.display_drv
+    capture = getattr(display_drv, "capture_rgb", None)
+    if capture is None:
+        raise RuntimeError(f"{type(display_drv).__name__} does not support desktop screenshots")
+    pixels, width, height = capture()
+    save_rgb_png(output, pixels, width, height)
+    return f"saved {output} ({width}x{height}, {type(display_drv).__name__})"
 
-        capture = getattr(display_drv, "capture_rgb", None)
-        if capture is None:
-            raise RuntimeError(
-                f"{type(display_drv).__name__} does not support desktop screenshots"
-            )
-        pixels, width, height = capture()
-        save_rgb_png(output, pixels, width, height)
-        state["message"] = f"saved {output} ({width}x{height}, {type(display_drv).__name__})"
-        state["code"] = 0
-    except Exception as exc:
-        state["message"] = f"screenshot failed: {type(exc).__name__}: {exc}"
-        state["code"] = 1
-    finally:
-        print(state["message"], flush=True)
-        os._exit(state["code"])
+
+def _install_show_capture(deadline, output):
+    """Capture from a display ``show()`` call on the renderer's main thread."""
+    state = {"capturing": False}
+
+    def arm(display_class):
+        original = display_class.show
+
+        def show(display, *args, **kwargs):
+            result = original(display, *args, **kwargs)
+            if (
+                not state["capturing"]
+                and time.monotonic() >= deadline
+                and display is getattr(sys.modules.get("board_config"), "display_drv", None)
+            ):
+                state["capturing"] = True
+                try:
+                    print(_capture(output), flush=True)
+                    os._exit(0)
+                except Exception as exc:
+                    print(f"screenshot failed: {type(exc).__name__}: {exc}", flush=True)
+                    os._exit(1)
+            return result
+
+        display_class.show = show
+
+    try:
+        from displaysys.sdldisplay import SDLDisplay
+
+        arm(SDLDisplay)
+    except ImportError:
+        pass
+    try:
+        from displaysys.pgdisplay import PGDisplay
+
+        arm(PGDisplay)
+    except ImportError:
+        pass
 
 
 def main(argv=None):
     args = _parse_args(argv)
     repo_root = Path(__file__).resolve().parent.parent
     _prepare_paths(repo_root)
+    _apply_display_overrides(args.resolution, args.scale)
     example = _resolve_example(args.example, repo_root)
     output = args.output.resolve()
     os.chdir(repo_root / "src")
     import lib.path  # noqa: F401
 
-    state = {"code": 1, "message": "screenshot did not run"}
-    worker = threading.Thread(
-        target=_capture_after,
-        args=(args.delay, output, state),
-        daemon=True,
-    )
-    worker.start()
+    deadline = time.monotonic() + args.delay
+    _install_show_capture(deadline, output)
     try:
         _run_example(example)
     except SystemExit as exc:
         if exc.code not in (None, 0):
             raise
-    worker.join()
-    return state["code"]
+    remaining = deadline - time.monotonic()
+    if remaining > 0:
+        time.sleep(remaining)
+    try:
+        print(_capture(output), flush=True)
+        return 0
+    except Exception as exc:
+        print(f"screenshot failed: {type(exc).__name__}: {exc}", flush=True)
+        return 1
 
 
 if __name__ == "__main__":

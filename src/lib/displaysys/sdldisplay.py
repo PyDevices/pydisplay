@@ -18,7 +18,6 @@ from displaysys import (
     fit_scale_to_desktop,
     notify_board_config_scale_override,
 )
-from displaysys._frame_recorder import FFmpegFrameRecorder
 from eventsys import events
 from eventsys.keys import default_quit_chord
 
@@ -681,6 +680,8 @@ class SDLDisplay(DisplayDriver):
 
     def open_frame_recorder(self, path, *, fps=12, width=None, height=None):
         """Attach an ffmpeg recorder that receives RGB24 frames from ``show()``."""
+        from frame_recorder import FFmpegFrameRecorder
+
         self.close_frame_recorder()
         w = int(self.width * self._scale) if width is None else width
         h = int(self.height * self._scale) if height is None else height
@@ -695,18 +696,70 @@ class SDLDisplay(DisplayDriver):
             return recorder.close()
         return 0
 
-    def _read_renderer_rgb(self):
-        width = int(self.width * self._scale)
-        height = int(self.height * self._scale)
+    def _read_texture_rgb(self):
+        """Read the logical display texture as packed RGB24."""
+        width = self.width
+        height = self.height
         pixels = bytearray(width * height * 3)
-        usdl2.SDL_RenderReadPixels(
-            self._renderer,
-            None,
-            usdl2.SDL_PIXELFORMAT_RGB24,
-            pixels,
-            width * 3,
-        )
-        return bytes(pixels), width, height
+        retcheck(usdl2.SDL_SetRenderTarget(self._renderer, self._buffer))
+        try:
+            usdl2.SDL_RenderReadPixels(
+                self._renderer,
+                None,
+                usdl2.SDL_PIXELFORMAT_RGB24,
+                pixels,
+                width * 3,
+            )
+        finally:
+            retcheck(usdl2.SDL_SetRenderTarget(self._renderer, None))
+        return bytes(pixels)
+
+    def _visible_rgb(self):
+        """Return the scrolled and scaled visible frame as RGB24."""
+        width = self.width
+        height = self.height
+        stride = width * 3
+        source = self._read_texture_rgb()
+
+        y_start = self.vscsad()
+        if y_start:
+            rows = []
+            rows.extend(range(self._tfa))
+            rows.extend(range(y_start, self._tfa + self._vsa))
+            rows.extend(range(self._tfa, y_start))
+            rows.extend(range(self._tfa + self._vsa, height))
+            source = b"".join(source[y * stride : (y + 1) * stride] for y in rows)
+
+        out_width = int(width * self._scale)
+        out_height = int(height * self._scale)
+        if out_width == width and out_height == height:
+            return source, width, height
+
+        integer_scale = int(self._scale)
+        if (
+            integer_scale == self._scale
+            and out_width == width * integer_scale
+            and out_height == height * integer_scale
+        ):
+            scaled = bytearray()
+            for src_y in range(height):
+                row = source[src_y * stride : (src_y + 1) * stride]
+                expanded = bytearray()
+                for src_x in range(0, stride, 3):
+                    expanded.extend(row[src_x : src_x + 3] * integer_scale)
+                scaled.extend(expanded * integer_scale)
+            return bytes(scaled), out_width, out_height
+
+        scaled = bytearray(out_width * out_height * 3)
+        for out_y in range(out_height):
+            src_y = min(height - 1, int(out_y / self._scale))
+            src_row = src_y * stride
+            out_row = out_y * out_width * 3
+            for out_x in range(out_width):
+                src_x = min(width - 1, int(out_x / self._scale)) * 3
+                dst = out_row + out_x * 3
+                scaled[dst : dst + 3] = source[src_row + src_x : src_row + src_x + 3]
+        return bytes(scaled), out_width, out_height
 
     def render(self, renderRect=None):
         """
@@ -754,7 +807,7 @@ class SDLDisplay(DisplayDriver):
             self.render()
         recorder = self._frame_recorder
         if recorder is not None:
-            pixels, _width, _height = self._read_renderer_rgb()
+            pixels, _width, _height = self._visible_rgb()
             recorder.write(pixels)
         usdl2.SDL_RenderPresent(self._renderer)
         self._show_pending = False
@@ -766,10 +819,7 @@ class SDLDisplay(DisplayDriver):
         read_pixels = getattr(usdl2, "SDL_RenderReadPixels", None)
         if read_pixels is None:
             raise RuntimeError("usdl2 does not provide SDL_RenderReadPixels")
-        # RenderPresent may invalidate the renderer backbuffer. Composite the
-        # current display texture again so readback always sees a complete frame.
-        self.render()
-        return self._read_renderer_rgb()
+        return self._visible_rgb()
 
     def _deinit(self) -> None:
         """Release this window; call ``SDL_Quit`` only when no SDLDisplay remains."""

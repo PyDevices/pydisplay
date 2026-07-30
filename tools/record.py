@@ -4,17 +4,24 @@
 Examples:
     python tools/record.py bouncing_balls
     python tools/record.py bouncing_balls 10
-    python tools/record.py logo --duration 3 --fps 15 --output demo.mp4
+    python tools/record.py logo --duration 3 --resolution 320x240 --scale 1
 """
 
 import argparse
+import importlib
 import os
 from pathlib import Path
 import sys
-import threading
 import time
 
-from screenshot import _prepare_paths, _resolve_example, _run_example
+from screenshot import (
+    _apply_display_overrides,
+    _positive_scale,
+    _prepare_paths,
+    _resolution,
+    _resolve_example,
+    _run_example,
+)
 
 
 def _default_output(example):
@@ -32,6 +39,17 @@ def _parse_args(argv=None):
     )
     parser.add_argument("-d", "--duration", type=float, help="same as positional seconds")
     parser.add_argument("--fps", type=int, default=12, help="output frame rate (default: 12)")
+    parser.add_argument(
+        "--resolution",
+        type=_resolution,
+        metavar="WIDTHxHEIGHT",
+        help="override the logical display resolution",
+    )
+    parser.add_argument(
+        "--scale",
+        type=_positive_scale,
+        help="override the desktop window scale",
+    )
     parser.add_argument("-o", "--output", type=Path, help="output MP4 path")
     args = parser.parse_args(argv)
     if args.seconds is not None and args.duration is not None:
@@ -45,79 +63,84 @@ def _parse_args(argv=None):
     return args
 
 
-def _record_until(deadline, output, fps, state):
-    recorder = None
-    display_drv = None
+def _finish_recording(display, output, fps):
+    frames = display.close_frame_recorder()
+    return f"saved {output} ({frames} frames at {fps} fps, {type(display).__name__})"
+
+
+def _install_show_recording(deadline, output, fps):
+    """Start, feed, and finish recording from the renderer's main thread."""
+    state = {"display": None, "finishing": False}
+
+    def arm(display_class):
+        original = display_class.show
+
+        def show(display, *args, **kwargs):
+            if state["display"] is None:
+                output.parent.mkdir(parents=True, exist_ok=True)
+                display.open_frame_recorder(str(output), fps=fps)
+                state["display"] = display
+            if not state["finishing"] and time.monotonic() >= deadline:
+                state["finishing"] = True
+                try:
+                    print(_finish_recording(display, output, fps), flush=True)
+                    os._exit(0)
+                except Exception as exc:
+                    print(f"recording failed: {type(exc).__name__}: {exc}", flush=True)
+                    os._exit(1)
+            return original(display, *args, **kwargs)
+
+        display_class.show = show
+
     try:
-        while time.monotonic() < deadline:
-            board_config = sys.modules.get("board_config")
-            candidate = getattr(board_config, "display_drv", None)
-            if candidate is not None and hasattr(candidate, "open_frame_recorder"):
-                display_drv = candidate
-                break
-            time.sleep(0.01)
-        if display_drv is None:
-            raise RuntimeError("example did not create a recordable desktop display")
+        from displaysys.sdldisplay import SDLDisplay
 
-        output.parent.mkdir(parents=True, exist_ok=True)
-        recorder = display_drv.open_frame_recorder(str(output), fps=fps)
+        arm(SDLDisplay)
+    except ImportError:
+        pass
+    try:
+        from displaysys.pgdisplay import PGDisplay
 
-        # Preserve a frame for one-shot examples that rendered before the
-        # recorder was attached. Looping examples add frames from show().
-        pixels, _width, _height = display_drv.capture_rgb()
-        recorder.write(pixels)
-
-        remaining = deadline - time.monotonic()
-        if remaining > 0:
-            time.sleep(remaining)
-        frames = display_drv.close_frame_recorder()
-        recorder = None
-        state["message"] = (
-            f"saved {output} ({frames} frames at {fps} fps, {type(display_drv).__name__})"
-        )
-        state["code"] = 0
-    except Exception as exc:
-        state["message"] = f"recording failed: {type(exc).__name__}: {exc}"
-        state["code"] = 1
-    finally:
-        if recorder is not None:
-            try:
-                recorder.close()
-            except Exception:
-                pass
-        print(state["message"], flush=True)
-        os._exit(state["code"])
+        arm(PGDisplay)
+    except ImportError:
+        pass
+    return state
 
 
 def main(argv=None):
     args = _parse_args(argv)
     repo_root = Path(__file__).resolve().parent.parent
     _prepare_paths(repo_root)
-    from displaysys._frame_recorder import ffmpeg_executable
+    _apply_display_overrides(args.resolution, args.scale)
+    example = _resolve_example(args.example, repo_root)
+    output = args.output.resolve()
+    os.chdir(repo_root / "src")
+    importlib.import_module("lib.path")
+    ffmpeg_executable = importlib.import_module("frame_recorder").ffmpeg_executable
 
     if ffmpeg_executable() is None:
         raise SystemExit("record.py requires ffmpeg on PATH or the imageio-ffmpeg Python package")
 
-    example = _resolve_example(args.example, repo_root)
-    output = args.output.resolve()
-    os.chdir(repo_root / "src")
-    import lib.path  # noqa: F401
-
-    state = {"code": 1, "message": "recording did not run"}
     deadline = time.monotonic() + args.duration
-    worker = threading.Thread(
-        target=_record_until,
-        args=(deadline, output, args.fps, state),
-        daemon=True,
-    )
-    worker.start()
+    state = _install_show_recording(deadline, output, args.fps)
     try:
         _run_example(example)
     except SystemExit as exc:
         if exc.code not in (None, 0):
             raise
-    worker.join()
-    return state["code"]
+    remaining = deadline - time.monotonic()
+    if remaining > 0:
+        time.sleep(remaining)
+    display = state["display"]
+    if display is None:
+        print("recording failed: example did not show a recordable desktop display", flush=True)
+        return 1
+    try:
+        print(_finish_recording(display, output, args.fps), flush=True)
+        return 0
+    except Exception as exc:
+        print(f"recording failed: {type(exc).__name__}: {exc}", flush=True)
+        return 1
 
 
 if __name__ == "__main__":

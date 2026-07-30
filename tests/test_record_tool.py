@@ -22,9 +22,13 @@ class TestRecordTool(unittest.TestCase):
         )
 
     def test_positional_duration(self):
-        args = record._parse_args(["logo", "2.5", "--fps", "20"])
+        args = record._parse_args(
+            ["logo", "2.5", "--fps", "20", "--resolution", "320x240", "--scale", "2"]
+        )
         self.assertEqual(args.duration, 2.5)
         self.assertEqual(args.fps, 20)
+        self.assertEqual(args.resolution, (320, 240))
+        self.assertEqual(args.scale, 2.0)
 
 
 if __name__ == "__main__":

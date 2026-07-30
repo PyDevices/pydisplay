@@ -125,7 +125,7 @@ Installs `displaysys`, `usdl2`, `pygraphics-cmod`, and `lvgl-cpython` (no versio
 ```bash
 python tools/screenshot.py hello.py
 python tools/screenshot.py bouncing_balls 3
-python tools/screenshot.py logo --delay 2 --output docs/screenshots/logo.png
+python tools/screenshot.py logo --delay 2 --resolution 320x240 --scale 1
 ```
 
 Without ``--output``, screenshots are saved as
@@ -134,7 +134,7 @@ Without ``--output``, screenshots are saved as
 ```bash
 python tools/record.py bouncing_balls
 python tools/record.py bouncing_balls 10
-python tools/record.py logo --duration 3 --fps 15 --output docs/videos/logo.mp4
+python tools/record.py logo --duration 3 --fps 15 --resolution 320x240 --scale 1
 ```
 
 Without ``--output``, recordings are saved as
