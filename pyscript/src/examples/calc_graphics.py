@@ -1,4 +1,4 @@
-# deps: palettes
+# deps: palettes, pygraphics
 # modules: calc_engine
 """
 calc_graphics

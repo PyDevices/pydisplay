@@ -1,4 +1,5 @@
 # deps: palettes
+# add_ons: tft_text, tft_config
 """
 scroll.py
 =========

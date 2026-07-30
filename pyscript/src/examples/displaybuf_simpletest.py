@@ -1,4 +1,5 @@
 # deps: pygraphics
+# add_ons: color_setup
 """
 displaybuf_simpletest.py - Simple test program for displaybuf.py
 """

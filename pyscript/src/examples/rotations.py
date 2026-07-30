@@ -1,4 +1,4 @@
-# deps: palettes
+# deps: palettes, pygraphics
 """
 rotations.py
 ============

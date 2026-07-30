@@ -634,7 +634,27 @@ pre code {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 10px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.badge.dep {
+  background: rgba(99, 102, 241, 0.15);
+  color: #6366f1;
+}
+
+.badge.add-on {
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
 }
 
 /* Simple link list */

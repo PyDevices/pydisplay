@@ -1,5 +1,6 @@
 from board_config import runtime
 from keypins import KeyPins, Keys
+# add_ons: keypins
 
 
 buttons = KeyPins(
