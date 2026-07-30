@@ -174,12 +174,12 @@ def _candidates(package, repo_root):
         _expanduser(_join("~", "gh", "pydevices", package, "lib")),
         _normpath(_join(repo_root, "..", package, "lib")),
     ]
-    # Day-to-day cmods checkout: pygraphics lives under cmods/pygraphics.
-    if package == "pygraphics":
+    # Day-to-day native-module checkouts live under cmods/.
+    if package in ("pygraphics", "usdl2"):
         paths.extend(
             [
-                _expanduser(_join("~", "gh", "pydevices", "cmods", "pygraphics", "lib")),
-                _normpath(_join(repo_root, "..", "cmods", "pygraphics", "lib")),
+                _expanduser(_join("~", "gh", "pydevices", "cmods", package, "lib")),
+                _normpath(_join(repo_root, "..", "cmods", package, "lib")),
             ]
         )
     return paths

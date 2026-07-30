@@ -18,6 +18,7 @@ from displaysys import (
     fit_scale_to_desktop,
     notify_board_config_scale_override,
 )
+from displaysys._frame_recorder import FFmpegFrameRecorder
 from eventsys import events
 from eventsys.keys import default_quit_chord
 
@@ -445,6 +446,7 @@ class SDLDisplay(DisplayDriver):
         self._render_dirty = False
         self._show_pending = False
         self._requires_byteswap = False
+        self._frame_recorder = None
 
         # Determine the pixel format
         if color_depth == 32:
@@ -672,6 +674,40 @@ class SDLDisplay(DisplayDriver):
             return False
         return self._renderer is not None and self._window is not None
 
+    @property
+    def frame_recording(self) -> bool:
+        """True while an ffmpeg frame recorder is attached."""
+        return self._frame_recorder is not None
+
+    def open_frame_recorder(self, path, *, fps=12, width=None, height=None):
+        """Attach an ffmpeg recorder that receives RGB24 frames from ``show()``."""
+        self.close_frame_recorder()
+        w = int(self.width * self._scale) if width is None else width
+        h = int(self.height * self._scale) if height is None else height
+        self._frame_recorder = FFmpegFrameRecorder(path, w, h, fps)
+        return self._frame_recorder
+
+    def close_frame_recorder(self):
+        """Finalize and detach the active frame recorder."""
+        recorder = self._frame_recorder
+        self._frame_recorder = None
+        if recorder is not None:
+            return recorder.close()
+        return 0
+
+    def _read_renderer_rgb(self):
+        width = int(self.width * self._scale)
+        height = int(self.height * self._scale)
+        pixels = bytearray(width * height * 3)
+        usdl2.SDL_RenderReadPixels(
+            self._renderer,
+            None,
+            usdl2.SDL_PIXELFORMAT_RGB24,
+            pixels,
+            width * 3,
+        )
+        return bytes(pixels), width, height
+
     def render(self, renderRect=None):
         """
         Composite the logical framebuffer to the window.  Called from ``show()`` when draws are pending.
@@ -716,11 +752,28 @@ class SDLDisplay(DisplayDriver):
             return
         if self._render_dirty:
             self.render()
+        recorder = self._frame_recorder
+        if recorder is not None:
+            pixels, _width, _height = self._read_renderer_rgb()
+            recorder.write(pixels)
         usdl2.SDL_RenderPresent(self._renderer)
         self._show_pending = False
 
+    def capture_rgb(self):
+        """Return the visible window as ``(RGB24 bytes, width, height)``."""
+        if not self._sdl_active():
+            raise RuntimeError("SDL display is not active")
+        read_pixels = getattr(usdl2, "SDL_RenderReadPixels", None)
+        if read_pixels is None:
+            raise RuntimeError("usdl2 does not provide SDL_RenderReadPixels")
+        # RenderPresent may invalidate the renderer backbuffer. Composite the
+        # current display texture again so readback always sees a complete frame.
+        self.render()
+        return self._read_renderer_rgb()
+
     def _deinit(self) -> None:
         """Release this window; call ``SDL_Quit`` only when no SDLDisplay remains."""
+        self.close_frame_recorder()
         try:
             _displays.remove(self)
         except ValueError:

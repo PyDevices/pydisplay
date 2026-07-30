@@ -118,7 +118,28 @@ Installs `displaysys`, `usdl2`, `pygraphics-cmod`, and `lvgl-cpython` (no versio
 |--------|---------|
 | [`quit_inject.py`](quit_inject.py) | Inject quit into running examples (used by the example harness) |
 | [`pydisplay_test_mode.py`](pydisplay_test_mode.py) | Test-mode env for examples |
+| [`screenshot.py`](screenshot.py) | Run a desktop example and save its SDL2/pygame-ce window as PNG |
+| [`record.py`](record.py) | Run a desktop example and record its SDL2/pygame-ce window with FFmpeg |
 | [`typings/`](typings/) | MicroPython stdlib stubs + core package `.pyi` (see below) |
+
+```bash
+python tools/screenshot.py hello.py
+python tools/screenshot.py bouncing_balls 3
+python tools/screenshot.py logo --delay 2 --output docs/screenshots/logo.png
+```
+
+Without ``--output``, screenshots are saved as
+``docs/screenshots/EXAMPLE_NAME.png``.
+
+```bash
+python tools/record.py bouncing_balls
+python tools/record.py bouncing_balls 10
+python tools/record.py logo --duration 3 --fps 15 --output docs/videos/logo.mp4
+```
+
+Without ``--output``, recordings are saved as
+``docs/videos/EXAMPLE_NAME.mp4``. Recording requires ``ffmpeg`` on ``PATH`` or
+the binary-bundled ``imageio-ffmpeg`` Python package.
 
 ### IDE typings (`tools/typings/`)
 
