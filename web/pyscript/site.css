@@ -547,6 +547,13 @@ pre code {
   height: 22px;
 }
 
+.card .card-icon img {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
 .card h3 {
   margin: 0;
   font-size: 1.1rem;

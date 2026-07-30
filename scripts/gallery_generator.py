@@ -45,6 +45,7 @@ import json
 from pathlib import Path
 import re
 import shutil
+import subprocess
 import sys
 
 _scripts = Path(__file__).resolve().parent
@@ -57,6 +58,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES_DIR = REPO_ROOT / "src" / "examples"
 PYSCRIPT_DIR = REPO_ROOT / "web" / "pyscript"
 INDEX = PYSCRIPT_DIR / "index.html"
+THUMBNAILS_DIR = PYSCRIPT_DIR / "thumbnails"
+SCREENSHOT_TOOL = REPO_ROOT / "tools" / "screenshot.py"
 
 KEEP_HTML = frozenset(
     {
@@ -411,6 +414,61 @@ def _render_badges(ex: Example) -> str:
     return "\n                        " + "\n                        ".join(parts)
 
 
+def thumbnail_path(ex: Example) -> Path:
+    return THUMBNAILS_DIR / f"{ex.name}.png"
+
+
+def generate_missing_thumbnails(examples: list[Example]) -> tuple[int, int]:
+    """Capture missing gallery thumbnails; return ``(created, failed)``."""
+    created = 0
+    failed = 0
+    for ex in examples:
+        output = thumbnail_path(ex)
+        if not ex.in_gallery or output.exists():
+            continue
+        command = [
+            sys.executable,
+            str(SCREENSHOT_TOOL),
+            str(REPO_ROOT / ex.source_rel),
+            "--delay",
+            "2",
+            "--resolution",
+            "240x320",
+            "--scale",
+            "0.5",
+            "--output",
+            str(output),
+        ]
+        print(f"capturing thumbnail for {ex.name}...")
+        try:
+            result = subprocess.run(
+                command,
+                cwd=REPO_ROOT,
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            failed += 1
+            print(f"warning: thumbnail timed out for {ex.name}", file=sys.stderr)
+            continue
+        if result.returncode == 0 and output.exists():
+            created += 1
+            continue
+        failed += 1
+        detail = (result.stderr or result.stdout).strip().splitlines()
+        reason = detail[-1] if detail else f"exit {result.returncode}"
+        print(f"warning: thumbnail failed for {ex.name}: {reason}", file=sys.stderr)
+    return created, failed
+
+
+def render_card_icon(ex: Example) -> str:
+    if thumbnail_path(ex).exists():
+        return f'<img src="thumbnails/{ex.name}.png" alt="" loading="lazy">'
+    return GENERIC_ICON
+
+
 def render_card(ex: Example) -> str:
     if ex.featured:
         tag = '\n                        <span class="tag featured">featured</span>'
@@ -420,10 +478,11 @@ def render_card(ex: Example) -> str:
         tag = ""
     badges = _render_badges(ex)
     hrefs = ex.loader_hrefs()
+    icon = render_card_icon(ex)
     # No target=_blank: keep demos in one window (browser or PWA).
     return f'''                <article class="card">
                     <div class="card-top">
-                        <span class="card-icon">{GENERIC_ICON}</span>{tag}{badges}
+                        <span class="card-icon">{icon}</span>{tag}{badges}
                     </div>
                     <h3>{ex.title}</h3>
                     <p>{ex.blurb}</p>
@@ -532,6 +591,11 @@ def main(argv: list[str] | None = None) -> int:
         key=lambda e: (0 if e.featured else 1 if e.nochrome else 2, e.title.lower()),
     )
     stale: list[str] = []
+
+    if not args.check:
+        created, failed = generate_missing_thumbnails(examples)
+        if created or failed:
+            print(f"thumbnails: {created} created, {failed} failed")
 
     def write(path: Path, content: str) -> None:
         old = path.read_text(encoding="utf-8") if path.exists() else None

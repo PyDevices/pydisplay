@@ -103,6 +103,10 @@ Depends on changed paths — unrelated edits skip workflows:
 python scripts/gallery_generator.py
 python scripts/gallery_generator.py --check    # CI freshness
 
+# Normal generation captures missing 240x320 card thumbnails at scale 0.5
+# after 2 seconds. Existing web/pyscript/thumbnails/*.png files are preserved;
+# --check never launches examples.
+
 # After editing src/add_ons/framebuf.py:
 
 # After public-API changes in displaysys / eventsys / multimer:
