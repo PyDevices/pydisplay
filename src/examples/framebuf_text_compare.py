@@ -1,5 +1,6 @@
 # gallery: skip
 # deps: pygraphics
+# add_ons: framebuf
 """
 TEMP troubleshooting tool — delete after the font issue is resolved.
 

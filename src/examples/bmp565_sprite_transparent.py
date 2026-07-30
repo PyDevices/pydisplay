@@ -1,4 +1,5 @@
 # deps: pygraphics
+# add_ons: color_setup
 # gallery: binaries
 from collections import namedtuple
 

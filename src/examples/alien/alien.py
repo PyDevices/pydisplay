@@ -1,4 +1,5 @@
 # deps: palettes
+# add_ons: tft_config, tft_bitmap
 """
 alien.py
 =========

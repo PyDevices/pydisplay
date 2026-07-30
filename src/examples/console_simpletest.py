@@ -1,4 +1,5 @@
 # deps: pygraphics
+# add_ons: console
 """
 console_simpletest.py
 

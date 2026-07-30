@@ -23,7 +23,7 @@
     },
     "files.insertFinalNewline": true,
     "python.analysis.typeCheckingMode": "standard",
-    "python.languageServer": "None",
+    "python.languageServer": "Default",
     "jupyter.widgetScriptSources": [
         "jsdelivr.com",
         "unpkg.com"

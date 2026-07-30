@@ -11,6 +11,7 @@ Default-includes every example **entry point** under ``src/examples/``:
 Optional headers (first 10 lines), one line per namespace::
 
   # deps: palettes, lvgl          — logical packages → ?deps= via url_maker
+  # add_ons: console, tft_config  — pydisplay add_ons modules (shown as badges)
   # modules: calc_engine          — extra example .py stems (site)
   # manifests: alien              — site-served packages/<name>.json bundles
   # gallery: featured|skip|binaries|nochrome
@@ -103,6 +104,7 @@ class Example:
         self.extra_modules: list[str] = []
         self.extra_manifests: list[str] = []
         self.deps: list[str] = []
+        self.add_ons: list[str] = []
         self.pyscript_files: list[str] = []
         self.featured = False
         self.nochrome = False
@@ -334,6 +336,7 @@ def parse_example(path: Path) -> Example | None:
     ex.extra_modules = parse_header_list(lines, "# modules:")
     ex.extra_manifests = parse_header_list(lines, "# manifests:")
     ex.deps = parse_header_list(lines, "# deps:")
+    ex.add_ons = parse_header_list(lines, "# add_ons:")
     ex.pyscript_files = resolve_py_files(path, kind, name, lines, text)
     for entry in ex.pyscript_files:
         if not (EXAMPLES_DIR / entry).is_file():
@@ -396,6 +399,18 @@ def discover() -> list[Example]:
     return found
 
 
+def _render_badges(ex: Example) -> str:
+    """Render deps and add_ons as colored badge spans next to the card tag."""
+    parts: list[str] = []
+    for dep in ex.deps:
+        parts.append(f'<span class="badge dep">{dep}</span>')
+    for ao in ex.add_ons:
+        parts.append(f'<span class="badge add-on">{ao}</span>')
+    if not parts:
+        return ""
+    return "\n                        " + "\n                        ".join(parts)
+
+
 def render_card(ex: Example) -> str:
     if ex.featured:
         tag = '\n                        <span class="tag featured">featured</span>'
@@ -403,11 +418,12 @@ def render_card(ex: Example) -> str:
         tag = '\n                        <span class="tag">nochrome</span>'
     else:
         tag = ""
+    badges = _render_badges(ex)
     hrefs = ex.loader_hrefs()
     # No target=_blank: keep demos in one window (browser or PWA).
     return f'''                <article class="card">
                     <div class="card-top">
-                        <span class="card-icon">{GENERIC_ICON}</span>{tag}
+                        <span class="card-icon">{GENERIC_ICON}</span>{tag}{badges}
                     </div>
                     <h3>{ex.title}</h3>
                     <p>{ex.blurb}</p>
@@ -489,21 +505,8 @@ def copy_gallery_examples(dest: Path) -> int:
 
 
 def ensure_card_runtime_css(index_text: str) -> str:
-    """Inject minimal dual-link styles once if missing."""
-    marker = "/* gallery dual runtime links */"
-    if marker in index_text:
-        return index_text
-    css = f"""
-        {marker}
-        .card {{ display: flex; flex-direction: column; text-decoration: none; color: inherit; }}
-        .card-runtimes {{ display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: auto; padding-top: 0.75rem; }}
-        .card-runtimes .go {{ display: inline-flex; align-items: center; gap: 0.35rem; }}
-"""
-    # Insert before closing </style> of the first stylesheet block.
-    close = index_text.find("</style>")
-    if close == -1:
-        return index_text
-    return index_text[:close] + css + index_text[close:]
+    """No-op: card/badge styles live in site.css (kept for backward compat)."""
+    return index_text
 
 
 def main(argv: list[str] | None = None) -> int:

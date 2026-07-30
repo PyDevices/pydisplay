@@ -1,4 +1,5 @@
 # deps: pygraphics
+# add_ons: framebuf
 # gallery: binaries
 from board_config import display_drv
 from pygraphics import FrameBuffer, RGB565, pbm_to_framebuffer

@@ -1,4 +1,5 @@
-# deps: palettes
+# deps: palettes, pygraphics
+# add_ons: displaybuf
 # gallery: binaries
 """
 font_simpletest.py -- Simple test of the Font class.

@@ -1,4 +1,5 @@
-# deps: palettes
+# deps: palettes, pygraphics
+# add_ons: pixel_sim
 """
 pixel_sim_demos.py — NeoPixel simulator effects in one file.
 
