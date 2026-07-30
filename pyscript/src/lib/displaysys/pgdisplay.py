@@ -17,82 +17,11 @@ from displaysys import (
     fit_scale_to_desktop,
     notify_board_config_scale_override,
 )
+from displaysys._frame_recorder import FFmpegFrameRecorder
 from eventsys import events
 from eventsys.keys import default_quit_chord
 
 __all__ = ["FFmpegFrameRecorder", "PGDisplay", "get_events", "poll_event"]
-
-
-class FFmpegFrameRecorder:
-    """Pipe fixed-size RGB24 frames to ffmpeg for MP4 output."""
-
-    __slots__ = ("_closed", "_frame_bytes", "_frames", "_proc", "fps", "height", "path", "width")
-
-    def __init__(self, path, width, height, fps=12):
-        import subprocess
-
-        self.path = path
-        self.width = width
-        self.height = height
-        self.fps = fps
-        self._frames = 0
-        self._closed = False
-        self._frame_bytes = width * height * 3
-        self._proc = subprocess.Popen(
-            [
-                "ffmpeg",
-                "-y",
-                "-f",
-                "rawvideo",
-                "-pix_fmt",
-                "rgb24",
-                "-s",
-                f"{width}x{height}",
-                "-r",
-                str(fps),
-                "-i",
-                "pipe:0",
-                "-an",
-                "-c:v",
-                "libx264",
-                "-pix_fmt",
-                "yuv420p",
-                path,
-            ],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.PIPE,
-        )
-
-    def write(self, rgb_bytes):
-        if self._closed:
-            return
-        if len(rgb_bytes) != self._frame_bytes:
-            raise ValueError(
-                f"frame size {len(rgb_bytes)} != expected {self._frame_bytes} "
-                f"for {self.width}x{self.height} RGB24"
-            )
-        self._proc.stdin.write(rgb_bytes)
-        self._frames += 1
-
-    def close(self):
-        if self._closed:
-            return self._frames
-        self._closed = True
-        try:
-            self._proc.stdin.close()
-        except Exception:
-            pass
-        err = self._proc.stderr.read().decode("utf-8", errors="replace")
-        try:
-            self._proc.stderr.close()
-        except Exception:
-            pass
-        rc = self._proc.wait()
-        if rc != 0:
-            tail = "\n".join(err.strip().splitlines()[-8:])
-            raise RuntimeError(f"ffmpeg exited {rc} for {self.path}:\n{tail}")
-        return self._frames
 
 
 def _pg_key_name(key):
@@ -522,11 +451,19 @@ class PGDisplay(DisplayDriver):
         except pg.error:
             return False
 
-    def _buffer_rgb(self) -> bytes:
-        """Export the logical framebuffer as packed RGB24 bytes."""
-        if hasattr(pg.image, "tostring"):
-            return pg.image.tostring(self._buffer, "RGB")
-        return pg.image.tobytes(self._buffer, "RGB")
+    def capture_rgb(self):
+        """Return the visible window as ``(RGB24 bytes, width, height)``."""
+        if not self._video_active():
+            raise RuntimeError("pygame display is not active")
+        self.show()
+        width, height = self._window.get_size()
+        return self._window_rgb(), width, height
+
+    def _window_rgb(self):
+        """Export the composed visible window as packed RGB24 bytes."""
+        if hasattr(pg.image, "tobytes"):
+            return pg.image.tobytes(self._window, "RGB")
+        return pg.image.tostring(self._window, "RGB")
 
     @property
     def frame_recording(self) -> bool:
@@ -536,8 +473,8 @@ class PGDisplay(DisplayDriver):
     def open_frame_recorder(self, path, *, fps=12, width=None, height=None):
         """Attach an ffmpeg-backed recorder that receives one RGB24 frame per ``show()``."""
         self.close_frame_recorder()
-        w = self.width if width is None else width
-        h = self.height if height is None else height
+        w = int(self.width * self._scale) if width is None else width
+        h = int(self.height * self._scale) if height is None else height
         self._frame_recorder = FFmpegFrameRecorder(path, w, h, fps)
         return self._frame_recorder
 
@@ -546,11 +483,13 @@ class PGDisplay(DisplayDriver):
         recorder = self._frame_recorder
         self._frame_recorder = None
         if recorder is not None:
-            recorder.close()
+            return recorder.close()
+        return 0
 
     def _record_frame(self, rgb_bytes) -> None:
-        if self._frame_recorder is not None:
-            self._frame_recorder.write(rgb_bytes)
+        recorder = self._frame_recorder
+        if recorder is not None:
+            recorder.write(rgb_bytes)
 
     def render(self, renderRect=None) -> None:
         """
@@ -604,7 +543,7 @@ class PGDisplay(DisplayDriver):
             self.render()
             self._render_dirty = False
         if self._frame_recorder is not None:
-            self._record_frame(self._buffer_rgb())
+            self._record_frame(self._window_rgb())
         try:
             self._pg_window.flip()
         except pg.error:
