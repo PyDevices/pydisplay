@@ -18,12 +18,18 @@ The [installer.py](installer.md) script combines GitHub and micropython-lib inst
 
 - `displaysys` — display drivers (BusDisplay, SDLDisplay, PGDisplay, etc.)
 - `eventsys` — input events and Runtime
-- `pygraphics` — extended drawing helpers
 - `multimer` — cross-platform timers; see [multimer](../concepts/multimer.md)
+
+**Sister packages** (separate repos, installed from the same [micropython-lib MIP index](mip-micropython-lib.md)):
+
+- `pygraphics` — extended drawing helpers ([PyDevices/pygraphics](https://github.com/PyDevices/pygraphics)); see [graphics](../concepts/graphics.md)
+- `usdl2` — native SDL2 bindings ([PyDevices/usdl2](https://github.com/PyDevices/usdl2))
+- `palettes` — color palettes ([PyDevices/palettes](https://github.com/PyDevices/palettes)); see [palettes guide](guis/palettes.md)
+- `pdwidgets` — widget toolkit ([PyDevices/pdwidgets](https://github.com/PyDevices/pdwidgets)); see [pdwidgets guide](guis/pywidgets.md)
 
 **Optional packages:**
 
-- `add_ons` — optional extensions (framebuf shim, console, displaybuf, tft_config, …); [`palettes`](guis/palettes.md) and [`pdwidgets`](guis/pywidgets.md) are separate packages
+- `add_ons` — optional extensions (framebuf shim, console, displaybuf, tft_config, …)
 - `examples` — demo scripts
 - Bus/touch helpers — see [micropython-hardware packages](https://github.com/PyDevices/micropython-hardware/tree/main/packages)
 

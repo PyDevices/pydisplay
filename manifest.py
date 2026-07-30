@@ -41,18 +41,19 @@ if 0:
 
 
 if os.path.exists(os.path.join("$(BOARD_DIR)", "manifest.py")):
-    include("$(BOARD_DIR)/manifest.py")
+    include("$(BOARD_DIR)/manifest.py")  # type: ignore[name-defined]  # noqa: PGH003
 elif os.path.exists(os.path.join("$(PORT_DIR)", "boards", "manifest.py")):
-    include("$(PORT_DIR)/boards/manifest.py")
+    include("$(PORT_DIR)/boards/manifest.py")  # type: ignore[name-defined]  # noqa: PGH003
 elif os.path.exists(os.path.join("$(PORT_DIR)", "variants", "standard", "manifest.py")):
-    include("$(PORT_DIR)/variants/standard/manifest.py")
+    include("$(PORT_DIR)/variants/standard/manifest.py")  # type: ignore[name-defined]  # noqa: PGH003
 
 # Frozen asyncio on desktop MicroPython ports (required for multimer.AsyncTimer).
 _port = "$(PORT_DIR)".replace("\\", "/")
 if _port.endswith("/unix") or _port.endswith("/windows"):
-    include("$(MPY_DIR)/extmod/asyncio")
+    include("$(MPY_DIR)/extmod/asyncio")  # type: ignore[name-defined]  # noqa: PGH003
 
-package("displaysys", base_path="./src/lib", opt=3)
-package("eventsys", base_path="./src/lib", opt=3)
-package("pygraphics", base_path="./src/lib", opt=3)
-package("multimer", base_path="./src/lib", opt=3)
+package("displaysys", base_path="./src/lib", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
+package("eventsys", base_path="./src/lib", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
+package("multimer", base_path="./src/lib", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
+# pygraphics is a sister package (PyDevices/pygraphics) — install via MIP or
+# freeze from its own repo, not from src/lib/ (it is not in this repo).

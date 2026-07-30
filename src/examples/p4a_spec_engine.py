@@ -117,7 +117,7 @@ _FALLBACK_PAINT = {
         "icon.filename": "%(source.dir)s/icon.png",
         "presplash.filename": "%(source.dir)s/icon.png",
         "version": "0.5.0",
-        "requirements": "python3,sdl2,usdl2,displaysys,eventsys,graphics,multimer",
+        "requirements": "python3,sdl2,usdl2,displaysys,eventsys,pygraphics,multimer",
         "orientation": "portrait",
         "fullscreen": "0",
         "android.api": "31",

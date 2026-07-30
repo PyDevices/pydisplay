@@ -166,11 +166,11 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 
 | Script | Description | Platforms | Packages |
 |--------|-------------|-----------|----------|
-| `bmp565_simpletest.py` | BMP565 load/draw (slice + full blit) | CPython · MCU | graphics |
-| `bmp565_sprite.py` | Sprite animation | CPython · MCU | graphics |
-| `bmp565_sprite_transparent.py` | Transparency | CPython · MCU | graphics |
-| `bmp565_scroll.py` | Scrolling bitmap | CPython · MCU | graphics |
-| `bmp565_scroll_sprite.py` | Scrolling sprite | CPython · MCU | graphics |
+| `bmp565_simpletest.py` | BMP565 load/draw (slice + full blit) | CPython · MCU | pygraphics |
+| `bmp565_sprite.py` | Sprite animation | CPython · MCU | pygraphics |
+| `bmp565_sprite_transparent.py` | Transparency | CPython · MCU | pygraphics |
+| `bmp565_scroll.py` | Scrolling bitmap | CPython · MCU | pygraphics |
+| `bmp565_scroll_sprite.py` | Scrolling sprite | CPython · MCU | pygraphics |
 | `palettes_demo.py` | Palettes: cycles `wheel` / `cube` / `material` | CPython · MCU | core |
 | `pbm_simpletest.py` | PBM images | CPython · MCU | core |
 
@@ -178,7 +178,7 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 
 | Script | Description | Platforms | Packages |
 |--------|-------------|-----------|----------|
-| `calc_graphics.py` | Pocket calculator (graphics) | CPython · MCU · PyScript | core |
+| `calc_graphics.py` | Pocket calculator (pygraphics) | CPython · MCU · PyScript | core |
 | `calc_widgets.py` | Pocket calculator (pdwidgets) | CPython · MCU · PyScript | add_ons |
 | `calc_lvgl.py` | Pocket calculator (LVGL) | CPython · MCU · PyScript | LVGL |
 | `paint.py` | Paint app | CPython · PyScript | core |

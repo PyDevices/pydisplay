@@ -14,8 +14,10 @@ flowchart TB
   subgraph core [Core libraries]
     DS[displaysys]
     ES[eventsys]
-    GR[graphics optional]
     MT[multimer]
+  end
+  subgraph sister [Sister packages]
+    GR[pygraphics optional]
   end
   subgraph app [Your code]
     EX[examples / your app]
@@ -43,7 +45,7 @@ flowchart TB
 | **`boarddev`** | Shared lazy-bind helper for optional `board_devices` modules (proof / graduated boards). |
 | **`displaysys`** | Display backends (`BusDisplay`, `SDLDisplay`, `PGDisplay`, `PSDisplay`, `JNDisplay`, `FBDisplay`) with a unified drawing API. |
 | **`eventsys`** | `Runtime` pumps input and dispatches PyGame/SDL2-style events to callbacks; prefer `runtime.on(...)` + `runtime.run_forever()`. |
-| **`pygraphics`** | Optional helpers on top of `framebuf` (rounded rects, gradients, `Area` bounding boxes). |
+| **`pygraphics`** | Sister package ([PyDevices/pygraphics](https://github.com/PyDevices/pygraphics)) — optional helpers on top of `framebuf` (rounded rects, gradients, `Area` bounding boxes). Install from the [micropython-lib MIP index](../installation/mip-micropython-lib.md); see [graphics](graphics.md). |
 | **`multimer`** | Cross-platform `Timer` / `AsyncTimer`, ticks/sleep, and `asyncio` exposure. |
 | **`add_ons`** | Optional shims and integrations (`displaybuf`, config templates, GUI fetch helpers). |
 

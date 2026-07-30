@@ -1,4 +1,7 @@
-graphics extends `framebuf` with extra drawing helpers (rounded rectangles, gradients, polygons) and returns **Area** bounding boxes for partial updates.
+`pygraphics` extends `framebuf` with extra drawing helpers (rounded rectangles, gradients, polygons) and returns **Area** bounding boxes for partial updates.
+
+!!! note "Sister package"
+    `pygraphics` is a separate package from [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics), not part of the pydisplay repo. Install it from the [micropython-lib MIP index](../../installation/mip-micropython-lib.md) or [TestPyPI](../../installation/index.md#pypi-pip-testpypi).
 
 ## Narrative docs
 

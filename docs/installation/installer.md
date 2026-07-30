@@ -26,7 +26,7 @@ from installer import install
 
 install("displaysys")                                  # micropython-lib
 install("eventsys")
-install("graphics")
+install("pygraphics")
 install("multimer")
 install("/packages/add_ons.json", target="./add_ons")  # GitHub
 install("/packages/examples.json", target="./examples")

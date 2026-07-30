@@ -1,6 +1,9 @@
-# graphics
+# pygraphics
 
 Cross-platform 2D drawing: framebuf-compatible buffers, shape primitives that return **Area** bounds, fonts, and image loaders. One import works on MicroPython, CircuitPython, and CPython.
+
+!!! note "Sister package"
+    `pygraphics` is a separate package from [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics), not part of the pydisplay repo. Install it from the [micropython-lib MIP index](../installation/mip-micropython-lib.md) (`mip.install("pygraphics", index=…)`) or [TestPyPI](../installation/index.md#pypi-pip-testpypi). pydisplay's `add_ons` (`displaybuf`, `framebuf` shim, `tft_text`, …) import `pygraphics` at runtime.
 
 ## Quick start
 
