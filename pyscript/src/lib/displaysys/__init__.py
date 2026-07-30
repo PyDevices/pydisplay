@@ -68,6 +68,7 @@ __all__ = [
     "color_rgb",
     "desktop_work_area",
     "env_bool",
+    "env_float",
     "env_get",
     "env_int",
     "env_set",
@@ -143,6 +144,17 @@ def env_int(name, default=0):
         return int(str(raw).strip())
     except (TypeError, ValueError):
         return int(default)
+
+
+def env_float(name, default=0.0):
+    """Read a floating-point environment variable portably."""
+    raw = _env_raw(name)
+    if raw is None:
+        return float(default)
+    try:
+        return float(str(raw).strip())
+    except (TypeError, ValueError):
+        return float(default)
 
 
 def _env_raw(name):

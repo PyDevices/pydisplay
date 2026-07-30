@@ -17,11 +17,10 @@ from displaysys import (
     fit_scale_to_desktop,
     notify_board_config_scale_override,
 )
-from displaysys._frame_recorder import FFmpegFrameRecorder
 from eventsys import events
 from eventsys.keys import default_quit_chord
 
-__all__ = ["FFmpegFrameRecorder", "PGDisplay", "get_events", "poll_event"]
+__all__ = ["PGDisplay", "get_events", "poll_event"]
 
 
 def _pg_key_name(key):
@@ -472,6 +471,8 @@ class PGDisplay(DisplayDriver):
 
     def open_frame_recorder(self, path, *, fps=12, width=None, height=None):
         """Attach an ffmpeg-backed recorder that receives one RGB24 frame per ``show()``."""
+        from frame_recorder import FFmpegFrameRecorder
+
         self.close_frame_recorder()
         w = int(self.width * self._scale) if width is None else width
         h = int(self.height * self._scale) if height is None else height

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Shared desktop-display video recording support."""
+"""Optional desktop-display video recording support."""
 
 
 def ffmpeg_executable():
@@ -71,6 +71,8 @@ class FFmpegFrameRecorder:
                 "-i",
                 "pipe:0",
                 "-an",
+                "-vf",
+                "pad=ceil(iw/2)*2:ceil(ih/2)*2",
                 "-c:v",
                 "libx264",
                 "-pix_fmt",
@@ -96,7 +98,12 @@ class FFmpegFrameRecorder:
             now = time.monotonic()
             if self._frames and now < self._next_frame:
                 return False
-            self._proc.stdin.write(rgb_bytes)
+            try:
+                self._proc.stdin.write(rgb_bytes)
+            except BrokenPipeError as exc:
+                err = self._proc.stderr.read().decode("utf-8", errors="replace")
+                tail = "\n".join(err.strip().splitlines()[-8:])
+                raise RuntimeError(f"ffmpeg stopped while recording {self.path}:\n{tail}") from exc
             self._frames += 1
             self._next_frame = now + 1 / self.fps
             return True

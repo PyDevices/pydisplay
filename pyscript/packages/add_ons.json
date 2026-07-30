@@ -21,6 +21,10 @@
       "github:PyDevices/pydisplay/src/add_ons/fetch_ph_gui.py"
     ],
     [
+      "frame_recorder.py",
+      "github:PyDevices/pydisplay/src/add_ons/frame_recorder.py"
+    ],
+    [
       "framebuf.py",
       "github:PyDevices/pydisplay/src/add_ons/framebuf.py"
     ],
