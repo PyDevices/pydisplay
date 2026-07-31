@@ -20,6 +20,11 @@ if runtime is not None and "display_driver" not in sys.modules:
 import display_driver  # noqa: F401
 import lvgl as lv
 
+try:
+    from js import Date as _JSDate
+except ImportError:
+    _JSDate = None
+
 _CIRCLE = getattr(lv, "RADIUS_CIRCLE", 0x7FFF)
 DEFAULT_SKIN = "Grand Classic"
 
@@ -212,6 +217,15 @@ def _plain(obj):
         obj.remove_flag(lv.obj.FLAG.SCROLLABLE)
     except AttributeError:
         pass
+
+
+def _local_clock_time():
+    """Return browser-local time in PyScript, host/device local time elsewhere."""
+    if _JSDate is not None:
+        now = _JSDate.new()
+        return int(now.getHours()), int(now.getMinutes()), int(now.getSeconds())
+    now = time.localtime()
+    return now[3], now[4], now[5]
 
 
 class GlassShimmer:
@@ -547,8 +561,7 @@ class AnalogClock:
                 obj.remove_flag(flag)
 
     def update_time(self):
-        now = time.localtime()
-        hour, minute, second = now[3], now[4], now[5]
+        hour, minute, second = _local_clock_time()
         second_value = second * 12
         minute_value = minute * 12 + second // 5
         hour_value = (hour % 12) * 60 + minute
