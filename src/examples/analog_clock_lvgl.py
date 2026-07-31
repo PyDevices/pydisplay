@@ -42,6 +42,7 @@ BUILTIN_SKINS = {
         "hands": 0x17100B,
         "second": 0x9E1D18,
         "accent": 0x8A651E,
+        "hand_style": "dauphine",
         "numerals": "roman",
         "brand": "CHRONOMETER",
     },
@@ -57,6 +58,7 @@ BUILTIN_SKINS = {
         "hands": 0xF4FFF8,
         "second": 0xFF6B24,
         "accent": 0x42D6B5,
+        "hand_style": "diver",
         "numerals": "quarters",
         "brand": "200 m  AUTOMATIC",
     },
@@ -72,6 +74,7 @@ BUILTIN_SKINS = {
         "hands": 0x151515,
         "second": 0xE32322,
         "accent": 0xE32322,
+        "hand_style": "railway",
         "numerals": "none",
         "brand": "HELVETICA",
     },
@@ -87,6 +90,7 @@ BUILTIN_SKINS = {
         "hands": 0xF5EED0,
         "second": 0xD47C2B,
         "accent": 0xC99A50,
+        "hand_style": "sword",
         "numerals": "arabic",
         "brand": "FLIEGER",
     },
@@ -104,6 +108,7 @@ BUILTIN_SKINS = {
         "hands": 0xF8E9B8,
         "second": 0xD36B42,
         "accent": 0xE7C568,
+        "hand_style": "skeleton",
         "numerals": "roman",
         "brand": "ART DECO",
     },
@@ -120,6 +125,7 @@ BUILTIN_SKINS = {
         "hands": 0x245478,
         "second": 0x245478,
         "accent": 0x725D29,
+        "hand_style": "breguet",
         "numerals": "roman",
         "brand": "PARIS",
     },
@@ -138,6 +144,7 @@ BUILTIN_SKINS = {
         "hands": 0x15212A,
         "second": 0x0077D9,
         "accent": 0x0077D9,
+        "hand_style": "baton",
         "numerals": "quarters",
         "brand": "METRO",
     },
@@ -153,6 +160,7 @@ BUILTIN_SKINS = {
         "hands": 0xF0D8CF,
         "second": 0xD889A8,
         "accent": 0xCF8F82,
+        "hand_style": "leaf",
         "numerals": "none",
         "brand": "NOCTURNE",
     },
@@ -517,15 +525,91 @@ class AnalogClock:
         return line
 
     def _make_hands(self, dial):
-        shadow_w = max(4, dial // 34)
-        self.hour_shadow = self._line(0x000000, shadow_w + 3)
-        self.minute_shadow = self._line(0x000000, max(3, shadow_w - 1) + 3)
-        self.hour_hand = self._line(self.skin["hands"], shadow_w)
-        self.minute_hand = self._line(self.skin["hands"], max(3, shadow_w - 1))
-        self.second_hand = self._line(self.skin["second"], max(1, dial // 115))
-        self.hour_length = dial * 27 // 100
-        self.minute_length = dial * 39 // 100
-        self.second_length = dial * 43 // 100
+        style = self.skin.get("hand_style", "baton")
+        hour_length = dial * 27 // 100
+        minute_length = dial * 39 // 100
+        second_length = dial * 43 // 100
+        hour_w = max(4, dial // 34)
+        minute_w = max(3, dial // 42)
+        second_w = max(1, dial // 115)
+        hands = self.skin["hands"]
+        accent = self.skin["accent"]
+        face = self.skin["face"]
+        second = self.skin["second"]
+        self.hand_layers = {"hour": [], "minute": [], "second": []}
+
+        def add(which, color, width, length):
+            self.hand_layers[which].append((self._line(color, max(1, width)), max(2, length)))
+
+        if style == "dauphine":
+            # Wide lower facets and fine full-length tips suggest tapered hands.
+            for which, length, width in (
+                ("hour", hour_length, hour_w),
+                ("minute", minute_length, minute_w),
+            ):
+                add(which, 0x090705, width + 4, length + 2)
+                add(which, hands, width + 1, length * 82 // 100)
+                add(which, accent, max(1, width // 3), length)
+        elif style == "diver":
+            # Heavy black outlines around luminous centers stay legible underwater.
+            for which, length, width in (
+                ("hour", hour_length, hour_w + 3),
+                ("minute", minute_length, minute_w + 2),
+            ):
+                add(which, 0x010304, width + 5, length + 2)
+                add(which, hands, width, length)
+                add(which, accent, max(1, width // 4), length * 84 // 100)
+        elif style == "railway":
+            # Restrained black batons and the iconic high-contrast red seconds hand.
+            add("hour", hands, hour_w + 1, hour_length)
+            add("minute", hands, minute_w, minute_length)
+        elif style == "sword":
+            # Dark edging, a broad pale blade, and a fine warm center ridge.
+            for which, length, width in (
+                ("hour", hour_length, hour_w + 1),
+                ("minute", minute_length, minute_w + 1),
+            ):
+                add(which, 0x030403, width + 5, length + 2)
+                add(which, hands, width + 1, length)
+                add(which, accent, max(1, width // 4), length * 90 // 100)
+        elif style == "skeleton":
+            # A face-colored channel cuts through a bright outlined framework.
+            for which, length, width in (
+                ("hour", hour_length, hour_w + 1),
+                ("minute", minute_length, minute_w + 1),
+            ):
+                add(which, accent, width + 5, length)
+                add(which, face, width, length * 91 // 100)
+                add(which, hands, max(1, width // 3), length)
+        elif style == "breguet":
+            # Fine heat-blued tips over a shorter, broader traditional body.
+            for which, length, width in (
+                ("hour", hour_length, hour_w),
+                ("minute", minute_length, minute_w),
+            ):
+                add(which, 0x101820, width + 3, length + 1)
+                add(which, hands, width, length)
+                add(which, self.skin["face_grad"], max(1, width // 3), length * 68 // 100)
+        elif style == "leaf":
+            # Layered short and long strokes produce a soft leaf-like silhouette.
+            for which, length, width in (
+                ("hour", hour_length, hour_w),
+                ("minute", minute_length, minute_w),
+            ):
+                add(which, 0x080509, width + 4, length + 1)
+                add(which, hands, width + 2, length * 76 // 100)
+                add(which, hands, max(1, width // 2), length)
+        else:  # geometric baton
+            for which, length, width in (
+                ("hour", hour_length, hour_w + 2),
+                ("minute", minute_length, minute_w + 1),
+            ):
+                add(which, 0x05080A, width + 4, length + 2)
+                add(which, hands, width, length)
+
+        if style in ("diver", "sword", "skeleton", "baton"):
+            add("second", 0x050505, second_w + 2, second_length + 1)
+        add("second", second, second_w, second_length)
 
     def _make_hub(self, dial):
         self.hub = lv.obj(self.face)
@@ -565,14 +649,13 @@ class AnalogClock:
         second_value = second * 12
         minute_value = minute * 12 + second // 5
         hour_value = (hour % 12) * 60 + minute
-        for hand, length, value in (
-            (self.hour_shadow, self.hour_length + 2, hour_value),
-            (self.hour_hand, self.hour_length, hour_value),
-            (self.minute_shadow, self.minute_length + 2, minute_value),
-            (self.minute_hand, self.minute_length, minute_value),
-            (self.second_hand, self.second_length, second_value),
+        for which, value in (
+            ("hour", hour_value),
+            ("minute", minute_value),
+            ("second", second_value),
         ):
-            self.scale.set_line_needle_value(hand, length, value)
+            for hand, length in self.hand_layers[which]:
+                self.scale.set_line_needle_value(hand, length, value)
 
 
 class ClockSkinPicker:
