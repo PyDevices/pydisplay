@@ -68,6 +68,7 @@ async def _run():
         print("Missing ?modules= and/or ?manifests= in the URL.")
         return
     await ps_loader.install_pyodide(modules, manifests, deps)
+    ps_loader.set_board_defaults()
     __import__(entry)
 
 await _run()

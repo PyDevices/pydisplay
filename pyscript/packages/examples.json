@@ -57,6 +57,10 @@
       "github:PyDevices/pydisplay/src/examples/console_simpletest.py"
     ],
     [
+      "dino.py",
+      "github:PyDevices/pydisplay/src/examples/dino.py"
+    ],
+    [
       "displaybuf_simpletest.py",
       "github:PyDevices/pydisplay/src/examples/displaybuf_simpletest.py"
     ],

@@ -94,7 +94,7 @@
   }
 
   function showUpdateToast() {
-    showToast('A new version of the app shell is ready.', {
+    showToast('A new version of the app is available.', {
       actionLabel: 'Reload',
       dismissLabel: 'Later',
       onAction: function () {
