@@ -538,7 +538,8 @@ pre code {
 }
 
 .gallery-sidebar .grid {
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  /* Two 184px cards plus the 12px gap fit at half the 760px layout breakpoint. */
+  grid-template-columns: repeat(auto-fit, minmax(184px, 1fr));
   gap: 12px;
 }
 
@@ -553,6 +554,27 @@ pre code {
 
 .gallery-sidebar .card-runtimes {
   gap: 8px;
+}
+
+.gallery-drawer-toggle,
+.gallery-drawer-scrim {
+  display: none;
+}
+
+#demos > .section-head {
+  flex-wrap: wrap;
+}
+
+.gallery-collection-link {
+  margin-left: auto;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.gallery-collection-link:hover {
+  color: var(--accent-strong);
 }
 
 .gallery-preview {
@@ -871,7 +893,7 @@ pre code {
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 760px) {
   .gallery-main {
     width: min(1080px, 92vw);
   }
@@ -880,10 +902,27 @@ pre code {
     grid-template-columns: 1fr;
   }
 
-  .gallery-sidebar,
   .gallery-preview {
     position: static;
     width: 100%;
+  }
+
+  .gallery-drawer-toggle {
+    display: inline-flex;
+  }
+
+  .gallery-drawer-scrim {
+    position: fixed;
+    z-index: 39;
+    inset: 0;
+    display: block;
+    border: 0;
+    background: rgba(0, 0, 0, 0.58);
+    cursor: pointer;
+  }
+
+  .gallery-drawer-scrim[hidden] {
+    display: none;
   }
 
   .gallery-frame {
@@ -891,7 +930,32 @@ pre code {
   }
 
   .gallery-sidebar {
-    max-height: 52vh;
+    position: fixed;
+    z-index: 40;
+    top: 64px;
+    bottom: 12px;
+    left: 0;
+    width: min(86vw, 380px);
+    height: auto !important;
+    max-height: none;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-left: 0;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    background: var(--bg);
+    box-shadow: var(--shadow);
+    transform: translateX(-105%);
+    visibility: hidden;
+    transition: transform 180ms ease, visibility 180ms ease;
+  }
+
+  .gallery-sidebar.is-open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  body.gallery-drawer-open {
+    overflow: hidden;
   }
 
   .gallery-frame {

@@ -480,7 +480,7 @@ def render_card(ex: Example) -> str:
     badges = _render_badges(ex)
     hrefs = ex.loader_hrefs()
     icon = render_card_icon(ex)
-    # No target=_blank: keep demos in one window (browser or PWA).
+    link_attrs = ' target="_blank" rel="noopener"' if ex.nochrome else ""
     return f'''                <article class="card">
                     <div class="card-top">
                         <span class="card-icon">{icon}</span>
@@ -490,8 +490,8 @@ def render_card(ex: Example) -> str:
                     <h3>{ex.title}</h3>
                     <p>{ex.blurb}</p>
                     <div class="card-runtimes">
-                        <a class="go" href="{hrefs["micropython"]}">MicroPython {ARROW}</a>
-                        <a class="go" href="{hrefs["pyodide"]}">Pyodide {ARROW}</a>
+                        <a class="go" href="{hrefs["micropython"]}"{link_attrs}>MicroPython {ARROW}</a>
+                        <a class="go" href="{hrefs["pyodide"]}"{link_attrs}>Pyodide {ARROW}</a>
                     </div>
                 </article>'''
 

@@ -7,7 +7,7 @@
     <title>Peter Hinch demos — pydisplay MicroPython</title>
     <meta name="description" content="Discover and run Peter Hinch GUI demos in the browser with pydisplay and MicroPython.">
     <link rel="icon" type="image/svg+xml" href="https://pydevices.github.io/assets/img/logo.svg">
-    <link rel="manifest" href="./manifest.json">
+    <link rel="manifest" href="./peterhinch-manifest.json">
     <meta name="theme-color" content="#f54e00">
     <link rel="apple-touch-icon" href="./icon-192.png">
     <link rel="stylesheet" href="./pwa.css">
@@ -143,9 +143,9 @@
         </p>
 
         <nav class="gui-picker" aria-label="Peter Hinch GUI">
-            <a class="btn" data-gui="nano" href="?nano">Nano-GUI</a>
-            <a class="btn" data-gui="micro" href="?micro">Micro-GUI</a>
             <a class="btn" data-gui="touch" href="?touch">MicroPython-Touch</a>
+            <a class="btn" data-gui="micro" href="?micro">Micro-GUI</a>
+            <a class="btn" data-gui="nano" href="?nano">Nano-GUI</a>
         </nav>
 
         <div id="query-error" class="panel" hidden>
@@ -323,6 +323,20 @@ def _set_status(message, error=False, busy=True):
         _spinner.hidden = not busy
 
 
+def _scroll_to_demo_panel():
+    panel = document.querySelector(".demo-panel")
+    header = document.querySelector(".site-header")
+    if panel is None or header is None:
+        return
+    target = (
+        window.scrollY
+        + panel.getBoundingClientRect().top
+        - header.getBoundingClientRect().height
+        - 8
+    )
+    window.scrollTo(0, max(0, int(target)))
+
+
 def _gui_value(name):
     return str(getattr(window, name, "") or "").strip()
 
@@ -440,6 +454,8 @@ async def _boot():
                         "Demo is not compatible with the browser runtime: " + selected
                     )
                 raise ValueError("Unknown demo: " + selected)
+            await asyncio.sleep(0)
+            _scroll_to_demo_panel()
             _set_status("Running {}…".format(selected))
             await asyncio.sleep(0)
             __import__("gui.demos." + selected)

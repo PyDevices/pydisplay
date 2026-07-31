@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap">
     <link rel="stylesheet" href="./site.css">
-    <link rel="stylesheet" href="./demo.css?v=3">
+    <link rel="stylesheet" href="./demo.css?v=5">
     <link rel="stylesheet" href="./vendor/core.css">
     <script src="./pwa.js"></script>
     <script src="./loader-query.js"></script>
@@ -85,10 +85,13 @@
                 <div class="device">
                     <canvas id="display_canvas" width="320" height="480" tabindex="0"></canvas>
                     <canvas id="aux_canvas" width="1" height="1" tabindex="0"></canvas>
+                    <div class="device-footer">
+                        <button type="button" class="console-toggle" aria-expanded="false">Show console</button>
+                    </div>
                 </div>
             </div>
 
-            <section class="console-panel" aria-label="Console output" hidden>
+            <section class="console-panel" aria-label="Console output">
                 <h2 class="console-label">Console output</h2>
                 <div id="log" class="log"></div>
             </section>
@@ -289,6 +292,7 @@
                 _set("Installing…")
                 ps_loader.install_micropython(modules, manifests, deps, status=_set)
                 _set("Importing " + entry + "…")
+                ps_loader.set_board_defaults()
                 __import__(entry)
                 _set("")
             except Exception as e:
@@ -316,7 +320,7 @@
             _start()
     </script>
 
-    <script src="./runtime-layout.js?v=3"></script>
+    <script src="./runtime-layout.js?v=6"></script>
     <script type="module" src="./pyscript-json-config.js"></script>
 </body>
 </html>

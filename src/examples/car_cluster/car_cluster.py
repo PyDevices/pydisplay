@@ -6,7 +6,7 @@ car_cluster
 ====================================================
 Flagship LVGL automobile instrument cluster.
 
-Landscape 1200×560 cluster with Material accents, nested chrome, four side
+Landscape 1024×512 cluster with Material accents, nested chrome, four side
 gauges, dual steering-wheel style menu rails, and eight live center screens.
 
 Controls:
@@ -45,10 +45,8 @@ input_map.capture_virtual_devices()
 
 from displaysys import env_bool, env_get, env_set
 
-if env_get("PYDISPLAY_WIDTH") is None:
-    env_set("PYDISPLAY_WIDTH", "1200")
-if env_get("PYDISPLAY_HEIGHT") is None:
-    env_set("PYDISPLAY_HEIGHT", "560")
+env_set("PYDISPLAY_WIDTH", "1024")
+env_set("PYDISPLAY_HEIGHT", "512")
 if env_get("PYDISPLAY_SCALE") is None:
     env_set("PYDISPLAY_SCALE", "1")
 

@@ -68,6 +68,7 @@ def _run():
         print("Missing ?modules= and/or ?manifests= in the URL.")
         return
     ps_loader.install_micropython(modules, manifests, deps)
+    ps_loader.set_board_defaults()
     __import__(entry)
 
 _run()

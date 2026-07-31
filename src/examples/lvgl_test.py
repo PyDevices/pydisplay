@@ -1,3 +1,4 @@
+# gallery: skip
 # deps: lvgl, eventsys, multimer
 """Minimal LVGL button smoke: tap counts up on the button label.
 

@@ -1,3 +1,4 @@
+# gallery: skip
 from board_config import runtime
 
 

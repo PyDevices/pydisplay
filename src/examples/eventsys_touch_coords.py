@@ -1,3 +1,4 @@
+# gallery: skip
 # deps: eventsys
 """Guided touch capture via eventsys (no LVGL). Prints coords on MOUSEBUTTONUP."""
 

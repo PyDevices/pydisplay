@@ -27,6 +27,12 @@ from displaysys import color565
 from pygraphics import RGB565, FrameBuffer, text8
 from multimer import ticks_add, ticks_diff, ticks_ms
 from palettes import get_palette
+
+import board_config as _host_board
+
+if _host_board.display_drv.width < _host_board.display_drv.height:
+    _host_board.display_drv.rotation = (_host_board.display_drv.rotation + 90) % 360
+
 # Uncomment one and only one of the following two lines
 #from board_config import display_drv, runtime
 from pixel_sim import display_drv, runtime
@@ -177,7 +183,7 @@ def plasma_main():
 # short LED matrix (e.g. 64x16) still tapers to black instead of filling solid.
 
 _FIRE_FRAME_MS = 30
-_FIRE_COOLING = max(2, 200 // GRID_H)
+_FIRE_COOLING = max(6, 192 // GRID_H)
 
 
 def _fire_color(i):
@@ -199,14 +205,14 @@ _fire_dest = FrameBuffer(bytearray(GRID_W * GRID_H * 2), GRID_W, GRID_H, RGB565)
 
 
 def _fire_seed():
-    """Hot, gappy embers along the bottom row."""
+    """Keep a hot, irregular fuel bed along the bottom row."""
     base = (GRID_H - 1) * GRID_W
     for x in range(GRID_W):
-        r = getrandbits(3)
+        r = getrandbits(4)
         if r == 0:
             _fire_heat[base + x] = 0
-        elif r < 3:
-            _fire_heat[base + x] = 96 + getrandbits(6)
+        elif r < 5:
+            _fire_heat[base + x] = 128 + getrandbits(6)
         else:
             _fire_heat[base + x] = 192 + getrandbits(6)
 
@@ -216,18 +222,22 @@ def _fire_propagate():
     h = GRID_H
     heat = _fire_heat
     cool = _FIRE_COOLING
-    # Top → bottom so each cell reads the still-old row below (heat rises 1/frame).
+    # Top → bottom so every cell reads the still-old rows below. Averaging a
+    # small cone produces coherent tongues instead of single-pixel static.
     for y in range(h - 1):
         row = y * w
         below = row + w
+        below2 = min(h - 1, y + 2) * w
         for x in range(w):
-            drift = (getrandbits(2) % 3) - 1  # -1, 0, or +1
-            sx = x + drift
-            if sx < 0:
-                sx = 0
-            elif sx >= w:
-                sx = w - 1
-            v = heat[below + sx] - cool - getrandbits(2)
+            left = x - 1 if x else 0
+            right = x + 1 if x + 1 < w else w - 1
+            v = (
+                heat[below + left]
+                + heat[below + x] * 2
+                + heat[below + right]
+                + heat[below2 + x]
+            ) // 5
+            v -= cool + (getrandbits(3) & 0x03)
             heat[row + x] = v if v > 0 else 0
 
 
@@ -287,20 +297,34 @@ def matrix_main():
 # --- starfield --------------------------------------------------------------
 
 _STAR_FRAME_MS = 30
-_STAR_NUM = 80
-_STAR_FOCAL = 48
+_STAR_NUM = max(36, GRID_W)
+_STAR_FOCAL = 64
 _STAR_ZMAX = 255
-_STAR_ZMIN = 8
-_STAR_SPEED = 4
+_STAR_ZMIN = 12
+_STAR_SPEED = 8
 _STAR_BLACK = 0x0000
-_STAR_TINT = [color565(255 - z, 255 - z, 255) for z in range(_STAR_ZMAX + 1)]
+_STAR_TINT = [
+    color565(
+        48 + (_STAR_ZMAX - z) * 207 // _STAR_ZMAX,
+        48 + (_STAR_ZMAX - z) * 207 // _STAR_ZMAX,
+        72 + (_STAR_ZMAX - z) * 183 // _STAR_ZMAX,
+    )
+    for z in range(_STAR_ZMAX + 1)
+]
 
 
-def _star_spawn():
-    return [_randint(-GRID_W, GRID_W), _randint(-GRID_H, GRID_H), _STAR_ZMAX]
+def _star_spawn(initial=False):
+    z = _randint(_STAR_ZMIN + 1, _STAR_ZMAX) if initial else _STAR_ZMAX
+    return [
+        _randint(-GRID_W * 2, GRID_W * 2),
+        _randint(-GRID_H * 2, GRID_H * 2),
+        z,
+        -1,
+        -1,
+    ]
 
 
-_stars = [_star_spawn() for _ in range(_STAR_NUM)]
+_stars = [_star_spawn(initial=True) for _ in range(_STAR_NUM)]
 _star_dest = FrameBuffer(bytearray(GRID_W * GRID_H * 2), GRID_W, GRID_H, RGB565)
 
 
@@ -314,18 +338,21 @@ def _star_step():
         star[2] -= _STAR_SPEED
         z = star[2]
         if z <= _STAR_ZMIN:
-            star[0] = _randint(-GRID_W, GRID_W)
-            star[1] = _randint(-GRID_H, GRID_H)
-            star[2] = _STAR_ZMAX
+            star[:] = _star_spawn()
             continue
         sx = cx + star[0] * _STAR_FOCAL // z
         sy = cy + star[1] * _STAR_FOCAL // z
         if 0 <= sx < GRID_W and 0 <= sy < GRID_H:
+            px, py = star[3], star[4]
+            if 0 <= px < GRID_W and 0 <= py < GRID_H and (px != sx or py != sy):
+                pixel(px, py, tint[min(_STAR_ZMAX, z + 72)])
             pixel(sx, sy, tint[z])
+            if z < 56 and sx + 1 < GRID_W:
+                pixel(sx + 1, sy, tint[z])
+            star[3] = sx
+            star[4] = sy
         else:
-            star[0] = _randint(-GRID_W, GRID_W)
-            star[1] = _randint(-GRID_H, GRID_H)
-            star[2] = _STAR_ZMAX
+            star[:] = _star_spawn()
 
 
 def starfield_main():

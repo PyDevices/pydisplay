@@ -1,3 +1,4 @@
+# gallery: skip
 # deps: pygraphics
 """
 Simple test example to demonstrate pygraphics.FrameBuffer.

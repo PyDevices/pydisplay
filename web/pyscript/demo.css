@@ -207,18 +207,18 @@ html {
     width: min(760px, calc(100% - 24px));
   }
 
-  .runtime-page.runtime-standalone .play-area {
+  .runtime-page.runtime-standalone.runtime-with-console .play-area {
     grid-template-columns: auto auto;
     grid-template-rows: auto;
     column-gap: 18px;
   }
 
-  .runtime-page.runtime-standalone .play-area > .display-column {
+  .runtime-page.runtime-standalone.runtime-with-console .play-area > .display-column {
     grid-column: 1;
     grid-row: 1;
   }
 
-  .runtime-page.runtime-standalone .play-area > .console-panel {
+  .runtime-page.runtime-standalone.runtime-with-console .play-area > .console-panel {
     grid-column: 2;
     grid-row: 1;
   }
@@ -348,8 +348,30 @@ html {
   overflow: hidden;
 }
 
+.device-footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+}
+
 .console-panel[hidden] {
   display: none;
+}
+
+.console-toggle {
+  min-height: 30px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--ink-soft);
+  background: var(--panel-2);
+  font: 600 0.78rem var(--font);
+  cursor: pointer;
+}
+
+.console-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
 }
 
 .console-label {
