@@ -60,6 +60,7 @@ class TestApiSurface(unittest.TestCase):
                 "ticks_diff",
                 "ticks_less",
                 "asyncio",
+                "install_asyncio_compat",
             },
         )
 
@@ -168,6 +169,91 @@ class TestAsyncTimer(unittest.TestCase):
         std_asyncio.run(main())
         self.assertGreaterEqual(len(hits), 2)
         self.assertEqual(set(callback_threads), {main_thread})
+
+
+class TestAsyncioCompat(unittest.TestCase):
+    def test_backend_contract_is_unchanged(self):
+        from multimer import asyncio, asyncio_compat
+
+        self.assertIs(asyncio_compat.backend(), asyncio)
+
+    def test_run_delegates_without_running_loop(self):
+        from multimer import asyncio_compat
+
+        async def main():
+            return 42
+
+        self.assertEqual(asyncio_compat.run(main()), 42)
+
+    def test_run_schedules_inside_running_loop(self):
+        from multimer import asyncio, asyncio_compat
+
+        async def child():
+            await asyncio.sleep(0)
+            return 42
+
+        async def main():
+            loop = asyncio.get_running_loop()
+            task = asyncio_compat.run(child())
+            self.assertIs(asyncio_compat.new_event_loop(), loop)
+            self.assertEqual(await task, 42)
+
+        asyncio.run(main())
+
+    def test_zero_delay_sleeps_yield_to_browser_host(self):
+        from multimer import asyncio, asyncio_compat
+
+        calls = []
+
+        class Backend:
+            @staticmethod
+            async def sleep(delay):
+                calls.append(("sleep", delay))
+
+            @staticmethod
+            async def sleep_ms(delay):
+                calls.append(("sleep_ms", delay))
+
+        old_backend = asyncio_compat._backend
+
+        async def main():
+            asyncio_compat._backend = Backend()
+            try:
+                await asyncio_compat.sleep(0)
+                await asyncio_compat.sleep_ms(0)
+                await asyncio_compat.sleep(2)
+                await asyncio_compat.sleep_ms(3)
+            finally:
+                asyncio_compat._backend = old_backend
+
+        asyncio.run(main())
+        self.assertEqual(
+            calls,
+            [("sleep", 0.001), ("sleep_ms", 1), ("sleep", 2), ("sleep_ms", 3)],
+        )
+
+    def test_installer_replaces_module_names_only(self):
+        import sys
+
+        from multimer import asyncio
+
+        old_asyncio = sys.modules.get("asyncio")
+        old_uasyncio = sys.modules.get("uasyncio")
+        try:
+            facade = multimer.install_asyncio_compat()
+            self.assertIs(sys.modules["asyncio"], facade)
+            self.assertIs(sys.modules["uasyncio"], facade)
+            self.assertIs(multimer.asyncio, asyncio)
+            self.assertIs(multimer.install_asyncio_compat(), facade)
+        finally:
+            if old_asyncio is None:
+                sys.modules.pop("asyncio", None)
+            else:
+                sys.modules["asyncio"] = old_asyncio
+            if old_uasyncio is None:
+                sys.modules.pop("uasyncio", None)
+            else:
+                sys.modules["uasyncio"] = old_uasyncio
 
 
 class TestSchedule(unittest.TestCase):

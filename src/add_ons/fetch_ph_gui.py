@@ -1,12 +1,12 @@
 """
-fetch_ph_gui.py - Install one Peter Hinch GUI into add_ons/gui/ and patch FrameBuffer checks.
+fetch_ph_gui.py - Install one Peter Hinch GUI into add_ons/gui/.
 
 Supported ``which`` values (full upstream repo names):
   micropython-nano-gui, micropython-micro-gui, micropython-touch
 
 Only one ``gui/`` tree is active at a time. If a different core is present, the
-directory is emptied before installing. Patches are in-memory only (no edits
-under ``gui/``).
+directory is emptied before installing. Host compatibility changes are
+in-memory only (no edits under ``gui/``).
 
 Callers must define ``SSD`` on their setup module before calling fetch, because
 ``gui.core.colors`` imports ``SSD`` from ``color_setup`` / ``hardware_setup`` /
@@ -50,16 +50,6 @@ def _gui_dir():
 
         return os.path.join(_add_ons_dir(), "gui")
     return _add_ons_dir() + "/gui"
-
-
-def _core_path(which):
-    import sys
-
-    if sys.implementation.name == "cpython":
-        import os
-
-        return os.path.join(_gui_dir(), "core", _CORE_FILES[which])
-    return _gui_dir() + "/core/" + _CORE_FILES[which]
 
 
 def _detect_core():
@@ -132,59 +122,6 @@ def _gui_exists():
         return True
     except OSError:
         return False
-
-
-def _patch_writer():
-    """Accept pygraphics.FrameBuffer where writer._get_id checks builtin framebuf."""
-    try:
-        import framebuf
-        import gui.core.writer as wr
-
-        from pygraphics import FrameBuffer as GfxFrameBuffer
-    except ImportError:
-        return
-    if getattr(wr, "_pydisplay_fb_patch", False):
-        return
-
-    def _get_id(device):
-        if not (isinstance(device, framebuf.FrameBuffer) or isinstance(device, GfxFrameBuffer)):
-            raise ValueError("Device must be derived from FrameBuffer.")
-        return id(device)
-
-    wr._get_id = _get_id
-    wr._pydisplay_fb_patch = True
-
-
-def _patch_nanogui_refresh():
-    """Accept pygraphics.FrameBuffer where nanogui.refresh checks builtin framebuf."""
-    try:
-        import framebuf
-        import gui.core.nanogui as ng
-
-        from pygraphics import FrameBuffer as GfxFrameBuffer
-    except ImportError:
-        return
-    if getattr(ng.refresh, "_pydisplay_fb_patch", False):
-        return
-
-    def refresh(device, clear=False):
-        if not (isinstance(device, framebuf.FrameBuffer) or isinstance(device, GfxFrameBuffer)):
-            raise ValueError("Device must be derived from FrameBuffer.")
-        if device not in ng.DObject.devices:
-            ng.DObject.devices[device] = set()
-            device.fill(0)
-        else:
-            if clear:
-                ng.DObject.devices[device].clear()
-                device.fill(0)
-            else:
-                for obj in ng.DObject.devices[device]:
-                    obj.show()
-                ng.DObject.devices[device].clear()
-        device.show()
-
-    refresh._pydisplay_fb_patch = True
-    ng.refresh = refresh
 
 
 def _patch_time_ticks():
@@ -310,22 +247,6 @@ def _prime_primitives():
     primitives.__getattr__ = _getattr
 
 
-def _patch_uasyncio():
-    """Alias uasyncio -> asyncio on CPython."""
-    import sys
-
-    if "uasyncio" in sys.modules:
-        return
-    try:
-        import uasyncio  # noqa: F401
-
-        return
-    except ImportError:
-        import asyncio
-
-        sys.modules["uasyncio"] = asyncio
-
-
 def _patch_utime():
     """Alias utime -> time on CPython (after ticks_* are installed)."""
     import sys
@@ -363,11 +284,6 @@ def _apply_patches(which):
         _patch_time_ticks()
         _patch_utime()
         _patch_machine_pin()
-        _patch_uasyncio()
-    _patch_writer()
-    if which == "micropython-nano-gui":
-        _patch_nanogui_refresh()
-    if which in ("micropython-micro-gui", "micropython-touch"):
         _prime_primitives()
 
 

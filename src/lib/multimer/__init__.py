@@ -67,10 +67,27 @@ def uses_signals():
     return bool(_select._uses_signals)
 
 
+def install_asyncio_compat():
+    """Expose the host-loop-safe facade as both asyncio module names.
+
+    This is opt-in for applications which must run unchanged code that invokes
+    ``asyncio.run`` even when a host such as PyScript already owns the loop.
+    ``multimer.asyncio`` continues to return the unmodified backend.
+    """
+    import sys
+
+    compat = __import__("multimer.asyncio_compat", None, None, ("asyncio_compat",))
+    compat.backend()  # Resolve the real backend before replacing names.
+    sys.modules["asyncio"] = compat
+    sys.modules["uasyncio"] = compat
+    return compat
+
+
 __all__ = [
     "AsyncTimer",
     "Timer",
     "asyncio",
+    "install_asyncio_compat",
     "monotonic",
     "run_deadline_hook",
     "schedule",

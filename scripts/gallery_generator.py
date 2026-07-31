@@ -73,6 +73,7 @@ KEEP_HTML = frozenset(
         "pyodide",
         "mp",
         "py",
+        "peterhinch",
     }
 )
 
