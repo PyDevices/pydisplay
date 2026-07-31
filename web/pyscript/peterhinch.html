@@ -134,6 +134,9 @@
             <aside class="panel demo-panel">
                 <h2>Demos</h2>
                 <p id="demo-count">Discovering demos…</p>
+                <p id="control-hint" hidden>
+                    Use the arrow keys to navigate and adjust. Press Space to select.
+                </p>
                 <div class="demo-list" id="demo-list" aria-live="polite"></div>
             </aside>
 
@@ -207,6 +210,7 @@
                 touch: 'MicroPython-Touch'
             };
             document.getElementById('hinch-layout').hidden = false;
+            document.getElementById('control-hint').hidden = gui !== 'micro';
             document.getElementById('page-title').textContent = labels[gui] + ' demos';
             document.getElementById('page-lede').textContent =
                 'Demos are discovered live from the installed ' + labels[gui] + ' package.';
@@ -228,6 +232,11 @@ except OSError:
 if "/" not in sys.path:
     sys.path.insert(0, "/")
 import lib.path  # noqa: F401
+
+from displaysys import env_set
+
+env_set("PYDISPLAY_WIDTH", 320)
+env_set("PYDISPLAY_HEIGHT", 240)
 
 
 def _log_print(*args, **kwargs):

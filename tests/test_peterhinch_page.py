@@ -35,6 +35,21 @@ def test_dynamic_discovery_is_sorted_and_excludes_init():
     assert "names.sort()" in source
 
 
+def test_display_size_is_overridden_before_setup_import():
+    source = _source()
+    width = source.index('env_set("PYDISPLAY_WIDTH", 320)')
+    height = source.index('env_set("PYDISPLAY_HEIGHT", 240)')
+    setup_import = source.index("__import__(setup)")
+    assert width < setup_import
+    assert height < setup_import
+
+
+def test_micro_gui_has_visible_keyboard_hint():
+    source = _source()
+    assert "Use the arrow keys to navigate and adjust. Press Space to select." in source
+    assert "document.getElementById('control-hint').hidden = gui !== 'micro';" in source
+
+
 def test_known_incompatible_demos_are_filtered():
     assert _excluded("nano") == {
         "aclock",
