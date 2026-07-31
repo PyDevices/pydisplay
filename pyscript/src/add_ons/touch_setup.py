@@ -9,8 +9,18 @@ Usage:
     from gui.core.tgui import Screen, ssd
 """
 
+import sys
+
 from board_config import display_drv, runtime
 from displaybuf import DisplayBuffer as SSD
+
+import multimer
+import pygraphics
+
+# Peter Hinch's GUI modules import framebuf directly. Use the same FrameBuffer
+# implementation as DisplayBuffer so Writer glyph buffers can be blitted to ssd.
+sys.modules["framebuf"] = pygraphics
+multimer.install_asyncio_compat()
 
 # format = SSD.GS4_HMSB  # 4-bit (16 item) lookup table of 16-bit RGB565 colors; w*h/2 buffer
 # format = SSD.GS8  # 256 8-bit RGB332 colors; w*h buffer
@@ -33,10 +43,16 @@ class Poller:
     def __init__(self, poll_func):
         self._poll_func = poll_func
         self._touched = False
+        self._release_pending = False
         self.col = None
         self.row = None
 
     def poll(self):
+        # Browser pointer down/up events may both arrive in one event-pump pass.
+        # Keep the pressed state visible for one GUI poll before releasing it.
+        if self._release_pending:
+            self._touched = False
+            self._release_pending = False
         self._poll_func()
         return bool(self._touched)
 
@@ -47,7 +63,7 @@ class Poller:
             self.col, self.row = event.pos
             self._touched = True
         elif event.type == runtime.events.MOUSEBUTTONUP and event.button == 1:
-            self._touched = False
+            self._release_pending = True
 
 
 tpad = Poller(runtime.poll)
