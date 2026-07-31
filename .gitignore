@@ -38,6 +38,7 @@ web/pyscript/wheels
 Untitled-*
 
 # Local examples (symlinks to sibling repos — see scripts/personal_examples.py)
+src/add_ons/spotapi
 src/examples/spotapi
 src/examples/spotify_remote
 src/examples/frogger
