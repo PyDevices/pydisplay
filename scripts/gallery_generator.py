@@ -483,7 +483,9 @@ def render_card(ex: Example) -> str:
     # No target=_blank: keep demos in one window (browser or PWA).
     return f'''                <article class="card">
                     <div class="card-top">
-                        <span class="card-icon">{icon}</span>{tag}{badges}
+                        <span class="card-icon">{icon}</span>
+                        <span class="card-badges">{tag}{badges}
+                        </span>
                     </div>
                     <h3>{ex.title}</h3>
                     <p>{ex.blurb}</p>
