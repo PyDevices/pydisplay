@@ -5,11 +5,11 @@ See: https://github.com/peterhinch/micropython-micro-gui
 Fetches micropython-micro-gui into add_ons/gui/ when needed.
 
 On desktop, navigation uses keyboard stand-ins (not GPIO pins):
-  Tab / Right  — next control
-  Left         — previous control
-  Enter / Space — select / operate
-  Up           — increase
-  Down         — decrease
+  Right — next control
+  Left  — previous control
+  Space — select / operate
+  Up    — increase
+  Down  — decrease
 
 Usage:
     import hardware_setup  # creates display
@@ -110,10 +110,8 @@ def _bind_keys():
         return
     _KEYMAP.update(
         {
-            Keys.K_TAB: ("press", nxt),
             Keys.K_RIGHT: ("press", nxt),
             Keys.K_LEFT: ("press", prev),
-            Keys.K_RETURN: ("release", sel),
             Keys.K_SPACE: ("release", sel),
             Keys.K_UP: ("press", increase),
             Keys.K_DOWN: ("press", decrease),
