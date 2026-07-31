@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap">
     <link rel="stylesheet" href="site.css">
-    <script src="https://pydevices.github.io/assets/js/theme-toggle.js" defer></script>
+    <script src="./theme-toggle.js" defer></script>
 </head>
 <body>
     <header class="site-header">
@@ -52,26 +52,30 @@
             widgets, and LVGL without flashing a board first.
         </p>
         <p>
-            Open a card and click <strong>Run</strong>. The first load may take a few seconds while
+            Choose MicroPython or Pyodide on a card and the demo starts automatically. The first load may take a few seconds while
             the runtime downloads; featured demos stay pinned at the top. Each card has
             <strong>MicroPython</strong> and <strong>Pyodide</strong> links with the matching
             <code>?deps=</code> install query (MIP vs micropip).
         </p>
     </section>
 
-    <main class="wrap">
+    <main class="wrap gallery-main">
         <section class="section" id="demos">
             <div class="section-head">
                 <h2>Demos</h2>
                 <span class="hint">every example entry under <code>src/examples/</code> — opt out with <code># gallery: skip</code></span>
             </div>
-            <div class="grid">
+            <div class="gallery-workspace">
+                <div class="gallery-sidebar" aria-label="Demo list">
+                    <div class="grid">
                 <!-- GEN:demos:start -->
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/pydisplay_demo.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="tag featured">featured</span>
                         <span class="badge dep">pygraphics</span>
+                        </span>
                     </div>
                     <h3>Pydisplay Demo</h3>
                     <p>pydisplay_demo.py — flagship board_config demo: clicks, rotation, scrolling.</p>
@@ -83,10 +87,12 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/testris.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="tag featured">featured</span>
                         <span class="badge dep">pygraphics</span>
                         <span class="badge add-on">framebuf</span>
                         <span class="badge add-on">micropython</span>
+                        </span>
                     </div>
                     <h3>Testris</h3>
                     <p>Testris game implemented in MicroPython by Brad Barnett.</p>
@@ -98,8 +104,10 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/tv_remote_menu.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="tag featured">featured</span>
                         <span class="badge dep">pygraphics</span>
+                        </span>
                     </div>
                     <h3>Tv Remote Menu</h3>
                     <p>tv_remote_menu.py — 10-foot / remote-friendly menu for PyScript TV browsers.</p>
@@ -111,8 +119,10 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/car_cluster.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="tag">nochrome</span>
                         <span class="badge dep">lvgl</span>
+                        </span>
                     </div>
                     <h3>Car Cluster</h3>
                     <p>Flagship LVGL automobile instrument cluster.</p>
@@ -124,9 +134,11 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/alien.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge add-on">tft_config</span>
                         <span class="badge add-on">tft_bitmap</span>
+                        </span>
                     </div>
                     <h3>Alien</h3>
                     <p>Bounce a bitmap of an alien around the display.</p>
@@ -138,7 +150,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/bouncing_balls.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pygraphics</span>
+                        </span>
                     </div>
                     <h3>Bouncing Balls</h3>
                     <p>Animate colored balls bouncing inside the display.</p>
@@ -150,8 +164,10 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/boxlines.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge add-on">tft_config</span>
+                        </span>
                     </div>
                     <h3>Boxlines</h3>
                     <p>Test for lines and rectangles.</p>
@@ -163,8 +179,10 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/calc_graphics.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge dep">pygraphics</span>
+                        </span>
                     </div>
                     <h3>Calc Graphics</h3>
                     <p>Dark-theme pocket calculator drawn with ``pygraphics.FrameBuffer``.</p>
@@ -176,7 +194,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/calc_lvgl.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">lvgl</span>
+                        </span>
                     </div>
                     <h3>Calc Lvgl</h3>
                     <p>Dark-theme pocket calculator built with LVGL.</p>
@@ -188,7 +208,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/calc_widgets.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pdwidgets</span>
+                        </span>
                     </div>
                     <h3>Calc Widgets</h3>
                     <p>Dark-theme pocket calculator built with ``pdwidgets``.</p>
@@ -200,9 +222,11 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/chango.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge add-on">tft_config</span>
                         <span class="badge add-on">tft_write</span>
+                        </span>
                     </div>
                     <h3>Chango</h3>
                     <p>Test for TrueType write_font_converter.</p>
@@ -214,9 +238,11 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/color_test.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge add-on">tft_config</span>
                         <span class="badge add-on">tft_text</span>
+                        </span>
                     </div>
                     <h3>Color Test</h3>
                     <p>Test color with gradients.</p>
@@ -228,9 +254,11 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/console_advanced_demo.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge add-on">console</span>
                         <span class="badge add-on">wifi</span>
+                        </span>
                     </div>
                     <h3>Console Advanced Demo</h3>
                     <p>console_advanced_demo.py - Advanced demo of the mpconsole module</p>
@@ -242,8 +270,10 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/console_simpletest.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pygraphics</span>
                         <span class="badge add-on">console</span>
+                        </span>
                     </div>
                     <h3>Console Simpletest</h3>
                     <p>Call `console.hide()` to use the display for something else.</p>
@@ -255,8 +285,10 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/displaybuf_simpletest.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pygraphics</span>
                         <span class="badge add-on">color_setup</span>
+                        </span>
                     </div>
                     <h3>Displaybuf Simpletest</h3>
                     <p>displaybuf_simpletest.py - Simple test program for displaybuf.py</p>
@@ -268,6 +300,8 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/displaysys_block_test.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
+                        </span>
                     </div>
                     <h3>Displaysys Block Test</h3>
                     <p>The <code>displaysys_block_test</code> demo running in the browser via PyScript.</p>
@@ -279,6 +313,8 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/displaysys_fill_rect_test.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
+                        </span>
                     </div>
                     <h3>Displaysys Fill Rect Test</h3>
                     <p>The <code>displaysys_fill_rect_test</code> demo running in the browser via PyScript.</p>
@@ -290,6 +326,8 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/eventsys_encoder_test.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
+                        </span>
                     </div>
                     <h3>Eventsys Encoder Test</h3>
                     <p>A simple test of an encoder in eventsys.</p>
@@ -301,6 +339,8 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/eventsys_simpletest.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
+                        </span>
                     </div>
                     <h3>Eventsys Simpletest</h3>
                     <p>The <code>eventsys_simpletest</code> demo running in the browser via PyScript.</p>
@@ -312,7 +352,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/eventsys_touch_coords.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">eventsys</span>
+                        </span>
                     </div>
                     <h3>Eventsys Touch Coords</h3>
                     <p>Guided touch capture via eventsys (no LVGL). Prints coords on MOUSEBUTTONUP.</p>
@@ -324,7 +366,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/eventsys_touch_test.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pygraphics</span>
+                        </span>
                     </div>
                     <h3>Eventsys Touch Test</h3>
                     <p>eventsys_touch_test.py - Touch rotation test.</p>
@@ -336,8 +380,10 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/feathers.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge add-on">tft_config</span>
+                        </span>
                     </div>
                     <h3>Feathers</h3>
                     <p>Modified by Brad Barnett from Russ Hughes's original to scroll vertically instead of horizontally</p>
@@ -349,9 +395,11 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/fonts.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge add-on">tft_config</span>
                         <span class="badge add-on">tft_text</span>
+                        </span>
                     </div>
                     <h3>Fonts</h3>
                     <p>Test text_font_converter.py</p>
@@ -363,7 +411,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/framebuf_simpletest.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pygraphics</span>
+                        </span>
                     </div>
                     <h3>Framebuf Simpletest</h3>
                     <p>Simple test example to demonstrate pygraphics.FrameBuffer.</p>
@@ -375,8 +425,10 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/graphics_simpletest.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge dep">pygraphics</span>
+                        </span>
                     </div>
                     <h3>Graphics Simpletest</h3>
                     <p>Simple test example to demonstrate the use of pygraphics.</p>
@@ -388,9 +440,11 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/hello.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge add-on">tft_config</span>
                         <span class="badge add-on">tft_text</span>
+                        </span>
                     </div>
                     <h3>Hello</h3>
                     <p>Test for text_font_converter.</p>
@@ -402,7 +456,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/joystick_list_select.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pdwidgets</span>
+                        </span>
                     </div>
                     <h3>Joystick List Select</h3>
                     <p>The <code>joystick_list_select</code> demo running in the browser via PyScript.</p>
@@ -414,7 +470,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/keypins_simpletest.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge add-on">keypins</span>
+                        </span>
                     </div>
                     <h3>Keypins Simpletest</h3>
                     <p>The <code>keypins_simpletest</code> demo running in the browser via PyScript.</p>
@@ -426,7 +484,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/logo.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pygraphics</span>
+                        </span>
                     </div>
                     <h3>Logo</h3>
                     <p>Draws the PyDevices logo using only pydisplay's own graphics primitives -- no SVG import or renderer needed.</p>
@@ -438,7 +498,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/lv_gestures.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">lvgl</span>
+                        </span>
                     </div>
                     <h3>Lv Gestures</h3>
                     <p>LVGL multi-touch gesture smoke example (pinch scale).</p>
@@ -450,8 +512,10 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/lv_multi_display.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">lvgl</span>
                         <span class="badge add-on">lv_encoder_emu</span>
+                        </span>
                     </div>
                     <h3>Lv Multi Display</h3>
                     <p>Multi-display LVGL demo: primary UI + secondary encoder emulator.</p>
@@ -463,7 +527,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/lv_test_timer.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">lvgl</span>
+                        </span>
                     </div>
                     <h3>Lv Test Timer</h3>
                     <p>LVGL timer smoke test. Uses whatever timer mode ``board_config`` / ``runtime``</p>
@@ -475,9 +541,11 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/lvgl_test.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">lvgl</span>
                         <span class="badge dep">eventsys</span>
                         <span class="badge dep">multimer</span>
+                        </span>
                     </div>
                     <h3>Lvgl Test</h3>
                     <p>Minimal LVGL button smoke: tap counts up on the button label.</p>
@@ -489,9 +557,11 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/noto_fonts.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge add-on">tft_config</span>
                         <span class="badge add-on">tft_write</span>
+                        </span>
                     </div>
                     <h3>Noto Fonts</h3>
                     <p>Test for TrueType write_font_converter.</p>
@@ -503,6 +573,8 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/paint.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
+                        </span>
                     </div>
                     <h3>Paint</h3>
                     <p>A simple paint application demonstrating the use of displaysys.</p>
@@ -514,7 +586,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/pbm_create_new.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pygraphics</span>
+                        </span>
                     </div>
                     <h3>Pbm Create New</h3>
                     <p>The <code>pbm_create_new</code> demo running in the browser via PyScript.</p>
@@ -526,9 +600,11 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/pixel_sim_demos.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge dep">pygraphics</span>
                         <span class="badge add-on">pixel_sim</span>
+                        </span>
                     </div>
                     <h3>Pixel Sim Demos</h3>
                     <p>pixel_sim_demos.py — NeoPixel simulator effects in one file.</p>
@@ -540,9 +616,11 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/proverbs.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge add-on">tft_write</span>
                         <span class="badge add-on">tft_config</span>
+                        </span>
                     </div>
                     <h3>Proverbs</h3>
                     <p>Test for TrueType write_font_converter.</p>
@@ -554,9 +632,11 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/roku_remote.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">lvgl</span>
                         <span class="badge dep">pygraphics</span>
                         <span class="badge dep">pdwidgets</span>
+                        </span>
                     </div>
                     <h3>Roku Remote</h3>
                     <p>Launcher for the Roku remote stack.</p>
@@ -568,8 +648,10 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/rotations.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge dep">pygraphics</span>
+                        </span>
                     </div>
                     <h3>Rotations</h3>
                     <p>Rotates the display 0, 90, 180, and 270 degrees and displays the rotation</p>
@@ -581,9 +663,11 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/scroll.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge add-on">tft_text</span>
                         <span class="badge add-on">tft_config</span>
+                        </span>
                     </div>
                     <h3>Scroll</h3>
                     <p>Test for hardware scrolling.</p>
@@ -595,7 +679,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/simon.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pygraphics</span>
+                        </span>
                     </div>
                     <h3>Simon</h3>
                     <p>Simon — classic memory game for round (and rectangular) displays.</p>
@@ -607,9 +693,11 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/tiny_hello.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge add-on">tft_text</span>
                         <span class="badge add-on">tft_config</span>
+                        </span>
                     </div>
                     <h3>Tiny Hello</h3>
                     <p>Test text_font_converter on small displays.</p>
@@ -621,9 +709,11 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/tiny_toasters.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">palettes</span>
                         <span class="badge add-on">tft_bitmap</span>
                         <span class="badge add-on">tft_config</span>
+                        </span>
                     </div>
                     <h3>Tiny Toasters</h3>
                     <p>Test sprites_converter.</p>
@@ -635,7 +725,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/widgets_actions.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pdwidgets</span>
+                        </span>
                     </div>
                     <h3>Widgets Actions</h3>
                     <p>Showcase :class:`~pdwidgets.Menu`, :class:`~pdwidgets.Chip`,</p>
@@ -647,7 +739,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/widgets_demo.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pdwidgets</span>
+                        </span>
                     </div>
                     <h3>Widgets Demo</h3>
                     <p>The <code>widgets_demo</code> demo running in the browser via PyScript.</p>
@@ -659,7 +753,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/widgets_device_panel.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pdwidgets</span>
+                        </span>
                     </div>
                     <h3>Widgets Device Panel</h3>
                     <p>A fictional "Aurora Synth" control panel built entirely from pdwidgets.</p>
@@ -671,7 +767,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/widgets_form_kitchen.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pdwidgets</span>
+                        </span>
                     </div>
                     <h3>Widgets Form Kitchen</h3>
                     <p>Showcase :class:`~pdwidgets.FormRow`, :class:`~pdwidgets.Divider`,</p>
@@ -683,7 +781,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/widgets_gauge_dash.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pdwidgets</span>
+                        </span>
                     </div>
                     <h3>Widgets Gauge Dash</h3>
                     <p>Showcase :class:`~pdwidgets.Gauge`, :class:`~pdwidgets.FormRow`,</p>
@@ -695,7 +795,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/widgets_media_busy.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pdwidgets</span>
+                        </span>
                     </div>
                     <h3>Widgets Media Busy</h3>
                     <p>Showcase :class:`~pdwidgets.Image`, :class:`~pdwidgets.Spinner`,</p>
@@ -707,7 +809,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/widgets_nav_tabs.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pdwidgets</span>
+                        </span>
                     </div>
                     <h3>Widgets Nav Tabs</h3>
                     <p>Showcase :class:`~pdwidgets.AppBar`, :class:`~pdwidgets.Page`,</p>
@@ -719,7 +823,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/widgets_percent.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pdwidgets</span>
+                        </span>
                     </div>
                     <h3>Widgets Percent</h3>
                     <p>The <code>widgets_percent</code> demo running in the browser via PyScript.</p>
@@ -731,7 +837,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/widgets_pickers.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pdwidgets</span>
+                        </span>
                     </div>
                     <h3>Widgets Pickers</h3>
                     <p>Showcase :class:`~pdwidgets.ColorPicker` and :class:`~pdwidgets.DatePicker`.</p>
@@ -743,7 +851,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/widgets_settings.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pdwidgets</span>
+                        </span>
                     </div>
                     <h3>Widgets Settings</h3>
                     <p>A settings / preferences screen that exercises pdwidgets controls together:</p>
@@ -755,7 +865,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/widgets_sheets.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pdwidgets</span>
+                        </span>
                     </div>
                     <h3>Widgets Sheets</h3>
                     <p>Showcase :class:`~pdwidgets.Drawer`, :class:`~pdwidgets.BottomSheet`,</p>
@@ -767,7 +879,9 @@
                 <article class="card">
                     <div class="card-top">
                         <span class="card-icon"><img src="thumbnails/widgets_smartwatch.png" alt="" loading="lazy"></span>
+                        <span class="card-badges">
                         <span class="badge dep">pdwidgets</span>
+                        </span>
                     </div>
                     <h3>Widgets Smartwatch</h3>
                     <p>A smartwatch-style interface built with pdwidgets.</p>
@@ -777,6 +891,21 @@
                     </div>
                 </article>
             <!-- GEN:demos:end -->
+                    </div>
+                </div>
+                <section class="gallery-preview" aria-label="Selected demo">
+                    <div id="preview-empty" class="gallery-preview-empty">
+                        <strong>Run a demo here</strong>
+                        <span>Choose MicroPython or Pyodide from any card.</span>
+                    </div>
+                    <iframe
+                        id="demo-frame"
+                        class="gallery-frame"
+                        title="Selected pydisplay demo"
+                        scrolling="no"
+                        hidden
+                    ></iframe>
+                </section>
             </div>
         </section>
 
@@ -915,6 +1044,192 @@
                     apply(current);
                 });
             }
+        })();
+    </script>
+    <script>
+        (function () {
+            var frame = document.getElementById('demo-frame');
+            var empty = document.getElementById('preview-empty');
+            var sidebar = document.querySelector('.gallery-sidebar');
+            var frameObserver = null;
+            var links = Array.prototype.slice.call(
+                document.querySelectorAll('#demos .card-runtimes .go')
+            );
+            var allowedPages = {
+                'micropython.html': true,
+                'pyodide.html': true,
+                'mp.html': true,
+                'py.html': true,
+            };
+
+            function demoUrl(raw) {
+                if (!raw) return null;
+                var url;
+                try {
+                    url = new URL(raw, window.location.href);
+                } catch (error) {
+                    return null;
+                }
+                var filename = url.pathname.split('/').pop();
+                if (url.origin !== window.location.origin || !allowedPages[filename]) {
+                    return null;
+                }
+                return {
+                    absolute: url.href,
+                    relative: filename + url.search,
+                };
+            }
+
+            function selectedLabel(link) {
+                var card = link && link.closest('.card');
+                var name = card && card.querySelector('h3');
+                var runtime = link && link.textContent.trim();
+                return (name ? name.textContent.trim() : 'Selected demo') +
+                    (runtime ? ' — ' + runtime : '');
+            }
+
+            function iframeUrl(relative) {
+                var url = new URL(relative, window.location.href);
+                url.searchParams.set('console', 'true');
+                return url.pathname.split('/').pop() + url.search;
+            }
+
+            function markSelected(relative) {
+                links.forEach(function (link) {
+                    var selected = demoUrl(link.getAttribute('href'));
+                    var active = Boolean(selected && selected.relative === relative);
+                    if (active) {
+                        link.setAttribute('aria-current', 'page');
+                    } else {
+                        link.removeAttribute('aria-current');
+                    }
+                    var card = link.closest('.card');
+                    if (card && active) card.classList.add('is-active');
+                    if (card && !active && !card.querySelector('[aria-current="page"]')) {
+                        card.classList.remove('is-active');
+                    }
+                });
+            }
+
+            function syncWorkspaceHeight() {
+                var mobile = window.matchMedia('(max-width: 900px)').matches;
+                var height = 0;
+                if (!frame.hidden && frame.contentDocument) {
+                    var doc = frame.contentDocument;
+                    height = Math.max(
+                        doc.documentElement ? doc.documentElement.scrollHeight : 0,
+                        doc.body ? doc.body.scrollHeight : 0
+                    );
+                    if (height > 0) {
+                        frame.style.height = Math.ceil(height) + 'px';
+                    }
+                } else if (!empty.hidden) {
+                    height = empty.getBoundingClientRect().height;
+                }
+                if (sidebar) {
+                    sidebar.style.height = !mobile && height > 0
+                        ? Math.ceil(height) + 'px'
+                        : '';
+                }
+            }
+
+            function observeFrameSize() {
+                if (frameObserver) {
+                    frameObserver.disconnect();
+                }
+                if (!frame.contentDocument) {
+                    return;
+                }
+                syncWorkspaceHeight();
+                if (typeof ResizeObserver !== 'undefined') {
+                    frameObserver = new ResizeObserver(syncWorkspaceHeight);
+                    if (frame.contentDocument.documentElement) {
+                        frameObserver.observe(frame.contentDocument.documentElement);
+                    }
+                    if (frame.contentDocument.body) {
+                        frameObserver.observe(frame.contentDocument.body);
+                    }
+                }
+            }
+
+            frame.addEventListener('load', observeFrameSize);
+            window.addEventListener('resize', syncWorkspaceHeight);
+            window.addEventListener('message', function (event) {
+                if (
+                    event.origin !== window.location.origin ||
+                    event.source !== frame.contentWindow ||
+                    !event.data ||
+                    event.data.type !== 'pydisplay-runtime-size'
+                ) {
+                    return;
+                }
+                var height = Math.ceil(Number(event.data.height));
+                var width = Math.ceil(Number(event.data.width));
+                if (
+                    !Number.isFinite(height) ||
+                    !Number.isFinite(width) ||
+                    height <= 0 ||
+                    width <= 0
+                ) {
+                    return;
+                }
+                frame.style.height = height + 'px';
+                frame.style.width = width + 'px';
+                if (sidebar && !window.matchMedia('(max-width: 900px)').matches) {
+                    sidebar.style.height = height + 'px';
+                }
+            });
+
+            function loadDemo(raw, push) {
+                var selected = demoUrl(raw);
+                if (!selected) return false;
+                var matchingLink = links.find(function (link) {
+                    var candidate = demoUrl(link.getAttribute('href'));
+                    return candidate && candidate.relative === selected.relative;
+                });
+                frame.src = iframeUrl(selected.relative);
+                frame.hidden = false;
+                empty.hidden = true;
+                frame.title = selectedLabel(matchingLink);
+                markSelected(selected.relative);
+                if (push) {
+                    var parent = new URL(window.location.href);
+                    parent.searchParams.set('run', selected.relative);
+                    window.history.pushState({ run: selected.relative }, '', parent);
+                }
+                return true;
+            }
+
+            links.forEach(function (link) {
+                link.addEventListener('click', function (event) {
+                    if (
+                        event.button !== 0 ||
+                        event.metaKey ||
+                        event.ctrlKey ||
+                        event.shiftKey ||
+                        event.altKey
+                    ) {
+                        return;
+                    }
+                    event.preventDefault();
+                    loadDemo(link.getAttribute('href'), true);
+                });
+            });
+
+            window.addEventListener('popstate', function () {
+                var run = new URL(window.location.href).searchParams.get('run');
+                if (!loadDemo(run, false)) {
+                    frame.removeAttribute('src');
+                    frame.hidden = true;
+                    empty.hidden = false;
+                    markSelected('');
+                    syncWorkspaceHeight();
+                }
+            });
+
+            var initial = new URL(window.location.href).searchParams.get('run');
+            loadDemo(initial, false);
+            syncWorkspaceHeight();
         })();
     </script>
 </body>

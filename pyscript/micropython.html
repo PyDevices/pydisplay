@@ -15,13 +15,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap">
     <link rel="stylesheet" href="./site.css">
-    <link rel="stylesheet" href="./demo.css">
+    <link rel="stylesheet" href="./demo.css?v=3">
     <link rel="stylesheet" href="./vendor/core.css">
     <script src="./pwa.js"></script>
     <script src="./loader-query.js"></script>
-    <script src="https://pydevices.github.io/assets/js/theme-toggle.js" defer></script>
+    <script src="./theme-toggle.js" defer></script>
 </head>
-<body data-loader-runtime="mpy">
+<body class="runtime-page" data-loader-runtime="mpy">
     <header class="site-header">
         <div class="wrap">
             <a class="brand" href="https://pydevices.github.io/">
@@ -81,14 +81,6 @@
         <p id="loader-param" hidden aria-hidden="true"></p>
 
         <div class="play-area" id="play-area">
-            <div class="stage-controls">
-                <div class="run-bar">
-                    <button id="run-btn" class="btn primary" disabled>Run</button>
-                </div>
-                <div class="loading" id="loading">
-                    <span class="spinner"></span> <span id="status">Loading MicroPython runtime…</span>
-                </div>
-            </div>
             <div class="display-column">
                 <div class="device">
                     <canvas id="display_canvas" width="320" height="480" tabindex="0"></canvas>
@@ -96,7 +88,7 @@
                 </div>
             </div>
 
-            <section class="console-panel" aria-label="Console output">
+            <section class="console-panel" aria-label="Console output" hidden>
                 <h2 class="console-label">Console output</h2>
                 <div id="log" class="log"></div>
             </section>
@@ -111,7 +103,7 @@
                         <li><code>?manifests=</code> — comma-separated MIP manifest names; each installs <code>packages/&lt;name&gt;.json</code>.</li>
                         <li><code>?deps=</code> — comma-separated packages installed via MIP (micropython-lib index).</li>
                         <li>Modules/manifests may both appear; whichever param comes <em>first</em> in the URL supplies the import entry point.</li>
-                        <li>Click <strong>Run</strong> to install everything, then import the entry.</li>
+                        <li>The selected entry installs and starts automatically.</li>
                     </ul>
                 </div>
                 <div class="panel">
@@ -240,7 +232,6 @@
         import os
         import sys
         from js import document
-        from pyscript.ffi import create_proxy
 
         try:
             os.chdir("/")
@@ -261,13 +252,11 @@
 
         builtins.print = _log_print
 
-        _status = document.getElementById("status")
-        _btn = document.getElementById("run-btn")
         _started = False
 
         def _set(msg):
-            if _status:
-                _status.textContent = msg
+            if msg:
+                _log_print(msg)
 
         def _from_window(name, default=""):
             from js import window
@@ -306,11 +295,9 @@
                 _log_print("Run failed:", e)
                 _set("Error — see console.")
                 _started = False
-                _btn.disabled = False
-                _btn.textContent = "Run"
                 raise
 
-        def _on_click(*_):
+        def _start():
             global _started
             if _started or _loader_disabled():
                 return
@@ -321,44 +308,15 @@
                 return
             # Sync path: paint Running… before any mip install work.
             _started = True
-            _btn.disabled = True
-            _btn.textContent = "Running…"
             _set("Starting…")
             import asyncio
             asyncio.create_task(_run(modules, manifests, deps, entry))
 
         if not _loader_disabled():
-            _btn.addEventListener("click", create_proxy(_on_click))
-            _btn.disabled = False
-            _set("Runtime ready — click Run.")
-            print("MicroPython runtime ready. Click Run to start the demo.")
+            _start()
     </script>
 
-    <script src="./loader-ready.js"></script>
-
-    <script>
-        (function () {
-            const device = document.querySelector('.play-area .device');
-            const panel = document.querySelector('.play-area .console-panel');
-            const log = document.getElementById('log');
-            if (!device || !panel || !log) return;
-            function syncConsoleHeight() {
-                if (window.innerWidth <= 880) {
-                    panel.style.height = '';
-                    return;
-                }
-                const h = device.getBoundingClientRect().height;
-                if (h > 0) {
-                    panel.style.height = h + 'px';
-                }
-            }
-            syncConsoleHeight();
-            window.addEventListener('resize', syncConsoleHeight);
-            if (typeof ResizeObserver !== 'undefined') {
-                new ResizeObserver(syncConsoleHeight).observe(device);
-            }
-        })();
-    </script>
+    <script src="./runtime-layout.js?v=3"></script>
     <script type="module" src="./pyscript-json-config.js"></script>
 </body>
 </html>
