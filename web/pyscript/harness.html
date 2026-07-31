@@ -6,7 +6,6 @@
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#f54e00">
 <script src="./pwa.js"></script>
-<script type="module" src="./vendor/core.js"></script>
 <script src="./loader-query.js"></script>
 <link rel="stylesheet" href="./vendor/core.css">
 </head>
@@ -52,7 +51,7 @@
     }
 })();
 </script>
-<script type="mpy" config="./micropython.toml" output="log">
+<script type="mpy" data-configs="./micropython.json ./pydisplay.json" output="log">
 import builtins
 from js import document
 import os
@@ -415,5 +414,6 @@ def _run():
 
 _run()
 </script>
+<script type="module" src="./pyscript-json-config.js"></script>
 </body>
 </html>

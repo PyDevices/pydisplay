@@ -1,3 +1,4 @@
+# gallery: skip
 # deps: pygraphics
 # add_ons: hardware_setup, gui
 """

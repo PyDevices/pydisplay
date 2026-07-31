@@ -5,10 +5,9 @@
         <link rel="manifest" href="./manifest.json">
         <meta name="theme-color" content="#f54e00">
         <script src="./pwa.js"></script>
-        <script type="module" src="./vendor/core.js"></script>
     </head>
     <body>
-        <script type="mpy" config="./micropython.toml" terminal worker>
+        <script type="mpy" data-configs="./micropython.json ./pydisplay.json" terminal worker>
             import lib.path
             from pyscript import document
             term = document.querySelector('script[terminal]').terminal
@@ -17,5 +16,6 @@
             code.interact(local=globals())
         </script>
         <canvas id="display_canvas" width="1" height="1" style="background-color: black; border:2px solid black;"></canvas>
+        <script type="module" src="./pyscript-json-config.js"></script>
     </body>
 </html>

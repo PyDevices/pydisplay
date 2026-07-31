@@ -20,9 +20,11 @@ const STATIC_ASSETS = [
   './pwa.js',
   './loader-ready.js',
   './loader-query.js',
+  './pyscript-json-config.js',
   './mini-coi-fd.js',
-  './micropython.toml',
-  './pyodide.toml',
+  './micropython.json',
+  './pyodide.json',
+  './pydisplay.json',
 ];
 
 // Loader HTML + gallery index change often; fetch network-first so deps/

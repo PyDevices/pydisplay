@@ -1,5 +1,6 @@
 #!/bin/python
 
+import argparse
 import json
 import os
 from pathlib import Path
@@ -11,6 +12,14 @@ if str(_scripts) not in sys.path:
     sys.path.insert(0, str(_scripts))
 from personal_examples import PERSONAL_EXAMPLE_DIRS  # noqa: E402
 
+parser = argparse.ArgumentParser(description="Generate install and PyScript manifests.")
+parser.add_argument(
+    "--toml",
+    action="store_true",
+    help="also generate legacy micropython.toml and pyodide.toml configs",
+)
+args = parser.parse_args()
+
 # Define constants
 package_ver = "0.0.1"
 repo_url = "github:PyDevices/pydisplay/"
@@ -20,6 +29,19 @@ output_dir = repo_dir
 packages_dir = "packages/"
 toml_full_path = output_dir + "web/pyscript/micropython.toml"
 pyodide_toml_path = output_dir + "web/pyscript/pyodide.toml"
+micropython_json_path = output_dir + "web/pyscript/micropython.json"
+pyodide_json_path = output_dir + "web/pyscript/pyodide.json"
+pydisplay_json_path = output_dir + "web/pyscript/pydisplay.json"
+peterhinch_config_paths = {
+    "nano": output_dir + "web/pyscript/peterhinch-nano.json",
+    "micro": output_dir + "web/pyscript/peterhinch-micro.json",
+    "touch": output_dir + "web/pyscript/peterhinch-touch.json",
+}
+peterhinch_packages = {
+    "nano": "micropython-nano-gui",
+    "micro": "micropython-micro-gui",
+    "touch": "micropython-touch",
+}
 
 # list of package directories, dependencies and extra files in that package.
 # pydisplay core packages (displaysys/eventsys/multimer) install from the
@@ -94,13 +116,23 @@ def pyscript_toml_file_entry(repo_relative_path: str, mount: str) -> str:
 
 
 package_dicts = {}
+master_files = {}
 master_toml = [
     f'interpreter = "{PYSCRIPT_INTERPRETER}"',
     "",
     "[files]",
 ]
+
+
+def add_pyscript_file(repo_relative_path: str, mount: str) -> None:
+    """Add one local source to both TOML and JSON-compatible file maps."""
+    source = PYSCRIPT_TOML_SRC_PREFIX + repo_relative_path
+    master_files[source] = mount
+    master_toml.append(pyscript_toml_file_entry(repo_relative_path, mount))
+
+
 for rel_path, mount in toml_only_mounts:
-    master_toml.append(pyscript_toml_file_entry(rel_path, mount))
+    add_pyscript_file(rel_path, mount)
 master_toml.append("")
 
 # Iterate over the packages and create the package files
@@ -124,11 +156,9 @@ for package_path, deps, extra_files in packages:
             toml_dest_dir = "/" + "/".join(master_dest_file.split("/")[:-1]) + "/"
             if toml_dest_dir == "//":
                 toml_dest_dir = "/"
-            master_toml.append(
-                pyscript_toml_file_entry(
-                    os.path.relpath(full_file_path, repo_dir).replace("\\", "/"),
-                    toml_dest_dir,
-                )
+            add_pyscript_file(
+                os.path.relpath(full_file_path, repo_dir).replace("\\", "/"),
+                toml_dest_dir,
             )
 
     package_skip = PACKAGE_SKIP_DIRS.get(package_name, set())
@@ -158,7 +188,7 @@ for package_path, deps, extra_files in packages:
                 if toml_dest_dir == "//":
                     toml_dest_dir = "/"
                 toml_src_file = src_dir + master_dest_file
-                master_toml.append(pyscript_toml_file_entry(toml_src_file, f"/{toml_dest_dir}/"))
+                add_pyscript_file(toml_src_file, f"/{toml_dest_dir}/")
 
     if package_name not in toml_exclude:
         master_toml.append("")
@@ -223,7 +253,7 @@ for entry in sorted(os.listdir(examples_root)):
     example_package_names.append(entry)
 
 # Gallery loaders use `import ps_loader` (top-level); also mount at VFS root.
-master_toml.append(pyscript_toml_file_entry("src/add_ons/ps_loader.py", "/"))
+add_pyscript_file("src/add_ons/ps_loader.py", "/")
 
 # web/pyscript/packages → ../../packages (same layout as web/pyscript/src).
 pyscript_packages_link = os.path.join(output_dir, "web", "pyscript", "packages")
@@ -237,20 +267,53 @@ if os.path.islink(pyscript_packages_link) or os.path.exists(pyscript_packages_li
 else:
     os.symlink("../../packages", pyscript_packages_link)
 
-# Write toml files (same [files]; MicroPython vs Pyodide interpreter).
-# pygraphics is not mounted: MP WASM freezes the cmod; Pyodide installs
-# pygraphics-cmod (pyemscripten wasm) from TestPyPI via gallery ?deps=
-# (see url_maker.py).
-with open(toml_full_path, "w") as f:
-    for line in master_toml:
-        f.write(line + "\n")
-
-with open(pyodide_toml_path, "w") as f:
-    for line in master_toml:
-        if line.startswith("interpreter ="):
-            f.write(f'interpreter = "{PYODIDE_INTERPRETER}"\n')
-        else:
+# Legacy TOML output is opt-in. JSON composition is the default browser path.
+if args.toml:
+    with open(toml_full_path, "w") as f:
+        for line in master_toml:
             f.write(line + "\n")
+
+    with open(pyodide_toml_path, "w") as f:
+        for line in master_toml:
+            if line.startswith("interpreter ="):
+                f.write(f'interpreter = "{PYODIDE_INTERPRETER}"\n')
+            else:
+                f.write(line + "\n")
+
+
+def github_mip_raw_url(source: str) -> str:
+    """Convert github:owner/repo/path to its raw GitHub source URL."""
+    prefix = "github:"
+    if not source.startswith(prefix):
+        raise ValueError(f"Unsupported Peter Hinch manifest URL: {source}")
+    owner, repository, path = source[len(prefix) :].split("/", 2)
+    return f"https://raw.githubusercontent.com/{owner}/{repository}/master/{path}"
+
+
+# JSON configs keep runtimes separate from the shared pydisplay filesystem so a
+# page can compose the runtime it needs before PyScript starts.
+with open(micropython_json_path, "w") as f:
+    json.dump({"interpreter": PYSCRIPT_INTERPRETER}, f, indent=2)
+    f.write("\n")
+with open(pyodide_json_path, "w") as f:
+    json.dump({"interpreter": PYODIDE_INTERPRETER}, f, indent=2)
+    f.write("\n")
+with open(pydisplay_json_path, "w") as f:
+    json.dump({"files": master_files}, f, indent=2)
+    f.write("\n")
+
+# The manual package manifests remain the source of truth for each upstream GUI
+# file inventory.
+for gui, package_stem in peterhinch_packages.items():
+    package_path = output_dir + packages_dir + package_stem + ".json"
+    with open(package_path) as f:
+        gui_package = json.load(f)
+    files = {}
+    for destination, source in gui_package["urls"]:
+        files[github_mip_raw_url(source)] = "/add_ons/" + destination
+    with open(peterhinch_config_paths[gui], "w") as f:
+        json.dump({"files": files}, f, indent=2)
+        f.write("\n")
 
 print(
     f"{__file__.split('/')[-1]} finished "
