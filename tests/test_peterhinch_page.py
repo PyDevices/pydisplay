@@ -6,6 +6,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "web" / "pyscript" / "peterhinch.html"
+PWA_MANIFEST = ROOT / "web" / "pyscript" / "peterhinch-manifest.json"
 
 
 def _source():
@@ -34,6 +35,18 @@ def test_page_selects_a_gui_specific_micropython_config_before_core_loads():
     assert "runtime.type = 'mpy';" in source
     assert "runtime.dataset.configs" in source
     assert "pyodide" not in source.lower()
+
+
+def test_page_has_its_own_pwa_identity():
+    source = _source()
+    manifest = json.loads(PWA_MANIFEST.read_text(encoding="utf-8"))
+    service_worker = (ROOT / "web" / "pyscript" / "sw.js").read_text(encoding="utf-8")
+    assert '<link rel="manifest" href="./peterhinch-manifest.json">' in source
+    assert manifest["name"] == "Peter Hinch GUI Demos"
+    assert manifest["id"] == "./peterhinch"
+    assert manifest["start_url"] == "./peterhinch.html?nano"
+    assert "'./peterhinch-manifest.json'" in service_worker
+    assert "'./peterhinch.html'" in service_worker
 
 
 def test_generated_configs_split_shared_files_from_gui_manifests():
@@ -128,6 +141,14 @@ def test_gui_name_links_to_its_upstream_repository():
     assert "packageLink.href = repositories[gui];" in source
 
 
+def test_gui_picker_is_ordered_touch_micro_nano():
+    source = _source()
+    touch = source.index('data-gui="touch"')
+    micro = source.index('data-gui="micro"')
+    nano = source.index('data-gui="nano"')
+    assert touch < micro < nano
+
+
 def test_console_stacks_below_canvas_and_cards_are_synchronized():
     source = _source()
     assert "grid-template-columns: minmax(220px, 300px) max-content;" in source
@@ -173,6 +194,17 @@ def test_selected_demo_must_be_discovered_and_supported():
     assert "if selected in discovered:" in source
     assert "Demo is not compatible with the browser runtime:" in source
     assert '__import__("gui.demos." + selected)' in source
+
+
+def test_valid_demo_scrolls_panel_below_sticky_header():
+    source = _source()
+    validation = source.index("if selected not in names:")
+    scroll = source.index("_scroll_to_demo_panel()", validation)
+    demo_import = source.index('__import__("gui.demos." + selected)')
+    assert validation < scroll < demo_import
+    assert 'document.querySelector(".demo-panel")' in source
+    assert 'document.querySelector(".site-header")' in source
+    assert "window.scrollTo(0, max(0, int(target)))" in source
 
 
 def test_gallery_regeneration_preserves_page():

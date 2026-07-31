@@ -1,3 +1,4 @@
+# gallery: skip
 # deps: pdwidgets
 # Align enum smoke for pdwidgets — labels at every ALIGN around a center button.
 import board_config

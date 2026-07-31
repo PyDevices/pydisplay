@@ -1,3 +1,4 @@
+# gallery: skip
 # deps: palettes
 # add_ons: tft_text, tft_config
 """

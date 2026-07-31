@@ -1,3 +1,4 @@
+# gallery: skip
 # deps: pygraphics
 from board_config import display_drv
 from pygraphics import Draw, FrameBuffer, MONO_HLSB, RGB565

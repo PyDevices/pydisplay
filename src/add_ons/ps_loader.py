@@ -17,6 +17,22 @@ WHEEL_INDEX_URLS = (
 )
 # JSON API (not simple) — used to pin pyemscripten wasm wheels by direct URL.
 WHEEL_JSON_URL = "https://test.pypi.org/pypi/{package_name}/json"
+BOARD_WIDTH = 320
+BOARD_HEIGHT = 480
+
+
+def _quiet_install(mip_mod, package, **kwargs):
+    """Run MIP without its per-file download/copy chatter."""
+    had_printer = hasattr(mip_mod, "print")
+    printer = getattr(mip_mod, "print", None)
+    try:
+        mip_mod.print = lambda *args, **print_kwargs: None
+        return mip_mod.install(package, **kwargs)
+    finally:
+        if had_printer:
+            mip_mod.print = printer
+        else:
+            delattr(mip_mod, "print")
 
 
 def parse_names(raw):
@@ -29,6 +45,14 @@ def parse_names(raw):
         if name:
             names.append(name)
     return names
+
+
+def set_board_defaults():
+    """Set the gallery's browser defaults without importing board_config."""
+    from displaysys import env_set
+
+    env_set("PYDISPLAY_WIDTH", BOARD_WIDTH)
+    env_set("PYDISPLAY_HEIGHT", BOARD_HEIGHT)
 
 
 def _page_base():
@@ -68,7 +92,7 @@ def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url
     for name in manifests:
         if status:
             status("Installing manifest " + name + "…")
-        mip_mod.install(manifest_url(name), **manifest_kw)
+        _quiet_install(mip_mod, manifest_url(name), **manifest_kw)
         # Flat sibling imports (``import roku_engine``) match desktop wrapper,
         # which puts ``examples/<pkg>/`` on ``sys.path``.
         pkg_path = MANIFEST_MIP_TARGET + "/" + name
@@ -88,7 +112,7 @@ def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url
             continue
         if status:
             status("Fetching " + name + "…")
-        mip_mod.install(module_url(name))
+        _quiet_install(mip_mod, module_url(name))
 
 
 def _install_index_deps_micropython(mip_mod, names, status):
@@ -97,8 +121,7 @@ def _install_index_deps_micropython(mip_mod, names, status):
     for which in names:
         if status:
             status("Installing " + which + "…")
-        print("MIP install:", which, "index=", MIP_LIB_INDEX)
-        mip_mod.install(which, index=MIP_LIB_INDEX)
+        _quiet_install(mip_mod, which, index=MIP_LIB_INDEX)
 
 
 def _ensure_cwd():
@@ -229,15 +252,12 @@ async def _install_wheels_pyodide(names, status):
         if status:
             status("Installing " + spec + "…")
         if spec.startswith("http://") or spec.startswith("https://"):
-            print("micropip.install", spec)
             await micropip.install(spec)
             continue
         wheel_url = await _pyemscripten_wheel_url(spec)
         if wheel_url:
-            print("micropip.install", spec, "→", wheel_url)
             await micropip.install(wheel_url)
         else:
-            print("micropip.install", spec, "indexes=", WHEEL_INDEX_URLS)
             await micropip.install(spec, index_urls=WHEEL_INDEX_URLS)
 
 

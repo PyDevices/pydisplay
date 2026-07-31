@@ -8,12 +8,32 @@
 
   var showConsole =
     new URLSearchParams(window.location.search).get("console") === "true";
-  if (panel) {
-    panel.hidden = !showConsole;
-  }
+  var toggle = document.querySelector(".console-toggle");
   var standalone = window.parent === window;
   document.body.classList.add(standalone ? "runtime-standalone" : "runtime-embedded");
-  document.body.classList.add(showConsole ? "runtime-with-console" : "runtime-without-console");
+
+  function applyConsoleState(visible) {
+    showConsole = visible;
+    document.body.classList.toggle("runtime-with-console", visible);
+    document.body.classList.toggle("runtime-without-console", !visible);
+    if (panel) {
+      panel.hidden = !visible;
+      panel.style.width = visible && lastWidth > 0 ? lastWidth + "px" : "";
+      panel.style.height = visible && lastHeight > 0 ? lastHeight + "px" : "";
+    }
+    if (toggle) {
+      toggle.textContent = visible ? "Hide console" : "Show console";
+      toggle.setAttribute("aria-expanded", visible ? "true" : "false");
+    }
+    var url = new URL(window.location.href);
+    if (visible) {
+      url.searchParams.set("console", "true");
+    } else {
+      url.searchParams.delete("console");
+    }
+    window.history.replaceState(null, "", url);
+    syncConsoleSize();
+  }
 
   var lastWidth = -1;
   var lastHeight = -1;
@@ -21,11 +41,7 @@
   function reportHeight() {
     requestAnimationFrame(function () {
       var main = document.querySelector(".loader-main");
-      var height = Math.max(
-        document.documentElement.scrollHeight,
-        document.body.scrollHeight,
-        main ? Math.ceil(main.getBoundingClientRect().bottom) : 0
-      );
+      var height = main ? Math.ceil(main.getBoundingClientRect().bottom) : 0;
       if (window.parent !== window && height > 0) {
         var width = Math.ceil(device.getBoundingClientRect().width);
         window.parent.postMessage(
@@ -47,6 +63,9 @@
     if (!showConsole || !panel) {
       lastWidth = width;
       lastHeight = height;
+      if (panel && showConsole) {
+        panel.style.width = width + "px";
+      }
       reportHeight();
       return;
     }
@@ -73,6 +92,12 @@
     reportHeight();
   }
 
+  applyConsoleState(showConsole);
+  if (toggle) {
+    toggle.addEventListener("click", function () {
+      applyConsoleState(!showConsole);
+    });
+  }
   syncConsoleSize();
   window.addEventListener("resize", syncConsoleSize);
   window.addEventListener("load", reportHeight);
