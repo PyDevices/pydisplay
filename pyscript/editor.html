@@ -5,12 +5,11 @@
         <link rel="manifest" href="./manifest.json">
         <meta name="theme-color" content="#f54e00">
         <script src="./pwa.js"></script>
-        <script type="module" src="./vendor/core.js"></script>
     </head>
     <body>
         <canvas id="display_canvas" width="1" height="1" style="background-color: black; border:2px solid black;"></canvas>
         <!-- Hidden bootstrap: mip + path. Runs before the visible editor. -->
-        <script type="mpy-editor" env="demo" setup config="./micropython.toml">
+        <script type="mpy-editor" env="demo" setup data-configs="./micropython.json ./pydisplay.json">
             import mip
             mip.install("github:PyDevices/pydisplay/src/examples/pydisplay_demo.py")
             import lib.path
@@ -19,5 +18,6 @@
         <script type="mpy-editor" env="demo">
             import pydisplay_demo
         </script>
+        <script type="module" src="./pyscript-json-config.js"></script>
     </body>
 </html>

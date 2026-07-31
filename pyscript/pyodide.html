@@ -19,7 +19,6 @@
     <link rel="stylesheet" href="./vendor/core.css">
     <script src="./pwa.js"></script>
     <script src="./loader-query.js"></script>
-    <script type="module" src="./vendor/core.js"></script>
     <script src="https://pydevices.github.io/assets/js/theme-toggle.js" defer></script>
 </head>
 <body data-loader-runtime="py">
@@ -234,7 +233,7 @@
         })();
     </script>
 
-    <script type="py" config="./pyodide.toml" output="log">
+    <script type="py" data-configs="./pyodide.json ./pydisplay.json" output="log">
         import builtins
         import os
         import sys
@@ -353,5 +352,6 @@
             }
         })();
     </script>
+    <script type="module" src="./pyscript-json-config.js"></script>
 </body>
 </html>

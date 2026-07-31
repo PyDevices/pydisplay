@@ -1,0 +1,3 @@
+{
+  "interpreter": "./vendor/pyodide/pyodide.mjs"
+}

@@ -18,7 +18,6 @@
     <link rel="stylesheet" href="./demo.css">
     <link rel="stylesheet" href="./vendor/core.css">
     <script src="./pwa.js"></script>
-    <script type="module" src="./vendor/core.js"></script>
     <script src="https://pydevices.github.io/assets/js/theme-toggle.js" defer></script>
     <style>
         .gui-picker {
@@ -33,13 +32,17 @@
         }
         .hinch-layout {
             display: grid;
-            grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
-            gap: 26px;
+            grid-template-columns: minmax(220px, 300px) max-content;
+            gap: 14px;
+            justify-content: center;
             align-items: start;
         }
         .demo-panel {
             position: sticky;
             top: 18px;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
         }
         .demo-panel h2 {
             margin-top: 0;
@@ -47,7 +50,7 @@
         .demo-list {
             display: grid;
             gap: 6px;
-            max-height: 680px;
+            min-height: 0;
             overflow: auto;
         }
         .demo-link {
@@ -65,7 +68,24 @@
             background: color-mix(in srgb, var(--accent) 7%, transparent);
         }
         .hinch-stage .play-area {
+            grid-template-columns: auto;
+            grid-template-rows: auto auto auto;
+            justify-content: center;
             margin-bottom: 0;
+        }
+        .hinch-stage .play-area > .stage-controls,
+        .hinch-stage .play-area > .display-column,
+        .hinch-stage .play-area > .console-panel {
+            grid-column: 1;
+        }
+        .hinch-stage .play-area > .stage-controls {
+            grid-row: 1;
+        }
+        .hinch-stage .play-area > .display-column {
+            grid-row: 2;
+        }
+        .hinch-stage .play-area > .console-panel {
+            grid-row: 3;
         }
         .status-error {
             color: #c53b2c;
@@ -73,9 +93,11 @@
         @media (max-width: 880px) {
             .hinch-layout {
                 grid-template-columns: 1fr;
+                justify-content: stretch;
             }
             .demo-panel {
                 position: static;
+                height: auto !important;
             }
             .demo-list {
                 max-height: 320px;
@@ -116,7 +138,8 @@
             <h1 id="page-title">Peter Hinch GUI demos</h1>
         </div>
         <p class="loader-lede" id="page-lede">
-            Choose a GUI to discover its demos directly from the installed package.
+            Demos are discovered live from the installed
+            <a id="package-link" href="#">GUI</a> package.
         </p>
 
         <nav class="gui-picker" aria-label="Peter Hinch GUI">
@@ -187,6 +210,34 @@
             var demo = params.get('demo') || '';
             window.__hinchGui = gui;
             window.__hinchDemo = demo;
+            window.__hinchDemoSignature = '';
+            if (gui) {
+                const cacheKey = 'peterhinch-demos-' + gui;
+                const cached = window.sessionStorage.getItem(cacheKey) || '';
+                const names = cached ? cached.split('\n').filter(Boolean) : [];
+                if (names.length) {
+                    const list = document.getElementById('demo-list');
+                    list.replaceChildren();
+                    names.forEach(function (name) {
+                        const link = document.createElement('a');
+                        link.className = 'demo-link';
+                        link.textContent = name;
+                        link.href = '?' + gui + '&demo=' + encodeURIComponent(name);
+                        if (name === demo) {
+                            link.setAttribute('aria-current', 'page');
+                        }
+                        list.appendChild(link);
+                    });
+                    document.getElementById('demo-count').textContent =
+                        names.length + ' compatible demo' +
+                        (names.length === 1 ? '' : 's') + ' found.';
+                    window.__hinchDemoSignature = cached;
+                }
+            }
+            if (gui && demo) {
+                document.getElementById('status').textContent =
+                    'Starting ' + demo + '…';
+            }
 
             document.querySelectorAll('[data-gui]').forEach(function (link) {
                 if (link.dataset.gui === gui) {
@@ -209,16 +260,22 @@
                 micro: 'Micro-GUI',
                 touch: 'MicroPython-Touch'
             };
+            var repositories = {
+                nano: 'https://github.com/peterhinch/micropython-nano-gui',
+                micro: 'https://github.com/peterhinch/micropython-micro-gui',
+                touch: 'https://github.com/peterhinch/micropython-touch'
+            };
             document.getElementById('hinch-layout').hidden = false;
             document.getElementById('control-hint').hidden = gui !== 'micro';
             document.getElementById('page-title').textContent = labels[gui] + ' demos';
-            document.getElementById('page-lede').textContent =
-                'Demos are discovered live from the installed ' + labels[gui] + ' package.';
+            var packageLink = document.getElementById('package-link');
+            packageLink.textContent = labels[gui];
+            packageLink.href = repositories[gui];
             document.title = labels[gui] + ' demos — pydisplay MicroPython';
         })();
     </script>
 
-    <script type="mpy" config="./micropython.toml" output="log">
+    <script id="hinch-runtime" type="text/plain" output="log">
 import asyncio
 import builtins
 import os
@@ -340,6 +397,9 @@ def _render_demos(gui, selected, names):
     _demo_count.textContent = "{} compatible demo{} found.".format(
         len(names), "" if len(names) == 1 else "s"
     )
+    signature = "\n".join(names)
+    window.sessionStorage.setItem("peterhinch-demos-" + gui, signature)
+    window.__hinchDemoSignature = signature
 
 
 async def _boot():
@@ -359,14 +419,19 @@ async def _boot():
 
     await asyncio.sleep(0)
     try:
-        _set_status("Installing GUI and PyGraphics…")
+        if selected:
+            _set_status("Starting {}…".format(selected))
+        else:
+            _set_status("Initializing GUI…")
         print("Loading", setup)
         __import__(setup)
 
-        _set_status("Discovering demos…")
+        if not selected:
+            _set_status("Discovering demos…")
         discovered = _discover_demos()
         names = _supported_demos(gui, discovered)
-        _render_demos(gui, selected, names)
+        if _gui_value("__hinchDemoSignature") != "\n".join(names):
+            _render_demos(gui, selected, names)
 
         if selected:
             if selected not in names:
@@ -394,22 +459,48 @@ asyncio.create_task(_boot())
 
     <script>
         (function () {
+            const gui = window.__hinchGui;
+            if (!gui) return;
+            const runtime = document.getElementById('hinch-runtime');
+            runtime.type = 'mpy';
+            runtime.dataset.configs = [
+                './micropython.json',
+                './pydisplay.json',
+                './peterhinch-' + gui + '.json'
+            ].join(' ');
+        })();
+    </script>
+    <script type="module" src="./pyscript-json-config.js"></script>
+
+    <script>
+        (function () {
             const device = document.querySelector('.play-area .device');
+            const stage = document.querySelector('.hinch-stage');
             const panel = document.querySelector('.play-area .console-panel');
+            const demoPanel = document.querySelector('.demo-panel');
             const log = document.getElementById('log');
-            if (!device || !panel || !log) return;
-            function syncConsoleHeight() {
+            if (!device || !stage || !panel || !demoPanel || !log) return;
+            function syncCardLayout() {
+                const rect = device.getBoundingClientRect();
+                if (rect.width > 0) {
+                    stage.style.width = rect.width + 'px';
+                    panel.style.width = rect.width + 'px';
+                }
+                if (rect.height > 0) panel.style.height = rect.height + 'px';
                 if (window.innerWidth <= 880) {
-                    panel.style.height = '';
+                    demoPanel.style.height = '';
                     return;
                 }
-                const height = device.getBoundingClientRect().height;
-                if (height > 0) panel.style.height = height + 'px';
+                const demoTop = demoPanel.getBoundingClientRect().top;
+                const consoleBottom = panel.getBoundingClientRect().bottom;
+                if (consoleBottom > demoTop) {
+                    demoPanel.style.height = consoleBottom - demoTop + 'px';
+                }
             }
-            syncConsoleHeight();
-            window.addEventListener('resize', syncConsoleHeight);
+            syncCardLayout();
+            window.addEventListener('resize', syncCardLayout);
             if (typeof ResizeObserver !== 'undefined') {
-                new ResizeObserver(syncConsoleHeight).observe(device);
+                new ResizeObserver(syncCardLayout).observe(device);
             }
         })();
     </script>
