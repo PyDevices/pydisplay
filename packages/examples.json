@@ -49,8 +49,8 @@
       "github:PyDevices/pydisplay/src/examples/calc_widgets.py"
     ],
     [
-      "chat_orpheus.py",
-      "github:PyDevices/pydisplay/src/examples/chat_orpheus.py"
+      "chat_lvgl.py",
+      "github:PyDevices/pydisplay/src/examples/chat_lvgl.py"
     ],
     [
       "color_test.py",
