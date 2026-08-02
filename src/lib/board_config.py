@@ -8,9 +8,11 @@ framebuffer, subscribe to input events, and keep the runtime alive with
 ``runtime.run_forever()``.
 
 For desktop development the bundled module selects a windowed display backend
-and a compatible event source. On microcontrollers you typically copy a
-hardware-specific ``board_config.py`` from the micropython-hardware repo instead
-of using the desktop default.
+and a compatible event source, and exposes lazy ``DEVICES`` (including
+``audio_out`` via SDL) the same way hardware boards do through
+``board_devices``. On microcontrollers you typically copy a hardware-specific
+``board_config.py`` from the micropython-hardware repo instead of using the
+desktop default.
 
 Desktop size / timer overrides (set before importing ``board_config``)::
 
@@ -97,6 +99,10 @@ def _desktop_display(title):
 
 _host = _host_kind()
 
+# Hardware boards re-export this from board_devices via setup_devices.
+# Desktop default starts empty; filled below to simulate board_devices.
+DEVICES = frozenset()
+
 if _host == "pyscript":
     from displaysys.psdisplay import PSDevices, PSDisplay
 
@@ -119,5 +125,22 @@ else:
         get_events,
         timer_async=env_bool("PYDISPLAY_TIMER_ASYNC", DEFAULT_TIMER_ASYNC),
     )
+
+    # Simulate board_devices: lazy audio_out via boarddev (SDL queued PCM).
+    import boarddev
+
+    class _DesktopDevices:
+        DEVICES = frozenset({"audio_out"})
+
+        @staticmethod
+        def audio_out():
+            from audiodev import AudioFormat
+            from sdl2audio import audio_out as _sdl_audio_out
+
+            # Gemini / common TTS default: 24 kHz mono s16le
+            return _sdl_audio_out(AudioFormat(24000, 1, 16), queue_ms=150)
+
+    DEVICES = _DesktopDevices.DEVICES
+    boarddev.bind_lazy(globals(), _DesktopDevices)
 
 display_drv.fill(0)
