@@ -125,6 +125,7 @@ class VirtualDevices:
             self.user_data = None
             self._fifo = []
             self._callback = None
+            self._active_key_event = None
             # Multipoint snapshot for LVGL gestures (SDL fingers / etc.).
             self.points = ()
             self._fingers = {}  # finger_id -> (x, y)
@@ -137,6 +138,11 @@ class VirtualDevices:
             event = self._fifo.pop(0) if self._fifo else None
             if self._callback is not None:
                 self._callback(event, *args)
+
+        @property
+        def has_pending(self):
+            """Whether another routed event is ready without waiting for the host."""
+            return bool(self._fifo)
 
         def add_event(self, event):
             # Coalesce pointer motion: host_pump + high-rate FINGERMOTION otherwise
@@ -157,16 +163,38 @@ class VirtualDevices:
             ):
                 self._fifo[-1] = event
                 return
-            # KEYUP: drop pending KEYDOWNs for this key so typing is not stuck
-            # replaying a backlog after a hold.
-            if event.type == events.KEYUP:
+            if self.type == types.KEYPAD:
                 key = getattr(event, "key", None)
-                if key is not None and self._fifo:
-                    self._fifo = [
-                        e
-                        for e in self._fifo
-                        if not (e.type == events.KEYDOWN and getattr(e, "key", None) == key)
-                    ]
+                active = self._active_key_event
+                active_key = getattr(active, "key", None)
+                if event.type == events.KEYDOWN:
+                    # A host keyboard can report rollover (B goes down before A
+                    # comes up), but LVGL's KEYPAD indev models only one active
+                    # key. Insert a release edge so every physical KEYDOWN is a
+                    # distinct press instead of being treated as PRESSING A.
+                    if active is not None and active_key != key:
+                        self._fifo.append(
+                            events.Key(
+                                events.KEYUP,
+                                active.name,
+                                active.key,
+                                active.mod,
+                                active.scancode,
+                                active.window,
+                            )
+                        )
+                    self._active_key_event = event
+                elif event.type == events.KEYUP:
+                    if active is not None and active_key != key:
+                        # This key was already synthetically released when the
+                        # newer overlapping key became active.
+                        return
+                    self._active_key_event = None
+            # Preserve KEYDOWN/KEYUP ordering.  Host backends drain their native
+            # queue in batches, so a normal fast keystroke commonly arrives as
+            # both events before LVGL polls this virtual keypad.  Removing the
+            # pending KEYDOWN here would turn that keystroke into release-only
+            # input and the focused text widget would miss the character.
             self._fifo.append(event)
 
         def _set_finger(self, finger_id, xy):

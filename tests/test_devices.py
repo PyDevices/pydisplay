@@ -113,6 +113,48 @@ class TestHostEventsDevice(unittest.TestCase):
 
 
 class TestVirtualDevicesMultiWindow(unittest.TestCase):
+    def test_fast_key_pairs_preserve_order(self):
+        burst = [
+            events.Key(events.KEYDOWN, "a", 97, 0, 4, 10),
+            events.Key(events.KEYUP, "a", 97, 0, 4, 10),
+            events.Key(events.KEYDOWN, "b", 98, 0, 5, 10),
+            events.Key(events.KEYUP, "b", 98, 0, 5, 10),
+        ]
+        host = HostEventsDevice(host_read=scripted(burst, None))
+        virtual = VirtualDevices(host, window_id=10)
+
+        virtual.poll_host_device()
+
+        self.assertEqual(virtual._vd_keypad._fifo, burst)
+        self.assertTrue(virtual._vd_keypad.has_pending)
+        virtual._vd_keypad.poll()
+        self.assertTrue(virtual._vd_keypad.has_pending)
+        virtual._vd_keypad.poll()
+        virtual._vd_keypad.poll()
+        virtual._vd_keypad.poll()
+        self.assertFalse(virtual._vd_keypad.has_pending)
+
+    def test_overlapping_keys_become_distinct_keypad_presses(self):
+        n_down = events.Key(events.KEYDOWN, "n", 110, 0, 17, 10)
+        g_down = events.Key(events.KEYDOWN, "g", 103, 0, 10, 10)
+        n_up = events.Key(events.KEYUP, "n", 110, 0, 17, 10)
+        g_up = events.Key(events.KEYUP, "g", 103, 0, 10, 10)
+        host = HostEventsDevice(host_read=scripted([n_down, g_down, n_up, g_up], None))
+        virtual = VirtualDevices(host, window_id=10)
+
+        virtual.poll_host_device()
+
+        routed = virtual._vd_keypad._fifo
+        self.assertEqual(
+            [(e.type, e.key) for e in routed],
+            [
+                (events.KEYDOWN, 110),
+                (events.KEYUP, 110),
+                (events.KEYDOWN, 103),
+                (events.KEYUP, 103),
+            ],
+        )
+
     def test_shared_host_routes_by_window(self):
         host = HostEventsDevice(
             host_read=scripted(
