@@ -13,12 +13,16 @@ Voice catalog comes from ``GeminiTTS.voices()`` (documented prebuilt list).
 Style, pace, and accent are prompt-driven via the Style field (``instructions``).
 """
 
-import display_driver  # noqa: F401 — wires LVGL flush + input + event_loop
-import lvgl as lv
-import board_config as bc
-
 from secrets import GEMINI_API_KEY
-from tts import GeminiTTS, TTSClient
+
+if not GEMINI_API_KEY:
+    raise RuntimeError("GEMINI_API_KEY is not set in the environment")
+
+import display_driver  # noqa: E402,F401 — wires LVGL flush + input + event_loop
+import lvgl as lv  # noqa: E402
+import board_config as bc  # noqa: E402
+
+from tts import GeminiTTS, TTSClient  # noqa: E402
 
 DEFAULT_TEXT = "Hello from MicroPython. Google text to speech is working."
 DEFAULT_STYLE = "Read clearly in a friendly, relaxed voice."
