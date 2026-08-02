@@ -1,11 +1,11 @@
 # gallery: skip
 # deps: pygraphics
-# add_ons: color_setup, gui
+# utils: color_setup, gui
 """
 nano_gui_simpletest.py - Copied from:
 https://github.com/peterhinch/micropython-nano-gui/tree/master?tab=readme-ov-file#23-verifying-hardware-configuration
 
-``color_setup`` fetches micropython-nano-gui into add_ons/gui/ when needed.
+``color_setup`` fetches micropython-nano-gui into utils/gui/ when needed.
 ``fetch_ph_gui`` (via the matching setup module) installs the GUI on desktop and in the browser.
 """
 

@@ -188,7 +188,12 @@ def _setup_sibling_paths(src):
 
 
 def _setup_bootstrap(src, mode):
-    """Put pydisplay packages on sys.path; headless skips display-oriented lib.path."""
+    """Ensure pydisplay packages resolve; prefer env PYTHONPATH/MICROPYPATH.
+
+    Headless skips display-oriented path setup. When env already seeds ``lib`` /
+    ``utils``, skip ``utils.path``. Fall back to ``import utils.path`` only if
+    ``displaysys`` is not importable (MCU-style / unset env).
+    """
     _setup_sibling_paths(src)
     if mode == "headless":
         lib = _join(src, "lib")
@@ -197,9 +202,16 @@ def _setup_bootstrap(src, mode):
         return
 
     try:
-        import lib.path  # noqa: F401
+        import displaysys  # noqa: F401
+
+        return
+    except ImportError:
+        pass
+
+    try:
+        import utils.path  # noqa: F401
     except Exception as exc:
-        raise RuntimeError("lib.path: {}".format(exc)) from exc
+        raise RuntimeError("utils.path: {}".format(exc)) from exc
 
 
 def _run_oneshot(script_path, timeout_s):

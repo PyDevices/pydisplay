@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
-"""Smoke-test add_ons/secrets.py. Run with cwd=src and the target interpreter.
+"""Smoke-test utils/secrets.py. Run with cwd=src and the target interpreter.
 
-Usage::
+Preferred (env already orders utils/ ahead of stdlib `secrets`)::
+
+    cd src && PYTHONPATH=.:lib:utils python ../tools/_secrets_smoke.py
+    cd src && MICROPYPATH=.:lib:utils micropython ../tools/_secrets_smoke.py
+
+Also works without env vars — falls back to importing utils/path.py::
 
     cd src && python ../tools/_secrets_smoke.py
     cd src && micropython ../tools/_secrets_smoke.py
@@ -15,14 +20,28 @@ def _dir_of(path):
     return path.rsplit("/", 1)[0] if "/" in path else "."
 
 
-def main():
+def _resolves_to_utils_secrets():
+    """True if plain `import secrets` already finds utils/secrets.py (PYTHONPATH/MICROPYPATH set)."""
     try:
-        import lib.path  # noqa: F401
+        import secrets as _probe
     except ImportError:
-        src = _dir_of(_dir_of(__file__.replace("\\", "/"))) + "/src"
-        if src not in sys.path:
-            sys.path.insert(0, src)
-        import lib.path  # noqa: F401
+        return False
+    path = getattr(_probe, "__file__", "") or ""
+    return "utils" in path.replace("\\", "/").split("/")
+
+
+def main():
+    sys.modules.pop("secrets", None)
+    if not _resolves_to_utils_secrets():
+        # PYTHONPATH/MICROPYPATH did not already put utils/ ahead of stdlib — bootstrap it.
+        sys.modules.pop("secrets", None)
+        try:
+            import utils.path  # noqa: F401
+        except ImportError:
+            src = _dir_of(_dir_of(__file__.replace("\\", "/"))) + "/src"
+            if src not in sys.path:
+                sys.path.insert(0, src)
+            import utils.path  # noqa: F401
 
     sys.modules.pop("secrets", None)
 

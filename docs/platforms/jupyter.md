@@ -19,11 +19,11 @@ Run pydisplay examples in VS Code or Jupyter with the `JNDisplay` backend.
 
 ## Setup
 
-See **[Run the notebook interactively](jupyter-run.md)** for install commands, `./tools/jupyter.sh`, JupyterLab in the browser, and VS Code / Cursor widget settings. Summary:
+See **[Run the notebook interactively](jupyter-run.md)** for install commands, `./bin/jupyter.sh`, JupyterLab in the browser, and VS Code / Cursor widget settings. Summary:
 
 1. `pip install pillow ipywidgets ipyevents jupyterlab`
-2. Open [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb) from the repo clone.
-3. Run cells starting with `import lib.path`.
+2. Open [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb) from the repo clone, or generate one with `./bin/jupyter.sh <example>`.
+3. Run cells top to bottom. The board-config cell prefers `PYTHONPATH`/`MICROPYPATH` set to `.:lib:utils` with the kernel `cwd` under `src/` (`./bin/jupyter.sh` sets this for you); it falls back to `import utils.path` when those env vars are unset.
 
 Board config: `board_configs/jndisplay/board_config.py` (registers `JNDevices` as a `QUEUE` device).
 

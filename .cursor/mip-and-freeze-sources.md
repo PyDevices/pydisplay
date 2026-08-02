@@ -9,7 +9,7 @@ Private reference (not for RTD). Verified 2026-07-08 against pydisplay, PyDevice
 | `mip.install("displaysys", index=PyDevices micropython-lib)` | micropython-lib MIP index | **`.mpy`** by default (matching bytecode version) |
 | `mip.install("displaysys", index=..., mpy=False)` on device | same index, source channel | **`.py`** |
 | `mpremote mip install --no-mpy --index … displaysys` | same index, `py/` channel | **`.py`** |
-| `mip.install("github:PyDevices/pydisplay/packages/add_ons.json")` | GitHub repo manifests (`add_ons` / `examples` / demos) | **`.py`** (never `.mpy`) |
+| `mip.install("github:PyDevices/pydisplay/packages/utils.json")` | GitHub repo manifests (`utils` / `examples` / demos) | **`.py`** (never `.mpy`) |
 | `mip.install("github:PyDevices/pydisplay/src/lib/board_config.py")` | single GitHub file | **`.py`** |
 | `cmods/build_mp.sh` → `FROZEN_MANIFEST` | local `.py` trees under cmods | **frozen bytecode** in firmware (not filesystem `.py`/`.mpy`) |
 
@@ -42,7 +42,7 @@ See also [installation/mip-micropython-lib.md](../docs/installation/mip-micropyt
 
 [`github:PyDevices/pydisplay/…`](../docs/installation/mip-github.md) installs copy manifest-listed **source `.py` files** directly. No mpy-cross step. Used for:
 
-- `packages/*.json` (add_ons, examples, spibus, i80bus, board bundles)
+- `packages/*.json` (utils, examples, spibus, i80bus, board bundles)
 - `board_configs/…/package.json`
 - individual paths (`/src/lib/board_config.py`, drivers, etc.)
 

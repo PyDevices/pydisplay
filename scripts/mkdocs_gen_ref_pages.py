@@ -19,9 +19,9 @@ SOURCE_TREES = (
         ("", "displaysys", "eventsys", "multimer"),
     ),
     (
-        root / "src/add_ons",
-        Path("reference", "add_ons"),
-        ("add_ons",),
+        root / "src/utils",
+        Path("reference", "utils"),
+        ("utils",),
         ("",),
     ),
 )
@@ -55,7 +55,7 @@ for src, ref_prefix, nav_prefix, path_entries in SOURCE_TREES:
         rel_parts = path.relative_to(src).parts
         if any(p in SKIP_DIR_NAMES for p in rel_parts):
             continue
-        if src == root / "src" / "add_ons" and any(p in ADD_ONS_SKIP_DIR_NAMES for p in rel_parts):
+        if src == root / "src" / "utils" and any(p in ADD_ONS_SKIP_DIR_NAMES for p in rel_parts):
             continue
 
         module_path = path.relative_to(src).with_suffix("")

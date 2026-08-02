@@ -12,8 +12,6 @@ import time
 
 from board_config import display_drv, runtime
 
-import lib.path  # noqa: F401
-
 if runtime is not None and "display_driver" not in sys.modules:
     runtime.stop_timer()
 

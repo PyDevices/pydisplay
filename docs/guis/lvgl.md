@@ -34,7 +34,7 @@ With [`display_driver`](https://github.com/PyDevices/lv_bindings/blob/main/pytho
 Install examples package, then on device:
 
 ```python
-import lib.path  # development layout only
+import utils.path  # development layout only
 import lv_test_timer
 ```
 

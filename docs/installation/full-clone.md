@@ -17,27 +17,26 @@ The `src/` directory mirrors what a device filesystem looks like after installin
 
 ```
 src/
-├── path.py              # adds lib/, examples/, add_ons/ to sys.path
 ├── lib/                 # core packages (displaysys, eventsys, …)
 ├── examples/            # demo scripts
-├── add_ons/             # optional extensions (color_setup, tft_config, gui/, …)
+├── utils/               # optional extensions — path.py, color_setup, tft_config, gui/, …
 ```
 
-Optional third-party add-ons (not in git): copy [Nano-GUI](../guis/nano-gui.md) `gui/` into `add_ons/gui/`.
+Optional third-party add-ons (not in git): copy [Nano-GUI](../guis/nano-gui.md) `gui/` into `utils/gui/`.
 
 ## Run on desktop
 
-See [Desktop CPython quick start](../guides/desktop-cpython.md) for dependencies and first run.
+Preferred: set `PYTHONPATH=.:lib:utils` (MicroPython: `MICROPYPATH` instead), `cd src`, and run the interpreter directly on a file — no path bootstrap needed. See [Desktop CPython quick start](../guides/desktop-cpython.md) for dependencies and first run.
 
 ## Run on a microcontroller
 
 See [ESP32 board quick start](../guides/esp32-board.md) for MIP install and `mpremote` workflow.
 
-## path.py
+## utils/path.py
 
-`path.py` prepends `lib/`, `examples/`, and `add_ons/` to `sys.path` so imports like `import displaysys` and `import hello` work without installing into `lib/` on the device.
+`utils/path.py` prepends `lib/`, `utils/`, and cwd to `sys.path` so imports like `import displaysys` work without installing into `/lib` on the device. It never adds `examples/` — example scripts are always reached as `from examples import <name>` / `import examples.<name>`, not by putting `examples/` on `sys.path`.
 
-For production firmware you may freeze modules or install into `/lib` and omit `path.py`.
+On desktop, prefer setting `PYTHONPATH`/`MICROPYPATH` (see above) so you never need to import it. `utils/path.py` is for targets without that option: a bare device REPL, or a `boot.py`/`main.py` entry point, when `utils/` is present on the device. Omit `utils/` and `import utils.path` entirely if everything is installed flat into `/lib` — that's already on `sys.path`.
 
 ## Regenerating package manifests
 

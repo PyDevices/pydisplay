@@ -1,5 +1,5 @@
 """
-fetch_ph_gui.py - Install one Peter Hinch GUI into add_ons/gui/.
+fetch_ph_gui.py - Install one Peter Hinch GUI into utils/gui/.
 
 Supported ``which`` values (full upstream repo names):
   micropython-nano-gui, micropython-micro-gui, micropython-touch
@@ -30,7 +30,7 @@ _PACKAGES = {
 _IN_FETCH = False
 
 
-def _add_ons_dir():
+def _utils_dir():
     # CPython (esp. Windows PE under WSL UNC) needs native separators so mip
     # can mkdir/open install targets. MP/CP have no ``os.path``.
     import sys
@@ -48,8 +48,8 @@ def _gui_dir():
     if sys.implementation.name == "cpython":
         import os
 
-        return os.path.join(_add_ons_dir(), "gui")
-    return _add_ons_dir() + "/gui"
+        return os.path.join(_utils_dir(), "gui")
+    return _utils_dir() + "/gui"
 
 
 def _detect_core():
@@ -288,14 +288,14 @@ def _apply_patches(which):
 
 
 def fetch_ph_gui(which, apply_patches=True):
-    """Ensure ``which`` GUI is in add_ons/gui/ and optionally patched.
+    """Ensure ``which`` GUI is in utils/gui/ and optionally patched.
 
     Returns True when ready. Pass ``apply_patches=False`` when pre-seeding
     (e.g. PyScript loader) before the setup module defines ``SSD`` — callers
     that import ``color_setup`` / ``hardware_setup`` / ``touch_setup`` will
     call again with patches enabled.
 
-    Uses ``mip.install`` (firmware on MicroPython; portable ``add_ons/mip.py``
+    Uses ``mip.install`` (firmware on MicroPython; portable ``utils/mip.py``
     on CPython / Pyodide / CircuitPython).
     """
     global _IN_FETCH
@@ -325,7 +325,7 @@ def fetch_ph_gui(which, apply_patches=True):
             return False
 
         try:
-            mip.install(_PACKAGES[which], target=_add_ons_dir(), mpy=False)
+            mip.install(_PACKAGES[which], target=_utils_dir(), mpy=False)
         except Exception:
             return False
 

@@ -11,7 +11,7 @@ Default-includes every example **entry point** under ``src/examples/``:
 Optional headers (first 10 lines), one line per namespace::
 
   # deps: palettes, lvgl          — logical packages → ?deps= via url_maker
-  # add_ons: console, tft_config  — pydisplay add_ons modules (shown as badges)
+  # utils: console, tft_config  — pydisplay utils modules (shown as badges)
   # modules: calc_engine          — extra example .py stems (site)
   # manifests: alien              — site-served packages/<name>.json bundles
   # gallery: featured|skip|binaries|nochrome
@@ -108,7 +108,7 @@ class Example:
         self.extra_modules: list[str] = []
         self.extra_manifests: list[str] = []
         self.deps: list[str] = []
-        self.add_ons: list[str] = []
+        self.utils: list[str] = []
         self.pyscript_files: list[str] = []
         self.featured = False
         self.nochrome = False
@@ -340,7 +340,7 @@ def parse_example(path: Path) -> Example | None:
     ex.extra_modules = parse_header_list(lines, "# modules:")
     ex.extra_manifests = parse_header_list(lines, "# manifests:")
     ex.deps = parse_header_list(lines, "# deps:")
-    ex.add_ons = parse_header_list(lines, "# add_ons:")
+    ex.utils = parse_header_list(lines, "# utils:")
     ex.pyscript_files = resolve_py_files(path, kind, name, lines, text)
     for entry in ex.pyscript_files:
         if not (EXAMPLES_DIR / entry).is_file():
@@ -404,11 +404,11 @@ def discover() -> list[Example]:
 
 
 def _render_badges(ex: Example) -> str:
-    """Render deps and add_ons as colored badge spans next to the card tag."""
+    """Render deps and utils as colored badge spans next to the card tag."""
     parts: list[str] = []
     for dep in ex.deps:
         parts.append(f'<span class="badge dep">{dep}</span>')
-    for ao in ex.add_ons:
+    for ao in ex.utils:
         parts.append(f'<span class="badge add-on">{ao}</span>')
     if not parts:
         return ""

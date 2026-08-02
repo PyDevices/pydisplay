@@ -22,8 +22,8 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
   dependencies installed.
 - Desktop matrices use repo `.venv` (`cpython-venv`) plus interpreters on
   `PATH` / `bin/` (`micropython`, `circuitpython`, and when present
-  `micropython.exe` / `python.exe`). `./tools/jupyter.sh` and
-  `./tools/pyscript.sh` aid Jupyter and PyScript development.
+  `micropython.exe` / `python.exe`). `./bin/jupyter.sh` and
+  `./bin/pyscript.sh` aid Jupyter and PyScript development.
 - The desktop display backend on CPython on Windows is `PGDisplay` (pygame-ce;
   `import pygame`). Prefer `python.exe` for PG work. Do **not** install pygame-ce
   into `.venv` / system `python3` on this laptop — those stay SDL-primary;

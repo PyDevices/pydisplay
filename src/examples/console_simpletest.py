@@ -1,6 +1,6 @@
 # gallery: skip
 # deps: pygraphics
-# add_ons: console
+# utils: console
 """
 console_simpletest.py
 

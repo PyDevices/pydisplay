@@ -3,7 +3,7 @@
 Cross-platform 2D drawing: framebuf-compatible buffers, shape primitives that return **Area** bounds, fonts, and image loaders. One import works on MicroPython, CircuitPython, and CPython.
 
 !!! note "Sister package"
-    `pygraphics` is a separate package from [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics), not part of the pydisplay repo. Install it from the [micropython-lib MIP index](../installation/mip-micropython-lib.md) (`mip.install("pygraphics", index=…)`) or [TestPyPI](../installation/index.md#pypi-pip-testpypi). pydisplay's `add_ons` (`displaybuf`, `framebuf` shim, `tft_text`, …) import `pygraphics` at runtime.
+    `pygraphics` is a separate package from [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics), not part of the pydisplay repo. Install it from the [micropython-lib MIP index](../installation/mip-micropython-lib.md) (`mip.install("pygraphics", index=…)`) or [TestPyPI](../installation/index.md#pypi-pip-testpypi). pydisplay's `utils` (`displaybuf`, `framebuf` shim, `tft_text`, …) import `pygraphics` at runtime.
 
 ## Quick start
 
@@ -205,7 +205,7 @@ display_drv.show()          # present on SDL; on raw SPI may follow panel habits
 - **Highest RAM** (full panel buffer) — trade memory for speed when the UI redraws text often.
 - **Fastest** of the three `font_simpletest` modes: glyph work stays in RAM; the panel receives only
   the dirty region (scanline `blit_rect`s), not per-pixel fills.
-- Requires `add_ons/displaybuf.py` on the import path (`import lib.path` from `src/`).
+- Requires `utils/displaybuf.py` on the import path — set `PYTHONPATH`/`MICROPYPATH` to `.:lib:utils` (preferred), or `import utils.path` where env vars aren't available.
 - Partial `area=` updates apply to **RGB565** `DisplayBuffer`; GS8/GS4 paths currently refresh
   wider bands (see `displaybuf` notes in source).
 
@@ -266,7 +266,7 @@ For streaming/large BMP assets, use `pygraphics.BMP565` (sliceable, optional str
 
 | Need | Use |
 |------|-----|
-| Scrollable full-screen buffer | `add_ons/displaybuf.DisplayBuffer` |
+| Scrollable full-screen buffer | `utils/displaybuf.DisplayBuffer` |
 | TFT proportional fonts | `tft_text` / `tft_write` add-ons |
 | Large BMP sprites | `pygraphics.BMP565` |
 

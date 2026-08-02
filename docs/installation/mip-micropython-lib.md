@@ -16,7 +16,7 @@ mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip
 ```
 
 On **PyScript MicroPython** (`micropython.html`, `mp.html`), `?deps=` installs
-use the **bytecode** channel via ``add_ons/ps_loader.py`` (firmware ``mip`` on
+use the **bytecode** channel via ``utils/ps_loader.py`` (firmware ``mip`` on
 MicroPython; portable ``mip.py`` on Pyodide for manifests/modules).
 
 With `mpremote`:
@@ -42,11 +42,11 @@ Package names **never contain `/`**. Paths with `/` are GitHub repo installs —
 
 These must come from GitHub:
 
-- `add_ons`, `examples`
+- `utils`, `examples`
 - `spibus`, `i80bus` (viper not supported in micropython-lib packaging)
 - Board config packages (use GitHub `board_configs/.../package.json`)
 
-The [installer.py](installer.md) script installs micropython-lib packages plus GitHub add_ons, examples, and `board_config.py` in one step.
+The [installer.py](installer.md) script installs micropython-lib packages plus GitHub utils, examples, and `board_config.py` in one step.
 
 ## Verify install
 

@@ -7,10 +7,10 @@
 | Component | Location | Notes |
 |-----------|----------|-------|
 | `board_config.py` | `board_configs/` or `src/lib/` | display + `eventsys.Runtime` |
-| `touch_setup.py` | `src/add_ons/` | Fetches touch GUI; mouse/touch `Poller` → `Display(ssd, tpad)` |
-| `fetch_ph_gui.py` | `src/add_ons/` | mip install into `add_ons/gui/` + FrameBuffer patches |
-| `displaybuf.py` | `src/add_ons/` | `ssd` framebuffer |
-| `uctypes.py` | `src/add_ons/` | CircuitPython shim for `writer.py` |
+| `touch_setup.py` | `src/utils/` | Fetches touch GUI; mouse/touch `Poller` → `Display(ssd, tpad)` |
+| `fetch_ph_gui.py` | `src/utils/` | mip install into `utils/gui/` + FrameBuffer patches |
+| `displaybuf.py` | `src/utils/` | `ssd` framebuffer |
+| `uctypes.py` | `src/utils/` | CircuitPython shim for `writer.py` |
 
 Upstream renamed `hardware_setup.py` → `touch_setup.py` (Dec 2024). pydisplay follows that name. Do **not** install upstream `drivers/` or `touch/` packages for the pydisplay bridge — input comes from `eventsys`.
 
@@ -25,7 +25,7 @@ from gui.core.tgui import Screen, ssd
 
 ```python
 import mip
-mip.install("github:PyDevices/pydisplay/packages/micropython-touch.json", target="./add_ons")
+mip.install("github:PyDevices/pydisplay/packages/micropython-touch.json", target="./utils")
 ```
 
 Or rely on `import touch_setup`.

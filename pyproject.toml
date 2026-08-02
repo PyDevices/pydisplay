@@ -2,7 +2,7 @@
 # Exclude some code from linting and formatting
 exclude = [
   "assets/icons/**",
-  "src/add_ons/png.py",
+  "src/utils/png.py",
   "src/examples/**",
   "tools/typings/**",
 ]
@@ -103,7 +103,7 @@ max-statements = 166
 [tool.ruff.lint.per-file-ignores]
 "web/wokwi/main.py" = ["E402", "I001"]
 "micropython/aiorepl/aiorepl.py" = ["PGH001"]
-"src/add_ons/viper_tools.py" = ["F821"]  # `uint` is a MicroPython @viper native type
+"src/utils/viper_tools.py" = ["F821"]  # `uint` is a MicroPython @viper native type
 
 # manifest.py files are evaluated with some global names pre-defined
 "**/manifest.py" = ["F821"]

@@ -1,6 +1,6 @@
 # gallery: skip
 # deps: pygraphics
-# add_ons: framebuf
+# utils: framebuf
 """
 TEMP troubleshooting tool — delete after the font issue is resolved.
 
@@ -14,7 +14,7 @@ Run from ``src/``::
 2×2 layout (320×480 default)::
 
     ┌─────────────────┬─────────────────┐
-    │ C framebuf      │ add_ons/framebuf│  top
+    │ C framebuf      │ utils/framebuf  │  top
     ├─────────────────┼─────────────────┤
     │ pygraphics cmod │ pure-Python     │  bottom
     └─────────────────┴─────────────────┘
@@ -29,8 +29,6 @@ import sys
 _src = os.getcwd()
 if _src not in sys.path:
     sys.path.insert(0, _src)
-
-import lib.path  # noqa: F401
 
 from board_config import display_drv, runtime
 import framebuf as native_fb
@@ -201,7 +199,7 @@ def _draw_graphics_panel(gfx, label):
 
 # --- framebuf: Python drop-in via exec ---
 _py_ns = {"__name__": "framebuf_py"}
-with open("add_ons/framebuf.py") as _f:
+with open("utils/framebuf.py") as _f:
     exec(_f.read(), _py_ns)
 PyFB = _py_ns["FrameBuffer"]
 
@@ -237,7 +235,7 @@ display_drv.show()
 
 print("text compare (2x2)  [TEMP — delete after font fix]")
 print("  top-left     = C framebuf")
-print("  top-right    = add_ons/framebuf.py")
+print("  top-right    = utils/framebuf.py")
 print("  bottom-left  = pygraphics cmod (text8/14/16, text, FB.text)")
 print("  bottom-right = staged pure-Python pygraphics (cmods sibling)")
 print("Close the window or press Ctrl+C here.")

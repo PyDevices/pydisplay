@@ -3,7 +3,7 @@
 #
 # kind: oneshot | loop | async | lvgl | pdwidgets | harness | legacy
 # quit: native_exit | poll | inject | pending | interactive
-# bootstrap: full (default) | headless — headless skips lib.path / display init
+# bootstrap: full (default) | headless — headless skips utils.path / display init
 # Timer mode for kit runs: host PYDISPLAY_TIMER_ASYNC is forwarded as wrapper
 # --timer-async (board_config / displaysys.env_set). Examples do not read env.
 
@@ -33,7 +33,7 @@ import = "calc_widgets"
 script = "examples/calc_widgets.py"
 kind = "pdwidgets"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 timeout_s = 45
 
 [examples.calc_lvgl]
@@ -66,7 +66,7 @@ import = "roku_remote.roku_widgets"
 script = "examples/roku_remote/roku_widgets.py"
 kind = "pdwidgets"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 timeout_s = 45
 
 [examples.roku_lvgl]
@@ -120,14 +120,14 @@ import = "color_test"
 script = "examples/color_test.py"
 kind = "loop"
 quit = "poll"
-deps = ["add_ons", "tft_config"]
+deps = ["utils", "tft_config"]
 
 [examples.chango]
 import = "chango.chango"
 script = "examples/chango/chango.py"
 kind = "loop"
 quit = "inject"
-deps = ["add_ons", "tft_config"]
+deps = ["utils", "tft_config"]
 
 # --- LVGL timer smoke test (matrix) ---
 # Also covered by tools/lv_timer_test_kit.py (``lv_test_timer.py kit``).
@@ -254,21 +254,21 @@ import = "console_advanced_demo"
 script = "examples/console_advanced_demo.py"
 kind = "loop"
 quit = "poll"
-deps = ["add_ons"]
+deps = ["utils"]
 
 [examples.console_simpletest]
 import = "console_simpletest"
 script = "examples/console_simpletest.py"
 kind = "oneshot"
 quit = "native_exit"
-deps = ["add_ons"]
+deps = ["utils"]
 
 [examples.displaybuf_simpletest]
 import = "displaybuf_simpletest"
 script = "examples/displaybuf_simpletest.py"
 kind = "oneshot"
 quit = "native_exit"
-deps = ["add_ons"]
+deps = ["utils"]
 
 [examples.eventsys_encoder_test]
 import = "eventsys_encoder_test"
@@ -303,7 +303,7 @@ import = "font_simpletest"
 script = "examples/font_simpletest.py"
 kind = "loop"
 quit = "poll"
-deps = ["add_ons"]
+deps = ["utils"]
 
 [examples.fonts]
 import = "fonts"
@@ -317,14 +317,14 @@ import = "hello"
 script = "examples/hello.py"
 kind = "loop"
 quit = "poll"
-deps = ["add_ons", "tft_config"]
+deps = ["utils", "tft_config"]
 
 [examples.joystick_list_select]
 import = "joystick_list_select"
 script = "examples/joystick_list_select.py"
 kind = "loop"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 
 [examples.logo]
 import = "logo"
@@ -339,7 +339,7 @@ script = "examples/nano_gui_simpletest.py"
 kind = "loop"
 quit = "poll"
 deps = ["micropython-nano-gui"]
-# Cold mip into add_ons/gui can take well over the default 30s.
+# Cold mip into utils/gui can take well over the default 30s.
 timeout_s = 120
 
 [examples.micro_gui_simpletest]
@@ -400,7 +400,7 @@ script = "examples/scroll_touch_test.py"
 kind = "loop"
 quit = "poll"
 timeout_s = 70
-deps = ["add_ons"]
+deps = ["utils"]
 
 [examples.testris]
 import = "testris"
@@ -423,7 +423,7 @@ import = "widgets_demo"
 script = "examples/widgets_demo.py"
 kind = "pdwidgets"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 timeout_s = 45
 
 [examples.widgets_percent]
@@ -431,7 +431,7 @@ import = "widgets_percent"
 script = "examples/widgets_percent.py"
 kind = "pdwidgets"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 timeout_s = 45
 
 [examples.widgets_device_panel]
@@ -439,7 +439,7 @@ import = "widgets_device_panel"
 script = "examples/widgets_device_panel.py"
 kind = "pdwidgets"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 timeout_s = 45
 
 [examples.widgets_smartwatch]
@@ -447,7 +447,7 @@ import = "widgets_smartwatch"
 script = "examples/widgets_smartwatch.py"
 kind = "pdwidgets"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 timeout_s = 45
 
 [examples.widgets_settings]
@@ -455,7 +455,7 @@ import = "widgets_settings"
 script = "examples/widgets_settings.py"
 kind = "pdwidgets"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 timeout_s = 45
 
 [examples.widgets_nav_tabs]
@@ -463,7 +463,7 @@ import = "widgets_nav_tabs"
 script = "examples/widgets_nav_tabs.py"
 kind = "pdwidgets"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 timeout_s = 45
 
 [examples.widgets_form_kitchen]
@@ -471,7 +471,7 @@ import = "widgets_form_kitchen"
 script = "examples/widgets_form_kitchen.py"
 kind = "pdwidgets"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 timeout_s = 45
 
 [examples.widgets_media_busy]
@@ -479,7 +479,7 @@ import = "widgets_media_busy"
 script = "examples/widgets_media_busy.py"
 kind = "pdwidgets"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 timeout_s = 45
 
 [examples.widgets_gauge_dash]
@@ -487,7 +487,7 @@ import = "widgets_gauge_dash"
 script = "examples/widgets_gauge_dash.py"
 kind = "pdwidgets"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 timeout_s = 45
 
 [examples.widgets_actions]
@@ -495,7 +495,7 @@ import = "widgets_actions"
 script = "examples/widgets_actions.py"
 kind = "pdwidgets"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 timeout_s = 45
 
 [examples.widgets_sheets]
@@ -503,7 +503,7 @@ import = "widgets_sheets"
 script = "examples/widgets_sheets.py"
 kind = "pdwidgets"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 timeout_s = 45
 
 [examples.widgets_pickers]
@@ -511,7 +511,7 @@ import = "widgets_pickers"
 script = "examples/widgets_pickers.py"
 kind = "pdwidgets"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 timeout_s = 45
 
 [examples.alien]
@@ -519,32 +519,32 @@ import = "alien.alien"
 script = "examples/alien/alien.py"
 kind = "loop"
 quit = "inject"
-deps = ["add_ons", "tft_config"]
+deps = ["utils", "tft_config"]
 
 [examples.proverbs]
 import = "proverbs.proverbs"
 script = "examples/proverbs/proverbs.py"
 kind = "loop"
 quit = "inject"
-deps = ["add_ons", "tft_config"]
+deps = ["utils", "tft_config"]
 
 [examples.tiny_toasters]
 import = "tiny_toasters.tiny_toasters"
 script = "examples/tiny_toasters/tiny_toasters.py"
 kind = "loop"
 quit = "inject"
-deps = ["add_ons", "tft_config"]
+deps = ["utils", "tft_config"]
 
 [examples.noto_fonts]
 import = "noto_fonts.noto_fonts"
 script = "examples/noto_fonts/noto_fonts.py"
 kind = "loop"
 quit = "inject"
-deps = ["add_ons"]
+deps = ["utils"]
 
 [examples.keypins_simpletest]
 import = "keypins_simpletest"
 script = "examples/keypins_simpletest.py"
 kind = "loop"
 quit = "poll"
-deps = ["add_ons"]
+deps = ["utils"]

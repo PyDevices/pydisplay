@@ -1,5 +1,5 @@
 # deps: palettes, pygraphics
-# add_ons: displaybuf
+# utils: displaybuf
 # gallery: binaries
 """
 font_simpletest.py -- Simple test of the Font class.
@@ -9,7 +9,7 @@ Cycles three rendering paths in succession (no env vars):
 
   string_blit  — off-screen string FrameBuffer + one blit_rect (opaque bg)
   per_pixel    — Font.text directly on display_drv (transparent, slowest bus)
-  displaybuf   — full-screen DisplayBuffer + dirty show (add_ons)
+  displaybuf   — full-screen DisplayBuffer + dirty show (utils)
 """
 
 from board_config import display_drv, runtime

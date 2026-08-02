@@ -1,4 +1,15 @@
-# Prebuilt runtime binaries
+# `bin/` — runtimes and launchers
+
+## Launchers
+
+| Script | Role |
+|--------|------|
+| [`pyscript.sh`](pyscript.sh) | Local PyScript gallery / demo server (`./bin/pyscript.sh …`) |
+| [`jupyter.sh`](jupyter.sh) | JupyterLab / Cursor notebooks (`./bin/jupyter.sh …`) |
+
+Supporting Python still lives under `tools/` (e.g. `tools/serve.py`, `tools/pyscript_autotest.py`).
+
+## Prebuilt runtime binaries
 
 Committed copies of the desktop MicroPython/CircuitPython (and Windows
 MicroPython, for completeness) unix executables built with pydisplay's

@@ -31,14 +31,14 @@ dist/
 .cursor/hinch_pkg_discovery/
 .cursor/skills/
 
-src/add_ons/gui
+src/utils/gui
 web/pyscript/wheels
 
 *.code-workspace
 Untitled-*
 
 # Local examples (symlinks to sibling repos — see scripts/personal_examples.py)
-src/add_ons/spotapi
+src/utils/spotapi
 src/examples/spotapi
 src/examples/spotify_remote
 src/examples/frogger

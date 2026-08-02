@@ -30,7 +30,7 @@ Repo and site maintenance scripts. Each runnable script uses a **domain prefix**
 
 - `python -m unittest discover -s tests`
 
-**Documentation** — runs when `docs/`, `mkdocs.yml`, `scripts/mkdocs_gen_ref_pages.py`, `src/lib/`, or `src/add_ons/` change:
+**Documentation** — runs when `docs/`, `mkdocs.yml`, `scripts/mkdocs_gen_ref_pages.py`, `src/lib/`, or `src/utils/` change:
 
 - `mkdocs build` (ReadTheDocs hosts [pydisplay.readthedocs.io](https://pydisplay.readthedocs.io) separately)
 
@@ -95,7 +95,7 @@ Depends on changed paths — unrelated edits skip workflows:
 ## Quick start
 
 ```bash
-# After adding/removing files under src/lib, src/add_ons, or src/examples:
+# After adding/removing files under src/lib, src/utils, or src/examples:
 ./scripts/install_refresh_manifests.sh --audit   # preview drift
 ./scripts/install_refresh_manifests.sh             # apply
 
@@ -107,7 +107,7 @@ python scripts/gallery_generator.py --check    # CI freshness
 # after 2 seconds. Existing web/pyscript/thumbnails/*.png files are preserved;
 # --check never launches examples.
 
-# After editing src/add_ons/framebuf.py:
+# After editing src/utils/framebuf.py:
 
 # After public-API changes in displaysys / eventsys / multimer:
 ./scripts/gen_package_pyi.sh                       # regenerate tools/typings/<pkg>/ stubs

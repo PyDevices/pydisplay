@@ -17,7 +17,8 @@ sudo apt update
 sudo apt install libsdl2-dev python3-venv
 git clone https://github.com/PyDevices/pydisplay.git
 cd pydisplay/src
-python3 -i path.py
+export PYTHONPATH=.:lib:utils
+python3 examples/pydisplay_demo.py
 ```
 
 **Fedora:**
@@ -34,7 +35,8 @@ If SDL2 fails or is unavailable, use PyGame instead — see [PGDisplay fallback]
 brew install sdl2
 git clone https://github.com/PyDevices/pydisplay.git
 cd pydisplay/src
-python3 -i path.py
+export PYTHONPATH=.:lib:utils
+python3 examples/pydisplay_demo.py
 ```
 
 ## Windows
@@ -60,7 +62,8 @@ Use the PyGame board config. From a clone, copy or symlink before running:
 ```bash
 cp ../board_configs/pgdisplay/board_config.py lib/board_config.py
 cd pydisplay/src
-python3 -i path.py
+export PYTHONPATH=.:lib:utils
+python3 examples/pydisplay_demo.py
 ```
 
 Or install via MIP on MicroPython Unix:
@@ -78,10 +81,12 @@ The default `src/lib/board_config.py` selects `PGDisplay` on CPython when PyGame
 
 ## MicroPython on Unix
 
-Same layout as CPython, but use the MicroPython interpreter:
+Same layout as CPython, but use the MicroPython interpreter and `MICROPYPATH` instead of `PYTHONPATH`:
 
 ```bash
-micropython -i path.py
+cd pydisplay/src
+export MICROPYPATH=.:lib:utils
+micropython examples/pydisplay_demo.py
 ```
 
 Install SDL2/PyGame for your OS first; MicroPython Unix builds vary in bundled modules.
@@ -101,7 +106,8 @@ For embedded Linux **without** X11/Wayland (Pi console, kiosk, headless HDMI), u
 cp ../board_configs/sdldisplay/linux_kms/board_config.py lib/board_config.py
 # or: mip.install("github:PyDevices/micropython-hardware/board_configs/sdldisplay/linux_kms")
 cd pydisplay/src
-python3 -i path.py
+export PYTHONPATH=.:lib:utils
+python3 examples/pydisplay_demo.py
 ```
 
 **Prerequisites**

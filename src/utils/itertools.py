@@ -1,4 +1,4 @@
-"""Minimal itertools subset for MicroPython (used by add_ons/png.py)."""
+"""Minimal itertools subset for MicroPython (used by utils/png.py)."""
 
 
 class chain:

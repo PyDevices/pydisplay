@@ -1,5 +1,5 @@
 # deps: palettes, pygraphics
-# add_ons: pixel_sim
+# utils: pixel_sim
 """
 pixel_sim_demos.py — NeoPixel simulator effects in one file.
 
@@ -7,9 +7,12 @@ Pick an effect with ``DEMO`` (``scroll``, ``plasma``, ``fire``, ``matrix``,
 ``starfield``, or ``reel`` for all of them in sequence).  Each effect calls
 ``runtime.poll()`` every frame so the desktop window stays closable.
 
-**Simulator (default):** ``import lib.path`` from ``src/`` and run::
+**Simulator (default):** set ``PYTHONPATH``/``MICROPYPATH`` to ``.:lib:utils`` and run
+directly from ``src/``::
 
-    cd src && python -c "import lib.path, runpy; runpy.run_path('add_ons/pixel_sim_demos.py', run_name='__main__')"
+    cd src && PYTHONPATH=.:lib:utils python examples/pixel_sim_demos.py
+
+Or from the REPL: ``from examples import pixel_sim_demos``.
 
 **Real PixelDisplay hardware:** use ``from board_config import display_drv, runtime``
 instead of ``from pixel_sim import …`` (your hardware ``board_config`` must wire

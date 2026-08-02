@@ -13,7 +13,7 @@ Requires LVGL built with ``LV_USE_FLOAT`` + ``LV_USE_GESTURE_RECOGNITION``
 
 Interactive (same as ``lv_test_timer``)::
 
-    python -i lib/path.py
+    python -i utils/path.py
     import lv_gestures
 """
 
@@ -28,8 +28,6 @@ if _src not in sys.path:
     sys.path.insert(0, _src)
 
 from board_config import display_drv, runtime  # noqa: E402
-
-import lib.path  # noqa: E402, F401
 
 if runtime is not None and "display_driver" not in sys.modules:
     runtime.stop_timer()

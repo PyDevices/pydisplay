@@ -28,11 +28,11 @@ install("displaysys")                                  # micropython-lib
 install("eventsys")
 install("pygraphics")
 install("multimer")
-install("/packages/add_ons.json", target="./add_ons")  # GitHub
+install("/packages/utils.json", target="./utils")  # GitHub
 install("/packages/examples.json", target="./examples")
 install("/board_configs/busdisplay/i80/wt32sc01-plus")  # GitHub board package
 install("/src/lib/board_config.py", target="./")       # default desktop config
-install("/src/lib/path.py", target="./")
+install("/src/utils/path.py", target="./")
 ```
 
 The default block at the bottom of `installer.py` runs a full install when you `import installer` — edit that section to match your hardware.
@@ -52,7 +52,7 @@ https://PyDevices.github.io/micropython-lib/mip/PyDevices
 
 ## Wokwi demo
 
-See the installer in action: uncomment the `add_ons` / `examples` lines in [`wokwi/main.py`](https://github.com/PyDevices/pydisplay/blob/main/web/wokwi/main.py) ([Wokwi guide](../guides/wokwi.md)).
+See the installer in action: uncomment the `utils` / `examples` lines in [`wokwi/main.py`](https://github.com/PyDevices/pydisplay/blob/main/web/wokwi/main.py) ([Wokwi guide](../guides/wokwi.md)).
 
 ## Custom installs
 
@@ -64,4 +64,4 @@ install("eventsys")
 install("/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3")
 ```
 
-Then `import path` and your application module.
+Then `import utils.path` (if `utils/` was installed) and your application module.

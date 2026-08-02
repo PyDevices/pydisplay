@@ -636,13 +636,15 @@ def run_pyscript_case(
 
 
 def _write_jupyter_notebook(example_id: str, example_meta: dict, duration_s: float) -> Path:
-    import_line = f"import {example_meta.get('import', example_id)}"
-    script = example_meta.get("script", f"examples/{example_id}.py")
-    py = SRC / script
-    if py.is_file() and "." in example_meta.get("import", ""):
-        pkg = example_meta["import"].rsplit(".", 1)[0]
-        if (SRC / "examples" / pkg / f"{pkg.split('.')[-1]}.py").exists():
-            import_line = f"import {example_meta['import']}"
+    # Prefer dotted examples imports (cwd=src, ``.`` on PYTHONPATH). Env is SoT;
+    # do not emit a utils.path bootstrap cell.
+    raw_import = example_meta.get("import", example_id)
+    if raw_import.startswith("examples."):
+        import_line = f"import {raw_import}"
+    elif "." in raw_import:
+        import_line = f"import examples.{raw_import}"
+    else:
+        import_line = f"from examples import {raw_import}"
 
     tools_rel = os.path.relpath(TOOLS, SRC)
     test_mode_source = "\n".join(
@@ -658,13 +660,6 @@ def _write_jupyter_notebook(example_id: str, example_meta: dict, duration_s: flo
     )
 
     cells = [
-        {
-            "cell_type": "code",
-            "metadata": {},
-            "execution_count": None,
-            "outputs": [],
-            "source": ["import lib.path\n"],
-        },
         {
             "cell_type": "code",
             "metadata": {},

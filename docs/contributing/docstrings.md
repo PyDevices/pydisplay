@@ -1,6 +1,6 @@
 # Docstring conventions
 
-Public API docstrings in `src/lib/` and `src/add_ons/` are rendered on [ReadTheDocs](https://pydisplay.readthedocs.io) via mkdocstrings. Follow these rules so generated reference pages stay accurate.
+Public API docstrings in `src/lib/` and `src/utils/` are rendered on [ReadTheDocs](https://pydisplay.readthedocs.io) via mkdocstrings. Follow these rules so generated reference pages stay accurate.
 
 ## Style
 
@@ -59,7 +59,7 @@ Griffe warnings mean a docstring parameter does not appear in the signature — 
 | Tier | Modules |
 |------|---------|
 | P0 | `displaysys`, `eventsys`, `multimer` |
-| P1 | `displaybuf`, `console`, other `add_ons` |
+| P1 | `displaybuf`, `console`, other `utils` |
 | P2 | Sibling packages document their own APIs: [pygraphics](https://pygraphics.readthedocs.io), [pdwidgets](https://pdwidgets.readthedocs.io), [palettes](https://palettes.readthedocs.io) |
 
 See [Contributing](../contributing.md) for the PR workflow.

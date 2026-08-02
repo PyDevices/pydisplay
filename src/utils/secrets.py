@@ -25,7 +25,7 @@ def _is_mcu_host(impl=None, platform=None):
 
 if _is_mcu_host():
     raise RuntimeError(
-        "This add_ons/secrets.py is for desktop/browser hosts only.\n"
+        "This utils/secrets.py is for desktop/browser hosts only.\n"
         "On a microcontroller, replace secrets.py with:\n"
         "\n"
         'WIFI_SSID = "your-ssid"\n'

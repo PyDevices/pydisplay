@@ -1,4 +1,4 @@
-"""Unit tests for add_ons/mip.py (portable host mip)."""
+"""Unit tests for utils/mip.py (portable host mip)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-_ADD_ONS = Path(__file__).resolve().parents[1] / "src" / "add_ons"
+_ADD_ONS = Path(__file__).resolve().parents[1] / "src" / "utils"
 if str(_ADD_ONS) not in sys.path:
     sys.path.insert(0, str(_ADD_ONS))
 
@@ -117,7 +117,7 @@ class MipPortableTests(unittest.TestCase):
             raise AssertionError("unexpected URL " + url)
 
         with tempfile.TemporaryDirectory() as tmp:
-            dest = Path(tmp) / "add_ons"
+            dest = Path(tmp) / "utils"
             with mock.patch.object(mip, "_http_get", side_effect=fake_get):
                 mip.install(
                     "github:PyDevices/pydisplay/packages/micropython-nano-gui.json",

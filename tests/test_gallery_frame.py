@@ -121,7 +121,7 @@ def test_runtime_loaders_show_two_cards_and_autorun():
 
 
 def test_runtime_loaders_set_browser_defaults_without_importing_board():
-    loader = (ROOT / "src" / "add_ons" / "ps_loader.py").read_text(encoding="utf-8")
+    loader = (ROOT / "src" / "utils" / "ps_loader.py").read_text(encoding="utf-8")
     assert "BOARD_WIDTH = 320" in loader
     assert "BOARD_HEIGHT = 480" in loader
     assert 'env_set("PYDISPLAY_WIDTH", BOARD_WIDTH)' in loader
@@ -157,7 +157,7 @@ def test_pixel_sim_demo_rotates_portrait_displays_before_layout():
 
 
 def test_pyscript_loader_silences_installer_file_chatter():
-    loader = (ROOT / "src" / "add_ons" / "ps_loader.py").read_text(encoding="utf-8")
+    loader = (ROOT / "src" / "utils" / "ps_loader.py").read_text(encoding="utf-8")
     assert "def _quiet_install(" in loader
     assert 'had_printer = hasattr(mip_mod, "print")' in loader
     assert "mip_mod.print = lambda *args, **print_kwargs: None" in loader

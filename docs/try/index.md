@@ -39,7 +39,7 @@ Full guide (asyncio porting, compatible examples, board config): [PyScript local
 
 Copy [`wokwi/`](../../web/wokwi/) `main.py` and `diagram.json` into a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3).
 
-Full example catalog: uncomment the two `add_ons` / `examples` lines in `main.py` (see [Wokwi guide](../guides/wokwi.md)).
+Full example catalog: uncomment the two `utils` / `examples` lines in `main.py` (see [Wokwi guide](../guides/wokwi.md)).
 
 ## Screenshot gallery
 

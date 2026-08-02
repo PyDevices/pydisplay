@@ -1,6 +1,6 @@
 # gallery: skip
 # deps: palettes
-# add_ons: tft_text, tft_config
+# utils: tft_text, tft_config
 """
 tiny_hello.py
 =============

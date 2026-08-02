@@ -20,7 +20,7 @@ Grid size defaults to 64x16; override with ``PIXEL_SIM_WIDTH`` /
 
 import os
 
-# ``lib/`` is on sys.path (via lib/path.py), so import the host board_config bare
+# ``lib/`` is on sys.path (via utils/path.py), so import the host board_config bare
 # — ``from lib import board_config`` fails on MicroPython (no namespace packages).
 import board_config as _host  # noqa: E402
 

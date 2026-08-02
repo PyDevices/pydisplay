@@ -54,7 +54,7 @@ plugins:
 - mkdocstrings:
     handlers:
       python:
-        paths: [src/lib, src/add_ons]
+        paths: [src/lib, src/utils]
         options:
           show_source: false
           show_bases: false
@@ -125,7 +125,7 @@ nav:
     - Nano-GUI: guis/nano-gui.md
     - TFT / st7789py ports: guis/tft-gui.md
     - PyWidgets: guis/pywidgets.md
-  - Add-ons: add-ons.md
+  - Utils: utils.md
   - Project:
     - Contributing: contributing.md
     - Docstring conventions: contributing/docstrings.md
@@ -140,7 +140,7 @@ nav:
     - graphics: reference/overviews/graphics.md
     - multimer: reference/overviews/multimer.md
   - Core modules: reference/
-  - Add-ons API: reference/add_ons/
+  - Utils API: reference/utils/
 
 markdown_extensions:
   - admonition

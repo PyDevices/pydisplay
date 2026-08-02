@@ -109,11 +109,8 @@ Open the **[live PyScript demo](https://PyDevices.github.io/pydisplay/pyscript/)
 ```bash
 git clone https://github.com/PyDevices/pydisplay.git
 cd pydisplay/src
-python3 -i path.py
-```
-
-```python
->>> import pydisplay_demo
+export PYTHONPATH=.:lib:utils
+python3 examples/pydisplay_demo.py
 ```
 
 A display window opens (PyGame or SDL2, whichever is installed). See the [Desktop CPython guide](https://pydisplay.readthedocs.io/en/latest/guides/desktop-cpython/).

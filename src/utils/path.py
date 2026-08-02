@@ -1,10 +1,10 @@
-"""Put '', .frozen (MP/CP), lib, add_ons, examples first on sys.path."""
+"""Put '', .frozen (MP/CP), lib, utils first on sys.path."""
 
 import os
 import sys
 
 __all__ = ["add", "cwd", "update"]
-_extra_dirs = ("add_ons", "examples")
+_extra_dirs = ("utils",)
 
 
 def cwd():
@@ -36,9 +36,9 @@ def add(directory, front=False):
 
 def update():
     # Prepend in reverse so the final order is:
-    # '', .frozen, lib, add_ons, examples, <stdlib...>
-    # add_ons must precede the stdlib so ``import secrets`` resolves to
-    # add_ons/secrets.py on CPython (stdlib also ships a ``secrets`` module).
+    # '', .frozen, lib, utils, <stdlib...>
+    # utils must precede the stdlib so ``import secrets`` resolves to
+    # utils/secrets.py on CPython (stdlib also ships a ``secrets`` module).
     for directory in reversed(_extra_dirs):
         add(directory, front=True)
     add("lib", front=True)

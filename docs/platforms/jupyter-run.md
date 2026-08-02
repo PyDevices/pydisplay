@@ -16,8 +16,8 @@ python3 -m venv .venv
 Or use the helper script from the repo root (starts JupyterLab and opens a demo):
 
 ```bash
-./tools/jupyter.sh calculator
-./tools/jupyter.sh calculator --cursor
+./bin/jupyter.sh calculator
+./bin/jupyter.sh calculator --cursor
 ```
 
 Generated demo notebooks are written to `src/run-{demo}.ipynb` (gitignored). The hub notebook is `src/jupyter_notebook.ipynb`.
@@ -37,7 +37,7 @@ Select the **`.venv`** kernel (**Kernel → Change Kernel**), then run cells top
 
 No LVGL build is required for the pydisplay walkthrough in the notebook.
 
-`src/lib/board_config.py` detects Jupyter (`get_ipython()`) and selects **`JNDisplay`** with `timer_async=True`. The notebook must run with working directory under **`src/`** so `import lib.path` finds `lib/`, `examples/`, and `add_ons/` — opening `src/jupyter_notebook.ipynb` from the repo in JupyterLab does that automatically.
+`src/lib/board_config.py` detects Jupyter (`get_ipython()`) and selects **`JNDisplay`** with `timer_async=True`. The notebook must run with working directory under **`src/`**. Prefer `PYTHONPATH`/`MICROPYPATH` set to `.:lib:utils` for the kernel process — `./bin/jupyter.sh` exports it automatically when unset; opening `src/jupyter_notebook.ipynb` directly in JupyterLab falls back to the notebook's own `import utils.path` cell. Either way, resolve example modules with `from examples import <name>` (or `import examples.<a>.<b>` for nested files) — never a bare `import <name>`.
 
 ## Touch input
 

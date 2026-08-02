@@ -1,7 +1,7 @@
 """framebuf API via pygraphics when frozen ``framebuf`` is unavailable.
 
 On MicroPython unix, the C ``framebuf`` module in ``.frozen`` still wins
-because ``path.py`` puts ``.frozen`` ahead of ``add_ons``.
+because ``path.py`` puts ``.frozen`` ahead of ``utils``.
 """
 
 from pygraphics import (

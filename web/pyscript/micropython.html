@@ -242,7 +242,7 @@
             pass
         if "/" not in sys.path:
             sys.path.insert(0, "/")
-        import lib.path  # noqa: F401
+        import utils.path  # noqa: F401
         import ps_loader
 
         def _log_print(*args, **kwargs):

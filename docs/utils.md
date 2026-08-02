@@ -1,23 +1,25 @@
-# Add-ons
+# Utils
 
-Optional extensions in [`src/add_ons/`](https://github.com/PyDevices/pydisplay/tree/main/src/add_ons/). Not required for basic display and event use. API docs: [Add-ons Reference](reference/add_ons/).
+Optional extensions in [`src/utils/`](https://github.com/PyDevices/pydisplay/tree/main/src/utils/). Not required for basic display and event use. API docs: [Utils Reference](reference/utils/).
 
 ## Install
 
 ```python
 import mip
-mip.install("github:PyDevices/pydisplay/packages/add_ons.json", target="./add_ons")
+mip.install("github:PyDevices/pydisplay/packages/utils.json", target="./utils")
 ```
 
 ## Path setup
 
-In a development clone, put `lib/`, `add_ons/`, and `examples/` on `sys.path`:
+Preferred: set `PYTHONPATH` (CPython/CircuitPython) or `MICROPYPATH` (MicroPython) to `.:lib:utils` and run from `src/` — no import needed.
+
+Without env vars (a bare device REPL, or `boot.py`/`main.py`), put `lib/` and `utils/` on `sys.path` explicitly:
 
 ```python
-import lib.path
+import utils.path
 ```
 
-Or copy the add-on modules into `lib/` on your device.
+Or copy the utils modules into `lib/` on your device.
 
 ## Notable modules
 
@@ -31,12 +33,12 @@ Or copy the add-on modules into `lib/` on your device.
 | `tft_text.py`, `tft_write.py` | russhughes font rendering |
 | `png.py` | PNG support (experimental) |
 
-Third-party trees copied locally (not in `add_ons.json`):
+Third-party trees copied locally (not in `utils.json`):
 
 | Path | Purpose |
 |------|---------|
 | `gui/` | Peter Hinch GUIs — install via [`fetch_ph_gui`](guis/nano-gui.md); gitignored; one of nano / micro / touch at a time |
 
-Many examples in `src/examples/` depend on add_ons. They are excluded from the micropython-lib packages — install from GitHub only.
+Many examples in `src/examples/` depend on utils. They are excluded from the micropython-lib packages — install from GitHub only.
 
 Some files are third-party ports included for convenience; see file headers for attribution.

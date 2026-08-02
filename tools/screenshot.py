@@ -127,7 +127,7 @@ def _parse_args(argv=None):
 def _prepare_paths(repo_root):
     src = repo_root / "src"
     tools = repo_root / "tools"
-    for path in (str(tools), str(src), str(src / "lib")):
+    for path in (str(tools), str(src), str(src / "lib"), str(src / "utils")):
         if path not in sys.path:
             sys.path.insert(0, path)
     import sibling_repos
@@ -202,7 +202,6 @@ def main(argv=None):
     example = _resolve_example(args.example, repo_root)
     output = args.output.resolve()
     os.chdir(repo_root / "src")
-    import lib.path  # noqa: F401
 
     deadline = time.monotonic() + args.delay
     _install_show_capture(deadline, output)

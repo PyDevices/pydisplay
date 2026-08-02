@@ -75,7 +75,7 @@ def _mark(step, **data):
 
 _mark("mpy_top")
 
-MANIFEST_MIP_TARGET = "examples"
+MANIFEST_MIP_TARGET = "."
 
 def _log_print(*args, **kwargs):
     el = document.getElementById("log")
@@ -304,8 +304,8 @@ def _install_packages(packages):
         return
     import sys
 
-    if "/add_ons" not in sys.path:
-        sys.path.insert(0, "/add_ons")
+    if "/utils" not in sys.path:
+        sys.path.insert(0, "/utils")
     from fetch_ph_gui import fetch_ph_gui
 
     for which in packages:
@@ -336,9 +336,7 @@ def _run():
         _mark("before_mip_manifest", name=name)
         # #endregion
         mip.install(_manifest_url(name), target=MANIFEST_MIP_TARGET)
-        pkg_path = MANIFEST_MIP_TARGET + "/" + name
-        if pkg_path not in sys.path:
-            sys.path.insert(0, pkg_path)
+        # Package at ./<name>/; cwd/``/`` on sys.path → ``import name``.
         # #region loader trace
         _mark("after_mip_manifest", name=name)
         # #endregion
@@ -346,7 +344,7 @@ def _run():
         in_pkg = False
         for m in manifests:
             try:
-                os.stat(MANIFEST_MIP_TARGET + "/" + m + "/" + name + ".py")
+                os.stat(m + "/" + name + ".py")
                 in_pkg = True
                 break
             except OSError:
@@ -356,14 +354,14 @@ def _run():
         # #region loader trace
         _mark("before_mip_module", name=name)
         # #endregion
-        mip.install(_module_url(name))
+        mip.install(_module_url(name), target=MANIFEST_MIP_TARGET)
         # #region loader trace
         _mark("after_mip_module", name=name)
         # #endregion
     # #region loader trace
     _mark("before_import_lib_path")
     # #endregion
-    import lib.path  # add_ons on path before fetch_ph_gui / packages
+    import utils.path  # utils on path before fetch_ph_gui / packages
     # #region loader trace
     _mark("after_import_lib_path")
     # #endregion

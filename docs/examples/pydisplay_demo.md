@@ -3,7 +3,7 @@
 !!! tip "Need a minimal template?"
     Copy the [**App starter**](app-starter.md) boilerplate to begin your first app without rotation or scrolling.
 
-[`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py) is the recommended feature demo for pydisplay. It is a single file that uses only **`src/lib`** modules — no `add_ons`, no `tft_config`, no `displaybuf`.
+[`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py) is the recommended feature demo for pydisplay. It is a single file that uses only **`src/lib`** modules — no `utils`, no `tft_config`, no `displaybuf`.
 
 It demonstrates:
 
@@ -17,25 +17,29 @@ Desktop-oriented sync demo (not in the PyScript gallery; see the async variant b
 
 ## Run it
 
-From a [full clone](../installation/full-clone.md) with `board_config` on your path:
-
-```python
-import lib.path   # adds lib/, examples/ to sys.path
-import pydisplay_demo
-```
-
-Desktop (SDL board config):
+From a [full clone](../installation/full-clone.md), set `PYTHONPATH`/`MICROPYPATH`, `cd src`, then run the example directly:
 
 ```bash
 cd src
-PYTHONPATH=../board_configs/sdldisplay:lib micropython -i lib/path.py
+export PYTHONPATH=.:lib:utils
+python3 examples/pydisplay_demo.py
 ```
+
+Desktop (SDL board config) — put `board_configs/sdldisplay` ahead of the default on the path:
+
+```bash
+cd src
+export PYTHONPATH=../board_configs/sdldisplay:.:lib:utils
+python3 examples/pydisplay_demo.py
+```
+
+Prefer the REPL? Run `python3 -i` and import from the `examples` package (never a bare `import pydisplay_demo` from `src/`):
 
 ```python
->>> import pydisplay_demo
+>>> from examples import pydisplay_demo
 ```
 
-On MCU, install the matching [board config](https://pydevices.github.io/micropython-hardware/board-configs.html), copy or symlink it as `board_config.py`, and run the script from `main.py` or the REPL the same way.
+On MCU, install the matching [board config](https://pydevices.github.io/micropython-hardware/board-configs.html), copy or symlink it as `board_config.py`, and run the script from `main.py` or the REPL the same way. If `examples.json` was installed with `target="."` (flat, no `examples/` subdirectory on the device), `import pydisplay_demo` is a bare import there.
 
 **Interact:** tap or click **Rotate** and **Color** in the top bar. The tips list in the middle scrolls automatically.
 

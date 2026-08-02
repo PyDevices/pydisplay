@@ -30,11 +30,11 @@ One-shot production build (output in `site/`):
 | [`mkdocs.yml`](https://github.com/PyDevices/pydisplay/blob/main/mkdocs.yml) | Site config, theme, navigation |
 | [`docs/requirements.txt`](https://github.com/PyDevices/pydisplay/blob/main/docs/requirements.txt) | Python packages for MkDocs and plugins |
 | [`.readthedocs.yaml`](https://github.com/PyDevices/pydisplay/blob/main/.readthedocs.yaml) | ReadTheDocs build settings (same deps) |
-| [`scripts/mkdocs_gen_ref_pages.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/mkdocs_gen_ref_pages.py) | Auto-generates API reference stubs from `src/lib/` and `src/add_ons/` |
+| [`scripts/mkdocs_gen_ref_pages.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/mkdocs_gen_ref_pages.py) | Auto-generates API reference stubs from `src/lib/` and `src/utils/` |
 
 Hand-authored pages live under `docs/` and follow a **Try → Quick start → Install → Learn → Reference** structure (see `mkdocs.yml` nav).
 
-API reference pages under `reference/` and `reference/add_ons/` are generated at build time — do not hand-edit them.
+API reference pages under `reference/` and `reference/utils/` are generated at build time — do not hand-edit them.
 
 Shared copy-paste blocks: `docs/_snippets/` (included via pymdownx Snippets).
 
@@ -52,7 +52,7 @@ It is wired up with three pieces:
 | [`docs/overrides/main.html`](https://github.com/PyDevices/pydisplay/blob/main/docs/overrides/main.html) | Material theme override that adds a **Download notebook** button (uses `page.nb_url` from `include_source: true`) |
 
 The notebook keeps living in `src/` so it can still be **run** there against the
-real source (relative imports like `import lib.path`). The committed copy has its
+real source (relative imports like `import utils.path`). The committed copy has its
 outputs stripped (nbstripout), and the docs build sets `execute: false`, so the
 rendered page shows **markdown and code cells only** — no live output or the
 interactive touch widget.

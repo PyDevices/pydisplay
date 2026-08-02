@@ -2,7 +2,7 @@
   "include": ["src"],
   "extraPaths": [
     "src",
-    "src/add_ons",
+    "src/utils",
     "src/examples",
     "src/lib"
   ],

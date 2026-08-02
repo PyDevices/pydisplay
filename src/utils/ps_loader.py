@@ -5,12 +5,14 @@
 
 Consolidates loader install logic for ``micropython.html``, ``pyodide.html``,
 ``mp.html``, and ``py.html``. Gallery pages call ``_ps_loader()`` on
-Run only (``import lib.path`` then ``import ps_loader``). MicroPython WASM uses
-firmware ``mip`` after ``lib.path``; Pyodide uses ``add_ons/mip.py``.
+Run only (``import utils.path`` then ``import ps_loader``). MicroPython WASM uses
+firmware ``mip`` after ``utils.path``; Pyodide uses ``utils/mip.py``.
 """
 
 MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
-MANIFEST_MIP_TARGET = "examples"
+# Install modules and manifests into cwd so ``import name`` / ``import pkg`` work
+# with ``/`` (or ``.``) on ``sys.path`` — same as desktop ``cd src``.
+MANIFEST_MIP_TARGET = "."
 WHEEL_INDEX_URLS = (
     "https://test.pypi.org/simple/",
     "https://pypi.org/simple/",
@@ -84,7 +86,6 @@ def module_url(name):
 
 def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url_base=None):
     import os
-    import sys
 
     manifest_kw = {"target": MANIFEST_MIP_TARGET}
     if url_base is not None:
@@ -93,17 +94,14 @@ def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url
         if status:
             status("Installing manifest " + name + "…")
         _quiet_install(mip_mod, manifest_url(name), **manifest_kw)
-        # Flat sibling imports (``import roku_engine``) match desktop wrapper,
-        # which puts ``examples/<pkg>/`` on ``sys.path``.
-        pkg_path = MANIFEST_MIP_TARGET + "/" + name
-        if pkg_path not in sys.path:
-            sys.path.insert(0, pkg_path)
+        # Package lands at ./<name>/; cwd/``/`` on sys.path → ``import name``.
+        # Flat sibling imports are handled by package ``__init__`` / entry modules.
     for name in modules:
         # Skip top-level fetch when the stem already lives inside a package.
         in_pkg = False
         for m in manifests:
             try:
-                os.stat(MANIFEST_MIP_TARGET + "/" + m + "/" + name + ".py")
+                os.stat(m + "/" + name + ".py")
                 in_pkg = True
                 break
             except OSError:
@@ -112,7 +110,7 @@ def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url
             continue
         if status:
             status("Fetching " + name + "…")
-        _quiet_install(mip_mod, module_url(name))
+        _quiet_install(mip_mod, module_url(name), target=MANIFEST_MIP_TARGET)
 
 
 def _install_index_deps_micropython(mip_mod, names, status):
@@ -134,35 +132,35 @@ def _ensure_cwd():
 
 
 def _import_firmware_mip():
-    """Firmware ``mip`` on MicroPython WASM (not ``add_ons/mip.py``).
+    """Firmware ``mip`` on MicroPython WASM (not ``utils/mip.py``).
 
-    ``lib.path`` must run first so ``add_ons`` is appended, not prepended.
+    ``utils.path`` must run first so ``utils`` is appended, not prepended.
     """
     import mip
 
-    import lib.path  # noqa: F401
+    import utils.path  # noqa: F401
 
     return mip
 
 
 def _import_portable_mip():
-    """Portable ``add_ons/mip.py`` for Pyodide (no firmware ``mip``)."""
+    """Portable ``utils/mip.py`` for Pyodide (no firmware ``mip``)."""
     _ensure_cwd()
     import mip
 
-    import lib.path  # noqa: F401
+    import utils.path  # noqa: F401
 
     return mip
 
 
 def _refresh_path_after_install():
-    """Re-scan cwd dirs so mip-created ``examples/`` is on ``sys.path``.
+    """Re-run ``utils.path.update`` after mip may have created ``lib`` / ``utils``.
 
-    ``lib.path`` often runs before manifests exist; only existing dirs are added.
+    ``utils.path`` often runs before installs exist; only existing dirs are added.
     """
-    import lib.path
+    import utils.path
 
-    lib.path.update()
+    utils.path.update()
 
 
 def install_micropython(modules, manifests, index_deps, status=None):

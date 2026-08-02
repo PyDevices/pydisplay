@@ -52,7 +52,7 @@ for pkg in "${PACKAGES[@]}"; do
     rm -rf "${OUT}/${pkg}"
 done
 
-export PYTHONPATH="${ROOT}/src/lib:${ROOT}/src/add_ons${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONPATH="${ROOT}/src/lib:${ROOT}/src/utils${PYTHONPATH:+:$PYTHONPATH}"
 
 echo "Running stubgen → ${OUT}/ …"
 "$STUBGEN" --ignore-errors -o "$OUT" \

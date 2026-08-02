@@ -50,9 +50,9 @@ peterhinch_packages = {
 # Sister packages (pygraphics, usdl2, palettes, pdwidgets, lvgl) are not from
 # this repo: frozen in firmware, or TestPyPI / MIP when needed (see url_maker.py).
 packages = [
-    ["add_ons", [], []],
+    ["utils", [], []],
     ["examples", [], []],
-    ["lib/displaysys", [], ["path.py"]],
+    ["lib/displaysys", [], []],
     ["lib/eventsys", [], []],
     ["lib/multimer", [], []],
 ]
@@ -61,7 +61,7 @@ packages = [
 # These names stay in `packages` for toml mounts but must not get a JSON file.
 MIP_INDEX_ONLY = frozenset({"displaysys", "eventsys", "multimer"})
 
-# Packages omitted from web/pyscript/micropython.toml (PyScript mounts add_ons for browser examples).
+# Packages omitted from web/pyscript/micropython.toml (PyScript mounts utils for browser examples).
 toml_exclude = ["examples"]
 
 # PyScript [files] mounts that are not part of any mip package JSON.
@@ -77,7 +77,7 @@ SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
 MIP_FILE_SUFFIXES = {".py", ".mpy", ".json"}
 # Local upstream checkouts (gitignored) — never list in mip manifests.
 PACKAGE_SKIP_DIRS = {
-    "add_ons": {"gui"},
+    "utils": {"gui"},
     "examples": set(PERSONAL_EXAMPLE_DIRS),
 }
 
@@ -111,7 +111,7 @@ PYODIDE_INTERPRETER = "./vendor/pyodide/pyodide.mjs"
 
 
 def pyscript_toml_file_entry(repo_relative_path: str, mount: str) -> str:
-    """repo_relative_path e.g. src/lib/path.py; mount e.g. /lib/."""
+    """repo_relative_path e.g. src/utils/path.py; mount e.g. /utils/."""
     return f'"{PYSCRIPT_TOML_SRC_PREFIX}{repo_relative_path}" = "{mount}"'
 
 
@@ -181,7 +181,7 @@ for package_path, deps, extra_files in packages:
             if package_name not in toml_exclude:
                 # Gallery loaders use ``import ps_loader``; mounted at VFS root below.
                 # PyScript rejects the same source key twice in ``[files]``.
-                if package_name == "add_ons" and f == "ps_loader.py":
+                if package_name == "utils" and f == "ps_loader.py":
                     continue
                 master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
                 toml_dest_dir = "/".join(master_dest_file.split("/")[:-1])
@@ -253,7 +253,7 @@ for entry in sorted(os.listdir(examples_root)):
     example_package_names.append(entry)
 
 # Gallery loaders use `import ps_loader` (top-level); also mount at VFS root.
-add_pyscript_file("src/add_ons/ps_loader.py", "/")
+add_pyscript_file("src/utils/ps_loader.py", "/")
 
 # web/pyscript/packages → ../../packages (same layout as web/pyscript/src).
 pyscript_packages_link = os.path.join(output_dir, "web", "pyscript", "packages")
@@ -310,7 +310,7 @@ for gui, package_stem in peterhinch_packages.items():
         gui_package = json.load(f)
     files = {}
     for destination, source in gui_package["urls"]:
-        files[github_mip_raw_url(source)] = "/add_ons/" + destination
+        files[github_mip_raw_url(source)] = "/utils/" + destination
     with open(peterhinch_config_paths[gui], "w") as f:
         json.dump({"files": files}, f, indent=2)
         f.write("\n")

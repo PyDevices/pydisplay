@@ -2,7 +2,7 @@
     "python.analysis.extraPaths": [
         "./src",
         "./src/examples",
-        "./src/add_ons",
+        "./src/utils",
         "./src/lib",
         "./tools/typings"
     ],
@@ -35,7 +35,7 @@
     "cursorpyright.analysis.extraPaths": [
         "./src",
         "./src/examples",
-        "./src/add_ons",
+        "./src/utils",
         "./src/lib",
         "./tools/typings"
     ],

@@ -161,15 +161,11 @@ _tools = _file.rsplit("/", 1)[0] if "/" in _file else "."
 _root = _tools.rsplit("/", 1)[0] if "/" in _tools else "."
 _src = (_root + "/src") if _root not in (".", "") else "src"
 _src_lib = _src + "/lib"
+_src_utils = _src + "/utils"
 # Prefer src/lib so eventsys/displaysys resolve from repo root or src/.
-for _p in (_src_lib, _src, _tools):
+for _p in (_src_lib, _src_utils, _src, _tools):
     if _p and _p not in sys.path:
         sys.path.insert(0, _p)
-
-try:
-    import lib.path  # noqa: F401 — when cwd is src/, also orders '', lib, …
-except ImportError:
-    pass
 
 from eventsys import events, types  # noqa: E402
 from eventsys._host import VirtualDevices  # noqa: E402

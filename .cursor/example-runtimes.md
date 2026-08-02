@@ -4,7 +4,7 @@ Automated **smoke tests** that run `[src/examples/](../src/examples/)` scripts o
 
 - Runtimes
   The canonical runtime list lives in `[tools/example_runtimes.toml](../tools/example_runtimes.toml)`. Agents should read that file before running the matrix.
-  The desktop interpreter runtimes are `micropython`, `micropython.exe`, `circuitpython`, `python.exe`, and repo-root `.venv/bin/python` (`cpython-venv` in the harness). The launcher runtimes are `tools/jupyter.sh` and `tools/pyscript.sh`.
+  The desktop interpreter runtimes are `micropython`, `micropython.exe`, `circuitpython`, `python.exe`, and repo-root `.venv/bin/python` (`cpython-venv` in the harness). The launcher runtimes are `bin/jupyter.sh` and `bin/pyscript.sh`.
 
   | Runtime id        | Platform            | How it runs                                                                                        |
   | ----------------- | ------------------- | -------------------------------------------------------------------------------------------------- |
@@ -13,8 +13,8 @@ Automated **smoke tests** that run `[src/examples/](../src/examples/)` scripts o
   | `circuitpython`   | CircuitPython unix  | `circuitpython` from `src/`                                                                        |
   | `cpython-venv`    | CPython desktop     | repo-root `.venv/bin/python` from `src/`                                                           |
   | `python.exe`      | CPython Windows     | `python.exe` from `src/`                                                                           |
-  | `pyscript`        | PyScript browser    | `tools/pyscript.sh` launcher; autotest uses `harness.html?modules=…&autotest=1` via `tools/serve.py` |
-  | `jupyter`         | Jupyter notebook    | `tools/jupyter.sh` launcher; executes generated `src/run-{example}.ipynb`                          |
+  | `pyscript`        | PyScript browser    | `bin/pyscript.sh` launcher; autotest uses `harness.html?modules=…&autotest=1` via `tools/serve.py` |
+  | `jupyter`         | Jupyter notebook    | `bin/jupyter.sh` launcher; executes generated `src/run-{example}.ipynb`                          |
 
   **Platform** (MicroPython, PyScript, …) is the product category in [Portability & platforms](../docs/platforms/index.md). **Runtime** is the concrete executable or launcher used in automation.
   ## Prerequisites

@@ -7,16 +7,16 @@
 | Component | Location | Notes |
 |-----------|----------|-------|
 | `board_config.py` | `board_configs/` or `src/lib/` | display + `eventsys.Runtime` |
-| `hardware_setup.py` | `src/add_ons/` | Fetches micro-gui; builds `Display` with keyboard stand-ins on desktop |
-| `fetch_ph_gui.py` | `src/add_ons/` | mip install into `add_ons/gui/` + FrameBuffer patches |
-| `displaybuf.py` | `src/add_ons/` | `ssd` framebuffer |
-| `uctypes.py` | `src/add_ons/` | CircuitPython shim for `writer.py` |
+| `hardware_setup.py` | `src/utils/` | Fetches micro-gui; builds `Display` with keyboard stand-ins on desktop |
+| `fetch_ph_gui.py` | `src/utils/` | mip install into `utils/gui/` + FrameBuffer patches |
+| `displaybuf.py` | `src/utils/` | `ssd` framebuffer |
+| `uctypes.py` | `src/utils/` | CircuitPython shim for `writer.py` |
 
 Do **not** install Peter Hinch's `drivers/`; pydisplay supplies the display.
 
 ## Config
 
-Importing [`hardware_setup.py`](https://github.com/PyDevices/pydisplay/blob/main/src/add_ons/hardware_setup.py) calls `fetch_ph_gui("micropython-micro-gui")` then creates `ssd` and `display`. Desktop navigation defaults:
+Importing [`hardware_setup.py`](https://github.com/PyDevices/pydisplay/blob/main/src/utils/hardware_setup.py) calls `fetch_ph_gui("micropython-micro-gui")` then creates `ssd` and `display`. Desktop navigation defaults:
 
 | Key | Action |
 |-----|--------|
@@ -29,7 +29,7 @@ Importing [`hardware_setup.py`](https://github.com/PyDevices/pydisplay/blob/main
 
 ```python
 import mip
-mip.install("github:PyDevices/pydisplay/packages/micropython-micro-gui.json", target="./add_ons")
+mip.install("github:PyDevices/pydisplay/packages/micropython-micro-gui.json", target="./utils")
 ```
 
 Or rely on `import hardware_setup` (needs `mip` on the target when `gui/` is missing).

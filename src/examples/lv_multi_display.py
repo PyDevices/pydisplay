@@ -1,5 +1,5 @@
 # deps: lvgl
-# add_ons: lv_encoder_emu
+# utils: lv_encoder_emu
 """
 Multi-display LVGL demo: primary UI + secondary encoder emulator.
 

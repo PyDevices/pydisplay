@@ -22,7 +22,8 @@ If SDL2 fails (common on Windows):
 pip install pygame-ce
 cp board_configs/pgdisplay/board_config.py src/lib/board_config.py
 cd pydisplay/src
-python3 -i path.py
+export PYTHONPATH=.:lib:utils
+python3 examples/pydisplay_demo.py
 ```
 
 ## Input on desktop

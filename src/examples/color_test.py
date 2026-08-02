@@ -1,5 +1,5 @@
 # deps: palettes
-# add_ons: tft_config, tft_text
+# utils: tft_config, tft_text
 """
 color_test.py
 =============

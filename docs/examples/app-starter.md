@@ -1,6 +1,6 @@
 # 🎨 App starter
 
-Copy one of the scripts below to start your first pydisplay app. Each is a single file that uses only **`src/lib`** modules — no `add_ons`, no `tft_config`, no `displaybuf`.
+Copy one of the scripts below to start your first pydisplay app. Each is a single file that uses only **`src/lib`** modules — no `utils`, no `tft_config`, no `displaybuf`.
 
 | Use this | When you want… |
 |----------|----------------|
@@ -10,7 +10,7 @@ Copy one of the scripts below to start your first pydisplay app. Each is a singl
 ## Prerequisites
 
 - A working [board config](https://pydevices.github.io/micropython-hardware/board-configs.html) on your path (from a [full clone](../installation/full-clone.md) or MIP install).
-- In a development clone, use `import lib.path` before importing your script so `lib/` and `examples/` are on `sys.path`.
+- In a development clone, set `PYTHONPATH` (CPython/CircuitPython) or `MICROPYPATH` (MicroPython) to `.:lib:utils` and run from `src/` so `board_config` and friends resolve.
 
 Save the boilerplate as `main.py` (or any name you prefer) and run it from the REPL or as your device's entry point.
 
@@ -100,21 +100,23 @@ Stick with `from pygraphics import Area` when you also use rectangle helpers fro
 
 ## Run it
 
-From a [full clone](../installation/full-clone.md) with `board_config` on your path, paste the script into `src/main.py` (or run from the REPL):
-
-```python
-import lib.path   # adds lib/, examples/ to sys.path (dev clone only)
-# import my_app   # or paste/run your saved script
-```
-
-Desktop (SDL board config):
+From a [full clone](../installation/full-clone.md), save the boilerplate as `src/main.py`, then set `PYTHONPATH`/`MICROPYPATH`, `cd src`, and run it directly — no path bootstrap needed:
 
 ```bash
 cd src
-PYTHONPATH=../board_configs/sdldisplay:lib micropython -i lib/path.py
+export PYTHONPATH=.:lib:utils
+python3 main.py
 ```
 
-On MCU, install the matching [board config](https://pydevices.github.io/micropython-hardware/board-configs.html), copy or symlink it as `board_config.py`, and run `main.py` from flash or the REPL.
+Desktop (SDL board config) — put `board_configs/sdldisplay` ahead of the default on the path:
+
+```bash
+cd src
+export PYTHONPATH=../board_configs/sdldisplay:.:lib:utils
+python3 main.py
+```
+
+On MCU, install the matching [board config](https://pydevices.github.io/micropython-hardware/board-configs.html), copy or symlink it as `board_config.py`, and run `main.py` from flash or the REPL — `import utils.path` first if `utils/` is on the device and you didn't set `MICROPYPATH`.
 
 **Interact:** tap or click the centered rectangle — it toggles between red and green.
 

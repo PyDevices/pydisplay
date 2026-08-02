@@ -72,7 +72,7 @@ def test_generated_configs_split_shared_files_from_gui_manifests():
             github_path = source.removeprefix("github:")
             owner, repository, path = github_path.split("/", 2)
             raw_source = f"https://raw.githubusercontent.com/{owner}/{repository}/master/{path}"
-            assert config["files"][raw_source] == f"/add_ons/{destination}"
+            assert config["files"][raw_source] == f"/utils/{destination}"
 
 
 def test_gallery_pages_compose_generated_json_configs():
@@ -103,7 +103,7 @@ def test_toml_generation_is_opt_in():
 
 def test_dynamic_discovery_is_sorted_and_excludes_init():
     source = _source()
-    assert 'os.listdir("/add_ons/gui/demos")' in source
+    assert 'os.listdir("/utils/gui/demos")' in source
     assert 'filename != "__init__.py"' in source
     assert "names.sort()" in source
 

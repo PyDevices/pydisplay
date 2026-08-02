@@ -115,7 +115,6 @@ def main(argv=None):
     example = _resolve_example(args.example, repo_root)
     output = args.output.resolve()
     os.chdir(repo_root / "src")
-    importlib.import_module("lib.path")
     ffmpeg_executable = importlib.import_module("frame_recorder").ffmpeg_executable
 
     if ffmpeg_executable() is None:

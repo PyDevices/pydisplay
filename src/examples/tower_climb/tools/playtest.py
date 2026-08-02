@@ -141,11 +141,13 @@ def main():
     env = os.environ.copy()
     env["SDL_VIDEODRIVER"] = "dummy"
     env["SDL_AUDIODRIVER"] = "dummy"
-    # Match lib.path: board_config in lib/, usdl2 in add_ons/.
+    # board_config in lib/, usdl2 in utils/; examples/ so tower_climb.py resolves
+    # as a script (sys.path[0]) without needing this on PYTHONPATH too — kept
+    # for parity with a package-style invocation.
     env["PYTHONPATH"] = os.pathsep.join(
         [
             os.path.join(SRC_DIR, "lib"),
-            os.path.join(SRC_DIR, "add_ons"),
+            os.path.join(SRC_DIR, "utils"),
             os.path.join(SRC_DIR, "examples"),
         ]
     )

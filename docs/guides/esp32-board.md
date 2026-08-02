@@ -28,7 +28,7 @@ mpremote mip install "github:PyDevices/micropython-hardware/board_configs/busdis
 for pkg in displaysys eventsys pygraphics multimer; do
   mpremote mip install --index "$INDEX" "$pkg"
 done
-mpremote mip install --target "./add_ons" "github:PyDevices/pydisplay/packages/add_ons.json"
+mpremote mip install --target "./utils" "github:PyDevices/pydisplay/packages/utils.json"
 ```
 
 **Option C — minimum packages only:**
@@ -46,11 +46,11 @@ mpremote mount .
 At the device REPL:
 
 ```python
-import lib.path
-import pydisplay_demo
+import utils.path
+from examples import pydisplay_demo
 ```
 
-If packages are installed into `/lib` on the device (no mount), skip `lib.path`:
+Under a mounted dev tree, `examples/` stays a subdirectory — resolve it as a package (`from examples import <name>` / `import examples.<a>.<b>`), never a bare `import <name>`. If instead you MIP-installed `examples.json` with `target="."` (flat, no `examples/` subdirectory), the same demo is a bare import:
 
 ```python
 import pydisplay_demo
@@ -61,8 +61,8 @@ See [**pydisplay_demo**](../examples/pydisplay_demo.md) for what the script demo
 ## 4. Try events
 
 ```python
-import lib.path
-import eventsys_simpletest
+import utils.path
+from examples import eventsys_simpletest
 ```
 
 ## Background network / workers

@@ -8,7 +8,7 @@
     </head>
     <body>
         <script type="mpy" data-configs="./micropython.json ./pydisplay.json" terminal worker>
-            import lib.path
+            import utils.path
             from pyscript import document
             term = document.querySelector('script[terminal]').terminal
             term.resize(99, 24)

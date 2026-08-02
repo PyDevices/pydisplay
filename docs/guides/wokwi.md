@@ -21,7 +21,7 @@ Run pydisplay on a simulated ESP32-S3 with an ILI9341 capacitive touch display �
 2. Replace **diagram.json** and **main.py** with the files from [`wokwi/`](../../web/wokwi/).
 3. Start the simulation. Serial shows `mip` downloads, then `testris` appears.
 
-**Full install:** uncomment the two `add_ons` / `examples` lines in `main.py` before starting (several-minute first boot).
+**Full install:** uncomment the two `utils` / `examples` lines in `main.py` before starting (several-minute first boot).
 
 The browser sim ships MicroPython — no local tools or firmware download needed.
 
@@ -31,7 +31,7 @@ The browser sim ships MicroPython — no local tools or firmware download needed
 
 | | **Quick (default)** | **Full** |
 |--|---------------------|----------|
-| **User action** | Use `main.py` as committed | Uncomment `add_ons` + `examples` lines |
+| **User action** | Use `main.py` as committed | Uncomment `utils` + `examples` lines |
 | **First boot** | ~30 s | Several minutes |
 | **Demo** | `testris` | Same + full `examples/` catalog |
 | **Also enables** | — | `hello.py`, bmp565, `pydisplay_demo`, LVGL prep, etc. |

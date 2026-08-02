@@ -4,10 +4,10 @@ pydisplay supports three install channels. Pick based on whether you need the fu
 
 ## Comparison
 
-| Channel | Format | Install tool | Includes examples | Includes add_ons |
+| Channel | Format | Install tool | Includes examples | Includes utils |
 |---------|--------|--------------|-------------------|------------------|
 | [Full clone](full-clone.md) | Entire repo | `git clone` | Yes | Yes |
-| [GitHub MIP](mip-github.md) | Source `.py` | `mip` / `mpremote mip` | Optional (`examples.json`) | Yes (`add_ons.json`) |
+| [GitHub MIP](mip-github.md) | Source `.py` | `mip` / `mpremote mip` | Optional (`examples.json`) | Yes (`utils.json`) |
 | [micropython-lib MIP](mip-micropython-lib.md) | Precompiled `.mpy` | `mip` with custom index | No | No |
 
 The [installer.py](installer.md) script combines GitHub and micropython-lib installs in one call — recommended for MicroPython boards.
@@ -29,7 +29,7 @@ The [installer.py](installer.md) script combines GitHub and micropython-lib inst
 
 **Optional packages:**
 
-- `add_ons` — optional extensions (framebuf shim, console, displaybuf, tft_config, …)
+- `utils` — optional extensions (framebuf shim, console, displaybuf, tft_config, …)
 - `examples` — demo scripts
 - Bus/touch helpers — see [micropython-hardware packages](https://github.com/PyDevices/micropython-hardware/tree/main/packages)
 

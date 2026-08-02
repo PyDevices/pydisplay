@@ -6,7 +6,7 @@ All examples live in [`src/examples/`](https://github.com/PyDevices/pydisplay/tr
 mip.install("github:PyDevices/pydisplay/packages/examples.json", target="./examples")
 ```
 
-Use `import lib.path` first in a development clone (see [full clone](../installation/full-clone.md)).
+Preferred: set `PYTHONPATH`/`MICROPYPATH` to `.:lib:utils`, `cd src`, then run `python3 examples/<name>.py` (or `from examples import <name>` at the REPL) — see [full clone](../installation/full-clone.md).
 
 !!! tip "Start here"
     New to pydisplay? Copy the [**App starter**](app-starter.md) boilerplate to begin your first app, then read the [**pydisplay_demo** guide](pydisplay_demo.md) for rotation, scrolling, and buffered text.
@@ -107,8 +107,8 @@ board_config.runtime.run_forever()
 ### Notes
 
 - `font_simpletest.py` — cycles `string_blit` → `per_pixel` → `displaybuf` in one run (see [Font rendering patterns](../concepts/graphics.md#choosing-a-font-rendering-pattern)).
-- `nano_gui_simpletest.py` / `micro_gui_simpletest.py` / `touch_gui_simpletest.py` need the matching Peter Hinch `gui/` in `add_ons/` (via `fetch_ph_gui` / mip).
-**Legend:** Platforms = CPython · MCU · PyScript · Wokwi · Packages = core · add_ons · LVGL
+- `nano_gui_simpletest.py` / `micro_gui_simpletest.py` / `touch_gui_simpletest.py` need the matching Peter Hinch `gui/` in `utils/` (via `fetch_ph_gui` / mip).
+**Legend:** Platforms = CPython · MCU · PyScript · Wokwi · Packages = core · utils · LVGL
 
 ## Suggested learning order
 
@@ -123,7 +123,7 @@ board_config.runtime.run_forever()
 | 6 | `eventsys_touch_test.py` | CPython · MCU | core | — |
 | 7 | `calc_graphics.py` | CPython · PyScript | core | — |
 | 8 | `paint.py` | CPython · PyScript | core | [paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/paint.png) |
-| 9 | `widgets_demo.py` | CPython · MCU | add_ons | — |
+| 9 | `widgets_demo.py` | CPython · MCU | utils | — |
 
 PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-asyncio.md).
 
@@ -146,9 +146,9 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | `eventsys_simpletest.py` | Event loop basics | CPython · MCU · PyScript | core |
 | `eventsys_touch_test.py` | Touch events | CPython · MCU | core |
 | `eventsys_encoder_test.py` | Rotary encoder | MCU | core |
-| `scroll_touch_test.py` | Touch scrolling (cycles `display_drv` ↔ DisplayBuffer) | CPython · MCU | add_ons |
+| `scroll_touch_test.py` | Touch scrolling (cycles `display_drv` ↔ DisplayBuffer) | CPython · MCU | utils |
 | `joystick_list_select.py` | Joystick + list | CPython · MCU | core |
-| `keypins_simpletest.py` | Keypad pins | MCU | add_ons |
+| `keypins_simpletest.py` | Keypad pins | MCU | utils |
 
 ## Drawing and fonts
 
@@ -156,7 +156,7 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 |--------|-------------|-----------|----------|
 | `framebuf_simpletest.py` | framebuf API | CPython · MCU | core |
 | `graphics_simpletest.py` | pygraphics module | CPython · MCU | core |
-| `font_simpletest.py` | Font: cycles `string_blit` / `per_pixel` / `displaybuf` | CPython · MCU | add_ons |
+| `font_simpletest.py` | Font: cycles `string_blit` / `per_pixel` / `displaybuf` | CPython · MCU | utils |
 | `font_list.py` | List / preview `.bin` fonts from a directory | CPython · MCU | core |
 | `fonts.py` | Page through fonts | CPython · MCU | core |
 | `boxlines.py` | Lines and boxes | CPython · MCU | core |
@@ -179,25 +179,25 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | Script | Description | Platforms | Packages |
 |--------|-------------|-----------|----------|
 | `calc_graphics.py` | Pocket calculator (pygraphics) | CPython · MCU · PyScript | core |
-| `calc_widgets.py` | Pocket calculator (pdwidgets) | CPython · MCU · PyScript | add_ons |
+| `calc_widgets.py` | Pocket calculator (pdwidgets) | CPython · MCU · PyScript | utils |
 | `calc_lvgl.py` | Pocket calculator (LVGL) | CPython · MCU · PyScript | LVGL |
 | `paint.py` | Paint app | CPython · PyScript | core |
 | `testris.py` | Tetris-like game | CPython · MCU | core |
 | `apollo.py` | Apollo DSKY | CPython · PyScript | core |
-| `widgets_*.py` | pdwidgets demos | CPython · MCU | add_ons |
-| `console_simpletest.py` | Console add-on | CPython · MCU | add_ons |
-| `console_advanced_demo.py` | Advanced console | CPython · MCU | add_ons |
+| `widgets_*.py` | pdwidgets demos | CPython · MCU | utils |
+| `console_simpletest.py` | Console add-on | CPython · MCU | utils |
+| `console_advanced_demo.py` | Advanced console | CPython · MCU | utils |
 
 ## Display buffers and misc
 
 | Script | Description | Platforms | Packages |
 |--------|-------------|-----------|----------|
-| `displaybuf_simpletest.py` | DisplayBuffer | CPython · MCU | add_ons |
+| `displaybuf_simpletest.py` | DisplayBuffer | CPython · MCU | utils |
 | `scroll.py` | Scrolling text | CPython · MCU | core |
 | `rotations.py` | Display rotation | CPython · MCU | core |
-| `nano_gui_simpletest.py` | Nano-GUI hardware check | CPython · MCU · PyScript | add_ons + `micropython-nano-gui` |
-| `micro_gui_simpletest.py` | Micro-GUI smoke | CPython · MCU · PyScript | add_ons + `micropython-micro-gui` |
-| `touch_gui_simpletest.py` | Touch GUI smoke | CPython · MCU · PyScript | add_ons + `micropython-touch` |
+| `nano_gui_simpletest.py` | Nano-GUI hardware check | CPython · MCU · PyScript | utils + `micropython-nano-gui` |
+| `micro_gui_simpletest.py` | Micro-GUI smoke | CPython · MCU · PyScript | utils + `micropython-micro-gui` |
+| `touch_gui_simpletest.py` | Touch GUI smoke | CPython · MCU · PyScript | utils + `micropython-touch` |
 | `lv_test_timer.py` | LVGL timer (follows `runtime.timer_async`) | CPython · MCU · PyScript | LVGL |
 
 ## Subdirectories

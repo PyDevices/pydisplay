@@ -1,19 +1,19 @@
 # Config files
 
-Templates for GUI libraries and ported examples live in [`src/add_ons/`](https://github.com/PyDevices/pydisplay/tree/main/src/add_ons/). Board-specific setup uses [`micropython-hardware` `board_configs/`](https://github.com/PyDevices/micropython-hardware/tree/main/board_configs) or `src/lib/board_config.py`.
+Templates for GUI libraries and ported examples live in [`src/utils/`](https://github.com/PyDevices/pydisplay/tree/main/src/utils/). Board-specific setup uses [`micropython-hardware` `board_configs/`](https://github.com/PyDevices/micropython-hardware/tree/main/board_configs) or `src/lib/board_config.py`.
 
 | File | Location | Required for |
 |------|----------|--------------|
 | `board_config.py` | micropython-hardware `board_configs/` or `src/lib/` | **Always** — display, touch, runtime, setup |
-| `path.py` | `src/lib/` | Development layout — adds `lib/`, `add_ons/`, `examples/` to path |
-| `color_setup.py` | `src/add_ons/` | [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui) — fetch + `ssd` |
-| `hardware_setup.py` | `src/add_ons/` | [Micro-GUI](https://github.com/peterhinch/micropython-micro-gui) — fetch + button/encoder `Display` |
-| `touch_setup.py` | `src/add_ons/` | [MicroPython-Touch](https://github.com/peterhinch/micropython-touch) — fetch + touch `Display` |
-| `fetch_ph_gui.py` | `src/add_ons/` | Installs one of the three `gui/` trees into `add_ons/gui/` |
-| `gui/` | `src/add_ons/gui/` | Active Peter Hinch GUI (mip / fetch; not in git) |
-| `tft_config.py` | `src/add_ons/` | @russhughes st7789py_mpy examples |
+| `path.py` | `src/utils/` | Optional — adds `lib/`, `utils/`, and cwd to path when `PYTHONPATH`/`MICROPYPATH` isn't set |
+| `color_setup.py` | `src/utils/` | [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui) — fetch + `ssd` |
+| `hardware_setup.py` | `src/utils/` | [Micro-GUI](https://github.com/peterhinch/micropython-micro-gui) — fetch + button/encoder `Display` |
+| `touch_setup.py` | `src/utils/` | [MicroPython-Touch](https://github.com/peterhinch/micropython-touch) — fetch + touch `Display` |
+| `fetch_ph_gui.py` | `src/utils/` | Installs one of the three `gui/` trees into `utils/gui/` |
+| `gui/` | `src/utils/gui/` | Active Peter Hinch GUI (mip / fetch; not in git) |
+| `tft_config.py` | `src/utils/` | @russhughes st7789py_mpy examples |
 
-Install add-on templates with [add_ons package](../installation/mip-github.md) or copy files from a full clone.
+Install add-on templates with [utils package](../installation/mip-github.md) or copy files from a full clone.
 
 ## board_config.py
 
@@ -23,10 +23,12 @@ The default desktop config is `src/lib/board_config.py`.
 
 ## path.py
 
-Import before examples when using the `src/` development tree:
+Preferred on desktop: set `PYTHONPATH` (CPython/CircuitPython) or `MICROPYPATH` (MicroPython) to `.:lib:utils` and `cd src` before running — no import needed.
+
+On a device (or any host where you can't set env vars), import it once from `boot.py`, `main.py`, or the REPL, before examples, when `utils/` is present on the device:
 
 ```python
-import lib.path
+import utils.path
 ```
 
 Not needed if all packages are installed into `/lib` on the device.

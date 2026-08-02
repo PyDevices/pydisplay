@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Compare MicroPython's built-in ``framebuf`` C module to ``add_ons/framebuf.py``.
+"""Compare MicroPython's built-in ``framebuf`` C module to ``utils/framebuf.py``.
 
 Run on MicroPython only (native ``framebuf`` must be the C extmod)::
 
@@ -11,7 +11,7 @@ Run on MicroPython only (native ``framebuf`` must be the C extmod)::
     micropython.exe tools/compare_framebuf_mp.py
 
 The C module owns the name ``framebuf``, so the Python implementation is loaded
-via ``exec`` from ``src/add_ons/framebuf.py``. Constants and buffer behaviour
+via ``exec`` from ``src/utils/framebuf.py``. Constants and buffer behaviour
 are compared side by side; mismatches print and exit 1.
 """
 
@@ -30,7 +30,7 @@ def _dirname(path):
 def _find_framebuf_py():
     p = _dirname(sys.argv[0])
     for _ in range(6):
-        candidate = p + "/src/add_ons/framebuf.py"
+        candidate = p + "/src/utils/framebuf.py"
         if _file_exists(candidate):
             return candidate
         p = _dirname(p)
@@ -112,7 +112,7 @@ def main():
     py_path = _find_framebuf_py()
     if not py_path:
         print(
-            "missing canonical module: src/add_ons/framebuf.py (run from repo root)",
+            "missing canonical module: src/utils/framebuf.py (run from repo root)",
             file=sys.stderr,
         )
         return 1
@@ -248,7 +248,7 @@ def main():
     if errors:
         print("{} mismatch(es).".format(len(errors)))
         return 1
-    print("All checks passed (native C framebuf vs add_ons/framebuf.py).")
+    print("All checks passed (native C framebuf vs utils/framebuf.py).")
     return 0
 
 

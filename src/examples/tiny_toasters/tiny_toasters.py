@@ -1,5 +1,5 @@
 # deps: palettes
-# add_ons: tft_bitmap, tft_config
+# utils: tft_bitmap, tft_config
 """
 tiny_toasters.py
 ================

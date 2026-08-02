@@ -8,7 +8,7 @@ connection.  It will install pydisplay and its dependencies from the
 PyDevices fork of the micropython-lib repository or the PyDevices/pydisplay
 repository on GitHub.
 
-To see this file in action on Wokwi, uncomment add_ons + examples in web/wokwi/main.py:
+To see this file in action on Wokwi, uncomment utils + examples in web/wokwi/main.py:
     https://github.com/PyDevices/pydisplay/tree/main/web/wokwi
 
 To download this file:
@@ -54,15 +54,15 @@ Includes 2 functions that install from different sources:
             - ft6x36
             - cst226
             - xpt2046
-        - Note the add_ons, examples, spibus and i80bus packages are not available from the PyDevices
-          fork of the micropython-lib repository.  It isn't the correct place for add_ons and examples,
+        - Note the utils, examples, spibus and i80bus packages are not available from the PyDevices
+          fork of the micropython-lib repository.  It isn't the correct place for utils and examples,
           while spibus and i80bus use micropython.viper, which is not supported by micropython-lib.
 - `repo_install`: Installs from the PyDevices/pydisplay repository on GitHub.
     - Can retrieve any file from the repository, not just packages.
     - Retrieves files as is, without precompilation (no .mpy files).
     - Includes:
         - GitHub-only packages:
-            - /packages/add_ons.json
+            - /packages/utils.json
             - /packages/examples.json
         - Board configs, hardware drivers, and bus/touch MIP packages live in
           PyDevices/micropython-hardware (install with full github: URLs via mip,
@@ -154,7 +154,7 @@ install("xpt2046")
 ####################################################################################################
 """
 ## GitHub-only packages (source .py; not on the micropython-lib index):
-install("/packages/add_ons.json", target="./add_ons")
+install("/packages/utils.json", target="./utils")
 install("/packages/examples.json", target="./examples")
 
 ## Hardware (boards / drivers / bus packages) — use mip against micropython-hardware:
@@ -175,7 +175,7 @@ install("displaysys")
 install("eventsys")
 install("pygraphics")
 install("multimer")
-install("/packages/add_ons.json", target="./add_ons")
+install("/packages/utils.json", target="./utils")
 install("/packages/examples.json", target="./examples")
 
 ## If you are running on a microcontroller, uncomment and edit the following line to match your hardware.
@@ -183,6 +183,6 @@ install("/packages/examples.json", target="./examples")
 
 ## Otherwise uncomment the following line to get the default board_config.py
 install("/src/lib/board_config.py", target="./")
-install("/src/lib/path.py", target="./")
+install("/src/utils/path.py", target="./")
 
 ##### Note, you can also use `mip.install` to install from micropython-lib or other repositories.

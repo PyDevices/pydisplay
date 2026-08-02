@@ -63,4 +63,4 @@ Public API docstrings: [Docstring conventions](contributing/docstrings.md).
 
 ## License
 
-Follow the license terms in the repository. Third-party add_ons retain their original licenses where noted.
+Follow the license terms in the repository. Third-party utils retain their original licenses where noted.

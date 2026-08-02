@@ -10,7 +10,7 @@ This page covers how `pygraphics` fits into the wider pydisplay stack.
 |------|-----|
 | Buffer + shapes + Area bounds | [`pygraphics`](graphics.md) — `FrameBuffer` or `Draw` |
 | Basic pixels on a display | `framebuf` API on display or buffer |
-| Peter Hinch scrollable buffer | `add_ons/displaybuf.DisplayBuffer` |
+| Peter Hinch scrollable buffer | `utils/displaybuf.DisplayBuffer` |
 | CPython without importing add-ons | `pygraphics` (bundles pure-Python framebuf) |
 
 See [Architecture](architecture.md).
@@ -43,4 +43,4 @@ Peter Hinch's API — full display as a logical framebuffer with 4/8/16-bit buff
 
 ## API reference
 
-[API reference (core)](../reference/) → `pygraphics`. [Add-ons API](../reference/add_ons/) → `displaybuf`.
+[API reference (core)](../reference/) → `pygraphics`. [Utils API](../reference/utils/) → `displaybuf`.

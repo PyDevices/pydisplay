@@ -7,8 +7,8 @@ Developer workflow only — local servers, test harnesses, and IDE typings. For 
 | Script | Purpose |
 |--------|---------|
 | [`serve.py`](serve.py) | HTTP server with Cross-Origin-Isolation headers |
-| [`pyscript.sh`](pyscript.sh) | Open one example in the browser — `./tools/pyscript.sh calculator` |
-| [`jupyter.sh`](jupyter.sh) | JupyterLab or Cursor notebooks — `./tools/jupyter.sh calculator` |
+| [`pyscript.sh`](../bin/pyscript.sh) | Open one example in the browser — `./bin/pyscript.sh calculator` |
+| [`jupyter.sh`](../bin/jupyter.sh) | JupyterLab or Cursor notebooks — `./bin/jupyter.sh calculator` |
 
 From repo root:
 
@@ -21,8 +21,8 @@ python tools/serve.py
 # http://127.0.0.1:8000/web/pyscript/index.html
 # http://127.0.0.1:8000/web/pyscript/micropython.html?modules=calc_graphics,calc_engine
 
-./tools/pyscript.sh calculator
-./tools/jupyter.sh calculator --cursor
+./bin/pyscript.sh calculator
+./bin/jupyter.sh calculator --cursor
 ```
 
 See [Run the notebook interactively](../docs/platforms/jupyter-run.md) and [PyScript local development](../docs/guides/pyscript.md).
@@ -75,7 +75,7 @@ X11/SDL window without a logged-in display, agents may wrap with `xvfb-run -a`
 
 | Script | Purpose |
 |--------|---------|
-| [`compare_framebuf_mp.py`](compare_framebuf_mp.py) | Compare built-in C ``framebuf`` vs ``src/add_ons/framebuf.py`` on-device |
+| [`compare_framebuf_mp.py`](compare_framebuf_mp.py) | Compare built-in C ``framebuf`` vs ``src/utils/framebuf.py`` on-device |
 | [`compare_graphics.py`](compare_graphics.py) | Shared compare engine (native ``pygraphics`` cmod vs staged pure-Python ``pygraphics``) |
 | [`compare_graphics_run.py`](compare_graphics_run.py) | Single-runtime subprocess entry (prints ``GRAPHICS_COMPARE_RESULT=`` JSON) |
 | [`compare_graphics_matrix.py`](compare_graphics_matrix.py) | Cross-runtime matrix (MP, CP, CPython; installs ``pygraphics-cmod`` from TestPyPI for CPython) |

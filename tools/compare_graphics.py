@@ -124,7 +124,7 @@ def _file_exists(path: str) -> bool:
 def find_repo_root(start=None):
     p = start or _dirname(__file__).replace("\\", "/")
     for _ in range(8):
-        if _file_exists(p + "/src/add_ons/framebuf.py"):
+        if _file_exists(p + "/src/utils/framebuf.py"):
             return p
         p = _dirname(p)
     return None

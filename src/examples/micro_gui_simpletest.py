@@ -1,6 +1,6 @@
 # gallery: skip
 # deps: pygraphics
-# add_ons: hardware_setup, gui
+# utils: hardware_setup, gui
 """
 micro_gui_simpletest.py - Smoke test for micropython-micro-gui on pydisplay.
 

@@ -1,6 +1,6 @@
 # gallery: skip
 # deps: palettes
-# add_ons: tft_config
+# utils: tft_config
 """
 boxlines.py
 ===========

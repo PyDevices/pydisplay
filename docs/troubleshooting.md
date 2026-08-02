@@ -10,9 +10,9 @@ Common problems when installing, importing, or running pydisplay.
 
 **Fix:**
 
-- **Full clone:** run from `src/` and `import path` first, or `python3 -i path.py`.
+- **Full clone:** `cd src` and set `PYTHONPATH`/`MICROPYPATH` to `.:lib:utils` before running (preferred), or `import utils.path` if `utils/` is present and you can't set env vars.
 - **Device:** install via [MIP](installation/mip-github.md) or [installer.py](installation/installer.md) into `/lib`.
-- **Examples:** `import lib.path` before `import hello` when using `mpremote mount`.
+- **Examples under `mpremote mount .`:** `import utils.path`, then resolve demos as a package — `from examples import hello`, not a bare `import hello` (the mounted tree still nests `examples/`).
 
 ### `ModuleNotFoundError: No module named 'board_config'`
 
@@ -49,7 +49,7 @@ mip.install("github:PyDevices/micropython-hardware/board_configs/sdldisplay")  #
 
 1. Confirm SDL2 dev libraries are installed — see [Desktop CPython](guides/desktop-cpython.md).
 2. Try **PGDisplay** (PyGame) instead of SDL2.
-3. Run `import hello` after `path.py` — a window should appear immediately.
+3. Run `python3 examples/hello.py` from `src/` (with `PYTHONPATH=.:lib:utils`) — a window should appear immediately.
 
 ### Wrong colors or garbled pixels on MCU
 

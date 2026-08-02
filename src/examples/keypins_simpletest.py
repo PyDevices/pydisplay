@@ -1,7 +1,7 @@
 # gallery: skip
 from board_config import runtime
 from keypins import KeyPins, Keys
-# add_ons: keypins
+# utils: keypins
 
 
 buttons = KeyPins(

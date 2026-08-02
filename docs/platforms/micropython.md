@@ -8,7 +8,7 @@ Platform notes for embedded MCUs and MicroPython on Unix. **Quick start:** [ESP3
 
 1. A `board_config.py` for your hardware — see [board configs](https://pydevices.github.io/micropython-hardware/board-configs.html).
 2. Core packages (`displaysys`, `eventsys`, …) via [installer.py](../installation/installer.md) or [GitHub MIP](../installation/mip-github.md).
-3. `import lib.path` before examples (unless installed into `/lib`).
+3. If you kept the optional `utils/` package on the device, `import utils.path` once in `boot.py`/`main.py` (or at the REPL) before examples. Skip it if everything is installed flat into `/lib`.
 
 ### Quick start with mpremote
 
@@ -24,7 +24,7 @@ mpremote mount .
 At the device REPL:
 
 ```python
-import lib.path
+import utils.path
 import hello
 ```
 
@@ -52,7 +52,7 @@ MCU MicroPython.
 
 ## Unix (desktop MicroPython)
 
-Same workflow as [CPython desktop](cpython-desktop.md), but run `micropython -i path.py` instead of `python3`.
+Same workflow as [CPython desktop](cpython-desktop.md): `cd src`, set `MICROPYPATH=.:lib:utils`, and run `micropython examples/<name>.py` instead of `python3 examples/<name>.py`.
 
 Use `board_configs/sdldisplay/` or the default `src/lib/board_config.py` for SDL2-based desktop display.
 
