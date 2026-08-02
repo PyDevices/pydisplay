@@ -16,6 +16,7 @@
     "./src/add_ons/micropython.py": "/add_ons/",
     "./src/add_ons/mip.py": "/add_ons/",
     "./src/add_ons/png.py": "/add_ons/",
+    "./src/add_ons/secrets.py": "/add_ons/",
     "./src/add_ons/tft_bitmap.py": "/add_ons/",
     "./src/add_ons/tft_config.py": "/add_ons/",
     "./src/add_ons/tft_text.py": "/add_ons/",

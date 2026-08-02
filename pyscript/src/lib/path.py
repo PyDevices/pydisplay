@@ -1,4 +1,4 @@
-"""Put '', .frozen (MP/CP), lib first on sys.path; append _extra_dirs."""
+"""Put '', .frozen (MP/CP), lib, add_ons, examples first on sys.path."""
 
 import os
 import sys
@@ -35,13 +35,16 @@ def add(directory, front=False):
 
 
 def update():
-    # Prepend in reverse so the final order is '', .frozen, lib.
+    # Prepend in reverse so the final order is:
+    # '', .frozen, lib, add_ons, examples, <stdlib...>
+    # add_ons must precede the stdlib so ``import secrets`` resolves to
+    # add_ons/secrets.py on CPython (stdlib also ships a ``secrets`` module).
+    for directory in reversed(_extra_dirs):
+        add(directory, front=True)
     add("lib", front=True)
     if sys.implementation.name in ("micropython", "circuitpython"):
         add(".frozen", front=True)
     add("", front=True)
-    for directory in _extra_dirs:
-        add(directory)
     try:
         import pydisplay_test_mode
 

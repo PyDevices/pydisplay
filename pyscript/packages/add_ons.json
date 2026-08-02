@@ -61,6 +61,10 @@
       "github:PyDevices/pydisplay/src/add_ons/ps_loader.py"
     ],
     [
+      "secrets.py",
+      "github:PyDevices/pydisplay/src/add_ons/secrets.py"
+    ],
+    [
       "tft_bitmap.py",
       "github:PyDevices/pydisplay/src/add_ons/tft_bitmap.py"
     ],
