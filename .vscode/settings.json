@@ -9,7 +9,7 @@
     "python.analysis.diagnosticSeverityOverrides": {
         "reportMissingModuleSource": "none"
     },
-    // MicroPython stubs. lvgl stubs come from the lvgl-cpython package (lvgl.pyi beside the .so).
+    // MicroPython + package stubs in tools/typings (includes committed lvgl.pyi).
     "python.analysis.stubPath": "./tools/typings",
     // pip install -U micropython-esp32-esp32_generic_s3-stubs==1.23.* --target ./.site_utils/typings --no-user
     "python.analysis.typeshedPaths": [
@@ -23,6 +23,7 @@
     },
     "files.insertFinalNewline": true,
     "python.analysis.typeCheckingMode": "standard",
+    // Cursor uses cursorpyright below; keep Pylance off to avoid dual servers.
     "python.languageServer": "None",
     "jupyter.widgetScriptSources": [
         "jsdelivr.com",

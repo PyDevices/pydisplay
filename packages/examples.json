@@ -49,6 +49,10 @@
       "github:PyDevices/pydisplay/src/examples/calc_widgets.py"
     ],
     [
+      "chat_orpheus.py",
+      "github:PyDevices/pydisplay/src/examples/chat_orpheus.py"
+    ],
+    [
       "color_test.py",
       "github:PyDevices/pydisplay/src/examples/color_test.py"
     ],
@@ -221,8 +225,16 @@
       "github:PyDevices/pydisplay/src/examples/touch_gui_simpletest.py"
     ],
     [
-      "tts_lvgl.py",
-      "github:PyDevices/pydisplay/src/examples/tts_lvgl.py"
+      "tts_gemini.py",
+      "github:PyDevices/pydisplay/src/examples/tts_gemini.py"
+    ],
+    [
+      "tts_kokoro.py",
+      "github:PyDevices/pydisplay/src/examples/tts_kokoro.py"
+    ],
+    [
+      "tts_orpheus.py",
+      "github:PyDevices/pydisplay/src/examples/tts_orpheus.py"
     ],
     [
       "tv_remote_menu.py",
