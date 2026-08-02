@@ -23,7 +23,8 @@
 
 set -euo pipefail
 
-_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Resolve symlinks so ~/bin/pyscript.sh → …/pydisplay/bin/pyscript.sh finds the repo.
+_SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 PYDISPLAY_ROOT="${PYDISPLAY_ROOT:-$(cd "$_SCRIPT_DIR/.." && pwd)}"
 SERVE="$PYDISPLAY_ROOT/tools/serve.py"
 PYSCRIPT_DIR="$PYDISPLAY_ROOT/web/pyscript"

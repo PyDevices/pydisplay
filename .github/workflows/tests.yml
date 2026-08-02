@@ -6,11 +6,13 @@ on:
       - main
     paths:
       - 'src/lib/**'
+      - 'src/utils/**'
       - 'tests/**'
       - '.github/workflows/tests.yml'
   pull_request:
     paths:
       - 'src/lib/**'
+      - 'src/utils/**'
       - 'tests/**'
       - '.github/workflows/tests.yml'
   workflow_dispatch:

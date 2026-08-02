@@ -22,7 +22,8 @@
 
 set -euo pipefail
 
-_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Resolve symlinks so ~/bin/jupyter.sh → …/pydisplay/bin/jupyter.sh finds the repo.
+_SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 PYDISPLAY_ROOT="${PYDISPLAY_ROOT:-$(cd "$_SCRIPT_DIR/.." && pwd)}"
 SRC="$PYDISPLAY_ROOT/src"
 HUB_NOTEBOOK="$SRC/jupyter_notebook.ipynb"
