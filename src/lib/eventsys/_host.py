@@ -148,6 +148,25 @@ class VirtualDevices:
             ):
                 self._fifo[-1] = event
                 return
+            # Same-key KEYDOWN coalesce (safety net if a host still emits repeats).
+            if (
+                event.type == events.KEYDOWN
+                and self._fifo
+                and self._fifo[-1].type == events.KEYDOWN
+                and getattr(self._fifo[-1], "key", None) == getattr(event, "key", None)
+            ):
+                self._fifo[-1] = event
+                return
+            # KEYUP: drop pending KEYDOWNs for this key so typing is not stuck
+            # replaying a backlog after a hold.
+            if event.type == events.KEYUP:
+                key = getattr(event, "key", None)
+                if key is not None and self._fifo:
+                    self._fifo = [
+                        e
+                        for e in self._fifo
+                        if not (e.type == events.KEYDOWN and getattr(e, "key", None) == key)
+                    ]
             self._fifo.append(event)
 
         def _set_finger(self, finger_id, xy):

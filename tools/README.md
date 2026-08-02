@@ -27,6 +27,18 @@ python tools/serve.py
 
 See [Run the notebook interactively](../docs/platforms/jupyter-run.md) and [PyScript local development](../docs/guides/pyscript.md).
 
+## Input / keypad probe
+
+| Script | Purpose |
+|--------|---------|
+| [`input_probe.py`](input_probe.py) | Cross-backend keyboard/keypad diagnostic + selftests (eventsys + optional LVGL map) |
+
+```bash
+python tools/input_probe.py --selftest
+cd src && micropython ../tools/input_probe.py --selftest --lvgl
+cd src && python ../tools/input_probe.py   # interactive; focus the window
+```
+
 ## PyScript headless debug (Playwright)
 
 | Script | Purpose |

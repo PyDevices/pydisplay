@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw
 
 from displaysys import DisplayDriver, color_rgb
 from eventsys import events
-from eventsys.keys import Keys, default_quit_chord, key_to_keycode, mod_mask
+from eventsys.keys import Keys, default_quit_chord, enrich_mod, key_to_keycode, mod_mask
 
 _JN_DEPS = "pip install ipywidgets ipyevents"
 
@@ -246,7 +246,7 @@ class JNDevices:
 
     def _on_key(self, event, kind):
         keycode = key_to_keycode(event.get("key", ""), event.get("location", 0))
-        mod = mod_mask(
+        base_mod = mod_mask(
             event.get("ctrlKey"),
             event.get("shiftKey"),
             event.get("altKey"),
@@ -256,10 +256,10 @@ class JNDevices:
             if event.get("repeat"):  # ignore auto-repeat
                 return
             self._pressed.add(keycode)
-            self._enqueue_key(events.KEYDOWN, keycode, mod)
+            self._enqueue_key(events.KEYDOWN, keycode, enrich_mod(base_mod, self._pressed))
         else:
             self._pressed.discard(keycode)
-            self._enqueue_key(events.KEYUP, keycode, mod)
+            self._enqueue_key(events.KEYUP, keycode, enrich_mod(base_mod, self._pressed))
 
     def _enqueue_key(self, type, keycode, mod):
         self._queue.append(events.Key(type, Keys.keyname(keycode), keycode, mod, 0, None))

@@ -98,7 +98,7 @@ def _handle_window_close(window):
     return None
 
 
-def _convert(e):
+def _convert(e):  # noqa: PLR0911 — one return per pygame event type
     """Convert a pygame event to an eventsys namedtuple."""
     t = e.type
     if t == pg.QUIT:
@@ -143,6 +143,9 @@ def _convert(e):
             win,
         )
     if t in (pg.KEYDOWN, pg.KEYUP):
+        # Match browser / SDL backends: drop OS auto-repeat KEYDOWNs.
+        if t == pg.KEYDOWN and getattr(e, "repeat", False):
+            return None
         return events.Key(t, _pg_key_name(e.key), e.key, e.mod, getattr(e, "scancode", 0), win)
     if t == pg.JOYAXISMOTION:
         return events.JoyAxisMotion(t, e.instance_id, e.axis, e.value / 32767.0)
