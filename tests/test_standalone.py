@@ -196,7 +196,6 @@ class TestStandalone(unittest.TestCase):
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 
-
     def test_displaysys_imports_and_runs_in_isolation(self):
         tmp = tempfile.mkdtemp(prefix="displaysys_standalone_")
         try:

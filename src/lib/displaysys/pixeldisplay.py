@@ -18,9 +18,8 @@ except ImportError:
         return x
 
 
-import pygraphics
-
 from displaysys import DisplayDriver, color_rgb
+import pygraphics
 
 
 def _color888_from_565(c):

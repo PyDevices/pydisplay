@@ -7,6 +7,7 @@ import unittest
 from unittest import mock
 
 import _env  # noqa: F401
+
 from displaysys.epaperdisplay import EPaperDisplay
 
 

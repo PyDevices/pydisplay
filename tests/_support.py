@@ -43,7 +43,6 @@ class FakeDisplay:
         self.touch_device = None
 
 
-
 class FakeFrameBuffer:
     """A minimal stand-in for a CircuitPython ``FrameBuffer``.
 
