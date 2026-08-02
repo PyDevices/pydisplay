@@ -37,8 +37,6 @@ if _src not in sys.path:
 if _PKG not in sys.path:
     sys.path.insert(0, _PKG)
 
-import lib.path  # noqa: F401 — adds lib/, add_ons/, examples/
-
 import input_map  # noqa: E402 — capture hook must run before display_driver
 
 input_map.capture_virtual_devices()

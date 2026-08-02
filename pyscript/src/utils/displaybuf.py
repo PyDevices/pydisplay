@@ -27,9 +27,8 @@ Usage:
 import gc
 import sys
 
-import pygraphics
-
 from displaysys import alloc_buffer, color332, color565, color565_swapped
+import pygraphics
 
 _has_viper_tools = False
 if sys.implementation.name == "micropython":

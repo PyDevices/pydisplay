@@ -2,7 +2,7 @@
 touch_setup.py - hardware setup for micropython-touch using DisplayBuffer on displaysys.
 See: https://github.com/peterhinch/micropython-touch
 
-Fetches micropython-touch into add_ons/gui/ when needed.
+Fetches micropython-touch into utils/gui/ when needed.
 
 Usage:
     import touch_setup  # creates display
@@ -76,7 +76,7 @@ runtime.on(
 from fetch_ph_gui import fetch_ph_gui  # noqa: E402
 
 if not fetch_ph_gui("micropython-touch"):
-    raise ImportError("micropython-touch not in add_ons/gui/; install with mip or copy gui/")
+    raise ImportError("micropython-touch not in utils/gui/; install with mip or copy gui/")
 
 from gui.core.tgui import Display  # noqa: E402
 

@@ -34,8 +34,6 @@ _tools = _src + "/../tools"
 if _tools not in sys.path:
     sys.path.insert(0, _tools)
 
-import lib.path  # noqa: F401 — must be first
-
 import json
 import time
 

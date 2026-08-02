@@ -1,5 +1,5 @@
 # deps: palettes
-# add_ons: tft_write, tft_config
+# utils: tft_write, tft_config
 """
 proverbs.py
 ===========

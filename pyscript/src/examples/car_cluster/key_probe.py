@@ -29,8 +29,6 @@ if _src and _src not in sys.path:
 if _PKG not in sys.path:
     sys.path.insert(0, _PKG)
 
-import lib.path  # noqa: F401
-
 import lvgl as lv
 from board_config import runtime
 from eventsys import events

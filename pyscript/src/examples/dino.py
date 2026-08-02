@@ -1,5 +1,5 @@
 # deps: pygraphics
-# add_ons: pixel_sim
+# utils: pixel_sim
 """
 dino.py — a self-contained, color pixel-matrix endless runner.
 

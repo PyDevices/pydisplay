@@ -12,9 +12,9 @@ mpremote transport/CLI removed and local filesystem writes. For:
   - CircuitPython (when urllib, urequests, or requests is available)
   - Pyodide / PyScript (``pyodide.http.open_url`` when urllib is unavailable)
 
-MicroPython ships ``mip`` in firmware. Use ``import lib.path`` for ``sys.path``
-(do not hardcode ``add_ons`` ahead of ``.frozen``) — ``lib.path`` keeps
-``.frozen`` before ``add_ons`` so this file is never imported when frozen
+MicroPython ships ``mip`` in firmware. Use ``import utils.path`` for ``sys.path``
+(do not hardcode ``utils`` ahead of ``.frozen``) — ``utils.path`` keeps
+``.frozen`` before ``utils`` so this file is never imported when frozen
 ``mip`` exists. PyScript gallery loaders call this module on Pyodide via
 ``ps_loader.py``.
 
@@ -22,7 +22,7 @@ API (compatible subset of on-device mip)::
 
     import mip
     mip.install("palettes", index="https://…/mip/PyDevices")
-    mip.install("github:org/repo/path/package.json", target="add_ons")
+    mip.install("github:org/repo/path/package.json", target="utils")
     mip.install("http://example.com/pkg.py")
 
 ``mpy`` defaults to **False** on CPython, CircuitPython, and Pyodide (they use
@@ -257,7 +257,7 @@ def _default_target():
         norm = p.replace("\\", "/").rstrip("/")
         if norm.endswith("/lib") or norm == "lib" or norm.endswith("\\lib"):
             return p
-    for candidate in ("lib", "/lib", "add_ons"):
+    for candidate in ("lib", "/lib", "utils"):
         try:
             os.stat(candidate)
             return candidate

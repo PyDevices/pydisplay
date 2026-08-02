@@ -288,7 +288,7 @@ except OSError:
     pass
 if "/" not in sys.path:
     sys.path.insert(0, "/")
-import lib.path  # noqa: F401
+import utils.path  # noqa: F401
 
 from displaysys import env_set
 
@@ -343,7 +343,7 @@ def _gui_value(name):
 
 def _discover_demos():
     names = []
-    for filename in os.listdir("/add_ons/gui/demos"):
+    for filename in os.listdir("/utils/gui/demos"):
         if filename.endswith(".py") and filename != "__init__.py":
             names.append(filename[:-3])
     names.sort()

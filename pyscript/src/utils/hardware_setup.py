@@ -2,7 +2,7 @@
 hardware_setup.py - hardware setup for micropython-micro-gui using DisplayBuffer.
 See: https://github.com/peterhinch/micropython-micro-gui
 
-Fetches micropython-micro-gui into add_ons/gui/ when needed.
+Fetches micropython-micro-gui into utils/gui/ when needed.
 
 On desktop, navigation uses keyboard stand-ins (not GPIO pins):
   Right — next control
@@ -139,7 +139,7 @@ runtime.on(runtime.events.KEYDOWN, _on_key)
 from fetch_ph_gui import fetch_ph_gui  # noqa: E402
 
 if not fetch_ph_gui("micropython-micro-gui"):
-    raise ImportError("micropython-micro-gui not in add_ons/gui/; install with mip or copy gui/")
+    raise ImportError("micropython-micro-gui not in utils/gui/; install with mip or copy gui/")
 
 from gui.core.ugui import Display  # noqa: E402
 

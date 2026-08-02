@@ -49,8 +49,6 @@ _PKG = __file__.replace("\\", "/").rsplit("/", 1)[0]
 if _PKG not in sys.path:
     sys.path.insert(0, _PKG)
 
-import lib.path  # noqa: F401 — adds lib/, add_ons/, examples/
-
 from displaysys import env_set
 
 # Local desktop test panel — change these and re-run. Must stay above board_config.

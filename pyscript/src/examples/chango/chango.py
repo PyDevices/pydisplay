@@ -1,5 +1,5 @@
 # deps: palettes
-# add_ons: tft_config, tft_write
+# utils: tft_config, tft_write
 """
 chango.py
 =========
