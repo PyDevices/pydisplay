@@ -7,12 +7,7 @@ Provides a CircuitPython-shaped subset so examples can use::
     wifi.radio.connect("ssid", "password")
     print(wifi.radio.ipv4_address)
 
-Store credentials on the board in ``/secrets.py`` (not in this module)::
-
-    WIFI_SSID = "your-ssid"
-    WIFI_PASSWORD = "your-passphrase"
-
-Then::
+Or, when a ``secrets`` module provides ``WIFI_SSID`` / ``WIFI_PASSWORD``::
 
     import wifi
     wifi.connect_from_secrets()
@@ -113,7 +108,7 @@ def connect_from_secrets(module="secrets"):
         print("\nAlready connected.\nNetwork config:", radio._wlan.ifconfig(), "\n")
         return True
     if not ssid:
-        print("wifi: WIFI_SSID missing — edit /secrets.py")
+        print("wifi: WIFI_SSID missing in secrets")
         return False
     radio.connect(ssid, password or "")
     return radio.ipv4_address is not None

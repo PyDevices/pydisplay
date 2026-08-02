@@ -2,8 +2,8 @@
 # deps: lvgl
 """LVGL textarea → Gemini TTS → SDL audio.
 
-Needs ``tts``, ``sdl2audio``, ``audiodev``, and ``secrets`` on ``MICROPYPATH``
-(e.g. ``~/.micropython/lib``). API key: Windows/User ``GEMINI_API_KEY``.
+Needs ``tts``, ``sdl2audio``, ``audiodev``, and a ``secrets`` module that
+provides ``GEMINI_API_KEY``.
 """
 
 import display_driver  # noqa: F401 — wires LVGL flush + input + event_loop
