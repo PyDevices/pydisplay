@@ -1,21 +1,25 @@
 # gallery: skip
 # deps: lvgl
-"""LVGL chat → Gemma (LM Studio) → Kokoro speaks the reply.
+"""LVGL chat → Gemma (LM Studio) → Deepgram Aura speaks the reply.
 
 Chat answers come from Gemma in LM Studio (``CHAT_MODEL``, default
-``google/gemma-4-e4b``); the local Kokoro server reads them aloud.
+``google/gemma-4-e4b``); Deepgram Aura streaming TTS reads them aloud.
 
 Secrets (optional overrides)::
 
     LM_STUDIO_BASE_URL = "http://192.168.1.10:1234/v1"
     CHAT_MODEL = "google/gemma-4-e4b"
     CHAT_TIMEOUT = 15
-    KOKORO_BASE_URL = "http://192.168.1.10:8880/v1"
+    DEEPGRAM_TOKEN = "your-token"
 
 Needs ``tts``, ``requests``, and ``board_config.audio_out``.
 """
 
 import json
+from secrets import DEEPGRAM_TOKEN
+
+if not DEEPGRAM_TOKEN:
+    raise RuntimeError("DEEPGRAM_TOKEN is not set in the environment")
 
 import board_config as bc
 import display_driver  # noqa: F401 — wires LVGL flush + input + event_loop
@@ -26,7 +30,8 @@ try:
 except ImportError:
     import urequests as requests
 
-from tts import KokoroTTS, TTSClient
+from tts import DeepgramTTS, TTSClient
+
 from multimer import sleep_ms
 
 try:
@@ -43,11 +48,6 @@ try:
     from secrets import CHAT_TIMEOUT
 except ImportError:
     CHAT_TIMEOUT = 15
-
-try:
-    from secrets import KOKORO_BASE_URL
-except ImportError:
-    KOKORO_BASE_URL = "http://127.0.0.1:8880/v1"
 
 SYSTEM_PROMPT = (
     "You are a helpful assistant on a small embedded display. "
@@ -74,7 +74,7 @@ _C_OK = 0x6FCF97
 _C_ERR = 0xE07A6A
 _C_USER = 0x2A3A4A
 
-_provider = KokoroTTS(base_url=KOKORO_BASE_URL)
+_provider = DeepgramTTS(DEEPGRAM_TOKEN)
 _client = TTSClient(_provider, chunk_size=4096)
 _messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 _status = None
@@ -324,7 +324,7 @@ def _speak(text):
     set_vol = getattr(output, "set_volume", None)
     if set_vol is not None:
         set_vol(85)
-    voice = KokoroTTS.voice_from_label(_dd_selected_text(_voice_dd, _voice_labels))
+    voice = DeepgramTTS.voice_from_label(_dd_selected_text(_voice_dd, _voice_labels))
     stream = None
     try:
         stream = _client.stream(text, voice=voice)
@@ -340,7 +340,7 @@ def _speak(text):
                 first_chunk = False
             total += output.write(chunk)
         if first_chunk:
-            raise ValueError("Kokoro stream completed without audio")
+            raise ValueError("Deepgram stream completed without audio")
         drain = getattr(output, "drain", None)
         if drain is not None:
             drain()
@@ -352,7 +352,7 @@ def _speak(text):
 
 
 def send(text=None):
-    """Send the input line: chat completion, then Kokoro playback."""
+    """Send the input line: chat completion, then Deepgram playback."""
     global _busy
     if _busy:
         return
@@ -376,19 +376,19 @@ def send(text=None):
         except Exception as exc:
             msg = _short_error(exc, "LM Studio unreachable")
             _set_status(msg, "err")
-            print("chat_lvgl:", msg)
+            print("chat_deepgram:", msg)
             return
         _add_bubble("assistant", reply)
-        # Finish revealing the complete reply before Kokoro generation blocks.
+        # Finish revealing the complete reply before Deepgram generation blocks.
         _settle_ui()
         _set_status("Generating speech...", "accent")
         try:
             total = _speak(reply)
             _set_status("Done (%d bytes)" % total, "ok")
         except Exception as exc:
-            msg = _short_error(exc, "Kokoro server unreachable")
+            msg = _short_error(exc, "Deepgram unreachable")
             _set_status(msg, "err")
-            print("chat_lvgl speak:", msg)
+            print("chat_deepgram speak:", msg)
     finally:
         _set_send_enabled(True)
         _busy = False
@@ -492,14 +492,14 @@ try:
 
     y = _pad
     title = lv.label(scr)
-    title.set_text("Kokoro Chat")
+    title.set_text("Deepgram Chat")
     title.set_style_text_color(_color(_C_TEXT), 0)
     _set_scaled_font(title, title_pt)
     title.align(lv.ALIGN.TOP_LEFT, _pad, y)
     y += title_pt + _pad // 3
 
     _status = lv.label(scr)
-    _status.set_text("Ask a question — %s answers, Kokoro speaks" % CHAT_MODEL)
+    _status.set_text("Ask a question — %s answers, Deepgram speaks" % CHAT_MODEL)
     _status.set_width(w - 2 * _pad)
     _status.set_long_mode(lv.label.LONG_MODE.WRAP)
     _status.set_style_text_color(_color(_C_MUTED), 0)
@@ -507,8 +507,8 @@ try:
     _status.align(lv.ALIGN.TOP_LEFT, _pad, y)
     y += _body_pt + _pad // 2
 
-    _voice_labels = [KokoroTTS.voice_label(n, d) for n, d in KokoroTTS.voices()]
-    default_voice = KokoroTTS.voice_label(_provider.voice)
+    _voice_labels = [DeepgramTTS.voice_label(n, d) for n, d in DeepgramTTS.voices()]
+    default_voice = DeepgramTTS.voice_label(_provider.voice)
     vlab = lv.label(scr)
     vlab.set_text("VOICE")
     _set_font(vlab, max(12, _body_pt - 4))
@@ -573,7 +573,7 @@ try:
 
     _add_bubble(
         "assistant",
-        "Hi — ask me anything. I answer with %s, then Kokoro reads it aloud." % CHAT_MODEL,
+        "Hi — ask me anything. I answer with %s, then Deepgram reads it aloud." % CHAT_MODEL,
         refresh=False,
     )
 finally:
@@ -581,7 +581,7 @@ finally:
         _inst.enable()
 
 _refresh_ui()
-print("chat_lvgl: ready — chat=%s speak=%s" % (CHAT_MODEL, KOKORO_BASE_URL))
+print("chat_deepgram: ready — chat=%s speak=Deepgram" % CHAT_MODEL)
 # Returns immediately on an interactive REPL with machine.Timer / signals;
 # blocks when launched as a named script (e.g. main.py boot).
 display_driver.runtime.run_forever()

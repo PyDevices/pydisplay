@@ -49,8 +49,20 @@
       "github:PyDevices/pydisplay/src/examples/calc_widgets.py"
     ],
     [
-      "chat_lvgl.py",
-      "github:PyDevices/pydisplay/src/examples/chat_lvgl.py"
+      "chat_deepgram.py",
+      "github:PyDevices/pydisplay/src/examples/chat_deepgram.py"
+    ],
+    [
+      "chat_gemini.py",
+      "github:PyDevices/pydisplay/src/examples/chat_gemini.py"
+    ],
+    [
+      "chat_groq.py",
+      "github:PyDevices/pydisplay/src/examples/chat_groq.py"
+    ],
+    [
+      "chat_kokoro.py",
+      "github:PyDevices/pydisplay/src/examples/chat_kokoro.py"
     ],
     [
       "color_test.py",
@@ -227,6 +239,10 @@
     [
       "tts_gemini.py",
       "github:PyDevices/pydisplay/src/examples/tts_gemini.py"
+    ],
+    [
+      "tts_groq.py",
+      "github:PyDevices/pydisplay/src/examples/tts_groq.py"
     ],
     [
       "tts_kokoro.py",
