@@ -11,7 +11,14 @@ from pyscript.ffi import create_proxy
 
 from displaysys import DisplayDriver, color_rgb
 from eventsys import events
-from eventsys.keys import Keys, default_quit_chord, dom_key_scrolls_page, key_to_keycode, mod_mask
+from eventsys.keys import (
+    Keys,
+    default_quit_chord,
+    dom_key_scrolls_page,
+    enrich_mod,
+    key_to_keycode,
+    mod_mask,
+)
 
 try:  # Gamepad polling is optional and only available in a browser.
     from js import navigator
@@ -254,18 +261,18 @@ class PSDevices:
 
     def _on_keydown(self, e):
         keycode = key_to_keycode(e.key, e.location)
-        mod = mod_mask(e.ctrlKey, e.shiftKey, e.altKey, e.metaKey)
         self._suppress_browser_scroll(e, keycode)
         if e.repeat:  # ignore auto-repeat
             return
         self._pressed.add(keycode)
+        mod = enrich_mod(mod_mask(e.ctrlKey, e.shiftKey, e.altKey, e.metaKey), self._pressed)
         self._enqueue_key(events.KEYDOWN, keycode, mod)
 
     def _on_keyup(self, e):
         keycode = key_to_keycode(e.key, e.location)
-        mod = mod_mask(e.ctrlKey, e.shiftKey, e.altKey, e.metaKey)
         self._suppress_browser_scroll(e, keycode)
         self._pressed.discard(keycode)
+        mod = enrich_mod(mod_mask(e.ctrlKey, e.shiftKey, e.altKey, e.metaKey), self._pressed)
         self._enqueue_key(events.KEYUP, keycode, mod)
 
     ############### Gamepad ################

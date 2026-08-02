@@ -280,11 +280,33 @@ def _convert(e):
             e.wheel.windowID,
         )
     elif e.type in (usdl2.SDL_KEYDOWN, usdl2.SDL_KEYUP):
-        name = usdl2.SDL_GetKeyName(e.key.keysym.sym)
+        # Match browser backends: ignore OS auto-repeat KEYDOWNs. Consumers that
+        # need held-key repeat (e.g. LVGL textarea) use their own long-press path.
+        if e.type == usdl2.SDL_KEYDOWN and getattr(e.key, "repeat", 0):
+            return None
+        sym = e.key.keysym.sym
+        name = usdl2.SDL_GetKeyName(sym)
+        # Some hosts (notably WSLg/RDP) report letters as
+        # SDL_SCANCODE_TO_KEYCODE(scancode) (bit 0x40000000) instead of ASCII.
+        if isinstance(sym, int) and (sym & 0x40000000) and name:
+            if len(name) == 1:
+                sym = ord(name.lower())
+            elif name == "Space":
+                sym = 32
+            elif name == "Return":
+                sym = 13
+            elif name == "Backspace":
+                sym = 8
+            elif name == "Escape":
+                sym = 27
+            elif name == "Tab":
+                sym = 9
+            elif name == "Delete":
+                sym = 127
         evt = events.Key(
             e.type,
             name,
-            e.key.keysym.sym,
+            sym,
             e.key.keysym.mod,
             e.key.keysym.scancode,
             e.key.windowID,

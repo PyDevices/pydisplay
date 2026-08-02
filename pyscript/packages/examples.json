@@ -221,6 +221,10 @@
       "github:PyDevices/pydisplay/src/examples/touch_gui_simpletest.py"
     ],
     [
+      "tts_lvgl.py",
+      "github:PyDevices/pydisplay/src/examples/tts_lvgl.py"
+    ],
+    [
       "tv_remote_menu.py",
       "github:PyDevices/pydisplay/src/examples/tv_remote_menu.py"
     ],

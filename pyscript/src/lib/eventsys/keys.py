@@ -696,9 +696,27 @@ def key_to_keycode(key, location=0):
     return Keys.K_UNKNOWN
 
 
+# Modifier key → ambient ``event.mod`` bit (for enriching browser masks).
+_MOD_KEY_BITS = {
+    Keys.K_LSHIFT: Keys.KMOD_LSHIFT,
+    Keys.K_RSHIFT: Keys.KMOD_RSHIFT,
+    Keys.K_LCTRL: Keys.KMOD_LCTRL,
+    Keys.K_RCTRL: Keys.KMOD_RCTRL,
+    Keys.K_LALT: Keys.KMOD_LALT,
+    Keys.K_RALT: Keys.KMOD_RALT,
+    Keys.K_LGUI: Keys.KMOD_LGUI,
+    Keys.K_RGUI: Keys.KMOD_RGUI,
+}
+
+
 def mod_mask(ctrl, shift, alt, meta):
     """
     Build an eventsys modifier mask from DOM modifier flags.
+
+    DOM only reports that a modifier *group* is held, not left vs right.
+    This returns the **left-hand** ``KMOD_L*`` bits. Prefer matching with
+    group masks (``KMOD_SHIFT`` / ``KMOD_CTRL`` / …) or :func:`chord_matches`,
+    or enrich with :func:`enrich_mod` when pressed keycodes are known.
 
     Args:
         ctrl (bool): Whether Ctrl is held.
@@ -718,6 +736,29 @@ def mod_mask(ctrl, shift, alt, meta):
         mask |= Keys.KMOD_LALT
     if meta:
         mask |= Keys.KMOD_LGUI
+    return mask
+
+
+def enrich_mod(mod, pressed_keys):
+    """OR left/right ``KMOD_*`` bits for modifier keycodes in ``pressed_keys``.
+
+    Use on browser backends after updating the pressed-key set so ambient
+    ``event.mod`` reflects Right Shift/Ctrl/… when those keys are down.
+
+    Args:
+        mod (int): Base modifier mask (e.g. from :func:`mod_mask`).
+        pressed_keys: Iterable of currently pressed key codes.
+
+    Returns:
+        int: ``mod`` with bits from pressed modifier keys set.
+    """
+    mask = mod or 0
+    if not pressed_keys:
+        return mask
+    for key in pressed_keys:
+        bit = _MOD_KEY_BITS.get(key)
+        if bit:
+            mask |= bit
     return mask
 
 
