@@ -27,7 +27,7 @@ This page is a **router** for the main pydisplay workflows. In every case, the u
 - [Architecture](concepts/architecture.md) — how ``board_config``, ``displaysys``, and ``eventsys`` fit together
 - [Portability & platforms](platforms/index.md) — where pydisplay runs and how the backend is chosen
 - [Ecosystem & sister projects](ecosystem.md) — LVGL in Python, GUIs, Jupyter
-- [Installation overview](installation/index.md) — MIP vs full clone vs micropython-lib
+- [Installation overview](installation/index.md) — MIP vs full clone vs TestPyPI / micropython-lib
 
 A simple app usually follows this shape:
 

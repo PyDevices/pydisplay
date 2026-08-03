@@ -2,7 +2,7 @@
 
 **Write your graphics code once. Run it everywhere Python runs.**
 
-PyDisplay is the portable foundation layer for Python graphics — **display drivers, unified input events, drawing primitives, fonts, palettes, and cross-platform timers** behind a single API. The same drawing code runs unchanged on a microcontroller, on your desktop, in a web browser, and inside a Jupyter Notebook. The published packages are pure-Python and ship through TestPyPI and micropython-lib / MIP.
+PyDisplay is the portable foundation layer for Python graphics — **display drivers, unified input events, drawing primitives, fonts, palettes, and cross-platform timers** behind a single API. The same drawing code runs unchanged on a microcontroller, on your desktop, in a web browser, and inside a Jupyter Notebook. The published packages are pure-Python: CPython wheels are published on TestPyPI, and MicroPython packages are served through micropython-lib / MIP.
 
 The mental model is simple: import ``board_config`` for ``display_drv`` and ``runtime``, draw into the display using the usual framebuffer-style calls, handle input with the shared runtime, and keep the app alive with ``runtime.run_forever()``. That pattern scales from a one-file demo to a larger widget stack.
 
