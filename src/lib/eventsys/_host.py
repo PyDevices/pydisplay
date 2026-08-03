@@ -124,20 +124,25 @@ class VirtualDevices:
             self.type = device_type
             self.user_data = None
             self._fifo = []
-            self._callback = None
+            self._callbacks = []
             self._active_key_event = None
             # Multipoint snapshot for LVGL gestures (SDL fingers / etc.).
             self.points = ()
             self._fingers = {}  # finger_id -> (x, y)
 
         def subscribe(self, callback):
-            self._callback = callback
+            if callback not in self._callbacks:
+                self._callbacks.append(callback)
+
+        def unsubscribe(self, callback):
+            if callback in self._callbacks:
+                self._callbacks.remove(callback)
 
         def poll(self, *args):
             self._virtual_devices.poll_host_device()
             event = self._fifo.pop(0) if self._fifo else None
-            if self._callback is not None:
-                self._callback(event, *args)
+            for callback in tuple(self._callbacks):
+                callback(event, *args)
 
         @property
         def has_pending(self):

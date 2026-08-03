@@ -134,6 +134,20 @@ class TestRuntimeOwnedRefresh(unittest.TestCase):
         self.assertIsNone(self.runtime._timer)
         self.assertEqual(self.runtime._tick_callbacks, [])
 
+    def test_nested_tick_dispatch_is_dropped(self):
+        self.runtime._ensure_ticks()
+        hits = []
+
+        def callback(timer):
+            hits.append(timer)
+            self.runtime._dispatch_tick(timer)
+
+        now = self.runtime._ticks_ms()
+        self.runtime._tick_callbacks.append([callback, 10, now, False])
+        self.runtime._dispatch_tick("timer")
+        self.assertEqual(hits, ["timer"])
+        self.assertFalse(self.runtime._in_tick_dispatch)
+
 
 if __name__ == "__main__":
     unittest.main()

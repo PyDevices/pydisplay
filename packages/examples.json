@@ -225,6 +225,10 @@
       "github:PyDevices/pydisplay/src/examples/simon.py"
     ],
     [
+      "stt_groq.py",
+      "github:PyDevices/pydisplay/src/examples/stt_groq.py"
+    ],
+    [
       "testris.py",
       "github:PyDevices/pydisplay/src/examples/testris.py"
     ],

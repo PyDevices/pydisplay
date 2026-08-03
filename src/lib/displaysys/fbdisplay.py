@@ -317,3 +317,15 @@ class FBDisplay(DisplayDriver):
         if getattr(raw, "auto_refresh", False):
             return
         raw.refresh()
+
+    def flush_rect(self, x, y, w, h):
+        """Make a directly-painted native framebuffer region visible.
+
+        Returns ``True`` when the native framebuffer can cache-sync the dirty
+        rows without a full-frame refresh/present, otherwise ``False``.
+        """
+        refresh_rect = getattr(self._raw_buffer, "refresh_rect", None)
+        if refresh_rect is None:
+            return False
+        refresh_rect(x, y, w, h)
+        return True

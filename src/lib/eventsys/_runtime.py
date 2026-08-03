@@ -211,6 +211,20 @@ class Runtime:
         self._timer_async = bool(timer_async)
         self._timer = None
         self._tick_callbacks = []
+        # A soft machine.Timer callback can be scheduled again after another
+        # MicroPython thread runs while the previous dispatch is still active.
+        # Drop that nested fire; each subscription keeps its own next deadline.
+        self._in_tick_dispatch = False
+        self._timer_thread_ident = None
+        try:
+            import sys
+
+            if sys.implementation.name == "micropython":
+                import _thread
+
+                self._timer_thread_ident = _thread.get_ident()
+        except (ImportError, AttributeError):
+            pass
         self._ticks_ms = None
         self._ticks_add = None
         self._ticks_diff = None
@@ -839,20 +853,38 @@ class Runtime:
         return timer
 
     def _dispatch_tick(self, timer_obj):
-        now = self._ticks_ms()
-        for entry in tuple(self._tick_callbacks):
-            if entry[3]:
-                continue
-            if self._ticks_diff(entry[2], now) > 0:
-                continue
-            entry[2] = self._ticks_add(now, entry[1])
-            entry[0](timer_obj)
-        # Sync QUIT from inside a service tick sets ``_pending_teardown`` and
-        # must run after all tick callbacks (including refresh) for this fire.
-        # When ``run_forever`` is blocking, leave teardown to its ``finally`` —
-        # stopping the timer here wedges the keep-alive ``sleep_ms``.
-        if self._pending_teardown and not self._blocking_run_forever:
-            self._try_perform_teardown()
+        # MicroPython soft callbacks execute on whichever Python thread happens
+        # to service the scheduler.  LVGL/display callbacks must stay on the
+        # thread that created this runtime; worker-thread fires are expendable
+        # because every subscription is deadline based.
+        if self._timer_thread_ident is not None:
+            try:
+                import _thread
+
+                if _thread.get_ident() != self._timer_thread_ident:
+                    return
+            except (ImportError, AttributeError):
+                pass
+        if self._in_tick_dispatch:
+            return
+        self._in_tick_dispatch = True
+        try:
+            now = self._ticks_ms()
+            for entry in tuple(self._tick_callbacks):
+                if entry[3]:
+                    continue
+                if self._ticks_diff(entry[2], now) > 0:
+                    continue
+                entry[2] = self._ticks_add(now, entry[1])
+                entry[0](timer_obj)
+            # Sync QUIT from inside a service tick sets ``_pending_teardown`` and
+            # must run after all tick callbacks (including refresh) for this fire.
+            # When ``run_forever`` is blocking, leave teardown to its ``finally`` —
+            # stopping the timer here wedges the keep-alive ``sleep_ms``.
+            if self._pending_teardown and not self._blocking_run_forever:
+                self._try_perform_teardown()
+        finally:
+            self._in_tick_dispatch = False
 
     def on_tick(self, callback, *, period, async_=False):
         """Subscribe ``callback`` to the shared timer (about every ``period`` ms).

@@ -113,6 +113,28 @@ class TestHostEventsDevice(unittest.TestCase):
 
 
 class TestVirtualDevicesMultiWindow(unittest.TestCase):
+    def test_virtual_device_notifies_multiple_subscribers(self):
+        event = events.Key(events.KEYDOWN, "Left Ctrl", 1073742048, 64, 224, 10)
+        host = HostEventsDevice(host_read=scripted([event], None))
+        keypad = VirtualDevices(host, window_id=10)._vd_keypad
+        received = []
+
+        def first(value, *_args):
+            received.append(("first", value))
+
+        def second(value, *_args):
+            received.append(("second", value))
+
+        keypad.subscribe(first)
+        keypad.subscribe(second)
+        keypad.poll()
+
+        self.assertEqual(received, [("first", event), ("second", event)])
+        keypad.unsubscribe(first)
+        keypad.add_event(event)
+        keypad.poll()
+        self.assertEqual(received[-1], ("second", event))
+
     def test_fast_key_pairs_preserve_order(self):
         burst = [
             events.Key(events.KEYDOWN, "a", 97, 0, 4, 10),
