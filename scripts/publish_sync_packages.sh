@@ -344,7 +344,8 @@ EOF
 done
 
 # displaysys: full tree (all backends). One MIP/TestPyPI package.
-# board_config.py is not included — install a board_configs/*/ package instead.
+# Package board_config.py as a top-level module so imports work as
+# import board_config, displaysys.
 echo
 echo "Processing displaysys (full package)"
 mkdir -p "$DEST_DIR/displaysys/displaysys"
@@ -359,6 +360,7 @@ metadata(
     pypi_publish="$(pypi_publish_name "displaysys")",
 )
 require("eventsys")
+module("board_config.py", base_path="$SOURCE_DIR/lib")
 package("displaysys")
 EOF
 copy_package_readme "displaysys" "$DEST_DIR/displaysys/displaysys/README.md"
