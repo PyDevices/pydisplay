@@ -52,6 +52,7 @@ _port = "$(PORT_DIR)".replace("\\", "/")
 if _port.endswith("/unix") or _port.endswith("/windows"):
     include("$(MPY_DIR)/extmod/asyncio")  # type: ignore[name-defined]  # noqa: PGH003
 
+module("board_config", base_path="./src/lib")  # type: ignore[name-defined]  # noqa: PGH003
 package("displaysys", base_path="./src/lib", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
 package("eventsys", base_path="./src/lib", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
 package("multimer", base_path="./src/lib", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
