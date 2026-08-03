@@ -6,6 +6,8 @@ Cross-platform periodic timers with a `machine.Timer`-style API — sync timers,
 
 ### CPython (TestPyPI)
 
+This package is published as a pure-Python wheel to TestPyPI.
+
 ```bash
 pip install \
   -i https://test.pypi.org/simple/ \

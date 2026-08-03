@@ -1,4 +1,4 @@
-# Publish to PyDevices/micropython-lib, mip/PyDevices, and TestPyPI.
+# Publish the Python-only pydisplay packages to micropython-lib and TestPyPI.
 #
 # Release trigger: push an annotated semver tag vX.Y.Z (see scripts/publish_release_tag.sh).
 #
@@ -25,10 +25,6 @@ on:
         description: Sync pydisplay src into micropython-lib PyDevices branch
         type: boolean
         default: true
-      upload_testpypi:
-        description: Build and upload wheels to TestPyPI (needs TESTPYPI_API_TOKEN)
-        type: boolean
-        default: false
       publish_mip_index:
         description: Rebuild mip/PyDevices and push to micropython-lib gh-pages
         type: boolean
@@ -99,7 +95,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install publish tools
-        if: github.event_name == 'push' || inputs.upload_testpypi == true
+        if: github.event_name == 'push'
         run: pip install hatch twine
 
       - name: Configure micropython-lib git
@@ -122,7 +118,7 @@ jobs:
             MSG="pydisplay: Release v${VERSION} (${GITHUB_SHA::7})."
           fi
           EXTRA=(--commit-message "$MSG" --push)
-          if [[ "${{ github.event_name }}" != "push" && "${{ inputs.upload_testpypi }}" != "true" ]]; then
+          if [[ "${{ github.event_name }}" != "push" ]]; then
             EXTRA=(--skip-pypi --commit-message "$MSG" --push)
           fi
           ./scripts/publish_sync_packages.sh "${EXTRA[@]}"

@@ -9,6 +9,8 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 
 ### Environment
 
+PyDisplay publishes a set of pure-Python packages — `displaysys`, `eventsys`, and `multimer` — to TestPyPI and micropython-lib / MIP. The release workflow is shared via `.github/workflows/publish-micropython-lib.yml` and `scripts/publish_sync_packages.sh`.
+
 - **Cursor Cloud (multi-repo workspace):** do not use a local
   `.cursor/environment.json` in this repo. The canonical cloud environment lives
   in [PyDevices/.github](https://github.com/PyDevices/.github) — start Cloud

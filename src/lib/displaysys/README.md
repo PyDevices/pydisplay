@@ -6,6 +6,8 @@ Cross-platform display drivers for MicroPython, CircuitPython, and CPython — `
 
 ### CPython (TestPyPI)
 
+This package is published as a pure-Python wheel to TestPyPI.
+
 ```bash
 pip install \
   -i https://test.pypi.org/simple/ \

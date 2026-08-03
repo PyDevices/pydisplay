@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Sync pydisplay packages into micropython-lib and optionally upload TestPyPI wheels.
+# Sync pydisplay packages into micropython-lib, build pure-Python TestPyPI wheels,
+# and push the MIP index.
 # Install example:  mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
 # Resolves to:  https://pydevices.github.io/micropython-lib/mip/PyDevices/package/6/displaysys/latest.json
 # Repo URL:  https://github.com/PyDevices/micropython-lib/blob/gh-pages/mip/PyDevices/package/6/displaysys/latest.json
