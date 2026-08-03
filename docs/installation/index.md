@@ -40,7 +40,7 @@ The [installer.py](installer.md) script combines GitHub and micropython-lib inst
 
 ## PyPI / pip (TestPyPI)
 
-CPython wheels are on [TestPyPI](https://test.pypi.org/) for maintainer testing (not production PyPI). Install with **both** indexes so PyDevices packages and PyPI-only dependencies resolve:
+Pure-Python CPython wheels are on [TestPyPI](https://test.pypi.org/) for maintainer testing (not production PyPI). Install with **both** indexes so PyDevices packages and PyPI-only dependencies resolve:
 
 ```bash
 pip install \
