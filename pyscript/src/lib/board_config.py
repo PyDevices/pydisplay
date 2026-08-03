@@ -126,11 +126,11 @@ else:
         timer_async=env_bool("PYDISPLAY_TIMER_ASYNC", DEFAULT_TIMER_ASYNC),
     )
 
-    # Simulate board_devices: lazy audio_out via boarddev (SDL queued PCM).
+    # Simulate board_devices: lazy SDL playback and microphone capture.
     import boarddev
 
     class _DesktopDevices:
-        DEVICES = frozenset({"audio_out"})
+        DEVICES = frozenset({"audio_out", "audio_in"})
 
         @staticmethod
         def audio_out():
@@ -139,6 +139,13 @@ else:
 
             # Gemini / common TTS default: 24 kHz mono s16le
             return _sdl_audio_out(AudioFormat(24000, 1, 16), queue_ms=150)
+
+        @staticmethod
+        def audio_in():
+            from audiodev import AudioFormat
+            from sdl2audio import audio_in as _sdl_audio_in
+
+            return _sdl_audio_in(AudioFormat(24000, 1, 16), queue_ms=150)
 
     DEVICES = _DesktopDevices.DEVICES
     boarddev.bind_lazy(globals(), _DesktopDevices)
