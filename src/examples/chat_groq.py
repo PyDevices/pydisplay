@@ -574,12 +574,10 @@ def _install_push_to_talk():
                 down = pressed()
                 if down and not was_pressed and not _busy and not _listening:
                     _listening = True
-                    painted = [False]
-                    _post_ui(_stt_listening_started, painted)
-                    # Do not let the blocking I2S read monopolize the VM until
-                    # the owner thread has committed the Listening frame.
-                    while not painted[0] and pressed():
-                        thread_sleep_ms(5)
+                    # MicroPython soft-timer callbacks can be serviced on this
+                    # worker and are rejected by Runtime to keep LVGL from
+                    # hopping threads. Paint synchronously before I2S blocks.
+                    _stt_listening_started([False])
                     _capture_and_transcribe(pressed)
                 was_pressed = down
                 thread_sleep_ms(10)
