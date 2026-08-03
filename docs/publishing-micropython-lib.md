@@ -1,6 +1,6 @@
 # Publishing micropython-lib and TestPyPI
 
-How to sync pydisplay into the [PyDevices/micropython-lib](https://github.com/PyDevices/micropython-lib) fork, rebuild the MIP index, and upload wheels to TestPyPI.
+How to sync pydisplay into the [PyDevices/micropython-lib](https://github.com/PyDevices/micropython-lib) fork, rebuild the MIP index, and upload CPython wheels to TestPyPI.
 
 There are **three related outputs**:
 

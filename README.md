@@ -17,7 +17,7 @@
 |:--:|:--:|
 | @peterhinch's `active.py` | @russhughes's `tiny_toasters.py` |
 
-PyDisplay is the portable foundation layer for Python graphics. It gives you **display drivers, unified input events, drawing primitives, fonts, palettes, and cross-platform timers** behind a single API — so the same drawing code runs unchanged on a $4 microcontroller, on your desktop, in a web browser, and even inside a Jupyter Notebook. The published packages are pure-Python and ship through TestPyPI and micropython-lib / MIP.
+PyDisplay is the portable foundation layer for Python graphics. It gives you **display drivers, unified input events, drawing primitives, fonts, palettes, and cross-platform timers** behind a single API — so the same drawing code runs unchanged on a $4 microcontroller, on your desktop, in a web browser, and even inside a Jupyter Notebook. The published packages are pure-Python: CPython wheels are published on TestPyPI, and MicroPython packages are served through micropython-lib / MIP.
 
 ### It really does run everywhere
 
