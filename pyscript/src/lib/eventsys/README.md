@@ -6,6 +6,8 @@ Cross-platform input events with PyGame/SDL2-style types — touch, mouse, keybo
 
 ### CPython (TestPyPI)
 
+This package is published as a pure-Python wheel to TestPyPI.
+
 ```bash
 pip install \
   -i https://test.pypi.org/simple/ \
