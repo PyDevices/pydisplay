@@ -115,6 +115,39 @@ python3 examples/pydisplay_demo.py
 
 A display window opens (PyGame or SDL2, whichever is installed). See the [Desktop CPython guide](https://pydisplay.readthedocs.io/en/latest/guides/desktop-cpython/).
 
+### 3.2.1 Path environment forms
+
+Use these environment variable forms when launching from `src/`:
+
+- Unix (MicroPython):
+
+```bash
+MICROPYPATH=.:.frozen:lib:utils:~/.micropython/lib:/usr/lib/micropython
+```
+
+- Windows (MicroPython):
+
+```powershell
+MICROPYPATH=.;.frozen;lib;utils;%USERPROFILE%\.micropython\lib
+```
+
+- CPython (Unix and Windows):
+
+```bash
+PYTHONPATH=.;lib;utils
+```
+
+If a runtime cannot read environment variables (for example, many MCUs or PyScript),
+or if the environment is intentionally set differently, add this to your startup
+file so imports are normalized:
+
+- MicroPython: `boot.py` or `main.py`
+- CircuitPython: `boot.py` or `code.py`
+
+```python
+import utils.path
+```
+
 ### 3.3 MicroPython board
 
 ```python
