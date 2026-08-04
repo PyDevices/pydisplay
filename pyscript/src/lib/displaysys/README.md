@@ -34,7 +34,7 @@ display_drv.fill_rect(10, 10, 40, 40, 0xF800)
 display_drv.show()
 ```
 
-`board_config` is included in this wheel and selects a desktop backend when run on CPython. On MCU boards, install a matching board config from the [pydisplay](https://github.com/PyDevices/pydisplay) repo.
+`board_config` is included in this wheel and selects a desktop backend when run on CPython. For MCU boards, either provide your own `board_config.py` or install an optional prebuilt board package from micropython-hardware ([install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html)).
 
 ## What you get
 
