@@ -125,6 +125,11 @@ import installer   # runs the default install
 
 Then pick a [board config](https://pydevices.github.io/micropython-hardware/board-configs.html) for your hardware and follow the [ESP32 board guide](https://pydisplay.readthedocs.io/en/latest/guides/esp32-board/).
 
+You can also create your own `board_config.py` instead of using a prebuilt
+board package. If you want prebuilt board packages, use the optional workflow
+guide in micropython-hardware:
+[install-workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html).
+
 ## 4. Installation
 
 | Channel | Format | Best for |

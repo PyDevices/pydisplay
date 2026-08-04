@@ -35,7 +35,7 @@ The [installer.py](installer.md) script combines GitHub and micropython-lib inst
 
 **Board support** ([micropython-hardware](https://github.com/PyDevices/micropython-hardware)):
 
-- `board_config.py` per hardware — see [board configs](https://pydevices.github.io/micropython-hardware/board-configs.html)
+- Optional prebuilt `board_config.py` packages per hardware — see [board configs](https://pydevices.github.io/micropython-hardware/board-configs.html) and [install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html)
 - Display and touch drivers under that repo’s `drivers/`
 
 ## PyPI / pip (TestPyPI)
@@ -58,7 +58,7 @@ For day-to-day desktop work without pip, use a [full clone](full-clone.md) or [d
 
 ## After installing
 
-1. Provide or install a `board_config.py` matching your hardware.
+1. Provide your own `board_config.py` for your hardware, or optionally install a prebuilt board package from micropython-hardware.
 2. Follow the quick start for your platform:
    - [ESP32 / MCU](../guides/esp32-board.md)
    - [Desktop CPython](../guides/desktop-cpython.md)

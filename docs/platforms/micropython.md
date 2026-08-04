@@ -6,7 +6,7 @@ Platform notes for embedded MCUs and MicroPython on Unix. **Quick start:** [ESP3
 
 ### Requirements
 
-1. A `board_config.py` for your hardware — see [board configs](https://pydevices.github.io/micropython-hardware/board-configs.html).
+1. A `board_config.py` for your hardware. You can provide your own, or optionally install a prebuilt board package from micropython-hardware — see [board configs](https://pydevices.github.io/micropython-hardware/board-configs.html) and [install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html).
 2. Core packages (`displaysys`, `eventsys`, …) via [installer.py](../installation/installer.md) or [GitHub MIP](../installation/mip-github.md).
 3. If you kept the optional `utils/` package on the device, `import utils.path` once in `boot.py`/`main.py` (or at the REPL) before examples. Skip it if everything is installed flat into `/lib`.
 
