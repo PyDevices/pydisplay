@@ -15,11 +15,11 @@ via micropip.
     # -> '?modules=hello'  (palettes frozen in MP WASM)
 
     urls_from_deps(modules=("hello",), deps=("palettes",), runtime="pyodide")
-    # -> '?modules=hello&deps=palettes,pygraphics-cmod'
+    # -> '?modules=hello&deps=palettes,pygraphics'
 
     urls_from_deps(modules=("hello",), deps=("palettes",), runtime=None)
     # -> {'micropython': '?modules=hello',
-    #     'pyodide': '?modules=hello&deps=palettes,pygraphics-cmod'}
+    #     'pyodide': '?modules=hello&deps=palettes,pygraphics'}
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ from typing import Iterable
 
 RUNTIMES = ("micropython", "pyodide")
 
-# Profiles → logical names already present (frozen, cmod, or toml-mounted).
+# Profiles → logical names already present (frozen/native, or toml-mounted).
 # Skip those names when emitting deps for that profile.
 PROFILES: dict[str, frozenset[str]] = {
     # Browser MP WASM: pydisplay core (displaysys/eventsys/multimer) toml-mounted;
@@ -51,8 +51,8 @@ PROFILES: dict[str, frozenset[str]] = {
             "usdl2-py",
         }
     ),
-    # Pyodide: pydisplay core toml-mounted. Sister packages (pygraphics-cmod
-    # pyemscripten wasm, usdl2, …) come from TestPyPI via ?deps=.
+    # Pyodide: pydisplay core toml-mounted. Sister packages (pygraphics
+    # pyemscripten wasm wheel, usdl2, …) come from TestPyPI via ?deps=.
     "pyscript-pyodide": frozenset(
         {
             "displaysys",
@@ -81,7 +81,7 @@ _MIP_REWRITE: dict[str, str | None] = {
     "lvgl": None,  # C-only; no MIP package
     "lvgl-cpython": None,
     "display_driver": None,  # ships with LVGL firmware / lvgl-cpython wheel
-    "pygraphics-cmod": "pygraphics",  # mip ships pure-Python pygraphics
+    "pygraphics": "pygraphics",  # micropython-lib package (pure Python)
     "usdl2-py": "usdl2",  # same import name on MIP (PyDevices/usdl2)
 }
 
@@ -89,7 +89,7 @@ _WHEEL_REWRITE: dict[str, str | None] = {
     "lvgl": "lvgl-cpython",
     "lvglcpython": "lvgl-cpython",
     "display_driver": "lvgl-cpython",  # bundled in the wheel
-    "pygraphics": "pygraphics-cmod",  # native + pyemscripten wasm on TestPyPI
+    "pygraphics": "pygraphics",  # TestPyPI project now provides native/wasm builds
     "usdl2-py": "usdl2",  # prefer native TestPyPI wheel when available
 }
 
@@ -178,9 +178,9 @@ def _apply_channel(
         if resolved not in seen:
             seen.add(resolved)
             out.append(resolved)
-    # palettes / pdwidgets need pygraphics; prefer the native TestPyPI cmod wheel.
-    if channel == "wheels" and pull_pygraphics and "pygraphics-cmod" not in seen:
-        out.append("pygraphics-cmod")
+    # palettes / pdwidgets need pygraphics; prefer the native TestPyPI build.
+    if channel == "wheels" and pull_pygraphics and "pygraphics" not in seen:
+        out.append("pygraphics")
     return out
 
 

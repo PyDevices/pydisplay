@@ -28,7 +28,7 @@ class UrlMakerTests(unittest.TestCase):
             deps=("palettes",),
             runtime="pyodide",
         )
-        self.assertEqual(q, "?modules=hello&deps=palettes,pygraphics-cmod")
+        self.assertEqual(q, "?modules=hello&deps=palettes,pygraphics")
 
     def test_runtime_none_returns_both(self):
         out = url(modules=("hello",), deps=("palettes",), runtime=None)
@@ -36,14 +36,14 @@ class UrlMakerTests(unittest.TestCase):
             out,
             {
                 "micropython": "?modules=hello",
-                "pyodide": "?modules=hello&deps=palettes,pygraphics-cmod",
+                "pyodide": "?modules=hello&deps=palettes,pygraphics",
             },
         )
 
     def test_deps_expand_both_channels(self):
         out = urls_from_deps(modules=("hello",), deps=("palettes",), runtime=None)
         self.assertEqual(out["micropython"], "?modules=hello")
-        self.assertEqual(out["pyodide"], "?modules=hello&deps=palettes,pygraphics-cmod")
+        self.assertEqual(out["pyodide"], "?modules=hello&deps=palettes,pygraphics")
 
     def test_lvgl_rewrite_wheels_omit_mip(self):
         out = urls_from_deps(
@@ -69,13 +69,13 @@ class UrlMakerTests(unittest.TestCase):
             "?manifests=car_cluster&deps=lvgl-cpython",
         )
 
-    def test_pygraphics_prefers_cmod_wheel(self):
-        self.assertEqual(rewrite_wheel("pygraphics"), "pygraphics-cmod")
+    def test_pygraphics_prefers_native_wheel(self):
+        self.assertEqual(rewrite_wheel("pygraphics"), "pygraphics")
         self.assertEqual(rewrite_mip("pygraphics"), "pygraphics")
-        # MP skips frozen pygraphics; Pyodide installs pygraphics-cmod from TestPyPI
+        # MP skips frozen pygraphics; Pyodide installs pygraphics from TestPyPI.
         out = urls_from_deps(modules=("x",), deps=("pygraphics",), runtime=None)
         self.assertEqual(out["micropython"], "?modules=x")
-        self.assertEqual(out["pyodide"], "?modules=x&deps=pygraphics-cmod")
+        self.assertEqual(out["pyodide"], "?modules=x&deps=pygraphics")
         q = url(
             modules=("x",),
             deps=("pygraphics",),
@@ -93,7 +93,7 @@ class UrlMakerTests(unittest.TestCase):
         self.assertEqual(out["micropython"], "?modules=calc_widgets,calc_engine")
         self.assertEqual(
             out["pyodide"],
-            "?modules=calc_widgets,calc_engine&deps=pdwidgets,pygraphics-cmod",
+            "?modules=calc_widgets,calc_engine&deps=pdwidgets,pygraphics",
         )
 
     def test_manifests_and_modules(self):

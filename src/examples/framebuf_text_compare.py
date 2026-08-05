@@ -4,7 +4,7 @@
 """
 TEMP troubleshooting tool — delete after the font issue is resolved.
 
-Visual text compare: framebuf and pygraphics, native C vs pure Python.
+Visual text compare: framebuf and pygraphics, native build vs pure Python.
 
 Run from ``src/``::
 
@@ -16,7 +16,7 @@ Run from ``src/``::
     ┌─────────────────┬─────────────────┐
     │ C framebuf      │ utils/framebuf  │  top
     ├─────────────────┼─────────────────┤
-    │ pygraphics cmod │ pure-Python     │  bottom
+    │ pygraphics      │ pure-Python     │  bottom
     └─────────────────┴─────────────────┘
 
 Pure-Python sources are staged from sibling ``cmods/pygraphics/lib/pygraphics``
@@ -215,9 +215,9 @@ fb_python, buf_python = _make_fb(PyFB, HALF_W, HALF_H, native_fb.RGB565)
 _draw_framebuf_panel(fb_native, "C framebuf", FB_STRINGS)
 _draw_framebuf_panel(fb_python, "py framebuf", FB_STRINGS)
 
-# --- graphics: cmod vs staged pure-Python pygraphics ---
+# --- graphics: native vs staged pure-Python pygraphics ---
 gfx_python = _stage_graphics_py()
-buf_gfx_native = _draw_graphics_panel(gfx_native, "gfx cmod")
+buf_gfx_native = _draw_graphics_panel(gfx_native, "gfx native")
 buf_gfx_python = _draw_graphics_panel(gfx_python, "gfx python")
 
 display_drv.fill(BLACK)
@@ -236,7 +236,7 @@ display_drv.show()
 print("text compare (2x2)  [TEMP — delete after font fix]")
 print("  top-left     = C framebuf")
 print("  top-right    = utils/framebuf.py")
-print("  bottom-left  = pygraphics cmod (text8/14/16, text, FB.text)")
+print("  bottom-left  = native pygraphics (text8/14/16, text, FB.text)")
 print("  bottom-right = staged pure-Python pygraphics (cmods sibling)")
 print("Close the window or press Ctrl+C here.")
 

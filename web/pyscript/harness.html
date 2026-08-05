@@ -241,6 +241,7 @@ def _loader_plan():
     return modules, manifests, packages, deps, entry
 
 MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+PSDISPLAY_BOARD_CONFIG_PACKAGE = "github:PyDevices/micropython-hardware/board_configs/psdisplay/package.json"
 
 def _same_origin_base():
     path = document.location.pathname
@@ -298,6 +299,16 @@ def _install_deps(names):
     for which in names:
         print("MIP install:", which)
         mip.install(which, index=MIP_LIB_INDEX)
+
+
+def _ensure_board_config(mip_mod):
+    try:
+        import board_config  # noqa: F401
+        return
+    except ImportError:
+        pass
+    print("MIP install: board_config (psdisplay)")
+    mip_mod.install(PSDISPLAY_BOARD_CONFIG_PACKAGE, target=MANIFEST_MIP_TARGET)
 
 def _install_packages(packages):
     if not packages:
@@ -365,6 +376,7 @@ def _run():
     # #region loader trace
     _mark("after_import_lib_path")
     # #endregion
+    _ensure_board_config(mip)
     if not deps:
         deps = _deps_from_entry(entry)
     if deps:

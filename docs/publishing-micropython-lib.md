@@ -76,7 +76,9 @@ Typical runtime: **~10–20 minutes**.
     displaysys
   ```
 
-  Fuller desktop stack smoke test (`displaysys`, `usdl2`, `pygraphics-cmod`, `lvgl-cpython`, `board_config` draw):
+  Fuller desktop stack smoke test (`displaysys`, `usdl2`, `pygraphics`, `lvgl-cpython`, `board_config` draw):
+  this uses the native TestPyPI `pygraphics` build, while MicroPython MIP uses
+  the pure-Python `pygraphics` package from micropython-lib.
 
   ```bash
   ./tools/test_testpypi_desktop.sh --headless

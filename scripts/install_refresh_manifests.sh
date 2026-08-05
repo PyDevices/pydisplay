@@ -64,7 +64,8 @@ pydisplay core packages (displaysys, eventsys, multimer) are not emitted as
 packages/*.json — install from the micropython-lib MIP index. Sister packages
 (pygraphics / palettes / pdwidgets / lvgl / usdl2) may be frozen in MP WASM;
 gallery deps skip those for MicroPython (see scripts/url_maker.py). Pyodide /
-CPython install them from TestPyPI when needed (pygraphics as pygraphics-cmod).
+CPython install them from TestPyPI when needed (native `pygraphics` package;
+MicroPython MIP still uses the pure-Python `pygraphics` package).
 
 Not generated here (edit manually):
   packages/micropython-{micro-gui,nano-gui,touch}.json

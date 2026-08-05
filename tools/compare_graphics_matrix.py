@@ -9,7 +9,7 @@ From repo root::
     python tools/compare_graphics_matrix.py
     python tools/compare_graphics_matrix.py --only-runtime micropython,cpython-venv
 
-For ``cpython-venv`` and ``python.exe``, installs ``pygraphics-cmod`` from TestPyPI
+For ``cpython-venv`` and ``python.exe``, installs ``pygraphics`` from TestPyPI
 (first time per interpreter) so ``import pygraphics`` resolves to the native wheel.
 
 Results: summary table on stderr, JSON in the system temp directory.
@@ -131,14 +131,14 @@ def _graphics_impl(python_exe: str) -> str | None:
     return proc.stdout.strip()
 
 
-def ensure_graphics_cmod(python_exe: str, *, verbose: bool) -> tuple[bool, str]:
+def ensure_graphics_native(python_exe: str, *, verbose: bool) -> tuple[bool, str]:
     impl = _graphics_impl(python_exe)
     if impl == "native_cmod":
-        return True, "pygraphics-cmod already active"
+        return True, "native pygraphics already active"
     if impl == "pygraphics_python":
         if verbose:
             print(
-                "Installing pygraphics-cmod from TestPyPI for {}...".format(python_exe),
+                "Installing pygraphics from TestPyPI for {}...".format(python_exe),
                 file=sys.stderr,
             )
     elif impl:
@@ -146,7 +146,7 @@ def ensure_graphics_cmod(python_exe: str, *, verbose: bool) -> tuple[bool, str]:
     else:
         if verbose:
             print(
-                "graphics not importable in {}; installing pygraphics-cmod...".format(python_exe),
+                "graphics not importable in {}; installing pygraphics...".format(python_exe),
                 file=sys.stderr,
             )
 
@@ -162,14 +162,14 @@ def ensure_graphics_cmod(python_exe: str, *, verbose: bool) -> tuple[bool, str]:
         TESTPYPI_INDEX,
         "--extra-index-url",
         PYPI_INDEX,
-        "pygraphics-cmod",
+        "pygraphics",
     ]
     subprocess.run(install, check=True)
 
     impl = _graphics_impl(python_exe)
     if impl != "native_cmod":
-        return False, "pygraphics-cmod install failed (implementation={!r})".format(impl)
-    return True, "installed pygraphics-cmod from TestPyPI"
+        return False, "pygraphics install failed (implementation={!r})".format(impl)
+    return True, "installed pygraphics from TestPyPI"
 
 
 def parse_result(stdout: str) -> dict | None:
@@ -193,7 +193,7 @@ def run_case(runtime_id: str, meta: dict, *, verbose: bool, timeout_s: float) ->
 
     setup_note = ""
     if runtime_id in CPYTHON_RUNTIME_IDS:
-        ok, setup_note = ensure_graphics_cmod(exe, verbose=verbose)
+        ok, setup_note = ensure_graphics_native(exe, verbose=verbose)
         if not ok:
             return {
                 "runtime": runtime_id,
@@ -204,7 +204,7 @@ def run_case(runtime_id: str, meta: dict, *, verbose: bool, timeout_s: float) ->
 
     cmd = [exe, str(RUN_SCRIPT), "--repo", str(REPO), "--quiet"]
     env = os.environ.copy()
-    # Avoid repo src/lib shadowing the pip-installed pygraphics-cmod on CPython.
+    # Avoid repo src/lib shadowing the pip-installed pygraphics on CPython.
     env.pop("PYTHONPATH", None)
 
     t0 = time.monotonic()

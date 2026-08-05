@@ -181,7 +181,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  {base}/web/pyscript/pyodide.html?modules=calc_lvgl,calc_engine")
     print(f"  {base}/web/pyscript/harness.html?modules=calc_graphics,calc_engine")
     print(f"  {base}/web/pyscript/mp.html?modules=hello")
-    print(f"  {base}/web/pyscript/py.html?modules=hello&deps=palettes,pygraphics-cmod")
+    print(f"  {base}/web/pyscript/py.html?modules=hello&deps=palettes,pygraphics")
     print(f"  {base}/web/landing/index.html")
     print("")
     print(PAGE_SNIPPET)

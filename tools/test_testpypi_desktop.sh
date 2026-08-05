@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Smoke-test PyDevices desktop wheels from TestPyPI in a throwaway venv.
 #
-# Installs displaysys (full package + board_config), usdl2, pygraphics-cmod,
+# Installs displaysys (full package + board_config), usdl2, pygraphics,
 # and lvgl-cpython, then runs a short import/draw check (opens a real SDL window by default).
 #
 # Usage (from repo root):
@@ -29,7 +29,7 @@ Usage: ./tools/test_testpypi_desktop.sh [--headless] [--keep]
 
 Create a venv, pip-install TestPyPI desktop packages (no version pins), and smoke-test:
 
-  displaysys  usdl2  pygraphics-cmod  lvgl-cpython
+  displaysys  usdl2  pygraphics  lvgl-cpython
 
 Environment:
   TESTPYPI_VENV   venv directory (default: /tmp/pydisplay-testpypi-venv)
@@ -76,7 +76,7 @@ python3 -m venv "$VENV"
     --extra-index-url "$PYPI_INDEX" \
     displaysys \
     usdl2 \
-    pygraphics-cmod \
+    pygraphics \
     lvgl-cpython
 
 echo "--- installed ---"

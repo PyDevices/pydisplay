@@ -895,7 +895,7 @@ def main(argv=None):
     if opts.get("help"):
         print(
             "Usage: compare_graphics_run.py [--repo PATH] [--quiet]\n"
-            "Compare native pygraphics cmod vs staged pure-Python pygraphics."
+            "Compare native pygraphics vs staged pure-Python pygraphics."
         )
         return 0
 
@@ -911,7 +911,7 @@ def main(argv=None):
         print()
         if result["status"] == "ok":
             print(
-                "All checks passed ({} ok, native pygraphics cmod vs pure-Python pygraphics).".format(
+                "All checks passed ({} ok, native pygraphics vs pure-Python pygraphics).".format(
                     result["checks_passed"]
                 )
             )

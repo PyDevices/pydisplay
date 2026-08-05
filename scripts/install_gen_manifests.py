@@ -65,12 +65,7 @@ MIP_INDEX_ONLY = frozenset({"displaysys", "eventsys", "multimer"})
 toml_exclude = ["examples"]
 
 # PyScript [files] mounts that are not part of any mip package JSON.
-# Desktop/browser default board_config stays available in the gallery VFS only;
-# MCU installs get board_config from board_configs/*/package.json instead.
-toml_only_mounts = [
-    ("src/lib/board_config.py", "/lib/"),
-    ("src/lib/boarddev.py", "/lib/"),
-]
+toml_only_mounts: list[tuple[str, str]] = []
 
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
 # MicroPython mip only fetches .py / .mpy / .json (see micropython-lib mip).
@@ -126,6 +121,9 @@ master_toml = [
 
 def add_pyscript_file(repo_relative_path: str, mount: str) -> None:
     """Add one local source to both TOML and JSON-compatible file maps."""
+    # board_config is now delivered via board_configs/* packages, not web mounts.
+    if repo_relative_path.replace("\\", "/").endswith("/board_config.py"):
+        return
     source = PYSCRIPT_TOML_SRC_PREFIX + repo_relative_path
     master_files[source] = mount
     master_toml.append(pyscript_toml_file_entry(repo_relative_path, mount))

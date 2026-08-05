@@ -76,8 +76,9 @@ PyDisplay publishes a set of pure-Python packages — `displaysys`, `eventsys`, 
   under `lib/`). Examples that `import palettes` / `pdwidgets` / `pygraphics` /
   the ctypes `usdl2` fallback need those `lib/` dirs on path. The PyPI project
   literally named `palettes` is an unrelated "random hex color" library — do
-  **not** `pip install palettes`. Prefer native TestPyPI wheels for `pygraphics`
-  (`pygraphics-cmod`) and `usdl2` when available. Clones normally live under
+  **not** `pip install palettes`. Prefer TestPyPI native builds for `pygraphics`
+  and `usdl2` when available (the micropython-lib `pygraphics` package remains
+  pure Python for MIP installs). Clones normally live under
   `/agent/repos/{…}` (symlinked into `~/gh/pydevices/`); if missing, clone
   `github.com/PyDevices/<name>` and put `<repo>/lib` on the venv path
   (`.pth` / `PYTHONPATH`).
