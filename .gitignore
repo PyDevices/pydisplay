@@ -47,6 +47,7 @@ src/examples/spotify_client
 src/examples/buildozer.spec
 src/run-*.ipynb
 src/run-*.nbconvert.ipynb
+pydisplay/src/.ipynb_checkpoints
 
 # CI / local sibling checkouts inside this workspace
 graphics/
