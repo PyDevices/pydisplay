@@ -303,12 +303,25 @@ def _install_deps(names):
 
 def _ensure_board_config(mip_mod):
     try:
-        import board_config  # noqa: F401
-        return
+        import board_config
+
+        # Older cached copies define _env_int/os.getenv; refresh those.
+        if not hasattr(board_config, "_env_int"):
+            return
     except ImportError:
         pass
     print("MIP install: board_config (psdisplay)")
+    try:
+        os.remove("board_config.py")
+    except Exception:
+        pass
     mip_mod.install(PSDISPLAY_BOARD_CONFIG_PACKAGE, target=MANIFEST_MIP_TARGET)
+    try:
+        import sys
+
+        sys.modules.pop("board_config", None)
+    except Exception:
+        pass
 
 def _install_packages(packages):
     if not packages:
