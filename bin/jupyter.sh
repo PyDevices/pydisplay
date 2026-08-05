@@ -383,21 +383,15 @@ bootstrap = [
 run_lines = [line + "\n" for line in (bootstrap + run_source.splitlines())] or ["\n"]
 run_lines[-1] = run_lines[-1].rstrip("\n")
 
-deps_lines = [
-  "import pip",
-  f"_deps = {repr(wheel_deps)}",
-  "if _deps:",
-  "    print('Installing deps:', ', '.join(_deps))",
-  "    pip.main([",
-  "        'install',",
-  f"        '-i', '{testpypi_index}',",
-  "        *_deps,",
-  "    ])",
-  "else:",
-  "    print('No # deps header found; skipping pip install.')",
-]
-deps_lines = [line + "\n" for line in deps_lines]
-deps_lines[-1] = deps_lines[-1].rstrip("\n")
+deps_lines = None
+if wheel_deps:
+    deps_lines = [
+        "# Install dependencies into the selected kernel",
+        "import pip",
+        f"pip.main(['install', '-i', '{testpypi_index}', *{repr(wheel_deps)}])",
+    ]
+    deps_lines = [line + "\n" for line in deps_lines]
+    deps_lines[-1] = deps_lines[-1].rstrip("\n")
 
 cells = [
     {
@@ -414,14 +408,6 @@ cells = [
         ],
     },
     {
-      "cell_type": "code",
-      "id": "deps",
-      "metadata": {},
-      "execution_count": None,
-      "outputs": [],
-      "source": deps_lines,
-    },
-    {
         "cell_type": "code",
         "id": "run",
         "metadata": {},
@@ -430,6 +416,19 @@ cells = [
         "source": run_lines,
     },
 ]
+
+if deps_lines:
+    cells.insert(
+        1,
+        {
+            "cell_type": "code",
+            "id": "deps",
+            "metadata": {},
+            "execution_count": None,
+            "outputs": [],
+            "source": deps_lines,
+        },
+    )
 
 nb = {
     "nbformat": 4,
