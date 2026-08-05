@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run pydisplay examples in Jupyter (JNDisplay / ipywidgets).
+# Run pydisplay examples in Jupyter (desktop / ipywidgets).
 #
 # Mirrors the primary CLI shapes of unix/micropython.exe:
 #
@@ -18,7 +18,8 @@
 #
 # Generated notebooks are always interactive Jupyter sessions (extra cells
 # can be run against the live kernel), so -i does not need a separate
-# run-then-REPL step the way a script interpreter would.
+# run-then-REPL step the way a script interpreter would. Notebook runs use a
+# shared scratch directory outside the repo for board_config installs.
 
 set -euo pipefail
 
@@ -28,6 +29,9 @@ PYDISPLAY_ROOT="${PYDISPLAY_ROOT:-$(cd "$_SCRIPT_DIR/.." && pwd)}"
 SRC="$PYDISPLAY_ROOT/src"
 HUB_NOTEBOOK="$SRC/jupyter_notebook.ipynb"
 VENV="${JUPYTER_VENV:-$PYDISPLAY_ROOT/.venv}"
+DESKTOP_BOARD_CONFIG_MIP="github:PyDevices/micropython-hardware/board_configs/desktop/package.json"
+PYDEVICES_MIP_INDEX="https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+TESTPYPI_INDEX="https://test.pypi.org/simple/"
 PORT=8888
 FILE_ARG=""
 MODULE_ARG=""
@@ -67,6 +71,12 @@ Generated notebooks import via \`from examples import <name>\` (or
 and never a path-bootstrap cell. If PYTHONPATH is unset, jupyter.sh exports
 PYTHONPATH=".:lib:utils" for the JupyterLab/kernel process (cwd=src) so
 \`import displaysys\`, \`import utils.*\`, etc. resolve without a bootstrap cell.
+Run notebooks also ensure a Jupyter board config is available by calling
+\`mip.install("${DESKTOP_BOARD_CONFIG_MIP}", target=".")\` when
+\`import board_config\` fails.
+
+The Jupyter environment itself must already have any example dependencies
+installed before `jupyter.sh` is launched.
 
 Environment:
   PYDISPLAY_ROOT    pydisplay clone (default: parent of bin/)
@@ -197,6 +207,53 @@ emit_entry() {
   printf '%s\n' "$slug"
 }
 
+extract_header_deps() {
+  local file_path="$1"
+  DEPS_FILE="$file_path" "$VENV/bin/python" <<'PY'
+import os
+
+path = os.environ["DEPS_FILE"]
+deps = []
+try:
+    with open(path, encoding="utf-8") as f:
+        for i, line in enumerate(f):
+            if i >= 10:
+                break
+            s = line.strip()
+            if s.startswith("# deps:"):
+                body = s.split(":", 1)[1].strip()
+                deps = [part.strip() for part in body.split(",") if part.strip()]
+                break
+except OSError:
+    pass
+print(",".join(deps))
+PY
+}
+
+map_wheel_deps() {
+  local deps_csv="$1"
+  if [[ -z "$deps_csv" ]]; then
+    printf '\n'
+    return 0
+  fi
+  PYDISPLAY_ROOT="$PYDISPLAY_ROOT" DEPS_CSV="$deps_csv" "$VENV/bin/python" <<'PY'
+import os
+import sys
+from urllib.parse import parse_qs
+
+root = os.environ["PYDISPLAY_ROOT"]
+deps_csv = os.environ.get("DEPS_CSV", "")
+deps = tuple(d.strip() for d in deps_csv.split(",") if d.strip())
+sys.path.insert(0, os.path.join(root, "scripts"))
+import url_maker  # noqa: E402
+
+query = url_maker.urls_from_deps(deps=deps, runtime="pyodide")
+parsed = parse_qs(query.lstrip("?"))
+deps_out = parsed.get("deps", [""])[0]
+print(deps_out)
+PY
+}
+
 # -m examples.<name> or -m <name> — top-level module/package under
 # src/examples/, or a dotted path to a file nested in an example package.
 resolve_module_target() {
@@ -217,8 +274,15 @@ resolve_module_target() {
   esac
 
   local relpath="${rest//./\/}"
-  if [[ -f "$SRC/examples/${relpath}.py" ]] || [[ -f "$SRC/examples/${relpath}/__init__.py" ]]; then
+  local source_file=""
+  if [[ -f "$SRC/examples/${relpath}.py" ]]; then
+    source_file="$SRC/examples/${relpath}.py"
+  elif [[ -f "$SRC/examples/${relpath}/__init__.py" ]]; then
+    source_file="$SRC/examples/${relpath}/__init__.py"
+  fi
+  if [[ -n "$source_file" ]]; then
     emit_entry "$rest"
+    printf '%s\n' "$source_file"
     return 0
   fi
 
@@ -265,6 +329,7 @@ resolve_file_target() {
       local mid="${rel#examples/}"
       mid="${mid%.py}"
       emit_entry "${mid//\//.}"
+      printf '%s\n' "$resolved"
       ;;
     *)
       echo "jupyter.sh: '$file' is not under examples/ — jupyter.sh can only launch example modules (examples/<name>.py)" >&2
@@ -277,9 +342,10 @@ write_run_notebook() {
   local title="$1"
   local out="$2"
   local run_source="$3"
+  local wheel_deps_csv="$4"
 
   mkdir -p "$(dirname "$out")"
-  TITLE="$title" OUT="$out" RUN_SOURCE="$run_source" "$VENV/bin/python" <<'PY'
+  TITLE="$title" OUT="$out" RUN_SOURCE="$run_source" WHEEL_DEPS="$wheel_deps_csv" BOARD_CONFIG_MIP="$DESKTOP_BOARD_CONFIG_MIP" MIP_INDEX="$PYDEVICES_MIP_INDEX" TESTPYPI_INDEX="$TESTPYPI_INDEX" "$VENV/bin/python" <<'PY'
 import json
 import os
 from pathlib import Path
@@ -287,9 +353,51 @@ from pathlib import Path
 title = os.environ["TITLE"]
 out = Path(os.environ["OUT"])
 run_source = os.environ["RUN_SOURCE"]
+board_config_mip = os.environ["BOARD_CONFIG_MIP"]
+mip_index = os.environ["MIP_INDEX"]
+wheel_deps = [d.strip() for d in os.environ.get("WHEEL_DEPS", "").split(",") if d.strip()]
+testpypi_index = os.environ["TESTPYPI_INDEX"]
 
-run_lines = [line + "\n" for line in run_source.splitlines()] or ["\n"]
+bootstrap = [
+  "import os",
+    "import sys",
+    "from pathlib import Path",
+    "",
+    "# Ensure desktop board_config is present for notebook runs.",
+  "scratch = Path(os.environ.get('PYDISPLAY_JUPYTER_SCRATCH', Path.home() / '.cache' / 'pydisplay' / 'jupyter'))",
+    "scratch.mkdir(parents=True, exist_ok=True)",
+    "sys.path.insert(0, str(scratch))",
+    "try:",
+    "    import board_config  # noqa: F401",
+    "except ImportError:",
+    "    import mip",
+    f'    mip.install(',
+    f'        "{board_config_mip}",',
+    f'        index="{mip_index}",',
+    f'        target=str(scratch),',
+    f'    )',
+    "    import board_config  # noqa: F401",
+    "",
+]
+
+run_lines = [line + "\n" for line in (bootstrap + run_source.splitlines())] or ["\n"]
 run_lines[-1] = run_lines[-1].rstrip("\n")
+
+deps_lines = [
+  "import pip",
+  f"_deps = {repr(wheel_deps)}",
+  "if _deps:",
+  "    print('Installing deps:', ', '.join(_deps))",
+  "    pip.main([",
+  "        'install',",
+  f"        '-i', '{testpypi_index}',",
+  "        *_deps,",
+  "    ])",
+  "else:",
+  "    print('No # deps header found; skipping pip install.')",
+]
+deps_lines = [line + "\n" for line in deps_lines]
+deps_lines[-1] = deps_lines[-1].rstrip("\n")
 
 cells = [
     {
@@ -304,6 +412,14 @@ cells = [
             "**Cursor / VS Code:** select the `.venv` kernel, then run all cells.\n",
             "**Stop:** Kernel → Restart (async examples run in the background).\n",
         ],
+    },
+    {
+      "cell_type": "code",
+      "id": "deps",
+      "metadata": {},
+      "execution_count": None,
+      "outputs": [],
+      "source": deps_lines,
     },
     {
         "cell_type": "code",
@@ -405,6 +521,7 @@ NOTEBOOK=""
 SLUG=""
 if [[ -n "$ENTRY_KIND" ]]; then
   ensure_jupyter_deps
+  WHEEL_DEPS_CSV=""
   case "$ENTRY_KIND" in
     code)
       SLUG="code"
@@ -416,6 +533,11 @@ if [[ -n "$ENTRY_KIND" ]]; then
       mapfile -t _lines <<<"$OUT"
       RUN_SOURCE="${_lines[0]}"
       SLUG="${_lines[1]}"
+      SRC_FILE="${_lines[2]:-}"
+      if [[ -n "$SRC_FILE" ]]; then
+        HEADER_DEPS="$(extract_header_deps "$SRC_FILE")"
+        WHEEL_DEPS_CSV="$(map_wheel_deps "$HEADER_DEPS")"
+      fi
       TITLE="$SLUG"
       ;;
     file)
@@ -423,11 +545,16 @@ if [[ -n "$ENTRY_KIND" ]]; then
       mapfile -t _lines <<<"$OUT"
       RUN_SOURCE="${_lines[0]}"
       SLUG="${_lines[1]}"
+      SRC_FILE="${_lines[2]:-}"
+      if [[ -n "$SRC_FILE" ]]; then
+        HEADER_DEPS="$(extract_header_deps "$SRC_FILE")"
+        WHEEL_DEPS_CSV="$(map_wheel_deps "$HEADER_DEPS")"
+      fi
       TITLE="$SLUG"
       ;;
   esac
   NOTEBOOK="$SRC/run-${SLUG}.ipynb"
-  write_run_notebook "$TITLE" "$NOTEBOOK" "$RUN_SOURCE" >/dev/null
+  write_run_notebook "$TITLE" "$NOTEBOOK" "$RUN_SOURCE" "$WHEEL_DEPS_CSV" >/dev/null
   echo "jupyter.sh: wrote $NOTEBOOK"
 else
   NOTEBOOK="$HUB_NOTEBOOK"
