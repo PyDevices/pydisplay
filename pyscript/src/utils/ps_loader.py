@@ -176,42 +176,16 @@ def _has_board_config():
         return False
 
 
-def _board_config_is_current():
-    """True when installed board_config matches the current psdisplay package.
-
-    Older cached copies used a local ``_env_int`` helper with ``os.getenv``.
-    The current package imports ``env_int`` from ``displaysys`` instead.
-    """
-    try:
-        import board_config
-
-        return not hasattr(board_config, "_env_int")
-    except ImportError:
-        return False
-
-
 def _ensure_board_config(mip_mod, status=None, url_base=None):
     """Install the default browser board_config when it is not already present."""
-    if _has_board_config() and _board_config_is_current():
+    if _has_board_config():
         return
     if status:
         status("Installing board_config (psdisplay)…")
     kwargs = {"target": MANIFEST_MIP_TARGET}
     if url_base is not None:
         kwargs["url_base"] = url_base
-    try:
-        import os
-
-        os.remove("board_config.py")
-    except Exception:
-        pass
     _quiet_install(mip_mod, PSDISPLAY_BOARD_CONFIG_PACKAGE, **kwargs)
-    try:
-        import sys
-
-        sys.modules.pop("board_config", None)
-    except Exception:
-        pass
     _refresh_path_after_install()
 
 

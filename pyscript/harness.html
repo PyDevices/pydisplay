@@ -1,57 +1,61 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#f54e00">
-<script src="./pwa.js"></script>
-<script src="./loader-query.js"></script>
-<link rel="stylesheet" href="./vendor/core.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#f54e00">
+    <script src="./pwa.js"></script>
+    <script src="./loader-query.js"></script>
+    <link rel="stylesheet" href="./vendor/core.css">
 </head>
+
 <body>
-<canvas id="display_canvas" width="320" height="480" tabindex="0"></canvas>
-<canvas id="aux_canvas" width="240" height="80" tabindex="0" style="display:block;margin-top:8px;"></canvas>
-<div id="log" style="display:none;white-space:pre-wrap;overflow:auto;max-height:40vh;border:1px solid #888;padding:8px;margin-top:8px;font-family:monospace;font-size:12px"></div>
-<script>
-(function () {
-    var Q = window.LoaderQuery;
-    var plan = Q.parse(window.location.search);
-    if (Q.invalidNames(plan).length) {
-        window.__loaderDisabled = true;
-        return;
-    }
-
-    var log = document.getElementById('log');
-    if (plan.debug) {
-        log.style.display = 'block';
-    }
-
-    Q.publish(plan);
-
-    // Safety-net only: if MicroPython never emits EXAMPLE_RESULT (import hang),
-    // report timeout — never status=ok (that masked missing-dep ImportErrors).
-    if (plan.autotest && plan.entryName) {
-        var safetyMs = Math.max(plan.autotestDuration * 1000 + 45000, 60000);
-        setTimeout(function () {
-            if (window.__loaderExampleResultSent) {
+    <canvas id="display_canvas" width="320" height="480" tabindex="0"></canvas>
+    <canvas id="aux_canvas" width="240" height="80" tabindex="0" style="display:block;margin-top:8px;"></canvas>
+    <div id="log"
+        style="display:none;white-space:pre-wrap;overflow:auto;max-height:40vh;border:1px solid #888;padding:8px;margin-top:8px;font-family:monospace;font-size:12px">
+    </div>
+    <script>
+        (function () {
+            var Q = window.LoaderQuery;
+            var plan = Q.parse(window.location.search);
+            if (Q.invalidNames(plan).length) {
+                window.__loaderDisabled = true;
                 return;
             }
-            window.__loaderExampleResultSent = true;
-            var payload = {
-                example: plan.entryName,
-                status: 'error',
-                error: 'autotest timeout (no Python EXAMPLE_RESULT)',
-                runtime: 'pyscript',
-                duration_s: plan.autotestDuration,
-                smoke: 'js_timeout'
-            };
-            console.log('EXAMPLE_RESULT=' + JSON.stringify(payload));
-        }, safetyMs);
-    }
-})();
-</script>
-<script type="mpy" data-configs="./micropython.json ./pydisplay.json" output="log">
+
+            var log = document.getElementById('log');
+            if (plan.debug) {
+                log.style.display = 'block';
+            }
+
+            Q.publish(plan);
+
+            // Safety-net only: if MicroPython never emits EXAMPLE_RESULT (import hang),
+            // report timeout — never status=ok (that masked missing-dep ImportErrors).
+            if (plan.autotest && plan.entryName) {
+                var safetyMs = Math.max(plan.autotestDuration * 1000 + 45000, 60000);
+                setTimeout(function () {
+                    if (window.__loaderExampleResultSent) {
+                        return;
+                    }
+                    window.__loaderExampleResultSent = true;
+                    var payload = {
+                        example: plan.entryName,
+                        status: 'error',
+                        error: 'autotest timeout (no Python EXAMPLE_RESULT)',
+                        runtime: 'pyscript',
+                        duration_s: plan.autotestDuration,
+                        smoke: 'js_timeout'
+                    };
+                    console.log('EXAMPLE_RESULT=' + JSON.stringify(payload));
+                }, safetyMs);
+            }
+        })();
+    </script>
+    <script type="mpy" data-configs="./micropython.json ./pydisplay.json" output="log">
 import builtins
 from js import document
 import os
@@ -303,25 +307,12 @@ def _install_deps(names):
 
 def _ensure_board_config(mip_mod):
     try:
-        import board_config
-
-        # Older cached copies define _env_int/os.getenv; refresh those.
-        if not hasattr(board_config, "_env_int"):
-            return
+        import board_config  # noqa: F401
+        return
     except ImportError:
         pass
     print("MIP install: board_config (psdisplay)")
-    try:
-        os.remove("board_config.py")
-    except Exception:
-        pass
     mip_mod.install(PSDISPLAY_BOARD_CONFIG_PACKAGE, target=MANIFEST_MIP_TARGET)
-    try:
-        import sys
-
-        sys.modules.pop("board_config", None)
-    except Exception:
-        pass
 
 def _install_packages(packages):
     if not packages:
@@ -437,6 +428,7 @@ def _run():
 
 _run()
 </script>
-<script type="module" src="./pyscript-json-config.js"></script>
+    <script type="module" src="./pyscript-json-config.js"></script>
 </body>
+
 </html>
