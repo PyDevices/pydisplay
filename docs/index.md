@@ -11,9 +11,9 @@ PyDisplay is a *foundation*, not a GUI toolkit. Use it directly for simple UIs, 
 !!! warning "Alpha quality"
     PyDisplay is under active development. APIs and documentation are still evolving. [Feedback and pull requests](contributing.md) are welcome.
 
-| ![active](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/active.gif) | ![tiny_toasters](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/tiny_toasters.gif) |
+| ![paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/paint.png) | ![tiny_toasters](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/tiny_toasters.gif) |
 |:--:|:--:|
-| `active.py` | `tiny_toasters.py` |
+| `paint.py` | `tiny_toasters.py` |
 
 More in the [screenshot gallery](try/index.md#screenshot-gallery).
 

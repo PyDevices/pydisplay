@@ -87,7 +87,6 @@ nav:
   - Installation:
     - Choose a method: installation/index.md
     - Full clone: installation/full-clone.md
-    - installer.py: installation/installer.md
     - GitHub MIP: installation/mip-github.md
     - micropython-lib MIP: installation/mip-micropython-lib.md
   - Hardware setup:

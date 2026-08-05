@@ -116,4 +116,4 @@ CircuitPython `circup` packages are not published yet. Copy files manually from 
 
 ## USB Video note
 
-`board_configs/cp/fbdisplay/usb_video` lets a board appear as a USB webcam streaming the framebuffer. Works on some hosts (e.g. ChromeOS); Windows may not recognize the device. See `assets/screenshots/circuitpython_usb_video_chromebook.gif` in the repo.
+`board_configs/cp/fbdisplay/usb_video` lets a board appear as a USB webcam streaming the framebuffer. Works on some hosts (e.g. ChromeOS); Windows may not recognize the device.

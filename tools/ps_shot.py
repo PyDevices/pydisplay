@@ -4,7 +4,7 @@ Take a screenshot after N seconds using a separate process with a hard kill.
 Uses threading to kill the browser after the wait, then saves the final screenshot.
 
 Use when Chromium may stall under sync MicroPython-WASM loops. See
-``.cursor/pyscript-troubleshooting.md``.
+the PyScript troubleshooting guide.
 
 Usage:
     python tools/ps_shot.py URL [wait_sec] [out.png]
@@ -24,7 +24,8 @@ URL = (
     else "http://127.0.0.1:8000/web/pyscript/harness.html?manifests=tiny_toasters"
 )
 WAIT_SEC = float(sys.argv[2]) if len(sys.argv) > 2 else 6.0
-OUT = sys.argv[3] if len(sys.argv) > 3 else "/tmp/pyscript_shot.png"
+TEMP_DIR = os.environ.get("TEMP") or os.environ.get("TMPDIR") or os.environ.get("TMP") or "/tmp"
+OUT = sys.argv[3] if len(sys.argv) > 3 else f"{TEMP_DIR.rstrip('/')}/pyscript_shot.png"
 
 t0 = time.time()
 

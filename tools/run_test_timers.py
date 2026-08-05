@@ -13,8 +13,10 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 import json
+import os
 from pathlib import Path
 import sys
+import tempfile
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "tools"))
@@ -30,7 +32,18 @@ from example_test_kit import (  # noqa: E402
 )
 
 EXAMPLE_ID = "test_timers"
-REPORT_PATH = REPO / ".cursor" / "test_timers_report.md"
+
+
+def _temp_dir() -> Path:
+    return Path(
+        os.environ.get("TEMP")
+        or os.environ.get("TMPDIR")
+        or os.environ.get("TMP")
+        or tempfile.gettempdir()
+    )
+
+
+REPORT_PATH = _temp_dir() / "test_timers_report.md"
 
 # Public probe labels in report column order.
 PROBE_COLUMNS = (
@@ -113,7 +126,7 @@ def _write_report(rows: list[dict]) -> None:
             "",
             "**Legend:** **PASS** = ≥2 callbacks in 300 ms · **FAIL** = ran but failed · **SKIP** = not on this port",
             "",
-            "Raw JSON: `.cursor/test_timers_results.json`",
+            f"Raw JSON: `{_temp_dir() / 'test_timers_results.json'}`",
             "",
             "## Reproduce",
             "",
@@ -177,7 +190,7 @@ def main() -> int:
     print()
     print_table(rows, "examples")
 
-    out_path = REPO / ".cursor" / "test_timers_results.json"
+    out_path = _temp_dir() / "test_timers_results.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(rows, indent=2) + "\n")
     _write_report(rows)

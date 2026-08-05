@@ -3,7 +3,7 @@
 Run LVGL timer/input harness on desktop Python+LVGL executables.
 
 Thin wrapper around ``lv_timer_test_kit.py``: sync + async, strict click
-checks, results in ``.cursor/desktop_lv_test_results.json``.
+checks, results in the system temp directory.
 
 From repo root:
     python tools/run_desktop_lv_tests.py
@@ -14,15 +14,27 @@ For per-runtime selection, use ``python tools/lv_timer_test_kit.py`` instead.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 import sys
+import tempfile
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "tools"))
 
 from lv_timer_test_kit import LVGL_RUNTIMES, run_kit  # noqa: E402
 
-DESKTOP_RESULTS = REPO / ".cursor" / "desktop_lv_test_results.json"
+
+def _temp_dir() -> Path:
+    return Path(
+        os.environ.get("TEMP")
+        or os.environ.get("TMPDIR")
+        or os.environ.get("TMP")
+        or tempfile.gettempdir()
+    )
+
+
+DESKTOP_RESULTS = _temp_dir() / "desktop_lv_test_results.json"
 DESKTOP_MODES = ("sync", "async")
 
 

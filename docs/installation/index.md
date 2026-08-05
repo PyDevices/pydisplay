@@ -10,7 +10,7 @@ pydisplay supports three install channels. Pick based on whether you need the fu
 | [GitHub MIP](mip-github.md) | Source `.py` | `mip` / `mpremote mip` | Optional (`examples.json`) | Yes (`utils.json`) |
 | [micropython-lib MIP](mip-micropython-lib.md) | Precompiled `.mpy` | `mip` with custom index | No | No |
 
-The [installer.py](installer.md) script combines GitHub and micropython-lib installs in one call — recommended for MicroPython boards.
+For recommended board setup flows, see [micropython-hardware install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html).
 
 ## What gets installed
 

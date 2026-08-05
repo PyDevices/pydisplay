@@ -10,12 +10,12 @@
   <a href="https://pydisplay.readthedocs.io">Documentation</a> •
   <a href="https://PyDevices.github.io/pydisplay/pyscript/">Browser demo</a> •
   <a href="https://pydisplay.readthedocs.io/en/latest/guides/wokwi/">Wokwi simulator</a> •
-  <a href="assets/screenshots/README.md">Screenshot gallery</a>
+   <a href="docs/screenshots/README.md">Screenshot gallery</a>
 </p>
 
-| ![active.py](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/active.gif) | ![tiny_toasters.py](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/tiny_toasters.gif) |
+| ![paint.py](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/paint.png) | ![tiny_toasters.py](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/tiny_toasters.gif) |
 |:--:|:--:|
-| @peterhinch's `active.py` | @russhughes's `tiny_toasters.py` |
+| `paint.py` | @russhughes's `tiny_toasters.py` |
 
 PyDisplay is the portable foundation layer for Python graphics. It gives you **display drivers, unified input events, drawing primitives, fonts, palettes, and cross-platform timers** behind a single API — so the same drawing code runs unchanged on a $4 microcontroller, on your desktop, in a web browser, and even inside a Jupyter Notebook. The published packages are pure-Python: CPython wheels are published on TestPyPI, and MicroPython packages are served through micropython-lib / MIP.
 
@@ -137,9 +137,8 @@ MICROPYPATH=.;.frozen;lib;utils;%USERPROFILE%\.micropython\lib
 PYTHONPATH=.;lib;utils
 ```
 
-If a runtime cannot read environment variables (for example, many MCUs or PyScript),
-or if the environment is intentionally set differently, add this to your startup
-file so imports are normalized:
+If environment variables are unavailable or not set as recommended (for example, many MCUs or PyScript),
+add this to your startup file so imports are normalized:
 
 - MicroPython: `boot.py` or `main.py`
 - CircuitPython: `boot.py` or `code.py`
@@ -150,11 +149,9 @@ import utils.path
 
 ### 3.3 MicroPython board
 
-```python
-import mip
-mip.install("github:PyDevices/pydisplay/installer.py")
-import installer   # runs the default install
-```
+Use the micropython-hardware install workflows for pip/mip setup and board packages:
+
+- https://pydevices.github.io/micropython-hardware/install-workflows.html
 
 Then pick a [board config](https://pydevices.github.io/micropython-hardware/board-configs.html) for your hardware and follow the [ESP32 board guide](https://pydisplay.readthedocs.io/en/latest/guides/esp32-board/).
 
@@ -168,7 +165,7 @@ guide in micropython-hardware:
 | Channel | Format | Best for |
 |---------|--------|----------|
 | [Full clone](https://pydisplay.readthedocs.io/en/latest/installation/full-clone/) | Entire repo | Development, desktop, contributing |
-| [`installer.py`](https://pydisplay.readthedocs.io/en/latest/installation/installer/) | Source files | One-shot setup on a MicroPython board |
+| [Board install workflows](https://pydisplay.readthedocs.io/en/latest/installation/installer/) | pip / MIP | Recommended setup path for MicroPython boards |
 | [GitHub MIP](https://pydisplay.readthedocs.io/en/latest/installation/mip-github/) | Source `.py` | Picking individual packages |
 | [micropython-lib MIP](https://pydisplay.readthedocs.io/en/latest/installation/mip-micropython-lib/) | Precompiled `.mpy` | Smallest footprint on device |
 

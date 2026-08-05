@@ -205,7 +205,7 @@ display_drv.show()          # present on SDL; on raw SPI may follow panel habits
 - **Highest RAM** (full panel buffer) — trade memory for speed when the UI redraws text often.
 - **Fastest** of the three `font_simpletest` modes: glyph work stays in RAM; the panel receives only
   the dirty region (scanline `blit_rect`s), not per-pixel fills.
-- Requires `utils/displaybuf.py` on the import path — set `PYTHONPATH`/`MICROPYPATH` to `.:lib:utils` (preferred), or `import utils.path` where env vars aren't available.
+- Requires `utils/displaybuf.py` on the import path — set `PYTHONPATH`/`MICROPYPATH` to `.:lib:utils` (preferred), or see [Utils path setup](../utils.md#path-setup) when environment variables are unavailable or not set as recommended.
 - Partial `area=` updates apply to **RGB565** `DisplayBuffer`; GS8/GS4 paths currently refresh
   wider bands (see `displaybuf` notes in source).
 

@@ -25,10 +25,10 @@ The default desktop config is `src/lib/board_config.py`.
 
 Preferred on desktop: set `PYTHONPATH` (CPython/CircuitPython) or `MICROPYPATH` (MicroPython) to `.:lib:utils` and `cd src` before running — no import needed.
 
-On a device (or any host where you can't set env vars), import it once from `boot.py`, `main.py`, or the REPL, before examples, when `utils/` is present on the device:
+When environment variables are unavailable or not set as recommended, follow [Utils path setup](../utils.md#path-setup) and [README path environment forms](../../README.md#321-path-environment-forms). The fallback import is:
 
 ```python
-import utils.path
+import utils.path  # see ../utils.md#path-setup
 ```
 
 Not needed if all packages are installed into `/lib` on the device.

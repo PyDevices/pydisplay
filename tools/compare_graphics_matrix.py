@@ -12,7 +12,7 @@ From repo root::
 For ``cpython-venv`` and ``python.exe``, installs ``pygraphics-cmod`` from TestPyPI
 (first time per interpreter) so ``import pygraphics`` resolves to the native wheel.
 
-Results: summary table on stderr, JSON at ``.cursor/compare_graphics_results.json``.
+Results: summary table on stderr, JSON in the system temp directory.
 """
 
 from __future__ import annotations
@@ -25,6 +25,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 
 import tomllib
@@ -33,7 +34,18 @@ REPO = Path(__file__).resolve().parent.parent
 TOOLS = REPO / "tools"
 RUNTIMES_TOML = TOOLS / "example_runtimes.toml"
 RUN_SCRIPT = TOOLS / "compare_graphics_run.py"
-RESULTS_JSON = REPO / ".cursor" / "compare_graphics_results.json"
+
+
+def _temp_dir() -> Path:
+    return Path(
+        os.environ.get("TEMP")
+        or os.environ.get("TMPDIR")
+        or os.environ.get("TMP")
+        or tempfile.gettempdir()
+    )
+
+
+RESULTS_JSON = _temp_dir() / "compare_graphics_results.json"
 RESULT_RE = re.compile(r"^GRAPHICS_COMPARE_RESULT=(.+)$", re.MULTILINE)
 
 # Desktop subprocess interpreters that can load graphics cmod alongside staged python.

@@ -116,13 +116,13 @@ board_config.runtime.run_forever()
 |------|--------|-----------|----------|------------|
 | 0 | [**App starter**](app-starter.md) (doc boilerplate) | CPython · MCU · PyScript | core | — |
 | 1 | [`pydisplay_demo.py`](pydisplay_demo.md) | CPython · MCU | core | — |
-| 2 | `color_test.py` | CPython · MCU | core | [color_test](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/color_test.png) |
+| 2 | `color_test.py` | CPython · MCU | core | [color_test](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/color_test.png) |
 | 3 | `eventsys_simpletest.py` | CPython · MCU · PyScript | core | — |
-| 4 | `framebuf_simpletest.py` | CPython · MCU | core | [framebuf](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/framebuf_simpletest.png) |
-| 5 | `graphics_simpletest.py` | CPython · MCU | core | [shapes](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/shapes_simpletest.png) |
+| 4 | `framebuf_simpletest.py` | CPython · MCU | core | [framebuf](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/framebuf_simpletest.png) |
+| 5 | `graphics_simpletest.py` | CPython · MCU | core | — |
 | 6 | `eventsys_touch_test.py` | CPython · MCU | core | — |
 | 7 | `calc_graphics.py` | CPython · PyScript | core | — |
-| 8 | `paint.py` | CPython · PyScript | core | [paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/paint.png) |
+| 8 | `paint.py` | CPython · PyScript | core | [paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/paint.png) |
 | 9 | `widgets_demo.py` | CPython · MCU | utils | — |
 
 PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-asyncio.md).

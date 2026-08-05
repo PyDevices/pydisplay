@@ -1,7 +1,6 @@
 [tool.ruff]
 # Exclude some code from linting and formatting
 exclude = [
-  "assets/icons/**",
   "src/utils/png.py",
   "src/examples/**",
   "tools/typings/**",

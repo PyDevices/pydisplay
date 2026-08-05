@@ -4,7 +4,7 @@
 """Compare native ``pygraphics`` cmod to staged pure-Python ``pygraphics``.
 
 Loads both implementations in one interpreter: ``import pygraphics`` (native cmod)
-and a copy of the pure-Python tree under ``.cursor/compare_graphics_py/pygraphics_py``.
+and a copy of the pure-Python tree in the system temp directory.
 Paired ``FrameBuffer`` draws are compared byte-for-byte.
 
 Pure-Python sources are resolved from (first hit wins):
@@ -22,6 +22,7 @@ Used by ``compare_graphics_run.py`` (single runtime) and
 import json
 import os
 import sys
+import tempfile
 
 RESULT_PREFIX = "GRAPHICS_COMPARE_RESULT="
 
@@ -261,6 +262,10 @@ def _expanduser(path: str) -> str:
     return path
 
 
+def _temp_dir() -> str:
+    return _env_get("TEMP") or _env_get("TMPDIR") or _env_get("TMP") or tempfile.gettempdir()
+
+
 def _is_dir(path: str) -> bool:
     try:
         os.listdir(path)
@@ -306,7 +311,7 @@ def resolve_python_graphics_src(repo: str) -> str:
 
 def stage_python_graphics(repo: str):
     src = resolve_python_graphics_src(repo)
-    staging = repo + "/.cursor/compare_graphics_py"
+    staging = _temp_dir().rstrip("/") + "/compare_graphics_py"
     pkg_dir = staging + "/pygraphics_py"
     _makedirs(pkg_dir)
 

@@ -65,4 +65,4 @@ mip.install("github:PyDevices/micropython-hardware/drivers/display/st7789.py", t
 
 - Packages use **source** `.py` files (not `.mpy` bytecode).
 - `spibus` and `i80bus` (in micropython-hardware) use `@micropython.viper` and are only available via GitHub, not micropython-lib.
-- After install, `import utils.path` if you kept the optional `utils/` package (adds `lib/`, `utils/`, and cwd to `sys.path`); skip it if everything lives flat under `/lib`.
+- After install, see [Utils path setup](../utils.md#path-setup) when environment variables are unavailable or not set as recommended. Skip this if everything lives flat under `/lib`.

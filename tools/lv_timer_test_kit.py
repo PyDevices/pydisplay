@@ -28,6 +28,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import tempfile
 
 REPO = Path(__file__).resolve().parent.parent
 SRC = REPO / "src"
@@ -35,7 +36,18 @@ TOOLS = REPO / "tools"
 HARNESS_ARG = "examples/lv_test_timer.py"
 RESULT_RE = re.compile(r"^KIT_RESULT=(.+)$", re.MULTILINE)
 DEFAULT_TIMEOUT = 45
-DEFAULT_RESULTS = REPO / ".cursor" / "lv_timer_test_kit_results.json"
+
+
+def _temp_dir() -> Path:
+    return Path(
+        os.environ.get("TEMP")
+        or os.environ.get("TMPDIR")
+        or os.environ.get("TMP")
+        or tempfile.gettempdir()
+    )
+
+
+DEFAULT_RESULTS = _temp_dir() / "lv_timer_test_kit_results.json"
 
 # Subprocess LVGL matrix (order: Unix first, then Windows .exe targets).
 LVGL_RUNTIMES = (

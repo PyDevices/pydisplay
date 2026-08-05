@@ -18,6 +18,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -39,6 +40,15 @@ DEFAULT_ONESHOT_TIMEOUT = 15
 PYSCRIPT_PORT = 8000
 SUBPROCESS_RUNTIME_KIND = "subprocess"
 RUNTIME_TIMING_KEYS = ("duration_s", "timeout_s", "oneshot_timeout_s")
+
+
+def _temp_dir() -> Path:
+    return Path(
+        os.environ.get("TEMP")
+        or os.environ.get("TMPDIR")
+        or os.environ.get("TMP")
+        or tempfile.gettempdir()
+    )
 
 
 def load_toml(path: Path) -> dict:
@@ -523,7 +533,7 @@ def ensure_pyscript_server(port: int = PYSCRIPT_PORT) -> None:
     print(f"Starting {SERVE} on port {port}...", file=sys.stderr)
     # Access logs go to stderr; an unread PIPE fills (~64KiB) and deadlocks
     # ThreadingHTTPServer mid-matrix (HTML loads, MicroPython never starts).
-    serve_log = REPO / ".cursor" / "pyscript_serve_kit.log"
+    serve_log = _temp_dir() / "pyscript_serve_kit.log"
     serve_log.parent.mkdir(parents=True, exist_ok=True)
     with open(serve_log, "ab") as log_fh:
         proc = subprocess.Popen(
@@ -1017,7 +1027,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--results-json",
         metavar="PATH",
-        help="Write full result rows to PATH (default: .cursor/example_test_results.json)",
+        help="Write full result rows to PATH (default: temp dir/example_test_results.json)",
     )
     parser.add_argument(
         "--duration-s",
@@ -1111,9 +1121,7 @@ def main(argv: list[str] | None = None) -> int:
     print_table(rows, args.order)
 
     out_path = (
-        Path(args.results_json)
-        if args.results_json
-        else REPO / ".cursor" / "example_test_results.json"
+        Path(args.results_json) if args.results_json else _temp_dir() / "example_test_results.json"
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(rows, indent=2) + "\n", encoding="utf-8")

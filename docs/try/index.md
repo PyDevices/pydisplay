@@ -45,11 +45,11 @@ Full example catalog: uncomment the two `utils` / `examples` lines in `main.py` 
 
 | | | |
 |--|--|--|
-| ![active](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/active.gif) | ![tiny_toasters](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/tiny_toasters.gif) | ![calculator](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/calculator.png) |
-| ![color_test](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/color_test.png) | ![console_advanced_demo](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/console_advanced_demo.gif) | ![paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/paint.png) |
-| ![circuitpython_usb_video](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/circuitpython_usb_video_chromebook.gif) | ![proverbs](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/proverbs.png) | ![testris](https://raw.githubusercontent.com/PyDevices/pydisplay/main/assets/screenshots/testris.png) |
+| ![tiny_toasters](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/tiny_toasters.gif) | ![color_test](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/color_test.png) | ![console_advanced_demo](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/console_advanced_demo.gif) |
+| ![paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/paint.png) | ![proverbs](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/proverbs.png) | ![testris](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/testris.png) |
+| ![framebuf_simpletest](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/framebuf_simpletest.png) | ![fonts](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/fonts.png) | ![bmp565_sprite](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/bmp565_sprite.gif) |
 
-Full table: [assets/screenshots/README.md](https://github.com/PyDevices/pydisplay/blob/main/assets/screenshots/README.md).
+Full table: [docs/screenshots/README.md](https://github.com/PyDevices/pydisplay/blob/main/docs/screenshots/README.md).
 
 ## Next steps
 

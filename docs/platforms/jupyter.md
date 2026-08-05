@@ -23,7 +23,7 @@ See **[Run the notebook interactively](jupyter-run.md)** for install commands, `
 
 1. `pip install pillow ipywidgets ipyevents jupyterlab`
 2. Open [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb) from the repo clone, or generate one with `./bin/jupyter.sh <example>`.
-3. Run cells top to bottom. The board-config cell prefers `PYTHONPATH`/`MICROPYPATH` set to `.:lib:utils` with the kernel `cwd` under `src/` (`./bin/jupyter.sh` sets this for you); it falls back to `import utils.path` when those env vars are unset.
+3. Run cells top to bottom. The board-config cell prefers `PYTHONPATH`/`MICROPYPATH` set to `.:lib:utils` with the kernel `cwd` under `src/` (`./bin/jupyter.sh` sets this for you); for fallback when environment variables are unavailable or not set as recommended, see [Utils path setup](../utils.md#path-setup).
 
 Board config: `board_configs/jndisplay/board_config.py` (registers `JNDevices` as a `QUEUE` device).
 

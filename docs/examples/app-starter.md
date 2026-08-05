@@ -116,7 +116,7 @@ export PYTHONPATH=../board_configs/sdldisplay:.:lib:utils
 python3 main.py
 ```
 
-On MCU, install the matching [board config](https://pydevices.github.io/micropython-hardware/board-configs.html), copy or symlink it as `board_config.py`, and run `main.py` from flash or the REPL — `import utils.path` first if `utils/` is on the device and you didn't set `MICROPYPATH`.
+On MCU, install the matching [board config](https://pydevices.github.io/micropython-hardware/board-configs.html), copy or symlink it as `board_config.py`, and run `main.py` from flash or the REPL. For fallback path handling, see [Utils path setup](../utils.md#path-setup) and [README path environment forms](../../README.md#321-path-environment-forms).
 
 **Interact:** tap or click the centered rectangle — it toggles between red and green.
 

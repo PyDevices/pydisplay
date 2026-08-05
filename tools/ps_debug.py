@@ -6,13 +6,14 @@ and checks for WASM loading errors.
 
 Prefer this over Cursor Browser screenshots when sync Python may be blocking
 the main thread (``page.evaluate`` / screenshots often hang). See
-``.cursor/pyscript-troubleshooting.md``.
+the PyScript troubleshooting guide.
 
 Usage:
     python tools/ps_debug.py URL [timeout_sec]
 """
 
 import json
+import os
 import sys
 import time
 
@@ -28,6 +29,8 @@ TIMEOUT_SEC = int(sys.argv[2]) if len(sys.argv) > 2 else 25
 
 t0 = time.time()
 all_events = []
+TEMP_DIR = os.environ.get("TEMP") or os.environ.get("TMPDIR") or os.environ.get("TMP") or "/tmp"
+DEBUG_SHOT = f"{TEMP_DIR.rstrip('/')}/pyscript_debug.png"
 
 
 def ts():
@@ -141,8 +144,8 @@ def run():
             print(f"[eval error] {e}", flush=True)
 
         try:
-            page.screenshot(path="/tmp/pyscript_debug.png", timeout=5000)
-            print(f"[{ts()}][screenshot] saved to /tmp/pyscript_debug.png", flush=True)
+            page.screenshot(path=DEBUG_SHOT, timeout=5000)
+            print(f"[{ts()}][screenshot] saved to {DEBUG_SHOT}", flush=True)
         except Exception as e:
             print(f"[{ts()}][screenshot error] {e}", flush=True)
 

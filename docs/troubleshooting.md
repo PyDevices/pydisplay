@@ -10,9 +10,9 @@ Common problems when installing, importing, or running pydisplay.
 
 **Fix:**
 
-- **Full clone:** `cd src` and set `PYTHONPATH`/`MICROPYPATH` to `.:lib:utils` before running (preferred), or `import utils.path` if `utils/` is present and you can't set env vars.
-- **Device:** install via [MIP](installation/mip-github.md) or [installer.py](installation/installer.md) into `/lib`.
-- **Examples under `mpremote mount .`:** `import utils.path`, then resolve demos as a package — `from examples import hello`, not a bare `import hello` (the mounted tree still nests `examples/`).
+- **Full clone:** `cd src` and set `PYTHONPATH`/`MICROPYPATH` to `.:lib:utils` before running (preferred), or `import utils.path` if `utils/` is present and environment variables are unavailable or not set as recommended (see [Utils path setup](utils.md#path-setup)).
+- **Device:** install via [MIP](installation/mip-github.md) or [micropython-hardware install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html) into `/lib`.
+- **Examples under `mpremote mount .`:** `import utils.path` (see [Utils path setup](utils.md#path-setup)), then resolve demos as a package — `from examples import hello`, not a bare `import hello` (the mounted tree still nests `examples/`).
 
 ### `ModuleNotFoundError: No module named 'board_config'`
 

@@ -46,7 +46,7 @@ cd src && python ../tools/input_probe.py   # interactive; focus the window
 | [`ps_debug.py`](ps_debug.py) | CDP console + network probe for a harness/load URL |
 | [`ps_shot.py`](ps_shot.py) | Timed screenshot with a hard kill if Chromium stalls |
 
-Agent-oriented guide: [PyScript troubleshooting](../.cursor/pyscript-troubleshooting.md).
+Agent-oriented guide: [PyScript local development](../docs/guides/pyscript.md).
 
 ```bash
 python tools/serve.py   # separate terminal
@@ -91,7 +91,7 @@ python tools/compare_graphics_matrix.py --only-runtime micropython,cpython-venv
 
 Expanded coverage includes ``FrameBuffer`` shape ops, module-level helpers, ``Draw`` (clip, text8), and per-glyph font probes (ASCII 32–126) to catch romfont mapping bugs in ``pygraphics-cmod``.
 
-Results JSON: ``.cursor/compare_graphics_results.json``. Exit 0 when all runtimes pass; exit 1 on any mismatch or setup failure.
+Results JSON: system temp directory (`$TEMP`, or `$TMPDIR`/`$TMP` fallback). Exit 0 when all runtimes pass; exit 1 on any mismatch or setup failure.
 
 ## LVGL / timer harnesses
 

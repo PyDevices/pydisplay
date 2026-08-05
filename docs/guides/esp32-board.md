@@ -16,9 +16,9 @@ Don't see your board? Use the closest match or [contribute a config](https://pyd
 
 ## 2. Install packages
 
-**Option A — installer.py (recommended):**
+**Option A — micropython-hardware install workflows (recommended):**
 
-Follow [installer.py](../installation/installer.md) on the device or via `mpremote run`.
+Follow [install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html) for pip/mip setup on device or host.
 
 **Option B — MIP from your PC:**
 
@@ -46,7 +46,7 @@ mpremote mount .
 At the device REPL:
 
 ```python
-import utils.path
+import utils.path  # see ../utils.md#path-setup
 from examples import pydisplay_demo
 ```
 
@@ -61,7 +61,7 @@ See [**pydisplay_demo**](../examples/pydisplay_demo.md) for what the script demo
 ## 4. Try events
 
 ```python
-import utils.path
+import utils.path  # see ../utils.md#path-setup
 from examples import eventsys_simpletest
 ```
 

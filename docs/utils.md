@@ -13,7 +13,7 @@ mip.install("github:PyDevices/pydisplay/packages/utils.json", target="./utils")
 
 Preferred: set `PYTHONPATH` (CPython/CircuitPython) or `MICROPYPATH` (MicroPython) to `.:lib:utils` and run from `src/` — no import needed.
 
-Without env vars (a bare device REPL, or `boot.py`/`main.py`), put `lib/` and `utils/` on `sys.path` explicitly:
+When environment variables are unavailable or not set as recommended (for example, a bare device REPL, or `boot.py`/`main.py`), put `lib/` and `utils/` on `sys.path` explicitly:
 
 ```python
 import utils.path

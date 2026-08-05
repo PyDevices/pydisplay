@@ -12,7 +12,7 @@ The walkthrough below covers wiring pydisplay to LVGL manually (e.g. with upstre
 
 --8<-- "_snippets/minimum-mip.md"
 
-Or use [installer.py](../installation/installer.md) for a one-shot setup.
+Or follow [micropython-hardware install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html) for current board setup.
 
 ### 2. Build or obtain LVGL MicroPython firmware
 
@@ -34,7 +34,7 @@ With [`display_driver`](https://github.com/PyDevices/lv_bindings/blob/main/pytho
 Install examples package, then on device:
 
 ```python
-import utils.path  # development layout only
+import utils.path  # see ../utils.md#path-setup
 import lv_test_timer
 ```
 

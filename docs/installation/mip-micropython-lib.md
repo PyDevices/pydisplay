@@ -46,7 +46,7 @@ These must come from GitHub:
 - `spibus`, `i80bus` (viper not supported in micropython-lib packaging)
 - Board config packages (use GitHub `board_configs/.../package.json`)
 
-The [installer.py](installer.md) script installs micropython-lib packages plus GitHub utils, examples, and `board_config.py` in one step.
+For combined board + package setup, use [micropython-hardware install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html).
 
 ## Verify install
 
