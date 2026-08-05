@@ -17,6 +17,10 @@ WHEEL_INDEX_URLS = (
     "https://test.pypi.org/simple/",
     "https://pypi.org/simple/",
 )
+# Browser default board config package for examples that import board_config.
+PSDISPLAY_BOARD_CONFIG_PACKAGE = (
+    "github:PyDevices/micropython-hardware/board_configs/psdisplay/package.json"
+)
 # JSON API (not simple) — used to pin pyemscripten wasm wheels by direct URL.
 WHEEL_JSON_URL = "https://test.pypi.org/pypi/{package_name}/json"
 BOARD_WIDTH = 320
@@ -163,10 +167,33 @@ def _refresh_path_after_install():
     utils.path.update()
 
 
+def _has_board_config():
+    try:
+        import board_config  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
+def _ensure_board_config(mip_mod, status=None, url_base=None):
+    """Install the default browser board_config when it is not already present."""
+    if _has_board_config():
+        return
+    if status:
+        status("Installing board_config (psdisplay)…")
+    kwargs = {"target": MANIFEST_MIP_TARGET}
+    if url_base is not None:
+        kwargs["url_base"] = url_base
+    _quiet_install(mip_mod, PSDISPLAY_BOARD_CONFIG_PACKAGE, **kwargs)
+    _refresh_path_after_install()
+
+
 def install_micropython(modules, manifests, index_deps, status=None):
     """Sync install plan for MicroPython WASM (firmware ``mip``)."""
     _ensure_cwd()
     mip = _import_firmware_mip()
+    _ensure_board_config(mip, status)
     _install_manifests_and_modules(mip, modules, manifests, status)
     _refresh_path_after_install()
     _install_index_deps_micropython(mip, index_deps, status)
@@ -266,6 +293,7 @@ async def install_pyodide(modules, manifests, wheel_deps, status=None):
     # Let the gallery paint "Running…" before sync mip fetches block the thread.
     await asyncio.sleep(0)
     mip = _import_portable_mip()
+    _ensure_board_config(mip, status, url_base=_page_base())
 
     _install_manifests_and_modules(
         mip,
