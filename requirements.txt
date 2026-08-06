@@ -1,0 +1,11 @@
+--index-url https://test.pypi.org/simple/
+
+usdl2>=0.0.18
+pygraphics>=0.0.29
+lvgl-cpython>=9.5.22
+multimer>=0.0.29
+eventsys>=0.0.29
+displaysys>=0.0.29
+palettes>=0.0.7
+pdwidgets>=0.0.13
+pydisplay-desktop>=0.0.5
