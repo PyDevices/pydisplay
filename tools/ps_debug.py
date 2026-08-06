@@ -88,7 +88,7 @@ def run():
         def on_exception(params):
             exc = params.get("exceptionDetails", {})
             text = exc.get("text", "") + " " + str(exc.get("exception", {}).get("description", ""))
-            print(f"[{ts()}][EXCEPTION] {text[:600]}", flush=True)
+            print(f"[{ts()}][EXCEPTION] {text[:3000]}", flush=True)
             all_events.append({"src": "exception", "text": text})
 
         cdp.on("Runtime.consoleAPICalled", on_console_api)

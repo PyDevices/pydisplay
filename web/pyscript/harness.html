@@ -245,7 +245,7 @@ def _loader_plan():
     return modules, manifests, packages, deps, entry
 
 MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
-PSDISPLAY_BOARD_CONFIG_PACKAGE = "github:PyDevices/micropython-hardware/board_configs/psdisplay/package.json"
+DESKTOP_BOARD_CONFIG_PACKAGE = "github:PyDevices/micropython-hardware/board_configs/desktop/package.json"
 
 def _same_origin_base():
     path = document.location.pathname
@@ -311,8 +311,13 @@ def _ensure_board_config(mip_mod):
         return
     except ImportError:
         pass
-    print("MIP install: board_config (psdisplay)")
-    mip_mod.install(PSDISPLAY_BOARD_CONFIG_PACKAGE, target=MANIFEST_MIP_TARGET)
+    print("MIP install: board_config (desktop)")
+    # deps (displaysys → …) need the PyDevices index; default is micropython.org/pi/v2.
+    mip_mod.install(
+        DESKTOP_BOARD_CONFIG_PACKAGE,
+        target=MANIFEST_MIP_TARGET,
+        index=MIP_LIB_INDEX,
+    )
 
 def _install_packages(packages):
     if not packages:
