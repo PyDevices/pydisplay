@@ -426,97 +426,25 @@ kind = "loop"
 quit = "poll"
 deps = ["core"]
 
-[examples.widgets_demo]
-import = "widgets_demo"
-script = "examples/widgets_demo.py"
+[examples.widgets_clinic_queue]
+import = "widgets_clinic_queue"
+script = "examples/widgets_clinic_queue.py"
 kind = "pdwidgets"
 quit = "inject"
 deps = ["utils"]
 timeout_s = 45
 
-[examples.widgets_percent]
-import = "widgets_percent"
-script = "examples/widgets_percent.py"
+[examples.widgets_energy_panel]
+import = "widgets_energy_panel"
+script = "examples/widgets_energy_panel.py"
 kind = "pdwidgets"
 quit = "inject"
 deps = ["utils"]
 timeout_s = 45
 
-[examples.widgets_device_panel]
-import = "widgets_device_panel"
-script = "examples/widgets_device_panel.py"
-kind = "pdwidgets"
-quit = "inject"
-deps = ["utils"]
-timeout_s = 45
-
-[examples.widgets_smartwatch]
-import = "widgets_smartwatch"
-script = "examples/widgets_smartwatch.py"
-kind = "pdwidgets"
-quit = "inject"
-deps = ["utils"]
-timeout_s = 45
-
-[examples.widgets_settings]
-import = "widgets_settings"
-script = "examples/widgets_settings.py"
-kind = "pdwidgets"
-quit = "inject"
-deps = ["utils"]
-timeout_s = 45
-
-[examples.widgets_nav_tabs]
-import = "widgets_nav_tabs"
-script = "examples/widgets_nav_tabs.py"
-kind = "pdwidgets"
-quit = "inject"
-deps = ["utils"]
-timeout_s = 45
-
-[examples.widgets_form_kitchen]
-import = "widgets_form_kitchen"
-script = "examples/widgets_form_kitchen.py"
-kind = "pdwidgets"
-quit = "inject"
-deps = ["utils"]
-timeout_s = 45
-
-[examples.widgets_media_busy]
-import = "widgets_media_busy"
-script = "examples/widgets_media_busy.py"
-kind = "pdwidgets"
-quit = "inject"
-deps = ["utils"]
-timeout_s = 45
-
-[examples.widgets_gauge_dash]
-import = "widgets_gauge_dash"
-script = "examples/widgets_gauge_dash.py"
-kind = "pdwidgets"
-quit = "inject"
-deps = ["utils"]
-timeout_s = 45
-
-[examples.widgets_actions]
-import = "widgets_actions"
-script = "examples/widgets_actions.py"
-kind = "pdwidgets"
-quit = "inject"
-deps = ["utils"]
-timeout_s = 45
-
-[examples.widgets_sheets]
-import = "widgets_sheets"
-script = "examples/widgets_sheets.py"
-kind = "pdwidgets"
-quit = "inject"
-deps = ["utils"]
-timeout_s = 45
-
-[examples.widgets_pickers]
-import = "widgets_pickers"
-script = "examples/widgets_pickers.py"
+[examples.widgets_locker_kiosk]
+import = "widgets_locker_kiosk"
+script = "examples/widgets_locker_kiosk.py"
 kind = "pdwidgets"
 quit = "inject"
 deps = ["utils"]

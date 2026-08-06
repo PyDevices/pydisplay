@@ -90,7 +90,7 @@ runtime.run_forever()
 
 **LVGL apps** — [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py): import `display_driver`, build UI, then `runtime.run_forever()`. See [LVGL guide](../guis/lvgl.md).
 
-**pdwidgets** — [`widgets_percent.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_percent.py) / [`widgets_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_demo.py): build UI, then:
+**pdwidgets** — [`widgets_clinic_queue.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_clinic_queue.py) and related kiosk demos: build UI, then:
 
 ```python
 import board_config
@@ -123,7 +123,7 @@ board_config.runtime.run_forever()
 | 6 | `eventsys_touch_test.py` | CPython · MCU | core | — |
 | 7 | `calc_graphics.py` | CPython · PyScript | core | — |
 | 8 | `paint.py` | CPython · PyScript | core | [paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/paint.png) |
-| 9 | `widgets_demo.py` | CPython · MCU | utils | — |
+| 9 | `widgets_clinic_queue.py` | CPython · MCU | utils | — |
 
 PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-asyncio.md).
 

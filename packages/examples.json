@@ -237,52 +237,16 @@
       "github:PyDevices/pydisplay/src/examples/tv_remote_menu.py"
     ],
     [
-      "widgets_actions.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_actions.py"
+      "widgets_clinic_queue.py",
+      "github:PyDevices/pydisplay/src/examples/widgets_clinic_queue.py"
     ],
     [
-      "widgets_demo.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_demo.py"
+      "widgets_energy_panel.py",
+      "github:PyDevices/pydisplay/src/examples/widgets_energy_panel.py"
     ],
     [
-      "widgets_device_panel.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_device_panel.py"
-    ],
-    [
-      "widgets_form_kitchen.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_form_kitchen.py"
-    ],
-    [
-      "widgets_gauge_dash.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_gauge_dash.py"
-    ],
-    [
-      "widgets_media_busy.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_media_busy.py"
-    ],
-    [
-      "widgets_nav_tabs.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_nav_tabs.py"
-    ],
-    [
-      "widgets_percent.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_percent.py"
-    ],
-    [
-      "widgets_pickers.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_pickers.py"
-    ],
-    [
-      "widgets_settings.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_settings.py"
-    ],
-    [
-      "widgets_sheets.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_sheets.py"
-    ],
-    [
-      "widgets_smartwatch.py",
-      "github:PyDevices/pydisplay/src/examples/widgets_smartwatch.py"
+      "widgets_locker_kiosk.py",
+      "github:PyDevices/pydisplay/src/examples/widgets_locker_kiosk.py"
     ],
     [
       "alien/__init__.py",
