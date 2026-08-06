@@ -32,7 +32,8 @@
         }
         .hinch-layout {
             display: grid;
-            grid-template-columns: minmax(220px, 300px) max-content;
+            /* Demo column width is capped to the canvas via syncCardLayout. */
+            grid-template-columns: max-content max-content;
             gap: 14px;
             justify-content: center;
             align-items: start;
@@ -43,6 +44,7 @@
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
+            max-width: 100%;
         }
         .demo-panel h2 {
             margin-top: 0;
@@ -92,8 +94,8 @@
         }
         @media (max-width: 880px) {
             .hinch-layout {
-                grid-template-columns: 1fr;
-                justify-content: stretch;
+                grid-template-columns: max-content;
+                justify-content: center;
             }
             .demo-panel {
                 position: static;
@@ -206,7 +208,13 @@
                 }
             });
 
-            var gui = selectors.length === 1 && unknownBare.length === 0 ? selectors[0] : '';
+            var gui = '';
+            if (selectors.length === 1 && unknownBare.length === 0) {
+                gui = selectors[0];
+            } else if (selectors.length === 0 && unknownBare.length === 0) {
+                // Bare URL (or only ?demo=…): same as ?touch
+                gui = 'touch';
+            }
             var demo = params.get('demo') || '';
             window.__hinchGui = gui;
             window.__hinchDemo = demo;
@@ -249,9 +257,7 @@
                 var error = document.getElementById('query-error');
                 var text = document.getElementById('query-error-text');
                 error.hidden = false;
-                if (window.location.search) {
-                    text.textContent = 'Unsupported or ambiguous selector. Use ?nano, ?micro, or ?touch.';
-                }
+                text.textContent = 'Unsupported or ambiguous selector. Use ?nano, ?micro, or ?touch.';
                 return;
             }
 
@@ -289,9 +295,11 @@ except OSError:
 if "/" not in sys.path:
     sys.path.insert(0, "/")
 import utils.path  # noqa: F401
+import ps_loader
 
 from displaysys import env_set
 
+# Hinch demos use 320x240 (gallery default is 320x480).
 env_set("PYDISPLAY_WIDTH", 320)
 env_set("PYDISPLAY_HEIGHT", 240)
 
@@ -437,6 +445,9 @@ async def _boot():
             _set_status("Starting {}…".format(selected))
         else:
             _set_status("Initializing GUI…")
+        # color_setup / hardware_setup / touch_setup import board_config —
+        # same psdisplay package as harness.html / gallery loaders.
+        ps_loader.ensure_board_config(status=_set_status)
         print("Loading", setup)
         __import__(setup)
 
@@ -499,8 +510,12 @@ asyncio.create_task(_boot())
             function syncCardLayout() {
                 const rect = device.getBoundingClientRect();
                 if (rect.width > 0) {
-                    stage.style.width = rect.width + 'px';
-                    panel.style.width = rect.width + 'px';
+                    const width = rect.width + 'px';
+                    stage.style.width = width;
+                    panel.style.width = width;
+                    // Demos list must never be wider than canvas / console.
+                    demoPanel.style.width = width;
+                    demoPanel.style.maxWidth = width;
                 }
                 if (rect.height > 0) panel.style.height = rect.height + 'px';
                 if (window.innerWidth <= 880) {

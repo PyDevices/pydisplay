@@ -3,7 +3,7 @@
   "short_name": "Hinch GUIs",
   "description": "MicroPython Nano-GUI, Micro-GUI, and Touch-GUI demos running in the browser.",
   "id": "./peterhinch",
-  "start_url": "./peterhinch.html?nano",
+  "start_url": "./peterhinch.html?touch",
   "scope": "./",
   "display": "standalone",
   "launch_handler": {
