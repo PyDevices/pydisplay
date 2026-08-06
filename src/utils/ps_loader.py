@@ -189,6 +189,18 @@ def _ensure_board_config(mip_mod, status=None, url_base=None):
     _refresh_path_after_install()
 
 
+def ensure_board_config(status=None):
+    """Ensure browser ``board_config`` (psdisplay) is importable.
+
+    Call after ``utils.path`` (and any ``env_set`` size overrides) and before
+    importing demos or setup modules that ``import board_config``.
+    Same package as ``harness.html`` / gallery ``install_micropython``.
+    """
+    _ensure_cwd()
+    mip = _import_firmware_mip()
+    _ensure_board_config(mip, status)
+
+
 def install_micropython(modules, manifests, index_deps, status=None):
     """Sync install plan for MicroPython WASM (firmware ``mip``)."""
     _ensure_cwd()

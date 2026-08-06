@@ -44,9 +44,16 @@ def test_page_has_its_own_pwa_identity():
     assert '<link rel="manifest" href="./peterhinch-manifest.json">' in source
     assert manifest["name"] == "Peter Hinch GUI Demos"
     assert manifest["id"] == "./peterhinch"
-    assert manifest["start_url"] == "./peterhinch.html?nano"
+    assert manifest["start_url"] == "./peterhinch.html?touch"
     assert "'./peterhinch-manifest.json'" in service_worker
     assert "'./peterhinch.html'" in service_worker
+
+
+def test_bare_url_defaults_to_touch_gui():
+    source = _source()
+    assert "Bare URL (or only ?demo=…): same as ?touch" in source
+    assert "gui = 'touch';" in source
+    assert "selectors.length === 0 && unknownBare.length === 0" in source
 
 
 def test_generated_configs_split_shared_files_from_gui_manifests():
@@ -151,12 +158,14 @@ def test_gui_picker_is_ordered_touch_micro_nano():
 
 def test_console_stacks_below_canvas_and_cards_are_synchronized():
     source = _source()
-    assert "grid-template-columns: minmax(220px, 300px) max-content;" in source
+    assert "grid-template-columns: max-content max-content;" in source
     assert "justify-content: center;" in source
     assert ".hinch-stage .play-area > .console-panel" in source
     assert "grid-row: 3;" in source
-    assert "stage.style.width = rect.width + 'px';" in source
-    assert "panel.style.width = rect.width + 'px';" in source
+    assert "stage.style.width = width;" in source
+    assert "panel.style.width = width;" in source
+    assert "demoPanel.style.width = width;" in source
+    assert "demoPanel.style.maxWidth = width;" in source
     assert "panel.style.height = rect.height + 'px';" in source
     assert "demoPanel.style.height = consoleBottom - demoTop + 'px';" in source
 
