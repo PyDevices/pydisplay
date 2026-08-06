@@ -5,6 +5,10 @@
       "github:PyDevices/pydisplay/src/examples/analog_clock_lvgl.py"
     ],
     [
+      "audio_out_test.py",
+      "github:PyDevices/pydisplay/src/examples/audio_out_test.py"
+    ],
+    [
       "bmp565_scroll.py",
       "github:PyDevices/pydisplay/src/examples/bmp565_scroll.py"
     ],
