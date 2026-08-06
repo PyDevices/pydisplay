@@ -540,10 +540,20 @@ class SDLDisplay(DisplayDriver):
     ############### Required API Methods ################
 
     def _lock_window_size(self) -> None:
-        """Keep the OS window fixed to the scaled panel size (not user-resizable)."""
+        """Keep the OS window fixed to the scaled panel size (not user-resizable).
+
+        When rotation swaps the aspect ratio, the previous min==max lock rejects
+        ``SetWindowSize`` and then ``SetWindowMaximumSize`` (max would be smaller
+        than the old min). Raise max, relax min, resize, then re-lock.
+        """
         w = int(self.width * self._scale)
         h = int(self.height * self._scale)
         usdl2.SDL_SetWindowResizable(self._window, 0)
+        # Raise max first so aspect swaps are not blocked by the old min==max lock.
+        # SDL rejects 0 for min/max on this build; use 1 and a large ceiling.
+        usdl2.SDL_SetWindowMaximumSize(self._window, 16384, 16384)
+        usdl2.SDL_SetWindowMinimumSize(self._window, 1, 1)
+        usdl2.SDL_SetWindowSize(self._window, w, h)
         usdl2.SDL_SetWindowMinimumSize(self._window, w, h)
         usdl2.SDL_SetWindowMaximumSize(self._window, w, h)
 
@@ -551,13 +561,6 @@ class SDLDisplay(DisplayDriver):
         """
         Initializes the display instance.  Called by __init__ and rotation setter.
         """
-        retcheck(
-            usdl2.SDL_SetWindowSize(
-                self._window,
-                int(self.width * self._scale),
-                int(self.height * self._scale),
-            )
-        )
         self._lock_window_size()
         retcheck(usdl2.SDL_RenderSetLogicalSize(self._renderer, self.width, self.height))
 
@@ -659,12 +662,17 @@ class SDLDisplay(DisplayDriver):
         """
 
         if (angle := (value % 360) - (self._rotation % 360)) != 0:
+            # 90/270 swap dims; 180 keeps the current logical size.
+            if abs(angle) % 180 == 0:
+                new_w, new_h = self.width, self.height
+            else:
+                new_w, new_h = self.height, self.width
             tempBuffer = usdl2.SDL_CreateTexture(
                 self._renderer,
                 self._px_format,
                 usdl2.SDL_TEXTUREACCESS_TARGET,
-                self.height,
-                self.width,
+                new_w,
+                new_h,
             )
             if not tempBuffer:
                 raise RuntimeError(f"{usdl2.SDL_GetError()}")
@@ -673,8 +681,8 @@ class SDLDisplay(DisplayDriver):
             retcheck(usdl2.SDL_SetRenderTarget(self._renderer, tempBuffer))
             if abs(angle) != 180:
                 dstrect = usdl2.SDL_Rect(
-                    (self.height - self.width) // 2,
-                    (self.width - self.height) // 2,
+                    (new_w - self.width) // 2,
+                    (new_h - self.height) // 2,
                     self.width,
                     self.height,
                 )
@@ -686,6 +694,7 @@ class SDLDisplay(DisplayDriver):
             retcheck(usdl2.SDL_SetRenderTarget(self._renderer, None))
             retcheck(usdl2.SDL_DestroyTexture(self._buffer))
             self._buffer = tempBuffer
+            self._render_dirty = True
 
     ############### Class Specific Methods ##############
 
