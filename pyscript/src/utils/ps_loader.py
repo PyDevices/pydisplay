@@ -17,9 +17,9 @@ WHEEL_INDEX_URLS = (
     "https://test.pypi.org/simple/",
     "https://pypi.org/simple/",
 )
-# Browser default board config package for examples that import board_config.
-PSDISPLAY_BOARD_CONFIG_PACKAGE = (
-    "github:PyDevices/micropython-hardware/board_configs/psdisplay/package.json"
+# Browser default board package (display + board_devices + audio drivers).
+DESKTOP_BOARD_CONFIG_PACKAGE = (
+    "github:PyDevices/micropython-hardware/board_configs/desktop/package.json"
 )
 # JSON API (not simple) — used to pin pyemscripten wasm wheels by direct URL.
 WHEEL_JSON_URL = "https://test.pypi.org/pypi/{package_name}/json"
@@ -177,20 +177,20 @@ def _has_board_config():
 
 
 def _ensure_board_config(mip_mod, status=None, url_base=None):
-    """Install the default browser board_config when it is not already present."""
+    """Install desktop board_config (+ audio) when it is not already present."""
     if _has_board_config():
         return
     if status:
-        status("Installing board_config (psdisplay)…")
-    kwargs = {"target": MANIFEST_MIP_TARGET}
+        status("Installing board_config (desktop)…")
+    kwargs = {"target": MANIFEST_MIP_TARGET, "index": MIP_LIB_INDEX}
     if url_base is not None:
         kwargs["url_base"] = url_base
-    _quiet_install(mip_mod, PSDISPLAY_BOARD_CONFIG_PACKAGE, **kwargs)
+    _quiet_install(mip_mod, DESKTOP_BOARD_CONFIG_PACKAGE, **kwargs)
     _refresh_path_after_install()
 
 
 def ensure_board_config(status=None):
-    """Ensure browser ``board_config`` (psdisplay) is importable.
+    """Ensure browser ``board_config`` (desktop package) is importable.
 
     Call after ``utils.path`` (and any ``env_set`` size overrides) and before
     importing demos or setup modules that ``import board_config``.

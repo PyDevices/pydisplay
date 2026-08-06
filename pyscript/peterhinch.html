@@ -446,7 +446,7 @@ async def _boot():
         else:
             _set_status("Initializing GUI…")
         # color_setup / hardware_setup / touch_setup import board_config —
-        # same psdisplay package as harness.html / gallery loaders.
+        # same desktop package as harness.html / gallery loaders.
         ps_loader.ensure_board_config(status=_set_status)
         print("Loading", setup)
         __import__(setup)
