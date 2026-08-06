@@ -53,7 +53,7 @@
     <main class="cards wrap">
         <div class="section-head">
             <h2>Core runtime</h2>
-            <span class="hint">board_config + Runtime — not a separate event broker</span>
+            <span class="hint">board_config + Runtime — one idiom everywhere</span>
         </div>
         <div class="install-block">
             <pre><code>from board_config import display_drv, runtime
@@ -62,10 +62,11 @@ runtime.on(runtime.events.MOUSEBUTTONDOWN, on_click)
 runtime.run_forever()</code></pre>
         </div>
         <p class="prose" style="margin-top: 14px;">
-            <code>board_config</code> wires <code>display_drv</code> and <code>runtime</code> for your host.
-            Register handlers with <code>runtime.on(...)</code>, then drive the loop with
-            <code>runtime.run_forever()</code>. The same idiom appears in MCU examples,
-            the PyScript gallery, and the Android paint demo.
+            Import <code>board_config</code>, register handlers, run the loop.
+            Guides and the full platform matrix live in the
+            <a href="https://pydisplay.readthedocs.io">documentation</a>
+            (<a href="https://pydisplay.readthedocs.io/en/latest/platforms/">Portability</a>,
+            <a href="https://pydisplay.readthedocs.io/en/latest/ecosystem/">Ecosystem</a>).
         </p>
 
         <div class="section-head" style="margin-top: 36px;">

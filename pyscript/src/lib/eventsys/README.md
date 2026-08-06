@@ -15,6 +15,8 @@ pip install \
   eventsys
 ```
 
+Why both indexes: [two-index pip install](https://pydisplay.readthedocs.io/en/latest/publishing-micropython-lib/#two-index-pip-install-required).
+
 Pulls in [multimer](https://test.pypi.org/project/multimer/) for shared timers used by `Runtime`.
 
 ### MicroPython (MIP)
