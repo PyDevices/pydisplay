@@ -71,28 +71,6 @@ Headless desktop default is `SDL_VIDEODRIVER=dummy` (see `AGENTS.md`). For a rea
 X11/SDL window without a logged-in display, agents may wrap with `xvfb-run -a`
 — details in [AGENTS.md — Running examples headlessly](../AGENTS.md#running-examples-headlessly-gui-smoke-tests).
 
-## Graphics / framebuf parity
-
-| Script | Purpose |
-|--------|---------|
-| [`compare_framebuf_mp.py`](compare_framebuf_mp.py) | Compare built-in C ``framebuf`` vs ``src/utils/framebuf.py`` on-device |
-| [`compare_graphics.py`](compare_graphics.py) | Shared compare engine (native/TestPyPI ``pygraphics`` vs staged pure-Python ``pygraphics``) |
-| [`compare_graphics_run.py`](compare_graphics_run.py) | Single-runtime subprocess entry (prints ``GRAPHICS_COMPARE_RESULT=`` JSON) |
-| [`compare_graphics_matrix.py`](compare_graphics_matrix.py) | Cross-runtime matrix (MP, CP, CPython; installs ``pygraphics`` from TestPyPI for CPython) |
-
-```bash
-# One runtime
-micropython tools/compare_graphics_run.py
-
-# Full desktop matrix (from repo root)
-python tools/compare_graphics_matrix.py
-python tools/compare_graphics_matrix.py --only-runtime micropython,cpython-venv
-```
-
-Expanded coverage includes ``FrameBuffer`` shape ops, module-level helpers, ``Draw`` (clip, text8), and per-glyph font probes (ASCII 32–126) to catch romfont mapping bugs in ``pygraphics`` implementations.
-
-Results JSON: system temp directory (`$TEMP`, or `$TMPDIR`/`$TMP` fallback). Exit 0 when all runtimes pass; exit 1 on any mismatch or setup failure.
-
 ## LVGL / timer harnesses
 
 | Script | Purpose |

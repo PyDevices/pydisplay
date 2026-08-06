@@ -27,7 +27,6 @@ dist/
 .cursor/*_plan.md
 .cursor/*-plan.md
 .cursor/*-migration.md
-.cursor/compare_graphics_py/
 .cursor/hinch_pkg_discovery/
 .cursor/skills/
 
