@@ -113,10 +113,6 @@
       "github:PyDevices/pydisplay/src/examples/framebuf_simpletest.py"
     ],
     [
-      "framebuf_text_compare.py",
-      "github:PyDevices/pydisplay/src/examples/framebuf_text_compare.py"
-    ],
-    [
       "graphics_simpletest.py",
       "github:PyDevices/pydisplay/src/examples/graphics_simpletest.py"
     ],
