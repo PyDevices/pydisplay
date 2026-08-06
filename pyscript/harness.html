@@ -318,6 +318,19 @@ def _ensure_board_config(mip_mod):
         target=MANIFEST_MIP_TARGET,
         index=MIP_LIB_INDEX,
     )
+    # Localhost-only override: raw.githubusercontent.com caches HEAD (~5 min),
+    # which breaks same-session verification after board_config edits. Do not
+    # enable on github.io (dev/ is not part of the Pages deploy).
+    host = document.location.hostname
+    if host in ("127.0.0.1", "localhost"):
+        try:
+            mip_mod.install(
+                _same_origin_base() + "dev/board_config.py",
+                target=MANIFEST_MIP_TARGET,
+            )
+            print("MIP override: local dev/board_config.py")
+        except Exception as exc:
+            print("local board_config override skipped:", type(exc).__name__, exc)
 
 def _install_packages(packages):
     if not packages:

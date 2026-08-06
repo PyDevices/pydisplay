@@ -1,5 +1,6 @@
 {
   "files": {
+    "./src/utils/audio.py": "/utils/",
     "./src/utils/byteswap.py": "/utils/",
     "./src/utils/color_setup.py": "/utils/",
     "./src/utils/console.py": "/utils/",
