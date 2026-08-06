@@ -46,7 +46,8 @@ cd src && python ../tools/input_probe.py   # interactive; focus the window
 | [`ps_debug.py`](ps_debug.py) | CDP console + network probe for a harness/load URL |
 | [`ps_shot.py`](ps_shot.py) | Timed screenshot with a hard kill if Chromium stalls |
 
-Agent-oriented guide: [PyScript local development](../docs/guides/pyscript.md).
+Agent-oriented guide: [PyScript local development](../docs/guides/pyscript.md)
+(including [Headless / CDP troubleshooting](../docs/guides/pyscript.md#headless--cdp-troubleshooting)).
 
 ```bash
 python tools/serve.py   # separate terminal
@@ -56,20 +57,101 @@ python tools/serve.py   # separate terminal
 
 ## Example test matrix
 
+**Source of truth** for the cross-runtime example test system: this section
+(workflow), [`example_runtimes.toml`](example_runtimes.toml) (runtime command
+templates), and [`example_test_manifest.toml`](example_test_manifest.toml)
+(per-example metadata). **Platform** is the product category (see
+[Portability & platforms](../docs/platforms/index.md)); **runtime** is the
+concrete launcher used in automation.
+
 | Script | Purpose |
 |--------|---------|
 | [`example_test_kit.py`](example_test_kit.py) | Cross-runtime example matrix |
 | [`example_test_manifest.toml`](example_test_manifest.toml) | Per-example metadata |
 | [`example_runtimes.toml`](example_runtimes.toml) | Runtime command templates |
+| [`sibling_repos.py`](sibling_repos.py) | Discover sibling `lib/` paths for matrix runs |
+
+### Unit tests first (default gate)
 
 ```bash
-python tools/example_test_kit.py --curated-only
-python tools/example_test_kit.py --only-example calculator --only-runtime micropython
+.venv/bin/python -m unittest discover -s tests
 ```
 
-Headless desktop default is `SDL_VIDEODRIVER=dummy` (see `AGENTS.md`). For a real
-X11/SDL window without a logged-in display, agents may wrap with `xvfb-run -a`
-— details in [AGENTS.md — Running examples headlessly](../AGENTS.md#running-examples-headlessly-gui-smoke-tests).
+### Matrix commands
+
+```bash
+# Curated set across available runtimes
+.venv/bin/python tools/example_test_kit.py --curated-only
+
+# Scope
+.venv/bin/python tools/example_test_kit.py --only-example calculator --only-runtime micropython
+.venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv
+
+# Order: --order examples (default) / --order runtimes
+# Broader: --all-except-harness
+```
+
+**Headless desktop** (dummy SDL — default for matrix/smoke):
+
+```bash
+SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
+  .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv
+```
+
+**Async timers on desktop:** prefer kit `--timer-async` (uses `env_set`, works
+for Windows PE under WSL). Shell export of `PYDISPLAY_TIMER_ASYNC=1` also works
+on hosts with `getenv`. Semantics: [Runtime — timer_async](../docs/concepts/runtime.md#timer_async-in-srclibboard_configpy).
+
+**Results:** summary on stderr; full JSON defaults to the system temp dir
+(`example_test_results.json`), not a path under the repo. Override with
+`--results-json PATH`.
+
+**Real X display:** `DISPLAY=:1` (xfce) without dummy SDL opens a window titled
+`"<impl> on <platform>"`. Optional: `xvfb-run -a …` (no `SDL_VIDEODRIVER=dummy`)
+for a real X11/SDL path without `:1`. Do not require Xvfb in the tools scripts;
+wrap when useful. PyScript/Playwright does not need Xvfb.
+
+### Interpreters and binaries
+
+Desktop matrices use repo `.venv` (`cpython-venv`) plus interpreters on
+`PATH` / `~/bin` / committed `repo:bin/` (`micropython`, `circuitpython`; see
+[`bin/README.md`](../bin/README.md)). `micropython.exe` / `python.exe` are
+Windows binaries and cannot run in a Linux cloud sandbox.
+
+After usermod changes that affect these binaries or PyScript vendor wasm,
+refresh with sibling `cmods/build_pydisplay_runtimes.sh` when that workspace
+is available.
+
+**`micropython.exe` matrix:** no `threading` / `_thread`. The example wrapper
+uses a `Runtime.poll` deadline quit (not a multimer SDL quit timer). With
+`pydisplay_test_mode.ENABLED`, `Runtime` skips auto-refresh wiring so examples
+that call `show()` themselves avoid a competing SDL refresh timer.
+
+### Sibling pure-Python repos
+
+Examples that `import palettes` / `pdwidgets` / `pygraphics` / the ctypes
+`usdl2` fallback need those sibling `lib/` dirs on path. The PyPI project
+literally named `palettes` is unrelated — do **not** `pip install palettes`.
+Prefer TestPyPI native builds for `pygraphics` and `usdl2` when available.
+
+Quick setup: `bash scripts/setup_sibling_repos.sh` (clones current `main`,
+writes `.pth` files). The harness auto-discovers the same paths via
+`sibling_repos.py`. `pdwidgets` also needs pydisplay's `src/lib` on path
+(the harness adds it).
+
+### Known pre-existing failures (not environment bugs)
+
+- `nano_gui_simpletest` needs the matching Hinch `gui/` package.
+- `tools/png_test.py` in **pdwidgets** (PNG probe) needs `PDWIDGETS_PNG_DIR` /
+  material-design-icons and a sibling pydisplay checkout.
+
+### PyScript matrix
+
+Start or reuse `python tools/serve.py`, then re-run with `--only-runtime pyscript`.
+Headless needs Playwright (`.venv/bin/pip install -r requirements-dev.txt` and
+`.venv/bin/playwright install chromium`). Without it, pyscript cells report
+`needs_playwright` (not a hard failure). Troubleshooting hangs / CDP:
+[PyScript — Headless / CDP troubleshooting](../docs/guides/pyscript.md#headless--cdp-troubleshooting).
 
 ## LVGL / timer harnesses
 

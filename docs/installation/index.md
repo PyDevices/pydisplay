@@ -24,8 +24,8 @@ For recommended board setup flows, see [micropython-hardware install workflows](
 
 - `pygraphics` — extended drawing helpers ([PyDevices/pygraphics](https://github.com/PyDevices/pygraphics)); see [graphics](../concepts/graphics.md)
 - `usdl2` — native SDL2 bindings ([PyDevices/usdl2](https://github.com/PyDevices/usdl2))
-- `palettes` — color palettes ([PyDevices/palettes](https://github.com/PyDevices/palettes)); see [palettes guide](guis/palettes.md)
-- `pdwidgets` — widget toolkit ([PyDevices/pdwidgets](https://github.com/PyDevices/pdwidgets)); see [pdwidgets guide](guis/pywidgets.md)
+- `palettes` — color palettes ([PyDevices/palettes](https://github.com/PyDevices/palettes)); see [palettes guide](../guis/palettes.md)
+- `pdwidgets` — widget toolkit ([PyDevices/pdwidgets](https://github.com/PyDevices/pdwidgets)); see [pdwidgets guide](../guis/pywidgets.md)
 
 **Optional packages:**
 

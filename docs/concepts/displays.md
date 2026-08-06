@@ -175,7 +175,7 @@ Related examples: [`scroll_touch_test.py`](https://github.com/PyDevices/pydispla
 
 BusDisplay uses CircuitPython-style rotation degrees (`0`, `90`, `180`, `270`).
 
-Known issues: Unix SDL rotation clears the screen; scrolling while rotated has edge cases on desktop and MCU — see [roadmap](https://github.com/PyDevices/pydisplay#roadmap).
+Known issues: Unix SDL rotation clears the screen; scrolling while rotated has edge cases on desktop and MCU — track work on [GitHub Issues](https://github.com/PyDevices/pydisplay/issues).
 
 ## Next
 

@@ -43,13 +43,11 @@ Full example catalog: uncomment the two `utils` / `examples` lines in `main.py` 
 
 ## Screenshot gallery
 
-| | | |
-|--|--|--|
-| ![tiny_toasters](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/tiny_toasters.gif) | ![color_test](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/color_test.png) | ![console_advanced_demo](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/console_advanced_demo.gif) |
-| ![paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/paint.png) | ![proverbs](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/proverbs.png) | ![testris](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/testris.png) |
-| ![framebuf_simpletest](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/framebuf_simpletest.png) | ![fonts](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/fonts.png) | ![bmp565_sprite](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/bmp565_sprite.gif) |
+| | |
+|--|--|
+| ![tiny_toasters](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/tiny_toasters.gif) | ![paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/paint.png) |
 
-Full table: [docs/screenshots/README.md](https://github.com/PyDevices/pydisplay/blob/main/docs/screenshots/README.md).
+Full gallery (all screenshots): [docs/screenshots/README.md](../screenshots/README.md).
 
 ## Next steps
 

@@ -15,19 +15,14 @@ PyDisplay is a *foundation*, not a GUI toolkit. Use it directly for simple UIs, 
 |:--:|:--:|
 | `paint.py` | `tiny_toasters.py` |
 
-More in the [screenshot gallery](try/index.md#screenshot-gallery).
+More in the [screenshot gallery](screenshots/README.md).
 
 ## It runs everywhere
 
-Portability is PyDisplay's headline feature:
-
-| Runtime | Microcontrollers | Unix / Linux | Windows | Browser | Jupyter |
-|---------|:----------------:|:------------:|:-------:|:-------:|:-------:|
-| **MicroPython** | ✅ | ✅ | ✅ | ✅ PyScript · Wokwi | — |
-| **CircuitPython** | ✅ | ✅ | — | — | — |
-| **CPython** | — | ✅ | ✅ | — | ✅ |
-
-Develop on your laptop with a mouse, then deploy the *same* code to a touchscreen on an ESP32. See **[Portability & platforms](platforms/index.md)** for the full story.
+Portability is PyDisplay's headline feature — MicroPython, CircuitPython, and
+CPython across MCU, desktop, browser (PyScript / Wokwi), and Jupyter. Develop on
+your laptop with a mouse, then deploy the *same* code to a touchscreen on an
+ESP32. Full matrix and backend notes: **[Portability & platforms](platforms/index.md)**.
 
 ## 🚀 Get started
 

@@ -129,4 +129,4 @@ Native Linux fbdev/DRM modules are **out of scope** until this SDL KMS path is i
 
 ## Single-board computers
 
-CircuitPython with Blinka on Raspberry Pi and similar boards is planned but not fully tested. For **CPython + HDMI without a desktop**, prefer [Linux KMS](#linux-kms-no-window-manager) above. Track other SBC work on the [roadmap](https://github.com/PyDevices/pydisplay#roadmap).
+CircuitPython with Blinka on Raspberry Pi and similar boards is planned but not fully tested. For **CPython + HDMI without a desktop**, prefer [Linux KMS](#linux-kms-no-window-manager) above. Track other SBC work on [GitHub Issues](https://github.com/PyDevices/pydisplay/issues).

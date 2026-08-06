@@ -86,17 +86,12 @@ See the [Architecture guide](https://pydisplay.readthedocs.io/en/latest/concepts
 
 ## 2. Portability
 
-Portability is PyDisplay's headline feature. The same application code runs across every supported runtime and target:
+Portability is PyDisplay's headline feature. The same application code runs on
+MicroPython, CircuitPython, and CPython — MCU panels, desktop windows, the
+browser (PyScript / Wokwi), and Jupyter. Your code imports `board_config` and
+draws; the host selects the display backend.
 
-| Runtime | Microcontrollers | Unix / Linux | Windows | Browser | Jupyter Notebook |
-|---------|:----------------:|:------------:|:-------:|:-------:|:----------------:|
-| **MicroPython** | ✅ | ✅ | ✅ | ✅ [PyScript](https://pyscript.net/) · [Wokwi](https://wokwi.com) | — |
-| **CircuitPython** | ✅ | ✅ | — | — | — |
-| **CPython** | — | ✅ | ✅ | — | ✅ |
-
-The right display backend is selected automatically: `BusDisplay` on MCUs, `SDLDisplay` or `PGDisplay` on the desktop, `PSDisplay` in PyScript, `JNDisplay` in Jupyter, and `FBDisplay` for CircuitPython framebuffer displays. Your code just imports `board_config` and draws.
-
-Full details and per-platform notes: **[Portability & platforms](https://pydisplay.readthedocs.io/en/latest/platforms/)**.
+Full matrix and per-platform notes: **[Portability & platforms](https://pydisplay.readthedocs.io/en/latest/platforms/)**.
 
 ## 3. 🚀 Quick start
 
@@ -200,21 +195,13 @@ Full diagram and boot sequence: [Architecture](https://pydisplay.readthedocs.io/
 
 ## 6. Ecosystem & sister projects
 
-PyDisplay is the graphics, input-event, and timing backend for the wider PyDevices ecosystem:
+PyDisplay is the graphics, input-event, and timing backend for the wider
+PyDevices ecosystem — LVGL bindings for MicroPython, CircuitPython, and CPython
+(so you can develop LVGL apps in Jupyter and run the same code on MCU), plus
+Nano-GUI, MicroPython-Touch, TFT/`st7789py` ports, and
+[pdwidgets](https://github.com/PyDevices/pdwidgets).
 
-| Project | What it adds |
-|---------|--------------|
-| [lv_micropython_cmod](https://github.com/PyDevices/lv_micropython_cmod) | [LVGL](https://lvgl.io/) bindings for **MicroPython**, using PyDisplay for display and input. |
-| [lv_circuitpython_mod](https://github.com/PyDevices/lv_circuitpython_mod) | LVGL bindings for **CircuitPython**, backed by PyDisplay. |
-| [lv_cpython_mod](https://github.com/PyDevices/lv_cpython_mod) | LVGL bindings for **CPython**, backed by PyDisplay. |
-
-Because all three share PyDisplay as the backend, you can **build an LVGL app in pure Python and develop it interactively in a Jupyter Notebook**, then run the identical code on a microcontroller. See the [LVGL guide](https://pydisplay.readthedocs.io/en/latest/guis/lvgl/) and the [Jupyter walkthrough](https://pydisplay.readthedocs.io/en/latest/platforms/jupyter/).
-
-PyDisplay also integrates with:
-
-- [Nano-GUI](https://pydisplay.readthedocs.io/en/latest/guis/nano-gui/) and [MicroPython-Touch](https://pydisplay.readthedocs.io/en/latest/guis/micropython-touch/) by @peterhinch
-- [russhughes TFT / st7789py](https://pydisplay.readthedocs.io/en/latest/guis/tft-gui/) ports
-- the [pdwidgets](https://pydisplay.readthedocs.io/en/latest/guis/pywidgets/) toolkit ([PyDevices/pdwidgets](https://github.com/PyDevices/pdwidgets))
+Full project list and links: **[Ecosystem & sister projects](https://pydisplay.readthedocs.io/en/latest/ecosystem/)**.
 
 ## 7. 📚 Documentation map
 

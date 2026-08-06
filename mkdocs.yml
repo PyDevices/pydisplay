@@ -122,7 +122,9 @@ nav:
     - LVGL: guis/lvgl.md
     - MicroPython-Touch: guis/micropython-touch.md
     - Nano-GUI: guis/nano-gui.md
+    - Micro-GUI: guis/micro-gui.md
     - TFT / st7789py ports: guis/tft-gui.md
+    - Palettes: guis/palettes.md
     - PyWidgets: guis/pywidgets.md
   - Utils: utils.md
   - Project:

@@ -48,80 +48,33 @@ PyDisplay publishes a set of pure-Python packages — `displaysys`, `eventsys`, 
 
 ### Running examples headlessly (GUI smoke tests)
 
-- **Read [`.cursor/example-runtimes.md`](.cursor/example-runtimes.md)
-  first** — it is the source of truth for the cross-runtime example test system
-  (runtimes, prerequisites, the example contract, the matrix commands, and
-  debugging). The canonical runtime list is
-  [`tools/example_runtimes.toml`](tools/example_runtimes.toml) and per-example
-  metadata is [`tools/example_test_manifest.toml`](tools/example_test_manifest.toml).
-- The cross-runtime example harness is `tools/example_test_kit.py`. To run the
-  CPython matrix headlessly, set dummy SDL drivers so pygame or SDL needs no display:
-  `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv`
-  Use `--only-example <name> ...` to scope. Results are written to
-  `.cursor/example_test_results.json` (gitignored).
-- A real X display is also available at `DISPLAY=:1` (xfce desktop). Running an
-  example there (without the dummy SDL driver) opens a real pygame window titled
-  `"<impl> on <platform>"`, which can be screenshotted/recorded with `ffmpeg`
-  (`-f x11grab -i :1`).
-- **Xvfb (optional):** keep dummy SDL as the default for headless matrix/smoke.
-  Use `xvfb-run -a …` (no `SDL_VIDEODRIVER=dummy`) when you need a real X11/SDL
-  window path without `:1` — e.g. native screenshots/recording, or catching
-  “works on dummy, fails on real X” bugs. Do not change the tools scripts to
-  require it; wrap the command when useful. PyScript/Playwright tools do not
-  need Xvfb.
-- Known pre-existing example failures on CPython (not environment issues to
-  "fix"): `nano_gui_simpletest` needs the matching Hinch `gui/` package.
-  `tools/png_test.py` in **pdwidgets** (PNG probe) needs `PDWIDGETS_PNG_DIR` / material-design-icons and a sibling pydisplay checkout.
-- **Sibling pure-Python repos** (`palettes`, `pdwidgets`, `pygraphics`, `usdl2`
-  under `lib/`). Examples that `import palettes` / `pdwidgets` / `pygraphics` /
-  the ctypes `usdl2` fallback need those `lib/` dirs on path. The PyPI project
-  literally named `palettes` is an unrelated "random hex color" library — do
-  **not** `pip install palettes`. Prefer TestPyPI native builds for `pygraphics`
-  and `usdl2` when available (the micropython-lib `pygraphics` package remains
-  pure Python for MIP installs). Clones normally live under
-  `/agent/repos/{…}` (symlinked into `~/gh/pydevices/`); if missing, clone
-  `github.com/PyDevices/<name>` and put `<repo>/lib` on the venv path
-  (`.pth` / `PYTHONPATH`).
-  Quick setup: `bash scripts/setup_sibling_repos.sh` (clones current `main` and
-  writes `.pth` files). The example harness (`tools/sibling_repos.py`) auto-discovers
-  the same paths for matrix runs.
-  `pdwidgets` also needs pydisplay's `src/lib` on path (the example harness adds it).
-- Cross-runtime binaries: `micropython`/`circuitpython` resolve via `PATH` →
-  `~/bin` → committed `repo:bin/` (see `bin/README.md`), so the matrix runs those
-  two even when they are not on the system `PATH`. `micropython.exe` / `python.exe`
-  are Windows binaries and cannot run in the Linux cloud sandbox.
-  After usermod changes that affect these binaries (or PyScript vendor wasm),
-  refresh with sibling `cmods/build_pydisplay_runtimes.sh` when that workspace
-  is available.
-- **PyScript hangs / multimer / WASM:** read
-  [`.cursor/pyscript-troubleshooting.md`](.cursor/pyscript-troubleshooting.md)
-  before poking the IDE browser. Prefer Playwright helpers
-  (`tools/ps_debug.py`, `ps_shot.py`) and console/CDP capture — sync
-  `sleep_ms` on the main thread often wedges `page.evaluate` and screenshots.
+- **Read [`tools/README.md` — Example test matrix](tools/README.md#example-test-matrix)
+  first** — agent runbook for the cross-runtime example test system. Canonical
+  runtime list: [`tools/example_runtimes.toml`](tools/example_runtimes.toml);
+  per-example metadata: [`tools/example_test_manifest.toml`](tools/example_test_manifest.toml).
+- Quick headless CPython smoke:
 
-### `PYDISPLAY_TIMER_ASYNC` (default `board_config`)
+  ```bash
+  SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
+    .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv
+  ```
 
-`src/lib/board_config.py` sets `runtime.timer_async` when constructing
-`eventsys.Runtime`. **Examples never read this variable** — only the library
-board_config (and test harnesses that call `displaysys.env_set`).
+- PyScript hangs / CDP: prefer Playwright helpers and
+  [Headless / CDP troubleshooting](docs/guides/pyscript.md#headless--cdp-troubleshooting)
+  before poking the IDE browser.
 
-| Host branch | `timer_async` |
-|-------------|---------------|
-| PyScript (`PSDisplay`) | always `True` |
-| Jupyter (`JNDisplay`) | always `True` |
-| PG/SDL desktop | `False` by default; host override below |
-| MCU board_configs | whatever that board sets (no shell env needed) |
+### `PYDISPLAY_TIMER_ASYNC` (agents / matrix)
 
-**Desktop host override** (where `getenv` exists): set **`PYDISPLAY_TIMER_ASYNC`**
-before `board_config` is imported. Truthy: `1`, `true`, `yes`, `on`. Falsey:
-`0`, `false`, `no`, `off`. Helper: `displaysys.env_bool`.
+Host defaults and env semantics:
+[Runtime — `timer_async`](docs/concepts/runtime.md#timer_async-in-srclibboard_configpy).
+Examples never read this variable — only library `board_config` and harnesses
+that call `displaysys.env_set`.
 
 **Preferred for agents / matrix:** pass wrapper `--timer-async` (the example
 kit does this). That uses `env_set` and works for Windows PE under WSL without
 relying on OS environ. Shell export remains a valid host shortcut:
 
 ```bash
-# kit inherits host env and forwards --timer-async for PE/WSL
 PYDISPLAY_TIMER_ASYNC=1 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
   .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv
 ```
@@ -131,10 +84,8 @@ To force async on desktop for that example (or the LVGL kit), set
 `PYDISPLAY_TIMER_ASYNC=1` on the parent process before launch, or use a kit that
 passes `--timer-async`.
 
-**`micropython.exe` matrix:** no `threading` / `_thread`. `example_test_wrapper.py` uses a
-`Runtime.poll` deadline quit (not a multimer SDL quit timer). With
-`pydisplay_test_mode.ENABLED`, `Runtime` skips auto-refresh wiring so examples
-that call `show()` themselves avoid a competing SDL refresh timer.
+**`micropython.exe` matrix:** no `threading` / `_thread`. See
+[tools/README.md — Interpreters and binaries](tools/README.md#interpreters-and-binaries).
 
 ### Architecture note: timers and refresh
 
@@ -148,18 +99,10 @@ that call `show()` themselves avoid a competing SDL refresh timer.
 
 ### MCU: no `_thread` for network / blocking work
 
-ESP32 MicroPython `mp_thread` stacks are tiny (~5KiB on ESP32-P4). Starting
-`_thread.start_new_thread` for HTTP/ECP/discovery (or other deep call stacks)
-from a soft-timer / LVGL timer / input path causes `Stack protection fault` /
-`Guru Meditation` in task `mp_thread` — often right after the UI first paints.
-
-**Do this instead:** queue the callable and drain at most one job from the main
-tick (`runtime.on_tick`, an `lv.timer`, or a soft `multimer.Timer` pump). Touch
-only engine/mailbox state in the job; apply widget/FB mutations on the pump.
-See `roku_widgets` / `roku_lvgl` / `roku_graphics` (`_run_bg` + `_drain_bg`).
-
-Desktop CPython may still use threads; this rule is for MCU MicroPython (and
-any port with a similarly small `_thread` stack). Do not “fix” this in
+Full guidance:
+[MicroPython — Background work (`_thread`)](docs/platforms/micropython.md#background-work-_thread).
+App pattern: queue work and drain on the main tick — see `roku_widgets` /
+`roku_lvgl` / `roku_graphics` (`_run_bg` + `_drain_bg`). Do not “fix” this in
 `eventsys` with speculative reentrancy guards — keep the pattern in the app.
 
 ### LVGL
@@ -180,8 +123,10 @@ any port with a similarly small `_thread` stack). Do not “fix” this in
   cooperative deadline/`time.sleep` (sync) or `asyncio.sleep` (async). The LVGL
   timer kit covers dedicated click checks — its daemon-thread quit injection is
   incompatible with the generic example matrix for some ports.
-- **`multimer` is fragile** — read [`.cursor/rules/multimer-fragile.mdc`](.cursor/rules/multimer-fragile.mdc)
-  before editing `src/lib/multimer/` (thinking model required, small diffs, revert failures).
+- **`multimer` is fragile** — before editing `src/lib/multimer/`, read
+  [multimer concepts](docs/concepts/multimer.md) and follow the local Cursor
+  rule `multimer-fragile` (thinking model, small diffs, revert failures). Do not
+  duplicate that rule text in this repo.
 
 ### MCU board bring-up (displayif / soft-reset)
 

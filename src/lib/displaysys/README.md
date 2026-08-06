@@ -15,6 +15,8 @@ pip install \
   displaysys
 ```
 
+Why both indexes: [two-index pip install](https://pydisplay.readthedocs.io/en/latest/publishing-micropython-lib/#two-index-pip-install-required).
+
 For desktop SDL, also install native `usdl2` (or pure-Python `usdl2-py`) with the same two-index pattern. For PyGame, install `pygame-ce` from PyPI (`import pygame`).
 
 ### MicroPython (MIP)

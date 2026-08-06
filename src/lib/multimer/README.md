@@ -15,6 +15,8 @@ pip install \
   multimer
 ```
 
+Why both indexes: [two-index pip install](https://pydisplay.readthedocs.io/en/latest/publishing-micropython-lib/#two-index-pip-install-required).
+
 ### MicroPython (MIP)
 
 ```python

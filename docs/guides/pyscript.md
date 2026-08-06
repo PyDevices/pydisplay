@@ -71,6 +71,30 @@ Featured starters: `pydisplay_demo`, `testris`. See `scripts/gallery_generator.p
 
 `board_configs/psdisplay/` — 320×480 canvas with host input via `runtime`.
 
+## Headless / CDP troubleshooting
+
+Prefer Playwright helpers over poking the IDE browser when demos hang:
+
+| Script | Purpose |
+|--------|---------|
+| [`tools/ps_debug.py`](../../tools/ps_debug.py) | CDP console + network probe for a harness/load URL |
+| [`tools/ps_shot.py`](../../tools/ps_shot.py) | Timed screenshot with a hard kill if Chromium stalls |
+
+```bash
+python tools/serve.py   # separate terminal
+.venv/bin/python tools/ps_debug.py \
+  'http://127.0.0.1:8000/web/pyscript/harness.html?modules=calc_graphics,calc_engine&autotest=1' 20
+```
+
+**Common wedge:** sync `multimer.sleep_ms` (or other blocking sleep) on the
+**main thread** often stalls `page.evaluate` and screenshots — the browser
+never yields. Prefer `runtime.run_forever()` / async sleep patterns from the
+[asyncio guide](pyscript-asyncio.md). Capture console/CDP output with
+`ps_debug.py` before assuming a gallery or package map regression.
+
+Matrix notes (serve.py, Playwright install, `needs_playwright`):
+[tools/README.md — Example test matrix](../../tools/README.md#example-test-matrix).
+
 ## Next
 
 - [Make your PyScript app a PWA](pyscript-pwa.md)
