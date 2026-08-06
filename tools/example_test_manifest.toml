@@ -92,6 +92,14 @@ kind = "async"
 quit = "poll"
 deps = ["core"]
 
+[examples.piano]
+import = "piano"
+script = "examples/piano.py"
+kind = "async"
+quit = "poll"
+deps = ["core"]
+timeout_s = 45
+
 [examples.eventsys_simpletest]
 import = "eventsys_simpletest"
 script = "examples/eventsys_simpletest.py"

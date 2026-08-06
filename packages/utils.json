@@ -1,6 +1,10 @@
 {
   "urls": [
     [
+      "audio.py",
+      "github:PyDevices/pydisplay/src/utils/audio.py"
+    ],
+    [
       "byteswap.py",
       "github:PyDevices/pydisplay/src/utils/byteswap.py"
     ],

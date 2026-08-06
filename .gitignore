@@ -75,3 +75,7 @@ docs/_build/
 .cache/
 
 src/lib/gui
+
+# Local PyScript MIP overrides (not deployed)
+web/pyscript/dev/
+

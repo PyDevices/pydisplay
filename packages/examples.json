@@ -189,6 +189,10 @@
       "github:PyDevices/pydisplay/src/examples/pbm_simpletest.py"
     ],
     [
+      "piano.py",
+      "github:PyDevices/pydisplay/src/examples/piano.py"
+    ],
+    [
       "pixel_sim_demos.py",
       "github:PyDevices/pydisplay/src/examples/pixel_sim_demos.py"
     ],
