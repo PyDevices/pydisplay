@@ -54,18 +54,24 @@ Clone as siblings:
 workspace/
   circuitpython/
   usdl2/
-  lv_circuitpython_mod/   # optional LVGL; also drives CP unix builds via build_cp.sh
+  lv_circuitpython_mod/   # optional LVGL
+  pygraphics/             # optional native pygraphics
   pydisplay/              # this repo
 ```
 
 ```bash
-cd usdl2
-./apply_cp_unix_usdl_patches.sh --apply   # required before every CP unix compile
-cd ../lv_circuitpython_mod
+# Standalone: patch then make (no cmods required)
+cd usdl2 && ./apply_cp_unix_usdl_patches.sh --apply
+cd ../circuitpython/ports/unix && make -j VARIANT=coverage
+```
+
+With a [cmods](https://github.com/PyDevices/cmods) workspace, `./build_cp.sh` applies usdl2 + pygraphics + LVGL patches then builds:
+
+```bash
 ./build_cp.sh --port unix --variant coverage
 ```
 
-`build_cp.sh` runs `apply_cp_unix_usdl_patches.sh --apply` automatically for the **unix** port when `usdl2/` is a sibling. If you invoke `make` in `circuitpython/ports/unix` directly, run the patch script yourself first.
+Each apply script also runs automatically from `build_cp.sh` for the **unix** port when that sibling exists. If you invoke `make` in `circuitpython/ports/unix` directly, run the patch script(s) yourself first.
 
 Install `libsdl2-dev`, then symlink or copy the built binary (e.g. `ports/unix/build-coverage/micropython`) to `~/bin/circuitpython`.
 
@@ -94,11 +100,13 @@ mkdir -p cp-user-config
 # Create cp-user-config/user_post_mpconfigport.mk so FROZEN_MPY_DIRS points at
 # those clones and MICROPY_PY_ASYNCIO / select / traceback are enabled.
 # See [multimer building docs](https://github.com/PyDevices/multimer/blob/main/docs/building.md).
-cd lv_circuitpython_mod
-./build_cp.sh --port unix --variant coverage
+
+# Standalone patch + make, or cmods ./build_cp.sh which also applies usdl2/pygraphics/LVGL
+cd usdl2 && ./apply_cp_unix_usdl_patches.sh --apply && cd ..
+cd circuitpython/ports/unix && make -j VARIANT=coverage -I ../../../../cp-user-config
 ```
 
-`build_cp.sh` passes `-I ../cp-user-config/` (workspace sibling) when that
+When using [cmods](https://github.com/PyDevices/cmods) `build_cp.sh`, it passes `-I cp-user-config/` (workspace sibling) when that
 directory exists. See [lv_circuitpython_mod README](https://github.com/PyDevices/lv_circuitpython_mod).
 
 `multimer` supplies Adafruit-compatible `ticks_*` helpers for application code;
