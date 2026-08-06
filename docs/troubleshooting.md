@@ -77,6 +77,43 @@ mip.install("github:PyDevices/micropython-hardware/board_configs/sdldisplay")  #
 
 **Fix:** Start with `calc_graphics.py`, `paint.py`, or `eventsys_simpletest.py`.
 
+## WSL / WSLg
+
+### Square/box artifact and touch-drag lag on long presses (touchscreen, Ubuntu/WSLg)
+
+**Symptom:** On a touchscreen, a long press shows a small square/box popup around
+the touch point, and dragging (e.g. a glissando across piano keys) feels laggy —
+motion updates arrive in bursts rather than smoothly. **Mouse clicks/drags never
+show the square and are not laggy.** This reproduces identically in `micropython`,
+`micropython.exe`'s Linux counterpart under WSL, CircuitPython, and CPython
+`.venv`, regardless of display backend (`SDLDisplay` or `PGDisplay`/PyGame).
+
+**Cause:** This is **not a pydisplay bug**. It is WSLg's touch remoting: WSLg
+forwards touch input from the Windows host to the Linux guest over the RDP
+Input Extension Protocol ([MS-RDPEI](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpei/)),
+which negotiates `CS_READY_FLAGS_SHOW_TOUCH_VISUALS` and applies Windows'
+legacy "press and hold to right-click" gesture disambiguation — the square is
+that gesture's touch-visual feedback, and the hold-to-disambiguate delay is
+what shows up as drag lag. This happens **before** the event ever reaches X11
+or the app.
+
+**Confirmed environmental, not app-level**, by reproducing the identical square
++ right-click-menu behavior in `mousepad` (GTK text editor, unrelated to
+pydisplay) under the same WSLg session. Disabling Windows' *Settings → Bluetooth
+& devices → Touch → "Press and hold for right-click"* did **not** remove it,
+which is consistent with the gesture being applied at the RDP/WSLg layer, not
+by the Windows touch-input stack the setting controls.
+
+**Fix:** None available from application code — pydisplay's SDL2/PyGame event
+handling already treats touch and mouse input identically; there is no
+touch-visual or gesture-disambiguation logic to disable on the app side. Native
+Windows apps (`micropython.exe`, `python.exe`) are unaffected because they
+receive touch input directly from the Windows touch stack, bypassing WSLg's RDP
+remoting entirely. Native (non-WSL) Linux is also unaffected. Treat touch input
+under WSLg as inherently laggier/gesture-delayed than mouse input or native
+touch, and prefer mouse or native Windows/Linux for latency-sensitive touch
+testing.
+
 ## Wokwi
 
 ### Simulation starts but display stays blank

@@ -24,6 +24,7 @@ Wave shapes are registered by name so apps can add custom oscillators without
 forking the mixer.
 """
 
+import array
 import math
 import struct
 
@@ -156,6 +157,12 @@ class Mixer:
         self.rate = int(rate)
         self.master = float(master)
         self._voices = {}
+        # Reusable float accumulator, grown (never shrunk) as render() is
+        # called with larger *frames* -- avoids allocating a fresh `[0.0] *
+        # frames` list every call, which is the exact allocation observed to
+        # raise MemoryError under a note_on burst (each note_on kicks an
+        # immediate render()) on memory-constrained ports.
+        self._acc = array.array("f")
         # Smoothed per-block headroom gain: ramped across each render() call
         # rather than snapped, so voice-count changes (chord press/release)
         # don't produce an instantaneous volume-step click.
@@ -215,7 +222,13 @@ class Mixer:
         dead = []
 
         # Accumulate float samples then pack — clearer than per-voice packing.
-        acc = [0.0] * frames
+        # Reuse self._acc (growing it only when frames outgrows the current
+        # capacity) instead of allocating a fresh list every call.
+        acc = self._acc
+        if len(acc) < frames:
+            acc.extend([0.0] * (frames - len(acc)))
+        for i in range(frames):
+            acc[i] = 0.0
         for vid, voice in self._voices.items():
             wf = voice.wave
             freq = voice.freq
@@ -297,9 +310,11 @@ class AudioEngine:
         self._pumping = False
         # Time-based look-ahead: keep ~N chunks queued ahead of now so a
         # slow synchronous frame (redraw, GC, event dispatch) doesn't starve
-        # the backend's queue before the next tick arrives.
-        self._lookahead_chunks = 3
-        self._max_catchup_chunks = 6
+        # the backend's queue before the next tick arrives. Kept minimal —
+        # every extra chunk here is audible note_on-to-speaker latency for an
+        # interactive instrument, not just anti-underrun slack.
+        self._lookahead_chunks = 2
+        self._max_catchup_chunks = 5
         self._sched_start_ms = None
         self._played_frames = 0
 
