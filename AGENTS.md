@@ -52,6 +52,9 @@ PyDisplay publishes a set of pure-Python packages — `displaysys`, `eventsys`, 
   first** — agent runbook for the cross-runtime example test system. Canonical
   runtime list: [`tools/example_runtimes.toml`](tools/example_runtimes.toml);
   per-example metadata: [`tools/example_test_manifest.toml`](tools/example_test_manifest.toml).
+- `--only-example` / `--only-runtime` take **space-separated** ids on one flag
+  (`--only-runtime circuitpython python.exe`). Repeating the flag keeps only
+  the last list — see [tools/README.md](tools/README.md#matrix-commands).
 - Quick headless CPython smoke:
 
   ```bash

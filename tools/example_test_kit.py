@@ -6,6 +6,7 @@ From repo root:
     python tools/example_test_kit.py
     python tools/example_test_kit.py --order runtimes
     python tools/example_test_kit.py --only-example calculator --only-runtime micropython
+    python tools/example_test_kit.py --only-runtime circuitpython python.exe
 """
 
 from __future__ import annotations
@@ -1013,8 +1014,24 @@ def main(argv: list[str] | None = None) -> int:
         default="examples",
         help="examples: each example on all runtimes first; runtimes: each runtime on all examples first",
     )
-    parser.add_argument("--only-example", nargs="+", help="Subset of example ids")
-    parser.add_argument("--only-runtime", nargs="+", help="Subset of runtime ids")
+    parser.add_argument(
+        "--only-example",
+        nargs="+",
+        metavar="ID",
+        help=(
+            "Subset of example ids (space-separated after one flag; "
+            "repeating the flag keeps only the last list)"
+        ),
+    )
+    parser.add_argument(
+        "--only-runtime",
+        nargs="+",
+        metavar="ID",
+        help=(
+            "Subset of runtime ids (space-separated after one flag; "
+            "repeating the flag keeps only the last list)"
+        ),
+    )
     parser.add_argument(
         "--curated-only", action="store_true", help="Run only the v1 curated examples"
     )

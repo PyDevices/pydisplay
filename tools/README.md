@@ -83,13 +83,21 @@ concrete launcher used in automation.
 # Curated set across available runtimes
 .venv/bin/python tools/example_test_kit.py --curated-only
 
-# Scope
+# Scope (space-separated ids on one flag; see note below)
 .venv/bin/python tools/example_test_kit.py --only-example calculator --only-runtime micropython
-.venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv
+.venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv micropython
+.venv/bin/python tools/example_test_kit.py --no-unit-tests \
+  --only-example calc_lvgl lv_test_timer --only-runtime circuitpython
 
 # Order: --order examples (default) / --order runtimes
 # Broader: --all-except-harness
 ```
+
+`--only-example` and `--only-runtime` use `nargs="+"`: pass multiple ids
+space-separated after **one** occurrence of the flag. Repeating the flag
+silently keeps only the last list (`--only-runtime circuitpython --only-runtime
+python.exe` runs just `python.exe`). Same rule for `lv_timer_test_kit.py`
+`--only` / `--modes`.
 
 **Headless desktop** (dummy SDL — default for matrix/smoke):
 

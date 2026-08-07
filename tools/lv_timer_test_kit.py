@@ -297,14 +297,21 @@ def main(argv: list[str] | None = None) -> int:
         nargs="+",
         choices=_runtime_choices(),
         metavar="RUNTIME",
-        help="Run subset of runtimes (default: all LVGL subprocess targets)",
+        help=(
+            "Subset of runtimes, space-separated after one flag "
+            "(repeating the flag keeps only the last list; default: all LVGL "
+            "subprocess targets)"
+        ),
     )
     parser.add_argument(
         "--modes",
         nargs="+",
         choices=list(MODES),
         default=list(MODES),
-        help="Modes to run (default: sync async)",
+        help=(
+            "Modes to run, space-separated after one flag "
+            "(repeating the flag keeps only the last list; default: sync async)"
+        ),
     )
     parser.add_argument(
         "--backend",
