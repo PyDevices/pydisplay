@@ -59,6 +59,25 @@ def _select_sleep_ms():
 sleep_ms = _select_sleep_ms()
 
 
+def loop_running():
+    """True when an asyncio event loop is running *and* executing a coroutine.
+
+    The reliable cross-runtime answer to "may I create an ``AsyncTimer`` now?".
+    Callers must not hand-roll this from ``get_running_loop`` / ``get_event_loop``
+    — see :func:`multimer._asyncio_loader.loop_running` for why those mislead on
+    MicroPython and CircuitPython.
+    """
+    import sys
+
+    # Browser hosts own the loop for the whole lifetime of the program, including
+    # module import, where no task of ours is executing yet.
+    if sys.platform in ("emscripten", "webassembly"):
+        return True
+    from ._asyncio_loader import loop_running as _loop_running
+
+    return _loop_running()
+
+
 def backend_name():
     """Name of the active timer backend, one of :func:`backends`."""
     from . import _select
@@ -131,6 +150,7 @@ __all__ = [
     "backend_name",
     "backends",
     "install_asyncio_compat",
+    "loop_running",
     "monotonic",
     "run_deadline_hook",
     "schedule",

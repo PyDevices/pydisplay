@@ -52,6 +52,7 @@ class TestApiSurface(unittest.TestCase):
                 "AsyncTimer",
                 "backend_name",
                 "backends",
+                "loop_running",
                 "monotonic",
                 "run_deadline_hook",
                 "schedule",
@@ -225,6 +226,57 @@ class TestAsyncTimer(unittest.TestCase):
         std_asyncio.run(main())
         self.assertGreaterEqual(len(hits), 2)
         self.assertEqual(set(callback_threads), {main_thread})
+
+
+class TestLoopRunning(unittest.TestCase):
+    def test_false_outside_a_loop(self):
+        self.assertFalse(multimer.loop_running())
+
+    def test_true_inside_a_loop(self):
+        from multimer import asyncio
+
+        async def main():
+            return multimer.loop_running()
+
+        self.assertTrue(asyncio.run(main()))
+
+    def test_ignores_get_event_loop(self):
+        """``get_event_loop`` returns a loop even when none runs, so it must not be used.
+
+        A backend offering only ``get_event_loop`` has to report "no loop" rather
+        than trusting it — the case that made eventsys defer async timers forever
+        on MicroPython.
+        """
+        from multimer import _asyncio_loader
+
+        class OnlyGetEventLoop:
+            def get_event_loop(self):
+                return "a loop that is not running"
+
+        saved = _asyncio_loader._asyncio_mod
+        _asyncio_loader._asyncio_mod = OnlyGetEventLoop()
+        try:
+            self.assertFalse(_asyncio_loader.loop_running())
+        finally:
+            _asyncio_loader._asyncio_mod = saved
+
+    def test_prefers_current_task_over_get_running_loop(self):
+        """CircuitPython's ``get_running_loop()`` succeeds with no loop running."""
+        from multimer import _asyncio_loader
+
+        class LyingGetRunningLoop:
+            def current_task(self):
+                return None
+
+            def get_running_loop(self):
+                return "a loop that is not running"
+
+        saved = _asyncio_loader._asyncio_mod
+        _asyncio_loader._asyncio_mod = LyingGetRunningLoop()
+        try:
+            self.assertFalse(_asyncio_loader.loop_running())
+        finally:
+            _asyncio_loader._asyncio_mod = saved
 
 
 class TestAsyncioCompat(unittest.TestCase):

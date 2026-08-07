@@ -59,6 +59,7 @@ multimer.asyncio.run(main())
 - `ticks_ms`, `ticks_add`, `ticks_diff`, `ticks_less`, `sleep_ms`, `schedule`
 - Lazy `multimer.asyncio` (frozen on MP/CP, stdlib on CPython)
 - `backend_name`, `backends`, `use_backend` — inspect or override the backend choice
+- `loop_running` — True when an asyncio loop is running a coroutine (an `AsyncTimer` needs one)
 
 ## Choosing a backend
 

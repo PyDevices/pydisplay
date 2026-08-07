@@ -19,6 +19,7 @@ from multimer import (
     backend_name,       # active backend, e.g. "librt"
     backends,           # names accepted by use_backend
     use_backend,        # override the backend chosen at import
+    loop_running,       # True when an asyncio loop is running a coroutine
     set_deadline_hook,  # test/debug only
     run_deadline_hook,  # test/debug only
 )
@@ -151,8 +152,15 @@ install a hook.
 |----------|---------|
 | `AsyncTimer` | Software timer backed by asyncio/uasyncio |
 | `asyncio` | Lazy-loaded event-loop module |
+| `loop_running` | True when a loop is running *and* executing a coroutine |
 
 Keep-alive / async app entry: `eventsys.Runtime.run_forever` / `run` / `run_async`.
+
+Use `loop_running()` to decide whether an `AsyncTimer` can be created yet — it is
+the only check that answers correctly everywhere. Do not hand-roll it:
+`get_running_loop` is missing from uasyncio and succeeds on CircuitPython with no
+loop running, and `get_event_loop` creates a loop rather than reporting one, so
+both report a loop that is not there (or miss one that is).
 
 ## FAQ — callback did not fire
 

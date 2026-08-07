@@ -23,14 +23,9 @@ def backend():
 
 
 def _running():
-    try:
-        return _backend.current_task() is not None
-    except (AttributeError, RuntimeError):
-        try:
-            _backend.get_running_loop()
-            return True
-        except (AttributeError, RuntimeError):
-            return False
+    from ._asyncio_loader import loop_running
+
+    return loop_running()
 
 
 def run(coro):
