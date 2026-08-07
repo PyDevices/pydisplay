@@ -5,7 +5,7 @@
     <script>try{if(localStorage.getItem('pydevices-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}</script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>pydisplay — PyDevices</title>
-    <meta name="description" content="Cross-platform display and event drivers for MicroPython, CircuitPython, and CPython — plus a browser PWA and Android companion.">
+    <meta name="description" content="Cross-platform display and event drivers for MicroPython, CircuitPython, and CPython — plus a PyScript Gallery and Android companion.">
     <link rel="icon" type="image/svg+xml" href="https://pydevices.github.io/assets/img/logo.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,11 +16,15 @@
     <div id="pydevices-site-header"></div>
 
     <section class="hero wrap">
-        <div class="logo-badge product-mark"><img src="https://pydevices.github.io/assets/img/products/pydisplay.svg" alt="pydisplay" width="112" height="112"></div>
-        <span class="eyebrow">PyDevices / pydisplay</span>
-        <h1>Display, input &amp; events — one Python codebase.</h1>
+        <div class="hero-lead">
+            <div class="hero-brand">
+                <div class="logo-badge product-mark"><img src="https://pydevices.github.io/assets/img/products/pydisplay.svg" alt="pydisplay" width="112" height="112"></div>
+                <span class="eyebrow">PyDevices / pydisplay</span>
+            </div>
+            <h1>Display, input &amp; events — one Python codebase.</h1>
+        </div>
         <p>pydisplay is the foundation of the PyDevices stack: pure-Python display drivers, input, and a portable <code>Runtime</code> that run unmodified on MicroPython, CircuitPython, and CPython. The same board configs and examples stretch from MCU panels to desktop windows, the browser, and Android.</p>
-        <p>The biggest on-ramp is the installable <strong>PyScript PWA</strong> — live demos in the browser with no flash step. Need a native phone build? The <a href="https://pydevices.github.io/pydisplay_android/">pydisplay_android</a> companion ships a python-for-android APK path for the same stack.</p>
+        <p>The biggest on-ramp is the installable <strong>PyScript Gallery</strong> — the same pydisplay examples as MCUs and CPython, live in the browser with no flash step. Need a native phone build? The <a href="https://pydevices.github.io/pydisplay_android/">pydisplay_android</a> companion is how you install your pydisplay apps on your phone.</p>
         <div class="cta">
             <a class="btn primary" href="pyscript/">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9z"/></svg>
@@ -87,8 +91,8 @@ runtime.run_forever()</code></pre>
             </a>
             <a class="card" href="pyscript/">
                 <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
-                <h3>PyScript demos</h3>
-                <p>Gallery of the same <code>src/examples/</code> scripts — installable as a PWA.</p>
+                <h3>PyScript Gallery</h3>
+                <p>The same <code>src/examples/</code> scripts as MCUs and CPython — installable in the browser.</p>
             </a>
             <a class="card" href="https://wokwi.com/projects/415770470006384641">
                 <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9zM9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg></span>
