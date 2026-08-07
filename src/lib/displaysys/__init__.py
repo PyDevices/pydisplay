@@ -9,10 +9,16 @@ Each backend is a separate submodule; import only what your target needs::
 
     from displaysys import DisplayDriver, color565, capabilities
     from displaysys.busdisplay import BusDisplay
+
+Host auto-selection (desktop / Jupyter / PyScript)::
+
+    from displaysys import AutoDisplay
 """
 
 import gc
 import sys
+
+from .autodisplay import AutoDisplay, AutoDisplayResult, host_kind
 
 try:
     import micropython as _mp
@@ -58,6 +64,8 @@ def _install_byteswap():
 byteswap, _BYTESWAP_BACKEND = _install_byteswap()
 
 __all__ = [
+    "AutoDisplay",
+    "AutoDisplayResult",
     "DisplayDriver",
     "alloc_buffer",
     "byteswap",
@@ -73,6 +81,7 @@ __all__ = [
     "env_int",
     "env_set",
     "fit_scale_to_desktop",
+    "host_kind",
     "notify_board_config_scale_override",
 ]
 
@@ -332,6 +341,11 @@ def capabilities():
                 "async_default": True,
                 "touch_scale": "1.0",
                 "scroll_emulation": True,
+            },
+            "autodisplay": {
+                "eventsys": True,
+                "auto_refresh": True,
+                "host_select": True,
             },
         },
     }

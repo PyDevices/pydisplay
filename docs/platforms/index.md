@@ -20,7 +20,7 @@ The same import works on every platform:
 from board_config import display_drv, runtime
 ```
 
-What changes is which **display backend** `board_config` selects — automatically on desktop, PyScript, and Jupyter, or explicitly via a per-board config on hardware:
+What changes is which **display backend** is used — `displaysys.AutoDisplay` on desktop / PyScript / Jupyter (via the desktop `board_config`), or an explicit per-board config on hardware:
 
 | Backend | Used on | Selected by |
 |---------|---------|-------------|
