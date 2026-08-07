@@ -4,15 +4,18 @@
 Used by:
   - Cursor sessionStart hook (when workspace is pydisplay)
   - Agent after tagging a TestPyPI-publishing repo (CLI: --force)
+  - publish_release_tag.sh pre-bump (CLI: --set name=X.Y.Z ...)
 
 Preserves package install order and ``--index-url``. Only rewrites ``name>=ver``
-lines for known packages. Fail-open: exits 0 with ``{}`` on any error.
+lines for known packages. Fail-open: exits 0 with ``{}`` on any error
+(unless ``--force`` / ``--set``).
 """
 
 from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -32,6 +35,7 @@ PACKAGE_ORDER = (
 
 INDEX_URL = "https://test.pypi.org/simple/"
 JSON_URL = "https://test.pypi.org/pypi/{}/json"
+_FLOOR_RE = re.compile(r"^([A-Za-z0-9_.-]+)>=([0-9][0-9A-Za-z._+]*)\s*$")
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_REQ = os.path.join(_REPO_ROOT, "requirements.txt")
@@ -101,11 +105,20 @@ def _latest_version(name: str) -> str:
     return str(data["info"]["version"])
 
 
-def refresh(path: str) -> dict[str, str]:
-    versions = {}
-    for name in PACKAGE_ORDER:
-        versions[name] = _latest_version(name)
+def _read_floors(path: str) -> dict[str, str]:
+    floors: dict[str, str] = {}
+    if not os.path.isfile(path):
+        return floors
+    with open(path, encoding="utf-8") as handle:
+        for line in handle:
+            match = _FLOOR_RE.match(line.strip())
+            if match:
+                floors[match.group(1)] = match.group(2)
+    return floors
 
+
+def _write_floors(path: str, versions: dict[str, str]) -> bool:
+    """Write PACKAGE_ORDER floors. Return True if the file content changed."""
     lines = [f"--index-url {INDEX_URL}", ""]
     for name in PACKAGE_ORDER:
         lines.append(f"{name}>={versions[name]}")
@@ -116,14 +129,99 @@ def refresh(path: str) -> dict[str, str]:
     if os.path.isfile(path):
         with open(path, encoding="utf-8") as handle:
             old = handle.read()
-    if old != text:
-        with open(path, "w", encoding="utf-8") as handle:
-            handle.write(text)
+    if old == text:
+        return False
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write(text)
+    return True
+
+
+def refresh(path: str) -> dict[str, str]:
+    versions = {}
+    for name in PACKAGE_ORDER:
+        versions[name] = _latest_version(name)
+    _write_floors(path, versions)
     return versions
 
 
+def set_floors(
+    path: str, overrides: dict[str, str], *, fetch_missing: bool = True
+) -> dict[str, str]:
+    """Set specific floors; keep or fetch the rest. Returns the full floor map."""
+    unknown = sorted(set(overrides) - set(PACKAGE_ORDER))
+    if unknown:
+        raise ValueError("unknown package(s): " + ", ".join(unknown))
+
+    versions = _read_floors(path)
+    for name, ver in overrides.items():
+        versions[name] = ver
+
+    for name in PACKAGE_ORDER:
+        if name in versions:
+            continue
+        if not fetch_missing:
+            raise ValueError(f"missing floor for {name!r} and fetch_missing is false")
+        versions[name] = _latest_version(name)
+
+    _write_floors(path, versions)
+    return {name: versions[name] for name in PACKAGE_ORDER}
+
+
+def _parse_set_args(argv: list[str]) -> tuple[dict[str, str], str | None]:
+    """Parse ``--set a=1 b=2`` and optional ``--path`` from argv."""
+    overrides: dict[str, str] = {}
+    path = None
+    i = 0
+    while i < len(argv):
+        arg = argv[i]
+        if arg == "--set":
+            i += 1
+            while i < len(argv) and not argv[i].startswith("--"):
+                item = argv[i]
+                if "=" not in item:
+                    raise ValueError(f"--set expected name=version, got: {item}")
+                name, ver = item.split("=", 1)
+                name = name.strip()
+                ver = ver.strip().lstrip("v")
+                if not name or not ver:
+                    raise ValueError(f"--set expected name=version, got: {item}")
+                overrides[name] = ver
+                i += 1
+            continue
+        if arg == "--path":
+            i += 1
+            if i >= len(argv):
+                raise ValueError("--path requires a value")
+            path = argv[i]
+            i += 1
+            continue
+        i += 1
+    return overrides, path
+
+
 def main() -> int:
-    force = "--force" in sys.argv
+    argv = sys.argv[1:]
+    force = "--force" in argv
+    try:
+        overrides, set_path = _parse_set_args(argv)
+    except ValueError as exc:
+        print(f"refresh failed: {exc}", file=sys.stderr)
+        return 1
+
+    if overrides:
+        path = set_path or DEFAULT_REQ
+        try:
+            versions = set_floors(path, overrides)
+        except (urllib.error.URLError, TimeoutError, KeyError, OSError, ValueError) as exc:
+            print(f"refresh failed: {exc}", file=sys.stderr)
+            return 1
+        print(f"Updated {path}", file=sys.stderr)
+        for name in PACKAGE_ORDER:
+            mark = " *" if name in overrides else ""
+            print(f"  {name}>={versions[name]}{mark}", file=sys.stderr)
+        print("{}")
+        return 0
+
     payload = _load_stdin() if not force else {}
     paths = _paths_from_payload(payload)
 
@@ -134,7 +232,7 @@ def main() -> int:
     path = (
         _requirements_path(paths)
         if not force
-        else (sys.argv[sys.argv.index("--path") + 1] if "--path" in sys.argv else DEFAULT_REQ)
+        else (argv[argv.index("--path") + 1] if "--path" in argv else DEFAULT_REQ)
     )
 
     try:
