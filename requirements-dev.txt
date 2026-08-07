@@ -21,5 +21,8 @@ nbstripout>=0.9
 pre-commit>=4.0
 ruff>=0.15.17
 
+# IDE type stubs (stubgen; scripts/gen_package_pyi.sh -> tools/typings/)
+mypy>=2.3
+
 # Display / image inspection
 pillow>=12.0
