@@ -80,6 +80,12 @@ def _mark(step, **data):
 _mark("mpy_top")
 
 MANIFEST_MIP_TARGET = "."
+# Index packages install here instead of the cwd, which sys.path searches first.
+# board_config's deps (displaysys, and through it eventsys and multimer) are
+# published copies of libraries this page already maps from the working tree —
+# installed into the cwd they shadow it, so the harness would silently test
+# released code instead of the tree under development.
+DEPENDENCY_MIP_TARGET = "/mip"
 
 def _log_print(*args, **kwargs):
     el = document.getElementById("log")
@@ -295,14 +301,38 @@ def _deps_from_entry(entry):
             continue
     return []
 
+def _built_in(name):
+    """True when the runtime already provides ``name`` (native or frozen module)."""
+    try:
+        __import__(name)
+    except Exception:
+        return False
+    return True
+
+
 def _install_deps(names):
     if not names:
         return
     import mip
 
     for which in names:
+        # Native modules compiled into the wasm build (lvgl) have no MIP package,
+        # so installing one can only 404. Frozen pure-Python deps are equally
+        # already present. Either way the runtime's copy is the authoritative one.
+        if _built_in(which):
+            print("MIP skip (provided by runtime):", which)
+            continue
         print("MIP install:", which)
         mip.install(which, index=MIP_LIB_INDEX)
+
+
+def _dependency_target():
+    """Return :data:`DEPENDENCY_MIP_TARGET`, on sys.path behind the mapped tree."""
+    import sys
+
+    if DEPENDENCY_MIP_TARGET not in sys.path:
+        sys.path.append(DEPENDENCY_MIP_TARGET)
+    return DEPENDENCY_MIP_TARGET
 
 
 def _ensure_board_config(mip_mod):
@@ -315,7 +345,7 @@ def _ensure_board_config(mip_mod):
     # deps (displaysys → …) need the PyDevices index; default is micropython.org/pi/v2.
     mip_mod.install(
         DESKTOP_BOARD_CONFIG_PACKAGE,
-        target=MANIFEST_MIP_TARGET,
+        target=_dependency_target(),
         index=MIP_LIB_INDEX,
     )
     # Localhost-only override: raw.githubusercontent.com caches HEAD (~5 min),

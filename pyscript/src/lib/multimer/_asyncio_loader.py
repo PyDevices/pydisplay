@@ -40,3 +40,35 @@ def load_asyncio():
 
     _asyncio_mod = aio
     return aio
+
+
+def loop_running():
+    """True when a coroutine of a running event loop is currently executing.
+
+    ``current_task()`` is the only probe that answers this correctly on every
+    supported runtime, so prefer it whenever the implementation has it:
+
+    * uasyncio (MicroPython) has no ``get_running_loop`` at all, so testing for
+      that name reports "no loop" even from inside a task;
+    * CircuitPython's ``get_running_loop()`` succeeds even when no loop is
+      running, reporting a loop that is not there;
+    * ``get_event_loop()`` creates or returns a loop on every implementation, so
+      it can never answer this question.
+    """
+    aio = load_asyncio()
+    if aio is None:
+        return False
+    current_task = getattr(aio, "current_task", None)
+    if current_task is not None:
+        try:
+            return current_task() is not None
+        except RuntimeError:
+            return False
+    get_running_loop = getattr(aio, "get_running_loop", None)
+    if get_running_loop is not None:
+        try:
+            get_running_loop()
+            return True
+        except RuntimeError:
+            return False
+    return False

@@ -37,6 +37,7 @@ if _tools not in sys.path:
 import json
 import time
 
+import multimer
 from board_config import display_drv, runtime
 from displaysys import env_get
 
@@ -274,9 +275,11 @@ def _inject_click(cx, cy):
     if queue_dev is None:
         return 0
 
+    # LVGL coords are display space; the queue device expects host-window pixels.
+    at = quit_inject.host_point(cx, cy)
     pending = [
-        events.Button(events.MOUSEBUTTONDOWN, (cx, cy), 1, False, None),
-        events.Button(events.MOUSEBUTTONUP, (cx, cy), 1, False, None),
+        events.Button(events.MOUSEBUTTONDOWN, at, 1, False, None),
+        events.Button(events.MOUSEBUTTONUP, at, 1, False, None),
     ]
     orig_read = queue_dev._read
 
@@ -287,7 +290,9 @@ def _inject_click(cx, cy):
     try:
         deadline = time.time() + 1.5
         while (pending or get_state()["taps"] < 1) and time.time() < deadline:
-            time.sleep(0.01)
+            # Pump: the host queue is drained from the runtime tick, which
+            # pump-based backends only deliver while the main thread sleeps here.
+            multimer.sleep_ms(10)
     finally:
         queue_dev._read = orig_read
     return get_state()["taps"]
@@ -303,9 +308,10 @@ async def _inject_click_async(cx, cy):
     if queue_dev is None:
         return 0
 
+    at = quit_inject.host_point(cx, cy)
     pending = [
-        events.Button(events.MOUSEBUTTONDOWN, (cx, cy), 1, False, None),
-        events.Button(events.MOUSEBUTTONUP, (cx, cy), 1, False, None),
+        events.Button(events.MOUSEBUTTONDOWN, at, 1, False, None),
+        events.Button(events.MOUSEBUTTONUP, at, 1, False, None),
     ]
     orig_read = queue_dev._read
 
@@ -363,8 +369,10 @@ def _run_kit_sync():
     deadline = time.time() + _DURATION_S
     clicked_taps = None
     while time.time() < deadline:
-        # Avoid multimer.sleep_ms with LVGL + librt (signal-handler deadlock risk).
-        time.sleep(0.01)
+        # multimer.sleep_ms, not time.sleep: pump-based backends (threading on
+        # CircuitPython / Windows CPython, SDL2, win32 APC) deliver callbacks only
+        # while the main thread pumps. For librt this resolves to a plain sleep.
+        multimer.sleep_ms(10)
         if clicked_taps is None and get_state()["seconds"] >= 2:
             cx, cy = _button_center(btn)
             clicked_taps = _inject_click(cx, cy)
@@ -428,7 +436,10 @@ def run_kit():
 
 
 def _wants_kit():
-    return len(sys.argv) > 1 and sys.argv[1] in ("kit", "harness")
+    # Scan the whole command line: under a runner (e.g.
+    # tools/multimer_backend_preload.py) the token is not at a fixed index, and
+    # CircuitPython cannot rewrite sys.argv to move it.
+    return any(arg in ("kit", "harness") for arg in sys.argv[1:])
 
 
 if _wants_kit():
