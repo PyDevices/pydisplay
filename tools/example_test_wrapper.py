@@ -528,6 +528,7 @@ def _parse_args(argv):
         "duration": 5.0,
         "timeout": 30.0,
         "timer_async": None,
+        "multimer_backend": None,
     }
     i = 2
     while i < len(argv):
@@ -553,6 +554,9 @@ def _parse_args(argv):
         elif arg == "--timer-async" and i + 1 < len(argv):
             out["timer_async"] = argv[i + 1]
             i += 2
+        elif arg == "--multimer-backend" and i + 1 < len(argv):
+            out["multimer_backend"] = argv[i + 1]
+            i += 2
         else:
             raise ValueError("unknown argument: {}".format(arg))
     if not out["script"] or not out["kind"]:
@@ -561,43 +565,26 @@ def _parse_args(argv):
 
 
 def _subprocess_hard_exit(code, *, headless=False):
-    """SDL on desktop CPython/MicroPython can block normal interpreter shutdown."""
-    if headless:
-        if hasattr(os, "_exit"):
-            os._exit(code)
-        return False
-    try:
-        name = sys.implementation.name
-    except AttributeError:
-        return False
-    if name not in ("cpython", "micropython", "circuitpython"):
-        return False
+    """Exit past SDL teardown, which can block normal interpreter shutdown.
+
+    CPython only: ``os._exit`` is the only way to skip that teardown, and no
+    other supported runtime has it — MicroPython and CircuitPython must return
+    and let shutdown take its course. Returns False when it could not exit;
+    otherwise it does not return.
+    """
     if not hasattr(os, "_exit"):
         return False
-    # CircuitPython SDL teardown can block past the harness timeout.
-    if name == "circuitpython":
+    if headless:
         os._exit(code)
     try:
         import pydisplay_test_mode
 
-        if pydisplay_test_mode.ENABLED and name == "cpython":
+        if pydisplay_test_mode.ENABLED:
             os._exit(code)
     except ImportError:
         pass
-    try:
-        import pydisplay_test_mode
-
-        if pydisplay_test_mode.ENABLED:
-            try:
-                from board_config import display_drv
-
-                active = display_drv._sdl_active()
-                if not active:
-                    os._exit(code)
-            except Exception:
-                pass
-    except ImportError:
-        pass
+    # Reached only when pydisplay_test_mode is unavailable, i.e. not under this
+    # harness: let the display release SDL before the process disappears.
     try:
         from board_config import display_drv
 
@@ -607,7 +594,6 @@ def _subprocess_hard_exit(code, *, headless=False):
     except Exception:
         pass
     os._exit(code)
-    return False
 
 
 def main(argv=None):
@@ -694,6 +680,28 @@ def main(argv=None):
         except Exception:
             pass
 
+    # multimer.use_backend works on hosts that cannot read exported env vars
+    # (Windows PE under WSL), so prefer it over MULTIMER_BACKEND here. A backend
+    # this host cannot provide is a skip, not a failure — sweeps ask every
+    # runtime for every backend.
+    if args.get("multimer_backend") is not None:
+        import multimer
+
+        try:
+            multimer.use_backend(args["multimer_backend"])
+        except (ImportError, ValueError) as exc:
+            _print_result(
+                {
+                    "example": args["example"],
+                    "status": "skip",
+                    "error": "multimer backend {!r} unavailable: {}".format(
+                        args["multimer_backend"], exc
+                    ),
+                    "backend": "headless" if headless else "?",
+                }
+            )
+            return 0
+
     backend = "headless" if headless else "?"
     quit_injected = False
     error = None
@@ -726,8 +734,7 @@ def main(argv=None):
 
     _print_result(payload)
     code = 0 if status == "ok" else 1
-    if _subprocess_hard_exit(code, headless=headless):
-        return code
+    _subprocess_hard_exit(code, headless=headless)
     return code
 
 

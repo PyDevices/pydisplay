@@ -14,6 +14,12 @@ From repo root:
     python tools/lv_timer_test_kit.py
     python tools/lv_timer_test_kit.py --only cpython-venv
     python tools/lv_timer_test_kit.py --only cpython-venv --modes async
+    python tools/lv_timer_test_kit.py --backend sdl2
+
+``--backend`` forces one multimer backend through
+``tools/multimer_backend_preload.py`` (in-process, so it also works for the
+Windows ``.exe`` runtimes, which cannot read WSL-exported env vars). Runtimes
+without that backend report ``unavailable`` and do not fail the run.
 
 Runtimes resolve via ``tools/example_runtimes.toml`` (same as example_test_kit).
 Missing executables show as ``missing`` in the table.
@@ -127,7 +133,7 @@ def compute_exit_code(
     strict_clicks: bool = False,
 ) -> int:
     for row in rows:
-        if row.get("summary") == "missing":
+        if row.get("summary") == "missing" or row.get("unavailable"):
             continue
         if row.get("timed_out"):
             return 1
@@ -160,13 +166,23 @@ def run_case(
     timeout: int = DEFAULT_TIMEOUT,
     *,
     cwd: Path | None = None,
+    backend: str | None = None,
 ) -> dict:
-    cmd = [*cmd_base, HARNESS_ARG, "kit"]
+    # Every case goes through the preload so its settings are applied in-process:
+    # Windows MicroPython / CPython launched from WSL never see exported
+    # variables, and a mode that silently no-ops would report a sync run in the
+    # async column. The process env is still set for code that reads os.environ.
+    timer_async = {"async": "1", "sync": "0"}.get(mode)
+    preload = os.path.relpath(TOOLS / "multimer_backend_preload.py", SRC)
+    cmd = [*cmd_base, preload]
+    if timer_async is not None:
+        cmd += ["--env", f"PYDISPLAY_TIMER_ASYNC={timer_async}"]
+    cmd += [backend or "-", HARNESS_ARG, "kit"]
     env = os.environ.copy()
-    if mode == "async":
-        env["PYDISPLAY_TIMER_ASYNC"] = "1"
-    elif mode == "sync":
-        env["PYDISPLAY_TIMER_ASYNC"] = "0"
+    if backend:
+        env["MULTIMER_BACKEND"] = backend
+    if timer_async is not None:
+        env["PYDISPLAY_TIMER_ASYNC"] = timer_async
     run_cwd = str(cwd or SRC)
     try:
         proc = subprocess.run(
@@ -192,9 +208,17 @@ def run_case(
 
     result = parse_result(stdout)
     summary = summarize(result, returncode, timed_out)
+    # This host has no such backend; a sweep asks every runtime for every
+    # backend, so that is a skip rather than a failure. Match on the sentinel,
+    # not the preload exit code: CircuitPython does not propagate sys.exit(3).
+    unavailable = "MULTIMER_BACKEND_UNAVAILABLE" in stdout
+    if unavailable:
+        summary = "unavailable"
     return {
         "interpreter": interpreter,
         "mode": mode,
+        "backend": backend,
+        "unavailable": unavailable,
         "summary": summary,
         "returncode": returncode,
         "timed_out": timed_out,
@@ -236,6 +260,7 @@ def run_kit(
     strict_clicks: bool = False,
     results_path: Path = DEFAULT_RESULTS,
     emit_json: bool = False,
+    backend: str | None = None,
 ) -> int:
     modes_tuple = tuple(modes)
     interpreters = _resolve_interpreters(only)
@@ -248,8 +273,9 @@ def run_kit(
                 print(f"Skipping {name} {mode} (not found: {hint})", file=sys.stderr)
                 rows.append(_missing_row(name, mode, exe_hint=hint))
                 continue
-            print(f"Running {name} {mode}...", file=sys.stderr)
-            row = run_case(name, cmd_base, mode, timeout)
+            label = f"{name} {mode}" + (f" [{backend}]" if backend else "")
+            print(f"Running {label}...", file=sys.stderr)
+            row = run_case(name, cmd_base, mode, timeout, backend=backend)
             rows.append(row)
             if emit_json:
                 print(json.dumps(row, indent=2))
@@ -280,6 +306,14 @@ def main(argv: list[str] | None = None) -> int:
         default=list(MODES),
         help="Modes to run (default: sync async)",
     )
+    parser.add_argument(
+        "--backend",
+        metavar="NAME",
+        help=(
+            "Force one multimer backend (librt, machine, win32, sdl2, threading, "
+            "polling, async) instead of the platform default"
+        ),
+    )
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
     parser.add_argument(
         "--strict-clicks",
@@ -295,6 +329,7 @@ def main(argv: list[str] | None = None) -> int:
         timeout=args.timeout,
         strict_clicks=args.strict_clicks,
         emit_json=args.json,
+        backend=args.backend,
     )
 
 

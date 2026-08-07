@@ -345,6 +345,9 @@ def run_subprocess_case(
     timer_async = env.get("PYDISPLAY_TIMER_ASYNC")
     if timer_async is not None:
         cmd.extend(["--timer-async", str(timer_async)])
+    multimer_backend = env.get("MULTIMER_BACKEND")
+    if multimer_backend:
+        cmd.extend(["--multimer-backend", str(multimer_backend)])
     try:
         proc = subprocess.run(
             cmd,

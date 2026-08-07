@@ -160,6 +160,14 @@ Headless needs Playwright (`.venv/bin/pip install -r requirements-dev.txt` and
 | [`lv_timer_test_kit.py`](lv_timer_test_kit.py) | Full LVGL timer matrix (sync/async, all runtimes) |
 | [`run_test_timers.py`](run_test_timers.py) | multimer backend probes |
 | [`test_timers.py`](test_timers.py) | Host timer probes |
+| [`multimer_backend_preload.py`](multimer_backend_preload.py) | Force one multimer backend, then run a script |
+
+**Comparing multimer backends:** `lv_timer_test_kit.py --backend NAME` (or
+`example_test_kit.py` with `MULTIMER_BACKEND` set, which forwards
+`--multimer-backend` to the wrapper). Both call `multimer.use_backend()` inside
+the child, so they also work for the Windows `.exe` runtimes, which cannot read
+WSL-exported env vars. Runtimes lacking that backend report `unavailable` and do
+not fail the run. Semantics: [multimer — Overriding the backend](../docs/concepts/multimer.md#overriding-the-backend).
 
 ## TestPyPI desktop smoke test
 

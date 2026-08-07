@@ -17,6 +17,24 @@ def queue_device():
     return None
 
 
+def host_point(x, y):
+    """Convert a display-space point to the host-window coordinates ``_read`` yields.
+
+    ``eventsys.HostEventsDevice`` divides incoming positions by the display's
+    ``touch_scale``, because real SDL / pygame events arrive in window pixels.
+    Synthetic events therefore have to be pre-multiplied: on any scaled window —
+    the desktop default, and whatever ``fit_scale_to_desktop`` settles on — an
+    unscaled point is delivered somewhere else entirely and hits nothing.
+    """
+    try:
+        from board_config import display_drv
+
+        scale = getattr(display_drv, "touch_scale", 1) or 1
+    except Exception:
+        scale = 1
+    return (int(x * scale), int(y * scale))
+
+
 def display_backend_name():
     try:
         from board_config import display_drv
@@ -115,8 +133,9 @@ def inject_synthetic_touch(*, broker_poll=False, pump_count=20, pump_delay=0.02)
     )
     pending = []
     for pos in points:
-        pending.append(events.Button(events.MOUSEBUTTONDOWN, pos, 1, False, 0))
-        pending.append(events.Button(events.MOUSEBUTTONUP, pos, 1, False, 0))
+        at = host_point(*pos)
+        pending.append(events.Button(events.MOUSEBUTTONDOWN, at, 1, False, 0))
+        pending.append(events.Button(events.MOUSEBUTTONUP, at, 1, False, 0))
 
     orig_read = queue_dev._read
 
