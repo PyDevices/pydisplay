@@ -385,19 +385,11 @@ class Runtime:
     @staticmethod
     def _event_loop_running():
         """True when asyncio already has a running loop (PyScript, Jupyter, async main)."""
-        import sys
-
-        if sys.platform in ("emscripten", "webassembly"):
-            return True
         try:
-            from multimer import asyncio
-
-            if hasattr(asyncio, "get_running_loop"):
-                asyncio.get_running_loop()
-                return True
-        except (ImportError, RuntimeError):
-            pass
-        return False
+            from multimer import loop_running
+        except ImportError:
+            return False
+        return loop_running()
 
     def arm_async_refresh(self):
         """Wire deferred display refresh + auto-service once the loop is running."""
