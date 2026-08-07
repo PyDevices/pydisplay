@@ -2,10 +2,10 @@
 
 usdl2>=0.0.18
 pygraphics>=0.0.29
-lvgl-cpython>=9.5.22
-multimer>=0.0.31
-eventsys>=0.0.31
-displaysys>=0.0.31
+lvgl-cpython>=9.5.23
+multimer>=0.0.32
+eventsys>=0.0.32
+displaysys>=0.0.32
 palettes>=0.0.7
 pdwidgets>=0.0.13
-pydisplay-desktop>=0.0.7
+pydisplay-desktop>=0.0.8
