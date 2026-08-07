@@ -256,14 +256,14 @@ def _setup():
 
 
 def _button_center(btn):
-    from board_config import height, width
+    from board_config import display_drv
 
     try:
         area = lv.area_t()
         btn.get_coords(area)
         return (area.x1 + area.x2) // 2, (area.y1 + area.y2) // 2
     except Exception:
-        return width // 2, height - 55
+        return display_drv.width // 2, display_drv.height - 55
 
 
 def _inject_click(cx, cy):

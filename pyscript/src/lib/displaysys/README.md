@@ -28,21 +28,36 @@ mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip
 
 ## Quick start
 
+Apps normally import a `board_config` (from micropython-hardware / `pydisplay-desktop`) that wires the display and `eventsys.Runtime`:
+
 ```python
-from board_config import display_drv
+from board_config import display_drv, runtime
 
 display_drv.fill(0)
 display_drv.fill_rect(10, 10, 40, 40, 0xF800)
 display_drv.show()
 ```
 
-`board_config` is included in this wheel and selects a desktop backend when run on CPython. For MCU boards, either provide your own `board_config.py` or install an optional prebuilt board package from micropython-hardware ([install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html)).
+Host auto-selection lives in displaysys:
+
+```python
+from displaysys import AutoDisplay
+
+auto = AutoDisplay(width=320, height=480, scale=2.0)
+display_drv = auto.display
+# auto.host_read, auto.timer_async → pass to eventsys.Runtime
+```
+
+`AutoDisplay` picks `PSDisplay` (PyScript), `JNDisplay` (Jupyter), or
+`PGDisplay`→`SDLDisplay` (desktop). Install a board package for MCU pins, or
+use the desktop bundle from micropython-hardware
+([install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html)).
 
 ## What you get
 
 - Unified `framebuf`-style drawing surface (`fill`, `fill_rect`, `blit_rect`, `show`, …)
 - MCU (`BusDisplay`, `FBDisplay`, e-paper) and host backends (SDL, PyGame, Jupyter, PyScript)
-- Default `board_config.py` for desktop quick starts
+- `AutoDisplay` / `host_kind` for desktop-like host selection (board_config remains the app import surface)
 
 Desktop input backends use [eventsys](https://test.pypi.org/project/eventsys/) at runtime; install it separately when you need `Runtime` / host events.
 
@@ -55,4 +70,4 @@ Desktop input backends use [eventsys](https://test.pypi.org/project/eventsys/) a
 
 ## License
 
-MIT — see [LICENSE](https://github.com/PyDevices/pydisplay/blob/main/LICENSE).
+MIT — see [LICENSE](https://github.com/PyDevices/pydisplay/LICENSE).
