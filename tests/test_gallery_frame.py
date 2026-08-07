@@ -169,9 +169,15 @@ def test_pyscript_loader_silences_installer_file_chatter():
 def test_gallery_uses_local_theme_toggle_and_syncs_the_frame():
     source = INDEX.read_text(encoding="utf-8")
     theme = THEME.read_text(encoding="utf-8")
-    assert '<script src="./theme-toggle.js" defer></script>' in source
+    assert 'id="pydevices-site-header"' in source
+    assert 'id="pydevices-site-footer"' in source
+    assert '<script src="./site-chrome.js"></script>' in source
+    assert '<script src="./theme-toggle.js"></script>' in source
+    assert 'id="pwa-install-btn"' not in source
+    assert 'id="runtime-toggle"' not in source
     assert "applyThemeToFrames(next)" in theme
     assert 'document.querySelectorAll("iframe")' in theme
+    assert "assets/img/products/pydisplay.svg" in source
 
 
 def test_runtime_frame_and_sidebar_follow_content_height():

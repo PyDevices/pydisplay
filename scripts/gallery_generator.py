@@ -27,6 +27,7 @@ large landscape demos.
 Then:
 
   - Updates gallery cards in ``web/pyscript/index.html`` (``GEN:demos`` markers)
+  - Enforces shared org chrome mounts via ``ensure_site_chrome``
   - Deletes stale ``web/pyscript/*.html`` from the old per-demo page generator
 
 Each card links both runtimes (MicroPython + Pyodide) with filtered queries
@@ -571,6 +572,79 @@ def ensure_card_runtime_css(index_text: str) -> str:
     return index_text
 
 
+_HEADER_MOUNT = '<div id="pydevices-site-header"></div>'
+_FOOTER_MOUNT = '<div id="pydevices-site-footer"></div>'
+_PRODUCT_MARK = "https://pydevices.github.io/assets/img/products/pydisplay.svg"
+_CHROME_SCRIPTS = (
+    '    <script src="./site-chrome.js"></script>\n    <script src="./theme-toggle.js"></script>\n'
+)
+
+
+def ensure_site_chrome(index_text: str) -> str:
+    """Enforce shared org header/footer mounts + local chrome scripts."""
+    text = index_text
+    # Drop deferred theme script from <head> only (body scripts are managed below).
+    head_end = text.find("</head>")
+    if head_end != -1:
+        head = text[:head_end]
+        rest = text[head_end:]
+        head = re.sub(
+            r'\s*<script src="\./theme-toggle\.js"[^>]*></script>\s*',
+            "\n",
+            head,
+            count=1,
+        )
+        text = head + rest
+    text = re.sub(
+        r'<header class="site-header">.*?</header>',
+        _HEADER_MOUNT,
+        text,
+        count=1,
+        flags=re.DOTALL,
+    )
+    text = re.sub(
+        r'<footer class="site-footer[^"]*">.*?</footer>',
+        _FOOTER_MOUNT,
+        text,
+        count=1,
+        flags=re.DOTALL,
+    )
+    text = re.sub(
+        r'(<div class="logo-badge product-mark"><img src=")[^"]+(")',
+        rf"\1{_PRODUCT_MARK}\2",
+        text,
+        count=1,
+    )
+    # Drop obsolete Install / MP-Py header preference script block.
+    text = re.sub(
+        r"\n\s*<script>\s*\(function \(\) \{\s*"
+        r"var STORAGE_KEY = 'pydevices-gallery-loader';"
+        r".*?"
+        r"\}\)\(\);\s*</script>",
+        "\n",
+        text,
+        count=1,
+        flags=re.DOTALL,
+    )
+    # Normalize trailing chrome scripts to a single ordered pair.
+    text = re.sub(
+        r'\s*<script src="\./site-chrome\.js"></script>\s*',
+        "\n",
+        text,
+    )
+    text = re.sub(
+        r'\s*<script src="\./theme-toggle\.js"></script>\s*',
+        "\n",
+        text,
+    )
+    text = text.replace("</body>", _CHROME_SCRIPTS + "</body>", 1)
+    if 'id="pydevices-site-header"' not in text:
+        raise SystemExit("ensure_site_chrome failed to install header mount")
+    if 'id="pydevices-site-footer"' not in text:
+        raise SystemExit("ensure_site_chrome failed to install footer mount")
+    return text
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -620,6 +694,7 @@ def main(argv: list[str] | None = None) -> int:
             "(collapse async/all sections before regenerating)"
         )
     index_text = ensure_card_runtime_css(index_text)
+    index_text = ensure_site_chrome(index_text)
     # Update hint text for new headers.
     index_text = index_text.replace(
         "# pyscript skip: gallery",

@@ -21,6 +21,7 @@ const STATIC_ASSETS = [
   './icon-512.png',
   './site.css',
   './runtime-layout.js',
+  './site-chrome.js',
   './theme-toggle.js',
   './demo.css',
   './pwa.css',
