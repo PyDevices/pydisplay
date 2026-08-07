@@ -5,7 +5,7 @@ from displaysys import DisplayDriver as DisplayDriver, color_rgb as color_rgb
 HORIZONTAL: Incomplete
 VERTICAL: Incomplete
 
-class PixelFramebuffer(graphics.FrameBuffer):
+class PixelFramebuffer(pygraphics.FrameBuffer):
     rotation: Incomplete
     def __init__(self, pixels, width, height, orientation=..., alternating: bool = True, reverse_x: bool = False, reverse_y: bool = False, top: int = 0, bottom: int = 0, rotation: int = 0) -> None: ...
     @property
