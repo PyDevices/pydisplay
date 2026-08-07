@@ -118,9 +118,8 @@ Desktop matrices use repo `.venv` (`cpython-venv`) plus interpreters on
 [`bin/README.md`](../bin/README.md)). `micropython.exe` / `python.exe` are
 Windows binaries and cannot run in a Linux cloud sandbox.
 
-After usermod changes that affect these binaries or PyScript vendor wasm,
-refresh with sibling `cmods/build_pydisplay_runtimes.sh` when that workspace
-is available.
+After usermod changes that affect these binaries or PyScript vendor wasm, see
+[`bin/README.md`](../bin/README.md).
 
 **`micropython.exe` matrix:** no `threading` / `_thread`. The example wrapper
 uses a `Runtime.poll` deadline quit (not a multimer SDL quit timer). With

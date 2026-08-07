@@ -34,12 +34,13 @@ executables changes. From a local [cmods](https://github.com/PyDevices/cmods)
 workspace (optional convenience):
 
 ```bash
-../cmods/build_pydisplay_runtimes.sh
+../cmods/build_runtimes.sh
 ```
 
-That refreshes this directory plus
-`web/pyscript/vendor/micropython/` (wasm). Without cmods, build from a sibling
-workspace (`micropython/` + `pygraphics/`, and for CP `circuitpython/` + patches
-as in [usdl2](https://github.com/PyDevices/usdl2) /
+That installs into the workspace `bin/` first, then (when this repo is a sibling
+of that workspace) also refreshes this directory plus
+`web/pyscript/vendor/micropython/` (wasm). Without that workspace, build from a
+sibling layout (`micropython/` + `pygraphics/`, and for CP `circuitpython/` +
+patches as in [usdl2](https://github.com/PyDevices/usdl2) /
 [lv_circuitpython_mod](https://github.com/PyDevices/lv_circuitpython_mod)
 docs), then copy here — rename the CircuitPython unix binary to `circuitpython`.
