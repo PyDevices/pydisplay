@@ -4,4 +4,4 @@
 | ![color_test.png](color_test.png) | ![console_advanced_demo.gif](console_advanced_demo.gif) | ![displaybuf_simpletest.png](displaybuf_simpletest.png) |
 | ![fonts.png](fonts.png) | ![framebuf_simpletest.png](framebuf_simpletest.png) | ![noto_fonts.png](noto_fonts.png) |
 | ![paint.png](paint.png) | ![proverbs.png](proverbs.png) | ![testris.png](testris.png) |
-| ![tiny_toasters.gif](tiny_toasters.gif) |  |  |
+| ![tiny_toasters.gif](tiny_toasters.gif) | ![piano.png](piano.png) |  |
