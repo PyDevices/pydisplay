@@ -58,6 +58,24 @@ multimer.asyncio.run(main())
 - `AsyncTimer` — asyncio / uasyncio software timer
 - `ticks_ms`, `ticks_add`, `ticks_diff`, `ticks_less`, `sleep_ms`, `schedule`
 - Lazy `multimer.asyncio` (frozen on MP/CP, stdlib on CPython)
+- `backend_name`, `backends`, `use_backend` — inspect or override the backend choice
+
+## Choosing a backend
+
+`Timer` picks a backend at import. To inspect or override that choice:
+
+```python
+import multimer
+
+multimer.backend_name()          # 'librt', 'machine', 'sdl2', 'threading', …
+multimer.backends()              # every name use_backend accepts
+multimer.use_backend("sdl2")     # rebinds Timer and sleep_ms
+```
+
+Setting `MULTIMER_BACKEND` in the environment does the same at import time.
+Either way an unavailable backend raises rather than falling back, so a
+mis-spelled or unsupported name cannot be mistaken for the platform default.
+Call `use_backend` before creating timers.
 
 App keep-alive loops live on [eventsys.Runtime](https://test.pypi.org/project/eventsys/) (`run_forever`, `run`, `run_async`).
 

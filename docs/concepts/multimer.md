@@ -16,6 +16,9 @@ from multimer import (
     ticks_less,
     monotonic,
     asyncio,            # lazy: frozen on MP/CP, stdlib on CPython
+    backend_name,       # active backend, e.g. "librt"
+    backends,           # names accepted by use_backend
+    use_backend,        # override the backend chosen at import
     set_deadline_hook,  # test/debug only
     run_deadline_hook,  # test/debug only
 )
@@ -176,6 +179,20 @@ Backend selection for sync `Timer` (simplified; first usable match wins):
 | Polling / async-only | WASM, Jupyter | Prefer `AsyncTimer` |
 
 `tools/test_timers.py` probes public timers on the host. Run `python tools/run_test_timers.py` for a per-runtime matrix. Private backend probing is opt-in (`MULTIMER_PROBE_BACKENDS=1`).
+
+### Overriding the backend
+
+`multimer.backend_name()` reports the active choice; `multimer.use_backend(name)` replaces it and rebinds `Timer` and `sleep_ms`. Accepted names are `librt`, `machine`, `win32`, `sdl2`, `threading`, `polling`, and `async` (`AsyncTimer`) — the same list `multimer.backends()` returns. Setting `MULTIMER_BACKEND` applies one at import instead.
+
+An override that this host cannot provide raises `ImportError` (and an unknown name `ValueError`) rather than falling back, so a bad value can never be mistaken for the platform default. Call `use_backend` before creating timers.
+
+To compare backends on the same example across runtimes:
+
+```bash
+python tools/lv_timer_test_kit.py --backend sdl2
+```
+
+That routes each child through `tools/multimer_backend_preload.py`, which calls `use_backend` in-process — necessary because Windows `micropython.exe` / `python.exe` launched from WSL cannot read exported environment variables. Runtimes without the requested backend report `unavailable` instead of failing.
 
 ### librt backend (`_librt`)
 

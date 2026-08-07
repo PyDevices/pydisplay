@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
+import sys
 import threading
 import time
 import unittest
@@ -49,10 +50,13 @@ class TestApiSurface(unittest.TestCase):
             {
                 "Timer",
                 "AsyncTimer",
+                "backend_name",
+                "backends",
                 "monotonic",
                 "run_deadline_hook",
                 "schedule",
                 "set_deadline_hook",
+                "use_backend",
                 "uses_signals",
                 "sleep_ms",
                 "ticks_ms",
@@ -63,6 +67,58 @@ class TestApiSurface(unittest.TestCase):
                 "install_asyncio_compat",
             },
         )
+
+
+class TestBackendSelection(unittest.TestCase):
+    """``backend_name`` / ``use_backend`` — the supported way to pick a backend."""
+
+    def setUp(self):
+        self._original = multimer.backend_name()
+
+    def tearDown(self):
+        multimer.use_backend(self._original)
+
+    def test_backend_name_is_a_known_backend(self):
+        self.assertIn(multimer.backend_name(), multimer.backends())
+
+    def test_use_backend_rebinds_timer_and_sleep(self):
+        multimer.use_backend("polling")
+        self.assertEqual(multimer.backend_name(), "polling")
+        self.assertEqual(multimer.Timer.__module__, "multimer._backends.polling")
+        # ``from multimer import Timer`` must see the same class as multimer.Timer.
+        from multimer import _timer
+
+        self.assertIs(_timer.Timer, multimer.Timer)
+        self.assertFalse(multimer.uses_signals())
+
+    def test_use_backend_returns_active_name(self):
+        self.assertEqual(multimer.use_backend("polling"), "polling")
+
+    def test_async_backend_selects_awaitable_sleep(self):
+        multimer.use_backend("async")
+        self.assertIs(multimer.Timer, AsyncTimer)
+        # ``sleep_ms`` must be awaitable here, not a blocking sleep.
+        coro = multimer.sleep_ms(0)
+        self.addCleanup(coro.close)
+        self.assertTrue(hasattr(coro, "send"))
+
+    def test_unknown_backend_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            multimer.use_backend("no_such_backend")
+
+    def test_unavailable_backend_raises_import_error(self):
+        # win32 refuses to import off Windows; the selection must not fall back
+        # silently when a caller asks for a specific backend.
+        if sys.platform == "win32":
+            self.skipTest("win32 backend is available on this host")
+        with self.assertRaises(ImportError):
+            multimer.use_backend("win32")
+
+    def test_restores_previous_backend(self):
+        before = multimer.backend_name()
+        multimer.use_backend("polling")
+        multimer.use_backend(before)
+        self.assertEqual(multimer.backend_name(), before)
 
 
 class TestTicks(unittest.TestCase):
