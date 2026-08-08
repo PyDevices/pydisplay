@@ -1010,10 +1010,27 @@ def run_android_case(
             "stderr_tail": "android runtime unavailable (adb/device/APK)",
         }
 
+    adb_bin = _pick_adb_bin()
+    assert adb_bin is not None
+    adb = _adb_base_cmd(adb_bin)
+    # Drop prior examples' Tracebacks / KIT_RESULT lines before relaunch.
+    subprocess.run([*adb, "logcat", "-c"], capture_output=True, check=False)
+
     kind = example_meta.get("kind", "loop")
     cmd = [str(ANDROID_SH), script]
     if kind == "lvgl" or example_id == "lv_test_timer":
         cmd.append("--kit")
+    # Oneshot scripts return immediately; without a hold the Activity tears down
+    # (or Android splash covers the single present) and the screen looks blank.
+    if kind == "oneshot" or example_meta.get("quit") == "native_exit":
+        cmd.extend(["--hold-s", str(max(int(duration), 2))])
+    modules, manifests, deps = _pyscript_header_lists(script_path)
+    if modules:
+        cmd.extend(["--modules", ",".join(modules)])
+    if manifests:
+        cmd.extend(["--manifests", ",".join(manifests)])
+    if deps:
+        cmd.extend(["--deps", ",".join(deps)])
 
     stage = subprocess.run(
         cmd,
@@ -1038,10 +1055,6 @@ def run_android_case(
             "stdout_tail": (stage.stdout or "")[-2000:],
             "stderr_tail": (stage.stderr or "")[-1000:],
         }
-
-    adb_bin = _pick_adb_bin()
-    assert adb_bin is not None
-    adb = _adb_base_cmd(adb_bin)
     wants_kit = kind == "lvgl" or example_id == "lv_test_timer"
     # Non-kit examples only need to stay up for duration_s; kit waits for KIT_RESULT.
     deadline = time.time() + (timeout if wants_kit else max(duration + 2.0, 5.0))
@@ -1062,9 +1075,10 @@ def run_android_case(
         result = parse_android_result(text)
         if result is not None:
             break
+        if "Traceback" in text:
+            break
         if (
             not wants_kit
-            and "Traceback" not in text
             and ("Application loaded" in text or "SDLDisplay: initialized" in text)
             and time.time() >= deadline - 0.1
         ):
@@ -1509,7 +1523,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.curated_only:
         curated = {
             "pydisplay_demo",
-            "calculator",
+            "calc_graphics",
             "paint",
             "eventsys_simpletest",
             "graphics_simpletest",

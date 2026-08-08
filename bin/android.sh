@@ -28,6 +28,7 @@ MODULE_ARG=""
 CLEAR=0
 LOGCAT=0
 KIT=0
+HOLD_S=""
 DEPS_ARG=""
 MODULES_ARG=""
 MANIFESTS_ARG=""
@@ -46,6 +47,7 @@ and relaunch. Path resolution matches CLI python — not pyscript gallery lookup
   --clear           remove run/ + run_entry (+ run_argv); back to LVGL home
   --logcat          follow python/SDL logcat after start (or alone)
   --kit             write run_argv with "kit" for example_test_kit / lv_test_timer
+  --hold-s SEC      after the entry returns, keep presenting for SEC (oneshot hold)
   --deps A,B        optional companion staging (host packages/ or names)
   --modules A,B     optional: push src/examples/<name>.py beside entry when found
   --manifests A,B   optional: push packages/<name>.json when found under repo
@@ -223,6 +225,10 @@ while [[ $# -gt 0 ]]; do
       KIT=1
       shift
       ;;
+    --hold-s)
+      HOLD_S="${2:?--hold-s requires seconds}"
+      shift 2
+      ;;
     -m)
       MODULE_ARG="${2:?-m requires a module name}"
       shift 2
@@ -309,6 +315,19 @@ if [[ -n "$FILE_ARG" ]]; then
   adb_cmd shell "run-as $PACKAGE_ID sh -c 'rm -rf files/app/run; mkdir -p files/app/run'"
   stage_file "$RESOLVED" "run/${STEM}.py"
   echo "android.sh: staged $RESOLVED -> run/${STEM}.py"
+  # Nested package examples only (e.g. examples/chango/chango.py) — never the
+  # flat examples/*.py tree, which would push hundreds of unrelated siblings.
+  ENTRY_DIR="$(dirname "$RESOLVED")"
+  EXAMPLES_ROOT="$PYDISPLAY_ROOT/src/examples"
+  if [[ -d "$ENTRY_DIR" && "$ENTRY_DIR" != "$EXAMPLES_ROOT" && "$ENTRY_DIR" == "$EXAMPLES_ROOT"/* ]]; then
+    for sibling in "$ENTRY_DIR"/*.py; do
+      [[ -f "$sibling" ]] || continue
+      sib_base="$(basename "$sibling")"
+      [[ "$sib_base" == "${STEM}.py" ]] && continue
+      stage_file "$sibling" "run/${sib_base}"
+      echo "android.sh: staged sibling ${sib_base}"
+    done
+  fi
   stage_optional_csv deps "$DEPS_ARG"
   stage_optional_csv modules "$MODULES_ARG"
   stage_optional_csv manifests "$MANIFESTS_ARG"
@@ -318,6 +337,42 @@ elif [[ -n "$MODULE_ARG" ]]; then
   if [[ "$ENTRY_NAME" == examples.* ]]; then
     ENTRY_NAME="${ENTRY_NAME#examples.}"
   fi
+fi
+
+if [[ -n "$HOLD_S" ]]; then
+  # Oneshot examples draw once and return; Android splash / Activity teardown
+  # then hide the frame. Hold with periodic show()+event pump so pixels stay up.
+  hold_tmp="$(mktemp)"
+  cat >"$hold_tmp" <<EOF
+import importlib
+import time
+
+importlib.import_module(${ENTRY_NAME@Q})
+try:
+    from board_config import display_drv
+except Exception:
+    display_drv = None
+_deadline = time.time() + float(${HOLD_S@Q})
+while time.time() < _deadline:
+    if display_drv is not None:
+        try:
+            display_drv.show()
+        except Exception:
+            pass
+    try:
+        import usdl2
+
+        _e = usdl2.SDL_Event()
+        while usdl2.SDL_PollEvent(_e):
+            pass
+    except Exception:
+        pass
+    time.sleep(0.05)
+EOF
+  stage_file "$hold_tmp" "run/_android_hold.py"
+  rm -f "$hold_tmp"
+  ENTRY_NAME="_android_hold"
+  echo "android.sh: hold ${HOLD_S}s after entry via _android_hold"
 fi
 
 write_app_file "run_entry" "$ENTRY_NAME"

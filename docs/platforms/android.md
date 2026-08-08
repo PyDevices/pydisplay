@@ -6,7 +6,7 @@ For an **installable browser app** on Android phones (Chrome home screen, no APK
 
 ## Overview
 
-On Android there is no MicroPython port. pydisplay runs under **CPython** in a **python-for-android** APK with the **SDL2 bootstrap** (no Kivy). Native `libSDL2.so` comes from p4a’s `sdl2` recipe. The `import usdl2` API is the pure-Python binding shipped in [pydisplay-desktop](https://test.pypi.org/project/pydisplay-desktop/) (ctypes against that library). `displaysys.AutoDisplay` selects `SDLDisplay` with `SDL_WINDOW_SHOWN` / HIGHDPI flags when `sys.platform == "android"` (not `FULLSCREEN_DESKTOP` — that resizes the Activity surface after GL buffers exist and yields a black screen after splash).
+On Android there is no MicroPython port. pydisplay runs under **CPython** in a **python-for-android** APK with the **SDL2 bootstrap** (no Kivy). Native `libSDL2.so` comes from p4a’s `sdl2` recipe. The `import usdl2` API is the pure-Python binding shipped in [pydisplay-desktop](https://test.pypi.org/project/pydisplay-desktop/) (ctypes against that library). `displaysys.AutoDisplay` selects **`AndroidSDLDisplay`** (`SDL_WINDOW_SHOWN` / HIGHDPI; not `FULLSCREEN_DESKTOP` — that resizes the Activity surface after GL buffers exist and yields a black screen after splash).
 
 APK integration — template app, build scripts, and p4a recipes — lives in [**pydisplay_android**](https://github.com/PyDevices/pydisplay_android).
 
@@ -59,9 +59,23 @@ Prebuilt **`lvgl-cpython`** wheels for Android are on [TestPyPI](https://test.py
 
 See [pydisplay_android README](https://github.com/PyDevices/pydisplay_android/blob/main/README.md) for entry points (`main.py` / `launcher.py`) and recipe details. Display wiring uses the MCU-shaped `board_config` from **pydisplay-desktop** (`AutoDisplay` + `Runtime`); set `PYDISPLAY_WIDTH` / `HEIGHT` / `SCALE` in `main.py` (phone defaults are already set for Android).
 
+## Orientation (MCU-like)
+
+`AndroidSDLDisplay` locks the Activity to **fixed** landscape or portrait from the logical panel aspect (`width` vs `height`), including at `rotation = 0`:
+
+- `1280×720` → landscape Activity  
+- `720×1280` → portrait Activity  
+- `rotation = 90` on a portrait panel swaps logical size → landscape Activity  
+
+Tilting the phone does **not** change orientation (same contract as an SPI LCD on a board). The user turns the device to match the app. Scale stays at the board_config value (SDL letterboxes onto the surface); desktop chrome fitting is skipped. Desktop `SDLDisplay` still uses software `RenderCopyEx` rotation.
+
 ## Timers
 
 On Android, **multimer** skips auto **`sdl2`** (CPython `SDL_AddTimer` is not on the GLES thread → `EGL_BAD_ACCESS`). Auto-select falls through to **`threading`**; the launcher also sets `MULTIMER_BACKEND=threading`. See [multimer](../concepts/multimer.md).
+
+## Audio (lazy `audio_out`)
+
+`board_config.audio_out` stays lazy. On first `open()` / `write()`, `sdl2audio` attaches an Android-only `PCMOutput(session=…)` that requests audio focus and starts the APK’s `mediaplayback` foreground service (`foregroundServiceType=mediaPlayback`). Last `close()` abandons focus and stops the service. Non-Android consumers still get `session=None` — no API change.
 
 ## Android TV / Fire OS
 
