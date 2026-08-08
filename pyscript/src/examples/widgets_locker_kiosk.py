@@ -193,7 +193,7 @@ def _blip(hz, ms=40):
             pass
 
 
-def _on_digit(_d=None):
+def _on_digit(_d=None, _value=None):
     _blip(660, ms=25)
 
 

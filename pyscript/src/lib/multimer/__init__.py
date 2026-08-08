@@ -8,11 +8,13 @@ Public surface::
 
     from multimer import Timer, AsyncTimer, schedule, sleep_ms, ticks_ms
     from multimer import ticks_add, ticks_diff, ticks_less, monotonic, uses_signals
-    from multimer import backend_name, backends, use_backend
+    from multimer import backend_name, backends, backends_available, use_backend
+    from multimer import loop_running, install_asyncio_compat
 
-``Timer`` selects a platform backend (librt, win32 APC, SDL2, threading, or
-``machine.Timer``). On async-only hosts (PyScript / Jupyter), ``Timer`` is an
-alias of :class:`AsyncTimer`. Soft callbacks (``hard=False``) use
+``Timer`` selects a platform backend at import (``machine`` → ``librt`` →
+``sdl2`` → ``threading`` → ``polling``; on CPython, ``sdl2`` is skipped when
+pygame is importable). On async-only hosts (PyScript / Jupyter), ``Timer`` is
+an alias of :class:`AsyncTimer`. Soft callbacks (``hard=False``) use
 :func:`schedule`; on signal backends that already deliver on main, soft does
 not postpone the callback (coalesce/gap still apply).
 
@@ -44,8 +46,7 @@ def _select_sleep_ms():
     * ``AsyncTimer`` as ``Timer`` (PyScript/Jupyter, or ``use_backend("async")``):
       the awaitable async sleep;
     * signal-based sync backends (librt, ``machine.Timer``): the no-pump sleep;
-    * pump-based sync backends (win32 APC, SDL2, threading, polling): the
-      pumping sleep.
+    * pump-based sync backends (SDL2, threading, polling): the pumping sleep.
     """
     from . import _select
 
@@ -92,6 +93,13 @@ def backends():
     return _select.BACKENDS
 
 
+def backends_available():
+    """Backend names from :func:`backends` that can import on this host."""
+    from . import _select
+
+    return _select.backends_available()
+
+
 def use_backend(name):
     """Rebind ``Timer`` and ``sleep_ms`` to the backend called ``name``.
 
@@ -118,7 +126,7 @@ def uses_signals():
 
     Covers librt POSIX-timer signals and MicroPython ``machine.Timer``: callbacks
     keep firing at an interactive prompt with no ``run_forever`` keep-alive loop.
-    Pump-based backends (win32 APC, SDL2, threading) and async-only runtimes
+    Pump-based backends (SDL2, threading, polling) and async-only runtimes
     return False. Public accessor so callers (e.g. ``eventsys.Runtime.run_forever``)
     need not reach into ``multimer._select``.
     """
@@ -136,8 +144,28 @@ def install_asyncio_compat():
     """
     import sys
 
+    from . import _asyncio_loader
+
+    # Pin the concrete implementation *before* replacing module names.
+    # MicroPython's ``uasyncio`` shim forwards missing attrs into
+    # ``sys.modules["asyncio"]``; if that name becomes this facade while the
+    # loader/compat still hold the shim, ``getattr`` recurses until the
+    # recursion limit (seen via ``color_setup`` + ``timer_async``).
+    try:
+        import asyncio as real
+    except ImportError:
+        real = _asyncio_loader.load_asyncio()
+    if real is None:
+        raise ImportError("multimer.install_asyncio_compat: asyncio is not available")
+    if getattr(real, "__name__", "") == "multimer.asyncio_compat":
+        sys.modules["asyncio"] = real
+        sys.modules["uasyncio"] = real
+        return real
+
+    _asyncio_loader._asyncio_mod = real
+
     compat = __import__("multimer.asyncio_compat", None, None, ("asyncio_compat",))
-    compat.backend()  # Resolve the real backend before replacing names.
+    compat._backend = real
     sys.modules["asyncio"] = compat
     sys.modules["uasyncio"] = compat
     return compat
@@ -149,6 +177,7 @@ __all__ = [
     "asyncio",
     "backend_name",
     "backends",
+    "backends_available",
     "install_asyncio_compat",
     "loop_running",
     "monotonic",
@@ -173,7 +202,7 @@ def __getattr__(name):
         if mod is None:
             raise ImportError(
                 "multimer: asyncio not available — freeze extmod/asyncio in the "
-                "firmware manifest (see docs/building.md)"
+                "firmware manifest (see docs/platforms/micropython.md)"
             )
         return mod
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

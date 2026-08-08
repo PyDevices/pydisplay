@@ -370,7 +370,7 @@ def _run_kit_sync():
     clicked_taps = None
     while time.time() < deadline:
         # multimer.sleep_ms, not time.sleep: pump-based backends (threading on
-        # CircuitPython / Windows CPython, SDL2, win32 APC) deliver callbacks only
+        # CircuitPython / Windows CPython, SDL2) deliver callbacks only
         # while the main thread pumps. For librt this resolves to a plain sleep.
         multimer.sleep_ms(10)
         if clicked_taps is None and get_state()["seconds"] >= 2:

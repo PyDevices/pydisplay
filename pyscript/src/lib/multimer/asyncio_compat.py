@@ -12,6 +12,8 @@ delegates both operations unchanged.
 
 from ._asyncio_loader import load_asyncio
 
+# Concrete asyncio implementation (not the MicroPython ``uasyncio`` name shim).
+# ``install_asyncio_compat`` re-pins this before replacing ``sys.modules``.
 _backend = load_asyncio()
 if _backend is None:
     raise ImportError("multimer.asyncio_compat: asyncio is not available")

@@ -4,7 +4,6 @@
 """Cooperative polling Timer (last-resort backend)."""
 
 from .._core import _TimerCore
-from .._schedule import schedule
 from .._ticks import ticks_add, ticks_diff, ticks_ms
 
 _active = []
@@ -39,15 +38,11 @@ def _tick(max_items=None):
             continue
 
         fired += 1
-        timer._busy = True
-        try:
-            schedule(timer._invoke_callback, timer)
-        finally:
-            timer._busy = False
+        # ``_deliver`` owns hard/soft coalesce; do not call ``_invoke_callback``
+        # directly (that skipped soft gap / ``hard``).
+        timer._deliver()
 
-        if timer._mode == timer.ONE_SHOT:
-            timer._disarm()
-            timer._armed = False
+        if timer._mode == timer.ONE_SHOT or not timer._armed:
             break
 
         timer._next = ticks_add(timer._next, timer._period_ms)
