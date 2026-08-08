@@ -18,8 +18,11 @@ from multimer import (
     asyncio,            # lazy: frozen on MP/CP, stdlib on CPython
     backend_name,       # active backend, e.g. "librt"
     backends,           # names accepted by use_backend
+    backends_available, # subset of backends() that import on this host
     use_backend,        # override the backend chosen at import
     loop_running,       # True when an asyncio loop is running a coroutine
+    uses_signals,       # True when the sync backend needs no sleep pump
+    install_asyncio_compat,  # opt-in host-loop-safe asyncio facade
     set_deadline_hook,  # test/debug only
     run_deadline_hook,  # test/debug only
 )
@@ -42,7 +45,7 @@ tim = multimer.Timer(-1)
 tim.init(mode=multimer.Timer.PERIODIC, period=500, callback=on_tick)
 
 while True:
-    # Keep the main thread alertable / cooperative (esp. Win32 APC backends).
+    # Yield so pump-based backends (SDL2, threading, polling) can deliver.
     multimer.sleep_ms(1)
 ```
 
@@ -99,7 +102,9 @@ MicroPython-compatible names:
 | `True` | Backend delivery calls `callback` directly | Immediately on the delivery path |
 | `False` | Delivery goes through `schedule` | Soft coalesce + inter-tick gap always apply |
 
-**Soft only postpones when delivery is off the main thread** (threading backend, win32 APC enqueue, polling worker). On **signal backends** (`multimer.uses_signals()` — Linux librt, on-device `machine.Timer`), the backend already delivers on the main thread; CPython/CircuitPython `schedule` then invokes immediately there. So for *when* the callback runs, soft ≈ hard on librt. Soft still drops piled-up ticks (`_sched_pending` / soft gap). `eventsys.Runtime` ticks use `hard=False` for that coalesce/gap behavior.
+**Soft only postpones when delivery is off the main thread** (threading worker, polling). On **signal backends** (`multimer.uses_signals()` — Linux librt, on-device `machine.Timer`), the backend already delivers on the main thread; CPython/CircuitPython `schedule` then invokes immediately there. So for *when* the callback runs, soft ≈ hard on librt. Soft still drops piled-up ticks (`_sched_pending` / soft gap). `eventsys.Runtime` ticks use `hard=False` for that coalesce/gap behavior.
+
+The **SDL2** backend always invokes on the VM thread: usdl2 has already marshalled the timer callback there, so a second soft `schedule` hop is skipped (it stalled LVGL under load on `micropython.exe`). Soft coalesce/gap therefore do not apply on sdl2 the way they do on librt/threading.
 
 On MicroPython, soft uses built-in `micropython.schedule` (queue out of a locked-heap ISR) — that *does* defer relative to a hard ISR callback.
 
@@ -164,7 +169,7 @@ both report a loop that is not there (or miss one that is).
 
 ## FAQ — callback did not fire
 
-1. **Main loop never yields** — call `sleep_ms` or `runtime.poll()` so alertable/cooperative backends can deliver (especially Win32 APC).
+1. **Main loop never yields** — call `sleep_ms` or `runtime.poll()` so pump-based backends (SDL2, threading, polling) can deliver.
 2. **Async timer** — event loop must be running at `init()`; await something each loop (`await sleep_ms(0)`).
 3. **Timer deinited** — one-shot and `deinit()` stop callbacks.
 4. **Exception in callback** — exceptions propagate from the delivery path; fix the callback or catch inside it.
@@ -175,22 +180,95 @@ pydisplay owns the shared periodic timer through `eventsys.Runtime` (`on_tick`, 
 
 ## Internals (contributors)
 
-Backend selection for sync `Timer` (simplified; first usable match wins):
+Backend selection for sync `Timer` (first importable match wins):
 
-| Backend | Hosts | Notes |
-|---------|-------|-------|
-| MCU `machine.Timer` | On-device MicroPython / CircuitPython | Hardware timer |
-| `_librt` | Linux CPython / MicroPython unix | `timer_create`; callbacks on main thread via signals |
-| `_win32` | Windows | Waitable timer + APC; alertable waits via `sleep_ms` / `runtime.poll` |
-| `_threading` | Fallback | Background thread |
-| `_sdl2` | Fallback | `SDL_AddTimer` via `usdl2` when available |
-| Polling / async-only | WASM, Jupyter | Prefer `AsyncTimer` |
+1. Env override: `MULTIMER_BACKEND` / `use_backend(name)`
+2. Async-only host (PyScript / Jupyter) → `async` (`AsyncTimer` as `Timer`)
+3. Auto chain: **`machine` → `librt` → `sdl2` → `threading` → `polling`**,
+   with **`sdl2` omitted on CPython when pygame imports** (see tables).
+
+### Selection flow
+
+```mermaid
+flowchart TB
+  start["import multimer.Timer"]
+  override{"Override set?"}
+  bind["load_backend(name)"]
+  async_q{"Async-only host?"}
+  async_b["async (AsyncTimer)"]
+  try_machine["try machine"]
+  machine["machine"]
+  try_librt["try librt"]
+  librt["librt"]
+  skip_sdl2{"CPython + pygame?"}
+  try_sdl2["try sdl2 (needs usdl2)"]
+  sdl2["sdl2"]
+  try_threading["try threading"]
+  threading["threading"]
+  try_polling["try polling"]
+  polling["polling"]
+  fail["ImportError"]
+
+  start --> override
+  override -->|yes| bind
+  override -->|no| async_q
+  async_q -->|yes| async_b
+  async_q -->|no| try_machine
+  try_machine -->|ok| machine
+  try_machine -->|fail| try_librt
+  try_librt -->|ok| librt
+  try_librt -->|fail| skip_sdl2
+  skip_sdl2 -->|skip sdl2| try_threading
+  skip_sdl2 -->|no| try_sdl2
+  try_sdl2 -->|ok| sdl2
+  try_sdl2 -->|fail| try_threading
+  try_threading -->|ok| threading
+  try_threading -->|fail| try_polling
+  try_polling -->|ok| polling
+  try_polling -->|fail| fail
+```
+
+Override raises when the named backend cannot import (no silent fallback). On CPython, auto-selection skips `sdl2` when pygame is importable so `PGDisplay` does not share a process with usdl2 timers. **`micropython.exe` without usdl2** has no `threading` and lands on **`polling`**.
+
+### Backend roles
+
+| Backend | Typical hosts | Notes |
+|---------|---------------|-------|
+| `machine` | MCU MicroPython / CircuitPython | Preferred when `machine.Timer` exists (desktop unix MP/CP builds usually lack it) |
+| `librt` | Linux CPython / MicroPython unix | `timer_create`; main-thread signals. Not available on CircuitPython unix or Windows |
+| `sdl2` | Desktop usdl2 (MP, CP, and CPython without pygame) | `SDL_AddTimer`; pump via `SDL_PumpEvents`. Needs the `usdl2` module (frozen, wheel, or pure-Python). On CPython, skipped when pygame is importable so auto selection matches `AutoDisplay` (`PGDisplay`) and avoids usdl2+pygame dual-SDL deadlock. With pygame installed, use `MULTIMER_BACKEND=sdl2` only if the window is usdl2/`SDLDisplay` |
+| `threading` | Windows CPython with pygame; hosts with `_thread`/`threading` and no higher match | Worker + main-thread `schedule`. **Not** available on `micropython.exe` today |
+| `polling` | Last resort — notably **`micropython.exe` without usdl2** | Cooperative; advanced by `sleep_ms` / drain. Kept so `import multimer` still binds a sync timer when `machine` / `librt` / `sdl2` / `threading` are all unavailable |
+| `async` | PyScript / Jupyter (auto); anywhere via override | `AsyncTimer` as `Timer` |
+
+### Desktop auto-selection matrix
+
+Timer choice is decided at `import multimer`. It does **not** require opening a window. GUI harnesses (for example `lv_test_timer`) still need a display driver, so without usdl2 every **SDLDisplay** path fails before a timer cell can be reported — while a console app on the same runtime still gets the timer below.
+
+| Runtime | pygame-ce | usdl2 | GUI display | GUI status | Timer (GUI or console) |
+|---------|-----------|-------|-------------|------------|------------------------|
+| `cpython-venv` (Linux) | yes | yes or no | `PGDisplay` | ok | **`librt`** |
+| `cpython-venv` (Linux) | no | yes | `SDLDisplay` | ok | **`librt`** |
+| `cpython-venv` (Linux) | no | no | — | fail: no usdl2 | **`librt`** (console) |
+| `micropython` (Linux) | n/a | yes | `SDLDisplay` | ok | **`librt`** |
+| `micropython` (Linux) | n/a | no | — | fail: no usdl2 | **`librt`** (console) |
+| `circuitpython` (Linux) | n/a | yes | `SDLDisplay` | ok | **`sdl2`** |
+| `circuitpython` (Linux) | n/a | no | — | fail: no usdl2 | **`threading`** (console; has `_thread`) |
+| `micropython.exe` | n/a | yes | `SDLDisplay` | ok | **`sdl2`** |
+| `micropython.exe` | n/a | no | — | fail: no usdl2 | **`polling`** (console; no `threading` on this port) |
+| `python.exe` | yes | yes or no | `PGDisplay` | ok | **`threading`** |
+| `python.exe` | no | yes | `SDLDisplay` | ok | **`sdl2`** |
+| `python.exe` | no | no | — | fail: no usdl2 | **`threading`** (console) |
+
+GUI rows with usdl2 (and the pygame-only no-usdl2 rows) match `tools/lv_timer_test_kit.py --modes sync` / `KIT_RESULT.backend`. Console rows without usdl2 are from the same auto chain plus `backends_available()` on each host — especially **`micropython.exe` → `polling`**, which is why that backend stays in the product.
+
+`backends()` is the accept-list for overrides (auto order + `async`). It is **not** the try-order alone — that is `AUTO_BACKENDS` / `_auto_backends()` in `_select.py`. `backends_available()` probes which names import on the current host.
 
 `tools/test_timers.py` probes public timers on the host. Run `python tools/run_test_timers.py` for a per-runtime matrix. Private backend probing is opt-in (`MULTIMER_PROBE_BACKENDS=1`).
 
 ### Overriding the backend
 
-`multimer.backend_name()` reports the active choice; `multimer.use_backend(name)` replaces it and rebinds `Timer` and `sleep_ms`. Accepted names are `librt`, `machine`, `win32`, `sdl2`, `threading`, `polling`, and `async` (`AsyncTimer`) — the same list `multimer.backends()` returns. Setting `MULTIMER_BACKEND` applies one at import instead.
+`multimer.backend_name()` reports the active choice; `multimer.use_backend(name)` replaces it and rebinds `Timer` and `sleep_ms`. Accepted names are `machine`, `librt`, `sdl2`, `threading`, `polling`, and `async` (`AsyncTimer`) — the same list `multimer.backends()` returns. Setting `MULTIMER_BACKEND` applies one at import instead.
 
 An override that this host cannot provide raises `ImportError` (and an unknown name `ValueError`) rather than falling back, so a bad value can never be mistaken for the platform default. Call `use_backend` before creating timers.
 
@@ -202,13 +280,9 @@ python tools/lv_timer_test_kit.py --backend sdl2
 
 That routes each child through `tools/multimer_backend_preload.py`, which calls `use_backend` in-process — necessary because Windows `micropython.exe` / `python.exe` launched from WSL cannot read exported environment variables. Runtimes without the requested backend report `unavailable` instead of failing.
 
-### librt backend (`_librt`)
+### librt backend
 
 Linux **`timer_create`** / **`timer_settime`** with thread-directed signals (`SIGEV_THREAD_ID`). Callbacks run on the main thread (often inside the RT signal handler). Soft (`hard=False`) still runs there via immediate `schedule` — see [hard vs soft](#hard-vs-soft-hardfalse).
-
-### win32 backend (`_win32`)
-
-Windows **`CreateWaitableTimer`** + **`QueueUserAPC`**. Callbacks run on the main thread during alertable waits — **`multimer.sleep_ms()`** and **`eventsys.Runtime.poll()`** keep the thread alertable. Tight CPU-only loops (`while True: pass`) still stall timers; use **`sleep_ms(0)`** or **`runtime.poll()`**.
 
 ### SDL2 bindings (`usdl2`)
 

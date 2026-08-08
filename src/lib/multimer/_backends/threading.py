@@ -36,6 +36,10 @@ else:
 class Timer(_TimerCore):
     def __init__(self, id=-1, **kwargs):
         self._running = False
+        # Pre-bind so the worker can ``schedule`` onto the main thread without
+        # allocating a bound method each tick (and so soft coalesce runs inside
+        # ``_deliver`` rather than bypassing it via ``_invoke_callback``).
+        self._scheduled_deliver = self._run_deliver
         super().__init__(id, **kwargs)
 
     def _wait_idle(self):
@@ -49,6 +53,9 @@ class Timer(_TimerCore):
     def _disarm(self):
         self._running = False
 
+    def _run_deliver(self, _arg):
+        self._deliver()
+
     def _loop(self):
         next_t = ticks_add(ticks_ms(), self._period_ms)
         while self._running:
@@ -57,13 +64,8 @@ class Timer(_TimerCore):
                 _sleep_ms(delay)
             if not self._running:
                 break
-            self._busy = True
-            try:
-                schedule(self._invoke_callback, self)
-            finally:
-                self._busy = False
+            schedule(self._scheduled_deliver, self)
             if self._mode == self.ONE_SHOT:
                 self._running = False
-                self._armed = False
                 break
             next_t = ticks_add(next_t, self._period_ms)

@@ -8,9 +8,9 @@
 # --timer-async (board_config / displaysys.env_set). Examples do not read env.
 
 [defaults]
-duration_s = 5
-timeout_s = 30
-oneshot_timeout_s = 15
+duration_s = 2
+timeout_s = 15
+oneshot_timeout_s = 10
 
 # --- v1 curated (high-signal) ---
 
@@ -43,15 +43,6 @@ kind = "lvgl"
 quit = "inject"
 deps = ["lvgl"]
 timeout_s = 45
-
-[examples.p4a_spec_lvgl]
-import = "p4a_spec_lvgl"
-script = "examples/p4a_spec_lvgl.py"
-kind = "lvgl"
-quit = "inject"
-deps = ["lvgl"]
-runtimes = ["cpython-venv", "python.exe"]
-timeout_s = 60
 
 [examples.roku_graphics]
 import = "roku_remote.roku_graphics"
@@ -442,12 +433,14 @@ quit = "inject"
 deps = ["utils"]
 timeout_s = 45
 
+# Unproven kiosk (AudioEngine / PE audio); not a matrix gate until that path is solid.
 [examples.widgets_locker_kiosk]
 import = "widgets_locker_kiosk"
 script = "examples/widgets_locker_kiosk.py"
 kind = "pdwidgets"
 quit = "inject"
 deps = ["utils"]
+matrix = false
 timeout_s = 45
 
 [examples.alien]

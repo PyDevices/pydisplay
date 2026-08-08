@@ -52,6 +52,15 @@ PyDisplay publishes a set of pure-Python packages — `displaysys`, `eventsys`, 
   first** — agent runbook for the cross-runtime example test system. Canonical
   runtime list: [`tools/example_runtimes.toml`](tools/example_runtimes.toml);
   per-example metadata: [`tools/example_test_manifest.toml`](tools/example_test_manifest.toml).
+- **Preferred thorough gate:** example-by-example with **all selected runtimes
+  in parallel** (`--jobs 0`): **5** desktop for sync, **7** for async; both
+  `PYDISPLAY_TIMER_ASYNC=0` and `=1`, `--fail-fast`, line-buffered live log,
+  fix after a failed example wave then resume — see
+  [Preferred method](tools/README.md#preferred-method-parallel-runtimes-fail-fast-both-timer-modes)
+  and [Windows PE under WSL](tools/README.md#windows-pe-under-wsl).
+  Do **not** forward `SDL_*` to `*.exe` (PE windows should appear; unix stays
+  headless from the shell export). A PE `hang` with a live window means quit
+  failed, not that PE failed to start. `--curated-only` is smoke only.
 - `--only-example` / `--only-runtime` take **space-separated** ids on one flag
   (`--only-runtime circuitpython python.exe`). Repeating the flag keeps only
   the last list — see [tools/README.md](tools/README.md#matrix-commands).

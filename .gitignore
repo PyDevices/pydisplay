@@ -43,7 +43,6 @@ src/examples/spotify_remote
 src/examples/frogger
 src/examples/spotify_client
 
-src/examples/buildozer.spec
 src/run-*.ipynb
 src/run-*.nbconvert.ipynb
 pydisplay/src/.ipynb_checkpoints

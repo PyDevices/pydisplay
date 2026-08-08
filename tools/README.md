@@ -77,10 +77,62 @@ concrete launcher used in automation.
 .venv/bin/python -m unittest discover -s tests
 ```
 
-### Matrix commands
+### Preferred method (parallel runtimes, fail-fast, both timer modes)
+
+For thorough verification (timer/multimer/runtime changes, or “run the full
+matrix”), prefer **example-by-example**, **all selected runtimes in parallel**
+per example (`--jobs 0`, default), **`--fail-fast`**, and **both**
+`PYDISPLAY_TIMER_ASYNC` modes as separate kit runs.
+
+| Mode | Runtimes |
+|------|----------|
+| Sync (`PYDISPLAY_TIMER_ASYNC=0`) | **5** desktop SDL: `micropython`, `micropython.exe`, `circuitpython`, `cpython-venv`, `python.exe` |
+| Async (`PYDISPLAY_TIMER_ASYNC=1`) | **7** — the five above plus `pyscript`, `jupyter` |
+
+Default timing is already short (`duration_s=2`, `timeout_s=15` in the
+runtimes/manifest defaults). After each example’s parallel wave finishes, if
+any cell failed, stop before the next example; fix the root cause, then resume.
 
 ```bash
-# Curated set across available runtimes
+# PyScript needs the static server (async mode)
+python tools/serve.py   # separate terminal; reuse if already on :8000
+
+export SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy PYTHONUNBUFFERED=1
+mkdir -p /tmp/pydisplay-matrix
+
+SYNC_RT="micropython micropython.exe circuitpython cpython-venv python.exe"
+ASYNC_RT="$SYNC_RT pyscript jupyter"
+
+set -o pipefail   # keep kit exit status through tee
+
+# Sync — 5 runtimes concurrently per example
+PYDISPLAY_TIMER_ASYNC=0 stdbuf -oL -eL \
+  .venv/bin/python tools/example_test_kit.py --no-unit-tests --fail-fast \
+  --only-runtime $SYNC_RT \
+  --results-json /tmp/pydisplay-matrix/sync.json \
+  2>&1 | stdbuf -oL -eL tee /tmp/pydisplay-matrix/sync.log
+
+# After sync is clean — async, all 7
+PYDISPLAY_TIMER_ASYNC=1 stdbuf -oL -eL \
+  .venv/bin/python tools/example_test_kit.py --no-unit-tests --fail-fast \
+  --only-runtime $ASYNC_RT \
+  --results-json /tmp/pydisplay-matrix/async.json \
+  2>&1 | stdbuf -oL -eL tee /tmp/pydisplay-matrix/async.log
+```
+
+Live log lines: `Running <example> @ N runtime(s) in parallel...`, then
+`start` / `done` per runtime. `--fail-fast` waits for the current example’s
+workers, then exits if any cell failed. Resume with `--only-example`
+(remaining ids) or by restarting that mode from the failed example. Use
+`--jobs 1` for fully serial runtimes when isolating races. See
+[Windows PE under WSL](#windows-pe-under-wsl) for PE window / quit notes.
+
+`--curated-only` is a smoke shortcut, not a substitute for the preferred gate.
+
+### Matrix commands (scoped / smoke)
+
+```bash
+# Curated set across available runtimes (smoke)
 .venv/bin/python tools/example_test_kit.py --curated-only
 
 # Scope (space-separated ids on one flag; see note below)
@@ -106,13 +158,43 @@ SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
   .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv
 ```
 
-**Async timers on desktop:** prefer kit `--timer-async` (uses `env_set`, works
-for Windows PE under WSL). Shell export of `PYDISPLAY_TIMER_ASYNC=1` also works
-on hosts with `getenv`. Semantics: [Runtime — timer_async](../docs/concepts/runtime.md#timer_async-in-srclibboard_configpy).
+Unix subprocesses see that shell export. Windows `.exe` behavior is different —
+see [Windows PE under WSL](#windows-pe-under-wsl).
 
-**Results:** summary on stderr; full JSON defaults to the system temp dir
-(`example_test_results.json`), not a path under the repo. Override with
-`--results-json PATH`.
+**Async timers on desktop:** the kit forwards `PYDISPLAY_TIMER_ASYNC` as wrapper
+`--timer-async` (uses `env_set`, works for Windows PE under WSL). Shell export
+is the preferred way to select mode for a full kit run (see Preferred method
+above). Semantics: [Runtime — timer_async](../docs/concepts/runtime.md#timer_async-in-srclibboard_configpy).
+
+### Windows PE under WSL
+
+`micropython.exe` and `python.exe` are Windows PE binaries launched from WSL.
+They cannot read Linux-exported environment variables. The kit therefore
+forwards only values that must cross that boundary via wrapper argv +
+`displaysys.env_set` (notably `--timer-async` / `--multimer-backend`).
+
+**Do not forward `SDL_VIDEODRIVER` / `SDL_AUDIODRIVER` to PE.** Unix cells stay
+headless from the shell `SDL_*=dummy` export; PE keeps a real Windows video
+driver. During a matrix run you should see `micropython.exe` / `python.exe`
+windows — that means the cell started and is usable. Forwarding `dummy` into
+PE hides those windows.
+
+**`summary: hang` on PE is usually a quit failure, not a dead process.** If the
+Windows window stays up past `duration_s` / until the kit `timeout_s`, the
+example is still running (you can interact with it); the harness timed out
+waiting for cooperative quit / `EXAMPLE_RESULT`. PE child output is captured
+via temp files so a timeout kill does not wipe stdout the way pipes often did.
+Fix the quit path (wrapper deadline / `pydisplay_test_mode` / inject) rather
+than treating PE as “failed to launch.”
+
+**Scheduling:** with `--order examples` and `--jobs 0` (default), **all**
+selected runtimes for an example — including both `.exe` launchers — run
+concurrently.
+
+**Results:** live `Running <example> @ <runtime>...` lines on stderr; summary
+table at end (or when `--fail-fast` stops). Full JSON defaults to the system
+temp dir (`example_test_results.json`), not a path under the repo. Override
+with `--results-json PATH`.
 
 **Real X display:** `DISPLAY=:1` (xfce) without dummy SDL opens a window titled
 `"<impl> on <platform>"`. Optional: `xvfb-run -a …` (no `SDL_VIDEODRIVER=dummy`)
@@ -132,7 +214,9 @@ After usermod changes that affect these binaries or PyScript vendor wasm, see
 **`micropython.exe` matrix:** no `threading` / `_thread`. The example wrapper
 uses a `Runtime.poll` deadline quit (not a multimer SDL quit timer). With
 `pydisplay_test_mode.ENABLED`, `Runtime` skips auto-refresh wiring so examples
-that call `show()` themselves avoid a competing SDL refresh timer.
+that call `show()` themselves avoid a competing SDL refresh timer. WSL PE
+scheduling and SDL env rules:
+[Windows PE under WSL](#windows-pe-under-wsl).
 
 ### Sibling pure-Python repos
 

@@ -38,26 +38,6 @@ cd pydisplay_android
 ./scripts/test_desktop.sh
 ```
 
-## Customize buildozer.spec (LVGL editor)
-
-From a pydisplay checkout (CPython + `lvgl-cpython`), run the landscape desktop
-editor which emits a comment-free `src/examples/buildozer.spec` (gitignored)
-for you to copy into `pydisplay_android/p4a_app/buildozer.spec`:
-
-```bash
-cd pydisplay
-# optional size; defaults to 1280x720 landscape window
-PYDISPLAY_WIDTH=1280 PYDISPLAY_HEIGHT=720 \
-  .venv/bin/python -c "import runpy; runpy.run_path('src/examples/p4a_spec_lvgl.py')"
-# or from src/:
-# cd src && PYDISPLAY_WIDTH=1280 PYDISPLAY_HEIGHT=720 ../.venv/bin/python examples/p4a_spec_lvgl.py
-```
-
-Defaults load from a sibling `pydisplay_android/p4a_app/buildozer.spec` when
-present. Desktop size can also be set with `PYDISPLAY_SCALE`. Generated
-`orientation` follows the template (portrait for the paint defaults) and is
-independent of the landscape desktop window.
-
 ## LVGL on Android
 
 Prebuilt **`lvgl-cpython`** wheels for Android (`android_21_arm64_v8a`, etc.) are on [TestPyPI](https://test.pypi.org/project/lvgl-cpython/). The default paint APK does not include LVGL; add `lvglcpython` to `p4a_app/buildozer.spec` `requirements` and wire `main.py` to your LVGL module when you need it.
@@ -66,7 +46,7 @@ See [pydisplay_android README](https://github.com/PyDevices/pydisplay_android/bl
 
 ## Timers
 
-On Android, **multimer** selects the **`_sdl2`** backend (SDL timers on the UI thread) when `usdl2` is available — not `_threading`. See [multimer](../concepts/multimer.md#sdl2-bindings-usdl2).
+On Android, **multimer** selects the **`sdl2`** backend (SDL timers on the UI thread) when `usdl2` is available — ahead of `threading` in the auto chain. See [multimer](../concepts/multimer.md#sdl2-bindings-usdl2).
 
 ## Android TV / Fire OS
 

@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: MIT
 """asyncio-backed Timer with machine.Timer-compatible API."""
 
-from ._asyncio_loader import load_asyncio
+import sys
+
+from ._asyncio_loader import load_asyncio, loop_running
 from ._core import _TimerCore
 
 
@@ -14,18 +16,16 @@ def _require_asyncio():
     return aio
 
 
-def _loop_running(aio):
-    if hasattr(aio, "get_running_loop"):
-        try:
-            aio.get_running_loop()
-            return True
-        except RuntimeError:
-            return False
-    try:
-        aio.get_event_loop()
+def _may_arm_async_timer():
+    """True when :meth:`AsyncTimer.init` is allowed to create a task.
+
+    Browser hosts own the loop for the whole program (including import).
+    Everywhere else use :func:`loop_running` — not ``get_running_loop`` /
+    ``get_event_loop``, which mislead on MicroPython and CircuitPython.
+    """
+    if sys.platform in ("emscripten", "webassembly"):
         return True
-    except (AttributeError, RuntimeError):
-        return False
+    return loop_running()
 
 
 class AsyncTimer(_TimerCore):
@@ -59,7 +59,7 @@ class AsyncTimer(_TimerCore):
 
     def _arm(self):
         aio = _require_asyncio()
-        if not _loop_running(aio):
+        if not _may_arm_async_timer():
             raise RuntimeError("AsyncTimer.init requires a running event loop")
         self._running = True
         self._task = aio.create_task(self._loop())
@@ -83,14 +83,9 @@ class AsyncTimer(_TimerCore):
                     await aio.sleep(self._period_ms / 1000)
                 if not self._running:
                     break
-                self._busy = True
-                try:
-                    self._invoke_callback(self)
-                finally:
-                    self._busy = False
-                if self._mode == self.ONE_SHOT:
+                self._deliver()
+                if self._mode == self.ONE_SHOT or not self._armed:
                     self._running = False
-                    self._armed = False
                     break
         except cancelled:
             pass

@@ -5,9 +5,9 @@
 #   python tools/example_test_kit.py
 
 [defaults]
-duration_s = 5
-timeout_s = 30
-oneshot_timeout_s = 15
+duration_s = 2
+timeout_s = 15
+oneshot_timeout_s = 10
 
 # Subprocess interpreters — cwd is src/ unless noted.
 
@@ -30,7 +30,7 @@ command = ["micropython.exe"]
 cwd = "src"
 resolve = ["PATH", "~/bin/micropython.exe", "repo:bin/micropython.exe"]
 setup_notes = "MicroPython Windows (.exe). Async modes may be limited. bin/micropython.exe is committed for completeness only — Cursor Cloud agents cannot execute Windows binaries, so this runtime is not part of the cloud matrix."
-timeout_s = 60
+timeout_s = 25
 
 [runtimes.circuitpython]
 platform = "circuitpython"

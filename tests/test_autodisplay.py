@@ -97,9 +97,12 @@ class TestAutoDisplay(unittest.TestCase):
         display = mock.Mock(name="SDLDisplay")
         display.get_events = mock.Mock(name="sdl_get_events")
         display.requires_async_timer = False
+        sdl_mod = types.ModuleType("displaysys.sdldisplay")
+        sdl_mod.SDLDisplay = mock.Mock(return_value=display)
         with mock.patch.object(ad, "host_kind", return_value="desktop"), mock.patch.dict(
-            sys.modules, {"displaysys.pgdisplay": None}
-        ), mock.patch("displaysys.sdldisplay.SDLDisplay", return_value=display) as sdl_cls:
+            sys.modules,
+            {"displaysys.pgdisplay": None, "displaysys.sdldisplay": sdl_mod},
+        ):
             result = AutoDisplay(
                 width=160,
                 height=120,
@@ -108,8 +111,9 @@ class TestAutoDisplay(unittest.TestCase):
             )
         self.assertIs(result, display)
         self.assertFalse(result.requires_async_timer)
-        sdl_cls.assert_called_once()
-        kwargs = sdl_cls.call_args.kwargs
+        self.assertIs(result.get_events, display.get_events)
+        sdl_mod.SDLDisplay.assert_called_once()
+        kwargs = sdl_mod.SDLDisplay.call_args.kwargs
         self.assertEqual(kwargs["width"], 160)
         self.assertEqual(kwargs["height"], 120)
         self.assertEqual(kwargs["title"], "sdl")

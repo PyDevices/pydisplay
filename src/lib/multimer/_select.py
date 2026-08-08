@@ -10,20 +10,38 @@ _sleep_ms = None
 _drain = None
 # True when the active backend delivers timer callbacks without a sleep/pump
 # loop (librt POSIX-timer signals, or MicroPython ``machine.Timer``). Pump-based
-# backends (win32 APC, SDL2, the threading fallback) leave this False.
+# backends (SDL2, threading, polling) leave this False.
 _uses_signals = False
 # Name of the bound backend, one of ``BACKENDS`` (None before one binds).
 _backend = None
 
+# Auto-select try order (first ImportError-free bind wins). ``async`` is not
+# in this list — it is chosen by :func:`_async_only_runtime` or ``use_backend``.
+# ``sdl2`` may be skipped on CPython in :func:`_auto_backends` (see there).
+AUTO_BACKENDS = ("machine", "librt", "sdl2", "threading", "polling")
+
 # Every backend name accepted by ``load_backend``. ``machine`` is
-# ``machine.Timer``; ``async`` is ``AsyncTimer`` (the only choice on hosts
-# without a sync timer, and selectable elsewhere for async-native apps).
-BACKENDS = ("librt", "machine", "win32", "sdl2", "threading", "polling", "async")
+# ``machine.Timer``; ``async`` is ``AsyncTimer`` (async-only hosts, and
+# selectable elsewhere for async-native apps).
+# Concatenation (not (*AUTO_BACKENDS, "async")): MicroPython/CircuitPython
+# reject starred expressions in this position.
+BACKENDS = AUTO_BACKENDS + ("async",)  # noqa: RUF005
 
 # Forces one backend instead of the automatic choice below. Hosts that cannot
 # pass environment variables to a child process (MicroPython Windows under WSL)
 # use ``multimer.use_backend()`` instead.
 _ENV_OVERRIDE = "MULTIMER_BACKEND"
+
+
+class _BoundBackend:
+    """Shim so machine / AsyncTimer bind through the same globals as modules."""
+
+    def __init__(self, name, timer_cls, *, uses_signals=False, sleep_ms=None, drain=None):
+        self.__name__ = name
+        self.Timer = timer_cls
+        self._uses_signals = uses_signals
+        self._backend_sleep_ms = sleep_ms
+        self._backend_drain = drain
 
 
 def _set_backend(module):
@@ -32,29 +50,10 @@ def _set_backend(module):
     _sleep_ms = getattr(module, "_backend_sleep_ms", None)
     _drain = getattr(module, "_backend_drain", None)
     _uses_signals = getattr(module, "_uses_signals", False)
-    _backend = module.__name__.rsplit(".", 1)[-1]
-
-
-def _use_machine_timer():
-    """Bind MicroPython/CircuitPython ``machine.Timer`` (self-driving)."""
-    global Timer, _uses_signals, _backend
-    from machine import Timer as _MachineTimer
-
-    Timer = _MachineTimer
-    _uses_signals = True
-    _backend = "machine"
-
-
-def _use_async_timer():
-    """Bind :class:`AsyncTimer` as ``Timer`` (no sync timer on this host)."""
-    global Timer, _sleep_ms, _drain, _uses_signals, _backend
-    from ._async_timer import AsyncTimer
-
-    Timer = AsyncTimer
-    _sleep_ms = None
-    _drain = None
-    _uses_signals = False
-    _backend = "async"
+    name = getattr(module, "__name__", None)
+    if name and "." in name:
+        name = name.rsplit(".", 1)[-1]
+    _backend = name
 
 
 def load_backend(name):
@@ -65,17 +64,17 @@ def load_backend(name):
     manifests still see every backend module.
     """
     if name == "machine":
-        _use_machine_timer()
+        from machine import Timer as _MachineTimer
+
+        _set_backend(_BoundBackend("machine", _MachineTimer, uses_signals=True))
     elif name == "async":
-        _use_async_timer()
+        from ._async_timer import AsyncTimer
+
+        _set_backend(_BoundBackend("async", AsyncTimer))
     elif name == "librt":
         from ._backends import librt
 
         _set_backend(librt)
-    elif name == "win32":
-        from ._backends import win32
-
-        _set_backend(win32)
     elif name == "sdl2":
         from ._backends import sdl2
 
@@ -90,6 +89,17 @@ def load_backend(name):
         _set_backend(polling)
     else:
         raise ValueError(f"unknown multimer backend: {name!r} (expected one of {BACKENDS})")
+
+
+def _try(name):
+    """Bind ``name`` when still unbound; ignore ImportError."""
+    global Timer
+    if Timer is not None:
+        return
+    try:
+        load_backend(name)
+    except ImportError:
+        pass
 
 
 def _forced_backend():
@@ -109,21 +119,76 @@ def _forced_backend():
     return value or None
 
 
-def _running_in_ipython_kernel():
-    import builtins
+def _async_only_runtime():
+    """True on hosts that have no viable sync timer (PyScript / Jupyter).
 
-    get_ipython = getattr(builtins, "get_ipython", None)
-    if get_ipython is None:
-        return False
+    Predicates match desktop ``board_config._host_kind`` so ``Timer`` and
+    ``timer_async`` cannot disagree about whether this is an async-only host.
+    """
+    if sys.platform in ("emscripten", "webassembly"):
+        return True
     try:
-        shell = get_ipython()
+        import pyscript  # noqa: F401
+
+        return True
+    except Exception:
+        pass
+    try:
+        get_ipython()  # noqa: F821
+        return True
     except Exception:
         return False
-    return shell is not None and shell.__class__.__name__ == "ZMQInteractiveShell"
 
 
-def _async_only_runtime():
-    return sys.platform in ("emscripten", "webassembly") or _running_in_ipython_kernel()
+def _pygame_available():
+    """True when ``import pygame`` succeeds (pygame-ce or classic)."""
+    try:
+        import pygame  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
+def _auto_backends():
+    """:data:`AUTO_BACKENDS` with host-specific auto skips.
+
+    On CPython, skip auto ``sdl2`` when pygame is importable: that matches
+    ``AutoDisplay`` (pygame → ``PGDisplay``), and usdl2 timers plus pygame's
+    separate SDL deadlock. Without pygame, CPython may auto-select ``sdl2``
+    for ``SDLDisplay`` / usdl2. MicroPython and CircuitPython never skip
+    ``sdl2`` here. Explicit ``use_backend`` / ``MULTIMER_BACKEND`` still list
+    ``sdl2`` in :data:`BACKENDS`.
+    """
+    impl = getattr(sys.implementation, "name", "")
+    skip_sdl2 = impl == "cpython" and _pygame_available()
+    out = []
+    for name in AUTO_BACKENDS:
+        if name == "sdl2" and skip_sdl2:
+            continue
+        out.append(name)
+    return out
+
+
+def backends_available():
+    """Names from :data:`BACKENDS` that :func:`load_backend` can import here.
+
+    Probes without changing the active backend. Useful for harnesses that skip
+    unavailable overrides instead of failing the run.
+    """
+    global Timer, _sleep_ms, _drain, _uses_signals, _backend
+    saved = (Timer, _sleep_ms, _drain, _uses_signals, _backend)
+    found = []
+    try:
+        for name in BACKENDS:
+            try:
+                load_backend(name)
+            except ImportError:
+                continue
+            found.append(name)
+    finally:
+        Timer, _sleep_ms, _drain, _uses_signals, _backend = saved
+    return tuple(found)
 
 
 _override = _forced_backend()
@@ -134,48 +199,12 @@ if _override is not None:
 elif _async_only_runtime():
     # PyScript / Jupyter have no sync timer backend. Expose AsyncTimer as Timer so
     # ``from multimer import Timer`` matches the canonical app idiom on every host.
-    _use_async_timer()
+    load_backend("async")
 else:
-    if sys.platform == "win32":
-        # CPython 3.14: win32 QueueUserAPC + ctypes trampoline into LVGL/extension
-        # code fatals with ``_PyThreadState_Attach: non-NULL old thread state``
-        # (seen on touch → indev read_cb). Prefer the threading backend, which
-        # only ``schedule()``s from the worker and drains on the main pump.
-        # Keep win32 APC for MicroPython Windows and as CPython fallback.
-        if getattr(sys.implementation, "name", "") == "cpython":
-            try:
-                load_backend("threading")
-            except ImportError:
-                pass
-        if Timer is None:
-            try:
-                load_backend("win32")
-            except ImportError:
-                pass
-    elif sys.platform in ("linux", "unix"):
-        try:
-            load_backend("librt")
-        except ImportError:
-            try:
-                load_backend("machine")
-            except ImportError:
-                try:
-                    load_backend("threading")
-                except ImportError:
-                    pass
+    _tried = _auto_backends()
+    for _name in _tried:
+        _try(_name)
     if Timer is None:
-        try:
-            load_backend("machine")
-        except ImportError:
-            try:
-                load_backend("threading")
-            except ImportError:
-                try:
-                    load_backend("sdl2")
-                except ImportError:
-                    try:
-                        load_backend("polling")
-                    except ImportError:
-                        # CircuitPython: no machine.Timer; async-only Timer API.
-                        if getattr(sys.implementation, "name", "") == "circuitpython":
-                            _use_async_timer()
+        raise ImportError(
+            "multimer: no timer backend available (tried {})".format(", ".join(_tried))
+        )

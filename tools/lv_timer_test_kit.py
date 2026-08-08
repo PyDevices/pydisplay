@@ -317,7 +317,7 @@ def main(argv: list[str] | None = None) -> int:
         "--backend",
         metavar="NAME",
         help=(
-            "Force one multimer backend (librt, machine, win32, sdl2, threading, "
+            "Force one multimer backend (machine, librt, sdl2, threading, "
             "polling, async) instead of the platform default"
         ),
     )

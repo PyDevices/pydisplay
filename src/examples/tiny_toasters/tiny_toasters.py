@@ -214,7 +214,7 @@ def main():
     # move and draw sprites
 
     def _tick(_=None):
-        # Do not call runtime.poll() from on_tick: sync backends (librt/win32)
+        # Do not call runtime.poll() from on_tick: sync backends (librt/sdl2)
         # re-enter the timer path and hang. Auto-service handles QUIT.
         if runtime.quit_requested if runtime else False:
             return

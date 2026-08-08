@@ -11,8 +11,12 @@ def load_asyncio():
     if _asyncio_mod is not None:
         return _asyncio_mod
 
+    # Prefer ``asyncio`` over ``uasyncio``. On modern MicroPython, ``uasyncio`` is
+    # a lazy shim whose ``__getattr__`` forwards into ``sys.modules["asyncio"]``.
+    # Caching that shim breaks ``install_asyncio_compat``: after the facade
+    # replaces the ``asyncio`` name, shim → facade → shim recurses on getattr.
     try:
-        import uasyncio as aio
+        import asyncio as aio
 
         if hasattr(aio, "create_task"):
             _asyncio_mod = aio
@@ -21,7 +25,7 @@ def load_asyncio():
         pass
 
     try:
-        import asyncio as aio
+        import uasyncio as aio
 
         if hasattr(aio, "create_task"):
             _asyncio_mod = aio
@@ -35,7 +39,8 @@ def load_asyncio():
         return None
 
     # Fallback for incomplete builds (e.g. micropython.exe without frozen asyncio).
-    # Production desktop firmware should freeze extmod/asyncio — see docs/building.md.
+    # Production desktop firmware should freeze extmod/asyncio — see
+    # docs/platforms/micropython.md.
     aio = __import__("multimer._mpasyncio", None, None, ("_mpasyncio",))
 
     _asyncio_mod = aio

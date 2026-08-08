@@ -3,20 +3,21 @@
 # SPDX-License-Identifier: MIT
 """Unit tests for boarddev.bind_lazy."""
 
-from pathlib import Path
-import sys
-import types
 import unittest
 
-_LIB = Path(__file__).resolve().parents[1] / "src" / "lib"
-if str(_LIB) not in sys.path:
-    sys.path.insert(0, str(_LIB))
+import _env  # noqa: F401
 
-import boarddev  # noqa: E402
+try:
+    import boarddev
+except ImportError:  # pragma: no cover - CI without hardware checkout
+    boarddev = None
 
 
+@unittest.skipUnless(boarddev is not None, "boarddev requires micropython-hardware/drivers")
 class TestBindLazy(unittest.TestCase):
     def _make_devices_mod(self, **factories):
+        import types
+
         mod = types.ModuleType("fake_board_devices")
         mod.DEVICES = frozenset(factories)
         for name, factory in factories.items():

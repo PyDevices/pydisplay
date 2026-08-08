@@ -64,6 +64,13 @@ class _TimerCore:
         if kwargs:
             self.init(**kwargs)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        self.deinit()
+        return False
+
     def init(self, *, mode=PERIODIC, freq=-1, period=-1, callback=None, hard=True):
         """Arm or re-arm the timer with MicroPython ``machine.Timer`` semantics.
 
@@ -79,8 +86,10 @@ class _TimerCore:
                 delivery is already on the main thread, so soft invokes the
                 callback immediately there (≈ hard for *when* it runs). Soft
                 only defers to a later main-thread drain when the backend
-                delivers off-main (threading / win32 APC enqueue / polling).
-                On MicroPython, soft uses ``micropython.schedule`` (queue out
+                delivers off-main (threading / polling). The SDL2 backend
+                always invokes on the VM thread (usdl2 already marshalled
+                there) and skips a second soft ``schedule`` hop. On
+                MicroPython, soft uses ``micropython.schedule`` (queue out
                 of a locked-heap ISR).
 
         Raises:
