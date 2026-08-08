@@ -7,4 +7,4 @@ eventsys>=0.0.34
 displaysys>=0.0.34
 palettes>=0.0.7
 pdwidgets>=0.0.13
-pydisplay-desktop>=0.0.9
+pydisplay-desktop>=0.0.10
