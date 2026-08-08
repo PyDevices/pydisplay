@@ -99,19 +99,24 @@ def make_emu_display(
             None,
         )
     if name == "PSDisplay":
-        from displaysys.psdisplay import PSDevices, PSDisplay
+        from displaysys.psdisplay import PSDisplay
         import eventsys
 
+        # Per-canvas drain (PSDisplay owns PSDevices). Separate HostEventsDevice
+        # from the primary — not a second PG/SDL-style shared pump.
         cid = canvas_id if canvas_id is not None else "aux_canvas"
         dd = PSDisplay(cid, width, height)
-        host = eventsys.HostEventsDevice(host_read=PSDevices(cid, dd).read, display=dd)
+        host = eventsys.HostEventsDevice(host_read=dd.get_events, display=dd)
         return dd, [host]
     if name == "JNDisplay":
-        from displaysys.jndisplay import JNDevices, JNDisplay
+        from displaysys.jndisplay import JNDisplay
         import eventsys
 
         dd = JNDisplay(width, height)
-        host = eventsys.HostEventsDevice(host_read=JNDevices(dd).read, display=dd)
+        # Eagerly create JNDevices (widget) before LVGL attach; drain stays
+        # on the display for the aux HostEventsDevice.
+        dd.get_events()
+        host = eventsys.HostEventsDevice(host_read=dd.get_events, display=dd)
         return dd, [host]
     raise ValueError(f"lv_encoder_emu: unsupported backend {name!r}")
 
