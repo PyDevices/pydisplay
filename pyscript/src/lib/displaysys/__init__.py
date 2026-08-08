@@ -304,11 +304,6 @@ def capabilities():
             "busdisplay": {"eventsys": False, "auto_refresh": False},
             "fbdisplay": {"eventsys": False, "auto_refresh": False},
             "pixeldisplay": {"eventsys": False, "auto_refresh": False},
-            "epaperdisplay": {
-                "eventsys": False,
-                "auto_refresh": False,
-                "buffer_push": "displayio_or_bus",
-            },
             "sdldisplay": {
                 "eventsys": True,
                 "auto_refresh": True,

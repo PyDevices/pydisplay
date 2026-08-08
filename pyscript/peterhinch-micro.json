@@ -16,7 +16,6 @@
     "https://raw.githubusercontent.com/peterhinch/micropython-micro-gui/master/gui/demos/dropdown.py": "/utils/gui/demos/dropdown.py",
     "https://raw.githubusercontent.com/peterhinch/micropython-micro-gui/master/gui/demos/dropdown_var.py": "/utils/gui/demos/dropdown_var.py",
     "https://raw.githubusercontent.com/peterhinch/micropython-micro-gui/master/gui/demos/dropdown_var_tuple.py": "/utils/gui/demos/dropdown_var_tuple.py",
-    "https://raw.githubusercontent.com/peterhinch/micropython-micro-gui/master/gui/demos/epaper.py": "/utils/gui/demos/epaper.py",
     "https://raw.githubusercontent.com/peterhinch/micropython-micro-gui/master/gui/demos/linked_sliders.py": "/utils/gui/demos/linked_sliders.py",
     "https://raw.githubusercontent.com/peterhinch/micropython-micro-gui/master/gui/demos/listbox.py": "/utils/gui/demos/listbox.py",
     "https://raw.githubusercontent.com/peterhinch/micropython-micro-gui/master/gui/demos/listbox_var.py": "/utils/gui/demos/listbox_var.py",

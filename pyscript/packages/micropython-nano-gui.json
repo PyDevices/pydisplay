@@ -65,26 +65,6 @@
       "github:peterhinch/micropython-nano-gui/gui/demos/color96.py"
     ],
     [
-      "gui/demos/epd21_sync.py",
-      "github:peterhinch/micropython-nano-gui/gui/demos/epd21_sync.py"
-    ],
-    [
-      "gui/demos/epd29_async.py",
-      "github:peterhinch/micropython-nano-gui/gui/demos/epd29_async.py"
-    ],
-    [
-      "gui/demos/epd29_lowpower.py",
-      "github:peterhinch/micropython-nano-gui/gui/demos/epd29_lowpower.py"
-    ],
-    [
-      "gui/demos/epd29_sync.py",
-      "github:peterhinch/micropython-nano-gui/gui/demos/epd29_sync.py"
-    ],
-    [
-      "gui/demos/epd_async.py",
-      "github:peterhinch/micropython-nano-gui/gui/demos/epd_async.py"
-    ],
-    [
       "gui/demos/fpt.py",
       "github:peterhinch/micropython-nano-gui/gui/demos/fpt.py"
     ],

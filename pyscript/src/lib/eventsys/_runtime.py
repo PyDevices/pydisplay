@@ -189,6 +189,8 @@ class Runtime:
                 ``touch_rotation_table`` type.
             ValueError: ``host_read`` / ``touch_read`` without a primary display,
                 or ``touch_rotation_table`` length not 4.
+            RuntimeError: ``timer_async`` is false while a display has
+                ``requires_async_timer`` (e.g. ``PSDisplay`` / ``JNDisplay``).
         """
         self.devices = []
         self._event_callbacks = {}
@@ -209,6 +211,10 @@ class Runtime:
         # this ``None`` so the interpreter ends with status 0.
         self._exit_code = None
         self._timer_async = bool(timer_async)
+        if not self._timer_async:
+            for drv in self._displays:
+                if getattr(drv, "requires_async_timer", False):
+                    raise RuntimeError("{} requires timer_async=True".format(type(drv).__name__))
         self._timer = None
         self._tick_callbacks = []
         # A soft machine.Timer callback can be scheduled again after another

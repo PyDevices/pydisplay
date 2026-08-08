@@ -60,7 +60,7 @@ use the desktop bundle from micropython-hardware
 ## What you get
 
 - Unified `framebuf`-style drawing surface (`fill`, `fill_rect`, `blit_rect`, `show`, …)
-- MCU (`BusDisplay`, `FBDisplay`, e-paper) and host backends (SDL, PyGame, Jupyter, PyScript)
+- MCU (`BusDisplay`, `FBDisplay`) and host backends (SDL, PyGame, Jupyter, PyScript)
 - `AutoDisplay` / `host_kind` for desktop-like host selection (board_config remains the app import surface)
 
 Desktop input backends use [eventsys](https://test.pypi.org/project/eventsys/) at runtime; install it separately when you need `Runtime` / host events.

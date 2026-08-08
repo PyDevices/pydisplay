@@ -65,10 +65,6 @@
       "github:peterhinch/micropython-micro-gui/gui/demos/dropdown_var_tuple.py"
     ],
     [
-      "gui/demos/epaper.py",
-      "github:peterhinch/micropython-micro-gui/gui/demos/epaper.py"
-    ],
-    [
       "gui/demos/linked_sliders.py",
       "github:peterhinch/micropython-micro-gui/gui/demos/linked_sliders.py"
     ],
