@@ -4,8 +4,9 @@
 
 """Host auto-selection for desktop-like displaysys backends.
 
-Selects ``PSDisplay`` / ``JNDisplay`` / ``PGDisplay``→``SDLDisplay`` from the
-runtime host so board configs stay MCU-shaped wiring only.
+Selects ``PSDisplay`` / ``JNDisplay`` / ``PGDisplay``→``SDLDisplay`` (or
+Android ``SDLDisplay``) from the runtime host so board configs stay MCU-shaped
+wiring only.
 
 Returns the display driver directly. Desktop drivers expose ``get_events`` for
 ``Runtime(host_read=...)`` and ``requires_async_timer`` for the timer default.
@@ -17,7 +18,9 @@ __all__ = ["AutoDisplay", "host_kind"]
 
 
 def host_kind():
-    """Return ``"pyscript"``, ``"jupyter"``, or ``"desktop"``."""
+    """Return ``"android"``, ``"pyscript"``, ``"jupyter"``, or ``"desktop"``."""
+    if sys.platform == "android":
+        return "android"
     try:
         import pyscript  # noqa: F401
 
@@ -76,6 +79,21 @@ def AutoDisplay(
         from displaysys.jndisplay import JNDisplay
 
         return JNDisplay(width, height, quiet=quiet)
+
+    if host == "android":
+        import usdl2
+
+        from displaysys.sdldisplay import SDLDisplay
+
+        return SDLDisplay(
+            width=width,
+            height=height,
+            rotation=rotation,
+            title=title,
+            scale=scale,
+            quiet=quiet,
+            window_flags=(usdl2.SDL_WINDOW_FULLSCREEN_DESKTOP | usdl2.SDL_WINDOW_ALLOW_HIGHDPI),
+        )
 
     try:
         from displaysys.pgdisplay import PGDisplay
