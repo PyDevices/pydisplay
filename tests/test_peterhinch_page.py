@@ -182,16 +182,11 @@ def test_known_incompatible_demos_are_filtered():
         "clocktest",
         "color15",
         "color96",
-        "epd21_sync",
-        "epd29_async",
-        "epd29_lowpower",
-        "epd29_sync",
-        "epd_async",
         "fpt",
         "mono_test",
         "sharptest",
     }
-    assert _excluded("micro") == {"audio", "bitmap", "date", "epaper", "qrcode"}
+    assert _excluded("micro") == {"audio", "bitmap", "date", "qrcode"}
     assert _excluded("touch") == {"audio", "bitmap", "date", "qrcode"}
 
 

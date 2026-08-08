@@ -54,20 +54,7 @@ def _touch_kind(text: str) -> str:
     return "none"
 
 
-def _epaper_dims(text: str) -> tuple[int, int, int] | None:
-    m = re.search(
-        r"EPaperDisplay\([^)]*width=(\d+),\s*height=(\d+),\s*color_depth=(\d+)",
-        text,
-    )
-    if m:
-        return int(m.group(1)), int(m.group(2)), int(m.group(3))
-    return None
-
-
 def _display_dims(text: str) -> tuple[int | None, int | None, int | None]:
-    dims = _epaper_dims(text)
-    if dims:
-        return dims[0], dims[1], dims[2]
     width = re.search(r"\bwidth=(\d+)", text)
     height = re.search(r"\bheight=(\d+)", text)
     depth = re.search(r"\bcolor_depth=(\d+)", text)
@@ -129,10 +116,10 @@ def main() -> int:
         "--root",
         action="append",
         default=[],
-        help="board_configs subtree to scan (default: busdisplay, epaperdisplay, fbdisplay)",
+        help="board_configs subtree to scan (default: busdisplay, fbdisplay)",
     )
     args = parser.parse_args()
-    subtrees = args.root or ["busdisplay", "epaperdisplay", "fbdisplay"]
+    subtrees = args.root or ["busdisplay", "fbdisplay"]
 
     all_issues: list[str] = []
     pair_count = 0

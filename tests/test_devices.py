@@ -281,6 +281,22 @@ class TestRuntime(unittest.TestCase):
         self.assertIs(runtime.keypad_dev, dev)
         self.assertIn(dev, runtime.devices)
 
+    def test_requires_async_timer_rejects_sync(self):
+        display = FakeDisplay()
+        display.requires_async_timer = True
+        display.needs_refresh = False
+        with self.assertRaises(RuntimeError) as ctx:
+            Runtime(displays=[display], timer_async=False)
+        self.assertIn("requires timer_async=True", str(ctx.exception))
+
+    def test_requires_async_timer_allows_async(self):
+        display = FakeDisplay()
+        display.requires_async_timer = True
+        display.needs_refresh = False
+        runtime = Runtime(displays=[display], timer_async=True)
+        self.addCleanup(runtime.stop_timer)
+        self.assertTrue(runtime.timer_async)
+
 
 class TestRegisterDevice(unittest.TestCase):
     def setUp(self):

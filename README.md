@@ -219,7 +219,7 @@ Everything lives in one place — the **[documentation site](https://pydisplay.r
 
 ## 8. 🤝 Contributing
 
-Fork, branch, and open a PR. See the [Contributing guide](https://pydisplay.readthedocs.io/en/latest/contributing/) and the open [GitHub Issues](https://github.com/PyDevices/pydisplay/issues). Roadmap items include EPaper displays, CircuitPython `circup` packages, end-user PyPI wheels, and more C bus drivers.
+Fork, branch, and open a PR. See the [Contributing guide](https://pydisplay.readthedocs.io/en/latest/contributing/) and the open [GitHub Issues](https://github.com/PyDevices/pydisplay/issues). Roadmap items include CircuitPython `circup` packages, end-user PyPI wheels, and more C bus drivers.
 
 ## 9. Credits & license
 

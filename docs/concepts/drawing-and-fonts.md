@@ -17,7 +17,7 @@ See [Architecture](architecture.md).
 
 ## pygraphics module
 
-`pygraphics` subclasses FrameBuffer and adds helpers (e.g. `round_rect`, `gradient_rect`). Methods return an **Area** object (`x`, `y`, `w`, `h`) describing the bounding box of what changed — useful for partial updates and e-paper.
+`pygraphics` subclasses FrameBuffer and adds helpers (e.g. `round_rect`, `gradient_rect`). Methods return an **Area** object (`x`, `y`, `w`, `h`) describing the bounding box of what changed — useful for partial updates.
 
 Use `Draw(canvas)` when you prefer a separate drawer object over subclassing.
 

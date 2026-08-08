@@ -48,7 +48,7 @@ class TestNeedsRefresh(unittest.TestCase):
 
         self.assertFalse(DisplayDriver.needs_refresh)
 
-        for module_name in ("busdisplay", "fbdisplay", "epaperdisplay", "pixeldisplay"):
+        for module_name in ("busdisplay", "fbdisplay", "pixeldisplay"):
             flag = _module_sets_needs_refresh(module_name)
             self.assertIn(flag, (None, False), module_name)
 

@@ -130,7 +130,7 @@ Manual packages (not generated) still in this repo:
 micropython-lib MIP index. Sister packages (`pygraphics`, `usdl2`, `palettes`,
 `pdwidgets`, `lvgl`) come from frozen firmware, MIP (where published), or
 TestPyPI — not this repo's `packages/`. Bus/touch/chip helper
-manifests (`spibus`, `i80bus`, `i2cbus`, `epaper_chip`, `tt21100`, `stmpe610`,
+manifests (`spibus`, `i80bus`, `i2cbus`, `tt21100`, `stmpe610`,
 `keypad_shift`) live in sibling `micropython-hardware/packages/`.
 
 ### Board configs

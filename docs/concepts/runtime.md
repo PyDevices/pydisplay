@@ -7,7 +7,7 @@ Every pydisplay app expects a **`board_config.py`** on `sys.path` that exports:
 | `display_drv` | yes | Display backend from [displaysys](displays.md) |
 | `runtime` | when `display_drv.needs_refresh` | [eventsys](events.md) `Runtime` — shared timer, optional input, quit lifecycle |
 
-**`runtime = None`** is allowed only on MCU boards whose display does **not** need periodic presentation (`needs_refresh` is false): bus displays, e-paper, pixel grids driven explicitly by the app. Hosted backends (SDL, pygame, PyScript, Jupyter) always export a `Runtime`.
+**`runtime = None`** is allowed only on MCU boards whose display does **not** need periodic presentation (`needs_refresh` is false): bus displays and pixel grids driven explicitly by the app. Hosted backends (SDL, pygame, PyScript, Jupyter) always export a `Runtime`.
 
 ## Quick start — hosted desktop
 

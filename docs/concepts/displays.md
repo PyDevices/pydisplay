@@ -50,11 +50,6 @@ Jupyter Notebook output via an interactive `ipywidgets` image. Input (mouse, whe
 
 PyScript browser canvas. Input (pointer/touch/pen, wheel, keyboard, gamepad) is captured by `PSDevices` and delivered as events. Config: `board_configs/psdisplay/`. See [PyScript](../guides/pyscript.md).
 
-### EPaperDisplay
-
-Planned — community help wanted.
-
-## How displays expose input
 
 All display backends feed input into [`eventsys`](events.md) the same way: as a
 stream of `eventsys.events` objects drained through a **`HostEventsDevice`**. They
@@ -69,7 +64,8 @@ platform exposes:
 Either way your handler sees the same `eventsys.events` objects, so application
 code never needs to know which backend is active. Desktop board configs also use
 `timer_async=env_bool("PYDISPLAY_TIMER_ASYNC", display_drv.requires_async_timer)`
-(`requires_async_timer` is `True` only on PS/JN).
+(`requires_async_timer` is `True` only on PS/JN). `eventsys.Runtime` raises if
+`timer_async=False` while any attached display has `requires_async_timer`.
 
 ### Desktop (SDL2, PyGame)
 

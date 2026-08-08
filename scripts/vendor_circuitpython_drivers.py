@@ -25,23 +25,6 @@ DISPLAY_DRIVERS = {
     "ssd1327": "Adafruit_CircuitPython_SSD1327",
     "ssd1331": "Adafruit_CircuitPython_SSD1331",
     "ssd1351": "Adafruit_CircuitPython_SSD1351",
-    "ssd1680": "Adafruit_CircuitPython_SSD1680",
-    "ssd1681": "Adafruit_CircuitPython_SSD1681",
-    "ssd1683": "Adafruit_CircuitPython_SSD1683",
-    "ssd1675": "Adafruit_CircuitPython_SSD1675",
-    "ssd1677": "Adafruit_CircuitPython_SSD1677",
-    "ssd1608": "Adafruit_CircuitPython_SSD1608",
-    "uc8151d": "Adafruit_CircuitPython_UC8151D",
-    "uc8179": "Adafruit_CircuitPython_UC8179",
-    "uc8253": "Adafruit_CircuitPython_UC8253",
-    "il0373": "Adafruit_CircuitPython_IL0373",
-    "il0398": "Adafruit_CircuitPython_IL0398",
-    "il91874": "Adafruit_CircuitPython_IL91874",
-    "ek79686": "Adafruit_CircuitPython_EK79686",
-    "jd79661": "Adafruit_CircuitPython_JD79661",
-    "jd79667": "Adafruit_CircuitPython_JD79667",
-    "spd1656": "Adafruit_CircuitPython_SPD1656",
-    "acep7in": "Adafruit_CircuitPython_ACeP7In",
     "ra8875": "Adafruit_CircuitPython_RA8875",
     "pcd8544": "Adafruit_CircuitPython_PCD8544",
 }
@@ -62,15 +45,6 @@ BUSDISPLAY_IMPORT = """try:
     from displaysys.busdisplay import BusDisplay
 except ImportError:
     from busdisplay import BusDisplay
-"""
-
-EPAPER_IMPORT = """try:
-    from displaysys.epaperdisplay import EPaperDisplay as _EPaperDisplayBase
-except ImportError:
-    try:
-        from epaperdisplay import EPaperDisplay as _EPaperDisplayBase
-    except ImportError:
-        _EPaperDisplayBase = object
 """
 
 
@@ -123,48 +97,12 @@ def patch_busdisplay(content: str) -> str:
     return content
 
 
-EPAPER_IMPORT = """try:
-    import digitalio
-except ImportError:
-    pass
-try:
-    from epaperdisplay import EPaperDisplay
-except ImportError:
-    from epaperdisplay_chip import EPaperDisplay
-"""
-
-
-def patch_epaper(content: str) -> str:
-    content = re.sub(r"^import digitalio\s*$", "", content, flags=re.M)
-    content = re.sub(r"^import epaperdisplay\s*$", "", content, flags=re.M)
-    content = re.sub(r"^import displayio\s*$", "", content, flags=re.M)
-    content = re.sub(
-        r"^try:\s*\n\s*from epaperdisplay import EPaperDisplay.*?\nexcept ImportError:.*?\n(?:\s*from .*?\n)?",
-        "",
-        content,
-        flags=re.M | re.S,
-    )
-    content = content.replace("epaperdisplay.EPaperDisplay", "EPaperDisplay")
-    if "from epaperdisplay_chip import EPaperDisplay" not in content:
-        match = re.search(r'^""".*?"""\s*\n', content, flags=re.S | re.M)
-        if match:
-            pos = match.end()
-            content = content[:pos] + "\n" + EPAPER_IMPORT + "\n" + content[pos:]
-        else:
-            content = EPAPER_IMPORT + "\n" + content
-    return content
-
-
-def vendor_adafruit(name: str, repo: str, out_dir: Path, *, epaper: bool = False) -> None:
+def vendor_adafruit(name: str, repo: str, out_dir: Path) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         repo_dir = Path(tmp) / repo
         clone_repo(repo, repo_dir)
         src = find_module_py(repo_dir, name.replace("_", ""))
-        content = src.read_text(encoding="utf-8")
-        if epaper or "EPaperDisplay" in content:
-            content = patch_epaper(content)
-        else:
-            content = patch_busdisplay(content)
+        content = patch_busdisplay(src.read_text(encoding="utf-8"))
         dest = out_dir / f"{name}.py"
         dest.write_text(content, encoding="utf-8")
         print(f"vendored {dest.relative_to(ROOT)}")
@@ -195,30 +133,11 @@ def main() -> int:
 
     display_dir = ROOT / "drivers" / "display"
     touch_dir = ROOT / "drivers" / "touch"
-    epaper_names = {
-        "ssd1680",
-        "ssd1681",
-        "ssd1683",
-        "ssd1675",
-        "ssd1677",
-        "ssd1608",
-        "uc8151d",
-        "uc8179",
-        "uc8253",
-        "il0373",
-        "il0398",
-        "il91874",
-        "ek79686",
-        "jd79661",
-        "jd79667",
-        "spd1656",
-        "acep7in",
-    }
 
     if run_all or args.display:
         for name, repo in DISPLAY_DRIVERS.items():
             try:
-                vendor_adafruit(name, repo, display_dir, epaper=name in epaper_names)
+                vendor_adafruit(name, repo, display_dir)
             except Exception as exc:  # noqa: BLE001
                 print(f"skip {name}: {exc}", file=sys.stderr)
 

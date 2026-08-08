@@ -220,15 +220,13 @@ These follow the 565 API without a separate “present” stage in the same sens
 |-------|---------|-------|
 | **BusDisplay** | Panel GRAM via SPI/I80 | Optional byteswap; true 565 |
 | **FBDisplay** | CircuitPython framebuf | RAM mirror + `refresh()` |
-| **EPaperDisplay** | 1/2/4 bpp packed | `color_depth` matches panel |
 
 ## Consolidation direction
 
 Goals discussed for displaysys maintenance:
 
 1. **One API** — all `DisplayDriver` instances report `color_depth=16` and accept
-   565 colors and blit buffers unless the hardware is genuinely sub-16-bit
-   (e-paper).
+   565 colors and blit buffers.
 2. **Shared conversion helpers** in `displaysys/__init__.py` — `color_rgb`
    (exists), plus swappable **loop** vs **LUT** blit writers for benchmarking.
 3. **Keep backend-specific fast paths** where they matter:

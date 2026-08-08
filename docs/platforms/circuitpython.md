@@ -15,7 +15,6 @@ pydisplay works with CircuitPython using Adafruit bus drivers and `framebufferio
 | `board_configs/cp/busdisplay/spi/ili9341_eyespi_qtpy_esp32s3` | EyeSPI ILI9341 on QT Py ESP32-S3 |
 | `board_configs/cp/pixeldisplay/neopixel_8x4` | NeoPixel 8×4 grid |
 | `board_configs/cp/pixeldisplay/dotstar_12x6` | DotStar 12×6 grid |
-| `board_configs/cp/epaperdisplay/magtag` | MagTag E-Ink |
 
 CircuitPython configs live under [`board_configs/cp/`](https://github.com/PyDevices/micropython-hardware/tree/main/board_configs/cp) in micropython-hardware. MicroPython configs stay at the top level of `board_configs/` (not under an `mp/` folder).
 

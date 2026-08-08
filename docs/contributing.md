@@ -44,7 +44,6 @@ Hooks refresh install manifests when `src/` changes and the PyScript gallery whe
 - **Display/touch drivers** for unsupported controllers
 - **C bus drivers** (STM32, i.MX RT) compatible with BusDisplay
 - **Documentation** fixes and platform guides — see [docstring conventions](contributing/docstrings.md)
-- **EPaperDisplay** implementation
 - **CircuitPython** board configs and circup packaging
 - **PyScript** asyncio examples and psdisplay improvements
 
