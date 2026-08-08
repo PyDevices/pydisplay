@@ -62,6 +62,10 @@ MANIFEST_TOML = TOOLS / "example_test_manifest.toml"
 WRAPPER = TOOLS / "example_test_wrapper.py"
 SERVE = TOOLS / "serve.py"
 RESULT_RE = re.compile(r"^EXAMPLE_RESULT=(.+)$", re.MULTILINE)
+# Android logcat may carry either wrapper EXAMPLE_RESULT or lv_test_timer KIT_RESULT.
+ANDROID_RESULT_RE = re.compile(r"^(?:.*\s)?(?:EXAMPLE_RESULT|KIT_RESULT)=(.+)$", re.MULTILINE)
+ANDROID_PACKAGE_ID = os.environ.get("PACKAGE_ID", "org.pydevices.launcher")
+ANDROID_SH = REPO / "bin" / "android.sh"
 # Short wall clocks: enough for inject/poll quit; override via --duration-s / --timeout-s.
 DEFAULT_DURATION = 2
 DEFAULT_TIMEOUT = 15
@@ -242,6 +246,63 @@ def resolve_runtime_exe(runtime_id: str, meta: dict) -> str | None:
     return shutil.which(Path(raw).name)
 
 
+def _pick_adb_bin() -> str | None:
+    override = os.environ.get("ADB")
+    if override:
+        return override
+    if shutil.which("adb.exe"):
+        return "adb.exe"
+    if shutil.which("adb"):
+        return "adb"
+    return None
+
+
+def _adb_base_cmd(adb_bin: str) -> list[str]:
+    cmd = [adb_bin]
+    serial = os.environ.get("ANDROID_SERIAL")
+    if serial:
+        cmd.extend(["-s", serial])
+    return cmd
+
+
+def android_runtime_available() -> bool:
+    """True when android.sh, adb, a device, and the launcher APK are present."""
+    if not ANDROID_SH.is_file():
+        return False
+    adb_bin = _pick_adb_bin()
+    if adb_bin is None:
+        return False
+    try:
+        proc = subprocess.run(
+            [*_adb_base_cmd(adb_bin), "devices"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    devices = [
+        line.split()[0]
+        for line in (proc.stdout or "").replace("\r", "").splitlines()[1:]
+        if line.strip().endswith("\tdevice")
+        or (len(line.split()) >= 2 and line.split()[1] == "device")
+    ]
+    if not devices:
+        return False
+    try:
+        path_proc = subprocess.run(
+            [*_adb_base_cmd(adb_bin), "shell", "pm", "path", ANDROID_PACKAGE_ID],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return bool((path_proc.stdout or "").strip())
+
+
 def runtime_available(runtime_id: str, meta: dict) -> bool:
     kind = meta.get("kind", SUBPROCESS_RUNTIME_KIND)
     if kind == SUBPROCESS_RUNTIME_KIND:
@@ -251,6 +312,8 @@ def runtime_available(runtime_id: str, meta: dict) -> bool:
     if kind == "jupyter":
         jupyter = REPO / ".venv" / "bin" / "jupyter"
         return jupyter.exists()
+    if kind == "android":
+        return android_runtime_available()
     return False
 
 
@@ -902,6 +965,147 @@ def run_jupyter_case(
     }
 
 
+def parse_android_result(log_text: str) -> dict | None:
+    for match in ANDROID_RESULT_RE.finditer(log_text.replace("\r", "")):
+        try:
+            return json.loads(match.group(1))
+        except json.JSONDecodeError:
+            continue
+    return None
+
+
+def run_android_case(
+    example_id: str,
+    example_meta: dict,
+    duration: float,
+    timeout: float,
+) -> dict:
+    """Stage via bin/android.sh and collect KIT_RESULT / EXAMPLE_RESULT from logcat."""
+    script = example_meta.get("script", f"examples/{example_id}.py")
+    script_path = SRC / script
+    if not script_path.is_file():
+        return {
+            "example": example_id,
+            "runtime": "android",
+            "summary": "missing_script",
+            "returncode": -1,
+            "timed_out": False,
+            "duration_s": duration,
+            "timeout_s": timeout,
+            "result": None,
+            "stdout_tail": "",
+            "stderr_tail": f"not found: {script_path}",
+        }
+    if not android_runtime_available():
+        return {
+            "example": example_id,
+            "runtime": "android",
+            "summary": "missing",
+            "returncode": -1,
+            "timed_out": False,
+            "duration_s": duration,
+            "timeout_s": timeout,
+            "result": None,
+            "stdout_tail": "",
+            "stderr_tail": "android runtime unavailable (adb/device/APK)",
+        }
+
+    kind = example_meta.get("kind", "loop")
+    cmd = [str(ANDROID_SH), script]
+    if kind == "lvgl" or example_id == "lv_test_timer":
+        cmd.append("--kit")
+
+    stage = subprocess.run(
+        cmd,
+        cwd=str(SRC),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=60,
+        check=False,
+    )
+    if stage.returncode != 0:
+        return {
+            "example": example_id,
+            "runtime": "android",
+            "summary": f"exit_{stage.returncode}",
+            "returncode": stage.returncode,
+            "timed_out": False,
+            "duration_s": duration,
+            "timeout_s": timeout,
+            "result": None,
+            "stdout_tail": (stage.stdout or "")[-2000:],
+            "stderr_tail": (stage.stderr or "")[-1000:],
+        }
+
+    adb_bin = _pick_adb_bin()
+    assert adb_bin is not None
+    adb = _adb_base_cmd(adb_bin)
+    wants_kit = kind == "lvgl" or example_id == "lv_test_timer"
+    # Non-kit examples only need to stay up for duration_s; kit waits for KIT_RESULT.
+    deadline = time.time() + (timeout if wants_kit else max(duration + 2.0, 5.0))
+    log_chunks: list[str] = []
+    result = None
+    while time.time() < deadline:
+        dump = subprocess.run(
+            [*adb, "logcat", "-d", "-v", "brief", "python:V", "*:S"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=20,
+            check=False,
+        )
+        text = dump.stdout or ""
+        log_chunks.append(text)
+        result = parse_android_result(text)
+        if result is not None:
+            break
+        if (
+            not wants_kit
+            and "Traceback" not in text
+            and ("Application loaded" in text or "SDLDisplay: initialized" in text)
+            and time.time() >= deadline - 0.1
+        ):
+            # Give the example a short settled window, then accept.
+            break
+        time.sleep(0.5)
+
+    combined = "\n".join(log_chunks)
+    timed_out = result is None and wants_kit
+    if result is None and (
+        "Traceback" not in combined
+        and (
+            "Application loaded" in combined
+            or "Initializing SDLDisplay" in combined
+            or "SDLDisplay: initialized" in combined
+        )
+    ):
+        # Duration-quit path when the example has no kit marker.
+        result = {"status": "ok", "backend": "android"}
+        timed_out = False
+    subprocess.run(
+        [*adb, "shell", "am", "force-stop", ANDROID_PACKAGE_ID],
+        capture_output=True,
+        check=False,
+    )
+    returncode = 0 if result and result.get("status") == "ok" else 1
+    summary = summarize(result, returncode, timed_out)
+    return {
+        "example": example_id,
+        "runtime": "android",
+        "summary": summary,
+        "returncode": returncode,
+        "timed_out": timed_out,
+        "duration_s": duration,
+        "timeout_s": timeout,
+        "result": result,
+        "stdout_tail": combined[-2000:] if combined else (stage.stdout or "")[-2000:],
+        "stderr_tail": (stage.stderr or "")[-1000:],
+    }
+
+
 def run_case(
     example_id: str,
     example_meta: dict,
@@ -936,6 +1140,9 @@ def run_case(
 
     if kind == "jupyter":
         return run_jupyter_case(example_id, example_meta, duration, timeout)
+
+    if kind == "android":
+        return run_android_case(example_id, example_meta, duration, timeout)
 
     return {
         "example": example_id,

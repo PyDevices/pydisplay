@@ -24,8 +24,10 @@ PyDisplay publishes a set of pure-Python packages — `displaysys`, `eventsys`, 
   dependencies installed.
 - Desktop matrices use repo `.venv` (`cpython-venv`) plus interpreters on
   `PATH` / `bin/` (`micropython`, `circuitpython`, and when present
-  `micropython.exe` / `python.exe`). `./bin/jupyter.sh` and
-  `./bin/pyscript.sh` aid Jupyter and PyScript development.
+  `micropython.exe` / `python.exe`).   `./bin/jupyter.sh`, `./bin/pyscript.sh`, and `./bin/android.sh` aid
+  Jupyter, PyScript, and Android (adb stage onto `org.pydevices.launcher`;
+  cwd paths like CLI Python — not PyScript gallery). Opt-in matrix:
+  `tools/example_test_kit.py --only-runtime android …`.
 - The desktop display backend on CPython on Windows is `PGDisplay` (pygame-ce;
   `import pygame`). Prefer `python.exe` for PG work. Do **not** install pygame-ce
   into `.venv` / system `python3` on this laptop — those stay SDL-primary;

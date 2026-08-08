@@ -88,6 +88,7 @@ per example (`--jobs 0`, default), **`--fail-fast`**, and **both**
 |------|----------|
 | Sync (`PYDISPLAY_TIMER_ASYNC=0`) | **5** desktop SDL: `micropython`, `micropython.exe`, `circuitpython`, `cpython-venv`, `python.exe` |
 | Async (`PYDISPLAY_TIMER_ASYNC=1`) | **7** — the five above plus `pyscript`, `jupyter` |
+| Android (opt-in) | `android` — `bin/android.sh` + emulator/device + `org.pydevices.launcher` APK; **not** in the default 5/7 lists (`--only-runtime android`) |
 
 Default timing is already short (`duration_s=2`, `timeout_s=15` in the
 runtimes/manifest defaults). After each example’s parallel wave finishes, if

@@ -83,3 +83,14 @@ status = "active"
 command_template = ["./bin/jupyter.sh", "-m", "{example}", "--no-open"]
 cwd = "."
 setup_notes = "Requires .venv with jupyterlab, ipywidgets, ipyevents, pillow. Executes generated src/run-{example}.ipynb."
+
+[runtimes.android]
+platform = "android"
+display_backend = "SDLDisplay"
+available_on = ["wsl", "linux"]
+kind = "android"
+status = "active"
+command_template = ["./bin/android.sh", "examples/{example}.py"]
+cwd = "src"
+timeout_s = 60
+setup_notes = "Requires adb.exe (WSL) or adb, a connected emulator/device, and org.pydevices.launcher debug APK. Opt in with --only-runtime android (not in the default 5/7 desktop matrix)."
