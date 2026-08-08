@@ -42,10 +42,14 @@ Host auto-selection lives in displaysys:
 
 ```python
 from displaysys import AutoDisplay
+import eventsys
 
-auto = AutoDisplay(width=320, height=480, scale=2.0)
-display_drv = auto.display
-# auto.host_read, auto.timer_async → pass to eventsys.Runtime
+display_drv = AutoDisplay(width=320, height=480, scale=2.0)
+runtime = eventsys.Runtime(
+    displays=[display_drv],
+    host_read=display_drv.get_events,
+    timer_async=display_drv.requires_async_timer,
+)
 ```
 
 `AutoDisplay` picks `PSDisplay` (PyScript), `JNDisplay` (Jupyter), or

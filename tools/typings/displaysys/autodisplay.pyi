@@ -1,22 +1,9 @@
 from collections.abc import Callable
 from typing import Literal
 
-__all__ = ["AutoDisplay", "AutoDisplayResult", "host_kind"]
+__all__ = ["AutoDisplay", "host_kind"]
 
 HostKind = Literal["pyscript", "jupyter", "desktop"]
-
-class AutoDisplayResult:
-    display: object
-    host_read: Callable[..., object]
-    timer_async: bool
-    host: HostKind
-    def __init__(
-        self,
-        display: object,
-        host_read: Callable[..., object],
-        timer_async: bool,
-        host: HostKind,
-    ) -> None: ...
 
 def host_kind() -> HostKind: ...
 def AutoDisplay(
@@ -28,4 +15,4 @@ def AutoDisplay(
     canvas_id: str = "display_canvas",
     *,
     quiet: bool = False,
-) -> AutoDisplayResult: ...
+) -> object: ...
