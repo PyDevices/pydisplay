@@ -155,13 +155,16 @@ def _auto_backends():
 
     On CPython, skip auto ``sdl2`` when pygame is importable: that matches
     ``AutoDisplay`` (pygame → ``PGDisplay``), and usdl2 timers plus pygame's
-    separate SDL deadlock. Without pygame, CPython may auto-select ``sdl2``
-    for ``SDLDisplay`` / usdl2. MicroPython and CircuitPython never skip
-    ``sdl2`` here. Explicit ``use_backend`` / ``MULTIMER_BACKEND`` still list
-    ``sdl2`` in :data:`BACKENDS`.
+    separate SDL deadlock. Also skip auto ``sdl2`` on Android: CPython
+    ``SDL_AddTimer`` callbacks are not on the GLES thread (unlike MicroPython's
+    ``mp_sched_schedule`` trampoline), so timer-driven ``show()`` hits
+    ``EGL_BAD_ACCESS``. Without pygame on desktop CPython, auto may still
+    select ``sdl2`` for ``SDLDisplay`` / usdl2. MicroPython and CircuitPython
+    never skip ``sdl2`` here. Explicit ``use_backend`` / ``MULTIMER_BACKEND``
+    still list ``sdl2`` in :data:`BACKENDS`.
     """
     impl = getattr(sys.implementation, "name", "")
-    skip_sdl2 = impl == "cpython" and _pygame_available()
+    skip_sdl2 = (impl == "cpython" and _pygame_available()) or sys.platform == "android"
     out = []
     for name in AUTO_BACKENDS:
         if name == "sdl2" and skip_sdl2:
