@@ -2,9 +2,9 @@
 
 pygraphics>=0.0.30
 lvgl-cpython>=9.5.24
-multimer>=0.0.36
-eventsys>=0.0.36
-displaysys>=0.0.36
+multimer>=0.0.37
+eventsys>=0.0.37
+displaysys>=0.0.37
 palettes>=0.0.7
 pdwidgets>=0.0.13
 pydisplay-desktop>=0.0.11
