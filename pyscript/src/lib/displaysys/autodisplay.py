@@ -5,8 +5,8 @@
 """Host auto-selection for desktop-like displaysys backends.
 
 Selects ``PSDisplay`` / ``JNDisplay`` / ``PGDisplay``→``SDLDisplay`` (or
-Android ``SDLDisplay``) from the runtime host so board configs stay MCU-shaped
-wiring only.
+Android ``AndroidSDLDisplay``) from the runtime host so board configs stay
+MCU-shaped wiring only.
 
 Returns the display driver directly. Desktop drivers expose ``get_events`` for
 ``Runtime(host_read=...)`` and ``requires_async_timer`` for the timer default.
@@ -83,13 +83,14 @@ def AutoDisplay(
     if host == "android":
         import usdl2
 
-        from displaysys.sdldisplay import SDLDisplay
+        from displaysys.androidsdl import AndroidSDLDisplay
 
         # Do not use SDL_WINDOW_FULLSCREEN_DESKTOP: it toggles immersive mode after
         # the Activity SurfaceView/GL buffers are created, and Android then rejects
         # presents (BLASTBufferQueue size mismatch → black screen after splash).
         # buildozer.spec keeps fullscreen=0; SHOWN + HIGHDPI matches that surface.
-        return SDLDisplay(
+        # AndroidSDLDisplay locks Activity orientation from logical aspect.
+        return AndroidSDLDisplay(
             width=width,
             height=height,
             rotation=rotation,
