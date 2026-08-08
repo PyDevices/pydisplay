@@ -113,8 +113,20 @@ class TestBackendSelection(unittest.TestCase):
 
         from multimer import _select
 
-        with mock.patch.object(_select, "_pygame_available", return_value=False):
+        with mock.patch.object(
+            _select, "_pygame_available", return_value=False
+        ), mock.patch.object(_select.sys, "platform", "linux"):
             self.assertIn("sdl2", _select._auto_backends())
+
+    def test_auto_backends_skips_sdl2_on_android(self):
+        from unittest import mock
+
+        from multimer import _select
+
+        with mock.patch.object(
+            _select, "_pygame_available", return_value=False
+        ), mock.patch.object(_select.sys, "platform", "android"):
+            self.assertNotIn("sdl2", _select._auto_backends())
 
     def test_backends_available_is_subset(self):
         available = multimer.backends_available()
