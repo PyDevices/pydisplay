@@ -151,14 +151,14 @@ class TestAutoDisplay(unittest.TestCase):
             AutoDisplay(width=10, height=10, canvas_id="c", quiet=True)
         env_set.assert_not_called()
 
-    def test_android_forces_sdl_fullscreen(self):
+    def test_android_uses_shown_highdpi_flags(self):
         display = mock.Mock(name="SDLDisplay")
         display.get_events = mock.Mock(name="sdl_get_events")
         display.requires_async_timer = False
         sdl_mod = types.ModuleType("displaysys.sdldisplay")
         sdl_mod.SDLDisplay = mock.Mock(return_value=display)
         usdl2_mod = types.ModuleType("usdl2")
-        usdl2_mod.SDL_WINDOW_FULLSCREEN_DESKTOP = 0x1001
+        usdl2_mod.SDL_WINDOW_SHOWN = 0x4
         usdl2_mod.SDL_WINDOW_ALLOW_HIGHDPI = 0x2000
         pg_mod = types.ModuleType("displaysys.pgdisplay")
         pg_mod.PGDisplay = mock.Mock(name="PGDisplay_should_not_be_used")
@@ -184,7 +184,7 @@ class TestAutoDisplay(unittest.TestCase):
         self.assertEqual(kwargs["height"], 1280)
         self.assertEqual(
             kwargs["window_flags"],
-            usdl2_mod.SDL_WINDOW_FULLSCREEN_DESKTOP | usdl2_mod.SDL_WINDOW_ALLOW_HIGHDPI,
+            usdl2_mod.SDL_WINDOW_SHOWN | usdl2_mod.SDL_WINDOW_ALLOW_HIGHDPI,
         )
 
 
