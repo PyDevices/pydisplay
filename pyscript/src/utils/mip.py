@@ -129,6 +129,35 @@ def _rewrite_url(url, branch=None):
     return url
 
 
+def _ssl_context():
+    """TLS context with a real CA store (Android p4a often has empty default paths)."""
+    try:
+        import ssl
+    except ImportError:
+        return None
+
+    paths = ssl.get_default_verify_paths()
+    if (paths.cafile and os.path.isfile(paths.cafile)) or (
+        paths.capath and os.path.isdir(paths.capath)
+    ):
+        return ssl.create_default_context()
+
+    # Android system trust store: one PEM per hash-named file.
+    android_capath = "/system/etc/security/cacerts"
+    if os.path.isdir(android_capath):
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        ctx.check_hostname = True
+        ctx.verify_mode = ssl.CERT_REQUIRED
+        for name in os.listdir(android_capath):
+            try:
+                ctx.load_verify_locations(cafile=os.path.join(android_capath, name))
+            except (ssl.SSLError, OSError):
+                pass
+        return ctx
+
+    return ssl.create_default_context()
+
+
 def _http_get(url):
     """Sync GET → bytes (Pyodide open_url, urllib, urequests, or requests)."""
     try:
@@ -146,7 +175,8 @@ def _http_get(url):
         from urllib.request import urlopen
 
         try:
-            with urlopen(url) as resp:
+            ctx = _ssl_context()
+            with urlopen(url, context=ctx) if ctx is not None else urlopen(url) as resp:
                 return resp.read()
         except HTTPError as e:
             raise RuntimeError("HTTP " + str(getattr(e, "code", e)) + " fetching " + url) from e
