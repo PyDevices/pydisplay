@@ -67,7 +67,7 @@ See [pydisplay_android README](https://github.com/PyDevices/pydisplay_android/bl
 - `720×1280` → portrait Activity  
 - `rotation = 90` on a portrait panel swaps logical size → landscape Activity  
 
-Tilting the phone does **not** change orientation (same contract as an SPI LCD on a board). The user turns the device to match the app. Scale stays at the board_config value (SDL letterboxes onto the surface); desktop chrome fitting is skipped. Desktop `SDLDisplay` still uses software `RenderCopyEx` rotation.
+Tilting the phone does **not** change orientation (same contract as an SPI LCD on a board). The user turns the device to match the app. After an aspect change (e.g. `tft_config.WIDE`), `AndroidSDLDisplay` rebinds the logical texture and letterboxes with `RenderSetLogicalSize` (CreateWindow scale is forced to 1 so a stale tall window cannot clip landscape content). Desktop chrome fitting / `PYDISPLAY_SCALE` do not drive the Android window size. Desktop `SDLDisplay` still uses software `RenderCopyEx` rotation.
 
 ## Timers
 
