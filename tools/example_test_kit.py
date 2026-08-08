@@ -65,11 +65,22 @@ RESULT_RE = re.compile(r"^EXAMPLE_RESULT=(.+)$", re.MULTILINE)
 # Android logcat may carry either wrapper EXAMPLE_RESULT or lv_test_timer KIT_RESULT.
 ANDROID_RESULT_RE = re.compile(r"^(?:.*\s)?(?:EXAMPLE_RESULT|KIT_RESULT)=(.+)$", re.MULTILINE)
 ANDROID_PACKAGE_ID = os.environ.get("PACKAGE_ID", "org.pydevices.launcher")
-ANDROID_SH = REPO / "bin" / "android.sh"
+# Lives in sibling pydisplay_android (pydisplay/bin/android.sh is a thin shim).
+ANDROID_SH = Path(
+    os.environ.get(
+        "ANDROID_SH",
+        str(REPO.parent / "pydisplay_android" / "scripts" / "android.sh"),
+    )
+)
 # Short wall clocks: enough for inject/poll quit; override via --duration-s / --timeout-s.
 DEFAULT_DURATION = 2
 DEFAULT_TIMEOUT = 15
 DEFAULT_ONESHOT_TIMEOUT = 10
+# Android emulator paint is slow (splash + first EGL presents). Oneshot hold runs
+# in-app after android.sh returns; observe window must cover that hold.
+ANDROID_ONESHOT_HOLD_S = 20
+ANDROID_OBSERVE_S = 20
+ANDROID_STAGE_TIMEOUT_S = 120
 PYSCRIPT_PORT = 8000
 SUBPROCESS_RUNTIME_KIND = "subprocess"
 RUNTIME_TIMING_KEYS = ("duration_s", "timeout_s", "oneshot_timeout_s")
@@ -980,7 +991,7 @@ def run_android_case(
     duration: float,
     timeout: float,
 ) -> dict:
-    """Stage via bin/android.sh and collect KIT_RESULT / EXAMPLE_RESULT from logcat."""
+    """Stage via pydisplay_android/scripts/android.sh; collect results from logcat."""
     script = example_meta.get("script", f"examples/{example_id}.py")
     script_path = SRC / script
     if not script_path.is_file():
@@ -1017,13 +1028,16 @@ def run_android_case(
     subprocess.run([*adb, "logcat", "-c"], capture_output=True, check=False)
 
     kind = example_meta.get("kind", "loop")
-    cmd = [str(ANDROID_SH), script]
+    cmd = [str(ANDROID_SH), "--no-attach", script]
     if kind == "lvgl" or example_id == "lv_test_timer":
         cmd.append("--kit")
     # Oneshot scripts return immediately; without a hold the Activity tears down
     # (or Android splash covers the single present) and the screen looks blank.
+    # Hold runs on-device after android.sh returns — observe window must cover it.
+    hold_s = 0
     if kind == "oneshot" or example_meta.get("quit") == "native_exit":
-        cmd.extend(["--hold-s", str(max(int(duration), 2))])
+        hold_s = max(int(duration), ANDROID_ONESHOT_HOLD_S)
+        cmd.extend(["--hold-s", str(hold_s)])
     modules, manifests, deps = _pyscript_header_lists(script_path)
     if modules:
         cmd.extend(["--modules", ",".join(modules)])
@@ -1039,7 +1053,7 @@ def run_android_case(
         text=True,
         encoding="utf-8",
         errors="replace",
-        timeout=60,
+        timeout=ANDROID_STAGE_TIMEOUT_S,
         check=False,
     )
     if stage.returncode != 0:
@@ -1056,10 +1070,18 @@ def run_android_case(
             "stderr_tail": (stage.stderr or "")[-1000:],
         }
     wants_kit = kind == "lvgl" or example_id == "lv_test_timer"
-    # Non-kit examples only need to stay up for duration_s; kit waits for KIT_RESULT.
-    deadline = time.time() + (timeout if wants_kit else max(duration + 2.0, 5.0))
+    # Leave the Activity up long enough for splash + first presents. Kit examples
+    # wait for KIT_RESULT up to timeout_s; others use a paint observe window.
+    observe_s = max(
+        float(ANDROID_OBSERVE_S),
+        duration + 2.0,
+        float(hold_s) + 4.0 if hold_s else 0.0,
+    )
+    deadline = time.time() + (float(timeout) if wants_kit else observe_s)
+    paint_until = time.time() + observe_s
     log_chunks: list[str] = []
     result = None
+    saw_display = False
     while time.time() < deadline:
         dump = subprocess.run(
             [*adb, "logcat", "-d", "-v", "brief", "python:V", "*:S"],
@@ -1072,30 +1094,27 @@ def run_android_case(
         )
         text = dump.stdout or ""
         log_chunks.append(text)
-        result = parse_android_result(text)
-        if result is not None:
-            break
-        if "Traceback" in text:
-            break
         if (
-            not wants_kit
-            and ("Application loaded" in text or "SDLDisplay: initialized" in text)
-            and time.time() >= deadline - 0.1
+            "Application loaded" in text
+            or "SDLDisplay: initialized" in text
+            or "AndroidSDLDisplay: initialized" in text
+            or "Initializing AndroidSDLDisplay" in text
         ):
-            # Give the example a short settled window, then accept.
+            saw_display = True
+        parsed = parse_android_result(text)
+        if parsed is not None:
+            result = parsed
+        if "Traceback" in text and result is None:
+            break
+        if result is not None and time.time() >= paint_until:
+            break
+        if not wants_kit and saw_display and time.time() >= paint_until:
             break
         time.sleep(0.5)
 
     combined = "\n".join(log_chunks)
     timed_out = result is None and wants_kit
-    if result is None and (
-        "Traceback" not in combined
-        and (
-            "Application loaded" in combined
-            or "Initializing SDLDisplay" in combined
-            or "SDLDisplay: initialized" in combined
-        )
-    ):
+    if result is None and "Traceback" not in combined and saw_display:
         # Duration-quit path when the example has no kit marker.
         result = {"status": "ok", "backend": "android"}
         timed_out = False

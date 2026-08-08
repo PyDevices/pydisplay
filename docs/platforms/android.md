@@ -42,17 +42,62 @@ cd pydisplay_android
 
 ## Stage an example over adb (`android.sh`)
 
-From a pydisplay checkout, `bin/android.sh` stages a **cwd path** onto the installed launcher and relaunches — same shape as CLI `python` / `micropython`, **not** [pyscript.sh](../../bin/pyscript.sh) gallery lookup.
+Host tool: [`pydisplay_android/scripts/android.sh`](https://github.com/PyDevices/pydisplay_android/blob/main/scripts/android.sh) (on PATH as `~/bin/android.sh` in Brad’s layout; `pydisplay/bin/android.sh` is a thin shim). Stages a **cwd path** onto the installed launcher and relaunches — same shape as CLI `python` / `micropython`, **not** [pyscript.sh](../../bin/pyscript.sh) gallery lookup.
 
 ```bash
 cd pydisplay/src
-../bin/android.sh examples/lv_test_timer.py
-../bin/android.sh examples/paint.py
-../bin/android.sh --clear
+android.sh examples/lv_test_timer.py
+android.sh examples/paint.py
+android.sh --clear
 ```
 
-Optional: `--kit` (writes `run_argv` for kit mode), `--deps` / `--modules` / `--manifests`. Matrix: `tools/example_test_kit.py --only-runtime android …`.
+When stdin is a TTY, `android.sh` **stays attached** after launch and wires this terminal to the app’s `stdin` / `stdout` / `stderr` (prints, tracebacks, and `input()`). Use `--no-attach` for fire-and-forget (CI / the example matrix).
 
+```bash
+android.sh -h                         # micropython-shaped help (-c / -m / file / -i / -X …)
+android.sh --version
+android.sh -c 'print(1+1)' -i
+android.sh -i                         # omit main.py → clean >>> (like firmware with no main)
+android.sh examples/paint.py -i       # oneshot: stdio, then >>> when it exits
+android.sh examples/lv_test_timer.py -i   # looping: Ctrl+C → KeyboardInterrupt → >>>
+android.sh --clear                    # restore packaged launcher main.py
+```
+
+Startup matches MicroPython: packaged **`boot.py`** does env / path / stdio setup, then runs **`main.py`** if present, otherwise parks for the attach REPL. Upstream p4a/sdl2 hardcodes `main.py` as the Activity entry; `build_android.sh` patches `getEntryPoint` so **`boot.py` is preferred**. `android.sh` stages examples as `main.py` (`import <stem>`) plus `run/<stem>.py`; it hot-syncs `boot.py` + stdio helpers and does **not** overwrite a staged user `main.py`.
+
+### Attach / `-i` (like `python -i` / `micropython -i`)
+
+| Situation | What you see |
+|-----------|----------------|
+| Script running (oneshot or `run_forever` loop) | Stdio only — prints and `input()` in this terminal; **no** `>>>` yet |
+| Oneshot / falls off the bottom | Banner + `>>>` automatically |
+| Looping entry + **Ctrl+C** | `KeyboardInterrupt`, then banner + `>>>` (same as desktop `-i` with the threading timer) |
+| Bare `android.sh -i` | Clean `>>>` (`main.py` removed for this session) |
+
+With `multimer` **threading** (`timer_async=False`, Android’s usual path) there is no MicroPython soft-IRQ into the REPL mid-loop — matching `micropython.exe -i` on Windows desktop. MicroPython’s **signals** / `machine.Timer` path can return from `run_forever` immediately so `>>>` coexists with ticks; Android does not try to fake that.
+
+**Host vs in-app keys:** Ctrl+D on a blank line is a **soft reset** (fresh namespace), like MicroPython. To disconnect the host attach while leaving the app running, use **Ctrl+\\** (not Ctrl+D).
+
+TTY / editing aim for MicroPython REPL parity:
+
+| Key | Action |
+|-----|--------|
+| Ctrl+A | blank line → raw REPL; else start-of-line |
+| Ctrl+B | blank line → normal REPL; else cursor left |
+| Ctrl+C | interrupt running code / cancel line |
+| Ctrl+D | blank line → soft reset; else delete; paste/raw → finish |
+| Ctrl+E | blank line → paste mode; else end-of-line |
+| Arrows | history (up/down) and cursor (left/right) |
+| Tab | completion (`im`→`import `, `sys.`→members) / 4-space indent |
+| Ctrl+P / Ctrl+N | history prev/next |
+| Ctrl+K / Ctrl+U | kill to end / kill to start |
+| Ctrl+\ | disconnect host attach (app keeps running) |
+
+`help()`, `help("modules")` (top-level names, 4×18 columns), and `help(obj)` follow MicroPython’s help style. Auto-indent after `:` on compound statements.
+
+Each launch hot-syncs `boot.py`, `stdio_sidecar.py`, and `mp_*.py` from a sibling `pydisplay_android` checkout (when present) and drops stale bytecode that would otherwise shadow updates. Optional: `--kit`, `--deps` / `--modules` / `--manifests`. Matrix: `tools/example_test_kit.py --only-runtime android …`.
+
+The boot-entrypoint Java patch requires an APK rebuild (`./build_android.sh`); hot-sync alone cannot retarget an older package that still launches `main.py` first.
 ## LVGL on Android
 
 Prebuilt **`lvgl-cpython`** wheels for Android are on [TestPyPI](https://test.pypi.org/project/lvgl-cpython/) and are included in the launcher APK (`lvglcpython` in `buildozer.spec`). The home UI is LVGL; buttons can `mip.install` examples such as `lv_test_timer` from GitHub with `index=` the [PyDevices MIP index](https://PyDevices.github.io/micropython-lib/mip/PyDevices).

@@ -24,7 +24,8 @@ PyDisplay publishes a set of pure-Python packages — `displaysys`, `eventsys`, 
   dependencies installed.
 - Desktop matrices use repo `.venv` (`cpython-venv`) plus interpreters on
   `PATH` / `bin/` (`micropython`, `circuitpython`, and when present
-  `micropython.exe` / `python.exe`).   `./bin/jupyter.sh`, `./bin/pyscript.sh`, and `./bin/android.sh` aid
+  `micropython.exe` / `python.exe`).   `./bin/jupyter.sh`, `./bin/pyscript.sh`, and
+  `android.sh` (`pydisplay_android/scripts/`, usually via `~/bin`) aid
   Jupyter, PyScript, and Android (adb stage onto `org.pydevices.launcher`;
   cwd paths like CLI Python — not PyScript gallery). Opt-in matrix:
   `tools/example_test_kit.py --only-runtime android …`.

@@ -6,7 +6,7 @@
 |--------|------|
 | [`pyscript.sh`](pyscript.sh) | Local PyScript gallery / demo server (`./bin/pyscript.sh …`) |
 | [`jupyter.sh`](jupyter.sh) | JupyterLab / Cursor notebooks (`./bin/jupyter.sh …`) |
-| [`android.sh`](android.sh) | Stage a **cwd** `.py` onto `org.pydevices.launcher` via adb (`./bin/android.sh examples/foo.py` from `src/`) — not gallery lookup |
+| [`android.sh`](android.sh) | Thin shim → [`pydisplay_android/scripts/android.sh`](../../pydisplay_android/scripts/android.sh) (prefer `~/bin/android.sh` on PATH) |
 
 Supporting Python still lives under `tools/` (e.g. `tools/serve.py`, `tools/pyscript_autotest.py`).
 

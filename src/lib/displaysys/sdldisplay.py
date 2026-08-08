@@ -584,8 +584,14 @@ class SDLDisplay(DisplayDriver):
         if not self._sdl_active():
             return (x, y, w, h)
         pitch = int(w * self.color_depth // 8)
-        if len(buffer) != pitch * h:
+        need = pitch * h
+        buflen = len(buffer)
+        if buflen < need:
             raise ValueError("Buffer size does not match dimensions")
+        # Prefix is enough (PGDisplay / MCU blitters index w*h pixels). Examples
+        # often pass a larger scratch framebuffer with a smaller blit height.
+        if buflen > need:
+            buffer = memoryview(buffer)[:need]
         blitRect = usdl2.SDL_Rect(x, y, w, h)
         retcheck(usdl2.SDL_UpdateTexture(self._buffer, blitRect, buffer, pitch))
         self._render_dirty = True

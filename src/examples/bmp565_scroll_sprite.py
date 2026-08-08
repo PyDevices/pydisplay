@@ -16,8 +16,11 @@ print(f"\n{image.width=}, {image.height=}, {image.bpp=}")
 
 
 def draw_bg(dest_x, source_y, count=1, source=image):
+    # 1D row slice is ``count * source.width`` pixels; blit as a vertical
+    # strip (width=count, height=source.width). Do not use display_drv.height —
+    # tall panels (e.g. Android after rotation) are larger than the bitmap.
     display_drv.blit_rect(
-        source[source_y : source_y + count], dest_x, 0, count, display_drv.height
+        source[source_y : source_y + count], dest_x, 0, count, source.width
     )
 
 
