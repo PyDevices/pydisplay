@@ -37,7 +37,7 @@ Select the **`.venv`** kernel (**Kernel → Change Kernel**), then run cells top
 
 No LVGL build is required for the pydisplay walkthrough in the notebook.
 
-`src/lib/board_config.py` detects Jupyter (`get_ipython()`) and selects **`JNDisplay`** with `timer_async=True`. The notebook must run with working directory under **`src/`**. Prefer `PYTHONPATH`/`MICROPYPATH` set to `.:lib:utils` for the kernel process (`./bin/jupyter.sh` exports it automatically); for fallback when environment variables are unavailable or not set as recommended, see [Utils path setup](../utils.md#path-setup). Either way, resolve example modules with `from examples import <name>` (or `import examples.<a>.<b>` for nested files) — never a bare `import <name>`.
+Desktop `board_config` uses `displaysys.AutoDisplay`, which detects Jupyter (`get_ipython()`) and selects **`JNDisplay`** with `timer_async=True`. The notebook must run with working directory under **`src/`**. Prefer `PYTHONPATH`/`MICROPYPATH` set to `.:lib:utils` for the kernel process (`./bin/jupyter.sh` exports it automatically); for fallback when environment variables are unavailable or not set as recommended, see [Utils path setup](../utils.md#path-setup). Either way, resolve example modules with `from examples import <name>` (or `import examples.<a>.<b>` for nested files) — never a bare `import <name>`.
 
 ## Touch input
 

@@ -238,7 +238,7 @@ def _sleep_ms_signal(ms):
 
 
 def _sleep_ms_pump(ms):
-    """Sleep for pump-based backends (win32 APC, SDL2, threading fallback).
+    """Sleep for pump-based backends (SDL2, threading, polling).
 
     These deliver timer callbacks only while the main thread pumps, so drain
     the cooperative scheduler and the backend event queue around the wait.

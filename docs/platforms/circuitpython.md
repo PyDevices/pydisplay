@@ -99,7 +99,7 @@ git clone https://github.com/adafruit/Adafruit_CircuitPython_Ticks.git
 mkdir -p cp-user-config
 # Create cp-user-config/user_post_mpconfigport.mk so FROZEN_MPY_DIRS points at
 # those clones and MICROPY_PY_ASYNCIO / select / traceback are enabled.
-# See [multimer building docs](https://github.com/PyDevices/multimer/blob/main/docs/building.md).
+# See [multimer](../concepts/multimer.md).
 
 # Standalone patch + make, or cmods ./build_cp.sh which also applies usdl2/pygraphics/LVGL
 cd usdl2 && ./apply_cp_unix_usdl_patches.sh --apply && cd ..

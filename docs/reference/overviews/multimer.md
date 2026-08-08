@@ -11,8 +11,12 @@ multimer provides cross-platform periodic timers compatible with `machine.Timer`
 
 - `multimer.Timer` — platform-selected sync backend (`Timer.PERIODIC` / `Timer.ONE_SHOT`)
 - `multimer.AsyncTimer` — asyncio/uasyncio software timer
+- `multimer.backend_name` / `backends` / `backends_available` / `use_backend` — inspect or override the backend
+- `multimer.uses_signals` — True when the sync backend needs no sleep pump
+- `multimer.loop_running` — True when an asyncio loop is running a coroutine
 - `multimer.schedule` — `micropython.schedule`-compatible deferral (immediate on main / librt; queued off-main)
 - `multimer.asyncio` — lazy-loaded event-loop module
+- `multimer.install_asyncio_compat` — opt-in host-loop-safe asyncio facade
 - `multimer.ticks_ms` / `multimer.sleep_ms` / `multimer.monotonic` — portable time primitives
 - `multimer.set_deadline_hook` / `multimer.run_deadline_hook` — **dev/troubleshooting only**; cooperative wall-clock deadline for single-threaded harnesses (see [multimer concept — deadline hooks](../../concepts/multimer.md#development--troubleshooting--deadline-hooks))
 - `eventsys.Runtime.run_forever` / `run` / `run_async` — application keep-alive and async entry

@@ -1,4 +1,4 @@
-from ._asyncio_loader import load_asyncio as load_asyncio
+from ._asyncio_loader import load_asyncio as load_asyncio, loop_running as loop_running
 from ._core import _TimerCore
 
 class AsyncTimer(_TimerCore):

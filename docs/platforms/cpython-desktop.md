@@ -39,6 +39,12 @@ export PYTHONPATH=.:lib:utils
 python3 examples/pydisplay_demo.py
 ```
 
+Default **`multimer.Timer`** on CPython follows the shared auto chain but
+**skips `sdl2` when pygame is importable** (so `PGDisplay` does not share a
+process with usdl2 timers). Without pygame, macOS may select **`sdl2`** when
+`usdl2` is present, else **`threading`**, then **`polling`**. See
+[multimer](../concepts/multimer.md).
+
 ## Windows
 
 SDL2 native libraries can be awkward on Windows. Recommended path:
@@ -47,13 +53,12 @@ SDL2 native libraries can be awkward on Windows. Recommended path:
 2. Use **PGDisplay** (PyGame) instead of SDL2 — see below.
 3. Or develop in **WSL** with the Linux instructions above.
 
-On Windows, default **`multimer.Timer`** prefers the **`_threading`** backend on
-CPython (a known CPython 3.14 fatal crash in the `_win32` APC trampoline —
-`_PyThreadState_Attach: non-NULL old thread state` — means `_win32` is a
-CPython fallback only, not the default); MicroPython/CircuitPython on Windows
-use **`_win32`** (waitable timer + APC) instead. When a fallback lands on the
-**`multimer._sdl2`** backend, it imports timer APIs from **`usdl2`** first when
-available, then ctypes against system libSDL2. See [multimer](../concepts/multimer.md).
+Default **`multimer.Timer`** on CPython Windows: with pygame installed,
+**`threading`** so `PGDisplay` is safe; without pygame, **`sdl2`** when
+`usdl2` is available (matches `SDLDisplay`). MicroPython Windows
+auto-selects **`sdl2`** when `usdl2` is present, and **`polling`** when it
+is not (no `threading` on that port). Full GUI/console matrix:
+[multimer — desktop auto-selection](../concepts/multimer.md#desktop-auto-selection-matrix).
 
 ## PGDisplay fallback
 
@@ -83,7 +88,7 @@ mip.install("github:PyDevices/micropython-hardware/board_configs/pgdisplay")
 | `board_configs/sdldisplay/` | `SDLDisplay` (SDL2) |
 | `board_configs/pgdisplay/` | `PGDisplay` (PyGame) |
 
-The default `src/lib/board_config.py` selects `PGDisplay` on CPython when PyGame is installed, otherwise `SDLDisplay`.
+The default desktop bundle (`board_configs/desktop/`) uses `displaysys.AutoDisplay`, which selects `PGDisplay` on CPython when PyGame is installed, otherwise `SDLDisplay`.
 
 ## MicroPython on Unix
 

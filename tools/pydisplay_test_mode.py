@@ -26,20 +26,21 @@ def check_deadline():
     global _start_s, _deadline_fired
     if not ENABLED:
         return False
-    if _deadline_fired:
-        return True
-    # Keep-alive only: do not start or fire the wall-clock deadline while the
-    # app is still importing (mip/fetch) or before ``run`` / ``run_forever``'s
-    # loop is on the stack. Service ticks can interrupt a long install; stopping
-    # the shared timer then wedges the fetch or ``asyncio.run``.
+    # Keep-alive only: do not arm or fire until ``run`` / ``run_forever`` is on
+    # the stack. ``runtime is None`` must also wait — an early timer tick during
+    # import used to start the clock, fire with no runtime, set
+    # ``_deadline_fired``, then never quit once the blocking loop started.
     try:
         import board_config
 
         rt = getattr(board_config, "runtime", None)
-        if rt is not None and not getattr(rt, "_blocking_run_forever", False):
-            return False
     except Exception:
-        pass
+        return False
+    if rt is None or not getattr(rt, "_blocking_run_forever", False):
+        return False
+    if getattr(rt, "_quit_requested", False):
+        _deadline_fired = True
+        return True
     import time
 
     now = time.time()
@@ -48,19 +49,16 @@ def check_deadline():
         return False
     if now - _start_s < float(DURATION_S):
         return False
-    _deadline_fired = True
     try:
-        import board_config
-
-        rt = getattr(board_config, "runtime", None)
-        if rt is not None:
-            request = getattr(rt, "request_quit", None)
-            if callable(request):
-                request()
-            elif not getattr(rt, "quit_requested", False):
-                handle = getattr(rt, "_handle_quit", None)
-                if callable(handle):
-                    handle()
+        request = getattr(rt, "request_quit", None)
+        if callable(request):
+            request()
+            _deadline_fired = True
+        elif not getattr(rt, "quit_requested", False):
+            handle = getattr(rt, "_handle_quit", None)
+            if callable(handle):
+                handle()
+                _deadline_fired = True
     except Exception:
         pass
     return True

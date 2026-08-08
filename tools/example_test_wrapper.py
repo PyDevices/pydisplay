@@ -254,7 +254,7 @@ def _touch_delay_s(duration_s):
 
 
 def _has_background_inject():
-    """True when a daemon thread can sleep then inject quit (not MP win32)."""
+    """True when a daemon thread can sleep then inject quit (not MicroPython)."""
     try:
         import threading
 
@@ -529,6 +529,7 @@ def _parse_args(argv):
         "timeout": 30.0,
         "timer_async": None,
         "multimer_backend": None,
+        "env": [],
     }
     i = 2
     while i < len(argv):
@@ -556,6 +557,9 @@ def _parse_args(argv):
             i += 2
         elif arg == "--multimer-backend" and i + 1 < len(argv):
             out["multimer_backend"] = argv[i + 1]
+            i += 2
+        elif arg == "--env" and i + 1 < len(argv):
+            out["env"].append(argv[i + 1])
             i += 2
         else:
             raise ValueError("unknown argument: {}".format(arg))
@@ -660,6 +664,23 @@ def main(argv=None):
         _print_result(payload)
         return 1
 
+    # Windows PE under WSL does not see Linux-exported env vars via getenv.
+    # Apply --env / --timer-async via env_set before board_config / SDL init
+    # (deadline hook and the example both import board_config).
+    try:
+        from displaysys import env_set
+    except Exception:
+        env_set = None
+    if env_set is not None:
+        for item in args.get("env") or []:
+            if "=" not in item:
+                continue
+            key, value = item.split("=", 1)
+            if key:
+                env_set(key, value)
+        if args.get("timer_async") is not None:
+            env_set("PYDISPLAY_TIMER_ASYNC", args["timer_async"])
+
     # Install the deadline hook AFTER bootstrap: it imports multimer, which is
     # only on sys.path once _setup_bootstrap has run. The hook drives quit for
     # the canonical no-loop idiom (runtime auto-service / run_forever).
@@ -669,16 +690,6 @@ def main(argv=None):
         pydisplay_test_mode.install_deadline_hook()
     except Exception:
         pass
-
-    # Windows PE under WSL does not see Linux-exported env vars via getenv.
-    # Apply --timer-async via env_set before examples import board_config.
-    if args.get("timer_async") is not None:
-        try:
-            from displaysys import env_set
-
-            env_set("PYDISPLAY_TIMER_ASYNC", args["timer_async"])
-        except Exception:
-            pass
 
     # multimer.use_backend works on hosts that cannot read exported env vars
     # (Windows PE under WSL), so prefer it over MULTIMER_BACKEND here. A backend

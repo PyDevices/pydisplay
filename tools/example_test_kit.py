@@ -12,6 +12,7 @@ From repo root:
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import os
 from pathlib import Path
@@ -27,6 +28,32 @@ import urllib.request
 from sibling_repos import apply_sibling_env
 import tomllib
 
+
+def _ensure_user_micropy_lib(env: dict) -> None:
+    """Preserve MicroPython defaults when ``MICROPYPATH`` is overridden.
+
+    A shell ``MICROPYPATH=.:lib:utils`` *replaces* the interpreter default path,
+    which drops both ``.frozen`` (lvgl / ``display_driver``) and
+    ``~/.micropython/lib`` (``board_config`` from pydisplay-desktop / mip).
+    Append those entries when missing so subprocess runtimes still resolve them
+    after the working-tree ``lib/`` prefix.
+    """
+    cur = env.get("MICROPYPATH")
+    if not cur:
+        return
+    parts = cur.split(os.pathsep)
+    extras: list[str] = []
+    if ".frozen" not in parts:
+        extras.append(".frozen")
+    user_lib = Path.home() / ".micropython" / "lib"
+    if user_lib.is_dir():
+        lib = str(user_lib)
+        if lib not in parts:
+            extras.append(lib)
+    if extras:
+        env["MICROPYPATH"] = cur + os.pathsep + os.pathsep.join(extras)
+
+
 REPO = Path(__file__).resolve().parent.parent
 TOOLS = REPO / "tools"
 SRC = REPO / "src"
@@ -35,12 +62,23 @@ MANIFEST_TOML = TOOLS / "example_test_manifest.toml"
 WRAPPER = TOOLS / "example_test_wrapper.py"
 SERVE = TOOLS / "serve.py"
 RESULT_RE = re.compile(r"^EXAMPLE_RESULT=(.+)$", re.MULTILINE)
-DEFAULT_DURATION = 5
-DEFAULT_TIMEOUT = 30
-DEFAULT_ONESHOT_TIMEOUT = 15
+# Short wall clocks: enough for inject/poll quit; override via --duration-s / --timeout-s.
+DEFAULT_DURATION = 2
+DEFAULT_TIMEOUT = 15
+DEFAULT_ONESHOT_TIMEOUT = 10
 PYSCRIPT_PORT = 8000
 SUBPROCESS_RUNTIME_KIND = "subprocess"
 RUNTIME_TIMING_KEYS = ("duration_s", "timeout_s", "oneshot_timeout_s")
+# Desktop SDL subprocesses — preferred sync matrix (skip async-only hosts).
+SYNC_RUNTIMES = (
+    "micropython",
+    "micropython.exe",
+    "circuitpython",
+    "cpython-venv",
+    "python.exe",
+)
+# Full preferred async matrix (includes pyscript + jupyter).
+ASYNC_RUNTIMES = (*SYNC_RUNTIMES, "pyscript", "jupyter")
 
 
 def _temp_dir() -> Path:
@@ -342,34 +380,90 @@ def run_subprocess_case(
     ]
     env = os.environ.copy()
     apply_sibling_env(env, repo_root=str(REPO))
-    # micropython.exe (Windows PE) cannot read WSL-exported env; pass via argv.
+    _ensure_user_micropy_lib(env)
+    # Windows PE under WSL cannot read Linux-exported env; pass via argv + env_set.
     timer_async = env.get("PYDISPLAY_TIMER_ASYNC")
     if timer_async is not None:
         cmd.extend(["--timer-async", str(timer_async)])
     multimer_backend = env.get("MULTIMER_BACKEND")
     if multimer_backend:
         cmd.extend(["--multimer-backend", str(multimer_backend)])
+    # Do not forward SDL_* to Windows PE. WSL-exported env is invisible to
+    # .exe children (so unix stays headless via the shell export), and PE
+    # should keep a real Windows video driver — dummy there hides the brief
+    # window that confirms the cell is running.
+    #
+    # PE also cannot see PYTHONUNBUFFERED from the WSL shell; pass it so
+    # CPython .exe flushes EXAMPLE_RESULT / init lines before a timeout kill.
+    if runtime_id.endswith(".exe"):
+        cmd.extend(["--env", "PYTHONUNBUFFERED=1"])
+    #
+    # PE stdout via pipes is often empty after a timeout kill (process was
+    # still usable; quit just did not end it). Write PE output to temp files
+    # so tails survive TimeoutExpired.
+    is_pe = runtime_id.endswith(".exe")
+    out_path = err_path = None
+    out_f = err_f = None
+    timed_out = False
+    returncode = -1
+    stdout = ""
+    stderr = ""
     try:
-        proc = subprocess.run(
-            cmd,
-            cwd=str(SRC),
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=timeout + 5,
-            env=env,
-            check=False,
-        )
-        timed_out = False
-        returncode = proc.returncode
-        stdout = proc.stdout or ""
-        stderr = proc.stderr or ""
-    except subprocess.TimeoutExpired as exc:
-        timed_out = True
-        returncode = -1
-        stdout = (exc.stdout or "") if isinstance(exc.stdout, str) else ""
-        stderr = (exc.stderr or "") if isinstance(exc.stderr, str) else ""
+        if is_pe:
+            with tempfile.NamedTemporaryFile(
+                "w+", encoding="utf-8", delete=False, suffix=".stdout"
+            ) as out_f, tempfile.NamedTemporaryFile(
+                "w+", encoding="utf-8", delete=False, suffix=".stderr"
+            ) as err_f:
+                out_path, err_path = out_f.name, err_f.name
+                try:
+                    proc = subprocess.run(
+                        cmd,
+                        cwd=str(SRC),
+                        stdout=out_f,
+                        stderr=err_f,
+                        timeout=timeout + 5,
+                        env=env,
+                        stdin=subprocess.DEVNULL,
+                        check=False,
+                    )
+                    timed_out = False
+                    returncode = proc.returncode
+                except subprocess.TimeoutExpired:
+                    timed_out = True
+                    returncode = -1
+            stdout = Path(out_path).read_text(encoding="utf-8", errors="replace")
+            stderr = Path(err_path).read_text(encoding="utf-8", errors="replace")
+        else:
+            try:
+                proc = subprocess.run(
+                    cmd,
+                    cwd=str(SRC),
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    timeout=timeout + 5,
+                    env=env,
+                    stdin=subprocess.DEVNULL,
+                    check=False,
+                )
+                timed_out = False
+                returncode = proc.returncode
+                stdout = proc.stdout or ""
+                stderr = proc.stderr or ""
+            except subprocess.TimeoutExpired as exc:
+                timed_out = True
+                returncode = -1
+                stdout = (exc.stdout or "") if isinstance(exc.stdout, str) else ""
+                stderr = (exc.stderr or "") if isinstance(exc.stderr, str) else ""
+    finally:
+        for path in (out_path, err_path):
+            if path:
+                try:
+                    Path(path).unlink(missing_ok=True)
+                except OSError:
+                    pass
 
     result = parse_result(stdout)
     summary = summarize(result, returncode, timed_out)
@@ -651,14 +745,24 @@ def run_pyscript_case(
 
 def _write_jupyter_notebook(example_id: str, example_meta: dict, duration_s: float) -> Path:
     # Prefer dotted examples imports (cwd=src, ``.`` on PYTHONPATH). Env is SoT;
-    # do not emit a utils.path bootstrap cell.
-    raw_import = example_meta.get("import", example_id)
-    if raw_import.startswith("examples."):
-        import_line = f"import {raw_import}"
-    elif "." in raw_import:
-        import_line = f"import examples.{raw_import}"
+    # do not emit a utils.path bootstrap cell. Scripts outside ``src/examples/``
+    # (e.g. tools/test_timers.py) are loaded by path.
+    script = example_meta.get("script", f"examples/{example_id}.py")
+    script_path = (SRC / script).resolve()
+    try:
+        under_examples = script_path.is_relative_to(SRC / "examples")
+    except AttributeError:
+        under_examples = str(script_path).startswith(str((SRC / "examples").resolve()))
+    if under_examples:
+        raw_import = example_meta.get("import", example_id)
+        if raw_import.startswith("examples."):
+            import_line = f"import {raw_import}"
+        elif "." in raw_import:
+            import_line = f"import examples.{raw_import}"
+        else:
+            import_line = f"from examples import {raw_import}"
     else:
-        import_line = f"from examples import {raw_import}"
+        import_line = "import runpy\nrunpy.run_path(%r, run_name=__name__)" % (str(script_path),)
 
     tools_rel = os.path.relpath(TOOLS, SRC)
     test_mode_source = "\n".join(
@@ -745,6 +849,7 @@ def run_jupyter_case(
     ]
     env = os.environ.copy()
     apply_sibling_env(env, repo_root=str(REPO), prepend_paths=[str(SRC)])
+    _ensure_user_micropy_lib(env)
 
     try:
         try:
@@ -846,39 +951,37 @@ def run_case(
     }
 
 
-def test_all_examples(
-    examples: dict[str, dict],
-    runtimes: dict[str, dict],
+def _missing_runtime_row(example_id: str, runtime_id: str) -> dict:
+    return {
+        "example": example_id,
+        "runtime": runtime_id,
+        "summary": "missing",
+        "returncode": -1,
+        "timed_out": False,
+        "result": None,
+        "stdout_tail": "",
+        "stderr_tail": "",
+    }
+
+
+def _run_example_wave(
+    example_id: str,
+    example_meta: dict,
+    work: list[tuple[str, dict]],
     manifest_defaults: dict,
     runtime_defaults: dict,
     *,
-    fail_fast: bool = False,
-    verbose: bool = False,
+    jobs: int,
 ) -> list[dict]:
-    rows = []
-    for example_id, example_meta in examples.items():
-        for runtime_id, runtime_meta in runtimes.items():
-            if not example_allowed_on_runtime(example_meta, runtime_id):
-                continue
-            if not runtime_available(runtime_id, runtime_meta):
-                if verbose:
-                    print(
-                        f"Skipping {example_id} @ {runtime_id} (runtime missing)", file=sys.stderr
-                    )
-                rows.append(
-                    {
-                        "example": example_id,
-                        "runtime": runtime_id,
-                        "summary": "missing",
-                        "returncode": -1,
-                        "timed_out": False,
-                        "result": None,
-                        "stdout_tail": "",
-                        "stderr_tail": "",
-                    }
-                )
-                continue
-            print(f"Running {example_id} @ {runtime_id}...", file=sys.stderr)
+    """Run one wave of runtimes; preserve ``work`` order in returned rows."""
+    if not work:
+        return []
+    for runtime_id, _ in work:
+        print(f"  start {example_id} @ {runtime_id}", file=sys.stderr)
+
+    if jobs == 1 or len(work) == 1:
+        rows = []
+        for runtime_id, runtime_meta in work:
             row = run_case(
                 example_id,
                 example_meta,
@@ -888,8 +991,95 @@ def test_all_examples(
                 runtime_defaults,
             )
             rows.append(row)
-            if fail_fast and _row_failed(row):
-                break
+            print(
+                f"  done  {example_id} @ {runtime_id}: {row.get('summary')}",
+                file=sys.stderr,
+            )
+        return rows
+
+    max_workers = len(work) if jobs <= 0 else min(jobs, len(work))
+    by_runtime: dict[str, dict] = {}
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {
+            pool.submit(
+                run_case,
+                example_id,
+                example_meta,
+                runtime_id,
+                runtime_meta,
+                manifest_defaults,
+                runtime_defaults,
+            ): runtime_id
+            for runtime_id, runtime_meta in work
+        }
+        for fut in as_completed(futures):
+            runtime_id = futures[fut]
+            row = fut.result()
+            by_runtime[runtime_id] = row
+            print(
+                f"  done  {example_id} @ {runtime_id}: {row.get('summary')}",
+                file=sys.stderr,
+            )
+    return [by_runtime[runtime_id] for runtime_id, _ in work]
+
+
+def test_all_examples(
+    examples: dict[str, dict],
+    runtimes: dict[str, dict],
+    manifest_defaults: dict,
+    runtime_defaults: dict,
+    *,
+    fail_fast: bool = False,
+    verbose: bool = False,
+    jobs: int = 0,
+) -> list[dict]:
+    """Run each example across runtimes, then advance to the next example.
+
+    With ``jobs != 1`` (default ``0`` = one worker per runtime), all eligible
+    runtimes for an example run concurrently. An empty PE ``hang`` usually
+    means the example stayed alive past ``timeout_s`` (quit did not end it) —
+    not that the Windows process failed to start. Fail-fast waits for that
+    example's workers to finish, then stops before the next example.
+    """
+    rows: list[dict] = []
+    for example_id, example_meta in examples.items():
+        work: list[tuple[str, dict]] = []
+        example_rows: list[dict] = []
+        for runtime_id, runtime_meta in runtimes.items():
+            if not example_allowed_on_runtime(example_meta, runtime_id):
+                continue
+            if not runtime_available(runtime_id, runtime_meta):
+                if verbose:
+                    print(
+                        f"Skipping {example_id} @ {runtime_id} (runtime missing)",
+                        file=sys.stderr,
+                    )
+                example_rows.append(_missing_runtime_row(example_id, runtime_id))
+                continue
+            work.append((runtime_id, runtime_meta))
+
+        if not work:
+            rows.extend(example_rows)
+            continue
+
+        print(
+            f"Running {example_id} @ {len(work)} runtime(s)"
+            + (" in parallel..." if jobs != 1 and len(work) > 1 else "..."),
+            file=sys.stderr,
+        )
+        example_rows.extend(
+            _run_example_wave(
+                example_id,
+                example_meta,
+                work,
+                manifest_defaults,
+                runtime_defaults,
+                jobs=jobs,
+            )
+        )
+        rows.extend(example_rows)
+        if fail_fast and any(_row_failed(r) for r in example_rows):
+            return rows
     return rows
 
 
@@ -949,7 +1139,7 @@ def test_all_runtimes(
             )
             rows.append(row)
             if fail_fast and _row_failed(row):
-                break
+                return rows
     return rows
 
 
@@ -1050,6 +1240,16 @@ def main(argv: list[str] | None = None) -> int:
         help="Write full result rows to PATH (default: temp dir/example_test_results.json)",
     )
     parser.add_argument(
+        "--jobs",
+        type=int,
+        default=0,
+        metavar="N",
+        help=(
+            "With --order examples: parallel workers per example "
+            "(0=all runtimes concurrently, default; 1=serial)"
+        ),
+    )
+    parser.add_argument(
         "--duration-s",
         type=float,
         metavar="SEC",
@@ -1121,8 +1321,14 @@ def main(argv: list[str] | None = None) -> int:
             runtime_defaults,
             fail_fast=args.fail_fast,
             verbose=args.verbose,
+            jobs=args.jobs,
         )
     else:
+        if args.jobs not in (0, 1):
+            print(
+                "warning: --jobs only applies to --order examples; ignoring",
+                file=sys.stderr,
+            )
         rows = test_all_runtimes(
             examples,
             runtimes,

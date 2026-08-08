@@ -454,15 +454,25 @@ def _run():
             _finish_autotest(entry, status="error", error=_import_error[0])
             raise
         _arm_autotest_on_quit(entry)
+    # Nested package examples (e.g. modules=roku_lvgl&manifests=roku_remote)
+    # install as ``roku_remote/roku_lvgl.py`` — import the dotted path, not the bare stem.
+    import_name = entry
+    for m in manifests:
+        try:
+            os.stat(m + "/" + entry + ".py")
+            import_name = m + "." + entry
+            break
+        except OSError:
+            pass
     # #region loader trace
-    _mark("before_import_entry", entry=entry)
+    _mark("before_import_entry", entry=entry, import_name=import_name)
     # #endregion
     try:
-        __import__(entry)
+        __import__(import_name)
     except Exception as exc:
         _import_error[0] = "{}: {}".format(type(exc).__name__, exc)
         # #region loader trace
-        _mark("import_entry_failed", entry=entry, error=_import_error[0])
+        _mark("import_entry_failed", entry=entry, import_name=import_name, error=_import_error[0])
         # #endregion
         if _autotest_enabled():
             _finish_autotest(entry, status="error", error=_import_error[0])

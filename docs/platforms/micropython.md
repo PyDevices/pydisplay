@@ -58,7 +58,7 @@ Use `board_configs/sdldisplay/` or the default `src/lib/board_config.py` for SDL
 
 ## usdl2 (native SDL2)
 
-For best SDL2 performance on MicroPython Unix, CircuitPython Unix, and `micropython.exe`, build with the optional native **`usdl2`** module from [PyDevices/usdl2](https://github.com/PyDevices/usdl2). It provides the SDL2 subset used by **`SDLDisplay`** and, when the host selects the SDL timer backend, **`multimer._sdl2`**.
+For best SDL2 performance on MicroPython Unix, CircuitPython Unix, and `micropython.exe`, build with the optional native **`usdl2`** module from [PyDevices/usdl2](https://github.com/PyDevices/usdl2). It provides the SDL2 subset used by **`SDLDisplay`** and, when the host selects the SDL timer backend, **`multimer` `sdl2`**.
 
 Without the native module, `SDLDisplay` falls back to pure-Python ffi/ctypes bindings from the same repo (`usdl2-py` on TestPyPI / MIP `usdl2`); timer selection is unchanged (`multimer` still picks `_librt` or threading backends first on each platform).
 
@@ -92,4 +92,4 @@ make USER_C_MODULES=../../.. FROZEN_MANIFEST=../../../pydisplay/manifest.py
 
 ([cmods](https://github.com/PyDevices/cmods) `./build_mp.sh` is an optional convenience wrapper for the same sibling layout — not required.)
 
-See [multimer building docs](https://github.com/PyDevices/multimer/blob/main/docs/building.md) and [tools/README.md](https://github.com/PyDevices/pydisplay/blob/main/tools/README.md).
+See [multimer](../concepts/multimer.md) and [tools/README.md](../../tools/README.md).

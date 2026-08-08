@@ -52,6 +52,7 @@ class TestApiSurface(unittest.TestCase):
                 "AsyncTimer",
                 "backend_name",
                 "backends",
+                "backends_available",
                 "loop_running",
                 "monotonic",
                 "run_deadline_hook",
@@ -82,6 +83,44 @@ class TestBackendSelection(unittest.TestCase):
     def test_backend_name_is_a_known_backend(self):
         self.assertIn(multimer.backend_name(), multimer.backends())
 
+    def test_backends_has_no_win32(self):
+        self.assertNotIn("win32", multimer.backends())
+
+    def test_backends_order_matches_auto_then_async(self):
+        self.assertEqual(
+            multimer.backends(),
+            ("machine", "librt", "sdl2", "threading", "polling", "async"),
+        )
+
+    def test_auto_backends_skips_sdl2_when_pygame_present(self):
+        from multimer import _select
+
+        self.assertEqual(sys.implementation.name, "cpython")
+        self.assertTrue(_select._pygame_available())
+        self.assertNotIn("sdl2", _select._auto_backends())
+        # Explicit override list still includes sdl2.
+        self.assertIn("sdl2", multimer.backends())
+        self.assertNotEqual(multimer.backend_name(), "sdl2")
+
+    def test_auto_backends_allows_sdl2_on_cpython_without_pygame(self):
+        from unittest import mock
+
+        from multimer import _select
+
+        with mock.patch.object(_select, "_pygame_available", return_value=False):
+            self.assertIn("sdl2", _select._auto_backends())
+
+    def test_backends_available_is_subset(self):
+        available = multimer.backends_available()
+        self.assertTrue(available)
+        self.assertTrue(set(available).issubset(set(multimer.backends())))
+        self.assertIn(multimer.backend_name(), available)
+
+    def test_backends_available_does_not_change_active(self):
+        before = multimer.backend_name()
+        multimer.backends_available()
+        self.assertEqual(multimer.backend_name(), before)
+
     def test_use_backend_rebinds_timer_and_sleep(self):
         multimer.use_backend("polling")
         self.assertEqual(multimer.backend_name(), "polling")
@@ -108,18 +147,34 @@ class TestBackendSelection(unittest.TestCase):
             multimer.use_backend("no_such_backend")
 
     def test_unavailable_backend_raises_import_error(self):
-        # win32 refuses to import off Windows; the selection must not fall back
-        # silently when a caller asks for a specific backend.
-        if sys.platform == "win32":
-            self.skipTest("win32 backend is available on this host")
+        # ``machine.Timer`` is absent on CPython desktop; the selection must not
+        # fall back silently when a caller asks for a specific backend.
+        try:
+            from machine import Timer as _MachineTimer  # noqa: F401
+        except ImportError:
+            pass
+        else:
+            self.skipTest("machine.Timer is available on this host")
         with self.assertRaises(ImportError):
-            multimer.use_backend("win32")
+            multimer.use_backend("machine")
 
     def test_restores_previous_backend(self):
         before = multimer.backend_name()
         multimer.use_backend("polling")
         multimer.use_backend(before)
         self.assertEqual(multimer.backend_name(), before)
+
+    def test_context_manager_deinits(self):
+        hits = []
+        with Timer(-1) as t:
+            t.init(period=20, callback=lambda _t: hits.append(1))
+            for _ in range(8):
+                sleep_ms(10)
+        self.assertGreaterEqual(len(hits), 1)
+        # After exit the timer must be disarmed.
+        n = len(hits)
+        sleep_ms(50)
+        self.assertEqual(len(hits), n)
 
 
 class TestTicks(unittest.TestCase):
@@ -163,9 +218,8 @@ class TestTimerSemantics(unittest.TestCase):
 
         t = Timer(-1)
         t.init(period=50, callback=cb)
-        deadline = time.monotonic() + 0.35
-        while time.monotonic() < deadline:
-            time.sleep(0.01)
+        for _ in range(35):
+            sleep_ms(10)
         t.deinit()
         self.assertGreaterEqual(len(hits), 2)
         self.assertIs(hits[0], t)
@@ -183,7 +237,8 @@ class TestTimerSemantics(unittest.TestCase):
 
         t = Timer(-1)
         t.init(mode=Timer.ONE_SHOT, period=50, callback=cb)
-        time.sleep(0.2)
+        for _ in range(25):
+            sleep_ms(10)
         self.assertEqual(len(hits), 1)
         self.assertEqual(callback_threads, [main_thread])
 
@@ -192,10 +247,38 @@ class TestTimerSemantics(unittest.TestCase):
 
         t = Timer(-1)
         t.init(freq=20, period=1, callback=lambda _t: hits.append(1))
-        time.sleep(0.25)
+        for _ in range(25):
+            sleep_ms(10)
         t.deinit()
         self.assertGreaterEqual(len(hits), 2)
         self.assertLessEqual(len(hits), 12)
+
+    def test_soft_coalesce_under_threading(self):
+        """``hard=False`` must go through ``_deliver`` (coalesce), not raw invoke."""
+        original = multimer.backend_name()
+        try:
+            try:
+                multimer.use_backend("threading")
+            except ImportError:
+                self.skipTest("threading backend unavailable")
+            hits = []
+
+            def cb(_t):
+                hits.append(1)
+                multimer.sleep_ms(40)
+
+            t = multimer.Timer(-1)
+            t.init(period=10, callback=cb, hard=False)
+            # Use ``multimer.sleep_ms`` (rebound by use_backend), not the
+            # module-level import captured under the previous backend.
+            for _ in range(20):
+                multimer.sleep_ms(10)
+            t.deinit()
+            # Without coalesce a 10 ms period over ~200 ms would enqueue many more.
+            self.assertGreaterEqual(len(hits), 1)
+            self.assertLessEqual(len(hits), 8)
+        finally:
+            multimer.use_backend(original)
 
 
 class TestAsyncTimer(unittest.TestCase):
@@ -341,8 +424,6 @@ class TestAsyncioCompat(unittest.TestCase):
         )
 
     def test_installer_replaces_module_names_only(self):
-        import sys
-
         from multimer import asyncio
 
         old_asyncio = sys.modules.get("asyncio")
@@ -358,6 +439,50 @@ class TestAsyncioCompat(unittest.TestCase):
                 sys.modules.pop("asyncio", None)
             else:
                 sys.modules["asyncio"] = old_asyncio
+            if old_uasyncio is None:
+                sys.modules.pop("uasyncio", None)
+            else:
+                sys.modules["uasyncio"] = old_uasyncio
+
+    def test_installer_survives_uasyncio_name_shim(self):
+        """MicroPython ``uasyncio`` forwards into ``sys.modules['asyncio']``.
+
+        If the loader cached that shim and the facade then replaced ``asyncio``,
+        ``loop_running`` / ``getattr(current_task)`` used to recurse forever.
+        """
+        import types
+
+        from multimer import _asyncio_loader, asyncio_compat
+
+        real = sys.modules["asyncio"]
+        old_cached = _asyncio_loader._asyncio_mod
+        old_backend = asyncio_compat._backend
+        old_uasyncio = sys.modules.get("uasyncio")
+
+        shim = types.ModuleType("uasyncio")
+
+        def _shim_getattr(name):
+            return getattr(sys.modules["asyncio"], name)
+
+        shim.__getattr__ = _shim_getattr  # type: ignore[attr-defined]
+        shim.create_task = real.create_task  # load_asyncio probe
+
+        try:
+            sys.modules["uasyncio"] = shim
+            _asyncio_loader._asyncio_mod = shim
+            asyncio_compat._backend = shim
+
+            facade = multimer.install_asyncio_compat()
+            self.assertIs(sys.modules["asyncio"], facade)
+            self.assertIs(asyncio_compat._backend, real)
+            self.assertIs(_asyncio_loader._asyncio_mod, real)
+            # Must not recurse through shim → facade → shim.
+            self.assertTrue(callable(getattr(sys.modules["uasyncio"], "current_task", None)))
+            self.assertFalse(multimer.loop_running())
+        finally:
+            _asyncio_loader._asyncio_mod = old_cached
+            asyncio_compat._backend = old_backend
+            sys.modules["asyncio"] = real
             if old_uasyncio is None:
                 sys.modules.pop("uasyncio", None)
             else:

@@ -79,6 +79,27 @@ mip.install("github:PyDevices/micropython-hardware/board_configs/sdldisplay")  #
 
 ## WSL / WSLg
 
+### Matrix: Windows PE windows missing, or `.exe` cells report `hang`
+
+**Symptom:** During `tools/example_test_kit.py` under
+`SDL_VIDEODRIVER=dummy`, Unix runtimes stay headless (expected), but
+`micropython.exe` / `python.exe` never show a window — or those cells report
+`hang` while a Windows window is still up and interactive.
+
+**Cause (missing window):** the harness forwarded `SDL_*=dummy` into PE via
+wrapper `--env` / `env_set`. PE does not see WSL-exported env; only explicit
+forwarding makes it headless. The kit must **not** forward `SDL_*` to `*.exe`.
+
+**Cause (`hang` with a live window):** the example did not quit after
+`duration_s` (deadline hook / inject / `Runtime.poll` path). The kit then hits
+`timeout_s` and labels the cell `hang`. The process was usable the whole time —
+not a failed PE launch. Pipe capture used to hide PE stdout after the timeout
+kill; the kit now captures PE output to temp files.
+
+**Fix:** restore real Windows video for PE (no `SDL_*` forward); fix the quit
+path so the example exits and prints `EXAMPLE_RESULT`. Details:
+[tools/README.md — Windows PE under WSL](../tools/README.md#windows-pe-under-wsl).
+
 ### Square/box artifact and touch-drag lag on long presses (touchscreen, Ubuntu/WSLg)
 
 **Symptom:** On a touchscreen, a long press shows a small square/box popup around

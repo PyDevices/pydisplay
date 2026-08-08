@@ -27,9 +27,12 @@ class TestDisplaysysCapabilities(unittest.TestCase):
             "pgdisplay",
             "psdisplay",
             "jndisplay",
+            "autodisplay",
         ):
             self.assertIn(name, modules)
-            self.assertIn("auto_refresh", modules[name])
+            if name != "autodisplay":
+                self.assertIn("auto_refresh", modules[name])
+        self.assertTrue(modules["autodisplay"].get("host_select"))
 
     def test_no_backend_import_side_effects(self):
         """``capabilities()`` must not import concrete display backends.

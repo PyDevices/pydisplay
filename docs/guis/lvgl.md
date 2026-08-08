@@ -64,9 +64,9 @@ When **`runtime.timer_async` is true**, `display_driver` claims runtime-driven r
 Full apps typically build the UI then call **`runtime.run_forever()`** (see
 [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py)).
 
-`src/lib/board_config.py` reads **`PYDISPLAY_TIMER_ASYNC`** for the PG/SDL
-desktop branch (default `False`). PyScript and Jupyter always use
-`timer_async=True`. Force async on desktop before `board_config` loads:
+Desktop `board_config` reads **`PYDISPLAY_TIMER_ASYNC`** for the PG/SDL
+branch (default from `AutoDisplay`, normally `False`). PyScript and Jupyter
+always use `timer_async=True`. Force async on desktop before `board_config` loads:
 
 ```python
 import os

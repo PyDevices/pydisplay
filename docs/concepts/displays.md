@@ -34,7 +34,7 @@ SDL2 bindings for **`SDLDisplay`**: native **`usdl2`** when built in or installe
 
 ### PGDisplay
 
-PyGame desktop backend. The default `board_config.py` selects it first on CPython (it is easier to install on Windows and avoids some SDL glitches on Chromebooks); if PyGame is not installed it falls back to `SDLDisplay`. Config: `board_configs/pgdisplay/`.
+PyGame desktop backend. `displaysys.AutoDisplay` (used by `board_configs/desktop/`) selects it first on CPython (it is easier to install on Windows and avoids some SDL glitches on Chromebooks); if PyGame is not installed it falls back to `SDLDisplay`. Explicit config: `board_configs/pgdisplay/`.
 
 ### FBDisplay
 

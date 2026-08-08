@@ -247,7 +247,7 @@ def main():
     if _probe_backends_enabled():
         print("development backend probes enabled (MULTIMER_PROBE_BACKENDS=1)")
         print()
-        for name in ("librt", "win32", "threading", "polling"):
+        for name in ("librt", "sdl2", "threading", "polling"):
             probes.append(
                 (
                     f"_backends.{name}.Timer",

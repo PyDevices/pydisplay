@@ -39,8 +39,8 @@ on a microcontroller. Optional fixed target: ``ROKU_HOST`` in :mod:`roku_engine`
 
 Desktop panel size: edit ``_WIDTH`` / ``_HEIGHT`` / ``_SCALE`` below. Those are
 applied via ``displaysys.env_set`` before any front end imports ``board_config``.
-Leave ``_SCALE`` as ``None`` to keep board_config's default (autoscale still fits
-the window).
+Leave ``_SCALE`` as ``None`` to keep the desktop ``AutoDisplay`` default
+(autoscale still fits the window).
 """
 
 import sys
@@ -53,10 +53,10 @@ from displaysys import env_set
 
 # Local desktop test panel — change these and re-run. Must stay above board_config.
 # Match LilyGO T-HMI (ST7789 I80): 240x320. Never apply on MCU boards (panel
-# size comes from that board's board_config).
+# size comes from that board's board_config / display_drv).
 _WIDTH = None
 _HEIGHT = None
-_SCALE = None  # e.g. 1 or 2; None = board_config default + autoscale
+_SCALE = None  # e.g. 1 or 2; None = AutoDisplay default + autoscale
 _MCU_PLATFORMS = (
     "esp32",
     "esp8266",
@@ -115,12 +115,12 @@ def _panel_fb_bytes():
     """Bytes for one RGB565 panel buffer at the launcher size."""
     w, h = _WIDTH, _HEIGHT
     if w is None or h is None:
-        import board_config
+        from board_config import display_drv
 
         if w is None:
-            w = board_config.width
+            w = display_drv.width
         if h is None:
-            h = board_config.height
+            h = display_drv.height
     return int(w) * int(h) * 2
 
 

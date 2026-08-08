@@ -256,14 +256,14 @@ def _setup():
 
 
 def _button_center(btn):
-    from board_config import height, width
+    from board_config import display_drv
 
     try:
         area = lv.area_t()
         btn.get_coords(area)
         return (area.x1 + area.x2) // 2, (area.y1 + area.y2) // 2
     except Exception:
-        return width // 2, height - 55
+        return display_drv.width // 2, display_drv.height - 55
 
 
 def _inject_click(cx, cy):
@@ -370,7 +370,7 @@ def _run_kit_sync():
     clicked_taps = None
     while time.time() < deadline:
         # multimer.sleep_ms, not time.sleep: pump-based backends (threading on
-        # CircuitPython / Windows CPython, SDL2, win32 APC) deliver callbacks only
+        # CircuitPython / Windows CPython, SDL2) deliver callbacks only
         # while the main thread pumps. For librt this resolves to a plain sleep.
         multimer.sleep_ms(10)
         if clicked_taps is None and get_state()["seconds"] >= 2:

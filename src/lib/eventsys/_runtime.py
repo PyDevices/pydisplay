@@ -720,7 +720,7 @@ class Runtime:
 
     @staticmethod
     def _sync_refresh_needs_deferred_arm():
-        """True when sync timers need a poll/sleep drain loop (SDL2, Win32 APC)."""
+        """True when sync timers need a poll/sleep drain loop (SDL2, threading)."""
         try:
             from multimer._select import _drain
 
@@ -920,7 +920,7 @@ class Runtime:
             raise RuntimeError("display refresh already claimed")
         # Always record the claim, even when the runtime-driven refresh
         # subscription has not been armed yet (deferred sync refresh on desktop
-        # win32/SDL2 backends arms lazily from the first poll()). The claim's
+        # SDL2/threading backends arm lazily from the first poll()). The claim's
         # second job is to tell _service_tick a GUI layer owns input polling;
         # dropping it here let Runtime.poll() keep draining input events out
         # from under LVGL. ``_refresh_paused`` gates the deferred ``_show`` when

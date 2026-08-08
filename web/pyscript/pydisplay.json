@@ -41,6 +41,7 @@
     "./src/utils/fonts/vga2_bold_16x32.py": "/utils/fonts/",
     "./src/utils/pixel_sim/__init__.py": "/utils/pixel_sim/",
     "./src/lib/displaysys/__init__.py": "/lib/displaysys/",
+    "./src/lib/displaysys/autodisplay.py": "/lib/displaysys/",
     "./src/lib/displaysys/busdisplay.py": "/lib/displaysys/",
     "./src/lib/displaysys/epaperdisplay.py": "/lib/displaysys/",
     "./src/lib/displaysys/fbdisplay.py": "/lib/displaysys/",
@@ -77,7 +78,6 @@
     "./src/lib/multimer/_backends/polling.py": "/lib/multimer/_backends/",
     "./src/lib/multimer/_backends/sdl2.py": "/lib/multimer/_backends/",
     "./src/lib/multimer/_backends/threading.py": "/lib/multimer/_backends/",
-    "./src/lib/multimer/_backends/win32.py": "/lib/multimer/_backends/",
     "./src/utils/ps_loader.py": "/"
   }
 }
