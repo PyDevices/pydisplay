@@ -6,13 +6,13 @@ For an **installable browser app** on Android phones (Chrome home screen, no APK
 
 ## Overview
 
-On Android there is no MicroPython port. pydisplay runs under **CPython** in a **python-for-android** APK with the **SDL2 bootstrap**. The `import usdl2` API comes from the [usdl2](https://github.com/PyDevices/usdl2) package on TestPyPI (native `android_21_*` wheels). pydisplay's existing `SDLDisplay` backend works unchanged once `usdl2` is installed.
+On Android there is no MicroPython port. pydisplay runs under **CPython** in a **python-for-android** APK with the **SDL2 bootstrap**. The `import usdl2` API comes from the [usdl2](https://test.pypi.org/project/usdl2/) package on TestPyPI (native `android_21_*` wheels). pydisplay's existing `SDLDisplay` backend works unchanged once `usdl2` is installed.
 
 APK integration — template app, build scripts, and p4a recipes — lives in [**pydisplay_android**](https://github.com/PyDevices/pydisplay_android).
 
 ## Workspace
 
-Clone the Android packaging repo (TestPyPI supplies the wheels; sibling `usdl2` / `lv_cpython_mod` clones are optional for local development):
+Clone the Android packaging repo (TestPyPI supplies the wheels; a sibling `lv_cpython_mod` clone is optional for local development):
 
 ```bash
 git clone https://github.com/PyDevices/pydisplay_android.git

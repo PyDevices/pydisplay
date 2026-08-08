@@ -290,10 +290,10 @@ Desktop SDL2 access is shared between display and timer code:
 
 | Consumer | Import chain |
 |----------|--------------|
-| `displaysys.sdldisplay` | built-in `usdl2` → pure-Python `usdl2-py` |
-| `multimer` SDL backend | `usdl2` (native or `usdl2-py`) |
+| `displaysys.sdldisplay` | built-in / env `usdl2` → desktop board / `pydisplay-desktop` |
+| `multimer` SDL backend | `usdl2` (native or pure-Python desktop binding) |
 
-Both prefer the native **`usdl2`** module when it is frozen, built in, or installed from TestPyPI. Otherwise the pure-Python package from [PyDevices/usdl2](https://github.com/PyDevices/usdl2) (`lib/usdl2.py`) is used. See [Displays — SDLDisplay](displays.md#sdldisplay) and [MicroPython — usdl2](../platforms/micropython.md#usdl2-native-sdl2).
+Both prefer a native **`usdl2`** module when it is frozen or already present. Otherwise the pure-Python binding from [`pydisplay-desktop`](https://pydevices.github.io/micropython-hardware/pydisplay-desktop.html) / the MIP desktop board (`drivers/usdl2.py`) provides `import usdl2`. See [Displays — SDLDisplay](displays.md#sdldisplay) and [MicroPython — Desktop SDL](../platforms/micropython.md#desktop-sdl-usdl2).
 
 ## Next
 

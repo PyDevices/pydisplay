@@ -76,7 +76,7 @@ Typical runtime: **~10–20 minutes**.
     displaysys
   ```
 
-  Fuller desktop stack smoke test (`displaysys`, `usdl2`, `pygraphics`, `lvgl-cpython`, `board_config` draw):
+  Fuller desktop stack smoke test (`displaysys`, `pydisplay-desktop`, `pygraphics`, `lvgl-cpython`, `board_config` draw):
   this uses the native TestPyPI `pygraphics` build, while MicroPython MIP uses
   the pure-Python `pygraphics` package from micropython-lib.
 
@@ -209,18 +209,20 @@ pip install \
   displaysys
 ```
 
-Example with desktop SDL (`usdl2` from TestPyPI; `pygame-ce` from PyPI when using `PGDisplay`):
+Example with desktop SDL (`pydisplay-desktop` from TestPyPI bundles `usdl2` + desktop `board_config`; `pygame-ce` from PyPI when using `PGDisplay`):
 
 ```bash
 pip install \
   -i https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
-  displaysys usdl2
+  displaysys pydisplay-desktop
 ```
+
+Android APK builds still install TestPyPI `usdl2` Android wheels via `pydisplay_android` (see that repo’s README) — not through `pydisplay-desktop`.
 
 | Flag | Index | Why it is needed |
 |------|-------|------------------|
-| `-i https://test.pypi.org/simple/` | **TestPyPI** (primary) | Resolves PyDevices packages you install and their deps that exist **only** on TestPyPI (`displaysys`, `eventsys`, `multimer`, `usdl2`, …). |
+| `-i https://test.pypi.org/simple/` | **TestPyPI** (primary) | Resolves PyDevices packages you install and their deps that exist **only** on TestPyPI (`displaysys`, `eventsys`, `multimer`, `pydisplay-desktop`, …; Android also uses TestPyPI `usdl2` wheels). |
 | `--extra-index-url https://pypi.org/simple/` | **PyPI** (secondary) | Resolves third-party deps published **only** on production PyPI (e.g. `pygame-ce` for `PGDisplay`, and other third-party libs). |
 
 **Both must be present.** If you omit TestPyPI, pip cannot find PyDevices wheels. If you omit PyPI, pip fails when a declared dependency (for example `pygame-ce`) is not on TestPyPI.

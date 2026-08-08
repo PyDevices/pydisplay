@@ -22,7 +22,6 @@ import urllib.request
 
 # Install order SoT (leaves before dependents). Keep in sync with the Cursor rule.
 PACKAGE_ORDER = (
-    "usdl2",
     "pygraphics",
     "lvgl-cpython",
     "multimer",

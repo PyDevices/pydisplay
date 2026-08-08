@@ -127,9 +127,10 @@ python scripts/gallery_generator.py --check    # CI freshness
 Manual packages (not generated) still in this repo:
 `packages/micropython-{micro-gui,nano-gui,touch}.json`. pydisplay core packages
 (`displaysys`, `eventsys`, `multimer`) have no `packages/*.json` — use the
-micropython-lib MIP index. Sister packages (`pygraphics`, `usdl2`, `palettes`,
+micropython-lib MIP index. Sister packages (`pygraphics`, `palettes`,
 `pdwidgets`, `lvgl`) come from frozen firmware, MIP (where published), or
-TestPyPI — not this repo's `packages/`. Bus/touch/chip helper
+TestPyPI — not this repo's `packages/`. Desktop SDL (`usdl2`) ships with
+micropython-hardware’s MIP desktop board / `pydisplay-desktop`. Bus/touch/chip helper
 manifests (`spibus`, `i80bus`, `i2cbus`, `tt21100`, `stmpe610`,
 `keypad_shift`) live in sibling `micropython-hardware/packages/`.
 

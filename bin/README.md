@@ -41,6 +41,5 @@ That installs into the workspace `bin/` first, then (when this repo is a sibling
 of that workspace) also refreshes this directory plus
 `web/pyscript/vendor/micropython/` (wasm). Without that workspace, build from a
 sibling layout (`micropython/` + `pygraphics/`, and for CP `circuitpython/` +
-patches as in [usdl2](https://github.com/PyDevices/usdl2) /
 [lv_circuitpython_mod](https://github.com/PyDevices/lv_circuitpython_mod)
-docs), then copy here — rename the CircuitPython unix binary to `circuitpython`.
+as needed), then copy here — rename the CircuitPython unix binary to `circuitpython`.

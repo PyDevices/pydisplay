@@ -2,9 +2,11 @@
 
 Install source `.py` files directly from the pydisplay GitHub repository using MicroPython's `mip` module.
 
-Core libraries (`displaysys`, `eventsys`, `multimer`, `pygraphics`, `usdl2`,
+Core libraries (`displaysys`, `eventsys`, `multimer`, `pygraphics`,
 `palettes`, `pdwidgets`) are **not** published as `packages/*.json` here —
 use the [micropython-lib MIP index](mip-micropython-lib.md) instead.
+Desktop `usdl2` comes with the micropython-hardware MIP desktop board package
+(or `pydisplay-desktop` on TestPyPI), not as a core micropython-lib package.
 
 ## What remains on GitHub MIP
 

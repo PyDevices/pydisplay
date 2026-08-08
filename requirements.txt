@@ -1,6 +1,5 @@
 --index-url https://test.pypi.org/simple/
 
-usdl2>=0.0.18
 pygraphics>=0.0.29
 lvgl-cpython>=9.5.22
 multimer>=0.0.34

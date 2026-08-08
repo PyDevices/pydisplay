@@ -45,36 +45,33 @@ Addressable LED grids (NeoPixel, DotStar) use `displaysys.pixeldisplay.PixelDisp
 
 ## Unix desktop (SDL2)
 
-CircuitPython on Unix can use **`SDLDisplay`** with the native **`usdl2`** module.
+CircuitPython on Unix can use **`SDLDisplay`**, which imports **`usdl2`**.
 
-Clone as siblings:
+Get `usdl2` the same way as other desktop hosts: install the MIP desktop board
+package from [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
+(`board_configs/desktop`, which includes `drivers/usdl2.py`), or on CPython use
+[`pydisplay-desktop`](https://pydevices.github.io/micropython-hardware/pydisplay-desktop.html)
+from TestPyPI. Install `libsdl2-dev` on the host so the SDL library is available.
+
+For a local CircuitPython unix binary, clone as siblings and build the coverage
+variant (optional LVGL / pygraphics usermods as needed):
 
 ```
 workspace/
   circuitpython/
-  usdl2/
   lv_circuitpython_mod/   # optional LVGL
   pygraphics/             # optional native pygraphics
   pydisplay/              # this repo
 ```
 
 ```bash
-# Standalone: patch then make (no cmods required)
-cd usdl2 && ./apply_cp_unix_usdl_patches.sh --apply
-cd ../circuitpython/ports/unix && make -j VARIANT=coverage
+cd circuitpython/ports/unix && make -j VARIANT=coverage
 ```
 
-With a [cmods](https://github.com/PyDevices/cmods) workspace, `./build_cp.sh` applies usdl2 + pygraphics + LVGL patches then builds:
+Symlink or copy the built binary (e.g. `ports/unix/build-coverage/micropython`)
+to `~/bin/circuitpython`.
 
-```bash
-./build_cp.sh --port unix --variant coverage
-```
-
-Each apply script also runs automatically from `build_cp.sh` for the **unix** port when that sibling exists. If you invoke `make` in `circuitpython/ports/unix` directly, run the patch script(s) yourself first.
-
-Install `libsdl2-dev`, then symlink or copy the built binary (e.g. `ports/unix/build-coverage/micropython`) to `~/bin/circuitpython`.
-
-([cmods](https://github.com/PyDevices/cmods) is an optional convenience workspace for the same sibling layout — not required.)
+([cmods](https://github.com/PyDevices/cmods) `./build_cp.sh` is an optional convenience wrapper for the same sibling layout — not required.)
 
 ### Frozen asyncio (required for multimer.AsyncTimer)
 
@@ -85,7 +82,6 @@ CircuitPython unix pydisplay builds must **freeze** Adafruit's `asyncio` and
 ```
 workspace/
   circuitpython/
-  usdl2/
   lv_circuitpython_mod/
   Adafruit_CircuitPython_asyncio/
   Adafruit_CircuitPython_Ticks/
@@ -100,8 +96,6 @@ mkdir -p cp-user-config
 # those clones and MICROPY_PY_ASYNCIO / select / traceback are enabled.
 # See [multimer](../concepts/multimer.md).
 
-# Standalone patch + make, or cmods ./build_cp.sh which also applies usdl2/pygraphics/LVGL
-cd usdl2 && ./apply_cp_unix_usdl_patches.sh --apply && cd ..
 cd circuitpython/ports/unix && make -j VARIANT=coverage -I ../../../../cp-user-config
 ```
 
