@@ -63,7 +63,7 @@ Use `board_configs/sdldisplay/` or the default `src/lib/board_config.py` for SDL
 - **CPython:** [`pydisplay-desktop`](https://pydevices.github.io/micropython-hardware/pydisplay-desktop.html) from TestPyPI (two-index pip — see [publishing](../publishing-micropython-lib.md#two-index-pip-install-required)), which bundles `usdl2` with the desktop `board_config`
 - **MicroPython / CircuitPython Unix (and `micropython.exe`):** the MIP desktop board package from [micropython-hardware](https://github.com/PyDevices/micropython-hardware) (`board_configs/desktop`, which pulls in `drivers/usdl2.py`)
 
-When a native `usdl2` module is already present in the firmware or environment, that build is used; otherwise the pure-Python binding from `pydisplay-desktop` / the MIP desktop board provides `import usdl2`. Timer auto-selection is unchanged (`multimer` still prefers `_librt` or threading backends first on each platform).
+When a native `usdl2` module is already present in the firmware or environment, that build is used; otherwise the pure-Python binding from `pydisplay-desktop` / the MIP desktop board provides `import usdl2`. Desktop MicroPython / CircuitPython unix firmware that includes [displayif](https://github.com/PyDevices/displayif) freezes native `usdl2` (it wins over MIP `lib/usdl2.py`). Timer auto-selection is unchanged (`multimer` still prefers `_librt` or threading backends first on each platform).
 
 ## Frozen firmware
 

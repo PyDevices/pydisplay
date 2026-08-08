@@ -47,25 +47,30 @@ Addressable LED grids (NeoPixel, DotStar) use `displaysys.pixeldisplay.PixelDisp
 
 CircuitPython on Unix can use **`SDLDisplay`**, which imports **`usdl2`**.
 
-Get `usdl2` the same way as other desktop hosts: install the MIP desktop board
-package from [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
+When the unix firmware is built with [displayif](https://github.com/PyDevices/displayif)
+(`./apply_cp_patches.sh` then the unix coverage build), native `usdl2` is frozen
+and wins over MIP `lib/usdl2.py`. Otherwise install the MIP desktop board package
+from [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
 (`board_configs/desktop`, which includes `drivers/usdl2.py`), or on CPython use
 [`pydisplay-desktop`](https://pydevices.github.io/micropython-hardware/pydisplay-desktop.html)
 from TestPyPI. Install `libsdl2-dev` on the host so the SDL library is available.
 
 For a local CircuitPython unix binary, clone as siblings and build the coverage
-variant (optional LVGL / pygraphics usermods as needed):
+variant (optional LVGL / pygraphics usermods as needed; include `displayif` for
+native `usdl2`):
 
 ```
 workspace/
   circuitpython/
+  displayif/              # native usdl2 (apply_cp_patches.sh)
   lv_circuitpython_mod/   # optional LVGL
   pygraphics/             # optional native pygraphics
   pydisplay/              # this repo
 ```
 
 ```bash
-cd circuitpython/ports/unix && make -j VARIANT=coverage
+cd displayif && ./apply_cp_patches.sh --apply --port unix --variant coverage
+cd ../circuitpython/ports/unix && make -j VARIANT=coverage
 ```
 
 Symlink or copy the built binary (e.g. `ports/unix/build-coverage/micropython`)
