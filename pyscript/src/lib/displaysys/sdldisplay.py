@@ -7,6 +7,7 @@ displaysys.sdldisplay — SDL2 desktop display driver.
 """
 
 import struct
+import sys
 
 import usdl2
 
@@ -547,7 +548,12 @@ class SDLDisplay(DisplayDriver):
         When rotation swaps the aspect ratio, the previous min==max lock rejects
         ``SetWindowSize`` and then ``SetWindowMaximumSize`` (max would be smaller
         than the old min). Raise max, relax min, resize, then re-lock.
+
+        On Android the Activity already owns a single SurfaceView-backed window;
+        ``SetWindowSize`` / min==max locks fight that surface and can break presents.
         """
+        if sys.platform == "android":
+            return
         w = int(self.width * self._scale)
         h = int(self.height * self._scale)
         usdl2.SDL_SetWindowResizable(self._window, 0)

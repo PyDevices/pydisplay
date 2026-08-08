@@ -85,6 +85,10 @@ def AutoDisplay(
 
         from displaysys.sdldisplay import SDLDisplay
 
+        # Do not use SDL_WINDOW_FULLSCREEN_DESKTOP: it toggles immersive mode after
+        # the Activity SurfaceView/GL buffers are created, and Android then rejects
+        # presents (BLASTBufferQueue size mismatch → black screen after splash).
+        # buildozer.spec keeps fullscreen=0; SHOWN + HIGHDPI matches that surface.
         return SDLDisplay(
             width=width,
             height=height,
@@ -92,7 +96,7 @@ def AutoDisplay(
             title=title,
             scale=scale,
             quiet=quiet,
-            window_flags=(usdl2.SDL_WINDOW_FULLSCREEN_DESKTOP | usdl2.SDL_WINDOW_ALLOW_HIGHDPI),
+            window_flags=(usdl2.SDL_WINDOW_SHOWN | usdl2.SDL_WINDOW_ALLOW_HIGHDPI),
         )
 
     try:
