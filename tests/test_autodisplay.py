@@ -30,8 +30,12 @@ class TestHostKind(unittest.TestCase):
     def test_desktop(self):
         with mock.patch.dict(sys.modules, {"pyscript": None}), mock.patch.object(
             builtins, "get_ipython", create=True, side_effect=NameError
-        ):
+        ), mock.patch.object(ad.sys, "platform", "linux"):
             self.assertEqual(host_kind(), "desktop")
+
+    def test_android(self):
+        with mock.patch.object(ad.sys, "platform", "android"):
+            self.assertEqual(host_kind(), "android")
 
 
 class TestAutoDisplay(unittest.TestCase):
@@ -146,6 +150,42 @@ class TestAutoDisplay(unittest.TestCase):
         ):
             AutoDisplay(width=10, height=10, canvas_id="c", quiet=True)
         env_set.assert_not_called()
+
+    def test_android_forces_sdl_fullscreen(self):
+        display = mock.Mock(name="SDLDisplay")
+        display.get_events = mock.Mock(name="sdl_get_events")
+        display.requires_async_timer = False
+        sdl_mod = types.ModuleType("displaysys.sdldisplay")
+        sdl_mod.SDLDisplay = mock.Mock(return_value=display)
+        usdl2_mod = types.ModuleType("usdl2")
+        usdl2_mod.SDL_WINDOW_FULLSCREEN_DESKTOP = 0x1001
+        usdl2_mod.SDL_WINDOW_ALLOW_HIGHDPI = 0x2000
+        pg_mod = types.ModuleType("displaysys.pgdisplay")
+        pg_mod.PGDisplay = mock.Mock(name="PGDisplay_should_not_be_used")
+        with mock.patch.object(ad, "host_kind", return_value="android"), mock.patch.dict(
+            sys.modules,
+            {
+                "usdl2": usdl2_mod,
+                "displaysys.sdldisplay": sdl_mod,
+                "displaysys.pgdisplay": pg_mod,
+            },
+        ):
+            result = AutoDisplay(
+                width=720,
+                height=1280,
+                scale=1.0,
+                title="android",
+                quiet=True,
+            )
+        self.assertIs(result, display)
+        pg_mod.PGDisplay.assert_not_called()
+        kwargs = sdl_mod.SDLDisplay.call_args.kwargs
+        self.assertEqual(kwargs["width"], 720)
+        self.assertEqual(kwargs["height"], 1280)
+        self.assertEqual(
+            kwargs["window_flags"],
+            usdl2_mod.SDL_WINDOW_FULLSCREEN_DESKTOP | usdl2_mod.SDL_WINDOW_ALLOW_HIGHDPI,
+        )
 
 
 if __name__ == "__main__":

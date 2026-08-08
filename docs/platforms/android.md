@@ -6,7 +6,7 @@ For an **installable browser app** on Android phones (Chrome home screen, no APK
 
 ## Overview
 
-On Android there is no MicroPython port. pydisplay runs under **CPython** in a **python-for-android** APK with the **SDL2 bootstrap**. The `import usdl2` API comes from the [usdl2](https://test.pypi.org/project/usdl2/) package on TestPyPI (native `android_21_*` wheels). pydisplay's existing `SDLDisplay` backend works unchanged once `usdl2` is installed.
+On Android there is no MicroPython port. pydisplay runs under **CPython** in a **python-for-android** APK with the **SDL2 bootstrap** (no Kivy). Native `libSDL2.so` comes from p4a’s `sdl2` recipe. The `import usdl2` API is the pure-Python binding shipped in [pydisplay-desktop](https://test.pypi.org/project/pydisplay-desktop/) (ctypes against that library). `displaysys.AutoDisplay` selects `SDLDisplay` with fullscreen/HIGHDPI window flags when `sys.platform == "android"`.
 
 APK integration — template app, build scripts, and p4a recipes — lives in [**pydisplay_android**](https://github.com/PyDevices/pydisplay_android).
 
@@ -42,7 +42,7 @@ cd pydisplay_android
 
 Prebuilt **`lvgl-cpython`** wheels for Android (`android_21_arm64_v8a`, etc.) are on [TestPyPI](https://test.pypi.org/project/lvgl-cpython/). The default paint APK does not include LVGL; add `lvglcpython` to `p4a_app/buildozer.spec` `requirements` and wire `main.py` to your LVGL module when you need it.
 
-See [pydisplay_android README](https://github.com/PyDevices/pydisplay_android/blob/main/README.md) for entry points (`main.py` / `paint.py`, `board_config.py`) and recipe details.
+See [pydisplay_android README](https://github.com/PyDevices/pydisplay_android/blob/main/README.md) for entry points (`main.py` / `paint.py`) and recipe details. Display wiring uses the MCU-shaped `board_config` from **pydisplay-desktop** (`AutoDisplay` + `Runtime`); set `PYDISPLAY_WIDTH` / `HEIGHT` / `SCALE` in `main.py` (phone defaults are already set for Android).
 
 ## Timers
 
@@ -50,7 +50,7 @@ On Android, **multimer** selects the **`sdl2`** backend (SDL timers on the UI th
 
 ## Android TV / Fire OS
 
-Same CPython + SDL2 APK stack as phones, with **leanback** packaging and a landscape board config for 10-foot UI.
+Same CPython + SDL2 APK stack as phones, with **leanback** packaging and landscape framebuffer env for 10-foot UI.
 
 **Packaging** ([pydisplay_android](https://github.com/PyDevices/pydisplay_android)):
 
@@ -58,7 +58,7 @@ Same CPython + SDL2 APK stack as phones, with **leanback** packaging and a lands
 - `p4a_app/tv_features.xml` — `android.software.leanback` and `android.hardware.touchscreen` with `required="false"` so non-touch sticks can install.
 - `scripts/emulator_tv.sh` — install/launch helper for android-tv AVDs.
 
-**Board config:** `p4a_app/board_config_tv.py` — 1280×720 landscape, fullscreen on device. Copy over `board_config.py` (or import it from `main.py`) before a TV-oriented build. Phone paint stays on the portrait config by default.
+**Framebuffer:** import `board_config_tv` from `main.py` before `paint` (sets `PYDISPLAY_WIDTH=1280`, `HEIGHT=720`), or set those env vars yourself. Phone paint keeps portrait 720×1280 defaults from `main.py`.
 
 **Remote → eventsys** (SDL Android keyboard map; no extra remap required today):
 
@@ -76,4 +76,4 @@ TV **web** browsers (webOS / Tizen) are a different path — PyScript / [PWA](pw
 
 ## Your own app
 
-Use `pydisplay_android/p4a_app/` as the template: adapt `board_config.py`, replace `paint.py` (and the `import …` in `main.py`), add TestPyPI packages to `buildozer.spec`, and keep `p4a.local_recipes` pointed at this repo's `p4a_recipes/`.
+Use `pydisplay_android/p4a_app/` as the template: replace `paint.py` (and the `import …` in `main.py`), set `PYDISPLAY_*` for your panel size, add TestPyPI packages to `buildozer.spec`, and keep `p4a.local_recipes` pointed at this repo's `p4a_recipes/`. Do not ship a local `board_config.py` that shadows pydisplay-desktop’s module.
