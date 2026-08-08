@@ -17,7 +17,7 @@ pip install \
 
 Why both indexes: [two-index pip install](https://pydisplay.readthedocs.io/en/latest/publishing-micropython-lib/#two-index-pip-install-required).
 
-For desktop SDL, also install native `usdl2` (or pure-Python `usdl2-py`) with the same two-index pattern. For PyGame, install `pygame-ce` from PyPI (`import pygame`).
+For desktop SDL, also install [`pydisplay-desktop`](https://test.pypi.org/project/pydisplay-desktop/) with the same two-index pattern (bundles `usdl2` and the desktop `board_config`). For PyGame, install `pygame-ce` from PyPI (`import pygame`).
 
 ### MicroPython (MIP)
 
@@ -70,7 +70,7 @@ Desktop input backends use [eventsys](https://test.pypi.org/project/eventsys/) a
 - [Documentation — Displays](https://pydisplay.readthedocs.io/en/latest/concepts/displays/)
 - [Source](https://github.com/PyDevices/pydisplay)
 - [Issues](https://github.com/PyDevices/pydisplay/issues)
-- Related: [eventsys](https://test.pypi.org/project/eventsys/), [multimer](https://test.pypi.org/project/multimer/), [pygraphics](https://test.pypi.org/project/pygraphics/), [usdl2](https://test.pypi.org/project/usdl2/), [usdl2-py](https://test.pypi.org/project/usdl2-py/)
+- Related: [eventsys](https://test.pypi.org/project/eventsys/), [multimer](https://test.pypi.org/project/multimer/), [pygraphics](https://test.pypi.org/project/pygraphics/), [pydisplay-desktop](https://test.pypi.org/project/pydisplay-desktop/)
 
 ## License
 
