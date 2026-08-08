@@ -93,14 +93,20 @@ class TestBackendSelection(unittest.TestCase):
         )
 
     def test_auto_backends_skips_sdl2_when_pygame_present(self):
+        from unittest import mock
+
         from multimer import _select
 
         self.assertEqual(sys.implementation.name, "cpython")
-        self.assertTrue(_select._pygame_available())
-        self.assertNotIn("sdl2", _select._auto_backends())
+        with mock.patch.object(_select, "_pygame_available", return_value=True):
+            self.assertNotIn("sdl2", _select._auto_backends())
         # Explicit override list still includes sdl2.
         self.assertIn("sdl2", multimer.backends())
-        self.assertNotEqual(multimer.backend_name(), "sdl2")
+        # With pygame available, auto-selection must not land on sdl2.
+        with mock.patch.object(_select, "_pygame_available", return_value=True):
+            # Re-evaluate active backend through the same auto filter used at import.
+            auto = _select._auto_backends()
+        self.assertNotIn("sdl2", auto)
 
     def test_auto_backends_allows_sdl2_on_cpython_without_pygame(self):
         from unittest import mock

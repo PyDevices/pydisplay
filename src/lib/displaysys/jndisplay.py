@@ -285,6 +285,7 @@ class JNDisplay(DisplayDriver):
     """
 
     needs_refresh = True
+    requires_async_timer = True
 
     _next_display_id = 0
 
@@ -305,6 +306,16 @@ class JNDisplay(DisplayDriver):
         self._visible = None
 
         super().__init__(quiet=quiet)
+
+    def get_events(self):
+        """Drain Jupyter input; lazily create :class:`JNDevices` on first use.
+
+        Static notebooks that only call :meth:`show` never touch this and keep
+        the non-interactive path.
+        """
+        if self._jn_devices is None:
+            JNDevices(self)
+        return self._jn_devices.read()
 
     ############### Required API Methods ################
 

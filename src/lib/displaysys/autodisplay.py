@@ -6,26 +6,14 @@
 
 Selects ``PSDisplay`` / ``JNDisplay`` / ``PGDisplay``→``SDLDisplay`` from the
 runtime host so board configs stay MCU-shaped wiring only.
+
+Returns the display driver directly. Desktop drivers expose ``get_events`` for
+``Runtime(host_read=...)`` and ``requires_async_timer`` for the timer default.
 """
 
-__all__ = ["AutoDisplay", "AutoDisplayResult", "host_kind"]
+import sys
 
-
-class AutoDisplayResult:
-    """Bundle returned by :func:`AutoDisplay`.
-
-    Attributes:
-        display: Concrete displaysys driver instance.
-        host_read: Callable suitable for ``eventsys.Runtime(host_read=...)``.
-        timer_async: Recommended default for ``Runtime(timer_async=...)``.
-        host: ``"pyscript"``, ``"jupyter"``, or ``"desktop"``.
-    """
-
-    def __init__(self, display, host_read, timer_async, host):
-        self.display = display
-        self.host_read = host_read
-        self.timer_async = timer_async
-        self.host = host
+__all__ = ["AutoDisplay", "host_kind"]
 
 
 def host_kind():
@@ -53,7 +41,7 @@ def AutoDisplay(
     *,
     quiet=False,
 ):
-    """Construct a host-appropriate display and matching ``host_read``.
+    """Construct a host-appropriate display driver.
 
     Args:
         width, height, rotation, scale, title: Forwarded to PG/SDL constructors
@@ -62,39 +50,39 @@ def AutoDisplay(
         quiet: Suppress driver init chatter when True.
 
     Returns:
-        AutoDisplayResult: ``.display``, ``.host_read``, ``.timer_async``, ``.host``.
+        A ``PSDisplay``, ``JNDisplay``, ``PGDisplay``, or ``SDLDisplay`` with
+        ``get_events`` and ``requires_async_timer`` set for board_config wiring.
     """
     host = host_kind()
 
-    if host == "pyscript":
-        from displaysys.psdisplay import PSDevices, PSDisplay
+    if host != "pyscript" and sys.platform == "win32":
+        # SDL2's default Windows audio driver (WASAPI) glitches with
+        # pygame.mixer.Channel small-chunk playback; DirectSound does not.
+        # Must land before PGDisplay.pg.init() / first SDL audio subsystem
+        # init. Skip pyscript (webaudio). Explicit user choice is left alone.
+        # Lazy import: env_* live on the package and are defined after this
+        # module is loaded during ``import displaysys``.
+        from displaysys import env_get, env_set
 
-        display = PSDisplay(canvas_id, width, height, quiet=quiet)
-        devices = PSDevices(canvas_id, display)
-        return AutoDisplayResult(display, devices.read, True, host)
+        if env_get("SDL_AUDIODRIVER") is None:
+            env_set("SDL_AUDIODRIVER", "directsound")
+
+    if host == "pyscript":
+        from displaysys.psdisplay import PSDisplay
+
+        return PSDisplay(canvas_id, width, height, quiet=quiet)
 
     if host == "jupyter":
-        from displaysys.jndisplay import JNDevices, JNDisplay
+        from displaysys.jndisplay import JNDisplay
 
-        display = JNDisplay(width, height, quiet=quiet)
-        devices = JNDevices(display)
-        return AutoDisplayResult(display, devices.read, True, host)
+        return JNDisplay(width, height, quiet=quiet)
 
     try:
-        from displaysys.pgdisplay import PGDisplay, get_events
+        from displaysys.pgdisplay import PGDisplay
     except Exception:
-        from displaysys.sdldisplay import SDLDisplay, get_events
+        from displaysys.sdldisplay import SDLDisplay
 
-        display = SDLDisplay(
-            width=width,
-            height=height,
-            rotation=rotation,
-            title=title,
-            scale=scale,
-            quiet=quiet,
-        )
-    else:
-        display = PGDisplay(
+        return SDLDisplay(
             width=width,
             height=height,
             rotation=rotation,
@@ -103,4 +91,11 @@ def AutoDisplay(
             quiet=quiet,
         )
 
-    return AutoDisplayResult(display, get_events, False, host)
+    return PGDisplay(
+        width=width,
+        height=height,
+        rotation=rotation,
+        title=title,
+        scale=scale,
+        quiet=quiet,
+    )

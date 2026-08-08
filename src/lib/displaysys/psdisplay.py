@@ -328,8 +328,10 @@ class PSDisplay(DisplayDriver):
     """
 
     needs_refresh = True
+    requires_async_timer = True
 
     def __init__(self, id, width=None, height=None, *, quiet=False):
+        self._canvas_id = id
         self._canvas = document.getElementById(id)
         self._vis_ctx = self._canvas.getContext("2d")
         self._buffer = None
@@ -343,6 +345,9 @@ class PSDisplay(DisplayDriver):
         self.touch_scale = 1.0
 
         super().__init__(quiet=quiet)
+        # Per-canvas input; drain is the Runtime host_read callable.
+        self._ps_devices = PSDevices(id, self)
+        self.get_events = self._ps_devices.read
 
     ############### Required API Methods ################
 

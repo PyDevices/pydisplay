@@ -313,6 +313,8 @@ class PGDisplay(DisplayDriver):
         # DisplayDriver.__init__ used to reset touch_scale to 1.0; keep window scale
         # so HostEventsDevice maps pygame coords into panel space.
         self.touch_scale = self._scale
+        # System-wide pygame queue drain (same callable on every PGDisplay).
+        self.get_events = get_events
         if self not in _pg_displays:
             _pg_displays.append(self)
 

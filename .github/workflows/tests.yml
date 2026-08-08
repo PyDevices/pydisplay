@@ -23,6 +23,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Checkout micropython-hardware (boarddev for tests)
+        uses: actions/checkout@v4
+        with:
+          repository: PyDevices/micropython-hardware
+          path: micropython-hardware
+          sparse-checkout: |
+            drivers/boarddev.py
+          sparse-checkout-cone-mode: false
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'

@@ -536,6 +536,8 @@ class SDLDisplay(DisplayDriver):
 
         _displays.append(self)
         super().__init__(quiet=quiet)
+        # System-wide SDL queue drain (same callable on every SDLDisplay).
+        self.get_events = get_events
 
     ############### Required API Methods ################
 

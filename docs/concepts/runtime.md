@@ -12,14 +12,14 @@ Every pydisplay app expects a **`board_config.py`** on `sys.path` that exports:
 ## Quick start — hosted desktop
 
 ```python
-from sdldisplay import SDLDisplay, get_events
+from displaysys.sdldisplay import SDLDisplay
 import eventsys
 
 display_drv = SDLDisplay(width=320, height=480, rotation=0, scale=2.0, title="My app")
 
 runtime = eventsys.Runtime(
-    display=display_drv,
-    host_read=get_events,
+    displays=[display_drv],
+    host_read=display_drv.get_events,
 )
 ```
 

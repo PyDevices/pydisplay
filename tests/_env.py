@@ -4,8 +4,10 @@
 """Shared test bootstrap that puts pydisplay packages on ``sys.path``.
 
 Puts ``src/lib`` (displaysys, eventsys, multimer) and ``src/utils`` on
-``sys.path`` without installing anything. Does **not** require sibling git
-checkouts or optional packages such as ``pygraphics`` / ``usdl2``.
+``sys.path`` without installing anything. When a sibling (or nested)
+``micropython-hardware/drivers`` tree is present, that path is added so
+``boarddev`` imports work. Does **not** require optional packages such as
+``pygraphics`` / ``usdl2``.
 
     import _env  # noqa: F401
     import multimer
@@ -24,6 +26,18 @@ if _SRC_LIB not in sys.path:
     sys.path.insert(0, _SRC_LIB)
 if _SRC_UTILS not in sys.path:
     sys.path.insert(0, _SRC_UTILS)
+
+# Optional: boarddev and other hardware drivers when the sibling checkout
+# (or a CI nested clone under the repo root) is present.
+_HARDWARE_DRIVERS_CANDIDATES = (
+    os.path.join(_REPO_ROOT, "..", "micropython-hardware", "drivers"),
+    os.path.join(_REPO_ROOT, "micropython-hardware", "drivers"),
+)
+for _drivers in _HARDWARE_DRIVERS_CANDIDATES:
+    _drivers = os.path.abspath(_drivers)
+    if os.path.isdir(_drivers) and _drivers not in sys.path:
+        sys.path.insert(0, _drivers)
+        break
 
 #: Absolute path to the ``multimer`` package directory.
 MULTIMER_DIR = os.path.join(_SRC_LIB, "multimer")

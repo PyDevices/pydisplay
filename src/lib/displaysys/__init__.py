@@ -18,7 +18,7 @@ Host auto-selection (desktop / Jupyter / PyScript)::
 import gc
 import sys
 
-from .autodisplay import AutoDisplay, AutoDisplayResult, host_kind
+from .autodisplay import AutoDisplay, host_kind
 
 try:
     import micropython as _mp
@@ -65,7 +65,6 @@ byteswap, _BYTESWAP_BACKEND = _install_byteswap()
 
 __all__ = [
     "AutoDisplay",
-    "AutoDisplayResult",
     "DisplayDriver",
     "alloc_buffer",
     "byteswap",
@@ -544,6 +543,9 @@ class DisplayDriver:
     """
 
     needs_refresh = False
+    # True on async-native hosts (PSDisplay / JNDisplay); desktop PG/SDL keep False.
+    # Board configs decide Runtime.timer_async via env_bool(..., display.requires_async_timer).
+    requires_async_timer = False
     share_framebuffer = False
 
     def framebuffers(self):

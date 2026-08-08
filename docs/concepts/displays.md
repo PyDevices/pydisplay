@@ -63,11 +63,13 @@ platform exposes:
 
 | Backends | Input source | Wired via |
 |----------|--------------|-----------|
-| `SDL2Display`, `PGDisplay` | module-level `get_events()` draining the native OS event queue | `Runtime(..., host_read=get_events)` |
-| `JNDisplay`, `PSDisplay` | a `JNDevices` / `PSDevices` instance capturing browser input, drained via `read()` | `Runtime(..., host_read=devices_drv.read)` |
+| `SDLDisplay`, `PGDisplay` | System-wide OS queue drain (module `get_events`, also on `display_drv.get_events`) | `Runtime(..., host_read=display_drv.get_events)` |
+| `JNDisplay`, `PSDisplay` | Per-surface `PSDevices` / `JNDevices`, exposed as `display_drv.get_events` | `Runtime(..., host_read=display_drv.get_events)` |
 
 Either way your handler sees the same `eventsys.events` objects, so application
-code never needs to know which backend is active.
+code never needs to know which backend is active. Desktop board configs also use
+`timer_async=env_bool("PYDISPLAY_TIMER_ASYNC", display_drv.requires_async_timer)`
+(`requires_async_timer` is `True` only on PS/JN).
 
 ### Desktop (SDL2, PyGame)
 
@@ -75,11 +77,14 @@ SDL2 and PyGame provide a real OS event queue. The driver module drains it and
 converts each event to an `eventsys.events` object:
 
 ```python
-from displaysys.sdldisplay import SDLDisplay, get_events
+from displaysys.sdldisplay import SDLDisplay
 import eventsys
 
 display_drv = SDLDisplay(...)
-runtime = eventsys.Runtime(display=display_drv, host_read=get_events)
+runtime = eventsys.Runtime(
+    displays=[display_drv],
+    host_read=display_drv.get_events,
+)
 ```
 
 Use `poll_event()` only for optional manual single-event checks — not as the
@@ -102,16 +107,19 @@ launching — hot-plugging after startup is not handled.
 ### Browser / notebook (PyScript, Jupyter)
 
 `PSDevices` (PyScript) and `JNDevices` (Jupyter) capture all available input on
-the canvas/widget and turn it into the same `eventsys.events` objects, drained
-through `read()`:
+the canvas/widget and turn it into the same `eventsys.events` objects. The
+display owns that drain as `get_events`:
 
 ```python
-from displaysys.psdisplay import PSDevices, PSDisplay
+from displaysys.psdisplay import PSDisplay
 import eventsys
 
 display_drv = PSDisplay("display_canvas", width, height)
-devices_drv = PSDevices("display_canvas", display_drv)
-runtime = eventsys.Runtime(display=display_drv, host_read=devices_drv.read)
+runtime = eventsys.Runtime(
+    displays=[display_drv],
+    host_read=display_drv.get_events,
+    timer_async=display_drv.requires_async_timer,
+)
 ```
 
 Each captures:

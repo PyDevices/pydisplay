@@ -28,6 +28,7 @@ Or copy the utils modules into `lib/` on your device.
 | `framebuf.py` | framebuf API on CPython/CircuitPython |
 | `displaybuf.py` | Peter Hinch DisplayBuffer API |
 | `console.py` | Terminal-style console widget |
+| `lv_encoder_emu.py` | Desktop-only soft encoder UI on a secondary surface (stand-in for MCU `machine.Encoder` / `rotaryio`); see `examples/lv_multi_display.py` |
 | `pdwidgets/` | Moved to [pdwidgets](https://github.com/PyDevices/pdwidgets) — [user guide](guis/pywidgets.md) |
 | `palettes/` | Moved to [palettes](https://github.com/PyDevices/palettes) — [user guide](guis/palettes.md) |
 | `tft_text.py`, `tft_write.py` | russhughes font rendering |
