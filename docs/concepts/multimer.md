@@ -187,6 +187,49 @@ Backend selection for sync `Timer` (first importable match wins):
 3. Auto chain: **`machine` → `librt` → `sdl2` → `threading` → `polling`**,
    with **`sdl2` omitted on CPython when pygame imports** (see tables).
 
+### Selection flow
+
+```mermaid
+flowchart TB
+  start["import multimer.Timer"]
+  override{"Override set?"}
+  bind["load_backend(name)"]
+  async_q{"Async-only host?"}
+  async_b["async (AsyncTimer)"]
+  try_machine["try machine"]
+  machine["machine"]
+  try_librt["try librt"]
+  librt["librt"]
+  skip_sdl2{"CPython + pygame?"}
+  try_sdl2["try sdl2 (needs usdl2)"]
+  sdl2["sdl2"]
+  try_threading["try threading"]
+  threading["threading"]
+  try_polling["try polling"]
+  polling["polling"]
+  fail["ImportError"]
+
+  start --> override
+  override -->|yes| bind
+  override -->|no| async_q
+  async_q -->|yes| async_b
+  async_q -->|no| try_machine
+  try_machine -->|ok| machine
+  try_machine -->|fail| try_librt
+  try_librt -->|ok| librt
+  try_librt -->|fail| skip_sdl2
+  skip_sdl2 -->|skip sdl2| try_threading
+  skip_sdl2 -->|no| try_sdl2
+  try_sdl2 -->|ok| sdl2
+  try_sdl2 -->|fail| try_threading
+  try_threading -->|ok| threading
+  try_threading -->|fail| try_polling
+  try_polling -->|ok| polling
+  try_polling -->|fail| fail
+```
+
+Override raises when the named backend cannot import (no silent fallback). On CPython, auto-selection skips `sdl2` when pygame is importable so `PGDisplay` does not share a process with usdl2 timers. **`micropython.exe` without usdl2** has no `threading` and lands on **`polling`**.
+
 ### Backend roles
 
 | Backend | Typical hosts | Notes |
