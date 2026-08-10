@@ -8,14 +8,19 @@ sustain; multiple keys (and the computer keyboard) sound together. Rotates a
 portrait panel 90 degrees into landscape.
 """
 
-import board_config
 from audio import AudioEngine, midi_to_hz
+import board_config
+import board_devices
+
 from eventsys.keys import Keys
 from pygraphics import Draw
 
 display_drv = board_config.display_drv
 runtime = board_config.runtime
-audio_out = board_config.audio_out
+# Built here rather than taken from board_config so it can ask for the
+# interactive profile: the default is buffered for throughput, which a synth
+# writing at realtime pays as note-to-sound delay.
+audio_out = board_devices.audio_out(latency="low")
 
 # Landscape keyboard target.
 if display_drv.width < display_drv.height:
