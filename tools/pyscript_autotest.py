@@ -31,6 +31,13 @@ _IGNORE_ERROR_SUBSTR = (
     "Failed to execute 'fetch' on 'Window'",  # optional debug POST
     "net::ERR_",  # transient CDN/cache; pageerror path still catches hard fails
     "ResizeObserver loop",
+    # Chrome reports a failed subresource with no way to tell which one: the
+    # message carries no URL and the location is the *initiator*
+    # (micropython.mjs for every MIP fetch). harness.html probes for an optional
+    # local override in web/pyscript/dev/, so a 404 here is the normal case on
+    # any machine without that directory. A resource that actually matters still
+    # fails the run as a Python ImportError or traceback below.
+    "Failed to load resource",
 )
 
 _READY_MARKERS = (
