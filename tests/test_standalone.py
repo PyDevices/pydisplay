@@ -6,7 +6,8 @@
 Each test copies *only* one package into a temporary directory and imports it
 in a fresh subprocess whose path contains nothing else from the repository. If
 a package secretly depended on other pydisplay modules, the import would fail
-or those modules would appear in ``sys.modules``.
+or those modules would appear in ``sys.modules``. ``eventsys`` and ``displaysys``
+also receive shared ``events.py`` / ``keys.py`` (not pydisplay packages).
 """
 
 import os
@@ -67,9 +68,10 @@ _EVENTSYS_CHILD = textwrap.dedent(
     """
     import sys
 
+    import events
     import eventsys
-    from eventsys import KeypadDevice, Runtime, events, types
-    from eventsys.keys import Keys
+    import keys
+    from eventsys import KeypadDevice, Runtime, types
 
     forbidden = [m for m in {siblings!r} if m in sys.modules]
     assert not forbidden, "eventsys pulled in pydisplay modules: %r" % forbidden
@@ -90,7 +92,7 @@ _EVENTSYS_CHILD = textwrap.dedent(
     assert up and up[0].type == events.KEYUP, up
     assert len(seen) == 2, seen
 
-    assert Keys.keyname(Keys.K_a) == "A"
+    assert keys.keyname(keys.K_a) == "A"
 
     print("STANDALONE_OK")
     """
@@ -102,6 +104,8 @@ _DISPLAYSYS_CHILD = textwrap.dedent(
     import sys
 
     import displaysys
+    import events
+    import keys
     from displaysys import (
         alloc_buffer,
         color332,
@@ -109,6 +113,7 @@ _DISPLAYSYS_CHILD = textwrap.dedent(
         color565_swapped,
         color_rgb,
     )
+    from displaysys._domkeys import key_to_keycode
     from displaysys.fbdisplay import FBDisplay
 
 
@@ -139,6 +144,10 @@ _DISPLAYSYS_CHILD = textwrap.dedent(
     d.deinit()
 
     assert "multimer" not in sys.modules, "displaysys imported multimer unexpectedly"
+    assert "eventsys" not in sys.modules, "displaysys imported eventsys"
+    assert events.QUIT == 0x100
+    assert keys.K_q
+    assert key_to_keycode("BrowserBack", 0) == keys.K_AC_BACK
 
     print("STANDALONE_OK")
     """
@@ -175,6 +184,8 @@ class TestStandalone(unittest.TestCase):
         tmp = tempfile.mkdtemp(prefix="eventsys_standalone_")
         try:
             shutil.copytree(_env.EVENTSYS_DIR, os.path.join(tmp, "eventsys"))
+            shutil.copyfile(_env.EVENTS_PY, os.path.join(tmp, "events.py"))
+            shutil.copyfile(_env.KEYS_PY, os.path.join(tmp, "keys.py"))
 
             env = dict(os.environ)
             env["PYTHONPATH"] = tmp
@@ -200,6 +211,8 @@ class TestStandalone(unittest.TestCase):
         tmp = tempfile.mkdtemp(prefix="displaysys_standalone_")
         try:
             shutil.copytree(_env.DISPLAYSYS_DIR, os.path.join(tmp, "displaysys"))
+            shutil.copyfile(_env.EVENTS_PY, os.path.join(tmp, "events.py"))
+            shutil.copyfile(_env.KEYS_PY, os.path.join(tmp, "keys.py"))
 
             env = dict(os.environ)
             env["PYTHONPATH"] = tmp

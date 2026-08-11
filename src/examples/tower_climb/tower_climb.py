@@ -25,7 +25,7 @@ if _PKG_DIR not in sys.path:
 
 from board_config import display_drv, runtime
 from displaysys import color565
-from eventsys.keys import Keys
+import keys
 from pygraphics import BMP565, FrameBuffer, RGB565, rect, text8
 import _cfg as cfg
 from _paths import asset_path
@@ -631,28 +631,28 @@ def _handle_event(ev):
     t = ev.type
     if t == runtime.events.KEYDOWN:
         k = ev.key
-        if k in (Keys.K_LEFT, Keys.K_a):
+        if k in (keys.K_LEFT, keys.K_a):
             _keys["left"] = True
-        elif k in (Keys.K_RIGHT, Keys.K_d):
+        elif k in (keys.K_RIGHT, keys.K_d):
             _keys["right"] = True
-        elif k in (Keys.K_SPACE, Keys.K_UP, Keys.K_w):
+        elif k in (keys.K_SPACE, keys.K_UP, keys.K_w):
             _keys["up"] = True
-        elif k in (Keys.K_DOWN, Keys.K_s):
+        elif k in (keys.K_DOWN, keys.K_s):
             _keys["down"] = True
             _keys["smash"] = True
-        elif k in (Keys.K_x, Keys.K_z):
+        elif k in (keys.K_x, keys.K_z):
             _keys["smash"] = True
         if _trace is not None:
             _trace.log_input("keydown", key=int(k))
     elif t == runtime.events.KEYUP:
         k = ev.key
-        if k in (Keys.K_LEFT, Keys.K_a):
+        if k in (keys.K_LEFT, keys.K_a):
             _keys["left"] = False
-        elif k in (Keys.K_RIGHT, Keys.K_d):
+        elif k in (keys.K_RIGHT, keys.K_d):
             _keys["right"] = False
-        elif k in (Keys.K_SPACE, Keys.K_UP, Keys.K_w):
+        elif k in (keys.K_SPACE, keys.K_UP, keys.K_w):
             _keys["up"] = False
-        elif k in (Keys.K_DOWN, Keys.K_s):
+        elif k in (keys.K_DOWN, keys.K_s):
             _keys["down"] = False
             _keys["smash"] = False
         if _trace is not None:

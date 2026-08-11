@@ -19,8 +19,8 @@ from displaysys import (
     fit_scale_to_desktop,
     notify_board_config_scale_override,
 )
-from eventsys import events
-from eventsys.keys import default_quit_chord
+import events
+import keys
 
 _JOYSTICK_API = (
     "SDL_InitSubSystem",
@@ -439,6 +439,7 @@ class SDLDisplay(DisplayDriver):
     """
 
     needs_refresh = True
+    quit_chord = (keys.K_q, keys.KMOD_CTRL)
 
     def __init__(
         self,
@@ -463,7 +464,6 @@ class SDLDisplay(DisplayDriver):
         self._window_flags = window_flags
         self._scale = scale
         self.touch_scale = 1.0
-        self.quit_chord = default_quit_chord()
         self._buffer = None
         self._render_dirty = False
         self._show_pending = False

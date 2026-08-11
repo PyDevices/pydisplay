@@ -46,11 +46,11 @@ Ordered by layer. Each item is a targeted change with acceptance criteria.
 ### A. eventsys — ``KeypadDevice`` name must not use ``chr(key)`` (multi-backend / HW)
 
 - **Where:** ``eventsys/_keypad.py`` ``_poll``.
-- **Bug:** ``chr(Keys.K_UP)`` etc. raises ``ValueError`` (SDL scancode-masked
-  codes). FunHouse ``board_config`` feeds ``Keys.K_UP`` / ``K_DOWN``.
-- **Fix:** Set ``name`` via ``Keys.keyname(key)`` (or ``""`` / hex fallback),
+- **Bug:** ``chr(keys.K_UP)`` etc. raises ``ValueError`` (SDL scancode-masked
+  codes). FunHouse ``board_config`` feeds ``keys.K_UP`` / ``K_DOWN``.
+- **Fix:** Set ``name`` via ``keys.keyname(key)`` (or ``""`` / hex fallback),
   never ``chr(key)`` for arbitrary ints. Keep ``key`` as the int code.
-- **Accept:** ``KeypadDevice(read=lambda: {Keys.K_UP}).poll()`` returns a
+- **Accept:** ``KeypadDevice(read=lambda: {keys.K_UP}).poll()`` returns a
   ``KEYDOWN``; FunHouse up/down no longer crash the auto-service tick.
 - **Tests:** ``--selftest`` case ``keypad_chr_safe``; board smoke if available.
 
@@ -142,13 +142,13 @@ Ordered by layer. Each item is a targeted change with acceptance criteria.
   ``SDL_GetKeyName`` → ASCII/control codes at **sdldisplay** (affects all
   consumers), not only in ``display_driver``.
 - **Accept:** Letter ``KEYDOWN`` ``event.key`` in 32..126 on that host;
-  ``Keys.keyname`` resolves; LVGL and non-LVGL typing both work.
+  ``keys.keyname`` resolves; LVGL and non-LVGL typing both work.
 
 ## What this probe prints
 
 Interactive lines::
 
-    KEYDOWN  key=97  Keys.K_a  name='A'  mod=0x1  scancode=4  downs=1  [lv→97]
+    KEYDOWN  key=97  keys.K_a  name='A'  mod=0x1  scancode=4  downs=1  [lv→97]
 
 Counters expose OS repeat. ``--lvgl`` adds the mapped LVGL key. ``--selftest``
 runs automated checks for A and static mapping expectations for D/E/F.
@@ -162,15 +162,18 @@ _root = _tools.rsplit("/", 1)[0] if "/" in _tools else "."
 _src = (_root + "/src") if _root not in (".", "") else "src"
 _src_lib = _src + "/lib"
 _src_utils = _src + "/utils"
+_hw_lib = _root + "/../micropython-hardware/lib"
 # Prefer src/lib so eventsys/displaysys resolve from repo root or src/.
-for _p in (_src_lib, _src_utils, _src, _tools):
+for _p in (_hw_lib, _src_lib, _src_utils, _src, _tools):
     if _p and _p not in sys.path:
         sys.path.insert(0, _p)
 
-from eventsys import events, types  # noqa: E402
+from displaysys._domkeys import enrich_mod, key_to_keycode, mod_mask  # noqa: E402
+import events  # noqa: E402
+from eventsys import types  # noqa: E402
 from eventsys._host import VirtualDevices  # noqa: E402
 from eventsys._keypad import KeypadDevice  # noqa: E402
-from eventsys.keys import Keys, chord_matches, enrich_mod, key_to_keycode, mod_mask  # noqa: E402
+import keys  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Optional LVGL mapping (same function LVGL apps use)
@@ -222,8 +225,8 @@ def _lv_label(mapped):
 # Formatting
 # ---------------------------------------------------------------------------
 def _keys_const_name(code):
-    for name in dir(Keys):
-        if name.startswith("K_") and getattr(Keys, name, None) == code:
+    for name in dir(keys):
+        if name.startswith("K_") and getattr(keys, name, None) == code:
             return name
     return "?"
 
@@ -244,7 +247,7 @@ def _mod_parts(mod):
         "KMOD_CAPS",
         "KMOD_NUM",
     ):
-        bit = getattr(Keys, name, 0)
+        bit = getattr(keys, name, 0)
         if bit and (mod & bit) == bit:
             bits.append(name.replace("KMOD_", ""))
     return "0x%x(%s)" % (mod, "|".join(bits) if bits else "?")
@@ -258,7 +261,7 @@ def format_key_event(event, downs=None, show_lvgl=False):
     parts = [
         phase,
         "key=%s" % code,
-        "Keys.%s" % _keys_const_name(code),
+        "keys.%s" % _keys_const_name(code),
         "name=%r" % (getattr(event, "name", None) or ""),
         "mod=%s" % _mod_parts(getattr(event, "mod", 0) or 0),
         "scancode=%s" % getattr(event, "scancode", None),
@@ -311,11 +314,11 @@ def run_selftest():
 
     # A — KeypadDevice must not crash on SDL-masked navigation codes
     for label, code in (
-        ("K_UP", Keys.K_UP),
-        ("K_DOWN", Keys.K_DOWN),
-        ("K_LEFT", Keys.K_LEFT),
-        ("K_RIGHT", Keys.K_RIGHT),
-        ("K_ESCAPE", Keys.K_ESCAPE),
+        ("K_UP", keys.K_UP),
+        ("K_DOWN", keys.K_DOWN),
+        ("K_LEFT", keys.K_LEFT),
+        ("K_RIGHT", keys.K_RIGHT),
+        ("K_ESCAPE", keys.K_ESCAPE),
     ):
         held = {code}
 
@@ -344,23 +347,23 @@ def run_selftest():
     r.check("keypad_ascii_a", len(out_a) == 1 and out_a[0].key == 97, repr(out_a))
     r.check(
         "keypad_up_name",
-        KeypadDevice(read=lambda: {Keys.K_UP}).poll()[0].name == Keys.keyname(Keys.K_UP),
+        KeypadDevice(read=lambda: {keys.K_UP}).poll()[0].name == keys.keyname(keys.K_UP),
     )
 
     # G — bare mod_mask stays left-only; enrich_mod adds right bits from pressed keys
     m = mod_mask(True, True, True, True)
-    r.check("mod_mask_has_LSHIFT", bool(m & Keys.KMOD_LSHIFT))
-    r.check("mod_mask_lacks_RSHIFT", not (m & Keys.KMOD_RSHIFT), "hex=%s" % hex(m))
-    enriched = enrich_mod(m, {Keys.K_RSHIFT, Keys.K_RCTRL})
-    r.check("enrich_mod_RSHIFT", bool(enriched & Keys.KMOD_RSHIFT))
-    r.check("enrich_mod_RCTRL", bool(enriched & Keys.KMOD_RCTRL))
+    r.check("mod_mask_has_LSHIFT", bool(m & keys.KMOD_LSHIFT))
+    r.check("mod_mask_lacks_RSHIFT", not (m & keys.KMOD_RSHIFT), "hex=%s" % hex(m))
+    enriched = enrich_mod(m, {keys.K_RSHIFT, keys.K_RCTRL})
+    r.check("enrich_mod_RSHIFT", bool(enriched & keys.KMOD_RSHIFT))
+    r.check("enrich_mod_RCTRL", bool(enriched & keys.KMOD_RCTRL))
     r.check(
         "chord_matches_group_RCTRL",
-        chord_matches((Keys.K_q, Keys.KMOD_CTRL), Keys.K_q, Keys.KMOD_RCTRL),
+        keys.chord_matches((keys.K_q, keys.KMOD_CTRL), keys.K_q, keys.KMOD_RCTRL),
     )
     r.check(
         "key_to_keycode_Shift_right",
-        key_to_keycode("Shift", 2) == Keys.K_RSHIFT,
+        key_to_keycode("Shift", 2) == keys.K_RSHIFT,
     )
 
     # C — same-key KEYDOWN coalesce + KEYUP purge
@@ -393,23 +396,23 @@ def run_selftest():
                 self.mod = mod
                 self.name = name
 
-        mapped_up = _lv_key_from_event(Ev(Keys.K_UP))
+        mapped_up = _lv_key_from_event(Ev(keys.K_UP))
         r.check(
             "lv_arrows_are_caret",
             mapped_up == _lv.KEY.UP,
             "got %s" % _lv_label(mapped_up),
         )
-        mapped_tab = _lv_key_from_event(Ev(Keys.K_TAB))
+        mapped_tab = _lv_key_from_event(Ev(keys.K_TAB))
         r.check("lv_tab_is_next", mapped_tab == _lv.KEY.NEXT, "got %s" % _lv_label(mapped_tab))
-        mapped_shift = _lv_key_from_event(Ev(Keys.K_LSHIFT))
+        mapped_shift = _lv_key_from_event(Ev(keys.K_LSHIFT))
         r.check("lv_modifier_dropped", mapped_shift is None, "got %r" % (mapped_shift,))
-        mapped_f1 = _lv_key_from_event(Ev(Keys.K_F1))
+        mapped_f1 = _lv_key_from_event(Ev(keys.K_F1))
         r.check("lv_f1_dropped", mapped_f1 is None, "got %r" % (mapped_f1,))
-        mapped_sa = _lv_key_from_event(Ev(Keys.K_a, Keys.KMOD_LSHIFT))
+        mapped_sa = _lv_key_from_event(Ev(keys.K_a, keys.KMOD_LSHIFT))
         r.check("lv_shift_letter", mapped_sa == ord("A"), "got %r" % (mapped_sa,))
-        mapped_s1 = _lv_key_from_event(Ev(Keys.K_1, Keys.KMOD_LSHIFT))
+        mapped_s1 = _lv_key_from_event(Ev(keys.K_1, keys.KMOD_LSHIFT))
         r.check("lv_shift_digit", mapped_s1 == ord("!"), "got %r" % (mapped_s1,))
-        mapped_tracked = _lv_key_from_event(Ev(Keys.K_a, 0), Keys.KMOD_LSHIFT)
+        mapped_tracked = _lv_key_from_event(Ev(keys.K_a, 0), keys.KMOD_LSHIFT)
         r.check(
             "lv_tracked_mods",
             mapped_tracked == ord("A"),
@@ -435,8 +438,8 @@ Ordered by layer. Each item is a targeted change with acceptance criteria.
 
 A. eventsys — KeypadDevice name must not use chr(key) (multi-backend / HW)
    Where: eventsys/_keypad.py _poll
-   Fix: Keys.keyname(key) or "" / hex fallback — never chr(key) for arbitrary ints
-   Accept: KeypadDevice(read=lambda: {Keys.K_UP}).poll() returns KEYDOWN
+   Fix: keys.keyname(key) or "" / hex fallback — never chr(key) for arbitrary ints
+   Accept: KeypadDevice(read=lambda: {keys.K_UP}).poll() returns KEYDOWN
 
 B. displaysys — unify key-repeat policy (SDL/pygame vs browser)
    Where: sdldisplay/pgdisplay _convert vs psdisplay/jndisplay (already drop repeat)
@@ -506,12 +509,12 @@ def run_interactive(show_lvgl=False):
         print(format_key_event(event, downs=downs, show_lvgl=show_lvgl))
         # Chord sample: Ctrl+Shift+letter
         mod = getattr(event, "mod", 0) or 0
-        if event.type == events.KEYDOWN and (mod & Keys.KMOD_CTRL) and (mod & Keys.KMOD_SHIFT):
+        if event.type == events.KEYDOWN and (mod & keys.KMOD_CTRL) and (mod & keys.KMOD_SHIFT):
             print(
                 "  chord: Ctrl+Shift+%s  chord_matches(Ctrl)=%s"
                 % (
                     _keys_const_name(event.key),
-                    chord_matches((event.key, Keys.KMOD_CTRL), event.key, mod),
+                    keys.chord_matches((event.key, keys.KMOD_CTRL), event.key, mod),
                 )
             )
 

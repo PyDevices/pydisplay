@@ -17,7 +17,7 @@ The `src/` directory mirrors what a device filesystem looks like after installin
 
 ```
 src/
-├── lib/                 # core packages (displaysys, eventsys, …)
+├── lib/                 # core packages (displaysys, eventsys, events.py, keys.py, …)
 ├── examples/            # demo scripts
 ├── utils/               # optional extensions — path.py, color_setup, tft_config, gui/, …
 ```

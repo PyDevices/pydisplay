@@ -17,8 +17,8 @@ from displaysys import (
     fit_scale_to_desktop,
     notify_board_config_scale_override,
 )
-from eventsys import events
-from eventsys.keys import default_quit_chord
+import events
+import keys
 
 __all__ = ["PGDisplay", "get_events", "poll_event"]
 
@@ -236,6 +236,7 @@ class PGDisplay(DisplayDriver):
     """
 
     needs_refresh = True
+    quit_chord = (keys.K_q, keys.KMOD_CTRL)
 
     def __init__(
         self,
@@ -257,7 +258,6 @@ class PGDisplay(DisplayDriver):
         self._window_flags = window_flags
         self._scale = scale
         self.touch_scale = scale
-        self.quit_chord = default_quit_chord()
         self._buffer = None
         self._pg_window = None
         self._window_id = None

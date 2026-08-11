@@ -8,6 +8,7 @@ import unittest
 import _env  # noqa: F401
 from _support import FakeDisplay, scripted
 
+import events
 import eventsys
 from eventsys import (
     Device,
@@ -17,7 +18,6 @@ from eventsys import (
     Runtime,
     TouchDevice,
     VirtualDevices,
-    events,
     types,
 )
 from eventsys._device import _mapping as device_mapping

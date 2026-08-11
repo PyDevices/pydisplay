@@ -1,37 +1,19 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Tests for eventsys quit helpers and HostEventsDevice quit chord."""
+"""Tests for HostEventsDevice quit_chord handling."""
 
 import unittest
 
 import _env  # noqa: F401
 from _support import scripted
 
-import eventsys
-from eventsys import HostEventsDevice, Runtime, events
-from eventsys.keys import Keys, default_quit_chord, key_triggers_quit
+import events
+from eventsys import HostEventsDevice, Runtime
+import keys
 
-
-class TestDefaultQuitChord(unittest.TestCase):
-    def test_default_quit_chord_is_ctrl_q(self):
-        self.assertEqual(default_quit_chord(), (Keys.K_q, Keys.KMOD_CTRL))
-
-    def test_exported_from_eventsys(self):
-        self.assertEqual(eventsys.default_quit_chord(), (Keys.K_q, Keys.KMOD_CTRL))
-
-
-class TestKeyTriggersQuit(unittest.TestCase):
-    def test_keydown_matching_chord(self):
-        chord = default_quit_chord()
-        self.assertTrue(key_triggers_quit(events.KEYDOWN, Keys.K_q, Keys.KMOD_CTRL, chord))
-
-    def test_keyup_never_triggers(self):
-        chord = default_quit_chord()
-        self.assertFalse(key_triggers_quit(events.KEYUP, Keys.K_q, Keys.KMOD_CTRL, chord))
-
-    def test_none_chord_disabled(self):
-        self.assertFalse(key_triggers_quit(events.KEYDOWN, Keys.K_q, 0, None))
+_CTRL_Q = (keys.K_q, keys.KMOD_CTRL)
+_AC_BACK = (keys.K_AC_BACK, 0)
 
 
 class TestQuitRequested(unittest.TestCase):
@@ -62,9 +44,9 @@ class TestRuntimeQuitLifecycle(unittest.TestCase):
 class TestHostEventsDeviceQuitChord(unittest.TestCase):
     def test_chord_keydown_becomes_quit(self):
         class Data:
-            quit_chord = default_quit_chord()
+            quit_chord = _CTRL_Q
 
-        ev = events.Key(events.KEYDOWN, "q", Keys.K_q, Keys.KMOD_CTRL, 0, None)
+        ev = events.Key(events.KEYDOWN, "q", keys.K_q, keys.KMOD_CTRL, 0, None)
         dev = HostEventsDevice(host_read=scripted([ev]), display=Data())
         out = dev.poll()
         self.assertEqual(len(out), 1)
@@ -72,49 +54,61 @@ class TestHostEventsDeviceQuitChord(unittest.TestCase):
 
     def test_chord_keyup_filtered(self):
         class Data:
-            quit_chord = default_quit_chord()
+            quit_chord = _CTRL_Q
 
-        ev = events.Key(events.KEYUP, "q", Keys.K_q, Keys.KMOD_CTRL, 0, None)
+        ev = events.Key(events.KEYUP, "q", keys.K_q, keys.KMOD_CTRL, 0, None)
         dev = HostEventsDevice(host_read=scripted([ev]), display=Data())
         self.assertEqual(dev.poll(), [])
 
     def test_ac_back_keydown_becomes_quit(self):
-        """Android system Back (SDLK_AC_BACK) maps to QUIT without a chord."""
-
         class Data:
-            quit_chord = default_quit_chord()
+            quit_chord = _AC_BACK
 
-        ev = events.Key(events.KEYDOWN, "AC Back", Keys.K_AC_BACK, 0, 0, None)
+        ev = events.Key(events.KEYDOWN, "AC Back", keys.K_AC_BACK, 0, 0, None)
         dev = HostEventsDevice(host_read=scripted([ev]), display=Data())
         out = dev.poll()
         self.assertEqual(len(out), 1)
         self.assertEqual(out[0].type, events.QUIT)
 
-    def test_ac_back_works_without_quit_chord(self):
+    def test_ac_back_ignored_without_quit_chord(self):
         class Data:
             pass
 
-        ev = events.Key(events.KEYDOWN, "AC Back", Keys.K_AC_BACK, 0, 0, None)
+        ev = events.Key(events.KEYDOWN, "AC Back", keys.K_AC_BACK, 0, 0, None)
         dev = HostEventsDevice(host_read=scripted([ev]), display=Data())
         out = dev.poll()
         self.assertEqual(len(out), 1)
-        self.assertEqual(out[0].type, events.QUIT)
+        self.assertEqual(out[0].type, events.KEYDOWN)
 
     def test_ac_back_keyup_filtered(self):
         class Data:
-            pass
+            quit_chord = _AC_BACK
 
-        ev = events.Key(events.KEYUP, "AC Back", Keys.K_AC_BACK, 0, 0, None)
+        ev = events.Key(events.KEYUP, "AC Back", keys.K_AC_BACK, 0, 0, None)
         dev = HostEventsDevice(host_read=scripted([ev]), display=Data())
         self.assertEqual(dev.poll(), [])
 
+    def test_none_quit_chord_does_not_match(self):
+        class Data:
+            quit_chord = None
 
-class TestKeyTriggersQuitAcBack(unittest.TestCase):
-    def test_ac_back_triggers(self):
-        self.assertTrue(key_triggers_quit(events.KEYDOWN, Keys.K_AC_BACK, 0, None))
+        ev = events.Key(events.KEYDOWN, "q", keys.K_q, keys.KMOD_CTRL, 0, None)
+        dev = HostEventsDevice(host_read=scripted([ev]), display=Data())
+        out = dev.poll()
+        self.assertEqual(len(out), 1)
+        self.assertEqual(out[0].type, events.KEYDOWN)
 
-    def test_ac_back_keyup_does_not(self):
-        self.assertFalse(key_triggers_quit(events.KEYUP, Keys.K_AC_BACK, 0, None))
+
+class TestChordMatches(unittest.TestCase):
+    def test_ctrl_q(self):
+        self.assertTrue(keys.chord_matches(_CTRL_Q, keys.K_q, keys.KMOD_CTRL))
+        self.assertTrue(keys.chord_matches(_CTRL_Q, keys.K_q, keys.KMOD_RCTRL))
+        self.assertFalse(keys.chord_matches(_CTRL_Q, keys.K_q, 0))
+
+    def test_ac_back_no_mod(self):
+        self.assertTrue(keys.chord_matches(_AC_BACK, keys.K_AC_BACK, 0))
+        self.assertTrue(keys.chord_matches(_AC_BACK, keys.K_AC_BACK, keys.KMOD_CTRL))
+        self.assertFalse(keys.chord_matches(_AC_BACK, keys.K_q, 0))
 
 
 if __name__ == "__main__":

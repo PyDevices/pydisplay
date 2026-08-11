@@ -15,9 +15,9 @@ From the [PyScript gallery](../index.html) or:
 
 Desktop arrow keys stand in for the remote during development.
 
-## Expected key → eventsys mapping
+## Expected key → `keys` mapping
 
-| Remote / DOM `KeyboardEvent.key` | eventsys | Notes |
+| Remote / DOM `KeyboardEvent.key` | `keys` | Notes |
 |----------------------------------|----------|--------|
 | ArrowUp / ArrowDown / ArrowLeft / ArrowRight | `K_UP` … `K_RIGHT` | D-pad |
 | Enter | `K_RETURN` | Select / OK |
@@ -25,7 +25,7 @@ Desktop arrow keys stand in for the remote during development.
 | BrowserBack, GoBack, Back | `K_AC_BACK` | Why: TV Back should match Android SDL Back → quit |
 | ColorF0Red … (optional) | unmapped unless a demo needs them | Host-specific |
 
-Mappings live in `eventsys.keys._DOM_NAMED_KEYS`. Unknown TV keys arrive as
+Mappings live in `displaysys._domkeys._DOM_NAMED_KEYS`. Unknown TV keys arrive as
 `K_UNKNOWN` until added with a why-comment.
 
 ## Related

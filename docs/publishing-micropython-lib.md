@@ -57,7 +57,7 @@ Tags must match `v*.*.*` (e.g. `v0.0.5`, not `0.0.5`).
 Pushing the tag starts [**Publish micropython-lib**](https://github.com/PyDevices/pydisplay/actions/workflows/publish-micropython-lib.yml), which:
 
 1. Syncs `src/lib/*` into [micropython-lib](https://github.com/PyDevices/micropython-lib) (`PyDevices` branch) at version `X.Y.Z`
-2. Uploads CPython wheels to TestPyPI (`displaysys`, `eventsys`, `multimer`, …). Pure-Python `pygraphics` publishes from [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics) as `pygraphics`.
+2. Uploads CPython wheels to TestPyPI (`displaysys`, `pydisplay-events`, `pydisplay-keys`, `eventsys`, `multimer`, …). Pure-Python `pygraphics` publishes from [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics) as `pygraphics`.
 3. Rebuilds the [MIP index](https://PyDevices.github.io/micropython-lib/mip/PyDevices) on micropython-lib `gh-pages`
 
 Typical runtime: **~10–20 minutes**.
@@ -194,7 +194,7 @@ Or `mpremote mip install --index "https://PyDevices.github.io/micropython-lib/mi
 
 ### TestPyPI
 
-PyDevices CPython wheels are published to [TestPyPI](https://test.pypi.org) only (not production PyPI). Browse package names there (`displaysys`, `eventsys`, `multimer`, `pygraphics`, …).
+PyDevices CPython wheels are published to [TestPyPI](https://test.pypi.org) only (not production PyPI). Browse package names there (`displaysys`, `pydisplay-events`, `pydisplay-keys`, `eventsys`, `multimer`, `pygraphics`, …).
 
 **Naming:** MIP package names (e.g. `pygraphics`) may differ from the pip/TestPyPI project name when the MIP name is already taken on pypi.org. The mapping lives in `pypi_publish_name()` in [`publish_sync_packages.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_sync_packages.sh).
 
@@ -222,7 +222,7 @@ Android APK builds still install TestPyPI `usdl2` Android wheels via `pydisplay_
 
 | Flag | Index | Why it is needed |
 |------|-------|------------------|
-| `-i https://test.pypi.org/simple/` | **TestPyPI** (primary) | Resolves PyDevices packages you install and their deps that exist **only** on TestPyPI (`displaysys`, `eventsys`, `multimer`, `pydisplay-desktop`, …; Android also uses TestPyPI `usdl2` wheels). |
+| `-i https://test.pypi.org/simple/` | **TestPyPI** (primary) | Resolves PyDevices packages you install and their deps that exist **only** on TestPyPI (`displaysys`, `pydisplay-events`, `pydisplay-keys`, `eventsys`, `multimer`, `pydisplay-desktop`, …; Android also uses TestPyPI `usdl2` wheels). |
 | `--extra-index-url https://pypi.org/simple/` | **PyPI** (secondary) | Resolves third-party deps published **only** on production PyPI (e.g. `pygame-ce` for `PGDisplay`, and other third-party libs). |
 
 **Both must be present.** If you omit TestPyPI, pip cannot find PyDevices wheels. If you omit PyPI, pip fails when a declared dependency (for example `pygame-ce`) is not on TestPyPI.

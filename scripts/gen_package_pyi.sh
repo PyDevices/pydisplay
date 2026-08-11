@@ -14,6 +14,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 PACKAGES=(displaysys eventsys multimer)
+MODULES=(events keys)
 OUT=tools/typings
 STUBGEN="${ROOT}/.venv/bin/stubgen"
 PYTHON="${ROOT}/.venv/bin/python"
@@ -22,8 +23,8 @@ usage() {
     cat <<'EOF'
 Usage: ./scripts/gen_package_pyi.sh
 
-Regenerate mypy stubgen .pyi trees for displaysys, eventsys, and
-multimer into tools/typings/ (Pylance / pyright stubPath).
+Regenerate mypy stubgen .pyi trees for displaysys, eventsys,
+multimer, events, and keys into tools/typings/ (Pylance / pyright stubPath).
 
 (source is gitignored; public API is pygraphics.FrameBuffer).
 EOF
@@ -51,12 +52,16 @@ fi
 for pkg in "${PACKAGES[@]}"; do
     rm -rf "${OUT}/${pkg}"
 done
+for mod in "${MODULES[@]}"; do
+    rm -f "${OUT}/${mod}.pyi"
+done
 
 export PYTHONPATH="${ROOT}/src/lib:${ROOT}/src/utils${PYTHONPATH:+:$PYTHONPATH}"
 
 echo "Running stubgen → ${OUT}/ …"
 "$STUBGEN" --ignore-errors -o "$OUT" \
-    -p displaysys -p eventsys -p multimer
+    -p displaysys -p eventsys -p multimer \
+    -m events -m keys
 
 # Gitignored generated module; public FrameBuffer lives in _framebuf_plus.
 
@@ -85,4 +90,7 @@ echo "Updated:"
 for pkg in "${PACKAGES[@]}"; do
     count="$("$PYTHON" -c "from pathlib import Path; print(sum(1 for _ in Path('${OUT}/${pkg}').rglob('*.pyi')))")"
     echo "  ${OUT}/${pkg}/ (${count} .pyi)"
+done
+for mod in "${MODULES[@]}"; do
+    echo "  ${OUT}/${mod}.pyi"
 done

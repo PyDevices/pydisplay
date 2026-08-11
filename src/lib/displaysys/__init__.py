@@ -558,6 +558,8 @@ class DisplayDriver:
     # Board configs decide Runtime.timer_async via env_bool(..., display.requires_async_timer).
     requires_async_timer = False
     share_framebuffer = False
+    # HostEventsDevice reads this ``(key, mod)`` tuple; None disables keyboard quit.
+    quit_chord = None
 
     def framebuffers(self):
         """Return panel buffers for direct GUI paint, or ``None``.

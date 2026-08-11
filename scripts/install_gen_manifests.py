@@ -65,7 +65,11 @@ MIP_INDEX_ONLY = frozenset({"displaysys", "eventsys", "multimer"})
 toml_exclude = ["examples"]
 
 # PyScript [files] mounts that are not part of any mip package JSON.
-toml_only_mounts: list[tuple[str, str]] = []
+# events.py / keys.py are symlinks into sibling micropython-hardware/lib.
+toml_only_mounts: list[tuple[str, str]] = [
+    ("src/lib/events.py", "/lib/"),
+    ("src/lib/keys.py", "/lib/"),
+]
 
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
 # MicroPython mip only fetches .py / .mpy / .json (see micropython-lib mip).

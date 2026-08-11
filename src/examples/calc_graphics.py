@@ -19,7 +19,7 @@ if _EXAMPLES not in sys.path:
 
 from board_config import display_drv, runtime
 from calc_engine import CalcEngine
-from eventsys.keys import Keys
+import keys
 from pygraphics import RGB565, FrameBuffer
 from multimer import Timer
 from palettes import get_palette
@@ -40,24 +40,24 @@ _LABELS = [
 
 # fmt: off
 _CODES = [
-    Keys.K_ESCAPE,       Keys.K_c,            Keys.K_BACKSPACE,    Keys.K_KP_DIVIDE,
-    Keys.K_KP_7,         Keys.K_KP_8,         Keys.K_KP_9,         Keys.K_KP_MULTIPLY,
-    Keys.K_KP_4,         Keys.K_KP_5,         Keys.K_KP_6,         Keys.K_KP_MINUS,
-    Keys.K_KP_1,         Keys.K_KP_2,         Keys.K_KP_3,         Keys.K_KP_PLUS,
-    Keys.K_KP_PLUSMINUS, Keys.K_KP_0,         Keys.K_KP_PERIOD,    Keys.K_KP_ENTER,
-    Keys.K_s,            Keys.K_KP_POWER,     Keys.K_p,            Keys.K_KP_PERCENT,
+    keys.K_ESCAPE,       keys.K_c,            keys.K_BACKSPACE,    keys.K_KP_DIVIDE,
+    keys.K_KP_7,         keys.K_KP_8,         keys.K_KP_9,         keys.K_KP_MULTIPLY,
+    keys.K_KP_4,         keys.K_KP_5,         keys.K_KP_6,         keys.K_KP_MINUS,
+    keys.K_KP_1,         keys.K_KP_2,         keys.K_KP_3,         keys.K_KP_PLUS,
+    keys.K_KP_PLUSMINUS, keys.K_KP_0,         keys.K_KP_PERIOD,    keys.K_KP_ENTER,
+    keys.K_s,            keys.K_KP_POWER,     keys.K_p,            keys.K_KP_PERCENT,
 ]
 # fmt: on
 
 _KEY_ALIASES = {
-    Keys.K_RETURN: "=",
-    Keys.K_KP_EQUALS: "=",
-    Keys.K_SLASH: "/",
-    Keys.K_ASTERISK: "*",
-    Keys.K_MINUS: "-",
-    Keys.K_EQUALS: "=",
-    Keys.K_PERIOD: ".",
-    Keys.K_PERCENT: "%",
+    keys.K_RETURN: "=",
+    keys.K_KP_EQUALS: "=",
+    keys.K_SLASH: "/",
+    keys.K_ASTERISK: "*",
+    keys.K_MINUS: "-",
+    keys.K_EQUALS: "=",
+    keys.K_PERIOD: ".",
+    keys.K_PERCENT: "%",
 }
 
 

@@ -1,15 +1,18 @@
 # gallery: skip
 from board_config import runtime
-from keypins import KeyPins, Keys
+from keypins import KeyPins
+
+import keys
+
 # utils: keypins
 
 
 buttons = KeyPins(
-    left=Keys.K_LEFT,
-    right=Keys.K_RIGHT,
-    go=Keys.K_UP,
-    stop=Keys.K_DOWN,
-    fire=Keys.K_SPACE,
+    left=keys.K_LEFT,
+    right=keys.K_RIGHT,
+    go=keys.K_UP,
+    stop=keys.K_DOWN,
+    fire=keys.K_SPACE,
 )
 
 print("\nDetails of the buttons (KeyPins) object:")

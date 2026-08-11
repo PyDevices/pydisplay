@@ -101,7 +101,7 @@ LG webOS and Samsung Tizen ship Chromium-based browsers and encourage **web apps
 
 **Example:** [`tv_remote_menu`](https://pydevices.github.io/pydisplay/pyscript/micropython.html?modules=tv_remote_menu) — large-row D-pad menu. Remote key notes: [`web/pyscript/tv/README.md`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/tv/README.md).
 
-TV Back (`BrowserBack` / `GoBack` / `Back`) maps to `K_AC_BACK` in `eventsys.keys` so quit matches Android remotes.
+TV Back (`BrowserBack` / `GoBack` / `Back`) maps to `keys.K_AC_BACK` so `PSDisplay.quit_chord` matches Android remotes.
 
 Native Android TV / Fire OS APKs are separate — see [Android TV / Fire OS](android.md#android-tv--fire-os).
 

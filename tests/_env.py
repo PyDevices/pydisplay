@@ -5,9 +5,9 @@
 
 Puts ``src/lib`` (displaysys, eventsys, multimer) and ``src/utils`` on
 ``sys.path`` without installing anything. When a sibling (or nested)
-``micropython-hardware/drivers`` tree is present, that path is added so
-``boarddev`` imports work. Does **not** require optional packages such as
-``pygraphics`` / ``usdl2``.
+``micropython-hardware`` tree is present, ``lib/`` (``events``, ``keys``) and
+``drivers/`` (``boarddev``) are added. Does **not** require optional packages
+such as ``pygraphics`` / ``usdl2``.
 
     import _env  # noqa: F401
     import multimer
@@ -27,16 +27,22 @@ if _SRC_LIB not in sys.path:
 if _SRC_UTILS not in sys.path:
     sys.path.insert(0, _SRC_UTILS)
 
-# Optional: boarddev and other hardware drivers when the sibling checkout
-# (or a CI nested clone under the repo root) is present.
-_HARDWARE_DRIVERS_CANDIDATES = (
-    os.path.join(_REPO_ROOT, "..", "micropython-hardware", "drivers"),
-    os.path.join(_REPO_ROOT, "micropython-hardware", "drivers"),
+# Optional: events/keys (lib/) and boarddev (drivers/) from micropython-hardware.
+_HARDWARE_ROOT_CANDIDATES = (
+    os.path.join(_REPO_ROOT, "..", "micropython-hardware"),
+    os.path.join(_REPO_ROOT, "micropython-hardware"),
 )
-for _drivers in _HARDWARE_DRIVERS_CANDIDATES:
-    _drivers = os.path.abspath(_drivers)
-    if os.path.isdir(_drivers) and _drivers not in sys.path:
-        sys.path.insert(0, _drivers)
+_HARDWARE_ROOT = None
+for _hw in _HARDWARE_ROOT_CANDIDATES:
+    _hw = os.path.abspath(_hw)
+    if os.path.isdir(_hw):
+        _HARDWARE_ROOT = _hw
+        _hw_lib = os.path.join(_hw, "lib")
+        _hw_drivers = os.path.join(_hw, "drivers")
+        if os.path.isdir(_hw_lib) and _hw_lib not in sys.path:
+            sys.path.insert(0, _hw_lib)
+        if os.path.isdir(_hw_drivers) and _hw_drivers not in sys.path:
+            sys.path.insert(0, _hw_drivers)
         break
 
 #: Absolute path to the ``multimer`` package directory.
@@ -47,6 +53,10 @@ EVENTSYS_DIR = os.path.join(_SRC_LIB, "eventsys")
 
 #: Absolute path to the ``displaysys`` package directory.
 DISPLAYSYS_DIR = os.path.join(_SRC_LIB, "displaysys")
+
+#: Shared ``events.py`` / ``keys.py`` (micropython-hardware/lib).
+EVENTS_PY = os.path.join(_HARDWARE_ROOT, "lib", "events.py") if _HARDWARE_ROOT else ""
+KEYS_PY = os.path.join(_HARDWARE_ROOT, "lib", "keys.py") if _HARDWARE_ROOT else ""
 
 
 def _ensure_micropython_shim():

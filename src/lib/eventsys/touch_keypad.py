@@ -39,7 +39,7 @@ Poll idiom (legacy)::
         # Continuous movement: pad.read_held()
 """
 
-from ._events import events
+import events
 
 try:
     from pygraphics import Area

@@ -16,7 +16,7 @@ Desktop keyboards stand in for remotes during development.
 from board_config import display_drv, runtime
 
 from displaysys import color565
-from eventsys.keys import Keys
+import keys
 from pygraphics import RGB565, Font, FrameBuffer
 
 # Why tall rows: 10-foot UI — readable labels and large focus highlight.
@@ -80,16 +80,16 @@ def redraw():
 def on_key(e):
     # Why map AC_BACK like Escape: TV remotes / webOS Back should leave the app
     # the same way Android SDL Back becomes QUIT in HostEventsDevice.
-    if e.key in (Keys.K_ESCAPE, Keys.K_AC_BACK):
+    if e.key in (keys.K_ESCAPE, keys.K_AC_BACK):
         display_drv.quit()
         return
-    if e.key == Keys.K_UP:
+    if e.key == keys.K_UP:
         state["index"] = (state["index"] - 1) % len(ITEMS)
         state["status"] = ITEMS[state["index"]]
-    elif e.key == Keys.K_DOWN:
+    elif e.key == keys.K_DOWN:
         state["index"] = (state["index"] + 1) % len(ITEMS)
         state["status"] = ITEMS[state["index"]]
-    elif e.key in (Keys.K_RETURN, Keys.K_SPACE):
+    elif e.key in (keys.K_RETURN, keys.K_SPACE):
         choice = ITEMS[state["index"]]
         if choice == "Quit":
             display_drv.quit()

@@ -23,6 +23,7 @@ For desktop SDL, also install [`pydisplay-desktop`](https://test.pypi.org/projec
 
 ```python
 import mip
+
 mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
 ```
 
@@ -65,14 +66,14 @@ use the desktop bundle from micropython-hardware
 - MCU (`BusDisplay`, `FBDisplay`) and host backends (SDL, PyGame, Jupyter, PyScript)
 - `AutoDisplay` / `host_kind` for desktop-like host selection (board_config remains the app import surface)
 
-Desktop input backends use [eventsys](https://test.pypi.org/project/eventsys/) at runtime; install it separately when you need `Runtime` / host events.
+Host backends use [pydisplay-events](https://test.pypi.org/project/pydisplay-events/) and [pydisplay-keys](https://test.pypi.org/project/pydisplay-keys/) for event records and key codes (`import events` / `import keys`). Install [eventsys](https://test.pypi.org/project/eventsys/) separately when you need `Runtime` / host event polling.
 
 ## Links
 
 - [Documentation — Displays](https://pydisplay.readthedocs.io/en/latest/concepts/displays/)
 - [Source](https://github.com/PyDevices/pydisplay)
 - [Issues](https://github.com/PyDevices/pydisplay/issues)
-- Related: [eventsys](https://test.pypi.org/project/eventsys/), [multimer](https://test.pypi.org/project/multimer/), [pygraphics](https://test.pypi.org/project/pygraphics/), [pydisplay-desktop](https://test.pypi.org/project/pydisplay-desktop/)
+- Related: [pydisplay-events](https://test.pypi.org/project/pydisplay-events/), [pydisplay-keys](https://test.pypi.org/project/pydisplay-keys/), [eventsys](https://test.pypi.org/project/eventsys/), [multimer](https://test.pypi.org/project/multimer/), [pygraphics](https://test.pypi.org/project/pygraphics/), [pydisplay-desktop](https://test.pypi.org/project/pydisplay-desktop/)
 
 ## License
 

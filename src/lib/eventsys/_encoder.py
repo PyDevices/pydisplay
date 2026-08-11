@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: MIT
 """Rotary encoder device."""
 
+import events
+
 from ._device import Device, register_device_class, types
-from ._events import events
 
 
 class EncoderDevice(Device):

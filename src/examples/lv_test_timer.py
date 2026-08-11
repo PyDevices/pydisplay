@@ -268,7 +268,7 @@ def _button_center(btn):
 
 def _inject_click(cx, cy):
     import quit_inject
-    from eventsys import events
+    import events
 
     reset_taps()
     queue_dev = quit_inject.queue_device()
@@ -300,7 +300,7 @@ def _inject_click(cx, cy):
 
 async def _inject_click_async(cx, cy):
     import quit_inject
-    from eventsys import events
+    import events
     from multimer import asyncio
 
     reset_taps()

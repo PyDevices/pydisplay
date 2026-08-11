@@ -7,7 +7,8 @@ import unittest
 
 import _env  # noqa: F401
 
-from eventsys import JoystickDevice, Runtime, events, types
+import events
+from eventsys import JoystickDevice, Runtime, types
 
 
 class _MockJoystick:

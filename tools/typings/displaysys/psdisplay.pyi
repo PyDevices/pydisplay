@@ -1,5 +1,6 @@
 from _typeshed import Incomplete
 from displaysys import DisplayDriver as DisplayDriver, color_rgb as color_rgb
+from displaysys._domkeys import dom_key_scrolls_page as dom_key_scrolls_page, enrich_mod as enrich_mod, key_to_keycode as key_to_keycode, mod_mask as mod_mask
 
 def log(*args) -> None: ...
 
@@ -10,9 +11,11 @@ class PSDevices:
 
 class PSDisplay(DisplayDriver):
     needs_refresh: bool
-    color_depth: int
+    requires_async_timer: bool
     quit_chord: Incomplete
+    color_depth: int
     touch_scale: float
+    get_events: Incomplete
     def __init__(self, id, width=None, height=None, *, quiet: bool = False) -> None: ...
     def init(self) -> None: ...
     def fill_rect(self, x, y, w, h, c): ...

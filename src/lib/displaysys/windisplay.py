@@ -20,8 +20,8 @@ from displaysys import (
     fit_scale_to_desktop,
     notify_board_config_scale_override,
 )
-from eventsys import events
-from eventsys.keys import Keys, default_quit_chord
+import events
+import keys
 
 __all__ = ["WinDisplay", "get_events", "poll_event"]
 
@@ -166,7 +166,7 @@ def _wndproc(hwnd, msg, wparam, lparam):
             return 0
         vk = int(wparam) & 0xFF
         key = win.virtual_key_to_sdl(vk)
-        name = Keys.keyname(key)
+        name = keys.keyname(key)
         if name == "Unknown":
             name = win.GetKeyNameTextW(lparam) or str(vk)
         et = events.KEYDOWN if msg in (win.WM_KEYDOWN, win.WM_SYSKEYDOWN) else events.KEYUP
@@ -229,6 +229,7 @@ class WinDisplay(DisplayDriver):
 
     needs_refresh = True
     requires_async_timer = False
+    quit_chord = (keys.K_q, keys.KMOD_CTRL)
 
     def __init__(
         self,
@@ -252,7 +253,6 @@ class WinDisplay(DisplayDriver):
         self._title = title
         self._scale = scale
         self.touch_scale = scale
-        self.quit_chord = default_quit_chord()
         self._requires_byteswap = False
         self._hwnd = None
         self._window_id = None

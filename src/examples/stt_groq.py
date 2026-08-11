@@ -40,13 +40,13 @@ def _transcribe(pressed):
 
 def _desktop():
     import _thread
-    from eventsys.keys import Keys
+    import keys
 
     held = [False]
 
     def on_key(event):
         global _recording
-        if event.key != Keys.K_LCTRL:
+        if event.key != keys.K_LCTRL:
             return
         held[0] = event.type == bc.runtime.events.KEYDOWN
         if held[0] and not _recording:
@@ -60,9 +60,9 @@ def _desktop():
 
 def _microcontroller():
     global _recording
-    from eventsys.keys import Keys
+    import keys
 
-    pressed = lambda: Keys.K_LCTRL in bc.keypad.read()
+    pressed = lambda: keys.K_LCTRL in bc.keypad.read()
     print("stt_groq: hold BOOT to talk; release to transcribe")
     while True:
         if pressed() and not _recording:

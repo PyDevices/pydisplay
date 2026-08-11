@@ -17,6 +17,7 @@ import time
 import usdl2
 
 from displaysys.sdldisplay import SDLDisplay, retcheck
+import keys
 
 __all__ = ["AndroidSDLDisplay"]
 
@@ -183,6 +184,8 @@ def _wait_drawable_aspect(window, renderer, landscape, timeout_s=2.5):
 
 class AndroidSDLDisplay(SDLDisplay):
     """``SDLDisplay`` for Android: aspect → Activity lock, no RenderCopyEx rotate."""
+
+    quit_chord = (keys.K_AC_BACK, 0)
 
     def __init__(
         self,

@@ -12,8 +12,9 @@ from IPython.display import display, update_display
 from PIL import Image, ImageDraw
 
 from displaysys import DisplayDriver, color_rgb
-from eventsys import events
-from eventsys.keys import Keys, default_quit_chord, enrich_mod, key_to_keycode, mod_mask
+from displaysys._domkeys import enrich_mod, key_to_keycode, mod_mask
+import events
+import keys
 
 _JN_DEPS = "pip install ipywidgets ipyevents"
 
@@ -72,7 +73,7 @@ class JNDevices:
 
     Creates the interactive ``ipywidgets`` Image that mirrors the display buffer
     and watches it (via ``ipyevents``) for all available input, turning it into
-    ``eventsys.events`` objects (matching the desktop SDL2 / PyGame event
+    ``events`` objects (matching the desktop SDL2 / PyGame event
     stream), drained through :meth:`read`:
 
     - **Mouse**: ``MOUSEMOTION`` on every move, ``MOUSEBUTTONDOWN`` /
@@ -82,9 +83,9 @@ class JNDevices:
       modifier masks (left/right modifier variants via key location).
 
     Quit chord handling is configured on :class:`JNDisplay` via ``quit_chord``
-    (default from :func:`eventsys.keys.default_quit_chord`, CTRL+Q).
-    :class:`~eventsys.HostEventsDevice` applies the chord and Android Back
-    (``K_AC_BACK``) when constructed with ``display=``.
+    (default ``(keys.K_AC_BACK, 0)``).
+    :class:`~eventsys.HostEventsDevice` applies the chord when constructed with
+    ``display=``.
 
     This class also owns the display widget: ``JNDisplay`` pushes frames to it
     via :meth:`update_buffer`.
@@ -262,7 +263,7 @@ class JNDevices:
             self._enqueue_key(events.KEYUP, keycode, enrich_mod(base_mod, self._pressed))
 
     def _enqueue_key(self, type, keycode, mod):
-        self._queue.append(events.Key(type, Keys.keyname(keycode), keycode, mod, 0, None))
+        self._queue.append(events.Key(type, keys.keyname(keycode), keycode, mod, 0, None))
 
 
 class JNDisplay(DisplayDriver):
@@ -280,12 +281,13 @@ class JNDisplay(DisplayDriver):
     Attributes:
         color_depth (int): Bits per pixel (16).
         touch_scale (float): Pointer scale for ``QueueDevice`` (always ``1.0``).
-        quit_chord: Keyboard chord for quit (default CTRL+Q); ``None`` disables.
+        quit_chord: Keyboard chord for quit (default browser Back); ``None`` disables.
         needs_refresh (bool): True — ``eventsys.Runtime`` drives periodic ``show()``.
     """
 
     needs_refresh = True
     requires_async_timer = True
+    quit_chord = (keys.K_AC_BACK, 0)
 
     _next_display_id = 0
 
@@ -302,7 +304,6 @@ class JNDisplay(DisplayDriver):
         self._jn_devices = None
         self._static_shown = False
         self.touch_scale = 1.0
-        self.quit_chord = default_quit_chord()
         self._visible = None
 
         super().__init__(quiet=quiet)

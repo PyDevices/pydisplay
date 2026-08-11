@@ -8,7 +8,7 @@ Run from pydisplay/src::
     python examples/car_cluster/key_probe.py
 
 Focus the canvas, then press keys. Output shows SDL-style ``event.key``,
-``Keys`` name when known, suggested ``lv.KEY`` mapping, and digit/throttle
+``keys`` name when known, suggested ``lv.KEY`` mapping, and digit/throttle
 interpretation for the car cluster.
 
 Press Ctrl+Q (or your platform quit chord) to exit.
@@ -29,10 +29,11 @@ if _src and _src not in sys.path:
 if _PKG not in sys.path:
     sys.path.insert(0, _PKG)
 
-import lvgl as lv
-from board_config import runtime
-from eventsys import events
-from eventsys.keys import Keys
+from board_config import runtime  # noqa: E402
+import lvgl as lv  # noqa: E402
+
+import events  # noqa: E402
+import keys  # noqa: E402
 
 try:
     from input_map import digit_from_key, remap_nav_key
@@ -53,8 +54,8 @@ _LV_KEY_NAMES = {
 
 
 def _key_name(code):
-    for name in dir(Keys):
-        if name.startswith("K_") and getattr(Keys, name, None) == code:
+    for name in dir(keys):
+        if name.startswith("K_") and getattr(keys, name, None) == code:
             return name
     return "?"
 
@@ -65,7 +66,7 @@ def _on_key(event):
     phase = "DOWN" if event.type == events.KEYDOWN else "UP"
     code = event.key
     name = _key_name(code)
-    line = "KEY%s  code=%s  Keys.%s" % (phase, code, name)
+    line = "KEY%s  code=%s  keys.%s" % (phase, code, name)
     if digit_from_key is not None:
         d = digit_from_key(code)
         if d is not None:

@@ -35,10 +35,10 @@ python tests/test_multimer.py
 | Module | Area |
 |--------|------|
 | `test_multimer.py` | public multimer API (`Timer`, `AsyncTimer`, `schedule`, `sleep_ms`, and `ticks_*`) |
-| `test_events.py` | the `events` types/classes and `eventsys.register_event` |
+| `test_events.py` | the `events` types/classes and `events.register_event` |
 | `test_devices.py` | `Runtime` and the `Queue`/`Touch`/`Encoder`/`Keypad` devices plus `register_device` |
 | `test_joystick.py` | `JoystickDevice` with a mock driver |
-| `test_keys.py` | the `Keys` key/modifier tables and `keyname`/`key`/`modname`/`mod` helpers |
+| `test_keys.py` | the `keys` key/modifier tables and `keyname`/`key`/`modname`/`mod` helpers |
 | `test_area.py` | the `Area` rectangle helper (containment, overlap, transforms, protocols) |
 | `test_blit_hooks.py` | blit dispatch to display hooks and framebuffer fast paths |
 | `test_clip.py` | clip helpers and ``ClippedCanvas`` |

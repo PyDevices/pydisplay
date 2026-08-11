@@ -3,9 +3,10 @@
 # SPDX-License-Identifier: MIT
 """Host event device and LVGL virtual device fan-out."""
 
+import events
+import keys
+
 from ._device import Device, register_device_class, types
-from ._events import events
-from .keys import Keys, key_triggers_quit
 
 
 class HostEventsDevice(Device):
@@ -43,18 +44,12 @@ class HostEventsDevice(Device):
             chord_key = quit_chord[0] if quit_chord else None
             for event in dev_events:
                 if event.type == events.KEYDOWN:
-                    # Quit chord (default Ctrl+Q) and Android / TV Back → QUIT.
-                    # Why K_AC_BACK: Android SDL maps KEYCODE_BACK here; PyScript
-                    # TV browsers map BrowserBack/GoBack/Back to the same code.
-                    if key_triggers_quit(event.type, event.key, event.mod, quit_chord):
+                    if keys.chord_matches(quit_chord, event.key, event.mod):
                         event = events.Quit(events.QUIT)
-                elif event.type == events.KEYUP:
-                    # Swallow key-up for quit keys so apps do not see a dangling
-                    # KEYUP after the KEYDOWN was converted to QUIT.
-                    if event.key == Keys.K_AC_BACK:
-                        continue
-                    if quit_chord and event.key == chord_key:
-                        continue
+                # Swallow key-up for the quit key so apps do not see a
+                # dangling KEYUP after the KEYDOWN was converted to QUIT.
+                elif event.type == events.KEYUP and quit_chord and event.key == chord_key:
+                    continue
                 if event.type in self._data2:
                     if event.type in (
                         events.MOUSEMOTION,

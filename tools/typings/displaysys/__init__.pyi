@@ -1,5 +1,5 @@
+from .autodisplay import AutoDisplay as AutoDisplay, host_kind as host_kind
 from _typeshed import Incomplete
-from displaysys.autodisplay import AutoDisplay as AutoDisplay, host_kind as host_kind
 
 __all__ = ['AutoDisplay', 'DisplayDriver', 'alloc_buffer', 'byteswap', 'capabilities', 'color332', 'color565', 'color565_swapped', 'color_rgb', 'desktop_work_area', 'env_bool', 'env_float', 'env_get', 'env_int', 'env_set', 'fit_scale_to_desktop', 'host_kind', 'notify_board_config_scale_override']
 
@@ -24,6 +24,7 @@ class DisplayDriver:
     needs_refresh: bool
     requires_async_timer: bool
     share_framebuffer: bool
+    quit_chord: Incomplete
     def framebuffers(self) -> None: ...
     byteswap: Incomplete
     touch_scale: float

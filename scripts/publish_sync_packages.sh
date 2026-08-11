@@ -154,7 +154,11 @@ should_skip_name() {
 # pygraphics publishes from PyDevices/pygraphics, not this repo.
 # Convention: .cursor/testpypi-naming-convention.md
 pypi_publish_name() {
-    echo "$1"
+    case "$1" in
+        events) echo "pydisplay-events" ;;
+        keys) echo "pydisplay-keys" ;;
+        *) echo "$1" ;;
+    esac
 }
 
 # Short PyPI summary (one line) — not the monorepo tagline.
@@ -164,7 +168,13 @@ package_summary() {
             echo "Cross-platform display drivers for MicroPython, CircuitPython, and CPython"
             ;;
         eventsys)
-            echo "Cross-platform input events (PyGame/SDL2-style) with Runtime and device adapters"
+            echo "Input Runtime and device adapters for MicroPython, CircuitPython, and CPython"
+            ;;
+        events)
+            echo "SDL2/PyGame-style event types and namedtuple event classes"
+            ;;
+        keys)
+            echo "SDL-style key codes, modifier masks, and chord matching"
             ;;
         multimer)
             echo "Cross-platform machine.Timer-style and asyncio timers for MicroPython and CPython"
@@ -200,9 +210,12 @@ package_manifest_requires() {
     local package="$1"
     case "$package" in
         displaysys)
-            printf '%s\n' 'require("eventsys")'
+            printf '%s\n' 'require("events")'
+            printf '%s\n' 'require("keys")'
             ;;
         eventsys)
+            printf '%s\n' 'require("events")'
+            printf '%s\n' 'require("keys")'
             printf '%s\n' 'require("multimer")'
             ;;
     esac
@@ -240,6 +253,8 @@ prune_stale_packages() {
         should_skip_name "$package" && continue
         expected_top+=("$package")
     done
+    # events.py / keys.py are sibling-hardware modules synced into micropython-lib.
+    expected_top+=("events" "keys")
 
     if [[ -d "$DEST_DIR" ]]; then
         for existing in "$DEST_DIR"/*; do
@@ -358,7 +373,8 @@ metadata(
     license="$LICENSE",
     pypi_publish="$(pypi_publish_name "displaysys")",
 )
-require("eventsys")
+require("events")
+require("keys")
 package("displaysys")
 EOF
 copy_package_readme "displaysys" "$DEST_DIR/displaysys/displaysys/README.md"
@@ -368,6 +384,42 @@ if [[ "$SKIP_PYPI" -eq 0 ]]; then
     build_and_upload_pypi
     popd
 fi
+
+# events.py / keys.py — canonical sources in sibling micropython-hardware/lib.
+HARDWARE_LIB="$(cd "$SOURCE_REPO/../micropython-hardware/lib" 2>/dev/null && pwd || true)"
+if [[ -z "$HARDWARE_LIB" || ! -f "$HARDWARE_LIB/events.py" || ! -f "$HARDWARE_LIB/keys.py" ]]; then
+    echo "Error: expected $SOURCE_REPO/../micropython-hardware/lib/{events,keys}.py" >&2
+    exit 1
+fi
+for hw_mod in events keys; do
+    echo
+    echo "Processing $hw_mod (from micropython-hardware/lib)"
+    mkdir -p "$DEST_DIR/$hw_mod"
+    cp "$HARDWARE_LIB/$hw_mod.py" "$DEST_DIR/$hw_mod/$hw_mod.py"
+    cat <<EOF > "$DEST_DIR/$hw_mod/manifest.py"
+metadata(
+    description="$(package_summary "$hw_mod")",
+    version="$VERSION",
+    author="$AUTHOR",
+    license="$LICENSE",
+    pypi_publish="$(pypi_publish_name "$hw_mod")",
+)
+module("$hw_mod.py")
+EOF
+    cat <<EOF > "$DEST_DIR/$hw_mod/README.md"
+# $hw_mod
+
+$(package_summary "$hw_mod").
+
+Canonical source: [micropython-hardware/lib/${hw_mod}.py](https://github.com/PyDevices/micropython-hardware/blob/main/lib/${hw_mod}.py).
+EOF
+    if [[ "$SKIP_PYPI" -eq 0 ]]; then
+        ./scripts/publish_make_pyproject.py --output "$PYPI_DIR/$hw_mod" "$DEST_DIR/$hw_mod/manifest.py"
+        pushd "$PYPI_DIR/$hw_mod"
+        build_and_upload_pypi
+        popd
+    fi
+done
 
 prune_stale_packages
 prune_skipped_artifacts

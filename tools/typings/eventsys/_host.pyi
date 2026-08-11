@@ -1,6 +1,4 @@
 from ._device import Device as Device, register_device_class as register_device_class, types as types
-from ._events import events as events
-from .keys import Keys as Keys, key_triggers_quit as key_triggers_quit
 from _typeshed import Incomplete
 
 class HostEventsDevice(Device):

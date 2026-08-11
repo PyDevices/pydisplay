@@ -1,17 +1,18 @@
 from _typeshed import Incomplete
 from displaysys import DisplayDriver
 
-__all__ = ['PGDisplay', 'get_events', 'poll_event']
+__all__ = ['poll_event', 'get_events', 'PGDisplay']
 
 def poll_event(): ...
 def get_events(): ...
 
 class PGDisplay(DisplayDriver):
     needs_refresh: bool
+    quit_chord: Incomplete
     color_depth: Incomplete
     touch_scale: Incomplete
-    quit_chord: Incomplete
     runtime: Incomplete
+    get_events: Incomplete
     def __init__(self, width: int = 320, height: int = 240, rotation: int = 0, color_depth: int = 16, title: str = 'displaysys', scale: float = 1.0, window_flags=..., *, quiet: bool = False) -> None: ...
     def init(self) -> None: ...
     def blit_rect(self, buffer: memoryview, x: int, y: int, w: int, h: int): ...

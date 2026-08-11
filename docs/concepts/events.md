@@ -1,12 +1,15 @@
 # eventsys
 
-Cross-platform input events with PyGame/SDL2-style types. One import covers the runtime, built-in devices, event constants, and key codes.
+Cross-platform input events with PyGame/SDL2-style types. `eventsys` is the
+poller and device mux (`Runtime`, `HostEventsDevice`, …). Event type constants
+and namedtuples live in `events`; SDL key codes live in `keys`.
 
 For board wiring, auto-refresh, and the `runtime = None` rule, see **[Runtime](runtime.md)**.
 
 ## Quick start — poll loop
 
 ```python
+import events
 import eventsys
 
 runtime = eventsys.Runtime()
@@ -15,15 +18,16 @@ runtime.register(keypad)
 
 while True:
     for event in runtime.poll():  # always a list — safe to iterate
-        if event.type == eventsys.KEYDOWN:
+        if event.type == events.KEYDOWN:
             print("down", event.key)
-        elif event.type == eventsys.QUIT:
+        elif event.type == events.QUIT:
             break
 ```
 
 ## Quick start — subscribe
 
 ```python
+import events
 import eventsys
 
 runtime = eventsys.Runtime()
@@ -31,8 +35,8 @@ runtime = eventsys.Runtime()
 def on_key(event):
     print(event)
 
-runtime.on(eventsys.KEYDOWN, on_key)
-runtime.on([eventsys.KEYDOWN, eventsys.KEYUP], on_key)
+runtime.on(events.KEYDOWN, on_key)
+runtime.on([events.KEYDOWN, events.KEYUP], on_key)
 runtime.on_device(eventsys.KEYPAD, on_key)
 ```
 
@@ -140,10 +144,11 @@ exit when `runtime.quit_requested` becomes true or you handle `events.QUIT`.
 ## Custom events and devices
 
 ```python
+import events
 import eventsys
 
-eventsys.register_event(types={"MINE": None}, classes={"Mine": "type a b"})
-eventsys.register_device("MYPAD", [eventsys.KEYDOWN, eventsys.KEYUP])
+events.register_event(types={"MINE": None}, classes={"Mine": "type a b"})
+eventsys.register_device("MYPAD", [events.KEYDOWN, events.KEYUP])
 ```
 
 Use `eventsys.capabilities()` to inspect the dialect and built-in device list.

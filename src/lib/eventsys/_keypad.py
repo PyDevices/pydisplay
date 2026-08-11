@@ -3,14 +3,15 @@
 # SPDX-License-Identifier: MIT
 """Keypad device."""
 
+import events
+import keys
+
 from ._device import Device, register_device_class, types
-from ._events import events
-from .keys import Keys
 
 
 def _key_name(key):
     """Human-readable name for a key code (never assume ``chr``-safe)."""
-    name = Keys.keyname(key)
+    name = keys.keyname(key)
     if name != "Unknown":
         return name
     if isinstance(key, int) and 32 <= key <= 126:

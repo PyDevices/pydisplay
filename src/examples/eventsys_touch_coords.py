@@ -6,6 +6,7 @@ import sys
 
 from board_config import display_drv, runtime
 import eventsys
+import events
 
 try:
     from multimer import sleep_ms
@@ -83,5 +84,5 @@ if touch is not None:
     touch.rotation_table = (0, 0, 0, 0)
 
 _show()
-runtime.on(eventsys.MOUSEBUTTONUP, _on_up)
+runtime.on(events.MOUSEBUTTONUP, _on_up)
 runtime.run_forever()

@@ -136,13 +136,13 @@ Same CPython + SDL2 APK stack as phones, with **leanback** packaging and landsca
 
 **Remote → eventsys** (SDL Android keyboard map; no extra remap required today):
 
-| TV remote | eventsys |
+| TV remote | `keys` |
 |-----------|----------|
 | D-pad | `K_UP` / `K_DOWN` / `K_LEFT` / `K_RIGHT` |
 | Center / Enter | `K_RETURN` |
 | Back | `K_AC_BACK` → `QUIT` via `HostEventsDevice` |
 
-Why Back → quit: matches phone Android Back and the shared `eventsys.key_triggers_quit` path.
+Why Back → quit: `AndroidSDLDisplay.quit_chord` is `(keys.K_AC_BACK, 0)`.
 
 **Fire Stick / sideload:** build the APK, `adb connect <stick-ip>`, then `./scripts/emulator_tv.sh` or `adb install -r …` and launch from the Apps row.
 

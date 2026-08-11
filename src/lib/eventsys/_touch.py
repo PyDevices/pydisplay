@@ -11,8 +11,9 @@ except ImportError:
         return x
 
 
+import events
+
 from ._device import Device, register_device_class, types
-from ._events import events
 
 _DEFAULT_TOUCH_ROTATION_TABLE = (0b000, 0b101, 0b110, 0b011)
 

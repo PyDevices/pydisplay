@@ -37,7 +37,7 @@ if _EXAMPLES not in sys.path:
     sys.path.insert(0, _EXAMPLES)
 
 from board_config import display_drv, runtime
-from eventsys.keys import Keys
+import keys
 from pygraphics import RGB565, Area, FrameBuffer
 from multimer import Timer
 from roku_engine import (
@@ -1221,17 +1221,17 @@ class _Remote:
     def _on_key(self, e):
         key = e.key
         mapping = {
-            Keys.K_UP: "Up",
-            Keys.K_DOWN: "Down",
-            Keys.K_LEFT: "Left",
-            Keys.K_RIGHT: "Right",
-            Keys.K_RETURN: "Select",
-            Keys.K_KP_ENTER: "Select",
-            Keys.K_ESCAPE: "Back",
-            Keys.K_BACKSPACE: "Backspace",
-            Keys.K_h: "Home",
-            Keys.K_i: "Info",
-            Keys.K_SPACE: "Play",
+            keys.K_UP: "Up",
+            keys.K_DOWN: "Down",
+            keys.K_LEFT: "Left",
+            keys.K_RIGHT: "Right",
+            keys.K_RETURN: "Select",
+            keys.K_KP_ENTER: "Select",
+            keys.K_ESCAPE: "Back",
+            keys.K_BACKSPACE: "Backspace",
+            keys.K_h: "Home",
+            keys.K_i: "Info",
+            keys.K_SPACE: "Play",
         }
         ecp = mapping.get(key)
         if ecp:

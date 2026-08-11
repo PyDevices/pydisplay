@@ -10,15 +10,14 @@ from js import console, document
 from pyscript.ffi import create_proxy
 
 from displaysys import DisplayDriver, color_rgb
-from eventsys import events
-from eventsys.keys import (
-    Keys,
-    default_quit_chord,
+from displaysys._domkeys import (
     dom_key_scrolls_page,
     enrich_mod,
     key_to_keycode,
     mod_mask,
 )
+import events
+import keys
 
 try:  # Gamepad polling is optional and only available in a browser.
     from js import navigator
@@ -44,7 +43,7 @@ class PSDevices:
     Unified input for a PyScript canvas, registered as an eventsys QUEUE device.
 
     Captures all available browser input on a single HTML element and turns it
-    into ``eventsys.events`` objects (matching the desktop SDL2 / PyGame event
+    into ``events`` objects (matching the desktop SDL2 / PyGame event
     stream), drained through :meth:`read`:
 
     - **Pointer** (mouse via Pointer Events): ``MOUSEMOTION`` /
@@ -60,9 +59,9 @@ class PSDevices:
       ``JOYBUTTONDOWN`` / ``JOYBUTTONUP``.
 
     Quit chord handling is configured on :class:`PSDisplay` via ``quit_chord``
-    (default from :func:`eventsys.keys.default_quit_chord`, CTRL+Q).
-    :class:`~eventsys.HostEventsDevice` applies the chord and Android Back
-    (``K_AC_BACK``) when constructed with ``display=``.
+    (default ``(keys.K_AC_BACK, 0)`` for browser/TV Back).
+    :class:`~eventsys.HostEventsDevice` applies the chord when constructed with
+    ``display=``.
 
     Note:
         The element must be focused to receive key events.  The constructor sets
@@ -250,7 +249,7 @@ class PSDevices:
     ############### Keyboard ################
 
     def _enqueue_key(self, type, keycode, mod):
-        self._queue.append(events.Key(type, Keys.keyname(keycode), keycode, mod, 0, None))
+        self._queue.append(events.Key(type, keys.keyname(keycode), keycode, mod, 0, None))
 
     def _suppress_browser_scroll(self, e, keycode):
         if dom_key_scrolls_page(keycode):
@@ -329,6 +328,7 @@ class PSDisplay(DisplayDriver):
 
     needs_refresh = True
     requires_async_timer = True
+    quit_chord = (keys.K_AC_BACK, 0)
 
     def __init__(self, id, width=None, height=None, *, quiet=False):
         self._canvas_id = id
@@ -341,7 +341,6 @@ class PSDisplay(DisplayDriver):
         self._requires_byteswap = False
         self._rotation = 0
         self.color_depth = 16
-        self.quit_chord = default_quit_chord()
         self.touch_scale = 1.0
 
         super().__init__(quiet=quiet)

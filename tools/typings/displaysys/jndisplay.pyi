@@ -1,5 +1,6 @@
 from _typeshed import Incomplete
 from displaysys import DisplayDriver as DisplayDriver, color_rgb as color_rgb
+from displaysys._domkeys import enrich_mod as enrich_mod, key_to_keycode as key_to_keycode, mod_mask as mod_mask
 
 class JNDevices:
     image: Incomplete
@@ -9,10 +10,12 @@ class JNDevices:
 
 class JNDisplay(DisplayDriver):
     needs_refresh: bool
+    requires_async_timer: bool
+    quit_chord: Incomplete
     color_depth: int
     touch_scale: float
-    quit_chord: Incomplete
     def __init__(self, width, height, *, quiet: bool = False) -> None: ...
+    def get_events(self): ...
     def init(self) -> None: ...
     def fill_rect(self, x, y, w, h, c): ...
     def blit_rect(self, buf, x, y, w, h): ...

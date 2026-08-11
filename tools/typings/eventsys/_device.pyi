@@ -1,4 +1,3 @@
-from ._events import events as events
 from _typeshed import Incomplete
 
 class types:

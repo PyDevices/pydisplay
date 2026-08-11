@@ -267,26 +267,24 @@ def run_autotest(
                 "console_errors": soak_errors[:20],
             }
 
-        # --- quit chord: Ctrl+Q (eventsys.default_quit_chord) ---
+        # --- quit chord: BrowserBack (PSDisplay.quit_chord = K_AC_BACK) ---
         try:
             canvas = page.locator("#display_canvas")
             canvas.click(timeout=5000)
             # Prefer CDP trusted key events: synthetic KeyboardEvent often does
-            # not reach Pyodide create_proxy listeners; Chromium also swallows
-            # real Ctrl+Q as a browser quit chord.
+            # not reach Pyodide create_proxy listeners.
             try:
                 cdp = page.context.new_cdp_session(page)
-                # modifiers: 2 = Ctrl
                 for typ in ("keyDown", "keyUp"):
                     cdp.send(
                         "Input.dispatchKeyEvent",
                         {
                             "type": typ,
-                            "modifiers": 2,
-                            "key": "q",
-                            "code": "KeyQ",
-                            "windowsVirtualKeyCode": 81,
-                            "nativeVirtualKeyCode": 81,
+                            "modifiers": 0,
+                            "key": "BrowserBack",
+                            "code": "BrowserBack",
+                            "windowsVirtualKeyCode": 166,
+                            "nativeVirtualKeyCode": 166,
                             "text": "",
                             "unmodifiedText": "",
                         },
@@ -298,8 +296,9 @@ def run_autotest(
                       if (!c) return {ok: false, reason: 'no #display_canvas'};
                       c.focus();
                       const opts = {
-                        key: 'q', code: 'KeyQ', keyCode: 113, which: 113,
-                        ctrlKey: true, bubbles: true, cancelable: true
+                        key: 'BrowserBack', code: 'BrowserBack',
+                        keyCode: 166, which: 166,
+                        bubbles: true, cancelable: true
                       };
                       c.dispatchEvent(new KeyboardEvent('keydown', opts));
                       c.dispatchEvent(new KeyboardEvent('keyup', opts));
@@ -315,12 +314,12 @@ def run_autotest(
             console_msgs.append(
                 {
                     "type": "info",
-                    "text": "AUTOTEST_QUIT_CHORD=Control+q",
+                    "text": "AUTOTEST_QUIT_CHORD=BrowserBack",
                     "t": f"{elapsed():.2f}",
                 }
             )
             if stream_log:
-                print("[#log] AUTOTEST_QUIT_CHORD=Control+q", flush=True)
+                print("[#log] AUTOTEST_QUIT_CHORD=BrowserBack", flush=True)
         except Exception as exc:
             browser.close()
             return {

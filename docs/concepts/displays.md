@@ -57,7 +57,7 @@ PyScript browser canvas. Input (pointer/touch/pen, wheel, keyboard, gamepad) is 
 
 
 All display backends feed input into [`eventsys`](events.md) the same way: as a
-stream of `eventsys.events` objects drained through a **`HostEventsDevice`**. They
+stream of [`events`](events.md) records drained through a **`HostEventsDevice`**. They
 differ only in *how* that stream is produced, which depends on what each
 platform exposes:
 
@@ -66,7 +66,7 @@ platform exposes:
 | `SDLDisplay`, `PGDisplay`, `WinDisplay` | System-wide OS queue drain (module `get_events`, also on `display_drv.get_events`) | `Runtime(..., host_read=display_drv.get_events)` |
 | `JNDisplay`, `PSDisplay` | Per-surface `PSDevices` / `JNDevices`, exposed as `display_drv.get_events` | `Runtime(..., host_read=display_drv.get_events)` |
 
-Either way your handler sees the same `eventsys.events` objects, so application
+Either way your handler sees the same `events` objects, so application
 code never needs to know which backend is active. Desktop board configs also use
 `timer_async=env_bool("PYDISPLAY_TIMER_ASYNC", display_drv.requires_async_timer)`
 (`requires_async_timer` is `True` only on PS/JN). `eventsys.Runtime` raises if
@@ -75,7 +75,7 @@ code never needs to know which backend is active. Desktop board configs also use
 ### Desktop (SDL2, PyGame)
 
 SDL2 and PyGame provide a real OS event queue. The driver module drains it and
-converts each event to an `eventsys.events` object:
+converts each event to an `events` object:
 
 ```python
 from displaysys.sdldisplay import SDLDisplay
@@ -91,11 +91,11 @@ runtime = eventsys.Runtime(
 Use `poll_event()` only for optional manual single-event checks — not as the
 `host_read=` callback (it returns one event, not a list).
 
-Default quit chord on event backends is **CTRL+Q**
-(`eventsys.default_quit_chord()`, stored as `display_drv.quit_chord`);
-`HostEventsDevice` applies it when constructed with `display=`, along with
-Android system Back (`K_AC_BACK`). Window-close still emits `events.QUIT` from
-SDL/PyGame.
+Desktop hosts (`SDLDisplay`, `PGDisplay`, `WinDisplay`) set
+`display_drv.quit_chord` to **CTRL+Q** (`keys.K_q` + `keys.KMOD_CTRL`).
+`HostEventsDevice` matches that chord with `keys.chord_matches` and emits
+`events.QUIT`. Window-close still emits `events.QUIT` from SDL/PyGame.
+MCU drivers leave `quit_chord` as `None`.
 
 Pointer coordinates use `display_drv.touch_scale` (see `capabilities()` per
 backend); `HostEventsDevice` divides mouse events by that scale.
@@ -108,7 +108,7 @@ launching — hot-plugging after startup is not handled.
 ### Browser / notebook (PyScript, Jupyter)
 
 `PSDevices` (PyScript) and `JNDevices` (Jupyter) capture all available input on
-the canvas/widget and turn it into the same `eventsys.events` objects. The
+the canvas/widget and turn it into the same `events` objects. The
 display owns that drain as `get_events`:
 
 ```python
@@ -130,20 +130,18 @@ Each captures:
   touch, and pen all work (with the `touch` flag set for non-mouse pointers).
 - **Wheel** — `MOUSEWHEEL` (also consumed by encoder devices).
 - **Keyboard** — `KEYDOWN` / `KEYUP` with SDL-style key codes, names, and
-  modifier masks (incl. left/right modifier variants) via the shared keymap in
-  `eventsys.keys`.
+  modifier masks (incl. left/right modifier variants) via `keys` and
+  displaysys DOM helpers.
 - **Gamepad** (PyScript only) — `JOYAXISMOTION` / `JOYBUTTONDOWN` /
   `JOYBUTTONUP`, polled from the Gamepad API on each `read()`.
-- **Quit** — an assignable key chord emits `events.QUIT` (the equivalent of
-  clicking an SDL window's close button; the runtime then deinitializes the
-  display and exits). The default is **CTRL+Q** from
-  `eventsys.default_quit_chord()`; Android Back (`K_AC_BACK`) also quits.
-  Reassign if the host intercepts Ctrl+Q:
+- **Quit** — `PSDisplay` / `JNDisplay` set `quit_chord` to browser/TV Back
+  (`keys.K_AC_BACK`). `HostEventsDevice` turns that KEYDOWN into `events.QUIT`
+  (same as closing an SDL window). Reassign if the host intercepts Back:
 
 ```python
-from eventsys.keys import Keys
+import keys
 
-display_drv.quit_chord = (Keys.K_c, Keys.KMOD_CTRL)  # e.g. CTRL+C on Jupyter
+display_drv.quit_chord = (keys.K_c, keys.KMOD_CTRL)  # e.g. CTRL+C on Jupyter
 ```
 
 > **Caveat:** key events require the canvas/widget to be focused (click it

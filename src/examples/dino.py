@@ -19,7 +19,7 @@ from random import getrandbits
 import board_config as _host_board
 
 from displaysys import color565
-from eventsys.keys import Keys
+import keys
 from multimer import ticks_diff, ticks_ms
 from pygraphics import MONO_HLSB, RGB565, FrameBuffer
 
@@ -511,16 +511,16 @@ game = DinoGame()
 
 def _on_input(event):
     if event.type == runtime.events.KEYDOWN:
-        if event.key in (Keys.K_SPACE, Keys.K_UP, Keys.K_w):
+        if event.key in (keys.K_SPACE, keys.K_UP, keys.K_w):
             game.keys["jump"] = True
             game.start_or_jump()
-        elif event.key in (Keys.K_DOWN, Keys.K_s):
+        elif event.key in (keys.K_DOWN, keys.K_s):
             game.set_down(True)
     elif event.type == runtime.events.KEYUP:
-        if event.key in (Keys.K_SPACE, Keys.K_UP, Keys.K_w):
+        if event.key in (keys.K_SPACE, keys.K_UP, keys.K_w):
             game.keys["jump"] = False
             game.release_jump()
-        elif event.key in (Keys.K_DOWN, Keys.K_s):
+        elif event.key in (keys.K_DOWN, keys.K_s):
             game.set_down(False)
     elif event.type in (runtime.events.MOUSEBUTTONDOWN, runtime.events.FINGERDOWN):
         game.start_or_jump()

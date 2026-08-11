@@ -12,18 +12,18 @@ held-key map from ``JOYHATMOTION`` / ``JOYBUTTON*`` using a ``joymap``.
 Import explicitly (not loaded by ``import eventsys``)::
 
     from eventsys.joystick_keys import JoystickKeys
-    from eventsys import Keys
+    import keys
 
     joymap = {
         1: {  # joystick instance_id
             "hats": {
                 # hat index → [left, right, down, up] key codes
-                0: [Keys.K_LEFT, Keys.K_RIGHT, Keys.K_DOWN, Keys.K_UP],
+                0: [keys.K_LEFT, keys.K_RIGHT, keys.K_DOWN, keys.K_UP],
             },
             "buttons": {
-                0: Keys.K_RETURN,
-                1: Keys.K_d,
-                2: Keys.K_f,
+                0: keys.K_RETURN,
+                1: keys.K_d,
+                2: keys.K_f,
             },
         }
     }
@@ -34,7 +34,7 @@ Import explicitly (not loaded by ``import eventsys``)::
             print(held)
 """
 
-from ._events import events
+import events
 
 
 class JoystickKeys:

@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: MIT
 """Board runtime: aggregates devices, shared timer, and quit lifecycle."""
 
+import events
+
 from ._encoder import EncoderDevice
-from ._events import events
 from ._host import HostEventsDevice
 from ._joystick import JoystickDevice
 from ._keypad import KeypadDevice
@@ -154,7 +155,8 @@ class Runtime:
     """Board runtime: input devices, shared timer, display refresh, and quit lifecycle.
 
     ``multimer`` is imported lazily when the shared timer starts so ``eventsys``
-    remains importable in isolation.
+    remains importable without it. Event types and key codes are the shared
+    ``events`` / ``keys`` modules (``Runtime.events`` is that events module).
     """
 
     events = events

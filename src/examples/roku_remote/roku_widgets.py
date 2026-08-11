@@ -36,7 +36,7 @@ if _EXAMPLES not in sys.path:
 
 import board_config
 import pdwidgets as pd
-from eventsys.keys import Keys
+import keys
 from roku_engine import (
     FRONTEND_BUTTONS,
     app_label,
@@ -67,17 +67,17 @@ def _shade(c, factor):
 
 
 _KEY_MAP = {
-    Keys.K_UP: "Up",
-    Keys.K_DOWN: "Down",
-    Keys.K_LEFT: "Left",
-    Keys.K_RIGHT: "Right",
-    Keys.K_RETURN: "Select",
-    Keys.K_KP_ENTER: "Select",
-    Keys.K_ESCAPE: "Back",
-    Keys.K_BACKSPACE: "Backspace",
-    Keys.K_h: "Home",
-    Keys.K_i: "Info",
-    Keys.K_SPACE: "Play",
+    keys.K_UP: "Up",
+    keys.K_DOWN: "Down",
+    keys.K_LEFT: "Left",
+    keys.K_RIGHT: "Right",
+    keys.K_RETURN: "Select",
+    keys.K_KP_ENTER: "Select",
+    keys.K_ESCAPE: "Back",
+    keys.K_BACKSPACE: "Backspace",
+    keys.K_h: "Home",
+    keys.K_i: "Info",
+    keys.K_SPACE: "Play",
 }
 
 

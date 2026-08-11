@@ -105,16 +105,16 @@ _KEYMAP = {}
 
 def _bind_keys():
     try:
-        from eventsys.keys import Keys
+        import keys
     except ImportError:
         return
     _KEYMAP.update(
         {
-            Keys.K_RIGHT: ("press", nxt),
-            Keys.K_LEFT: ("press", prev),
-            Keys.K_SPACE: ("release", sel),
-            Keys.K_UP: ("press", increase),
-            Keys.K_DOWN: ("press", decrease),
+            keys.K_RIGHT: ("press", nxt),
+            keys.K_LEFT: ("press", prev),
+            keys.K_SPACE: ("release", sel),
+            keys.K_UP: ("press", increase),
+            keys.K_DOWN: ("press", decrease),
         }
     )
 

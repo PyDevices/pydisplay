@@ -1,6 +1,6 @@
+import events
 import types
 from ._encoder import EncoderDevice as EncoderDevice
-from ._events import events as events
 from ._host import HostEventsDevice as HostEventsDevice
 from ._joystick import JoystickDevice as JoystickDevice
 from ._keypad import KeypadDevice as KeypadDevice

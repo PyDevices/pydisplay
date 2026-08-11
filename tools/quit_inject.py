@@ -111,7 +111,7 @@ def inject_synthetic_touch(*, broker_poll=False, pump_count=20, pump_delay=0.02)
 
     Used by example_test_wrapper for quit=inject examples (touch tests, drag demos).
     """
-    from eventsys import events
+    import events
 
     try:
         from board_config import display_drv
@@ -159,7 +159,7 @@ def inject_quit(*, broker_poll=True, pump_count=15, pump_delay=0.02, lvgl=False,
     Returns True if injection was attempted (QUEUE device existed).
     The caller should verify the process exits; if still running, quit was not handled.
     """
-    from eventsys import events
+    import events
 
     queue_dev = queue_device()
     if queue_dev is None:
