@@ -59,7 +59,7 @@ multimer.asyncio.run(main())
 
 ## What you get
 
-- `Timer` — auto-selected backend (`machine` → `librt` → `sdl2` → `threading` → `polling`; on CPython `sdl2` skipped when pygame is importable; `AsyncTimer` on PyScript/Jupyter)
+- `Timer` — auto-selected backend (`machine` → `librt` → `win32` → `sdl2` → `threading` → `polling`; on CPython `sdl2` skipped when pygame is importable; `win32` only auto-tries on Windows; `AsyncTimer` on PyScript/Jupyter)
 - `AsyncTimer` — asyncio / uasyncio software timer
 - `ticks_ms`, `ticks_add`, `ticks_diff`, `ticks_less`, `sleep_ms`, `schedule`
 - Lazy `multimer.asyncio` (frozen on MP/CP, stdlib on CPython)

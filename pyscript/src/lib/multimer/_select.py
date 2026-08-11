@@ -18,7 +18,7 @@ _backend = None
 # Auto-select try order (first ImportError-free bind wins). ``async`` is not
 # in this list — it is chosen by :func:`_async_only_runtime` or ``use_backend``.
 # ``sdl2`` may be skipped on CPython in :func:`_auto_backends` (see there).
-AUTO_BACKENDS = ("machine", "librt", "sdl2", "threading", "polling")
+AUTO_BACKENDS = ("machine", "librt", "win32", "sdl2", "threading", "polling")
 
 # Every backend name accepted by ``load_backend``. ``machine`` is
 # ``machine.Timer``; ``async`` is ``AsyncTimer`` (async-only hosts, and
@@ -75,6 +75,10 @@ def load_backend(name):
         from ._backends import librt
 
         _set_backend(librt)
+    elif name == "win32":
+        from ._backends import win32
+
+        _set_backend(win32)
     elif name == "sdl2":
         from ._backends import sdl2
 
@@ -167,6 +171,8 @@ def _auto_backends():
     skip_sdl2 = (impl == "cpython" and _pygame_available()) or sys.platform == "android"
     out = []
     for name in AUTO_BACKENDS:
+        if name == "win32" and sys.platform != "win32":
+            continue
         if name == "sdl2" and skip_sdl2:
             continue
         out.append(name)

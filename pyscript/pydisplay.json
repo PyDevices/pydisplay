@@ -50,6 +50,7 @@
     "./src/lib/displaysys/pixeldisplay.py": "/lib/displaysys/",
     "./src/lib/displaysys/psdisplay.py": "/lib/displaysys/",
     "./src/lib/displaysys/sdldisplay.py": "/lib/displaysys/",
+    "./src/lib/displaysys/windisplay.py": "/lib/displaysys/",
     "./src/lib/eventsys/__init__.py": "/lib/eventsys/",
     "./src/lib/eventsys/_capabilities.py": "/lib/eventsys/",
     "./src/lib/eventsys/_device.py": "/lib/eventsys/",
@@ -78,6 +79,7 @@
     "./src/lib/multimer/_backends/polling.py": "/lib/multimer/_backends/",
     "./src/lib/multimer/_backends/sdl2.py": "/lib/multimer/_backends/",
     "./src/lib/multimer/_backends/threading.py": "/lib/multimer/_backends/",
+    "./src/lib/multimer/_backends/win32.py": "/lib/multimer/_backends/",
     "./src/utils/ps_loader.py": "/"
   }
 }
