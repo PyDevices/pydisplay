@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Backend import isolation for displaysys."""
+"""Backend import isolation for displaydev."""
 
 import sys
 import unittest
@@ -14,14 +14,14 @@ class TestBackendIsolation(unittest.TestCase):
         if sys.implementation.name != "micropython":
             self.skipTest("BusDisplay imports only on MicroPython")
         before = set(sys.modules)
-        import displaysys.busdisplay  # noqa: F401
+        import displaydev.busdisplay  # noqa: F401
 
         for name in (
-            "displaysys.fbdisplay",
-            "displaysys.pgdisplay",
-            "displaysys.psdisplay",
-            "displaysys.jndisplay",
-            "displaysys.sdldisplay",
+            "displaydev.fbdisplay",
+            "displaydev.pgdisplay",
+            "displaydev.psdisplay",
+            "displaydev.jndisplay",
+            "displaydev.sdldisplay",
         ):
             if name not in before:
                 self.assertNotIn(name, sys.modules, f"busdisplay imported {name}")

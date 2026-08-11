@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Tests for ``displaysys.byteswap``.
+"""Tests for ``displaydev.byteswap``.
 
-``displaysys`` imports a native ``byteswap`` if one is available and otherwise
+``displaydev`` imports a native ``byteswap`` if one is available and otherwise
 falls back to a pure-Python implementation defined in the package. Either way
 the contract is the same: swap each pair of bytes in place, and reject
 odd-length buffers. These tests cover whichever implementation the host wired up.
@@ -13,7 +13,7 @@ import unittest
 
 import _env  # noqa: F401
 
-from displaysys import byteswap
+from displaydev import byteswap
 
 
 class TestByteswap(unittest.TestCase):

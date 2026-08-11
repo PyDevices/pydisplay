@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Sync pydisplay packages into micropython-lib, build pure-Python TestPyPI wheels,
 # and push the MIP index.
-# Install example:  mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
-# Resolves to:  https://pydevices.github.io/micropython-lib/mip/PyDevices/package/6/displaysys/latest.json
-# Repo URL:  https://github.com/PyDevices/micropython-lib/blob/gh-pages/mip/PyDevices/package/6/displaysys/latest.json
+# Install example:  mip.install("displaydev", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
+# Resolves to:  https://pydevices.github.io/micropython-lib/mip/PyDevices/package/6/displaydev/latest.json
+# Repo URL:  https://github.com/PyDevices/micropython-lib/blob/gh-pages/mip/PyDevices/package/6/displaydev/latest.json
+# displaydev and multimer canonical sources live in sibling micropython-hardware.
 #
 # CI / automation:
 #   MICROPYTHON_LIB_DIR=../micropython-lib ./scripts/publish_sync_packages.sh \
@@ -164,7 +165,7 @@ pypi_publish_name() {
 # Short PyPI summary (one line) — not the monorepo tagline.
 package_summary() {
     case "$1" in
-        displaysys)
+        displaydev)
             echo "Cross-platform display drivers for MicroPython, CircuitPython, and CPython"
             ;;
         eventsys)
@@ -186,6 +187,7 @@ package_summary() {
 }
 
 # Package-facing README used as the TestPyPI long description.
+# displaydev / multimer READMEs are reached via src/lib symlinks into hardware.
 package_readme_path() {
     local package="$1"
     echo "$SOURCE_DIR/lib/$package/README.md"
@@ -209,7 +211,7 @@ copy_package_readme() {
 package_manifest_requires() {
     local package="$1"
     case "$package" in
-        displaysys)
+        displaydev)
             printf '%s\n' 'require("events")'
             printf '%s\n' 'require("keys")'
             ;;
@@ -254,6 +256,7 @@ prune_stale_packages() {
         expected_top+=("$package")
     done
     # events.py / keys.py are sibling-hardware modules synced into micropython-lib.
+    # displaydev / multimer are also hardware-sourced (src/lib symlinks).
     expected_top+=("events" "keys")
 
     if [[ -d "$DEST_DIR" ]]; then
@@ -274,13 +277,13 @@ prune_stale_packages() {
         done
     fi
 
-    # displaysys is a single full package; drop any leftover displaysys-* backends.
-    if [[ -d "$DEST_DIR/displaysys" ]]; then
-        for existing in "$DEST_DIR/displaysys"/*; do
+    # displaydev is a single full package; drop any leftover displaydev-* backends.
+    if [[ -d "$DEST_DIR/displaydev" ]]; then
+        for existing in "$DEST_DIR/displaydev"/*; do
             [[ -e "$existing" ]] || continue
             name=$(basename "$existing")
-            if [[ "$name" != "displaysys" ]]; then
-                echo "Removing stale displaysys package: $existing"
+            if [[ "$name" != "displaydev" ]]; then
+                echo "Removing stale displaydev package: $existing"
                 rm -rf "$existing"
             fi
         done
@@ -328,10 +331,11 @@ push_micropython_lib() {
     done
 }
 
-# Copy all the directories in $SOURCE_DIR/lib except displaysys to $DEST_DIR/$package
+# Copy pydisplay-owned packages from src/lib. Skip hardware-sourced trees
+# (displaydev, multimer) even when they appear as src/lib symlinks.
 for package_dir in "$SOURCE_DIR/lib"/*; do
     package=$(basename $package_dir)
-    if [ -d "$package_dir" ] && [ "$package" != "displaysys" ] && ! should_skip_name "$package"; then
+    if [ -d "$package_dir" ] && [ "$package" != "displaydev" ] && [ "$package" != "multimer" ] && ! should_skip_name "$package"; then
         echo
         echo "Processing $package"
         copy_source_tree "$package_dir" "$DEST_DIR/$package/$package"
@@ -358,39 +362,74 @@ EOF
     fi
 done
 
-# displaysys: full tree (all backends). One MIP/TestPyPI package.
+HARDWARE_ROOT="$(cd "$SOURCE_REPO/../micropython-hardware" 2>/dev/null && pwd || true)"
+HARDWARE_LIB="${HARDWARE_ROOT:+$HARDWARE_ROOT/lib}"
+HARDWARE_DISPLAYDEV="${HARDWARE_ROOT:+$HARDWARE_ROOT/drivers/display/displaydev}"
+HARDWARE_MULTIMER="${HARDWARE_LIB:+$HARDWARE_LIB/multimer}"
+if [[ -z "$HARDWARE_ROOT" || ! -f "$HARDWARE_LIB/events.py" || ! -f "$HARDWARE_LIB/keys.py" ]]; then
+    echo "Error: expected $SOURCE_REPO/../micropython-hardware/lib/{events,keys}.py" >&2
+    exit 1
+fi
+if [[ ! -f "$HARDWARE_DISPLAYDEV/__init__.py" ]]; then
+    echo "Error: expected $HARDWARE_DISPLAYDEV/__init__.py" >&2
+    exit 1
+fi
+if [[ ! -f "$HARDWARE_MULTIMER/__init__.py" ]]; then
+    echo "Error: expected $HARDWARE_MULTIMER/__init__.py" >&2
+    exit 1
+fi
+
+# displaydev: full tree (all backends). Canonical source is micropython-hardware.
 # board_config.py is not included — install a board_configs/*/ package instead.
 echo
-echo "Processing displaysys (full package)"
-mkdir -p "$DEST_DIR/displaysys/displaysys"
-copy_source_tree "$SOURCE_DIR/lib/displaysys" "$DEST_DIR/displaysys/displaysys/displaysys"
-rm -f "$DEST_DIR/displaysys/displaysys/displaysys/boarddisplay.py"
-cat <<EOF > $DEST_DIR/displaysys/displaysys/manifest.py
+echo "Processing displaydev (from micropython-hardware/drivers/display/displaydev)"
+mkdir -p "$DEST_DIR/displaydev/displaydev"
+copy_source_tree "$HARDWARE_DISPLAYDEV" "$DEST_DIR/displaydev/displaydev/displaydev"
+rm -f "$DEST_DIR/displaydev/displaydev/displaydev/boarddisplay.py"
+cat <<EOF > $DEST_DIR/displaydev/displaydev/manifest.py
 metadata(
-    description="$(package_summary "displaysys")",
+    description="$(package_summary "displaydev")",
     version="$VERSION",
     author="$AUTHOR",
     license="$LICENSE",
-    pypi_publish="$(pypi_publish_name "displaysys")",
+    pypi_publish="$(pypi_publish_name "displaydev")",
 )
 require("events")
 require("keys")
-package("displaysys")
+package("displaydev")
 EOF
-copy_package_readme "displaysys" "$DEST_DIR/displaysys/displaysys/README.md"
+copy_package_readme "displaydev" "$DEST_DIR/displaydev/displaydev/README.md"
 if [[ "$SKIP_PYPI" -eq 0 ]]; then
-    ./scripts/publish_make_pyproject.py --output $PYPI_DIR/displaysys $DEST_DIR/displaysys/displaysys/manifest.py
-    pushd $PYPI_DIR/displaysys
+    ./scripts/publish_make_pyproject.py --output $PYPI_DIR/displaydev $DEST_DIR/displaydev/displaydev/manifest.py
+    pushd $PYPI_DIR/displaydev
+    build_and_upload_pypi
+    popd
+fi
+
+echo
+echo "Processing multimer (from micropython-hardware/lib/multimer)"
+copy_source_tree "$HARDWARE_MULTIMER" "$DEST_DIR/multimer/multimer"
+extra_requires="$(package_manifest_requires "multimer")"
+cat <<EOF > $DEST_DIR/multimer/manifest.py
+metadata(
+    description="$(package_summary "multimer")",
+    version="$VERSION",
+    author="$AUTHOR",
+    license="$LICENSE",
+    pypi_publish="$(pypi_publish_name "multimer")",
+)
+${extra_requires}
+package("multimer")
+EOF
+copy_package_readme "multimer" "$DEST_DIR/multimer/README.md"
+if [[ "$SKIP_PYPI" -eq 0 ]]; then
+    ./scripts/publish_make_pyproject.py --output $PYPI_DIR/multimer $DEST_DIR/multimer/manifest.py
+    pushd $PYPI_DIR/multimer
     build_and_upload_pypi
     popd
 fi
 
 # events.py / keys.py — canonical sources in sibling micropython-hardware/lib.
-HARDWARE_LIB="$(cd "$SOURCE_REPO/../micropython-hardware/lib" 2>/dev/null && pwd || true)"
-if [[ -z "$HARDWARE_LIB" || ! -f "$HARDWARE_LIB/events.py" || ! -f "$HARDWARE_LIB/keys.py" ]]; then
-    echo "Error: expected $SOURCE_REPO/../micropython-hardware/lib/{events,keys}.py" >&2
-    exit 1
-fi
 for hw_mod in events keys; do
     echo
     echo "Processing $hw_mod (from micropython-hardware/lib)"

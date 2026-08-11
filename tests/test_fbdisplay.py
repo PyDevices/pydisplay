@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Tests for ``displaysys.fbdisplay.FBDisplay``.
+"""Tests for ``displaydev.fbdisplay.FBDisplay``.
 
 A :class:`_support.FakeFrameBuffer` stands in for a real CircuitPython
 framebuffer so the pixel-pushing paths can be checked byte-for-byte.
@@ -126,7 +126,7 @@ class TestFBDisplayBitmapKwargs(unittest.TestCase):
         # bitmaptools missing → falls back to raw buffer path; must not crash.
         from _support import FakeFrameBuffer, quiet
 
-        from displaysys.fbdisplay import FBDisplay
+        from displaydev.fbdisplay import FBDisplay
 
         fb2 = FakeFrameBuffer(4, 2)
 

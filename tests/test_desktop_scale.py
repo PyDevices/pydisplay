@@ -7,7 +7,7 @@ import unittest
 
 import _env  # noqa: F401
 
-from displaysys import (
+from displaydev import (
     _DESKTOP_SCALE_MARGIN,
     _DESKTOP_WINDOW_CHROME_H,
     desktop_work_area,

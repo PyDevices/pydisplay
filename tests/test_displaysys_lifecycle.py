@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Tests for displaysys quit lifecycle and backend isolation."""
+"""Tests for displaydev quit lifecycle and backend isolation."""
 
 import sys
 import unittest
@@ -10,7 +10,7 @@ from unittest import mock
 import _env  # noqa: F401
 from _support import make_fbdisplay, quiet
 
-from displaysys import DisplayDriver
+from displaydev import DisplayDriver
 
 
 class CountingDriver(DisplayDriver):
@@ -64,10 +64,10 @@ class TestBackendIsolation(unittest.TestCase):
         before = set(sys.modules)
 
         for name in (
-            "displaysys.pgdisplay",
-            "displaysys.sdldisplay",
-            "displaysys.psdisplay",
-            "displaysys.jndisplay",
+            "displaydev.pgdisplay",
+            "displaydev.sdldisplay",
+            "displaydev.psdisplay",
+            "displaydev.jndisplay",
         ):
             if name not in before:
                 self.assertNotIn(name, sys.modules)

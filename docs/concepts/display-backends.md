@@ -56,7 +56,7 @@ RGB888 unpack (used by `PixelFramebuffer` and `pygraphics.RGB888`) treats the in
 as `0xRRGGBB`. Passing `0xFFFF` (565 white) through that path yields cyan
 (R=0, G=255, B=255), not white.
 
-The shared expand helper is **`color_rgb()`** in `displaysys/__init__.py`: 565
+The shared expand helper is **`color_rgb()`** in `displaydev/__init__.py`: 565
 int or 2-byte little-endian slice → `(r, g, b)` with 5/6/5 bit expansion. Tests
 live in `tests/test_color.py`.
 
@@ -136,7 +136,7 @@ coordinates — see [Displays — Browser / notebook](displays.md#browser--noteb
 | **PGDisplay** | CPython desktop | Easier install on Windows; avoids some SDL glitches on Chromebooks; fallback after `WinDisplay` |
 | **PSDisplay** | PyScript | HTML Canvas 2D; no SDL/pygame in the browser |
 | **JNDisplay** | Jupyter | `ipywidgets` / PNG refresh; interactive `JNDevices` |
-| **PixelDisplay** | MCU / CP | NeoPixel / DotStar grids via `displaysys.pixeldisplay` |
+| **PixelDisplay** | MCU / CP | NeoPixel / DotStar grids via `displaydev.pixeldisplay` |
 
 CircuitPython Unix **SDLDisplay** forces **software rendering** when accelerated
 GL cannot attach rotated render targets (see comment in `sdldisplay.py`).
@@ -155,7 +155,7 @@ Backends use several patterns to map **565 API input** to **native storage**:
 | **Zero-copy passthrough** | **SDLDisplay** at 16 bpp | `SDL_UpdateTexture` with 565 pitch — buffer format matches texture |
 | **Raw 565 pack** | **BusDisplay**, **FBDisplay** | `(c & 0xFFFF).to_bytes(2, …)` — no expand |
 
-Not yet centralized in `displaysys`, but useful for future shared helpers:
+Not yet centralized in `displaydev`, but useful for future shared helpers:
 
 - **`frombuffer` + blit** (Pygame) — `pg.image.frombuffer(buf, (w,h), "RGB565")`
   then `dest.blit(src, (x,y))` for **16-in / 16-stored** without a Python loop
@@ -210,7 +210,7 @@ discourage bypassing the DisplayDriver API (see
 The inner `PixelFramebuffer` stays **RGB888** for the strip; `fill_rect`,
 `pixel`, and `blit_rect` expand via `color_rgb` before writing the inner buffer.
 
-MicroPython uses `displaysys.pixeldisplay.PixelFramebuffer`; CircuitPython uses
+MicroPython uses `displaydev.pixeldisplay.PixelFramebuffer`; CircuitPython uses
 Adafruit `adafruit_pixel_framebuf` behind the same `PixelDisplay` wrapper.
 
 ## Hardware drivers (brief)
@@ -224,11 +224,11 @@ These follow the 565 API without a separate “present” stage in the same sens
 
 ## Consolidation direction
 
-Goals discussed for displaysys maintenance:
+Goals discussed for displaydev maintenance:
 
 1. **One API** — all `DisplayDriver` instances report `color_depth=16` and accept
    565 colors and blit buffers.
-2. **Shared conversion helpers** in `displaysys/__init__.py` — `color_rgb`
+2. **Shared conversion helpers** in `displaydev/__init__.py` — `color_rgb`
    (exists), plus swappable **loop** vs **LUT** blit writers for benchmarking.
 3. **Keep backend-specific fast paths** where they matter:
    - SDL: zero-copy 565 blit

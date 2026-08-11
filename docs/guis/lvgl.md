@@ -137,4 +137,4 @@ The table shows the timer backend in each cell (e.g. `librt.Timer, ok` / `_async
 
 - [Architecture](../concepts/architecture.md)
 - [Events](../concepts/events.md)
-- [API reference → displaysys](../reference/overviews/displaysys.md)
+- [API reference → displaydev](../reference/overviews/displaydev.md)

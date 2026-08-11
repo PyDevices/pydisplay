@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Helpers shared by the multimer, eventsys, and displaysys tests."""
+"""Helpers shared by the multimer, eventsys, and displaydev tests."""
 
 import contextlib
 import io
@@ -33,7 +33,7 @@ class FakeDisplay:
     """Minimal stand-in for a display driver used by ``TouchDevice``.
 
     ``TouchDevice`` only needs ``width``/``height``/``rotation`` and a settable
-    ``touch_device`` attribute, so this avoids pulling in ``displaysys``.
+    ``touch_device`` attribute, so this avoids pulling in ``displaydev``.
     """
 
     def __init__(self, width=320, height=240, rotation=0):
@@ -46,7 +46,7 @@ class FakeDisplay:
 class FakeFrameBuffer:
     """A minimal stand-in for a CircuitPython ``FrameBuffer``.
 
-    It exposes the three things ``displaysys.fbdisplay.FBDisplay`` needs:
+    It exposes the three things ``displaydev.fbdisplay.FBDisplay`` needs:
 
     - a ``width`` / ``height`` in pixels,
     - the buffer protocol (so ``memoryview(fb)`` aliases its bytes), and
@@ -105,7 +105,7 @@ def make_fbdisplay(width=8, height=4, reverse_bytes_in_word=False):
 
     Returns ``(display, framebuffer)``.
     """
-    from displaysys.fbdisplay import FBDisplay
+    from displaydev.fbdisplay import FBDisplay
 
     fb = FakeFrameBuffer(width, height)
     with quiet():
@@ -115,7 +115,7 @@ def make_fbdisplay(width=8, height=4, reverse_bytes_in_word=False):
 
 def make_u16_fbdisplay(width=8, height=4, reverse_bytes_in_word=False):
     """Build an ``FBDisplay`` backed by a uint16-indexed framebuffer."""
-    from displaysys.fbdisplay import FBDisplay
+    from displaydev.fbdisplay import FBDisplay
 
     fb = FakeU16FrameBuffer(width, height)
     with quiet():

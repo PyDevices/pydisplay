@@ -8,7 +8,7 @@ desktop (SDL/PG), PyScript, or Jupyter. Each :class:`EncoderEmu` owns:
 
 * a :class:`SoftEncoder` (position + pushbutton state)
 * an eventsys :class:`~eventsys.EncoderDevice` registered on ``runtime``
-* an LVGL emulator UI (← / Enter / →) on a secondary displaysys surface,
+* an LVGL emulator UI (← / Enter / →) on a secondary displaydev surface,
   in a private focus group (not the app default)
 
 Multiple emulators may coexist in one app (one window/canvas each)::
@@ -72,7 +72,7 @@ def make_emu_display(
     """Create a same-backend secondary display for an encoder emulator.
 
     Args:
-        primary: Primary displaysys driver (default: ``board_config.display_drv``).
+        primary: Primary displaydev driver (default: ``board_config.display_drv``).
         width, height: Emulator panel size in pixels.
         title: Window title (SDL/PG).
         scale: PGDisplay scale (ignored by other backends).
@@ -88,18 +88,18 @@ def make_emu_display(
         primary = display_drv
     name = type(primary).__name__
     if name == "SDLDisplay":
-        from displaysys.sdldisplay import SDLDisplay
+        from displaydev.sdldisplay import SDLDisplay
 
         return SDLDisplay(width=width, height=height, title=title, quiet=True), None
     if name == "PGDisplay":
-        from displaysys.pgdisplay import PGDisplay
+        from displaydev.pgdisplay import PGDisplay
 
         return (
             PGDisplay(width=width, height=height, title=title, scale=scale, quiet=True),
             None,
         )
     if name == "PSDisplay":
-        from displaysys.psdisplay import PSDisplay
+        from displaydev.psdisplay import PSDisplay
         import eventsys
 
         # Per-canvas drain (PSDisplay owns PSDevices). Separate HostEventsDevice
@@ -109,7 +109,7 @@ def make_emu_display(
         host = eventsys.HostEventsDevice(host_read=dd.get_events, display=dd)
         return dd, [host]
     if name == "JNDisplay":
-        from displaysys.jndisplay import JNDisplay
+        from displaydev.jndisplay import JNDisplay
         import eventsys
 
         dd = JNDisplay(width, height)
@@ -156,7 +156,7 @@ class EncoderEmu:
 
     Args:
         runtime: ``board_config.runtime`` (or any :class:`eventsys.Runtime`).
-        display: Existing secondary displaysys driver, or ``None`` to create one.
+        display: Existing secondary displaydev driver, or ``None`` to create one.
         attach_devices: Host devices for ``display_driver.attach`` (PS/JN);
             ignored when ``display`` is created by :func:`make_emu_display`.
         title, width, height, scale, canvas_id: Forwarded to :func:`make_emu_display`
@@ -225,7 +225,7 @@ class EncoderEmu:
 
     @property
     def display(self):
-        """Secondary displaysys driver for the emulator surface."""
+        """Secondary displaydev driver for the emulator surface."""
         return self._display
 
     @property

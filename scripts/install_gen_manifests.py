@@ -44,7 +44,7 @@ peterhinch_packages = {
 }
 
 # list of package directories, dependencies and extra files in that package.
-# pydisplay core packages (displaysys/eventsys/multimer) install from the
+# pydisplay core packages (displaydev/eventsys/multimer) install from the
 # micropython-lib MIP index — do not emit packages/<name>.json for those. They
 # still appear here so PyScript micropython.toml mounts stay generated.
 # Sister packages (pygraphics, usdl2, palettes, pdwidgets, lvgl) are not from
@@ -52,14 +52,14 @@ peterhinch_packages = {
 packages = [
     ["utils", [], []],
     ["examples", [], []],
-    ["lib/displaysys", [], []],
+    ["lib/displaydev", [], []],
     ["lib/eventsys", [], []],
     ["lib/multimer", [], []],
 ]
 
 # Emit packages/*.json only for GitHub-MIP / PyScript demo bundles.
 # These names stay in `packages` for toml mounts but must not get a JSON file.
-MIP_INDEX_ONLY = frozenset({"displaysys", "eventsys", "multimer"})
+MIP_INDEX_ONLY = frozenset({"displaydev", "eventsys", "multimer"})
 
 # Packages omitted from web/pyscript/micropython.toml (PyScript mounts utils for browser examples).
 toml_exclude = ["examples"]

@@ -1,13 +1,13 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Tests for the color helpers and ``alloc_buffer`` in ``displaysys``."""
+"""Tests for the color helpers and ``alloc_buffer`` in ``displaydev``."""
 
 import unittest
 
 import _env  # noqa: F401
 
-from displaysys import (
+from displaydev import (
     alloc_buffer,
     color332,
     color565,

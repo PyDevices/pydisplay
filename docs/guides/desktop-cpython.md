@@ -39,4 +39,4 @@ Mouse events map to touch events. Same event API as on embedded targets.
 
 ## Reference
 
-- [API reference (core)](../reference/) → `displaysys`, `eventsys`
+- [API reference (core)](../reference/) → `displaydev`, `eventsys`

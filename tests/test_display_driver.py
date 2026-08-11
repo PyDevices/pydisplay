@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Tests for the ``displaysys.DisplayDriver`` base class.
+"""Tests for the ``displaydev.DisplayDriver`` base class.
 
 Geometry, byte-swap and lifecycle behaviour are exercised through the concrete
 ``FBDisplay`` driver (a real subclass with no hardware needs). The vertical
@@ -15,7 +15,7 @@ import unittest
 import _env  # noqa: F401
 from _support import make_fbdisplay, quiet
 
-from displaysys import DisplayDriver
+from displaydev import DisplayDriver
 
 
 class FakeTouch:

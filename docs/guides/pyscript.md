@@ -105,4 +105,4 @@ Matrix notes (serve.py, Playwright install, `needs_playwright`):
 
 ## Reference
 
-- [API reference (core)](../reference/) → `displaysys.psdisplay`
+- [API reference (core)](../reference/) → `displaydev.psdisplay`

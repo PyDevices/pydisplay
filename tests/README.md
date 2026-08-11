@@ -2,7 +2,7 @@
 
 Self-contained tests for in-tree [`multimer`](../src/lib/multimer),
 [`eventsys`](../src/lib/eventsys), [`pygraphics`](https://github.com/PyDevices/pygraphics) (sibling `lib/pygraphics`), and
-[`displaysys`](../src/lib/displaysys) packages.
+[`displaydev`](../src/lib/displaydev) packages.
 
 They use only the Python standard library (`unittest`) — no third-party test
 runner or build step is required. The shared bootstrap in
@@ -69,6 +69,6 @@ bundled `pygraphics.framebuf` implementation, which is verified byte-for-byte
 against the real MicroPython `framebuf` C module (fuzz-tested; see
 `test_framebuf.py`).
 
-The displaysys driver tests run on plain CPython using a hardware-free
+The displaydev driver tests run on plain CPython using a hardware-free
 framebuffer (`_support.FakeFrameBuffer`) and a quiet-stdout helper. Tests that
 need the optional `multimer` dependency are skipped when it is not importable.

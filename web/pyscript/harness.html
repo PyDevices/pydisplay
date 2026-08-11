@@ -81,7 +81,7 @@ _mark("mpy_top")
 
 MANIFEST_MIP_TARGET = "."
 # Index packages install here instead of the cwd, which sys.path searches first.
-# board_config's deps (displaysys, and through it eventsys and multimer) are
+# board_config's deps (displaydev, and through it eventsys and multimer) are
 # published copies of libraries this page already maps from the working tree —
 # installed into the cwd they shadow it, so the harness would silently test
 # released code instead of the tree under development.
@@ -342,7 +342,7 @@ def _ensure_board_config(mip_mod):
     except ImportError:
         pass
     print("MIP install: board_config (desktop)")
-    # deps (displaysys → …) need the PyDevices index; default is micropython.org/pi/v2.
+    # deps (displaydev → …) need the PyDevices index; default is micropython.org/pi/v2.
     mip_mod.install(
         DESKTOP_BOARD_CONFIG_PACKAGE,
         target=_dependency_target(),

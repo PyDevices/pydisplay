@@ -1,4 +1,4 @@
-from displaysys import DisplayDriver as DisplayDriver
+from displaydev import DisplayDriver as DisplayDriver
 
 class FBDisplay(DisplayDriver):
     share_framebuffer: bool

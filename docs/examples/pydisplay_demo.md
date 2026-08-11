@@ -69,7 +69,7 @@ Constants in the script: `TOP = 36`, `BOT = 20`, `ROW = 20` (height of each tip 
 |--------|------|
 | `board_config.display_drv` | Platform display driver (SDL, BusDisplay, …) |
 | `board_config.runtime` | Input event runtime (touch / mouse) |
-| `displaysys.color565` | RGB → RGB565 color values |
+| `displaydev.color565` | RGB → RGB565 color values |
 | `pygraphics.Area` | Rectangle hit-testing for buttons |
 | `pygraphics.Font`, `FrameBuffer`, `RGB565` | Text rendered in RAM, blitted once |
 | `multimer.Timer`, `run_forever`, `sleep_ms` | Periodic scroll + main loop |

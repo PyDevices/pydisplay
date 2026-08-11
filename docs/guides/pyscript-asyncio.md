@@ -80,4 +80,4 @@ Regenerate manifest after adding examples: `./scripts/install_refresh_manifests.
 
 ## Reference
 
-- [API reference (core)](../reference/) → `eventsys`, `displaysys.psdisplay`
+- [API reference (core)](../reference/) → `eventsys`, `displaydev.psdisplay`

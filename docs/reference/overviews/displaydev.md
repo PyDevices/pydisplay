@@ -1,4 +1,4 @@
-displaysys provides display driver classes (`BusDisplay`, `SDLDisplay`, `PGDisplay`, `PSDisplay`, `JNDisplay`, `FBDisplay`) with a unified drawing API based on MicroPython's `framebuf`.
+displaydev provides display driver classes (`BusDisplay`, `SDLDisplay`, `PGDisplay`, `PSDisplay`, `JNDisplay`, `FBDisplay`) with a unified drawing API based on MicroPython's `framebuf`.
 
 ## Narrative docs
 
@@ -14,6 +14,7 @@ displaysys provides display driver classes (`BusDisplay`, `SDLDisplay`, `PGDispl
 - `SDLDisplay` / `PGDisplay` — desktop backends (SDL2 / PyGame)
 - `PSDisplay` / `JNDisplay` — PyScript browser / Jupyter Notebook
 - `FBDisplay` — CircuitPython framebuffer displays
+- `displaydev.auto.AutoDisplay` / `host_kind` — optional host selection (not re-exported from the package)
 - `display_drv.quit()` — release resources; called automatically by `Runtime` on quit
 
 Generated API pages for each module appear below (build time).

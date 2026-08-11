@@ -82,7 +82,7 @@ def _positive_scale(value):
 
 
 def _apply_display_overrides(resolution, scale):
-    from displaysys import env_set
+    from displaydev import env_set
 
     if resolution is not None:
         width, height = resolution
@@ -181,13 +181,13 @@ def _install_show_capture(deadline, output):
         display_class.show = show
 
     try:
-        from displaysys.sdldisplay import SDLDisplay
+        from displaydev.sdldisplay import SDLDisplay
 
         arm(SDLDisplay)
     except ImportError:
         pass
     try:
-        from displaysys.pgdisplay import PGDisplay
+        from displaydev.pgdisplay import PGDisplay
 
         arm(PGDisplay)
     except ImportError:

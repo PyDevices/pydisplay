@@ -3,16 +3,17 @@
 # SPDX-License-Identifier: MIT
 """Shared test bootstrap that puts pydisplay packages on ``sys.path``.
 
-Puts ``src/lib`` (displaysys, eventsys, multimer) and ``src/utils`` on
-``sys.path`` without installing anything. When a sibling (or nested)
-``micropython-hardware`` tree is present, ``lib/`` (``events``, ``keys``) and
-``drivers/`` (``boarddev``) are added. Does **not** require optional packages
-such as ``pygraphics`` / ``usdl2``.
+Puts ``src/lib`` (eventsys; ``displaydev`` / ``multimer`` symlinks) and
+``src/utils`` on ``sys.path`` without installing anything. When a sibling (or
+nested) ``micropython-hardware`` tree is present, ``lib/`` (``events``,
+``keys``, ``multimer``), ``drivers/`` (``boarddev``), and ``drivers/display``
+(``displaydev``) are added. Does **not** require optional packages such as
+``pygraphics`` / ``usdl2``.
 
     import _env  # noqa: F401
     import multimer
     import eventsys
-    import displaysys
+    import displaydev
 """
 
 import os
@@ -27,7 +28,8 @@ if _SRC_LIB not in sys.path:
 if _SRC_UTILS not in sys.path:
     sys.path.insert(0, _SRC_UTILS)
 
-# Optional: events/keys (lib/) and boarddev (drivers/) from micropython-hardware.
+# Optional: events/keys/multimer (lib/), boarddev (drivers/), displaydev
+# (drivers/display) from micropython-hardware.
 _HARDWARE_ROOT_CANDIDATES = (
     os.path.join(_REPO_ROOT, "..", "micropython-hardware"),
     os.path.join(_REPO_ROOT, "micropython-hardware"),
@@ -39,20 +41,31 @@ for _hw in _HARDWARE_ROOT_CANDIDATES:
         _HARDWARE_ROOT = _hw
         _hw_lib = os.path.join(_hw, "lib")
         _hw_drivers = os.path.join(_hw, "drivers")
+        _hw_display = os.path.join(_hw, "drivers", "display")
         if os.path.isdir(_hw_lib) and _hw_lib not in sys.path:
             sys.path.insert(0, _hw_lib)
         if os.path.isdir(_hw_drivers) and _hw_drivers not in sys.path:
             sys.path.insert(0, _hw_drivers)
+        if os.path.isdir(_hw_display) and _hw_display not in sys.path:
+            sys.path.insert(0, _hw_display)
         break
-
-#: Absolute path to the ``multimer`` package directory.
-MULTIMER_DIR = os.path.join(_SRC_LIB, "multimer")
 
 #: Absolute path to the ``eventsys`` package directory.
 EVENTSYS_DIR = os.path.join(_SRC_LIB, "eventsys")
 
-#: Absolute path to the ``displaysys`` package directory.
-DISPLAYSYS_DIR = os.path.join(_SRC_LIB, "displaysys")
+#: Absolute path to the ``multimer`` package directory (hardware).
+MULTIMER_DIR = (
+    os.path.join(_HARDWARE_ROOT, "lib", "multimer")
+    if _HARDWARE_ROOT
+    else os.path.join(_SRC_LIB, "multimer")
+)
+
+#: Absolute path to the ``displaydev`` package directory (hardware).
+DISPLAYDEV_DIR = (
+    os.path.join(_HARDWARE_ROOT, "drivers", "display", "displaydev")
+    if _HARDWARE_ROOT
+    else os.path.join(_SRC_LIB, "displaydev")
+)
 
 #: Shared ``events.py`` / ``keys.py`` (micropython-hardware/lib).
 EVENTS_PY = os.path.join(_HARDWARE_ROOT, "lib", "events.py") if _HARDWARE_ROOT else ""

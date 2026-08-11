@@ -35,11 +35,11 @@ SDL2 bindings for **`SDLDisplay`**: `import usdl2` from [`pydisplay-desktop`](ht
 
 ### WinDisplay
 
-Native Win32 HWND backend for **CPython on Windows** (`uwin32`). Logical RGB565 GRAM, presented with `StretchDIBits`. `displaysys.AutoDisplay` tries it first on `win32` before pygame/SDL. Explicit config: `board_configs/windisplay/`.
+Native Win32 HWND backend for **CPython on Windows** (`uwin32`). Logical RGB565 GRAM, presented with `StretchDIBits`. `displaydev.auto.AutoDisplay` tries it first on `win32` before pygame/SDL. Explicit config: `board_configs/windisplay/`.
 
 ### PGDisplay
 
-PyGame desktop backend. `displaysys.AutoDisplay` (used by `board_configs/desktop/`) selects it after `WinDisplay` on Windows, and first on other CPython desktops; if PyGame is not installed it falls back to `SDLDisplay`. Explicit config: `board_configs/pgdisplay/`.
+PyGame desktop backend. `displaydev.auto.AutoDisplay` (used by `board_configs/desktop/`) selects it after `WinDisplay` on Windows, and first on other CPython desktops; if PyGame is not installed it falls back to `SDLDisplay`. Explicit config: `board_configs/pgdisplay/`.
 
 ### FBDisplay
 
@@ -78,7 +78,7 @@ SDL2 and PyGame provide a real OS event queue. The driver module drains it and
 converts each event to an `events` object:
 
 ```python
-from displaysys.sdldisplay import SDLDisplay
+from displaydev.sdldisplay import SDLDisplay
 import eventsys
 
 display_drv = SDLDisplay(...)
@@ -112,7 +112,7 @@ the canvas/widget and turn it into the same `events` objects. The
 display owns that drain as `get_events`:
 
 ```python
-from displaysys.psdisplay import PSDisplay
+from displaydev.psdisplay import PSDisplay
 import eventsys
 
 display_drv = PSDisplay("display_canvas", width, height)
@@ -131,7 +131,7 @@ Each captures:
 - **Wheel** — `MOUSEWHEEL` (also consumed by encoder devices).
 - **Keyboard** — `KEYDOWN` / `KEYUP` with SDL-style key codes, names, and
   modifier masks (incl. left/right modifier variants) via `keys` and
-  displaysys DOM helpers.
+  displaydev DOM helpers.
 - **Gamepad** (PyScript only) — `JOYAXISMOTION` / `JOYBUTTONDOWN` /
   `JOYBUTTONUP`, polled from the Gamepad API on each `read()`.
 - **Quit** — `PSDisplay` / `JNDisplay` set `quit_chord` to browser/TV Back
@@ -193,4 +193,4 @@ Known issues: Unix SDL rotation clears the screen; scrolling while rotated has e
 
 ## API reference
 
-[API reference (core)](../reference/) → `displaysys`.
+[API reference (core)](../reference/) → `displaydev`.

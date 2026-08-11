@@ -6,7 +6,7 @@
 `displaybuf`
 ====================================================
 
-FrameBuffer wrapper for using framebuf based GUIs with displaysys.
+FrameBuffer wrapper for using framebuf based GUIs with displaydev.
 Works with MicroPython Nano-GUI, Micro-GUI and MicroPython-Touch from Peter Hinch,
 but may also be used without them.
 
@@ -27,7 +27,7 @@ Usage:
 import gc
 import sys
 
-from displaysys import alloc_buffer, color332, color565, color565_swapped
+from displaydev import alloc_buffer, color332, color565, color565_swapped
 import pygraphics
 
 _has_viper_tools = False
@@ -66,7 +66,7 @@ _display_drv_set_attrs = {"vscroll"}
 
 class DisplayBuffer(pygraphics.FrameBuffer):
     """
-    Wrap a displaysys driver with a framebuf-compatible logical framebuffer.
+    Wrap a displaydev driver with a framebuf-compatible logical framebuffer.
 
     Call ``show()`` to copy the buffer to the physical display. Supported formats:
     ``DisplayBuffer.RGB565``, ``DisplayBuffer.GS8``, ``DisplayBuffer.GS4_HMSB``.
@@ -84,7 +84,7 @@ class DisplayBuffer(pygraphics.FrameBuffer):
         Allocate a logical framebuffer backed by ``display_drv``.
 
         Args:
-            display_drv: A displaysys driver (BusDisplay, SDLDisplay, etc.).
+            display_drv: A displaydev driver (BusDisplay, SDLDisplay, etc.).
             format: One of ``RGB565``, ``GS8``, or ``GS4_HMSB``.
             stride: Lines per chunk for GS8/GS4 bounce buffers (MicroPython viper).
 

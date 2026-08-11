@@ -24,8 +24,8 @@ import os
 # — ``from lib import board_config`` fails on MicroPython (no namespace packages).
 import board_config as _host  # noqa: E402
 
-from displaysys import color565, color_rgb
-from displaysys.pixeldisplay import PixelDisplay
+from displaydev import color565, color_rgb
+from displaydev.pixeldisplay import PixelDisplay
 import pygraphics
 
 

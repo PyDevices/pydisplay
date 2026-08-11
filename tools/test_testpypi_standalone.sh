@@ -82,7 +82,7 @@ test_package() {
 
 test_package multimer "import multimer; print('multimer', multimer.Timer)"
 
-test_package displaysys "import displaysys; print('displaysys', displaysys.DisplayDriver.__name__)"
+test_package displaydev "import displaydev; print('displaydev', displaydev.DisplayDriver.__name__)"
 
 test_package eventsys "
 import eventsys
@@ -94,17 +94,17 @@ print('eventsys', type(r).__name__)
 test_package pygraphics "import pygraphics; print('pygraphics', pygraphics.implementation())"
 
 if [[ "$DESKTOP" -eq 1 ]]; then
-    # usdl2 / pygame-ce are runtime deps, not pip requires of the displaysys wheel.
+    # usdl2 / pygame-ce are runtime deps, not pip requires of the displaydev wheel.
     # Distinct venv labels so the two stacks do not clobber each other.
-    BASE_VENV="${BASE_VENV}-sdl" test_package displaysys "
+    BASE_VENV="${BASE_VENV}-sdl" test_package displaydev "
 from board_config import display_drv
 print('sdldisplay', type(display_drv).__name__)
 display_drv.fill(0)
 display_drv.show()
 " usdl2
 
-    BASE_VENV="${BASE_VENV}-pg" test_package displaysys "
-from displaysys.pgdisplay import PGDisplay
+    BASE_VENV="${BASE_VENV}-pg" test_package displaydev "
+from displaydev.pgdisplay import PGDisplay
 print('pgdisplay', PGDisplay.__name__)
 " pygame-ce
 fi

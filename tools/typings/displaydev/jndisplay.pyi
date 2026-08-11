@@ -1,6 +1,6 @@
 from _typeshed import Incomplete
-from displaysys import DisplayDriver as DisplayDriver, color_rgb as color_rgb
-from displaysys._domkeys import enrich_mod as enrich_mod, key_to_keycode as key_to_keycode, mod_mask as mod_mask
+from displaydev import DisplayDriver as DisplayDriver, color_rgb as color_rgb
+from displaydev._domkeys import enrich_mod as enrich_mod, key_to_keycode as key_to_keycode, mod_mask as mod_mask
 
 class JNDevices:
     image: Incomplete

@@ -14,7 +14,7 @@ and is what ``roku_remote`` launches.
 
 Shares :class:`roku_engine.RokuEngine` for ECP over the LAN (SSDP discover +
 HTTP keypress / apps / queries). Uses only the three core pydisplay packages
-(``pygraphics``, ``displaysys`` via ``board_config``, ``eventsys``, ``multimer``).
+(``pygraphics``, ``displaydev`` via ``board_config``, ``eventsys``, ``multimer``).
 
 Geometry scales from a 320x480 reference up through tall phone portraits.
 Remote chrome matches ``roku_lvgl``: utility, D-pad, options (replay / info /

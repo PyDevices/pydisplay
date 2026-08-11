@@ -16,7 +16,7 @@ For recommended board setup flows, see [micropython-hardware install workflows](
 
 **Core libraries** (under `src/lib/`):
 
-- `displaysys` — display drivers (BusDisplay, SDLDisplay, PGDisplay, etc.)
+- `displaydev` — display drivers (BusDisplay, SDLDisplay, PGDisplay, etc.)
 - `eventsys` — input events and Runtime
 - `multimer` — cross-platform timers; see [multimer](../concepts/multimer.md)
 
@@ -46,10 +46,10 @@ Pure-Python CPython wheels are on [TestPyPI](https://test.pypi.org/) for maintai
 pip install \
   -i https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
-  displaysys
+  displaydev
 ```
 
-- **`-i` TestPyPI** — primary index for PyDevices packages (`displaysys`, `eventsys`, `pydisplay-desktop`, …; Android APK builds also use TestPyPI `usdl2` wheels).
+- **`-i` TestPyPI** — primary index for PyDevices packages (`displaydev`, `eventsys`, `pydisplay-desktop`, …; Android APK builds also use TestPyPI `usdl2` wheels).
 - **`--extra-index-url` PyPI** — secondary index for dependencies published only on [pypi.org](https://pypi.org) (for example `pygame-ce` when using `PGDisplay`; still `import pygame` at runtime).
 
 Omitting either index causes `pip` to fail: TestPyPI-only packages are not on PyPI, and PyPI-only deps are not on TestPyPI. Full explanation: [Publishing micropython-lib — two-index pip install](../publishing-micropython-lib.md#two-index-pip-install-required).

@@ -9,7 +9,13 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 
 ### Environment
 
-PyDisplay publishes a set of pure-Python packages — `displaysys`, `eventsys`, and `multimer` — to TestPyPI and micropython-lib / MIP. The release workflow is shared via `.github/workflows/publish-micropython-lib.yml` and `scripts/publish_sync_packages.sh`.
+PyDisplay publishes `eventsys` from `src/lib`. `displaydev` and `multimer`
+live in sibling [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
+(`drivers/display/displaydev`, `lib/multimer`) and are symlinked into
+`src/lib` for `PYTHONPATH`. All three still publish via
+`.github/workflows/publish-micropython-lib.yml` and
+`scripts/publish_sync_packages.sh`. `AutoDisplay` is
+`from displaydev.auto import AutoDisplay` only.
 
 - **Cursor Cloud (multi-repo workspace):** do not use a local
   `.cursor/environment.json` in this repo. The canonical cloud environment lives
@@ -83,7 +89,7 @@ PyDisplay publishes a set of pure-Python packages — `displaysys`, `eventsys`, 
 Host defaults and env semantics:
 [Runtime — `timer_async`](docs/concepts/runtime.md#timer_async-in-srclibboard_configpy).
 Examples never read this variable — only library `board_config` and harnesses
-that call `displaysys.env_set`.
+that call `displaydev.env_set`.
 
 **Preferred for agents / matrix:** pass wrapper `--timer-async` (the example
 kit does this). That uses `env_set` and works for Windows PE under WSL without
@@ -107,7 +113,7 @@ passes `--timer-async`.
 - The single shared periodic timer is owned by `eventsys.Runtime`
   (`Runtime.on_tick` / `stop_timer`), not by display drivers. `board_config`
   constructs `eventsys.Runtime(displays=[display_drv], ...)` which wires periodic
-  refresh when `display_drv.needs_refresh` is true. `displaysys` drivers only
+  refresh when `display_drv.needs_refresh` is true. `displaydev` drivers only
   `show()`/`deinit()` and declare `needs_refresh`; `multimer` stays
   display-agnostic. GUI layers claim presentation via
   `runtime.claim_display_refresh()` (LVGL via frozen/bundled `display_driver`).

@@ -6,7 +6,8 @@
 # triggers this repo's publish workflow.
 #
 # Before tagging, pre-bumps TestPyPI floors in requirements.txt for packages
-# this tag publishes (multimer, eventsys, displaysys) and commits that change
+# this tag publishes (multimer, eventsys; displaydev after its first TestPyPI
+# wheel is in PACKAGE_ORDER) and commits that change
 # so the release commit already carries the new floors.
 #
 # Usage:
@@ -24,7 +25,8 @@ DRY_RUN=0
 VERSION=""
 
 # Packages uploaded by this repo's tag publish (same VERSION).
-FLOOR_PACKAGES=(multimer eventsys displaysys)
+# displaydev joins this list when PACKAGE_ORDER switches after the first wheel.
+FLOOR_PACKAGES=(multimer eventsys)
 
 usage() {
     cat <<'EOF'
@@ -37,7 +39,7 @@ Create an annotated git tag vVERSION on the current commit.
   --push      Push the branch (if floors committed) and tag to origin
   --dry-run   Print the version / floor bumps; do not commit or tag
 
-Before tagging, bumps requirements.txt floors for multimer/eventsys/displaysys
+Before tagging, bumps requirements.txt floors for multimer/eventsys
 to VERSION and commits when that file changes.
 
 Examples:

@@ -9,7 +9,7 @@ On microcontrollers, delete/replace this file with plain assignments::
 
 import sys
 
-from displaysys import env_get
+from displaydev import env_get
 
 _DESKTOP = frozenset(("linux", "darwin", "win32", "unix", "webassembly", "emscripten"))
 

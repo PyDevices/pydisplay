@@ -15,7 +15,7 @@ Desktop keyboards stand in for remotes during development.
 
 from board_config import display_drv, runtime
 
-from displaysys import color565
+from displaydev import color565
 import keys
 from pygraphics import RGB565, Font, FrameBuffer
 

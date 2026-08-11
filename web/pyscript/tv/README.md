@@ -25,7 +25,7 @@ Desktop arrow keys stand in for the remote during development.
 | BrowserBack, GoBack, Back | `K_AC_BACK` | Why: TV Back should match Android SDL Back → quit |
 | ColorF0Red … (optional) | unmapped unless a demo needs them | Host-specific |
 
-Mappings live in `displaysys._domkeys._DOM_NAMED_KEYS`. Unknown TV keys arrive as
+Mappings live in `displaydev._domkeys._DOM_NAMED_KEYS`. Unknown TV keys arrive as
 `K_UNKNOWN` until added with a why-comment.
 
 ## Related

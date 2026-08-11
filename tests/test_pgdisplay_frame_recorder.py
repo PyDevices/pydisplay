@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""PGDisplay frame recording via displaysys."""
+"""PGDisplay frame recording via displaydev."""
 
 import unittest
 

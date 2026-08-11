@@ -109,7 +109,7 @@ python scripts/gallery_generator.py --check    # CI freshness
 
 # After editing src/utils/framebuf.py:
 
-# After public-API changes in displaysys / eventsys / multimer:
+# After public-API changes in displaydev / eventsys / multimer:
 ./scripts/gen_package_pyi.sh                       # regenerate tools/typings/<pkg>/ stubs
 ```
 
@@ -117,7 +117,7 @@ python scripts/gallery_generator.py --check    # CI freshness
 
 | Prefix | Scripts | When to run |
 |--------|---------|-------------|
-| `gen_` | `gen_package_pyi.sh` | Core package API changes → regenerates `tools/typings/{displaysys,eventsys,multimer}/` |
+| `gen_` | `gen_package_pyi.sh` | Core package API changes → regenerates `tools/typings/{displaydev,eventsys,multimer}/` |
 | `pyscript_` | `gallery_generator.py` | Gallery cards in `web/pyscript/index.html` |
 | `mkdocs_` | `mkdocs_gen_ref_pages.py`, `mkdocs_gen_notebook_pages.py` | Automatically on `mkdocs build` |
 | `publish_` | `publish_sync_packages.sh`, `publish_release_tag.sh`, `build.py`, `publish_mip_ghpages.sh`, `publish_make_pyproject.py` | Tag push → CI release; or local / manual workflow |
@@ -126,7 +126,7 @@ python scripts/gallery_generator.py --check    # CI freshness
 
 Manual packages (not generated) still in this repo:
 `packages/micropython-{micro-gui,nano-gui,touch}.json`. pydisplay core packages
-(`displaysys`, `eventsys`, `multimer`) have no `packages/*.json` — use the
+(`displaydev`, `eventsys`, `multimer`) have no `packages/*.json` — use the
 micropython-lib MIP index. Sister packages (`pygraphics`, `palettes`,
 `pdwidgets`, `lvgl`) come from frozen firmware, MIP (where published), or
 TestPyPI — not this repo's `packages/`. Desktop SDL (`usdl2`) ships with

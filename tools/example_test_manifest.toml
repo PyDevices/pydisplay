@@ -5,7 +5,7 @@
 # quit: native_exit | poll | inject | pending | interactive
 # bootstrap: full (default) | headless — headless skips utils.path / display init
 # Timer mode for kit runs: host PYDISPLAY_TIMER_ASYNC is forwarded as wrapper
-# --timer-async (board_config / displaysys.env_set). Examples do not read env.
+# --timer-async (board_config / displaydev.env_set). Examples do not read env.
 
 [defaults]
 duration_s = 2
@@ -152,7 +152,7 @@ matrix = false
 duration_s = 5
 timeout_s = 45
 
-# --- displaysys harness scripts (matrix) ---
+# --- displaydev harness scripts (matrix) ---
 
 [examples.displaysys_block_test]
 import = "displaysys_block_test"

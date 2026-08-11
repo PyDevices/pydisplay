@@ -17,7 +17,7 @@ PyDevices.github.io repo) and scaled to whatever display this runs on.
 import math
 
 from board_config import display_drv
-from displaysys import color565
+from displaydev import color565
 import pygraphics
 
 

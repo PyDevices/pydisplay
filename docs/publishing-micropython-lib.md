@@ -57,7 +57,7 @@ Tags must match `v*.*.*` (e.g. `v0.0.5`, not `0.0.5`).
 Pushing the tag starts [**Publish micropython-lib**](https://github.com/PyDevices/pydisplay/actions/workflows/publish-micropython-lib.yml), which:
 
 1. Syncs `src/lib/*` into [micropython-lib](https://github.com/PyDevices/micropython-lib) (`PyDevices` branch) at version `X.Y.Z`
-2. Uploads CPython wheels to TestPyPI (`displaysys`, `pydisplay-events`, `pydisplay-keys`, `eventsys`, `multimer`, …). Pure-Python `pygraphics` publishes from [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics) as `pygraphics`.
+2. Uploads CPython wheels to TestPyPI (`displaydev`, `pydisplay-events`, `pydisplay-keys`, `eventsys`, `multimer`, …). Pure-Python `pygraphics` publishes from [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics) as `pygraphics`.
 3. Rebuilds the [MIP index](https://PyDevices.github.io/micropython-lib/mip/PyDevices) on micropython-lib `gh-pages`
 
 Typical runtime: **~10–20 minutes**.
@@ -66,17 +66,17 @@ Typical runtime: **~10–20 minutes**.
 
 - [ ] Workflow succeeded on the [Actions tab](https://github.com/PyDevices/pydisplay/actions)
 - [ ] [micropython/pydisplay](https://github.com/PyDevices/micropython-lib/tree/PyDevices/micropython/pydisplay) has a new commit from `github-actions[bot]`
-- [ ] MIP index updated — e.g. `…/package/6/displaysys/latest.json` shows the new version
+- [ ] MIP index updated — e.g. `…/package/6/displaydev/latest.json` shows the new version
 - [ ] TestPyPI packages exist at the new version (optional desktop check — [two-index install](#two-index-pip-install-required)):
 
   ```bash
   pip install \
     -i https://test.pypi.org/simple/ \
     --extra-index-url https://pypi.org/simple/ \
-    displaysys
+    displaydev
   ```
 
-  Fuller desktop stack smoke test (`displaysys`, `pydisplay-desktop`, `pygraphics`, `lvgl-cpython`, `board_config` draw):
+  Fuller desktop stack smoke test (`displaydev`, `pydisplay-desktop`, `pygraphics`, `lvgl-cpython`, `board_config` draw):
   this uses the native TestPyPI `pygraphics` build, while MicroPython MIP uses
   the pure-Python `pygraphics` package from micropython-lib.
 
@@ -86,7 +86,7 @@ Typical runtime: **~10–20 minutes**.
 
   Omit `--headless` to open a real SDL window. See [`tools/test_testpypi_desktop.sh`](../tools/test_testpypi_desktop.sh).
 
-- [ ] One hardware smoke test: `mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")`
+- [ ] One hardware smoke test: `mip.install("displaydev", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")`
 
 ### Retries without a new tag
 
@@ -181,20 +181,20 @@ Tag pushes always enable sync + TestPyPI + MIP. Manual runs default to **no Test
 ### MIP index (boards)
 
 - Index: [PyDevices.github.io/micropython-lib/mip/PyDevices](https://PyDevices.github.io/micropython-lib/mip/PyDevices)
-- Example: `…/mip/PyDevices/package/6/displaysys/latest.json` (bytecode version may differ)
+- Example: `…/mip/PyDevices/package/6/displaydev/latest.json` (bytecode version may differ)
 
 On device:
 
 ```python
 import mip
-mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
+mip.install("displaydev", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
 ```
 
-Or `mpremote mip install --index "https://PyDevices.github.io/micropython-lib/mip/PyDevices" displaysys`
+Or `mpremote mip install --index "https://PyDevices.github.io/micropython-lib/mip/PyDevices" displaydev`
 
 ### TestPyPI
 
-PyDevices CPython wheels are published to [TestPyPI](https://test.pypi.org) only (not production PyPI). Browse package names there (`displaysys`, `pydisplay-events`, `pydisplay-keys`, `eventsys`, `multimer`, `pygraphics`, …).
+PyDevices CPython wheels are published to [TestPyPI](https://test.pypi.org) only (not production PyPI). Browse package names there (`displaydev`, `pydisplay-events`, `pydisplay-keys`, `eventsys`, `multimer`, `pygraphics`, …).
 
 **Naming:** MIP package names (e.g. `pygraphics`) may differ from the pip/TestPyPI project name when the MIP name is already taken on pypi.org. The mapping lives in `pypi_publish_name()` in [`publish_sync_packages.sh`](https://github.com/PyDevices/pydisplay/blob/main/scripts/publish_sync_packages.sh).
 
@@ -206,7 +206,7 @@ Use **both** TestPyPI and PyPI on every install:
 pip install \
   -i https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
-  displaysys
+  displaydev
 ```
 
 Example with desktop SDL (`pydisplay-desktop` from TestPyPI bundles `usdl2` + desktop `board_config`; `pygame-ce` from PyPI when using `PGDisplay`):
@@ -215,14 +215,14 @@ Example with desktop SDL (`pydisplay-desktop` from TestPyPI bundles `usdl2` + de
 pip install \
   -i https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
-  displaysys pydisplay-desktop
+  displaydev pydisplay-desktop
 ```
 
 Android APK builds still install TestPyPI `usdl2` Android wheels via `pydisplay_android` (see that repo’s README) — not through `pydisplay-desktop`.
 
 | Flag | Index | Why it is needed |
 |------|-------|------------------|
-| `-i https://test.pypi.org/simple/` | **TestPyPI** (primary) | Resolves PyDevices packages you install and their deps that exist **only** on TestPyPI (`displaysys`, `pydisplay-events`, `pydisplay-keys`, `eventsys`, `multimer`, `pydisplay-desktop`, …; Android also uses TestPyPI `usdl2` wheels). |
+| `-i https://test.pypi.org/simple/` | **TestPyPI** (primary) | Resolves PyDevices packages you install and their deps that exist **only** on TestPyPI (`displaydev`, `pydisplay-events`, `pydisplay-keys`, `eventsys`, `multimer`, `pydisplay-desktop`, …; Android also uses TestPyPI `usdl2` wheels). |
 | `--extra-index-url https://pypi.org/simple/` | **PyPI** (secondary) | Resolves third-party deps published **only** on production PyPI (e.g. `pygame-ce` for `PGDisplay`, and other third-party libs). |
 
 **Both must be present.** If you omit TestPyPI, pip cannot find PyDevices wheels. If you omit PyPI, pip fails when a declared dependency (for example `pygame-ce`) is not on TestPyPI.

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Unit tests for ``displaysys.autodisplay`` host selection."""
+"""Unit tests for ``displaydev.auto`` host selection."""
 
 import builtins
 import sys
@@ -11,8 +11,8 @@ from unittest import mock
 
 import _env  # noqa: F401
 
-from displaysys import AutoDisplay, host_kind
-from displaysys import autodisplay as ad
+from displaydev import auto as ad
+from displaydev.auto import AutoDisplay, host_kind
 
 
 class TestHostKind(unittest.TestCase):
@@ -43,10 +43,10 @@ class TestAutoDisplay(unittest.TestCase):
         display = mock.Mock(name="PSDisplay")
         display.get_events = mock.Mock(name="ps_get_events")
         display.requires_async_timer = True
-        ps_mod = types.ModuleType("displaysys.psdisplay")
+        ps_mod = types.ModuleType("displaydev.psdisplay")
         ps_mod.PSDisplay = mock.Mock(return_value=display)
         with mock.patch.object(ad, "host_kind", return_value="pyscript"), mock.patch.dict(
-            sys.modules, {"displaysys.psdisplay": ps_mod}
+            sys.modules, {"displaydev.psdisplay": ps_mod}
         ):
             result = AutoDisplay(width=100, height=200, canvas_id="c1", quiet=True)
         self.assertIs(result, display)
@@ -58,10 +58,10 @@ class TestAutoDisplay(unittest.TestCase):
         display = mock.Mock(name="JNDisplay")
         display.get_events = mock.Mock(name="jn_get_events")
         display.requires_async_timer = True
-        jn_mod = types.ModuleType("displaysys.jndisplay")
+        jn_mod = types.ModuleType("displaydev.jndisplay")
         jn_mod.JNDisplay = mock.Mock(return_value=display)
         with mock.patch.object(ad, "host_kind", return_value="jupyter"), mock.patch.dict(
-            sys.modules, {"displaysys.jndisplay": jn_mod}
+            sys.modules, {"displaydev.jndisplay": jn_mod}
         ):
             result = AutoDisplay(width=80, height=60, quiet=True)
         self.assertIs(result, display)
@@ -72,11 +72,11 @@ class TestAutoDisplay(unittest.TestCase):
         display = mock.Mock(name="PGDisplay")
         display.get_events = mock.Mock(name="pg_get_events")
         display.requires_async_timer = False
-        pg_mod = types.ModuleType("displaysys.pgdisplay")
+        pg_mod = types.ModuleType("displaydev.pgdisplay")
         pg_mod.PGDisplay = mock.Mock(return_value=display)
         with mock.patch.object(ad, "host_kind", return_value="desktop"), mock.patch.object(
             ad.sys, "platform", "linux"
-        ), mock.patch.dict(sys.modules, {"displaysys.pgdisplay": pg_mod}):
+        ), mock.patch.dict(sys.modules, {"displaydev.pgdisplay": pg_mod}):
             result = AutoDisplay(
                 width=320,
                 height=480,
@@ -101,13 +101,13 @@ class TestAutoDisplay(unittest.TestCase):
         display = mock.Mock(name="SDLDisplay")
         display.get_events = mock.Mock(name="sdl_get_events")
         display.requires_async_timer = False
-        sdl_mod = types.ModuleType("displaysys.sdldisplay")
+        sdl_mod = types.ModuleType("displaydev.sdldisplay")
         sdl_mod.SDLDisplay = mock.Mock(return_value=display)
         with mock.patch.object(ad, "host_kind", return_value="desktop"), mock.patch.object(
             ad.sys, "platform", "linux"
         ), mock.patch.dict(
             sys.modules,
-            {"displaysys.pgdisplay": None, "displaysys.sdldisplay": sdl_mod},
+            {"displaydev.pgdisplay": None, "displaydev.sdldisplay": sdl_mod},
         ):
             result = AutoDisplay(
                 width=160,
@@ -128,14 +128,14 @@ class TestAutoDisplay(unittest.TestCase):
         display = mock.Mock(name="WinDisplay")
         display.get_events = mock.Mock()
         display.requires_async_timer = False
-        win_mod = types.ModuleType("displaysys.windisplay")
+        win_mod = types.ModuleType("displaydev.windisplay")
         win_mod.WinDisplay = mock.Mock(return_value=display)
-        pg_mod = types.ModuleType("displaysys.pgdisplay")
+        pg_mod = types.ModuleType("displaydev.pgdisplay")
         pg_mod.PGDisplay = mock.Mock(name="PGDisplay_should_not_be_used")
         with mock.patch.object(ad, "host_kind", return_value="desktop"), mock.patch.object(
             ad.sys, "platform", "win32"
-        ), mock.patch("displaysys.env_set") as env_set, mock.patch.dict(
-            sys.modules, {"displaysys.windisplay": win_mod, "displaysys.pgdisplay": pg_mod}
+        ), mock.patch("displaydev.env_set") as env_set, mock.patch.dict(
+            sys.modules, {"displaydev.windisplay": win_mod, "displaydev.pgdisplay": pg_mod}
         ):
             result = AutoDisplay(width=10, height=10, quiet=True)
         self.assertIs(result, display)
@@ -147,14 +147,14 @@ class TestAutoDisplay(unittest.TestCase):
         display = mock.Mock(name="PGDisplay")
         display.get_events = mock.Mock()
         display.requires_async_timer = False
-        pg_mod = types.ModuleType("displaysys.pgdisplay")
+        pg_mod = types.ModuleType("displaydev.pgdisplay")
         pg_mod.PGDisplay = mock.Mock(return_value=display)
         with mock.patch.object(ad, "host_kind", return_value="desktop"), mock.patch.object(
             ad.sys, "platform", "win32"
-        ), mock.patch("displaysys.env_get", return_value=None) as env_get, mock.patch(
-            "displaysys.env_set"
+        ), mock.patch("displaydev.env_get", return_value=None) as env_get, mock.patch(
+            "displaydev.env_set"
         ) as env_set, mock.patch.dict(
-            sys.modules, {"displaysys.windisplay": None, "displaysys.pgdisplay": pg_mod}
+            sys.modules, {"displaydev.windisplay": None, "displaydev.pgdisplay": pg_mod}
         ):
             AutoDisplay(width=10, height=10, quiet=True)
         env_get.assert_called_with("SDL_AUDIODRIVER")
@@ -165,12 +165,12 @@ class TestAutoDisplay(unittest.TestCase):
         display = mock.Mock(name="PSDisplay")
         display.get_events = mock.Mock()
         display.requires_async_timer = True
-        ps_mod = types.ModuleType("displaysys.psdisplay")
+        ps_mod = types.ModuleType("displaydev.psdisplay")
         ps_mod.PSDisplay = mock.Mock(return_value=display)
         with mock.patch.object(ad, "host_kind", return_value="pyscript"), mock.patch.object(
             ad.sys, "platform", "win32"
-        ), mock.patch("displaysys.env_set") as env_set, mock.patch.dict(
-            sys.modules, {"displaysys.psdisplay": ps_mod}
+        ), mock.patch("displaydev.env_set") as env_set, mock.patch.dict(
+            sys.modules, {"displaydev.psdisplay": ps_mod}
         ):
             AutoDisplay(width=10, height=10, canvas_id="c", quiet=True)
         env_set.assert_not_called()
@@ -179,19 +179,19 @@ class TestAutoDisplay(unittest.TestCase):
         display = mock.Mock(name="AndroidSDLDisplay")
         display.get_events = mock.Mock(name="sdl_get_events")
         display.requires_async_timer = False
-        android_mod = types.ModuleType("displaysys.androidsdl")
+        android_mod = types.ModuleType("displaydev.androidsdl")
         android_mod.AndroidSDLDisplay = mock.Mock(return_value=display)
         usdl2_mod = types.ModuleType("usdl2")
         usdl2_mod.SDL_WINDOW_SHOWN = 0x4
         usdl2_mod.SDL_WINDOW_ALLOW_HIGHDPI = 0x2000
-        pg_mod = types.ModuleType("displaysys.pgdisplay")
+        pg_mod = types.ModuleType("displaydev.pgdisplay")
         pg_mod.PGDisplay = mock.Mock(name="PGDisplay_should_not_be_used")
         with mock.patch.object(ad, "host_kind", return_value="android"), mock.patch.dict(
             sys.modules,
             {
                 "usdl2": usdl2_mod,
-                "displaysys.androidsdl": android_mod,
-                "displaysys.pgdisplay": pg_mod,
+                "displaydev.androidsdl": android_mod,
+                "displaydev.pgdisplay": pg_mod,
             },
         ):
             result = AutoDisplay(

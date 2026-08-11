@@ -42,8 +42,16 @@ def update():
     for directory in reversed(_extra_dirs):
         add(directory, front=True)
     add("lib", front=True)
-    # Desktop sibling checkout: events.py / keys.py live in micropython-hardware/lib.
+    # Desktop sibling checkout: events.py / keys.py / multimer in hardware lib/.
     for candidate in ("../micropython-hardware/lib", "../../micropython-hardware/lib"):
+        if _exists(candidate):
+            add(candidate, front=True)
+            break
+    # displaydev package lives in hardware drivers/display/.
+    for candidate in (
+        "../micropython-hardware/drivers/display",
+        "../../micropython-hardware/drivers/display",
+    ):
         if _exists(candidate):
             add(candidate, front=True)
             break

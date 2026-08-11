@@ -192,7 +192,7 @@ def _setup_bootstrap(src, mode):
 
     Headless skips display-oriented path setup. When env already seeds ``lib`` /
     ``utils``, skip ``utils.path``. Fall back to ``import utils.path`` only if
-    ``displaysys`` is not importable (MCU-style / unset env).
+    ``displaydev`` is not importable (MCU-style / unset env).
     """
     _setup_sibling_paths(src)
     if mode == "headless":
@@ -202,7 +202,7 @@ def _setup_bootstrap(src, mode):
         return
 
     try:
-        import displaysys  # noqa: F401
+        import displaydev  # noqa: F401
 
         return
     except ImportError:
@@ -668,7 +668,7 @@ def main(argv=None):
     # Apply --env / --timer-async via env_set before board_config / SDL init
     # (deadline hook and the example both import board_config).
     try:
-        from displaysys import env_set
+        from displaydev import env_set
     except Exception:
         env_set = None
     if env_set is not None:

@@ -1,5 +1,5 @@
 from _typeshed import Incomplete
-from displaysys import DisplayDriver
+from displaydev import DisplayDriver
 
 __all__ = ['poll_event', 'get_events', 'WinDisplay']
 

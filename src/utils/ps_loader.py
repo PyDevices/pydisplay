@@ -55,7 +55,7 @@ def parse_names(raw):
 
 def set_board_defaults():
     """Set the gallery's browser defaults without importing board_config."""
-    from displaysys import env_set
+    from displaydev import env_set
 
     env_set("PYDISPLAY_WIDTH", BOARD_WIDTH)
     env_set("PYDISPLAY_HEIGHT", BOARD_HEIGHT)

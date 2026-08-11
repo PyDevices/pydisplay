@@ -4,7 +4,7 @@ Common problems when installing, importing, or running pydisplay.
 
 ## Import errors
 
-### `ModuleNotFoundError: No module named 'displaysys'`
+### `ModuleNotFoundError: No module named 'displaydev'`
 
 **Cause:** Packages are not on `sys.path`.
 

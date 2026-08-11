@@ -65,7 +65,7 @@ runtime.run_forever()
 - [Documentation — Runtime](https://pydisplay.readthedocs.io/en/latest/concepts/runtime/)
 - [Source](https://github.com/PyDevices/pydisplay)
 - [Issues](https://github.com/PyDevices/pydisplay/issues)
-- Related: [pydisplay-events](https://test.pypi.org/project/pydisplay-events/), [pydisplay-keys](https://test.pypi.org/project/pydisplay-keys/), [multimer](https://test.pypi.org/project/multimer/), [displaysys](https://test.pypi.org/project/displaysys/)
+- Related: [pydisplay-events](https://test.pypi.org/project/pydisplay-events/), [pydisplay-keys](https://test.pypi.org/project/pydisplay-keys/), [multimer](https://test.pypi.org/project/multimer/), [displaydev](https://test.pypi.org/project/displaydev/)
 
 ## License
 

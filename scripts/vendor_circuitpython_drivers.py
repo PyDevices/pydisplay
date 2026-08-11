@@ -41,10 +41,7 @@ COMMUNITY_DISPLAY = {
     "community/st7565": ("mateusznowakdev/CircuitPython_DisplayIO_ST7565", "displayio_st7565.py"),
 }
 
-BUSDISPLAY_IMPORT = """try:
-    from displaysys.busdisplay import BusDisplay
-except ImportError:
-    from busdisplay import BusDisplay
+BUSDISPLAY_IMPORT = """from displaydev.busdisplay import BusDisplay
 """
 
 
@@ -85,12 +82,18 @@ def find_module_py(repo_dir: Path, stem: str) -> Path:
 def patch_busdisplay(content: str) -> str:
     content = re.sub(r"^from busdisplay import BusDisplay\s*$", "", content, flags=re.M)
     content = re.sub(
+        r"^try:\s*\n\s*from displaydev\.busdisplay import BusDisplay.*?\nexcept ImportError:.*?\n\s*from busdisplay import BusDisplay\s*\n",
+        "",
+        content,
+        flags=re.M | re.S,
+    )
+    content = re.sub(
         r"^try:\s*\n\s*from displaysys\.busdisplay import BusDisplay.*?\nexcept ImportError:.*?\n\s*from busdisplay import BusDisplay\s*\n",
         "",
         content,
         flags=re.M | re.S,
     )
-    if "from displaysys.busdisplay import BusDisplay" not in content:
+    if "from displaydev.busdisplay import BusDisplay" not in content:
         content = BUSDISPLAY_IMPORT + "\n" + content
     content = re.sub(r"^__version__ = .*$", "", content, flags=re.M)
     content = re.sub(r"^__repo__ = .*$", "", content, flags=re.M)

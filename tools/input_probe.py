@@ -2,12 +2,12 @@
 """Cross-backend input / keypad diagnostic (no LVGL required).
 
 Use this when debugging keyboard, hardware keypad, or LVGL keypad mapping.
-It exercises the same ``events.Key`` contract every displaysys backend must
+It exercises the same ``events.Key`` contract every displaydev backend must
 emit, plus optional LVGL mapping when ``display_driver`` is importable.
 
 ## Layers (fix at the lowest layer that owns the bug)
 
-1. **displaysys** (``sdldisplay`` / ``pgdisplay`` / ``psdisplay`` / ``jndisplay``)
+1. **displaydev** (``sdldisplay`` / ``pgdisplay`` / ``psdisplay`` / ``jndisplay``)
    — native → ``events.Key`` conversion (repeat, scancode, mod, name).
 2. **eventsys** (``HostEventsDevice``, ``KeypadDevice``, ``VirtualDevices``)
    — quit chords, hardware keypad, FIFO fan-out to virtual keypad.
@@ -54,7 +54,7 @@ Ordered by layer. Each item is a targeted change with acceptance criteria.
   ``KEYDOWN``; FunHouse up/down no longer crash the auto-service tick.
 - **Tests:** ``--selftest`` case ``keypad_chr_safe``; board smoke if available.
 
-### B. displaysys — document + unify key-repeat policy (SDL/pygame vs browser)
+### B. displaydev — document + unify key-repeat policy (SDL/pygame vs browser)
 
 - **Where:** ``sdldisplay._convert``, ``pgdisplay._convert`` vs
   ``psdisplay``/``jndisplay`` (already drop ``e.repeat``).
@@ -163,12 +163,12 @@ _src = (_root + "/src") if _root not in (".", "") else "src"
 _src_lib = _src + "/lib"
 _src_utils = _src + "/utils"
 _hw_lib = _root + "/../micropython-hardware/lib"
-# Prefer src/lib so eventsys/displaysys resolve from repo root or src/.
+# Prefer src/lib so eventsys/displaydev resolve from repo root or src/.
 for _p in (_hw_lib, _src_lib, _src_utils, _src, _tools):
     if _p and _p not in sys.path:
         sys.path.insert(0, _p)
 
-from displaysys._domkeys import enrich_mod, key_to_keycode, mod_mask  # noqa: E402
+from displaydev._domkeys import enrich_mod, key_to_keycode, mod_mask  # noqa: E402
 import events  # noqa: E402
 from eventsys import types  # noqa: E402
 from eventsys._host import VirtualDevices  # noqa: E402
@@ -441,7 +441,7 @@ A. eventsys — KeypadDevice name must not use chr(key) (multi-backend / HW)
    Fix: keys.keyname(key) or "" / hex fallback — never chr(key) for arbitrary ints
    Accept: KeypadDevice(read=lambda: {keys.K_UP}).poll() returns KEYDOWN
 
-B. displaysys — unify key-repeat policy (SDL/pygame vs browser)
+B. displaydev — unify key-repeat policy (SDL/pygame vs browser)
    Where: sdldisplay/pgdisplay _convert vs psdisplay/jndisplay (already drop repeat)
    Fix: either drop OS repeat on desktop for parity, OR expose repeat on events.Key
         and stop silently dropping only on browser

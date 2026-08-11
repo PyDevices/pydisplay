@@ -11,7 +11,7 @@ platform's own choice.
 Environment variables cover direct runs, but Windows MicroPython / CPython
 launched from WSL cannot see exported ones, so a sweep across runtimes has to
 apply its settings inside the child: ``multimer.use_backend()`` for the timer
-backend and ``displaysys.env_set()`` for ``--env`` values, both before the
+backend and ``displaydev.env_set()`` for ``--env`` values, both before the
 script imports ``board_config``. The target script keeps the real command line
 (``sys.argv`` is read-only on CircuitPython), so scripts must locate their own
 flags anywhere in ``sys.argv`` rather than at a fixed index.
@@ -56,7 +56,7 @@ def main(argv):
     _bootstrap_path()
 
     if env:
-        from displaysys import env_set
+        from displaydev import env_set
 
         for name, value in env:
             env_set(name, value)

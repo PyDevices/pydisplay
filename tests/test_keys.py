@@ -1,13 +1,13 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Tests for the ``keys`` module and displaysys DOM key helpers."""
+"""Tests for the ``keys`` module and displaydev DOM key helpers."""
 
 import unittest
 
 import _env  # noqa: F401
 
-from displaysys._domkeys import key_to_keycode
+from displaydev._domkeys import key_to_keycode
 import keys
 
 

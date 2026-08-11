@@ -14,8 +14,8 @@ MICROPYTHON_LIB = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
 HARDWARE = "github:PyDevices/micropython-hardware"
 PYDISPLAY = "github:PyDevices/pydisplay"
 
-# index= is required so bare deps like "displaysys" resolve from PyDevices MIP
-# (not micropython.org). displaysys → eventsys → multimer via package deps.
+# index= is required so bare deps like "displaydev" resolve from PyDevices MIP
+# (not micropython.org). displaydev → eventsys → multimer via package deps.
 mip.install(
     HARDWARE + "/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/",
     index=MICROPYTHON_LIB,

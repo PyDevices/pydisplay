@@ -1,5 +1,5 @@
 from _typeshed import Incomplete
-from displaysys import DisplayDriver as DisplayDriver, color_rgb as color_rgb
+from displaydev import DisplayDriver as DisplayDriver, color_rgb as color_rgb
 
 HORIZONTAL: Incomplete
 VERTICAL: Incomplete

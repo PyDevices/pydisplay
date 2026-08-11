@@ -14,7 +14,7 @@ One-line summary of the module's role. Optionally link to narrative docs:
 
 ```python
 """
-displaysys display drivers.
+displaydev display drivers.
 
 See also: https://pydisplay.readthedocs.io/en/latest/concepts/displays/
 """
@@ -58,7 +58,7 @@ Griffe warnings mean a docstring parameter does not appear in the signature — 
 
 | Tier | Modules |
 |------|---------|
-| P0 | `displaysys`, `eventsys`, `events`, `keys`, `multimer` |
+| P0 | `displaydev`, `eventsys`, `events`, `keys`, `multimer` |
 | P1 | `displaybuf`, `console`, other `utils` |
 | P2 | Sibling packages document their own APIs: [pygraphics](https://pygraphics.readthedocs.io), [pdwidgets](https://pdwidgets.readthedocs.io), [palettes](https://palettes.readthedocs.io) |
 

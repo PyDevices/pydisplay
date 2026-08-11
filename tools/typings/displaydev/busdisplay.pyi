@@ -1,5 +1,5 @@
 from _typeshed import Incomplete
-from displaysys import DisplayDriver as DisplayDriver
+from displaydev import DisplayDriver as DisplayDriver
 
 class BusDisplay(DisplayDriver):
     display_bus: Incomplete

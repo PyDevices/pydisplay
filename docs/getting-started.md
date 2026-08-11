@@ -24,7 +24,7 @@ This page is a **router** for the main pydisplay workflows. In every case, the u
 
 - [**App starter**](examples/app-starter.md) — copy-paste template for your first app (display, clicks, main loop)
 - [**pydisplay_demo**](examples/pydisplay_demo.md) — feature tour (rotation, scrolling, buffered text, multimer)
-- [Architecture](concepts/architecture.md) — how ``board_config``, ``displaysys``, and ``eventsys`` fit together
+- [Architecture](concepts/architecture.md) — how ``board_config``, ``displaydev``, and ``eventsys`` fit together
 - [Portability & platforms](platforms/index.md) — where pydisplay runs and how the backend is chosen
 - [Ecosystem & sister projects](ecosystem.md) — LVGL in Python, GUIs, Jupyter
 - [Installation overview](installation/index.md) — MIP vs full clone vs TestPyPI / micropython-lib

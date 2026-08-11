@@ -12,7 +12,7 @@ flowchart TB
     TD[touch driver module]
   end
   subgraph core [Core libraries]
-    DS[displaysys]
+    DS[displaydev]
     ES[eventsys]
     MT[multimer]
   end
@@ -41,9 +41,9 @@ flowchart TB
 
 | Piece | Role |
 |-------|------|
-| **`board_config.py`** | Wires pins / host display, creates `display_drv` and optional `runtime`. One file per hardware target. Desktop hosts use `displaysys.AutoDisplay`. End-device roles and lazy extras: [Board devices](https://pydevices.github.io/micropython-hardware/board-devices.html). |
+| **`board_config.py`** | Wires pins / host display, creates `display_drv` and optional `runtime`. One file per hardware target. Desktop hosts use `displaydev.auto.AutoDisplay`. End-device roles and lazy extras: [Board devices](https://pydevices.github.io/micropython-hardware/board-devices.html). |
 | **`boarddev`** | Shared lazy-bind helper for optional `board_devices` modules (proof / graduated boards). |
-| **`displaysys`** | Display backends (`BusDisplay`, `SDLDisplay`, `PGDisplay`, `PSDisplay`, `JNDisplay`, `FBDisplay`) plus `AutoDisplay` host selection, with a unified drawing API. |
+| **`displaydev`** | Display backends (`BusDisplay`, `SDLDisplay`, `PGDisplay`, `PSDisplay`, `JNDisplay`, `FBDisplay`) with a unified drawing API. Optional host selection is `from displaydev.auto import AutoDisplay` only. |
 | **`eventsys`** | `Runtime` pumps input and dispatches PyGame/SDL2-style events to callbacks; prefer `runtime.on(...)` + `runtime.run_forever()`. |
 | **`pygraphics`** | Sister package ([PyDevices/pygraphics](https://github.com/PyDevices/pygraphics)) — optional helpers on top of `framebuf` (rounded rects, gradients, `Area` bounding boxes). Install from the [micropython-lib MIP index](../installation/mip-micropython-lib.md); see [graphics](graphics.md). |
 | **`multimer`** | Cross-platform `Timer` / `AsyncTimer`, ticks/sleep, and `asyncio` exposure. |

@@ -136,7 +136,7 @@ nav:
     - Troubleshooting: troubleshooting.md
 - API reference:
   - Package overviews:
-    - displaysys: reference/overviews/displaysys.md
+    - displaydev: reference/overviews/displaydev.md
     - eventsys: reference/overviews/eventsys.md
     - graphics: reference/overviews/graphics.md
     - multimer: reference/overviews/multimer.md

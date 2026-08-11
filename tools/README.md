@@ -172,7 +172,7 @@ above). Semantics: [Runtime — timer_async](../docs/concepts/runtime.md#timer_a
 `micropython.exe` and `python.exe` are Windows PE binaries launched from WSL.
 They cannot read Linux-exported environment variables. The kit therefore
 forwards only values that must cross that boundary via wrapper argv +
-`displaysys.env_set` (notably `--timer-async` / `--multimer-backend`).
+`displaydev.env_set` (notably `--timer-async` / `--multimer-backend`).
 
 **Do not forward `SDL_VIDEODRIVER` / `SDL_AUDIODRIVER` to PE.** Unix cells stay
 headless from the shell `SDL_*=dummy` export; PE keeps a real Windows video
@@ -273,11 +273,11 @@ not fail the run. Semantics: [multimer — Overriding the backend](../docs/conce
 ./tools/test_testpypi_desktop.sh --headless   # CI / SSH without DISPLAY
 ```
 
-Installs `displaysys`, `usdl2`, `pygraphics`, and `lvgl-cpython` (no version pins). See [Publishing micropython-lib — verify after publish](../docs/publishing-micropython-lib.md#4-verify).
+Installs `displaydev`, `usdl2`, `pygraphics`, and `lvgl-cpython` (no version pins). See [Publishing micropython-lib — verify after publish](../docs/publishing-micropython-lib.md#4-verify).
 
 | Script | Purpose |
 |--------|---------|
-| [`test_testpypi_standalone.sh`](test_testpypi_standalone.sh) | Per-package TestPyPI venv import smoke (`multimer`, `displaysys`, `eventsys`, `pygraphics`; `--desktop` adds backend stacks) |
+| [`test_testpypi_standalone.sh`](test_testpypi_standalone.sh) | Per-package TestPyPI venv import smoke (`multimer`, `displaydev`, `eventsys`, `pygraphics`; `--desktop` adds backend stacks) |
 
 ```bash
 ./tools/test_testpypi_standalone.sh
@@ -320,7 +320,7 @@ the binary-bundled ``imageio-ffmpeg`` Python package.
 | Content | Source |
 |---------|--------|
 | MicroPython stdlib stubs | committed under `tools/typings/` |
-| `displaysys` / `eventsys` / `multimer` / `events` / `keys` | committed package trees / modules; regenerate with [`../scripts/gen_package_pyi.sh`](../scripts/gen_package_pyi.sh) |
+| `displaydev` / `eventsys` / `multimer` / `events` / `keys` | committed package trees / modules; regenerate with [`../scripts/gen_package_pyi.sh`](../scripts/gen_package_pyi.sh) |
 | `lvgl` | committed `tools/typings/lvgl.pyi` (from `cmods/lv_bindings/generated/lvgl.pyi`) |
 
 Confirm **Python: Select Interpreter** → `.venv/bin/python`. Cursor uses **cursorpyright** with `stubPath` / `typeshedPaths` → `tools/typings` (see [`.vscode/settings.json`](../.vscode/settings.json)).

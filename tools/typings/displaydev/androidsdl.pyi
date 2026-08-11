@@ -1,5 +1,5 @@
 from _typeshed import Incomplete
-from displaysys.sdldisplay import SDLDisplay
+from displaydev.sdldisplay import SDLDisplay
 
 __all__ = ['AndroidSDLDisplay']
 

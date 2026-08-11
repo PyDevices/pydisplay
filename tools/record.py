@@ -93,13 +93,13 @@ def _install_show_recording(deadline, output, fps):
         display_class.show = show
 
     try:
-        from displaysys.sdldisplay import SDLDisplay
+        from displaydev.sdldisplay import SDLDisplay
 
         arm(SDLDisplay)
     except ImportError:
         pass
     try:
-        from displaysys.pgdisplay import PGDisplay
+        from displaydev.pgdisplay import PGDisplay
 
         arm(PGDisplay)
     except ImportError:

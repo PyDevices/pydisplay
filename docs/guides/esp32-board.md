@@ -25,7 +25,7 @@ Follow [install workflows](https://pydevices.github.io/micropython-hardware/inst
 ```bash
 INDEX="https://PyDevices.github.io/micropython-lib/mip/PyDevices"
 mpremote mip install "github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/wt32sc01-plus"
-for pkg in displaysys events keys eventsys pygraphics multimer; do
+for pkg in displaydev events keys eventsys pygraphics multimer; do
   mpremote mip install --index "$INDEX" "$pkg"
 done
 mpremote mip install --target "./utils" "github:PyDevices/pydisplay/packages/utils.json"
@@ -82,4 +82,4 @@ discovery. Details: [MicroPython platform notes](../platforms/micropython.md#bac
 
 ## Reference
 
-- [API reference (core)](../reference/) → `displaysys`, `eventsys`
+- [API reference (core)](../reference/) → `displaydev`, `eventsys`

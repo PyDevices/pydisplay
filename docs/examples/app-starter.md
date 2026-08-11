@@ -66,10 +66,10 @@ runtime.run_forever()
 
 The boilerplate imports `Area` from `pygraphics` **only for hit-testing**. `display_drv.fill_rect(...)` returns an `(x, y, w, h)` tuple; wrapping it in `Area` lets you write `button.contains(e.pos)` instead of inline coordinate math.
 
-`displaysys` and `eventsys` do not depend on `pygraphics`. If you want a stack with no `pygraphics` import — or you install only those packages — keep the tuple from `fill_rect` and test clicks directly:
+`displaydev` and `eventsys` do not depend on `pygraphics`. If you want a stack with no `pygraphics` import — or you install only those packages — keep the tuple from `fill_rect` and test clicks directly:
 
 ```python
-# displaysys + eventsys only — no graphics import
+# displaydev + eventsys only — no graphics import
 button = None  # (x, y, w, h)
 
 
@@ -156,6 +156,6 @@ defaults to sync unless `PYDISPLAY_TIMER_ASYNC=1` is set before `board_config` l
 ## Related docs
 
 - [Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html) — choose and customize `board_config.py`
-- [Architecture](../concepts/architecture.md) — how board_config, displaysys, and eventsys fit together
+- [Architecture](../concepts/architecture.md) — how board_config, displaydev, and eventsys fit together
 - [pydisplay_demo](pydisplay_demo.md) — flagship feature demo (rotation, scroll, buffered text)
 - [Examples catalog](index.md) — full list of scripts

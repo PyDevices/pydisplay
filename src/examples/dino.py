@@ -18,7 +18,7 @@ from random import getrandbits
 
 import board_config as _host_board
 
-from displaysys import color565
+from displaydev import color565
 import keys
 from multimer import ticks_diff, ticks_ms
 from pygraphics import MONO_HLSB, RGB565, FrameBuffer

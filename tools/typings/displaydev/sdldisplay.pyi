@@ -1,5 +1,5 @@
 from _typeshed import Incomplete
-from displaysys import DisplayDriver as DisplayDriver, color_rgb as color_rgb, fit_scale_to_desktop as fit_scale_to_desktop, notify_board_config_scale_override as notify_board_config_scale_override
+from displaydev import DisplayDriver as DisplayDriver, color_rgb as color_rgb, fit_scale_to_desktop as fit_scale_to_desktop, notify_board_config_scale_override as notify_board_config_scale_override
 
 def poll_event(): ...
 def get_events(): ...

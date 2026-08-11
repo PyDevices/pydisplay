@@ -16,7 +16,7 @@ SOURCE_TREES = (
         root / "src/lib",
         Path("reference"),
         (),
-        ("", "displaysys", "eventsys", "multimer"),
+        ("", "displaydev", "eventsys", "multimer"),
     ),
     (
         root / "src/utils",

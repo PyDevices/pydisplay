@@ -6,7 +6,7 @@
 Each test copies *only* one package into a temporary directory and imports it
 in a fresh subprocess whose path contains nothing else from the repository. If
 a package secretly depended on other pydisplay modules, the import would fail
-or those modules would appear in ``sys.modules``. ``eventsys`` and ``displaysys``
+or those modules would appear in ``sys.modules``. ``eventsys`` and ``displaydev``
 also receive shared ``events.py`` / ``keys.py`` (not pydisplay packages).
 """
 
@@ -20,9 +20,9 @@ import unittest
 
 import _env
 
-_MULTIMER_SIBLINGS = ("displaysys", "eventsys", "pygraphics", "palettes")
-_EVENTSYS_SIBLINGS = ("displaysys", "pygraphics", "multimer", "palettes")
-_DISPLAYSYS_SIBLINGS = ("eventsys", "pygraphics", "multimer", "palettes")
+_MULTIMER_SIBLINGS = ("displaydev", "eventsys", "pygraphics", "palettes")
+_EVENTSYS_SIBLINGS = ("displaydev", "pygraphics", "multimer", "palettes")
+_DISPLAYDEV_SIBLINGS = ("eventsys", "pygraphics", "multimer", "palettes")
 
 _MULTIMER_CHILD = textwrap.dedent(
     """
@@ -99,22 +99,22 @@ _EVENTSYS_CHILD = textwrap.dedent(
 ).format(siblings=list(_EVENTSYS_SIBLINGS))
 
 
-_DISPLAYSYS_CHILD = textwrap.dedent(
+_DISPLAYDEV_CHILD = textwrap.dedent(
     """
     import sys
 
-    import displaysys
+    import displaydev
     import events
     import keys
-    from displaysys import (
+    from displaydev import (
         alloc_buffer,
         color332,
         color565,
         color565_swapped,
         color_rgb,
     )
-    from displaysys._domkeys import key_to_keycode
-    from displaysys.fbdisplay import FBDisplay
+    from displaydev._domkeys import key_to_keycode
+    from displaydev.fbdisplay import FBDisplay
 
 
     class FakeFrameBuffer:
@@ -131,7 +131,7 @@ _DISPLAYSYS_CHILD = textwrap.dedent(
 
 
     forbidden = [m for m in {siblings!r} if m in sys.modules]
-    assert not forbidden, "displaysys pulled in pydisplay modules: %r" % forbidden
+    assert not forbidden, "displaydev pulled in pydisplay modules: %r" % forbidden
 
     assert color565(255, 255, 255) == 0xFFFF
     assert color_rgb(0x0000) == (0, 0, 0)
@@ -143,15 +143,15 @@ _DISPLAYSYS_CHILD = textwrap.dedent(
     assert bytes(fb.data) == b"\\xff\\xff" * 8, "FBDisplay.fill did not paint buffer"
     d.deinit()
 
-    assert "multimer" not in sys.modules, "displaysys imported multimer unexpectedly"
-    assert "eventsys" not in sys.modules, "displaysys imported eventsys"
+    assert "multimer" not in sys.modules, "displaydev imported multimer unexpectedly"
+    assert "eventsys" not in sys.modules, "displaydev imported eventsys"
     assert events.QUIT == 0x100
     assert keys.K_q
     assert key_to_keycode("BrowserBack", 0) == keys.K_AC_BACK
 
     print("STANDALONE_OK")
     """
-).format(siblings=list(_DISPLAYSYS_SIBLINGS))
+).format(siblings=list(_DISPLAYDEV_SIBLINGS))
 
 
 class TestStandalone(unittest.TestCase):
@@ -207,10 +207,10 @@ class TestStandalone(unittest.TestCase):
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 
-    def test_displaysys_imports_and_runs_in_isolation(self):
-        tmp = tempfile.mkdtemp(prefix="displaysys_standalone_")
+    def test_displaydev_imports_and_runs_in_isolation(self):
+        tmp = tempfile.mkdtemp(prefix="displaydev_standalone_")
         try:
-            shutil.copytree(_env.DISPLAYSYS_DIR, os.path.join(tmp, "displaysys"))
+            shutil.copytree(_env.DISPLAYDEV_DIR, os.path.join(tmp, "displaydev"))
             shutil.copyfile(_env.EVENTS_PY, os.path.join(tmp, "events.py"))
             shutil.copyfile(_env.KEYS_PY, os.path.join(tmp, "keys.py"))
 
@@ -218,7 +218,7 @@ class TestStandalone(unittest.TestCase):
             env["PYTHONPATH"] = tmp
 
             proc = subprocess.run(
-                [sys.executable, "-c", _DISPLAYSYS_CHILD],
+                [sys.executable, "-c", _DISPLAYDEV_CHILD],
                 cwd=tmp,
                 env=env,
                 capture_output=True,

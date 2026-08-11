@@ -1,7 +1,6 @@
-from .autodisplay import AutoDisplay as AutoDisplay, host_kind as host_kind
 from _typeshed import Incomplete
 
-__all__ = ['AutoDisplay', 'DisplayDriver', 'alloc_buffer', 'byteswap', 'capabilities', 'color332', 'color565', 'color565_swapped', 'color_rgb', 'desktop_work_area', 'env_bool', 'env_float', 'env_get', 'env_int', 'env_set', 'fit_scale_to_desktop', 'host_kind', 'notify_board_config_scale_override']
+__all__ = ['DisplayDriver', 'alloc_buffer', 'byteswap', 'capabilities', 'color332', 'color565', 'color565_swapped', 'color_rgb', 'desktop_work_area', 'env_bool', 'env_float', 'env_get', 'env_int', 'env_set', 'fit_scale_to_desktop', 'notify_board_config_scale_override']
 
 byteswap: Incomplete
 

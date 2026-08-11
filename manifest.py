@@ -15,6 +15,6 @@ if 0:
         pass
 
 
-package("displaysys", base_path="./src/lib", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
+package("displaydev", base_path="./src/lib", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
 package("eventsys", base_path="./src/lib", opt=3)  # type: ignore[name-defined]  # noqa: PGH003
 package("multimer", base_path="./src/lib", opt=3)  # type: ignore[name-defined]  # noqa: PGH003

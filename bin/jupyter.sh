@@ -70,7 +70,7 @@ Generated notebooks import via \`from examples import <name>\` (or
 \`import examples.<a>.<b>\` for nested files) — never a bare \`import <name>\`
 and never a path-bootstrap cell. If PYTHONPATH is unset, jupyter.sh exports
 PYTHONPATH=".:lib:utils" for the JupyterLab/kernel process (cwd=src) so
-\`import displaysys\`, \`import utils.*\`, etc. resolve without a bootstrap cell.
+\`import displaydev\`, \`import utils.*\`, etc. resolve without a bootstrap cell.
 Run notebooks also ensure a Jupyter board config is available by calling
 \`mip.install("${DESKTOP_BOARD_CONFIG_MIP}", target=".")\` when
 \`import board_config\` fails.

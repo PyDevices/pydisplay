@@ -1,6 +1,6 @@
 # PyScript
 
-Experimental browser support via [PyScript](https://pyscript.net/) and `displaysys.psdisplay.PSDisplay`.
+Experimental browser support via [PyScript](https://pyscript.net/) and `displaydev.psdisplay.PSDisplay`.
 
 **Quick start:** [PyScript guide](../guides/pyscript.md) and [Try pydisplay](../try/index.md).
 
@@ -25,4 +25,4 @@ Browser / PyScript only — see [PWA — Smart TVs](pwa.md#smart-tvs-webos--tize
 
 ## Contributing
 
-Pull requests welcome for `displaysys/psdisplay.py`, asyncio example ports, and files under `web/pyscript/`.
+Pull requests welcome for `displaydev/psdisplay.py`, asyncio example ports, and files under `web/pyscript/`.

@@ -12,7 +12,7 @@ https://PyDevices.github.io/micropython-lib/mip/PyDevices
 
 ```python
 import mip
-mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
+mip.install("displaydev", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
 ```
 
 On **PyScript MicroPython** (`micropython.html`, `mp.html`), `?deps=` installs
@@ -22,14 +22,14 @@ MicroPython; portable ``mip.py`` on Pyodide for manifests/modules).
 With `mpremote`:
 
 ```bash
-mpremote mip install --index "https://PyDevices.github.io/micropython-lib/mip/PyDevices" displaysys
+mpremote mip install --index "https://PyDevices.github.io/micropython-lib/mip/PyDevices" displaydev
 ```
 
 ## Available packages
 
 **Core:**
 
-- `displaysys` (full package — all backends), `events`, `keys`, `eventsys`, `pygraphics`, `multimer`
+- `displaydev` (full package — all backends), `events`, `keys`, `eventsys`, `pygraphics`, `multimer`
 
 **Drivers** (examples):
 
@@ -52,9 +52,9 @@ For combined board + package setup, use [micropython-hardware install workflows]
 
 ```python
 import mip
-mip.install("displaysys", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
-import displaysys
-print(displaysys)
+mip.install("displaydev", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
+import displaydev
+print(displaydev)
 ```
 
 If the index is unreachable, use a [full clone](full-clone.md) or install individual

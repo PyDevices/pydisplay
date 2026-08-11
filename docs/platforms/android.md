@@ -6,7 +6,7 @@ For an **installable browser app** on Android phones (Chrome home screen, no APK
 
 ## Overview
 
-On Android there is no MicroPython port. pydisplay runs under **CPython** in a **python-for-android** APK with the **SDL2 bootstrap** (no Kivy). Native `libSDL2.so` comes from p4a’s `sdl2` recipe. The `import usdl2` API is the pure-Python binding shipped in [pydisplay-desktop](https://test.pypi.org/project/pydisplay-desktop/) (ctypes against that library). `displaysys.AutoDisplay` selects **`AndroidSDLDisplay`** (`SDL_WINDOW_SHOWN` / HIGHDPI; not `FULLSCREEN_DESKTOP` — that resizes the Activity surface after GL buffers exist and yields a black screen after splash).
+On Android there is no MicroPython port. pydisplay runs under **CPython** in a **python-for-android** APK with the **SDL2 bootstrap** (no Kivy). Native `libSDL2.so` comes from p4a’s `sdl2` recipe. The `import usdl2` API is the pure-Python binding shipped in [pydisplay-desktop](https://test.pypi.org/project/pydisplay-desktop/) (ctypes against that library). `displaydev.auto.AutoDisplay` selects **`AndroidSDLDisplay`** (`SDL_WINDOW_SHOWN` / HIGHDPI; not `FULLSCREEN_DESKTOP` — that resizes the Activity surface after GL buffers exist and yields a black screen after splash).
 
 APK integration — template app, build scripts, and p4a recipes — lives in [**pydisplay_android**](https://github.com/PyDevices/pydisplay_android).
 

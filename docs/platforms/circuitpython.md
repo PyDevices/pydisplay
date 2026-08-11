@@ -5,7 +5,7 @@ pydisplay works with CircuitPython using Adafruit bus drivers and `framebufferio
 ## Getting started
 
 1. Confirm your display works with Adafruit CircuitPython libraries and DisplayIO first.
-2. Copy needed directories from `src/lib/` to your board (`displaysys`, `eventsys`, etc.).
+2. Copy needed directories from `src/lib/` to your board (`displaydev`, `eventsys`, etc.).
 3. Create or adapt a `board_config.py` — use existing configs as templates:
 
 | Config | Use case |
@@ -26,22 +26,19 @@ MicroPython.
 
 ## BusDisplay on CircuitPython
 
-SPI and I80 displays use `displaysys.busdisplay.BusDisplay` with Adafruit FourWire / ParallelBus drivers.
+SPI and I80 displays use `displaydev.busdisplay.BusDisplay` with Adafruit FourWire / ParallelBus drivers.
 
-To prefer pydisplay's BusDisplay over a local shim, patch the graphics driver import:
+Chip drivers import pydisplay's BusDisplay:
 
 ```python
-try:
-    from displaysys.busdisplay import BusDisplay
-except ImportError:
-    from busdisplay import BusDisplay
+from displaydev.busdisplay import BusDisplay
 ```
 
 ## Framebuffer displays
 
-RGB666 (parallel), USB Video, and HUB75 LED matrices use `displaysys.fbdisplay.FBDisplay` with CircuitPython's `framebufferio.FramebufferDisplay`. No special patching is needed once CircuitPython sees the hardware.
+RGB666 (parallel), USB Video, and HUB75 LED matrices use `displaydev.fbdisplay.FBDisplay` with CircuitPython's `framebufferio.FramebufferDisplay`. No special patching is needed once CircuitPython sees the hardware.
 
-Addressable LED grids (NeoPixel, DotStar) use `displaysys.pixeldisplay.PixelDisplay` with `adafruit_pixel_framebuf`.
+Addressable LED grids (NeoPixel, DotStar) use `displaydev.pixeldisplay.PixelDisplay` with `adafruit_pixel_framebuf`.
 
 ## Unix desktop (SDL2)
 

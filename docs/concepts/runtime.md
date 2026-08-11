@@ -4,7 +4,7 @@ Every pydisplay app expects a **`board_config.py`** on `sys.path` that exports:
 
 | Symbol | Required | Role |
 |---|---|---|
-| `display_drv` | yes | Display backend from [displaysys](displays.md) |
+| `display_drv` | yes | Display backend from [displaydev](displays.md) |
 | `runtime` | when `display_drv.needs_refresh` | [eventsys](events.md) `Runtime` — shared timer, optional input, quit lifecycle |
 
 **`runtime = None`** is allowed only on MCU boards whose display does **not** need periodic presentation (`needs_refresh` is false): bus displays and pixel grids driven explicitly by the app. Hosted backends (SDL, pygame, PyScript, Jupyter) always export a `Runtime`.
@@ -12,7 +12,7 @@ Every pydisplay app expects a **`board_config.py`** on `sys.path` that exports:
 ## Quick start — hosted desktop
 
 ```python
-from displaysys.sdldisplay import SDLDisplay
+from displaydev.sdldisplay import SDLDisplay
 import eventsys
 
 display_drv = SDLDisplay(width=320, height=480, rotation=0, scale=2.0, title="My app")
@@ -103,7 +103,7 @@ in the process environment before `board_config` is imported on desktop hosts
 that have `getenv`, or prefer test-kit / matrix `--timer-async` (wrapper
 `env_set`) so Windows PE under WSL works. MCU board configs and PyScript /
 Jupyter use their platform defaults without shell env. See
-[`displaysys.env_bool`](../../src/lib/displaysys/__init__.py) and [Board configs — default](https://pydevices.github.io/micropython-hardware/board-configs.html#default-config).
+[`displaydev.env_bool`](../../src/lib/displaydev/__init__.py) and [Board configs — default](https://pydevices.github.io/micropython-hardware/board-configs.html#default-config).
 
 On SDL2 / Win32 sync timer hosts (`micropython.exe`, and similar), display
 refresh is **deferred until the first `runtime.poll()`** so importing
@@ -169,8 +169,8 @@ On `QUIT`, the runtime runs (in order): `before_quit` hook (if set) → `display
 
 ## Package boundaries
 
-- **displaysys** declares `needs_refresh` (boolean only); no timer code.
-- **eventsys** owns `DEFAULT_REFRESH_MS` and the shared timer; duck-types `display` without importing displaysys.
+- **displaydev** declares `needs_refresh` (boolean only); no timer code.
+- **eventsys** owns `DEFAULT_REFRESH_MS` and the shared timer; duck-types `display` without importing displaydev.
 - **board_config** is the only place that names both packages together.
 
 See also: [Events](events.md), [Architecture](architecture.md), [Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html).

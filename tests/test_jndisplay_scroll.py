@@ -9,7 +9,7 @@ from unittest import mock
 
 import _env  # noqa: F401
 
-from displaysys import capabilities
+from displaydev import capabilities
 
 
 def _has(module: str) -> bool:
@@ -19,14 +19,14 @@ def _has(module: str) -> bool:
 HAS_JNDisplay = _has("IPython") and _has("PIL")
 
 if HAS_JNDisplay:
-    from displaysys.jndisplay import JNDisplay
+    from displaydev.jndisplay import JNDisplay
 
 
 @unittest.skipUnless(HAS_JNDisplay, "IPython and Pillow required for jndisplay tests")
 class TestJNDisplayScroll(unittest.TestCase):
     def _make_display(self, w=10, h=12):
         with mock.patch(
-            "displaysys.DisplayDriver.__init__", lambda self, *a, **k: None
+            "displaydev.DisplayDriver.__init__", lambda self, *a, **k: None
         ), mock.patch.object(JNDisplay, "init", lambda self: None):
             d = JNDisplay(w, h)
         d._timer = None

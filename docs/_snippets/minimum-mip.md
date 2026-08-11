@@ -1,7 +1,7 @@
 ```python
 import mip
 INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
-mip.install("displaysys", index=INDEX)
+mip.install("displaydev", index=INDEX)
 mip.install("eventsys", index=INDEX)
 mip.install("github:PyDevices/micropython-hardware/board_configs/<your_board>")
 ```

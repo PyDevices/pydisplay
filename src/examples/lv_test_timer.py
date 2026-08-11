@@ -39,7 +39,7 @@ import time
 
 import multimer
 from board_config import display_drv, runtime
-from displaysys import env_get
+from displaydev import env_get
 
 # Optional logical orientation for LVGL (hw MADCTL/SDL/PG or software rotate).
 _lv_rot = env_get("PYDISPLAY_LV_ROTATION")
