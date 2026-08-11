@@ -184,8 +184,8 @@ Backend selection for sync `Timer` (first importable match wins):
 
 1. Env override: `MULTIMER_BACKEND` / `use_backend(name)`
 2. Async-only host (PyScript / Jupyter) → `async` (`AsyncTimer` as `Timer`)
-3. Auto chain: **`machine` → `librt` → `sdl2` → `threading` → `polling`**,
-   with **`sdl2` omitted on CPython when pygame imports** (see tables).
+3. Auto chain: **`machine` → `librt` → `win32` → `sdl2` → `threading` → `polling`**,
+   with **`win32` omitted off Windows** and **`sdl2` omitted on CPython when pygame imports** (see tables).
 
 ### Selection flow
 
@@ -200,6 +200,9 @@ flowchart TB
   machine["machine"]
   try_librt["try librt"]
   librt["librt"]
+  skip_win32{"win32 host?"}
+  try_win32["try win32 (needs uwin32)"]
+  win32b["win32"]
   skip_sdl2{"CPython + pygame?"}
   try_sdl2["try sdl2 (needs usdl2)"]
   sdl2["sdl2"]
@@ -217,7 +220,11 @@ flowchart TB
   try_machine -->|ok| machine
   try_machine -->|fail| try_librt
   try_librt -->|ok| librt
-  try_librt -->|fail| skip_sdl2
+  try_librt -->|fail| skip_win32
+  skip_win32 -->|no| skip_sdl2
+  skip_win32 -->|yes| try_win32
+  try_win32 -->|ok| win32b
+  try_win32 -->|fail| skip_sdl2
   skip_sdl2 -->|skip sdl2| try_threading
   skip_sdl2 -->|no| try_sdl2
   try_sdl2 -->|ok| sdl2
@@ -236,8 +243,9 @@ Override raises when the named backend cannot import (no silent fallback). On CP
 |---------|---------------|-------|
 | `machine` | MCU MicroPython / CircuitPython | Preferred when `machine.Timer` exists (desktop unix MP/CP builds usually lack it) |
 | `librt` | Linux CPython / MicroPython unix | `timer_create`; main-thread signals. Not available on CircuitPython unix or Windows |
+| `win32` | Windows CPython with `uwin32` | Waitable timer + APC; `SleepEx` alertable wait. Auto-tried only on `win32`. Not for `micropython.exe` |
 | `sdl2` | Desktop usdl2 (MP, CP, and CPython without pygame) | `SDL_AddTimer`; pump via `SDL_PumpEvents`. Needs the `usdl2` module (frozen, wheel, or pure-Python). On CPython, skipped when pygame is importable so auto selection matches `AutoDisplay` (`PGDisplay`) and avoids usdl2+pygame dual-SDL deadlock. With pygame installed, use `MULTIMER_BACKEND=sdl2` only if the window is usdl2/`SDLDisplay` |
-| `threading` | Windows CPython with pygame; hosts with `_thread`/`threading` and no higher match | Worker + main-thread `schedule`. **Not** available on `micropython.exe` today |
+| `threading` | Hosts with `_thread`/`threading` and no higher match | Worker + main-thread `schedule`. **Not** available on `micropython.exe` today |
 | `polling` | Last resort — notably **`micropython.exe` without usdl2** | Cooperative; advanced by `sleep_ms` / drain. Kept so `import multimer` still binds a sync timer when `machine` / `librt` / `sdl2` / `threading` are all unavailable |
 | `async` | PyScript / Jupyter (auto); anywhere via override | `AsyncTimer` as `Timer` |
 
@@ -256,9 +264,10 @@ Timer choice is decided at `import multimer`. It does **not** require opening a 
 | `circuitpython` (Linux) | n/a | no | — | fail: no usdl2 | **`threading`** (console; has `_thread`) |
 | `micropython.exe` | n/a | yes | `SDLDisplay` | ok | **`sdl2`** |
 | `micropython.exe` | n/a | no | — | fail: no usdl2 | **`polling`** (console; no `threading` on this port) |
-| `python.exe` | yes | yes or no | `PGDisplay` | ok | **`threading`** |
-| `python.exe` | no | yes | `SDLDisplay` | ok | **`sdl2`** |
-| `python.exe` | no | no | — | fail: no usdl2 | **`threading`** (console) |
+| `python.exe` | yes or no | yes or no | `WinDisplay` (needs `uwin32`) | ok | **`win32`** |
+| `python.exe` | yes | yes or no | `PGDisplay` if `uwin32` missing | ok | **`threading`** |
+| `python.exe` | no | yes | `SDLDisplay` if `uwin32` missing | ok | **`sdl2`** |
+| `python.exe` | no | no | — | fail: no usdl2 | **`threading`** if `uwin32` missing (console) |
 
 GUI rows with usdl2 (and the pygame-only no-usdl2 rows) match `tools/lv_timer_test_kit.py --modes sync` / `KIT_RESULT.backend`. Console rows without usdl2 are from the same auto chain plus `backends_available()` on each host — especially **`micropython.exe` → `polling`**, which is why that backend stays in the product.
 
@@ -268,7 +277,7 @@ GUI rows with usdl2 (and the pygame-only no-usdl2 rows) match `tools/lv_timer_te
 
 ### Overriding the backend
 
-`multimer.backend_name()` reports the active choice; `multimer.use_backend(name)` replaces it and rebinds `Timer` and `sleep_ms`. Accepted names are `machine`, `librt`, `sdl2`, `threading`, `polling`, and `async` (`AsyncTimer`) — the same list `multimer.backends()` returns. Setting `MULTIMER_BACKEND` applies one at import instead.
+`multimer.backend_name()` reports the active choice; `multimer.use_backend(name)` replaces it and rebinds `Timer` and `sleep_ms`. Accepted names are `machine`, `librt`, `win32`, `sdl2`, `threading`, `polling`, and `async` (`AsyncTimer`) — the same list `multimer.backends()` returns. Setting `MULTIMER_BACKEND` applies one at import instead.
 
 An override that this host cannot provide raises `ImportError` (and an unknown name `ValueError`) rather than falling back, so a bad value can never be mistaken for the platform default. Call `use_backend` before creating timers.
 

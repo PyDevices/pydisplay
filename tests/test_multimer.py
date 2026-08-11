@@ -83,14 +83,35 @@ class TestBackendSelection(unittest.TestCase):
     def test_backend_name_is_a_known_backend(self):
         self.assertIn(multimer.backend_name(), multimer.backends())
 
-    def test_backends_has_no_win32(self):
-        self.assertNotIn("win32", multimer.backends())
+    def test_backends_includes_win32(self):
+        self.assertIn("win32", multimer.backends())
 
     def test_backends_order_matches_auto_then_async(self):
         self.assertEqual(
             multimer.backends(),
-            ("machine", "librt", "sdl2", "threading", "polling", "async"),
+            ("machine", "librt", "win32", "sdl2", "threading", "polling", "async"),
         )
+
+    def test_auto_backends_skips_win32_off_windows(self):
+        from unittest import mock
+
+        from multimer import _select
+
+        with mock.patch.object(_select.sys, "platform", "linux"):
+            self.assertNotIn("win32", _select._auto_backends())
+
+    @unittest.skipUnless(sys.platform == "win32", "win32 timer backend")
+    def test_win32_backend_arms(self):
+        hits = []
+        multimer.use_backend("win32")
+        self.assertTrue(multimer.uses_signals())
+        t = Timer(-1)
+        t.init(period=40, callback=lambda _t: hits.append(1))
+        try:
+            sleep_ms(120)
+        finally:
+            t.deinit()
+        self.assertGreaterEqual(len(hits), 1)
 
     def test_auto_backends_skips_sdl2_when_pygame_present(self):
         from unittest import mock

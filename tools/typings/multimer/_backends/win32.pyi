@@ -1,0 +1,9 @@
+from .._core import _TimerCore
+
+_uses_signals: bool
+
+def _backend_sleep_ms(ms) -> None: ...
+
+class Timer(_TimerCore):
+    def _arm(self) -> None: ...
+    def _disarm(self) -> None: ...

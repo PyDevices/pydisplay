@@ -74,9 +74,9 @@ class TestAutoDisplay(unittest.TestCase):
         display.requires_async_timer = False
         pg_mod = types.ModuleType("displaysys.pgdisplay")
         pg_mod.PGDisplay = mock.Mock(return_value=display)
-        with mock.patch.object(ad, "host_kind", return_value="desktop"), mock.patch.dict(
-            sys.modules, {"displaysys.pgdisplay": pg_mod}
-        ):
+        with mock.patch.object(ad, "host_kind", return_value="desktop"), mock.patch.object(
+            ad.sys, "platform", "linux"
+        ), mock.patch.dict(sys.modules, {"displaysys.pgdisplay": pg_mod}):
             result = AutoDisplay(
                 width=320,
                 height=480,
@@ -103,7 +103,9 @@ class TestAutoDisplay(unittest.TestCase):
         display.requires_async_timer = False
         sdl_mod = types.ModuleType("displaysys.sdldisplay")
         sdl_mod.SDLDisplay = mock.Mock(return_value=display)
-        with mock.patch.object(ad, "host_kind", return_value="desktop"), mock.patch.dict(
+        with mock.patch.object(ad, "host_kind", return_value="desktop"), mock.patch.object(
+            ad.sys, "platform", "linux"
+        ), mock.patch.dict(
             sys.modules,
             {"displaysys.pgdisplay": None, "displaysys.sdldisplay": sdl_mod},
         ):
@@ -122,7 +124,26 @@ class TestAutoDisplay(unittest.TestCase):
         self.assertEqual(kwargs["height"], 120)
         self.assertEqual(kwargs["title"], "sdl")
 
-    def test_win32_sets_directsound_before_non_pyscript_backends(self):
+    def test_win32_prefers_windisplay(self):
+        display = mock.Mock(name="WinDisplay")
+        display.get_events = mock.Mock()
+        display.requires_async_timer = False
+        win_mod = types.ModuleType("displaysys.windisplay")
+        win_mod.WinDisplay = mock.Mock(return_value=display)
+        pg_mod = types.ModuleType("displaysys.pgdisplay")
+        pg_mod.PGDisplay = mock.Mock(name="PGDisplay_should_not_be_used")
+        with mock.patch.object(ad, "host_kind", return_value="desktop"), mock.patch.object(
+            ad.sys, "platform", "win32"
+        ), mock.patch("displaysys.env_set") as env_set, mock.patch.dict(
+            sys.modules, {"displaysys.windisplay": win_mod, "displaysys.pgdisplay": pg_mod}
+        ):
+            result = AutoDisplay(width=10, height=10, quiet=True)
+        self.assertIs(result, display)
+        win_mod.WinDisplay.assert_called_once()
+        pg_mod.PGDisplay.assert_not_called()
+        env_set.assert_not_called()
+
+    def test_win32_sets_directsound_when_windisplay_unavailable(self):
         display = mock.Mock(name="PGDisplay")
         display.get_events = mock.Mock()
         display.requires_async_timer = False
@@ -132,10 +153,13 @@ class TestAutoDisplay(unittest.TestCase):
             ad.sys, "platform", "win32"
         ), mock.patch("displaysys.env_get", return_value=None) as env_get, mock.patch(
             "displaysys.env_set"
-        ) as env_set, mock.patch.dict(sys.modules, {"displaysys.pgdisplay": pg_mod}):
+        ) as env_set, mock.patch.dict(
+            sys.modules, {"displaysys.windisplay": None, "displaysys.pgdisplay": pg_mod}
+        ):
             AutoDisplay(width=10, height=10, quiet=True)
         env_get.assert_called_with("SDL_AUDIODRIVER")
         env_set.assert_called_once_with("SDL_AUDIODRIVER", "directsound")
+        pg_mod.PGDisplay.assert_called_once()
 
     def test_win32_skips_directsound_for_pyscript(self):
         display = mock.Mock(name="PSDisplay")

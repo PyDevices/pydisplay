@@ -62,7 +62,7 @@ live in `tests/test_color.py`.
 
 ## Two-stage architecture: logical GRAM + present
 
-Four simulators — **SDLDisplay**, **PGDisplay**, **PSDisplay**, **JNDisplay**
+Five simulators — **SDLDisplay**, **PGDisplay**, **WinDisplay**, **PSDisplay**, **JNDisplay**
 — mimic an **ILI9341-style** panel:
 
 ```text
@@ -132,7 +132,8 @@ coordinates — see [Displays — Browser / notebook](displays.md#browser--noteb
 | Backend | Typical runtime | Why it exists |
 |---------|-----------------|---------------|
 | **SDLDisplay** | CPython, MicroPython Unix, CircuitPython Unix | Native SDL2 / `usdl2`; default on MP Unix |
-| **PGDisplay** | CPython desktop | Easier install on Windows; avoids some SDL glitches on Chromebooks; default in `lib/board_config.py` when pygame imports |
+| **WinDisplay** | Windows CPython | Native HWND via `uwin32`; preferred by `AutoDisplay` on `win32` |
+| **PGDisplay** | CPython desktop | Easier install on Windows; avoids some SDL glitches on Chromebooks; fallback after `WinDisplay` |
 | **PSDisplay** | PyScript | HTML Canvas 2D; no SDL/pygame in the browser |
 | **JNDisplay** | Jupyter | `ipywidgets` / PNG refresh; interactive `JNDevices` |
 | **PixelDisplay** | MCU / CP | NeoPixel / DotStar grids via `displaysys.pixeldisplay` |

@@ -197,6 +197,14 @@ def desktop_work_area(display_index=0):
     display_index = int(display_index)
     if sys.platform == "win32":
         try:
+            import uwin32
+
+            area = uwin32.SystemParametersInfoW_GETWORKAREA()
+            if area[2] > 0 and area[3] > 0:
+                return area
+        except Exception:
+            pass
+        try:
             import ctypes
             from ctypes import wintypes
 
@@ -313,6 +321,14 @@ def capabilities():
                 "scroll_emulation": True,
             },
             "pgdisplay": {
+                "eventsys": True,
+                "auto_refresh": True,
+                "default_period_ms": _DEFAULT_AUTO_REFRESH_PERIOD,
+                "async_default": False,
+                "touch_scale": "window scale",
+                "scroll_emulation": True,
+            },
+            "windisplay": {
                 "eventsys": True,
                 "auto_refresh": True,
                 "default_period_ms": _DEFAULT_AUTO_REFRESH_PERIOD,

@@ -4,9 +4,10 @@
 
 """Host auto-selection for desktop-like displaysys backends.
 
-Selects ``PSDisplay`` / ``JNDisplay`` / ``PGDisplay``→``SDLDisplay`` (or
-Android ``AndroidSDLDisplay``) from the runtime host so board configs stay
-MCU-shaped wiring only.
+Selects ``PSDisplay`` / ``JNDisplay`` / ``WinDisplay``→``PGDisplay``→
+``SDLDisplay`` (or Android ``AndroidSDLDisplay``) from the runtime host so
+board configs stay MCU-shaped wiring only. Explicit boards import a backend
+directly; this factory is convenience only.
 
 Returns the display driver directly. Desktop drivers expose ``get_events`` for
 ``Runtime(host_read=...)`` and ``requires_async_timer`` for the timer default.
@@ -53,22 +54,11 @@ def AutoDisplay(
         quiet: Suppress driver init chatter when True.
 
     Returns:
-        A ``PSDisplay``, ``JNDisplay``, ``PGDisplay``, or ``SDLDisplay`` with
-        ``get_events`` and ``requires_async_timer`` set for board_config wiring.
+        A ``PSDisplay``, ``JNDisplay``, ``WinDisplay``, ``PGDisplay``, or
+        ``SDLDisplay`` with ``get_events`` and ``requires_async_timer`` set for
+        board_config wiring.
     """
     host = host_kind()
-
-    if host != "pyscript" and sys.platform == "win32":
-        # SDL2's default Windows audio driver (WASAPI) glitches with
-        # pygame.mixer.Channel small-chunk playback; DirectSound does not.
-        # Must land before PGDisplay.pg.init() / first SDL audio subsystem
-        # init. Skip pyscript (web_audio). Explicit user choice is left alone.
-        # Lazy import: env_* live on the package and are defined after this
-        # module is loaded during ``import displaysys``.
-        from displaysys import env_get, env_set
-
-        if env_get("SDL_AUDIODRIVER") is None:
-            env_set("SDL_AUDIODRIVER", "directsound")
 
     if host == "pyscript":
         from displaysys.psdisplay import PSDisplay
@@ -99,6 +89,27 @@ def AutoDisplay(
             quiet=quiet,
             window_flags=(usdl2.SDL_WINDOW_SHOWN | usdl2.SDL_WINDOW_ALLOW_HIGHDPI),
         )
+
+    if sys.platform == "win32":
+        try:
+            from displaysys.windisplay import WinDisplay
+
+            return WinDisplay(
+                width=width,
+                height=height,
+                rotation=rotation,
+                title=title,
+                scale=scale,
+                quiet=quiet,
+            )
+        except Exception:
+            pass
+        # pygame / SDL fallback: SDL2 WASAPI glitches with pygame small-chunk
+        # playback; DirectSound does not. Must land before PGDisplay.pg.init().
+        from displaysys import env_get, env_set
+
+        if env_get("SDL_AUDIODRIVER") is None:
+            env_set("SDL_AUDIODRIVER", "directsound")
 
     try:
         from displaysys.pgdisplay import PGDisplay

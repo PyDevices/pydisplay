@@ -27,11 +27,12 @@ What changes is which **display backend** is used — `displaysys.AutoDisplay` o
 | `BusDisplay` | MicroPython / CircuitPython MCUs (SPI / I80) | [board config](https://pydevices.github.io/micropython-hardware/board-configs.html) |
 | `FBDisplay` | CircuitPython framebuffer displays (RGB, USB video) | board config |
 | `SDLDisplay` | CPython, MicroPython Unix, CircuitPython Unix (SDL2); Android APK; [Linux KMS](cpython-desktop.md#linux-kms-no-window-manager) | auto / `board_configs/sdldisplay/` · `sdldisplay/linux_kms/` |
-| `PGDisplay` | CPython desktop (PyGame — easy on Windows) | auto / `board_configs/pgdisplay/` |
+| `WinDisplay` | Windows CPython (native Win32 via `uwin32`) | auto (first on `win32`) / `board_configs/windisplay/` |
+| `PGDisplay` | CPython desktop (PyGame) | auto / `board_configs/pgdisplay/` |
 | `PSDisplay` | [PyScript](pyscript.md) browser canvas and [PWAs](pwa.md) | auto |
 | `JNDisplay` | [Jupyter Notebook](jupyter.md) | auto |
 
-Input is just as portable: a mouse on the desktop, a finger on a touchscreen, and a tap in the browser all arrive as the same [events](../concepts/events.md). Timers come from [`multimer`](../concepts/multimer.md), which picks a backend (`machine.Timer`, librt, threads, polling, SDL, or `asyncio`) to suit the host.
+Input is just as portable: a mouse on the desktop, a finger on a touchscreen, and a tap in the browser all arrive as the same [events](../concepts/events.md). Timers come from [`multimer`](../concepts/multimer.md), which picks a backend (`machine.Timer`, librt, win32, threads, polling, SDL, or `asyncio`) to suit the host.
 
 See [Displays](../concepts/displays.md) for backend details and [Architecture](../concepts/architecture.md) for how the pieces fit together.
 

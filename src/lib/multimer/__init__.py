@@ -12,8 +12,9 @@ Public surface::
     from multimer import loop_running, install_asyncio_compat
 
 ``Timer`` selects a platform backend at import (``machine`` → ``librt`` →
-``sdl2`` → ``threading`` → ``polling``; on CPython, ``sdl2`` is skipped when
-pygame is importable). On async-only hosts (PyScript / Jupyter), ``Timer`` is
+``win32`` → ``sdl2`` → ``threading`` → ``polling``; on CPython, ``sdl2`` is
+skipped when pygame is importable, and ``win32`` only auto-tries on Windows).
+On async-only hosts (PyScript / Jupyter), ``Timer`` is
 an alias of :class:`AsyncTimer`. Soft callbacks (``hard=False``) use
 :func:`schedule`; on signal backends that already deliver on main, soft does
 not postpone the callback (coalesce/gap still apply).
@@ -124,8 +125,9 @@ def use_backend(name):
 def uses_signals():
     """True when the active sync backend delivers timers without a sleep pump.
 
-    Covers librt POSIX-timer signals and MicroPython ``machine.Timer``: callbacks
-    keep firing at an interactive prompt with no ``run_forever`` keep-alive loop.
+    Covers librt POSIX-timer signals, Windows waitable-timer APCs, and
+    MicroPython ``machine.Timer``: callbacks keep firing at an interactive
+    prompt with no ``run_forever`` keep-alive loop.
     Pump-based backends (SDL2, threading, polling) and async-only runtimes
     return False. Public accessor so callers (e.g. ``eventsys.Runtime.run_forever``)
     need not reach into ``multimer._select``.

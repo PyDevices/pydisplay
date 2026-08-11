@@ -1,6 +1,6 @@
 # displaysys
 
-Cross-platform display drivers for MicroPython, CircuitPython, and CPython — `BusDisplay`, `SDLDisplay`, `PGDisplay`, `PSDisplay`, `JNDisplay`, `FBDisplay`, and more behind one drawing API.
+Cross-platform display drivers for MicroPython, CircuitPython, and CPython — `BusDisplay`, `SDLDisplay`, `PGDisplay`, `WinDisplay`, `PSDisplay`, `JNDisplay`, `FBDisplay`, and more behind one drawing API.
 
 ## Install
 
@@ -53,7 +53,9 @@ runtime = eventsys.Runtime(
 ```
 
 `AutoDisplay` picks `PSDisplay` (PyScript), `JNDisplay` (Jupyter), or
-`PGDisplay`→`SDLDisplay` (desktop). Install a board package for MCU pins, or
+`WinDisplay`→`PGDisplay`→`SDLDisplay` (desktop; Win32 first on Windows
+CPython). Explicit boards import a backend directly. Install a board package
+for MCU pins, or
 use the desktop bundle from micropython-hardware
 ([install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html)).
 

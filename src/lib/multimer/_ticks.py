@@ -226,14 +226,19 @@ def run_deadline_hook():
 
 
 def _sleep_ms_signal(ms):
-    """Sleep for signal-based backends (librt; ``uses_signals``).
+    """Sleep for signal-based backends (librt, win32; ``uses_signals``).
 
-    The periodic timer fires via an RT signal on the main thread during the
-    sleep, so the scheduler/event queue does not need pumping here (pumping
-    would only add avoidable work and reentrancy on the signal path).
+    The periodic timer fires on the main thread during the sleep (POSIX RT
+    signal, or a Win32 APC during ``SleepEx``), so the scheduler/event queue
+    does not need pumping here.
     """
     run_deadline_hook()
-    _raw_sleep_ms(ms)
+    from ._select import _sleep_ms as _backend_sleep_ms
+
+    if _backend_sleep_ms is not None:
+        _backend_sleep_ms(ms)
+    else:
+        _raw_sleep_ms(ms)
     run_deadline_hook()
 
 

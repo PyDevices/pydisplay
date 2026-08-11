@@ -10,6 +10,7 @@ See [Architecture](architecture.md) for how drivers connect to `board_config.py`
 |-------------|--------------|----------------------|
 | MicroPython MCU (SPI/I80) | `BusDisplay` | `board_configs/busdisplay/spi/...` |
 | CPython / MicroPython Unix desktop | `SDLDisplay` | `board_configs/sdldisplay/` |
+| Windows CPython (native Win32) | `WinDisplay` | `board_configs/windisplay/` |
 | Windows / Chromebook (PyGame easier) | `PGDisplay` | `board_configs/pgdisplay/` |
 | CircuitPython RGB / USB video | `FBDisplay` | varies |
 | Jupyter notebook | `JNDisplay` | `board_configs/jndisplay/` |
@@ -32,9 +33,13 @@ SDL2 desktop backend (CPython, MicroPython Unix, CircuitPython Unix). Uses an SD
 
 SDL2 bindings for **`SDLDisplay`**: `import usdl2` from [`pydisplay-desktop`](https://pydevices.github.io/micropython-hardware/pydisplay-desktop.html) (TestPyPI) or the MIP desktop board package in [micropython-hardware](https://github.com/PyDevices/micropython-hardware) (`drivers/usdl2.py`). A native `usdl2` module is used when already present in the firmware or environment. See [MicroPython — Desktop SDL](../platforms/micropython.md#desktop-sdl-usdl2).
 
+### WinDisplay
+
+Native Win32 HWND backend for **CPython on Windows** (`uwin32`). Logical RGB565 GRAM, presented with `StretchDIBits`. `displaysys.AutoDisplay` tries it first on `win32` before pygame/SDL. Explicit config: `board_configs/windisplay/`.
+
 ### PGDisplay
 
-PyGame desktop backend. `displaysys.AutoDisplay` (used by `board_configs/desktop/`) selects it first on CPython (it is easier to install on Windows and avoids some SDL glitches on Chromebooks); if PyGame is not installed it falls back to `SDLDisplay`. Explicit config: `board_configs/pgdisplay/`.
+PyGame desktop backend. `displaysys.AutoDisplay` (used by `board_configs/desktop/`) selects it after `WinDisplay` on Windows, and first on other CPython desktops; if PyGame is not installed it falls back to `SDLDisplay`. Explicit config: `board_configs/pgdisplay/`.
 
 ### FBDisplay
 
@@ -58,7 +63,7 @@ platform exposes:
 
 | Backends | Input source | Wired via |
 |----------|--------------|-----------|
-| `SDLDisplay`, `PGDisplay` | System-wide OS queue drain (module `get_events`, also on `display_drv.get_events`) | `Runtime(..., host_read=display_drv.get_events)` |
+| `SDLDisplay`, `PGDisplay`, `WinDisplay` | System-wide OS queue drain (module `get_events`, also on `display_drv.get_events`) | `Runtime(..., host_read=display_drv.get_events)` |
 | `JNDisplay`, `PSDisplay` | Per-surface `PSDevices` / `JNDevices`, exposed as `display_drv.get_events` | `Runtime(..., host_read=display_drv.get_events)` |
 
 Either way your handler sees the same `eventsys.events` objects, so application

@@ -25,6 +25,7 @@ class TestDisplaysysCapabilities(unittest.TestCase):
             "fbdisplay",
             "sdldisplay",
             "pgdisplay",
+            "windisplay",
             "psdisplay",
             "jndisplay",
             "autodisplay",
@@ -48,6 +49,7 @@ class TestDisplaysysCapabilities(unittest.TestCase):
         newly = set(sys.modules) - before
         self.assertNotIn("displaysys.pgdisplay", newly)
         self.assertNotIn("displaysys.sdldisplay", newly)
+        self.assertNotIn("displaysys.windisplay", newly)
 
 
 if __name__ == "__main__":

@@ -87,8 +87,9 @@ mip.install("github:PyDevices/micropython-hardware/board_configs/pgdisplay")
 |-------------|---------------|
 | `board_configs/sdldisplay/` | `SDLDisplay` (SDL2) |
 | `board_configs/pgdisplay/` | `PGDisplay` (PyGame) |
+| `board_configs/windisplay/` | `WinDisplay` (Windows CPython) |
 
-The default desktop bundle (`board_configs/desktop/`) uses `displaysys.AutoDisplay`, which selects `PGDisplay` on CPython when PyGame is installed, otherwise `SDLDisplay`.
+The default desktop bundle (`board_configs/desktop/`) uses `displaysys.AutoDisplay`, which selects `WinDisplay` on Windows CPython when `uwin32` imports, then `PGDisplay` when PyGame is installed, otherwise `SDLDisplay`.
 
 ## MicroPython on Unix
 
