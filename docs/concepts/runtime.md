@@ -103,7 +103,7 @@ in the process environment before `board_config` is imported on desktop hosts
 that have `getenv`, or prefer test-kit / matrix `--timer-async` (wrapper
 `env_set`) so Windows PE under WSL works. MCU board configs and PyScript /
 Jupyter use their platform defaults without shell env. See
-[`displaydev.env_bool`](../../src/lib/displaydev/__init__.py) and [Board configs — default](https://pydevices.github.io/micropython-hardware/board-configs.html#default-config).
+[`displaydev.env_bool`](https://github.com/PyDevices/micropython-hardware/blob/main/drivers/display/displaydev/__init__.py) and [Board configs — default](https://pydevices.github.io/micropython-hardware/board-configs.html#default-config).
 
 On SDL2 / Win32 sync timer hosts (`micropython.exe`, and similar), display
 refresh is **deferred until the first `runtime.poll()`** so importing

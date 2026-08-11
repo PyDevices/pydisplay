@@ -9,11 +9,11 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 
 ### Environment
 
-PyDisplay publishes `eventsys` from `src/lib`. `displaydev` and `multimer`
-live in sibling [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
-(`drivers/display/displaydev`, `lib/multimer`) and are symlinked into
-`src/lib` for `PYTHONPATH`. All three still publish via
-`.github/workflows/publish-micropython-lib.yml` and
+PyDisplay publishes `eventsys` from `src/lib`. `displaydev`, `multimer`,
+`events`, and `keys` live in sibling
+[micropython-hardware](https://github.com/PyDevices/micropython-hardware)
+and are installed with mip or pip (not copied into this repo). Publish still
+goes through `.github/workflows/publish-micropython-lib.yml` and
 `scripts/publish_sync_packages.sh`. `AutoDisplay` is
 `from displaydev.auto import AutoDisplay` only.
 
@@ -144,7 +144,7 @@ App pattern: queue work and drain on the main tick — see `roku_widgets` /
   cooperative deadline/`time.sleep` (sync) or `asyncio.sleep` (async). The LVGL
   timer kit covers dedicated click checks — its daemon-thread quit injection is
   incompatible with the generic example matrix for some ports.
-- **`multimer` is fragile** — before editing `src/lib/multimer/`, read
+- **`multimer` is fragile** — before editing hardware `lib/multimer/`, read
   [multimer concepts](docs/concepts/multimer.md) and follow the local Cursor
   rule `multimer-fragile` (thinking model, small diffs, revert failures). Do not
   duplicate that rule text in this repo.

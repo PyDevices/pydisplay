@@ -187,10 +187,13 @@ package_summary() {
 }
 
 # Package-facing README used as the TestPyPI long description.
-# displaydev / multimer READMEs are reached via src/lib symlinks into hardware.
 package_readme_path() {
     local package="$1"
-    echo "$SOURCE_DIR/lib/$package/README.md"
+    case "$package" in
+        displaydev) echo "$HARDWARE_DISPLAYDEV/README.md" ;;
+        multimer) echo "$HARDWARE_MULTIMER/README.md" ;;
+        *) echo "$SOURCE_DIR/lib/$package/README.md" ;;
+    esac
 }
 
 copy_package_readme() {
@@ -255,9 +258,8 @@ prune_stale_packages() {
         should_skip_name "$package" && continue
         expected_top+=("$package")
     done
-    # events.py / keys.py are sibling-hardware modules synced into micropython-lib.
-    # displaydev / multimer are also hardware-sourced (src/lib symlinks).
-    expected_top+=("events" "keys")
+    # Hardware-sourced packages are not under src/lib.
+    expected_top+=("events" "keys" "displaydev" "multimer")
 
     if [[ -d "$DEST_DIR" ]]; then
         for existing in "$DEST_DIR"/*; do
@@ -331,8 +333,8 @@ push_micropython_lib() {
     done
 }
 
-# Copy pydisplay-owned packages from src/lib. Skip hardware-sourced trees
-# (displaydev, multimer) even when they appear as src/lib symlinks.
+# Copy pydisplay-owned packages from src/lib (eventsys). Hardware packages
+# are copied from micropython-hardware below.
 for package_dir in "$SOURCE_DIR/lib"/*; do
     package=$(basename $package_dir)
     if [ -d "$package_dir" ] && [ "$package" != "displaydev" ] && [ "$package" != "multimer" ] && ! should_skip_name "$package"; then

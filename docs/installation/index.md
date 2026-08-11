@@ -14,11 +14,12 @@ For recommended board setup flows, see [micropython-hardware install workflows](
 
 ## What gets installed
 
-**Core libraries** (under `src/lib/`):
+**Core libraries** (micropython-lib MIP / TestPyPI; `eventsys` source is `src/lib/`):
 
-- `displaydev` — display drivers (BusDisplay, SDLDisplay, PGDisplay, etc.)
-- `eventsys` — input events and Runtime
-- `multimer` — cross-platform timers; see [multimer](../concepts/multimer.md)
+- `eventsys` — input events and Runtime (`src/lib/eventsys`)
+- `displaydev` — display drivers (BusDisplay, SDLDisplay, PGDisplay, etc.) from [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
+- `multimer` — cross-platform timers; see [multimer](../concepts/multimer.md) (micropython-hardware)
+- `events` / `keys` — event types and key codes (micropython-hardware)
 
 **Sister packages** (separate repos, installed from the same [micropython-lib MIP index](mip-micropython-lib.md)):
 

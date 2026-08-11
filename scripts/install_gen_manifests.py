@@ -44,32 +44,27 @@ peterhinch_packages = {
 }
 
 # list of package directories, dependencies and extra files in that package.
-# pydisplay core packages (displaydev/eventsys/multimer) install from the
-# micropython-lib MIP index — do not emit packages/<name>.json for those. They
-# still appear here so PyScript micropython.toml mounts stay generated.
+# eventsys installs from the micropython-lib MIP index — do not emit
+# packages/eventsys.json. It still appears here so PyScript mounts stay generated.
+# displaydev / multimer / events / keys live in micropython-hardware and are
+# installed via mip or pip (gallery: desktop board_config deps).
 # Sister packages (pygraphics, usdl2, palettes, pdwidgets, lvgl) are not from
 # this repo: frozen in firmware, or TestPyPI / MIP when needed (see url_maker.py).
 packages = [
     ["utils", [], []],
     ["examples", [], []],
-    ["lib/displaydev", [], []],
     ["lib/eventsys", [], []],
-    ["lib/multimer", [], []],
 ]
 
 # Emit packages/*.json only for GitHub-MIP / PyScript demo bundles.
 # These names stay in `packages` for toml mounts but must not get a JSON file.
-MIP_INDEX_ONLY = frozenset({"displaydev", "eventsys", "multimer"})
+MIP_INDEX_ONLY = frozenset({"eventsys"})
 
 # Packages omitted from web/pyscript/micropython.toml (PyScript mounts utils for browser examples).
 toml_exclude = ["examples"]
 
 # PyScript [files] mounts that are not part of any mip package JSON.
-# events.py / keys.py are symlinks into sibling micropython-hardware/lib.
-toml_only_mounts: list[tuple[str, str]] = [
-    ("src/lib/events.py", "/lib/"),
-    ("src/lib/keys.py", "/lib/"),
-]
+toml_only_mounts: list[tuple[str, str]] = []
 
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
 # MicroPython mip only fetches .py / .mpy / .json (see micropython-lib mip).
