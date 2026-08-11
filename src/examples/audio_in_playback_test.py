@@ -1,10 +1,10 @@
 # gallery: skip
 """Play PCM through a PCMInput into board_devices.audio_out (hearable).
 
-Default (hearable on all hosts): write a 440 Hz tone via audiodev.wav_output,
-read it back with wav_input (same PCMInput contract as audio_in), play on
-audio_out. Also opens board_devices.audio_in() briefly to prove the host mic
-factory.
+Default (hearable on all hosts): write a 440 Hz tone via
+audiodev.emulated_audio WAV devices, read it back with the same PCMInput
+contract as audio_in, play on audio_out. Also opens board_devices.audio_in()
+briefly to prove the host mic factory.
 
 Live mic path: pass --live to record ~3 s from board_devices.audio_in and play
 that buffer back.
@@ -47,16 +47,17 @@ def _wav_path():
 
 
 def _self_feed(out, fmt):
-    from audiodev import wav_input, wav_output
+    from audiodev.emulated_audio import audio_in as wav_in
+    from audiodev.emulated_audio import audio_out as wav_out
 
     path = _wav_path()
     print("self-feed wav:", path)
     tone = _tone_pcm(fmt.rate, duration_s=2.0)
-    wout = wav_output(path, fmt)
+    wout = wav_out(fmt, path=path)
     wout.write(tone)
     wout.close()
 
-    mic = wav_input(path)
+    mic = wav_in(path=path)
     chunk = bytearray(fmt.frame_size * 1024)
     pcm = bytearray()
     while True:
@@ -65,7 +66,7 @@ def _self_feed(out, fmt):
             break
         pcm.extend(chunk[:n])
     mic.close()
-    _play(out, pcm, "playing wav_input (PCMInput) -> audio_out")
+    _play(out, pcm, "playing emulated WAV PCMInput -> audio_out")
 
 
 def _probe_audio_in():

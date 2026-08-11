@@ -120,7 +120,7 @@ On Android, **multimer** skips auto **`sdl2`** (CPython `SDL_AddTimer` is not on
 
 ## Audio (lazy `audio_out`)
 
-`board_config.audio_out` stays lazy. On first `open()` / `write()`, `sdl2audio` attaches an Android-only `PCMOutput(session=…)` that requests audio focus and starts the APK’s `mediaplayback` foreground service (`foregroundServiceType=mediaPlayback`). Last `close()` abandons focus and stops the service. Non-Android consumers still get `session=None` — no API change.
+`board_config.audio_out` stays lazy. On first `open()` / `write()`, `audiodev.sdl2_audio` attaches an Android-only `PCMOutput(session=…)` that requests audio focus and starts the APK’s `mediaplayback` foreground service (`foregroundServiceType=mediaPlayback`). Last `close()` abandons focus and stops the service. Non-Android consumers still get `session=None` — no API change.
 
 ## Android TV / Fire OS
 
