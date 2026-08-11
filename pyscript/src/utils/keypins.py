@@ -6,15 +6,16 @@ A class to make keypad keys appear as pins on a microcontroller.
 
 Usage:
     from board_config import display_drv, runtime
-    from keypins import KeyPins, Keys
+    import keys
+    from keypins import KeyPins
 
 
     buttons = KeyPins(
-        left=Keys.K_LEFT,
-        right=Keys.K_RIGHT,
-        go=Keys.K_UP,
-        stop=Keys.K_DOWN,
-        fire=Keys.K_SPACE,
+        left=keys.K_LEFT,
+        right=keys.K_RIGHT,
+        go=keys.K_UP,
+        stop=keys.K_DOWN,
+        fire=keys.K_SPACE,
     )
 
     runtime.on([runtime.events.KEYDOWN, runtime.events.KEYUP], buttons)
@@ -26,8 +27,8 @@ Usage:
                 print(f"{button.name} ({button.keyname}) pressed")
 """
 
-from eventsys import events
-from eventsys.keys import Keys
+import events
+import keys
 
 
 class KeyPins:
@@ -79,4 +80,4 @@ class _KeyPin:
 
     @property
     def keyname(self):
-        return Keys.keyname(self.key)
+        return keys.keyname(self.key)

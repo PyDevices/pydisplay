@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: MIT
 """Board runtime: aggregates devices, shared timer, and quit lifecycle."""
 
+import events
+
 from ._encoder import EncoderDevice
-from ._events import events
 from ._host import HostEventsDevice
 from ._joystick import JoystickDevice
 from ._keypad import KeypadDevice
@@ -154,7 +155,8 @@ class Runtime:
     """Board runtime: input devices, shared timer, display refresh, and quit lifecycle.
 
     ``multimer`` is imported lazily when the shared timer starts so ``eventsys``
-    remains importable in isolation.
+    remains importable without it. Event types and key codes are the shared
+    ``events`` / ``keys`` modules (``Runtime.events`` is that events module).
     """
 
     events = events
@@ -172,7 +174,7 @@ class Runtime:
         """Create a board runtime and optionally wire host/touch devices.
 
         Args:
-            displays: Sequence of displaysys drivers. Index 0 is primary. Empty
+            displays: Sequence of displaydev drivers. Index 0 is primary. Empty
                 or ``None`` means no display (device-only runtime).
             host_read: Callable returning host events (mouse/keyboard); requires
                 a primary display.
@@ -291,7 +293,7 @@ class Runtime:
 
     @property
     def displays(self):
-        """Tuple of attached displaysys drivers (index 0 is primary)."""
+        """Tuple of attached displaydev drivers (index 0 is primary)."""
         return tuple(self._displays)
 
     @property
@@ -302,10 +304,10 @@ class Runtime:
         return None
 
     def add_display(self, drv):
-        """Attach a secondary displaysys driver and re-wire refresh if needed.
+        """Attach a secondary displaydev driver and re-wire refresh if needed.
 
         Args:
-            drv: displaysys driver instance.
+            drv: displaydev driver instance.
 
         Returns:
             The attached driver.

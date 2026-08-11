@@ -7,10 +7,10 @@ Testris game implemented in MicroPython by Brad Barnett.
 
 # For the display & optional touch drivers
 from board_config import display_drv, runtime
-from displaysys import alloc_buffer
+from displaydev import alloc_buffer
 from eventsys.touch_keypad import TouchKeypad
 from eventsys.joystick_keys import JoystickKeys
-from eventsys.keys import Keys
+import keys
 try:
     from random import choice  # For random piece selection
 except ImportError:
@@ -35,15 +35,15 @@ if display_drv.width > display_drv.height:
 
 # Setup the keypad
 # TouchKeypad uses read_held() for continuous movement; JoystickKeys uses read().
-START = Keys.K_RETURN  # RETURN
+START = keys.K_RETURN  # RETURN
 UNUSED = 0  # Not used
-PAUSE = Keys.K_ESCAPE  # ESCAPE
-CCW = Keys.K_d  # D
-DROP = Keys.K_UP  # UP
-CW = Keys.K_f  # F
-LEFT = Keys.K_LEFT  # LEFT
-DOWN = Keys.K_DOWN  # DOWN
-RIGHT = Keys.K_RIGHT  # RIGHT
+PAUSE = keys.K_ESCAPE  # ESCAPE
+CCW = keys.K_d  # D
+DROP = keys.K_UP  # UP
+CW = keys.K_f  # F
+LEFT = keys.K_LEFT  # LEFT
+DOWN = keys.K_DOWN  # DOWN
+RIGHT = keys.K_RIGHT  # RIGHT
 keypad = TouchKeypad(
     runtime,
     0,

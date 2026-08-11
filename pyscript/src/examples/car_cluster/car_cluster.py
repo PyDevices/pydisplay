@@ -41,7 +41,7 @@ import input_map  # noqa: E402 — capture hook must run before display_driver
 
 input_map.capture_virtual_devices()
 
-from displaysys import env_bool, env_get, env_set
+from displaydev import env_bool, env_get, env_set
 
 env_set("PYDISPLAY_WIDTH", "1024")
 env_set("PYDISPLAY_HEIGHT", "512")

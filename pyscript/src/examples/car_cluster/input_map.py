@@ -4,13 +4,13 @@
 import lvgl as lv
 
 try:
-    from eventsys.keys import Keys
+    import keys
 except ImportError:
-    Keys = None
+    keys = None
 
 try:
+    import events
     import eventsys
-    from eventsys import events
 except ImportError:
     eventsys = None
     events = None
@@ -23,9 +23,9 @@ _capture_done = False
 
 
 def _key_const(name, default):
-    if Keys is None:
+    if keys is None:
         return default
-    return getattr(Keys, name, default)
+    return getattr(keys, name, default)
 
 
 _SDL_UP = _key_const("K_UP", 1073741906)
@@ -38,10 +38,10 @@ _SDL_KP_ENTER = _key_const("K_KP_ENTER", 1073741912)
 _DIGIT_KEYS = {}
 for _i in range(10):
     _DIGIT_KEYS[_key_const("K_%d" % _i, 48 + _i)] = _i
-if Keys is not None:
-    _DIGIT_KEYS[Keys.K_KP_0] = 0
+if keys is not None:
+    _DIGIT_KEYS[keys.K_KP_0] = 0
     for _i in range(1, 10):
-        _DIGIT_KEYS[getattr(Keys, "K_KP_%d" % _i)] = _i
+        _DIGIT_KEYS[getattr(keys, "K_KP_%d" % _i)] = _i
 
 
 def remap_nav_key(sdl_key):

@@ -1,5 +1,5 @@
 """
-touch_setup.py - hardware setup for micropython-touch using DisplayBuffer on displaysys.
+touch_setup.py - hardware setup for micropython-touch using DisplayBuffer on displaydev.
 See: https://github.com/peterhinch/micropython-touch
 
 Fetches micropython-touch into utils/gui/ when needed.

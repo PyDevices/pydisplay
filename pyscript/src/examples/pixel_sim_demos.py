@@ -26,7 +26,7 @@ import math
 from random import getrandbits
 
 import pygraphics
-from displaysys import color565
+from displaydev import color565
 from pygraphics import RGB565, FrameBuffer, text8
 from multimer import ticks_add, ticks_diff, ticks_ms
 from palettes import get_palette

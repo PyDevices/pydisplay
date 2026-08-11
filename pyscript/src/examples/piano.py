@@ -12,7 +12,7 @@ from audio import AudioEngine, midi_to_hz
 import board_config
 import board_devices
 
-from eventsys.keys import Keys
+import keys
 from pygraphics import Draw
 
 display_drv = board_config.display_drv
@@ -51,34 +51,34 @@ NOTE_NAMES = (
 # Computer keyboard: whites on Z row, blacks on Q row (plus A-row for upper whites).
 _KEY_TO_MIDI = {
     # White C4..B4
-    Keys.K_z: 60,
-    Keys.K_x: 62,
-    Keys.K_c: 64,
-    Keys.K_v: 65,
-    Keys.K_b: 67,
-    Keys.K_n: 69,
-    Keys.K_m: 71,
+    keys.K_z: 60,
+    keys.K_x: 62,
+    keys.K_c: 64,
+    keys.K_v: 65,
+    keys.K_b: 67,
+    keys.K_n: 69,
+    keys.K_m: 71,
     # White C5..C6
-    Keys.K_COMMA: 72,
-    Keys.K_PERIOD: 74,
-    Keys.K_SLASH: 76,
-    Keys.K_a: 77,
-    Keys.K_s: 79,
-    Keys.K_d: 81,
-    Keys.K_f: 83,
-    Keys.K_g: 84,
+    keys.K_COMMA: 72,
+    keys.K_PERIOD: 74,
+    keys.K_SLASH: 76,
+    keys.K_a: 77,
+    keys.K_s: 79,
+    keys.K_d: 81,
+    keys.K_f: 83,
+    keys.K_g: 84,
     # Black C#4..A#4
-    Keys.K_q: 61,
-    Keys.K_w: 63,
-    Keys.K_e: 66,
-    Keys.K_r: 68,
-    Keys.K_t: 70,
+    keys.K_q: 61,
+    keys.K_w: 63,
+    keys.K_e: 66,
+    keys.K_r: 68,
+    keys.K_t: 70,
     # Black C#5..A#5
-    Keys.K_y: 73,
-    Keys.K_u: 75,
-    Keys.K_i: 78,
-    Keys.K_o: 80,
-    Keys.K_p: 82,
+    keys.K_y: 73,
+    keys.K_u: 75,
+    keys.K_i: 78,
+    keys.K_o: 80,
+    keys.K_p: 82,
 }
 
 

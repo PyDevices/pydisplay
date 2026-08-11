@@ -21,6 +21,7 @@ from random import getrandbits
 
 import eventsys
 import pygraphics
+import events
 
 try:
     from multimer import ticks_add, ticks_diff, ticks_ms
@@ -319,6 +320,6 @@ def _on_tick(_=None):
 
 
 draw_board()
-runtime.on(eventsys.MOUSEBUTTONUP, _on_up)
+runtime.on(events.MOUSEBUTTONUP, _on_up)
 runtime.on_tick(_on_tick, period=20, async_=getattr(runtime, "timer_async", False))
 runtime.run_forever()

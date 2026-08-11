@@ -11,7 +11,7 @@ except ImportError:
         return x
 
 
-from ._events import events
+import events
 
 _mapping = {}
 

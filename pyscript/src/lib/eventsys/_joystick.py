@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: MIT
 """Joystick device and driver interface."""
 
+import events
+
 from ._device import Device, register_device_class, types
-from ._events import events
 
 
 class JoystickDriver:

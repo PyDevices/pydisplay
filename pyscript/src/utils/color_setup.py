@@ -1,5 +1,5 @@
 """
-color_setup.py - color setup for DisplayBuffer with displaysys (nano-gui bridge).
+color_setup.py - color setup for DisplayBuffer with displaydev (nano-gui bridge).
 
 Fetches micropython-nano-gui into utils/gui/ when needed.
 

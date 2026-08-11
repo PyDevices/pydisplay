@@ -5,10 +5,6 @@
       "github:PyDevices/pydisplay/src/utils/audio.py"
     ],
     [
-      "byteswap.py",
-      "github:PyDevices/pydisplay/src/utils/byteswap.py"
-    ],
-    [
       "color_setup.py",
       "github:PyDevices/pydisplay/src/utils/color_setup.py"
     ],
@@ -25,10 +21,6 @@
       "github:PyDevices/pydisplay/src/utils/fetch_ph_gui.py"
     ],
     [
-      "frame_recorder.py",
-      "github:PyDevices/pydisplay/src/utils/frame_recorder.py"
-    ],
-    [
       "framebuf.py",
       "github:PyDevices/pydisplay/src/utils/framebuf.py"
     ],
@@ -41,20 +33,8 @@
       "github:PyDevices/pydisplay/src/utils/itertools.py"
     ],
     [
-      "keypins.py",
-      "github:PyDevices/pydisplay/src/utils/keypins.py"
-    ],
-    [
       "lv_encoder_emu.py",
       "github:PyDevices/pydisplay/src/utils/lv_encoder_emu.py"
-    ],
-    [
-      "micropython.py",
-      "github:PyDevices/pydisplay/src/utils/micropython.py"
-    ],
-    [
-      "mip.py",
-      "github:PyDevices/pydisplay/src/utils/mip.py"
     ],
     [
       "path.py",
@@ -99,14 +79,6 @@
     [
       "uctypes.py",
       "github:PyDevices/pydisplay/src/utils/uctypes.py"
-    ],
-    [
-      "viper_tools.py",
-      "github:PyDevices/pydisplay/src/utils/viper_tools.py"
-    ],
-    [
-      "wifi.py",
-      "github:PyDevices/pydisplay/src/utils/wifi.py"
     ],
     [
       "fonts/__init__.py",
@@ -169,6 +141,11 @@
       "github:PyDevices/pydisplay/src/utils/pixel_sim/board_config.py"
     ]
   ],
-  "deps": [],
+  "deps": [
+    [
+      "github:PyDevices/micropython-hardware/packages/utils.json",
+      "main"
+    ]
+  ],
   "version": "0.0.1"
 }

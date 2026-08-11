@@ -14,7 +14,7 @@ desktop (SDL/Pygame), MCU, and PyScript.
   .. hlist::
     :columns: 3
 
-    - `displaysys`
+    - `displaydev`
     - `pygraphics`
     - `multimer`
 

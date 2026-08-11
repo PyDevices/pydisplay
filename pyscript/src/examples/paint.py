@@ -1,5 +1,5 @@
 """
-A simple paint application demonstrating the use of displaysys.
+A simple paint application demonstrating the use of displaydev.
 """
 
 from board_config import display_drv, runtime
