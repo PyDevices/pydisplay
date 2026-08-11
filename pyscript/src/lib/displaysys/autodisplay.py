@@ -62,7 +62,7 @@ def AutoDisplay(
         # SDL2's default Windows audio driver (WASAPI) glitches with
         # pygame.mixer.Channel small-chunk playback; DirectSound does not.
         # Must land before PGDisplay.pg.init() / first SDL audio subsystem
-        # init. Skip pyscript (webaudio). Explicit user choice is left alone.
+        # init. Skip pyscript (web_audio). Explicit user choice is left alone.
         # Lazy import: env_* live on the package and are defined after this
         # module is loaded during ``import displaysys``.
         from displaysys import env_get, env_set

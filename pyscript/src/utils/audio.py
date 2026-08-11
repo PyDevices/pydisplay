@@ -409,6 +409,9 @@ class AudioEngine:
             # Nothing sounding — next note_on should not inherit a stale
             # look-ahead schedule from a previous (possibly long-idle) note.
             self._sched_start_ms = None
+            out = self._out
+            if out is not None:
+                out.service()
             return
         self._pumping = True
         try:
@@ -429,9 +432,11 @@ class AudioEngine:
                 frames_needed = max_frames
                 self._played_frames = target_frames - max_frames
             if frames_needed <= 0:
+                self.out.service()
                 return
             pcm = self.mixer.render(frames_needed, self._buf)
             self.out.write(pcm)
+            self.out.service()
             self._played_frames += frames_needed
         finally:
             self._pumping = False
