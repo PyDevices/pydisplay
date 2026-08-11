@@ -45,6 +45,9 @@ class _FakeOut:
         self.writes.append(bytes(buf))
         return len(buf)
 
+    def service(self):
+        pass
+
     def close(self):
         self.opened = False
 

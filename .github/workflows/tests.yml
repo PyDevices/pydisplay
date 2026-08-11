@@ -23,13 +23,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Checkout micropython-hardware (boarddev for tests)
+      - name: Checkout micropython-hardware (events/keys/multimer for eventsys)
         uses: actions/checkout@v4
         with:
           repository: PyDevices/micropython-hardware
           path: micropython-hardware
           sparse-checkout: |
-            drivers/boarddev.py
+            lib/events.py
+            lib/keys.py
+            lib/multimer
           sparse-checkout-cone-mode: false
 
       - uses: actions/setup-python@v5
