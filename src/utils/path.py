@@ -47,6 +47,11 @@ def update():
         if _exists(candidate):
             add(candidate, front=True)
             break
+    # byteswap, mip, viper_tools, keypins, wifi, frame_recorder, micropython shim.
+    for candidate in ("../micropython-hardware/utils", "../../micropython-hardware/utils"):
+        if _exists(candidate):
+            add(candidate, front=True)
+            break
     # displaydev package lives in hardware drivers/display/.
     for candidate in (
         "../micropython-hardware/drivers/display",

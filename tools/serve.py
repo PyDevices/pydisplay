@@ -48,6 +48,20 @@ from pathlib import Path
 import sys
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+# Hardware-owned utils (mip, byteswap, …) are mounted at ./src/utils/ in
+# PyScript configs but live in the sibling checkout — not in this repo.
+_HW_UTILS = REPO_ROOT.parent / "micropython-hardware" / "utils"
+_HW_UTIL_FILES = frozenset(
+    {
+        "byteswap.py",
+        "frame_recorder.py",
+        "keypins.py",
+        "micropython.py",
+        "mip.py",
+        "viper_tools.py",
+        "wifi.py",
+    }
+)
 
 # Path prefix the page-side debug beacon POSTs to. Anything under it is treated
 # as a log sink so Cursor Debug mode tooling can pick its own sub-paths.
@@ -112,6 +126,15 @@ class DemoRequestHandler(SimpleHTTPRequestHandler):
             self._send_cors(200)
             return
         super().do_HEAD()
+
+    def translate_path(self, path: str) -> str:
+        mapped = super().translate_path(path)
+        name = Path(mapped).name
+        if name in _HW_UTIL_FILES and Path(mapped).parent.name == "utils":
+            hw = _HW_UTILS / name
+            if hw.is_file():
+                return str(hw)
+        return mapped
 
     def _log_debug(self, raw: bytes) -> None:
         stamp = _stamp()

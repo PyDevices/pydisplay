@@ -127,8 +127,17 @@ def _parse_args(argv=None):
 def _prepare_paths(repo_root):
     src = repo_root / "src"
     tools = repo_root / "tools"
-    for path in (str(tools), str(src), str(src / "lib"), str(src / "utils")):
-        if path not in sys.path:
+    hw = repo_root.parent / "micropython-hardware"
+    for path in (
+        str(tools),
+        str(src),
+        str(src / "lib"),
+        str(src / "utils"),
+        str(hw / "lib"),
+        str(hw / "utils"),
+        str(hw / "drivers" / "display"),
+    ):
+        if Path(path).is_dir() and path not in sys.path:
             sys.path.insert(0, path)
     import sibling_repos
 

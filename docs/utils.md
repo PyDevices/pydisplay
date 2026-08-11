@@ -2,6 +2,12 @@
 
 Optional extensions in [`src/utils/`](https://github.com/PyDevices/pydisplay/tree/main/src/utils/). Not required for basic display and event use. API docs: [Utils Reference](reference/utils/).
 
+MCU / host helpers that used to live here (`byteswap`, `viper_tools`, `mip`,
+`micropython` shim, `keypins`, `wifi`, `frame_recorder`) are in
+[micropython-hardware `utils/`](https://github.com/PyDevices/micropython-hardware/tree/main/utils).
+`packages/utils.json` depends on that tree; a sibling checkout is on
+`sys.path` via [`path.py`](https://github.com/PyDevices/pydisplay/blob/main/src/utils/path.py).
+
 ## Install
 
 ```python

@@ -69,8 +69,9 @@ Mirrors micropython/micropython.exe's primary CLI shapes.
 Generated notebooks import via \`from examples import <name>\` (or
 \`import examples.<a>.<b>\` for nested files) — never a bare \`import <name>\`
 and never a path-bootstrap cell. If PYTHONPATH is unset, jupyter.sh exports
-PYTHONPATH=".:lib:utils" for the JupyterLab/kernel process (cwd=src) so
-\`import displaydev\`, \`import utils.*\`, etc. resolve without a bootstrap cell.
+PYTHONPATH=".:lib:utils" plus sibling micropython-hardware ``lib`` / ``utils`` /
+``drivers/display`` for the JupyterLab/kernel process (cwd=src) so
+\`import displaydev\`, \`import mip\`, etc. resolve without a bootstrap cell.
 Run notebooks also ensure a Jupyter board config is available by calling
 \`mip.install("${DESKTOP_BOARD_CONFIG_MIP}", target=".")\` when
 \`import board_config\` fails.
@@ -158,8 +159,13 @@ if [[ ! -d "$SRC/lib" ]]; then
 fi
 
 if [[ -z "${PYTHONPATH:-}" ]]; then
-  export PYTHONPATH=".:lib:utils"
-  echo "jupyter.sh: PYTHONPATH unset; exporting PYTHONPATH=.:lib:utils for the kernel (cwd=$SRC)" >&2
+  HW="$(cd "$PYDISPLAY_ROOT/../micropython-hardware" 2>/dev/null && pwd || true)"
+  HW_PATH=""
+  if [[ -n "$HW" && -d "$HW/utils" ]]; then
+    HW_PATH=":$HW/lib:$HW/utils:$HW/drivers/display"
+  fi
+  export PYTHONPATH=".:lib:utils${HW_PATH}"
+  echo "jupyter.sh: PYTHONPATH unset; exporting PYTHONPATH=$PYTHONPATH for the kernel (cwd=$SRC)" >&2
 fi
 
 jupyter_bin() {

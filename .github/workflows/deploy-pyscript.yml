@@ -24,6 +24,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Checkout micropython-hardware (utils for PyScript mounts)
+        uses: actions/checkout@v4
+        with:
+          repository: PyDevices/micropython-hardware
+          path: micropython-hardware
+          sparse-checkout: |
+            utils
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -43,6 +51,16 @@ jobs:
           rm -rf _site/pyscript/src _site/pyscript/packages
           mkdir -p _site/pyscript/src _site/pyscript/packages
           cp -r src/lib src/utils _site/pyscript/src/
+          # Hardware-owned helpers (mip.py, byteswap, …) — PyScript [files] still
+          # fetch them at src/utils/<name>.py.
+          cp micropython-hardware/utils/byteswap.py \
+             micropython-hardware/utils/frame_recorder.py \
+             micropython-hardware/utils/keypins.py \
+             micropython-hardware/utils/micropython.py \
+             micropython-hardware/utils/mip.py \
+             micropython-hardware/utils/viper_tools.py \
+             micropython-hardware/utils/wifi.py \
+             _site/pyscript/src/utils/
           cp src/jupyter_notebook.ipynb _site/pyscript/src/
           python scripts/gallery_generator.py --copy-examples _site/pyscript/src/examples
           # Example + lib MIP manifests; relative urls resolve via packages/ → ../src/

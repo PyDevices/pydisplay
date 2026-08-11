@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Checkout micropython-hardware (events/keys/multimer for eventsys)
+      - name: Checkout micropython-hardware (events/keys/multimer/utils)
         uses: actions/checkout@v4
         with:
           repository: PyDevices/micropython-hardware
@@ -32,6 +32,7 @@ jobs:
             lib/events.py
             lib/keys.py
             lib/multimer
+            utils
           sparse-checkout-cone-mode: false
 
       - uses: actions/setup-python@v5

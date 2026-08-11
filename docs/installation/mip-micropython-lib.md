@@ -17,7 +17,8 @@ mip.install("displaydev", index="https://PyDevices.github.io/micropython-lib/mip
 
 On **PyScript MicroPython** (`micropython.html`, `mp.html`), `?deps=` installs
 use the **bytecode** channel via ``utils/ps_loader.py`` (firmware ``mip`` on
-MicroPython; portable ``mip.py`` on Pyodide for manifests/modules).
+MicroPython). Pyodide uses portable ``mip.py`` from micropython-hardware
+``utils/`` for manifests and modules.
 
 With `mpremote`:
 

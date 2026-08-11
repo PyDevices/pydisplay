@@ -6,7 +6,8 @@
 Consolidates loader install logic for ``micropython.html``, ``pyodide.html``,
 ``mp.html``, and ``py.html``. Gallery pages call ``_ps_loader()`` on
 Run only (``import utils.path`` then ``import ps_loader``). MicroPython WASM uses
-firmware ``mip`` after ``utils.path``; Pyodide uses ``utils/mip.py``.
+firmware ``mip`` after ``utils.path``; Pyodide uses portable ``mip.py``
+(from micropython-hardware ``utils/``, mounted at ``/utils/``).
 """
 
 MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
@@ -136,7 +137,7 @@ def _ensure_cwd():
 
 
 def _import_firmware_mip():
-    """Firmware ``mip`` on MicroPython WASM (not ``utils/mip.py``).
+    """Firmware ``mip`` on MicroPython WASM (not portable ``mip.py``).
 
     ``utils.path`` must run first so ``utils`` is appended, not prepended.
     """
@@ -148,7 +149,7 @@ def _import_firmware_mip():
 
 
 def _import_portable_mip():
-    """Portable ``utils/mip.py`` for Pyodide (no firmware ``mip``)."""
+    """Portable ``mip.py`` for Pyodide (no firmware ``mip``)."""
     _ensure_cwd()
     import mip
 

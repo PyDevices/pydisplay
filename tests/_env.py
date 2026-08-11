@@ -5,8 +5,9 @@
 
 Puts ``src/lib`` (``eventsys``) and ``src/utils`` on ``sys.path`` without
 installing anything. When a sibling (or nested) ``micropython-hardware`` tree
-is present, ``lib/`` (``events``, ``keys``, ``multimer``) is added so
-``eventsys`` can import its hardware dependencies.
+is present, ``lib/`` (``events``, ``keys``, ``multimer``) and ``utils/``
+(``byteswap``, ``mip``, …) are added so ``eventsys`` and display helpers can
+import their hardware dependencies.
 
     import _env  # noqa: F401
     import eventsys
@@ -34,9 +35,23 @@ for _hw in _HARDWARE_ROOT_CANDIDATES:
     if os.path.isdir(_hw):
         _HARDWARE_ROOT = _hw
         _hw_lib = os.path.join(_hw, "lib")
+        _hw_utils = os.path.join(_hw, "utils")
         if os.path.isdir(_hw_lib) and _hw_lib not in sys.path:
             sys.path.insert(0, _hw_lib)
+        if os.path.isdir(_hw_utils) and _hw_utils not in sys.path:
+            sys.path.insert(0, _hw_utils)
         break
+
+#: Directories to put on ``PYTHONPATH`` / ``sys.path`` in subprocess probes.
+PATH_ENTRIES = [_SRC_LIB, _SRC_UTILS]
+if _HARDWARE_ROOT:
+    for _extra in (
+        os.path.join(_HARDWARE_ROOT, "lib"),
+        os.path.join(_HARDWARE_ROOT, "utils"),
+        os.path.join(_HARDWARE_ROOT, "drivers", "display"),
+    ):
+        if os.path.isdir(_extra) and _extra not in PATH_ENTRIES:
+            PATH_ENTRIES.append(_extra)
 
 #: Absolute path to the ``eventsys`` package directory.
 EVENTSYS_DIR = os.path.join(_SRC_LIB, "eventsys")

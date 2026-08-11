@@ -295,8 +295,8 @@ def fetch_ph_gui(which, apply_patches=True):
     that import ``color_setup`` / ``hardware_setup`` / ``touch_setup`` will
     call again with patches enabled.
 
-    Uses ``mip.install`` (firmware on MicroPython; portable ``utils/mip.py``
-    on CPython / Pyodide / CircuitPython).
+    Uses ``mip.install`` (firmware on MicroPython; portable ``mip.py`` from
+    micropython-hardware ``utils/`` on CPython / Pyodide / CircuitPython).
     """
     global _IN_FETCH
 

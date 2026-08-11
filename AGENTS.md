@@ -10,7 +10,8 @@ is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
 ### Environment
 
 PyDisplay publishes `eventsys` from `src/lib`. `displaydev`, `multimer`,
-`events`, and `keys` live in sibling
+`events`, `keys`, and portable `utils/` (`byteswap`, `mip`, `viper_tools`,
+`keypins`, `wifi`, `frame_recorder`, CPython `micropython` shim) live in sibling
 [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
 and are installed with mip or pip (not copied into this repo). Publish still
 goes through `.github/workflows/publish-micropython-lib.yml` and

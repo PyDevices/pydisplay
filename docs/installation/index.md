@@ -29,7 +29,7 @@ For recommended board setup flows, see [micropython-hardware install workflows](
 
 **Optional packages:**
 
-- `utils` — optional extensions (framebuf shim, console, displaybuf, tft_config, …)
+- `utils` — optional extensions (framebuf shim, console, displaybuf, tft_config, …); `byteswap` / `mip` / `viper_tools` / `keypins` / `wifi` / `frame_recorder` come from [micropython-hardware `utils/`](https://github.com/PyDevices/micropython-hardware/tree/main/utils)
 - `examples` — demo scripts
 - Bus/touch helpers — see [micropython-hardware packages](https://github.com/PyDevices/micropython-hardware/tree/main/packages)
 

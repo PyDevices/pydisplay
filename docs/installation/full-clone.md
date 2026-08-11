@@ -17,10 +17,14 @@ The `src/` directory mirrors what a device filesystem looks like after installin
 
 ```
 src/
-├── lib/                 # core packages (displaydev, eventsys, events.py, keys.py, …)
+├── lib/                 # eventsys
 ├── examples/            # demo scripts
-├── utils/               # optional extensions — path.py, color_setup, tft_config, gui/, …
+├── utils/               # pydisplay helpers — path.py, color_setup, tft_config, gui/, …
 ```
+
+Clone [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
+next to this repo for `displaydev`, `events`, `keys`, `multimer`, and portable
+`utils/` (`byteswap`, `mip`, …). `path.py` prepends that sibling tree.
 
 Optional third-party add-ons (not in git): copy [Nano-GUI](../guis/nano-gui.md) `gui/` into `utils/gui/`.
 

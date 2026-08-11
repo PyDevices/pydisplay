@@ -132,7 +132,8 @@ micropython-lib MIP index. Sister packages (`pygraphics`, `palettes`,
 TestPyPI — not this repo's `packages/`. Desktop SDL (`usdl2`) ships with
 micropython-hardware’s MIP desktop board / `pydisplay-desktop`. Bus/touch/chip helper
 manifests (`spibus`, `i80bus`, `i2cbus`, `tt21100`, `stmpe610`,
-`keypad_shift`) live in sibling `micropython-hardware/packages/`.
+`keypad_shift`) and portable `utils.json` (`byteswap`, `mip`, …) live in sibling
+`micropython-hardware/packages/`.
 
 ### Board configs
 

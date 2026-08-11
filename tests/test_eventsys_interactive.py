@@ -11,7 +11,7 @@ import types
 import unittest
 from unittest import mock
 
-import _env  # noqa: F401
+import _env
 
 from eventsys._runtime import (
     _cmdline_has_batch_flag,
@@ -206,9 +206,11 @@ class TestInteractiveSubprocess(unittest.TestCase):
             "print('I', int(_is_interactive_session()))"
         )
         env = os.environ.copy()
-        # Ensure src/lib is on path like other tests
-        root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src", "lib"))
-        env["PYTHONPATH"] = root + os.pathsep + env.get("PYTHONPATH", "")
+        path_parts = list(_env.PATH_ENTRIES)
+        existing = env.get("PYTHONPATH")
+        if existing:
+            path_parts.append(existing)
+        env["PYTHONPATH"] = os.pathsep.join(path_parts)
         proc = subprocess.run(
             [sys.executable, "-i", "-c", code],
             input="\n",
@@ -229,12 +231,12 @@ class TestInteractiveSubprocess(unittest.TestCase):
         )
         if not os.path.isfile(mp):
             self.skipTest("micropython unix binary not found")
-        root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src", "lib"))
+        path_inserts = "".join(f"sys.path.insert(0, {p!r})\n" for p in reversed(_env.PATH_ENTRIES))
         script = os.path.join(tempfile.gettempdir(), "pd_interactive_mp_probe.py")
         with open(script, "w") as f:
             f.write(
                 "import sys\n"
-                f"sys.path.insert(0, {root!r})\n"
+                f"{path_inserts}"
                 "from eventsys._runtime import _is_interactive_session\n"
                 "print('I', int(_is_interactive_session()))\n"
             )
@@ -265,7 +267,7 @@ class TestInteractiveSubprocess(unittest.TestCase):
                 with open(os.path.join(init, "__main__.py"), "w") as f:
                     f.write(
                         "import sys\n"
-                        f"sys.path.insert(0, {root!r})\n"
+                        f"{path_inserts}"
                         "from eventsys._runtime import _is_interactive_session\n"
                         "print('I', int(_is_interactive_session()))\n"
                     )

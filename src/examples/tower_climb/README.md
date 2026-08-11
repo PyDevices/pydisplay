@@ -86,7 +86,7 @@ Implemented in pydisplay’s **PGDisplay** backend, driven from the game via
    `--video` is set.
 2. On every `PGDisplay.show()`, the driver exports the **logical** RGB24
    framebuffer (`_buffer`, 320×480 for this game) through
-   `FFmpegFrameRecorder` in `src/utils/frame_recorder.py`.
+   `FFmpegFrameRecorder` in micropython-hardware `utils/frame_recorder.py`.
 3. ffmpeg encodes raw RGB24 piped on stdin to H.264 MP4.
 
 Properties:
@@ -94,7 +94,7 @@ Properties:
 - One encoded frame per game `show()` — duration matches gameplay.
 - Resolution is the game’s logical size, not the scaled pygame window.
 - Supported by the desktop ``PGDisplay`` and ``SDLDisplay`` backends.
-- Unit tests: `tests/test_pgdisplay_frame_recorder.py`.
+- Unit tests: micropython-hardware `tests/test_pgdisplay_frame_recorder.py`.
 
 Typical invocation (what `record_win.sh` runs):
 
@@ -177,7 +177,7 @@ extract only `tower_climb/`:
 - `board_config`, `displaydev`, `eventsys`, `pygraphics`, `multimer`
 - `FFmpegFrameRecorder` / `PGDisplay.open_frame_recorder` (recording)
 - `tools/example_test_manifest.toml` entry for CI smoke tests
-- `tests/test_pgdisplay_frame_recorder.py`
+- micropython-hardware `tests/test_pgdisplay_frame_recorder.py`
 
 The example matrix runs via:
 

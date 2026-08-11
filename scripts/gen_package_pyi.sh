@@ -60,7 +60,7 @@ done
 HW="$(cd "${ROOT}/../micropython-hardware" 2>/dev/null && pwd || true)"
 export PYTHONPATH="${ROOT}/src/lib:${ROOT}/src/utils${PYTHONPATH:+:$PYTHONPATH}"
 if [[ -n "$HW" ]]; then
-    export PYTHONPATH="${HW}/lib:${HW}/drivers/display:${PYTHONPATH}"
+    export PYTHONPATH="${HW}/lib:${HW}/utils:${HW}/drivers/display:${PYTHONPATH}"
 fi
 
 echo "Running stubgen → ${OUT}/ …"

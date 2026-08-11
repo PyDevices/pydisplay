@@ -41,8 +41,10 @@ mip.install("github:PyDevices/pydisplay/packages/utils.json", target="./utils")
 ```
 
 Bus / touch / chip-helper MIP packages (`spibus`, `i80bus`, `i2cbus`,
-`tt21100`, …) live in
-[`micropython-hardware/packages/`](https://github.com/PyDevices/micropython-hardware/tree/main/packages).
+`tt21100`, …) and portable helpers (`byteswap`, `mip`, `viper_tools`,
+`keypins`, `wifi`, `frame_recorder`) live in
+[`micropython-hardware/packages/`](https://github.com/PyDevices/micropython-hardware/tree/main/packages)
+(`utils.json` is a dependency of pydisplay `packages/utils.json`).
 
 ## Board configs
 

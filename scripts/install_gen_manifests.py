@@ -46,12 +46,17 @@ peterhinch_packages = {
 # list of package directories, dependencies and extra files in that package.
 # eventsys installs from the micropython-lib MIP index — do not emit
 # packages/eventsys.json. It still appears here so PyScript mounts stay generated.
-# displaydev / multimer / events / keys live in micropython-hardware and are
-# installed via mip or pip (gallery: desktop board_config deps).
+# displaydev / multimer / events / keys / portable utils (byteswap, mip, …)
+# live in micropython-hardware and are installed via mip or pip
+# (gallery: desktop board_config deps; PyScript mounts via toml_only_mounts).
 # Sister packages (pygraphics, usdl2, palettes, pdwidgets, lvgl) are not from
 # this repo: frozen in firmware, or TestPyPI / MIP when needed (see url_maker.py).
 packages = [
-    ["utils", [], []],
+    [
+        "utils",
+        [["github:PyDevices/micropython-hardware/packages/utils.json", "main"]],
+        [],
+    ],
     ["examples", [], []],
     ["lib/eventsys", [], []],
 ]
@@ -64,7 +69,18 @@ MIP_INDEX_ONLY = frozenset({"eventsys"})
 toml_exclude = ["examples"]
 
 # PyScript [files] mounts that are not part of any mip package JSON.
-toml_only_mounts: list[tuple[str, str]] = []
+# These modules live in micropython-hardware/utils. Local serve.py and
+# deploy-pyscript.yml map the URLs onto that tree so Pyodide can import mip
+# before other installs, and so keypins/wifi/byteswap examples resolve.
+toml_only_mounts: list[tuple[str, str]] = [
+    ("src/utils/byteswap.py", "/utils/"),
+    ("src/utils/frame_recorder.py", "/utils/"),
+    ("src/utils/keypins.py", "/utils/"),
+    ("src/utils/micropython.py", "/utils/"),
+    ("src/utils/mip.py", "/utils/"),
+    ("src/utils/viper_tools.py", "/utils/"),
+    ("src/utils/wifi.py", "/utils/"),
+]
 
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
 # MicroPython mip only fetches .py / .mpy / .json (see micropython-lib mip).

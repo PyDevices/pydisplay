@@ -3,13 +3,14 @@
 Stdlib `unittest` for pydisplay-owned packages: [`eventsys`](../src/lib/eventsys)
 and `src/utils`, plus gallery/tooling helpers.
 
-`displaydev`, `multimer`, `events`, `keys`, `boarddev`, and `audiodev` are
-tested in [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
+`displaydev`, `multimer`, `events`, `keys`, `boarddev`, `audiodev`, and
+portable `utils` (`mip`, `byteswap`, …) are tested in
+[micropython-hardware](https://github.com/PyDevices/micropython-hardware)
 (`tests/`). This suite still needs a sibling (or nested) hardware checkout so
 `eventsys` can import `events`, `keys`, and `multimer`.
 
-[`_env.py`](_env.py) puts `src/lib`, `src/utils`, and hardware `lib/` on
-`sys.path`.
+[`_env.py`](_env.py) puts `src/lib`, `src/utils`, and hardware `lib/` +
+`utils/` on `sys.path`.
 
 ## Running
 
@@ -31,7 +32,6 @@ python -m unittest discover -s tests -v
 | `test_auto_refresh.py` | runtime-owned display auto-refresh (uses `multimer`) |
 | `test_standalone.py` | `eventsys` imports with none of the rest of pydisplay on the path |
 | `test_audio_utils.py` | `src/utils/audio.py` mixer/notes (not `audiodev`) |
-| `test_mip_portable.py` | `utils/mip.py` |
 | `test_url_maker.py` | PyScript URL helpers |
 | `test_gallery_frame.py` / `test_gallery_screenshots.py` | gallery generator |
 | `test_screenshot_tool.py` / `test_record_tool.py` | desktop screenshot/record tools |
