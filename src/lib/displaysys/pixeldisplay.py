@@ -5,8 +5,8 @@
 """
 displaysys.pixeldisplay — addressable LED grids (NeoPixel, DotStar, etc.).
 
-MicroPython: ``PixelFramebuffer`` (``pygraphics.FrameBuffer`` + grid map) and
-``PixelDisplay`` live here.  CircuitPython board configs use
+MicroPython: ``PixelFramebuffer`` (RGB888 grid + strip map) and ``PixelDisplay``
+live here.  CircuitPython board configs use
 ``adafruit_pixel_framebuf.PixelFramebuffer`` with pydisplay ``PixelDisplay``.
 """
 
@@ -19,12 +19,15 @@ except ImportError:
 
 
 from displaysys import DisplayDriver, color_rgb
-import pygraphics
 
 
 def _color888_from_565(c):
     r, g, b = color_rgb(c)
     return (r << 16) | (g << 8) | b
+
+
+def _rgb888_bytes(c):
+    return bytes(((c >> 16) & 0xFF, (c >> 8) & 0xFF, c & 0xFF))
 
 
 HORIZONTAL = const(1)
@@ -106,7 +109,7 @@ def _build_grid_mapper(
     return grid_width, grid_height, indices
 
 
-class PixelFramebuffer(pygraphics.FrameBuffer):
+class PixelFramebuffer:
     """
     NeoPixel / DotStar grid framebuffer for MicroPython.
 
@@ -154,15 +157,50 @@ class PixelFramebuffer(pygraphics.FrameBuffer):
         )
         self._width = grid_width
         self._height = grid_height
-        buf = bytearray(grid_width * grid_height * 3)
-        self._double_buffer = bytearray(grid_width * grid_height * 3)
-        super().__init__(buf, grid_width, grid_height, pygraphics.RGB888)
+        nbytes = grid_width * grid_height * 3
+        self._buffer = bytearray(nbytes)
+        self._double_buffer = bytearray(nbytes)
         self.rotation = rotation
+
+    @property
+    def width(self):
+        """Logical grid width in pixels."""
+        return self._width
+
+    @property
+    def height(self):
+        """Logical grid height in pixels."""
+        return self._height
 
     @property
     def stride(self):
         """Pixels per row in the logical framebuffer."""
         return self._width
+
+    def fill_rect(self, x, y, w, h, c):
+        """Fill a rectangle with an RGB888 packed color ``0xRRGGBB``."""
+        rgb = _rgb888_bytes(c)
+        stride = self._width
+        if x == 0 and w == stride:
+            rowbytes = rgb * w
+            for _y in range(y, y + h):
+                begin = _y * stride * 3
+                self._buffer[begin : begin + len(rowbytes)] = rowbytes
+            return (x, y, w, h)
+        for _y in range(y, y + h):
+            row = _y * stride
+            for _x in range(x, x + w):
+                index = (row + _x) * 3
+                self._buffer[index : index + 3] = rgb
+        return (x, y, w, h)
+
+    def pixel(self, x, y, c=None):
+        """Get or set one RGB888 packed pixel ``0xRRGGBB``."""
+        index = (y * self._width + x) * 3
+        if c is None:
+            r, g, b = self._buffer[index : index + 3]
+            return (r << 16) | (g << 8) | b
+        self._buffer[index : index + 3] = _rgb888_bytes(c)
 
     def blit(self):
         """Not implemented — use :meth:`display` to flush the strip."""
