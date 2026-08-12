@@ -6,8 +6,8 @@
 
 | Component | Location | Notes |
 |-----------|----------|-------|
-| `board_config.py` | `board_configs/` or `src/lib/` | display + `eventsys.Runtime` |
-| `hardware_setup.py` | `src/utils/` | Fetches micro-gui; builds `Display` with keyboard stand-ins on desktop |
+| `board_config.py` | `micropython-hardware/board_configs/` | display + neutral input capabilities |
+| `hardware_setup.py` | `src/utils/` | Fetches micro-gui; uses `app_runtime` devices to build `Display` |
 | `fetch_ph_gui.py` | `src/utils/` | mip install into `utils/gui/` + FrameBuffer patches |
 | `displaybuf.py` | `src/utils/` | `ssd` framebuffer |
 | `uctypes.py` | `src/utils/` | CircuitPython shim for `writer.py` |

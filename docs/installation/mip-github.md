@@ -6,7 +6,7 @@ Core libraries (`displaydev`, `eventsys`, `multimer`, `pygraphics`,
 `palettes`, `pdwidgets`) are **not** published as `packages/*.json` here —
 use the [micropython-lib MIP index](mip-micropython-lib.md) instead.
 Desktop `usdl2` comes with the micropython-hardware MIP desktop board package
-(or `pydisplay-desktop` on TestPyPI), not as a core micropython-lib package.
+(or `pydevices-desktop` on TestPyPI), not as a core micropython-lib package.
 
 ## What remains on GitHub MIP
 

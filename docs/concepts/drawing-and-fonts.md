@@ -43,4 +43,4 @@ Peter Hinch's API — full display as a logical framebuffer with 4/8/16-bit buff
 
 ## API reference
 
-[API reference (core)](../reference/) → `pygraphics`. [Utils API](../reference/utils/) → `displaybuf`.
+[pygraphics source](https://github.com/PyDevices/pygraphics). [Utils API](../reference/utils/) → `displaybuf`.

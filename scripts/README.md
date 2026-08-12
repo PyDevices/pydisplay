@@ -1,148 +1,70 @@
-# pydisplay `scripts/`
+# pydisplay scripts
 
-Repo and site maintenance scripts. Each runnable script uses a **domain prefix** (`install_`, `pyscript_`, `mkdocs_`, `publish_`, `assets_`).
+These scripts maintain the examples, utility manifests, documentation, and
+PyScript/PWA gallery. Product publishing scripts live in sibling
+`micropython-hardware`.
 
 ## GitHub Actions
 
-### Overview
+| Workflow | Trigger | Purpose |
+|---|---|---|
+| `manifests.yml` | relevant source/config paths + manual | Verify example, utility, and gallery manifests |
+| `tests.yml` | examples, utils, tests, scripts, gallery + manual | Run pydisplay tests against canonical hardware packages |
+| `docs.yml` | docs, MkDocs config/helpers + manual | Verify the integration docs build |
+| `deploy-pyscript.yml` | gallery/example paths + manual | Assemble and publish the browser showcase |
 
-| Workflow | Trigger | What it does |
-|----------|---------|--------------|
-| [`manifests.yml`](../.github/workflows/manifests.yml) | Automatic (path-filtered) + manual | Manifest freshness checks |
-| [`tests.yml`](../.github/workflows/tests.yml) | Automatic (path-filtered) + manual | Unit tests (`tests/`) |
-| [`docs.yml`](../.github/workflows/docs.yml) | Automatic (path-filtered) + manual | `mkdocs build` (verify only; no deploy) |
-| [`deploy-pyscript.yml`](../.github/workflows/deploy-pyscript.yml) | Automatic (path-filtered) + manual | Manifest checks, then deploy browser demo to `gh-pages` |
-| [`publish-micropython-lib.yml`](../.github/workflows/publish-micropython-lib.yml) | **Tag push `v*.*.*`** + manual | Sync micropython-lib, MIP index, TestPyPI (full publish on tag) |
+pydisplay has no package-release workflow. Tags here do not publish reusable
+libraries. Core TestPyPI and MIP releases are tagged and published from
+`micropython-hardware`; companion repos publish their own prefixed distributions.
 
-**Automatic** workflows run on **push to `main`** and on **pull requests** when matching paths change. The first four also support **Run workflow** (`workflow_dispatch`).
+## Normal maintenance
 
-**Release publish:** push a semver tag (`v0.0.5`) — see [`publish_release_tag.sh`](publish_release_tag.sh). Manual dispatch remains for retries without a new tag.
-
-### Automatic workflows
-
-**Manifest freshness** — runs when `src/`, `packages/`, `web/pyscript/`, `web/wokwi/`, `board_configs/`, `scripts/install_*`, `scripts/gallery_generator.py`, or `scripts/audit_board_config_pairs.py` change:
-
-- `install_refresh_manifests.sh --audit`
-- `gallery_generator.py --check`
-- `audit_board_config_pairs.py`
-
-**Unit tests** — runs when `src/lib/` or `tests/` change:
-
-- `python -m unittest discover -s tests`
-
-**Documentation** — runs when `docs/`, `mkdocs.yml`, `scripts/mkdocs_gen_ref_pages.py`, `src/lib/`, or `src/utils/` change:
-
-- `mkdocs build` (ReadTheDocs hosts [pydisplay.readthedocs.io](https://pydisplay.readthedocs.io) separately)
-
-**Deploy PyScript site** — runs when `web/`, `src/`, or `scripts/gallery_generator.py` change:
-
-1. Same manifest audits as **Manifest freshness**
-2. Assemble `_site/` (PyScript app, `src/lib`, add-ons, examples, landing page)
-3. Push to [`gh-pages`](https://PyDevices.github.io/pydisplay/) via `peaceiris/actions-gh-pages` (uses `GITHUB_TOKEN`; no extra secret)
-
-### How to release
-
-Full checklist: [Publishing micropython-lib → How to release](../docs/publishing-micropython-lib.md#how-to-release).
+After adding, removing, or renaming examples or utilities:
 
 ```bash
-git checkout main && git pull
-./scripts/publish_release_tag.sh X.Y.Z --push
-```
-
-That pushes tag `vX.Y.Z` and triggers sync + TestPyPI + MIP index. See [Publish secrets](#publish-secrets) below.
-
-### Release publish (`publish-micropython-lib.yml`)
-
-**Tag push** (`vX.Y.Z`) — full publish (sync + TestPyPI + MIP):
-
-```bash
-./scripts/publish_release_tag.sh 0.0.5 --push
-```
-
-Version comes from the git tag (no `VERSION` file). [`publish_sync_packages.sh`](publish_sync_packages.sh) also accepts `--version` or `PYDISPLAY_VERSION` for local runs.
-
-**Manual dispatch** (Actions → Publish micropython-lib) — optional inputs:
-
-| Input | Default | Meaning |
-|-------|---------|---------|
-| Version | — | Semver `X.Y.Z` (required unless ref is a tag) |
-| Sync sources | on | Copy `src/` into micropython-lib |
-| Upload TestPyPI wheels | off | TestPyPI upload |
-| Rebuild MIP index | on | Rebuild `mip/PyDevices` |
-| Commit message | (auto) | micropython-lib commit text |
-
-Full walkthrough: [Publishing micropython-lib](../docs/publishing-micropython-lib.md).
-
-### Publish secrets
-
-| Secret | Required | Purpose |
-|--------|----------|---------|
-| `MICROPYTHON_LIB_DEPLOY_TOKEN` | yes | PAT with `contents:write` on [PyDevices/micropython-lib](https://github.com/PyDevices/micropython-lib) |
-| `TESTPYPI_API_TOKEN` | yes for tag releases | TestPyPI upload when a `vX.Y.Z` tag is pushed |
-
-### What runs on push to `main`?
-
-Depends on changed paths — unrelated edits skip workflows:
-
-| You changed… | Typical workflows |
-|--------------|-------------------|
-| `src/lib/` | Manifest freshness, Unit tests, Deploy PyScript (+ Documentation if add-ons also changed) |
-| `docs/` only | Documentation |
-| `scripts/publish_*` | nothing on push to `main` |
-| Push tag `vX.Y.Z` | **Publish micropython-lib** (sync + TestPyPI + MIP) |
-| README / assets only | nothing (no workflow watches those paths) |
-
-## Quick start
-
-```bash
-# After adding/removing files under src/lib, src/utils, or src/examples:
-./scripts/install_refresh_manifests.sh --audit   # preview drift
-./scripts/install_refresh_manifests.sh             # apply
-
-# After changing example PyScript headers or gallery card copy:
+./scripts/install_refresh_manifests.sh --audit
+./scripts/install_refresh_manifests.sh
 python scripts/gallery_generator.py
-python scripts/gallery_generator.py --check    # CI freshness
-
-# Normal generation captures missing 240x320 card thumbnails at scale 0.5
-# after 2 seconds. Existing web/pyscript/thumbnails/*.png files are preserved;
-# --check never launches examples.
-
-# After editing src/utils/framebuf.py:
-
-# After public-API changes in displaydev / eventsys / multimer:
-./scripts/gen_package_pyi.sh                       # regenerate tools/typings/<pkg>/ stubs
+python scripts/gallery_generator.py --check
 ```
 
-## By prefix
+`install_gen_manifests.py` enumerates pydisplay examples/utilities and the
+canonical sibling `micropython-hardware/lib/eventsys` source. The gallery keeps
+the historical virtual URL `./src/lib/eventsys/...`, but pydisplay does not own
+a second eventsys copy. The local server and Pages workflow map that URL to the
+hardware source.
 
-| Prefix | Scripts | When to run |
-|--------|---------|-------------|
-| `gen_` | `gen_package_pyi.sh` | Core package API changes → regenerates `tools/typings/{displaydev,eventsys,multimer}/` |
-| `pyscript_` | `gallery_generator.py` | Gallery cards in `web/pyscript/index.html` |
-| `mkdocs_` | `mkdocs_gen_ref_pages.py`, `mkdocs_gen_notebook_pages.py` | Automatically on `mkdocs build` |
-| `publish_` | `publish_sync_packages.sh`, `publish_release_tag.sh`, `build.py`, `publish_mip_ghpages.sh`, `publish_make_pyproject.py` | Tag push → CI release; or local / manual workflow |
+Normal gallery generation captures missing 240×320 thumbnails. Existing
+`web/pyscript/thumbnails/*.png` files are preserved; `--check` never launches
+examples.
 
-`manifestfile.py` is a shared library for the publish scripts (not prefixed).
+## Script groups
 
-Manual packages (not generated) still in this repo:
-`packages/micropython-{micro-gui,nano-gui,touch}.json`. pydisplay core packages
-(`displaydev`, `eventsys`, `multimer`) have no `packages/*.json` — use the
-micropython-lib MIP index. Sister packages (`pygraphics`, `palettes`,
-`pdwidgets`, `lvgl`) come from frozen firmware, MIP (where published), or
-TestPyPI — not this repo's `packages/`. Desktop SDL (`usdl2`) ships with
-micropython-hardware’s MIP desktop board / `pydisplay-desktop`. Bus/touch/chip helper
-manifests (`spibus`, `i80bus`, `i2cbus`, `tt21100`, `stmpe610`,
-`keypad_shift`) and portable `utils.json` (`byteswap`, `mip`, …) live in sibling
-`micropython-hardware/packages/`.
+| Prefix | Scripts | Purpose |
+|---|---|---|
+| `install_` | `install_gen_manifests.py`, `install_refresh_manifests.sh` | Example/helper manifests and gallery mounts |
+| `pyscript_` | cache/version helpers | Build the deployable PWA |
+| `mkdocs_` | reference/notebook generators | Build pydisplay integration docs |
+| `gen_` | `gen_package_pyi.sh` | Generate editor stubs from canonical sibling product sources |
 
-### Board configs
+## Package ownership
 
-Hardware board configs live in sibling
-[`micropython-hardware`](https://github.com/PyDevices/micropython-hardware).
-CI audits MicroPython / CircuitPython sibling pairs with:
+Generated `packages/examples.json` and `packages/utils.json` belong here. The
+manual Peter Hinch integration manifests also remain here:
 
-```bash
-.venv/bin/python scripts/audit_board_config_pairs.py
-```
+- `micropython-micro-gui.json`
+- `micropython-nano-gui.json`
+- `micropython-touch.json`
 
-Personal-only example symlinks under `src/examples/` (`frogger`, `spotapi`, `spotify_remote`, …) are listed in [`personal_examples.py`](personal_examples.py) and excluded from `install_gen_manifests`, `gallery_generator`, and CI.
+Core packages (`displaydev`, `audiodev`, `events`, `keys`, `multimer`, and
+optional `eventsys`) come from the unprefixed PyDevices MIP index or prefixed
+TestPyPI distributions. Board configs and drivers come from
+micropython-hardware. Companion packages (`pygraphics`, `palettes`, `pdwidgets`,
+and LVGL) come from their own repositories.
+
+## Publishing names
+
+TestPyPI distributions use `pydevices-*`; imports and MIP names stay unprefixed.
+The gallery URL generator follows the same rule: Pyodide dependencies are
+rewritten to prefixed wheel names, while MicroPython dependencies use unprefixed
+MIP names.

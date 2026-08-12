@@ -27,14 +27,14 @@ import time
 
 
 def _bootstrap_src_path():
-    """Allow ``python tools/test_timers.py`` from a dev clone (``src/lib`` on path)."""
+    """Allow the timer probe to use a sibling micropython-hardware checkout."""
     f = __file__.replace("\\", "/")
     if f.endswith(".py"):
         f = f[:-3]
     if f.endswith("/tools/test_timers"):
-        lib = f[: -len("/tools/test_timers")] + "/src/lib"
+        lib = f[: -len("/pydisplay/tools/test_timers")] + "/micropython-hardware/lib"
     else:
-        lib = "../src/lib"
+        lib = "../micropython-hardware/lib"
     try:
         os.stat(lib)
     except Exception:

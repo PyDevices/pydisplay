@@ -9,15 +9,9 @@ nav = mkdocs_gen_files.Nav()
 
 root = Path(__file__).parent.parent
 
-# (source tree, output prefix under reference/, nav prefix, extra sys.path entries)
-# pygraphics lives in the sibling PyDevices/pygraphics repo — not under src/lib.
+# pydisplay documents its application helpers. Product API documentation belongs
+# to the canonical packages in sibling micropython-hardware.
 SOURCE_TREES = (
-    (
-        root / "src/lib",
-        Path("reference"),
-        (),
-        ("", "displaydev", "eventsys", "multimer"),
-    ),
     (
         root / "src/utils",
         Path("reference", "utils"),

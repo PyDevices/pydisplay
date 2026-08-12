@@ -1704,7 +1704,11 @@ def restart_app():
 
     # Clean Runtime shutdown (same path as window close), then exit 42.
     try:
-        from board_config import runtime
+        module = sys.modules.get("display_driver")
+        if module is not None:
+            runtime = module.runtime
+        else:
+            from app_runtime import runtime
 
         runtime.request_quit(RESTART_EXIT_CODE)
         return None

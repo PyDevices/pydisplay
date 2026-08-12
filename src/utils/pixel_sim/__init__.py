@@ -4,7 +4,7 @@ pixel_sim — desktop simulator for addressable-LED matrices (NeoPixel / DotStar
 Develop a pixeldisplay app without hardware.  ``PixelDisplay`` draws into a
 ``pygraphics.FrameBuffer`` (RGB888, one cell per LED); on ``show()`` that
 framebuffer is scaled up and painted as an LED matrix onto the shared desktop /
-PyScript / notebook display from ``lib/board_config.py``.
+PyScript / notebook display from the selected ``board_config.py``.
 
 The board config for this simulator is just::
 
@@ -20,8 +20,7 @@ Grid size defaults to 64x16; override with ``PIXEL_SIM_WIDTH`` /
 
 import os
 
-# ``lib/`` is on sys.path (via utils/path.py), so import the host board_config bare
-# — ``from lib import board_config`` fails on MicroPython (no namespace packages).
+from app_runtime import runtime as _host_runtime  # noqa: E402
 import board_config as _host  # noqa: E402
 
 from displaydev import color565, color_rgb
@@ -50,13 +49,12 @@ PIXEL_WIDTH = _env_int("PIXEL_SIM_WIDTH", 64)
 PIXEL_HEIGHT = _env_int("PIXEL_SIM_HEIGHT", 16)
 
 # Reuse the standard scaled desktop/browser/notebook backend as the output surface.
-# The host board_config wires its own periodic-refresh runtime; the simulator
+# The host application wires its own optional periodic-refresh runtime; the simulator
 # presents frames itself via PixelDisplay.show(), so stop that shared timer to
 # avoid a redundant refresh loop (and its signal-based teardown on CPython).
 # The runtime itself is kept (re-exported below) so apps can still poll it for
 # window-close / quit events; poll() is independent of the timer.
 _backend = _host.display_drv
-_host_runtime = getattr(_host, "runtime", None)
 if _host_runtime is not None and hasattr(_host_runtime, "stop_timer"):
     _host_runtime.stop_timer()
 

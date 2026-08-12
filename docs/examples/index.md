@@ -57,7 +57,8 @@ See [PyScript local development](../guides/pyscript.md).
 **`runtime.run_forever()` with callbacks** — [`hello.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/hello.py), [`scroll.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll.py), [`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py), [`calc_graphics.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/calc_graphics.py):
 
 ```python
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 
 def on_click(e):
     ...
@@ -82,7 +83,7 @@ while True:
 **`tft_config` animation / one-shot** — subdirectory demos [`alien/alien.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/alien/alien.py), [`tiny_toasters/tiny_toasters.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/tiny_toasters/tiny_toasters.py), [`chango/chango.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/chango/chango.py):
 
 ```python
-from board_config import runtime
+from app_runtime import runtime
 
 tft.show()
 runtime.run_forever()
@@ -95,10 +96,11 @@ runtime.run_forever()
 ```python
 import board_config
 import pdwidgets as pd
+from app_runtime import runtime
 
-display = pd.Display(board_config.display_drv, board_config.runtime)
+display = pd.Display(board_config.display_drv, runtime)
 # ... widgets ...
-board_config.runtime.run_forever()
+runtime.run_forever()
 ```
 
 `Display` wires into the runtime at construction. During setup bursts before

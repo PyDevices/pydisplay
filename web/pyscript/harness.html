@@ -183,10 +183,13 @@ def _finish_autotest(entry, *, status="ok", error=None, quit_injected=False):
 
 def _arm_autotest_on_quit(entry):
     """Emit EXAMPLE_RESULT when Runtime processes quit (e.g. Ctrl+Q chord)."""
-    try:
-        from board_config import runtime
-    except Exception:
-        return
+    runtime = None
+    for module_name in ("display_driver", "app_runtime"):
+        module = sys.modules.get(module_name)
+        candidate = getattr(module, "runtime", None) if module is not None else None
+        if candidate is not None:
+            runtime = candidate
+            break
     if runtime is None:
         return
     prev = getattr(runtime, "before_quit", None)

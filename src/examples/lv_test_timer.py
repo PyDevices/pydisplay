@@ -38,7 +38,7 @@ import json
 import time
 
 import multimer
-from board_config import display_drv, runtime
+from board_config import display_drv
 from displaydev import env_get
 
 # Optional logical orientation for LVGL (hw MADCTL/SDL/PG or software rotate).
@@ -49,13 +49,9 @@ if _lv_rot is not None and str(_lv_rot).strip() != "":
     except (TypeError, ValueError):
         pass
 
-# Stop board_config auto-service before LVGL / display_driver import (ESP32-P4).
-# If display_driver is already loaded, stop_timer() wipes its on_tick subs and
-# leaves event_loop._timer_sub dangling so LVGL never ticks again.
-if runtime is not None and "display_driver" not in sys.modules:
-    runtime.stop_timer()
-
+import display_driver
 import lvgl as lv
+from display_driver import runtime
 
 _seconds = 0
 _taps = 0

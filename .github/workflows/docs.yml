@@ -8,14 +8,12 @@ on:
       - 'docs/**'
       - 'mkdocs.yml'
       - 'scripts/mkdocs_gen_ref_pages.py'
-      - 'src/lib/**'
       - 'src/utils/**'
   pull_request:
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
       - 'scripts/mkdocs_gen_ref_pages.py'
-      - 'src/lib/**'
       - 'src/utils/**'
   workflow_dispatch:
 

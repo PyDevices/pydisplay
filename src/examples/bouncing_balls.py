@@ -22,7 +22,8 @@ desktop (SDL/Pygame), MCU, and PyScript.
 
 from random import getrandbits
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 import pygraphics
 
 WIDTH = display_drv.width

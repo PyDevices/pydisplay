@@ -1,21 +1,14 @@
 # gallery: skip
-# deps: lvgl, eventsys, multimer
+# deps: lvgl, multimer
 """Minimal LVGL button smoke: tap counts up on the button label.
 
 Uses board_config + display_driver (real panel). Pattern matches the tap
 button in ``lv_test_timer.py``.
 """
 
-import sys
-
-from board_config import display_drv, runtime
-
-# Halt board_config auto-service before LVGL / display_driver import.
-if runtime is not None and "display_driver" not in sys.modules:
-    runtime.stop_timer()
-
 import display_driver  # noqa: F401 — wires LVGL flush + input + event_loop
 import lvgl as lv
+from display_driver import runtime
 
 _taps = 0
 

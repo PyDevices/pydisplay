@@ -69,7 +69,8 @@ Featured starters: `pydisplay_demo`, `testris`. See `scripts/gallery_generator.p
 
 ## Board config
 
-`board_configs/psdisplay/` — 320×480 canvas with host input via `runtime`.
+`board_configs/psdisplay/` — 320×480 canvas with neutral host input exported to
+the coordinator selected by the application.
 
 ## Headless / CDP troubleshooting
 
@@ -105,4 +106,4 @@ Matrix notes (serve.py, Playwright install, `needs_playwright`):
 
 ## Reference
 
-- [API reference (core)](../reference/) → `displaydev.psdisplay`
+- [displaydev source](https://github.com/PyDevices/micropython-hardware/tree/main/drivers/display/displaydev)

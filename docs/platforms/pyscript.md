@@ -13,7 +13,9 @@ Experimental browser support via [PyScript](https://pyscript.net/) and `displayd
 
 ## Board config
 
-`board_configs/psdisplay/board_config.py` — 320×480 canvas with `eventsys.Runtime` and PSDevices input.
+`micropython-hardware/board_configs/psdisplay/board_config.py` — 320×480 canvas
+with neutral PSDevices host input. Non-LVGL examples attach it through
+`app_runtime`; LVGL uses `display_driver`.
 
 ## Apple mobile (iOS / iPadOS)
 
@@ -25,4 +27,5 @@ Browser / PyScript only — see [PWA — Smart TVs](pwa.md#smart-tvs-webos--tize
 
 ## Contributing
 
-Pull requests welcome for `displaydev/psdisplay.py`, asyncio example ports, and files under `web/pyscript/`.
+Pull requests for `displaydev/psdisplay.py` belong in micropython-hardware;
+asyncio example ports and files under `web/pyscript/` belong here.

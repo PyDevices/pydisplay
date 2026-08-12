@@ -63,7 +63,8 @@ def test_generated_configs_split_shared_files_from_gui_manifests():
     assert micropython == {"interpreter": "./vendor/micropython/micropython.mjs"}
     assert pyodide == {"interpreter": "./vendor/pyodide/pyodide.mjs"}
     assert set(shared) == {"files"}
-    assert shared["files"]["./src/lib/board_config.py"] == "/lib/"
+    assert "./src/lib/board_config.py" not in shared["files"]
+    assert shared["files"]["./src/lib/eventsys/__init__.py"] == "/lib/eventsys/"
 
     packages = {
         "nano": "micropython-nano-gui",

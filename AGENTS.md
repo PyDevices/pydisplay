@@ -2,21 +2,20 @@
 
 ## Cursor Cloud specific instructions
 
-PyDisplay is a pure-Python, dependency-light graphics/input/timer library that
-runs on CPython, MicroPython, and CircuitPython. There is no build step; source
-lives under `src/lib` (packages) and `src/examples` (demos). `web/pyscript/src`
-is a symlink to `../../src`, so editing `src/` updates the PyScript gallery too.
+This repo is the PyDevices examples, documentation, and PyScript gallery. The
+shareable product libraries live in sibling `micropython-hardware`. There is no
+build step for examples. `web/pyscript/src` is a symlink to `../../src`, so
+editing `src/` updates the PyScript gallery too.
 
 ### Environment
 
-PyDisplay publishes `eventsys` from `src/lib`. `displaydev`, `multimer`,
-`events`, `keys`, and portable `utils/` (`byteswap`, `mip`, `viper_tools`,
-`keypins`, `wifi`, `frame_recorder`, CPython `micropython` shim) live in sibling
-[micropython-hardware](https://github.com/PyDevices/micropython-hardware)
-and are installed with mip or pip (not copied into this repo). Publish still
-goes through `.github/workflows/publish-micropython-lib.yml` and
-`scripts/publish_sync_packages.sh`. `AutoDisplay` is
-`from displaydev.auto import AutoDisplay` only.
+`displaydev`, `audiodev`, optional `eventsys`, `multimer`, `events`, `keys`,
+and portable hardware utilities live in sibling
+[micropython-hardware](https://github.com/PyDevices/micropython-hardware), which
+also owns TestPyPI/MIP publishing. Non-LVGL examples explicitly import
+`runtime` from `app_runtime`; LVGL examples import it from `display_driver`.
+Board configs never own a runtime. `AutoDisplay` is imported from
+`displaydev.auto` only.
 
 - **Cursor Cloud (multi-repo workspace):** do not use a local
   `.cursor/environment.json` in this repo. The canonical cloud environment lives
@@ -111,13 +110,10 @@ passes `--timer-async`.
 
 ### Architecture note: timers and refresh
 
-- The single shared periodic timer is owned by `eventsys.Runtime`
-  (`Runtime.on_tick` / `stop_timer`), not by display drivers. `board_config`
-  constructs `eventsys.Runtime(displays=[display_drv], ...)` which wires periodic
-  refresh when `display_drv.needs_refresh` is true. `displaydev` drivers only
-  `show()`/`deinit()` and declare `needs_refresh`; `multimer` stays
-  display-agnostic. GUI layers claim presentation via
-  `runtime.claim_display_refresh()` (LVGL via frozen/bundled `display_driver`).
+- Non-LVGL examples opt into `eventsys.Runtime` in `src/utils/app_runtime.py`.
+  LVGL's frozen/bundled `display_driver` owns an independent coordinator and
+  does not import `eventsys`. Both consume neutral board-config callables and
+  use `multimer`; display drivers remain policy-free.
 
 ### MCU: no `_thread` for network / blocking work
 

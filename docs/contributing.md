@@ -1,6 +1,9 @@
 # 🤝 Contributing
 
-pydisplay is a community project. Bug reports, board configs, drivers, docs, and examples are all welcome.
+pydisplay is the examples, integration documentation, and PyScript gallery.
+Examples, app helpers, gallery changes, and related docs are welcome here.
+Reusable drivers, board configs, and product libraries belong in
+[`micropython-hardware`](https://github.com/PyDevices/micropython-hardware).
 
 ## Development setup
 
@@ -58,7 +61,10 @@ Public API docstrings: [Docstring conventions](contributing/docstrings.md).
 
 ## Documentation
 
-**Maintainer releases** (micropython-lib, MIP index, TestPyPI): [How to release](publishing-micropython-lib.md#how-to-release) in [Publishing micropython-lib](publishing-micropython-lib.md). CI and scripts: [`scripts/README.md`](https://github.com/PyDevices/pydisplay/blob/main/scripts/README.md).
+**Maintainer releases:** reusable product publishing is owned by
+[`micropython-hardware`](https://github.com/PyDevices/micropython-hardware/blob/main/docs/publishing.md)
+and each companion package repo. pydisplay publishes documentation and the
+PyScript showcase; see [`scripts/README.md`](https://github.com/PyDevices/pydisplay/blob/main/scripts/README.md).
 
 ## License
 

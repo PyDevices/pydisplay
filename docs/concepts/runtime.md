@@ -1,115 +1,85 @@
-# Runtime and board_config
+# Runtime and board config
 
-Every pydisplay app expects a **`board_config.py`** on `sys.path` that exports:
+Every application needs a `board_config.py` on `sys.path` that describes its
+hardware or host. The board config exports hardware capabilities; the
+application decides which coordinator, if any, to instantiate.
+
+## Board-config contract
 
 | Symbol | Required | Role |
 |---|---|---|
-| `display_drv` | yes | Display backend from [displaydev](displays.md) |
-| `runtime` | when `display_drv.needs_refresh` | [eventsys](events.md) `Runtime` — shared timer, optional input, quit lifecycle |
+| `display_drv` | yes for display apps | Display interface from `displaydev` |
+| `host_read` | hosted input only | Callable that returns host events |
+| `touch_read` | touch boards only | Callable that returns contact points |
+| `touch_rotation_table` | optional | Four rotation masks for touch coordinates |
+| `keypad_read` | optional | Keypad reader |
+| `encoder_read` / `encoder_button_read` | optional | Encoder readers |
+| `joystick_driver` / `emulate` | optional | Joystick input and optional emulation mapping |
+| `timer_async` | optional | Host preference for async timing |
 
-**`runtime = None`** is allowed only on MCU boards whose display does **not** need periodic presentation (`needs_refresh` is false): bus displays and pixel grids driven explicitly by the app. Hosted backends (SDL, pygame, PyScript, Jupyter) always export a `Runtime`.
+Board configs do not import `eventsys` and do not export `runtime`.
 
-## Quick start — hosted desktop
+## Non-LVGL examples
+
+pydisplay's examples opt into the optional event traffic controller through the
+application helper:
 
 ```python
-from displaydev.sdldisplay import SDLDisplay
+from board_config import display_drv
+from app_runtime import runtime
+
+runtime.run_forever()
+```
+
+`app_runtime` calls `eventsys.Runtime.from_board_config(board_config)` and adds
+only gallery/example test behavior. Reusable `eventsys` remains independent of
+pydisplay.
+
+For your own app, instantiate the coordinator directly:
+
+```python
+import board_config
 import eventsys
 
-display_drv = SDLDisplay(width=320, height=480, rotation=0, scale=2.0, title="My app")
+runtime = eventsys.Runtime.from_board_config(board_config)
+```
 
-runtime = eventsys.Runtime(
-    displays=[display_drv],
-    host_read=display_drv.get_events,
+You may also provide overrides:
+
+```python
+runtime = eventsys.Runtime.from_board_config(
+    board_config,
+    refresh_period=16,
+    timer_async=True,
 )
 ```
 
-The runtime wires periodic `display_drv.show()` automatically when `display_drv.needs_refresh` is true (~30 FPS by default). No app code calls `on_tick` for refresh.
+## LVGL applications
 
-## Quick start — MCU with touch
-
-```python
-import eventsys
-from machine import I2C, Pin
-from ft6x36 import FT6x36
-from st7796 import ST7796
-
-# ... bus, display_drv, touch setup ...
-
-runtime = eventsys.Runtime(
-    display=display_drv,
-    touch_read=touch.read_points,
-)
-```
-
-Apps discover touch through `runtime.touch_dev`, not by importing the driver
-from `board_config`. See [Board devices](https://pydevices.github.io/micropython-hardware/board-devices.html).
-
-## Quick start — display-only MCU
+LVGL supplies its own coordinator:
 
 ```python
-import eventsys
-from st7789 import ST7789
-
-display_drv = ST7789(...)  # bus display; needs_refresh is False
-
-runtime = None
+from display_driver import runtime
 ```
 
-## App loop
+That implementation bridges LVGL to `displaydev` and `multimer`, owns LVGL
+tick/task handling and input-device adapters, and does not import `eventsys`.
 
-```python
-from board_config import display_drv, runtime
-
-while runtime is None or not runtime.quit_requested:
-    if runtime is not None:
-        for event in runtime.poll():
-            handle(event)
-    draw_frame()
-```
-
-Output-only demos that never read input still need `runtime` on hosted boards (for auto-refresh and window quit):
-
-```python
-while not runtime.quit_requested:
-    draw_frame()
-    runtime.poll()
-```
-
-## Runtime constructor
+## Direct constructor
 
 ```python
 eventsys.Runtime(
-    display=None,              # duck-typed: show(), quit(), optional needs_refresh
-    host_read=None,            # hosted event pump (SDL/pygame/PyScript/Jupyter)
-    touch_read=None,           # callable returning touch point(s) or falsy
-    touch_rotation_table=None, # optional 4-item rotation mask table
-    refresh_period=None,       # ms; None = use DEFAULT_REFRESH_MS when needs_refresh
-    timer_async=False,         # True for PyScript / Jupyter; desktop default in lib/board_config
+    display=None,
+    host_read=None,
+    touch_read=None,
+    touch_rotation_table=None,
+    refresh_period=None,
+    timer_async=False,
 )
 ```
 
-### `timer_async` in `src/lib/board_config.py`
-
-The shipped default config sets `timer_async` per host:
-
-| Host | Value |
-|------|-------|
-| PyScript | `True` |
-| Jupyter | `True` |
-| PG/SDL desktop | `False`, or `env_bool("PYDISPLAY_TIMER_ASYNC", False)` |
-
-**Library / host only** — examples do not read `PYDISPLAY_TIMER_ASYNC`. Set it
-in the process environment before `board_config` is imported on desktop hosts
-that have `getenv`, or prefer test-kit / matrix `--timer-async` (wrapper
-`env_set`) so Windows PE under WSL works. MCU board configs and PyScript /
-Jupyter use their platform defaults without shell env. See
-[`displaydev.env_bool`](https://github.com/PyDevices/micropython-hardware/blob/main/drivers/display/displaydev/__init__.py) and [Board configs — default](https://pydevices.github.io/micropython-hardware/board-configs.html#default-config).
-
-On SDL2 / Win32 sync timer hosts (`micropython.exe`, and similar), display
-refresh is **deferred until the first `runtime.poll()`** so importing
-`board_config` in a REPL does not start an SDL timer without a drain loop.
-
-Additional inputs after construction:
+Bare `Runtime()` is valid for custom wiring. Additional devices can be attached
+after construction:
 
 ```python
 runtime.add_keypad(read=buttons.read)
@@ -117,60 +87,79 @@ runtime.add_joystick(joystick_driver=drv)
 runtime.add_encoder(read=pos_read, button_read=btn_read, button=2)
 ```
 
-Bare `Runtime()` with no arguments is valid for tests and custom wiring via `register()`.
+## App loop
+
+The supplied coordinator can dispatch callbacks and own the loop:
+
+```python
+def on_click(event):
+    ...
+
+
+runtime.on(runtime.events.MOUSEBUTTONDOWN, on_click)
+runtime.run_forever()
+```
+
+Or an application can explicitly poll:
+
+```python
+while not runtime.quit_requested:
+    for event in runtime.poll():
+        handle(event)
+    draw_frame()
+```
+
+Hosted displays that set `needs_refresh` are presented by the coordinator.
+Display-only MCU applications can omit `eventsys` entirely and call
+`display_drv.show()` according to their own policy.
+
+## `timer_async`
+
+Board configs publish a neutral `timer_async` preference. Current defaults are:
+
+| Host | Value |
+|---|---|
+| PyScript / Jupyter | `True` |
+| PG/SDL desktop | `False`, optionally overridden by `PYDISPLAY_TIMER_ASYNC` |
+| MCU board config | selected by that config |
+
+Examples do not read the environment variable directly. The selected
+coordinator consumes `board_config.timer_async`; test harnesses can use their
+`--timer-async` option.
 
 ## Touch read contract
 
-Pass a callable as `touch_read=` (typically `touch.read_points`). Each poll,
-the runtime calls it once. `TouchDevice` maps the **primary** contact to
-`MOUSE*` events and exposes **all** rotated contacts as `runtime.touch_dev.points`
-(for LVGL gestures and other multipoint consumers).
+`touch_read` is called once per poll. It returns either a falsy value for no
+contacts or a sequence of `(x, y[, id[, …]])` contacts. The runtime maps the
+primary contact to mouse-style events and exposes all rotated contacts as
+`runtime.touch_dev.points`.
 
 | Return value | Meaning |
 |---|---|
-| falsy (`None`, `()`, `[]`) | no touch — emits `MOUSEBUTTONUP` if a press was active |
-| sequence of `(x, y[, id[, …]])` | contacts; empty sequence means up |
-| legacy bare `(x, y[, …])` with int first element | treated as a single point (compat) |
+| `None`, `()`, or `[]` | no touch; releases an active press |
+| sequence of point tuples | current contacts |
+| legacy bare `(x, y[, …])` | one contact; supported for compatibility |
 
-Prefer the sequence shape from `read_points()` — never return a bare `(x, y)`
-from that method when documenting a new driver (it is ambiguous with “one
-2-tuple point” vs “two ints”). Coordinates are in **panel / pre-rotation**
-pixel space; `TouchDevice` applies `touch_rotation_table=` (4-tuple of rotation
-masks, one per 90° step). See [Events — touch](events.md#built-in-devices) and
-[Board devices — touch duck-type](https://pydevices.github.io/micropython-hardware/board-devices.html#touch-duck-type).
+Coordinates are panel/pre-rotation coordinates. `touch_rotation_table` maps
+them to the active display rotation. New drivers should prefer `read_points()`
+returning a sequence, even for one contact.
 
-Touch drivers live under `drivers/touch/`. OSError from `touch_read` is treated
-as no touch for that poll.
+## Refresh ownership
 
-## Display refresh takeover (LVGL, games)
-
-GUI layers that present frames themselves can pause runtime-driven refresh:
-
-```python
-claim = runtime.claim_display_refresh()
-try:
-    ...  # present frames yourself
-finally:
-    claim.release()
-```
-
-Or use the context manager:
+A GUI layer that presents frames itself can pause eventsys-driven refresh:
 
 ```python
 with runtime.display_refresh_paused():
     run_game()
 ```
 
+LVGL does not use this eventsys mechanism: its own coordinator owns presentation
+from the outset.
+
 ## Quit lifecycle
 
-On `QUIT`, the runtime runs (in order): `before_quit` hook (if set) → `display.quit()` → `stop_timer()`. Set `runtime.before_quit` for LVGL shutdown before the display is released.
+On `QUIT`, eventsys runs its optional `before_quit` hook, releases the display,
+and stops its timer. `runtime.quit_requested` remains true after the first quit.
 
-`runtime.quit_requested` becomes true after the first quit and stays true (sticky flag).
-
-## Package boundaries
-
-- **displaydev** declares `needs_refresh` (boolean only); no timer code.
-- **eventsys** owns `DEFAULT_REFRESH_MS` and the shared timer; duck-types `display` without importing displaydev.
-- **board_config** is the only place that names both packages together.
-
-See also: [Events](events.md), [Architecture](architecture.md), [Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html).
+See [Events](events.md), [Architecture](architecture.md), and
+[Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html).

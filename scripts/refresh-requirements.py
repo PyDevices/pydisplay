@@ -22,14 +22,17 @@ import urllib.request
 
 # Install order SoT (leaves before dependents). Keep in sync with the Cursor rule.
 PACKAGE_ORDER = (
-    "pygraphics",
+    "pydevices-events",
+    "pydevices-keys",
+    "pydevices-multimer",
+    "pydevices-displaydev",
+    "pydevices-audiodev",
+    "pydevices-eventsys",
+    "pydevices-pygraphics",
+    "pydevices-palettes",
+    "pydevices-pdwidgets",
+    "pydevices-desktop",
     "pydevices-lvgl",
-    "multimer",
-    "eventsys",
-    "displaysys",
-    "palettes",
-    "pdwidgets",
-    "pydisplay-desktop",
 )
 
 INDEX_URL = "https://test.pypi.org/simple/"

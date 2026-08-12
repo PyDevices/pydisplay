@@ -162,7 +162,7 @@ def test_pyscript_loader_silences_installer_file_chatter():
     assert 'had_printer = hasattr(mip_mod, "print")' in loader
     assert "mip_mod.print = lambda *args, **print_kwargs: None" in loader
     assert 'delattr(mip_mod, "print")' in loader
-    assert "_quiet_install(mip_mod, module_url(name))" in loader
+    assert "_quiet_install(mip_mod, module_url(name), target=MANIFEST_MIP_TARGET)" in loader
     assert "_quiet_install(mip_mod, manifest_url(name), **manifest_kw)" in loader
 
 

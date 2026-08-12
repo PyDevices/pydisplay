@@ -10,9 +10,7 @@ except ImportError:
 
 try:
     import events
-    import eventsys
 except ImportError:
-    eventsys = None
     events = None
 
 # Captured when display_driver expands HOST → VirtualDevices (see capture_virtual_devices).
@@ -64,24 +62,21 @@ def digit_from_key(sdl_key):
 
 
 def capture_virtual_devices():
-    """Call before ``import display_driver`` so we can re-subscribe the keypad vdev."""
-    global _keypad_vdev, _capture_done
-    if eventsys is None or _capture_done:
-        return
-    VD = eventsys.VirtualDevices
-    _orig_init = VD.__init__
-
-    def _wrapped_init(self, host_device, window_id=None):
-        _orig_init(self, host_device, window_id=window_id)
-        global _keypad_vdev
-        _keypad_vdev = self._vd_keypad
-
-    VD.__init__ = _wrapped_init
-    _capture_done = True
+    """Retained as a no-op for callers predating the local LVGL input bridge."""
 
 
 def _find_keypad_indev():
     """Return the LVGL keypad indev created by display_driver, if any."""
+    global _keypad_vdev
+    if _keypad_vdev is None:
+        try:
+            import display_driver
+
+            for virtual in getattr(display_driver._driver_ref, "virtual_devices", ()):
+                _keypad_vdev = virtual._vd_keypad
+                break
+        except Exception:
+            pass
     if _keypad_vdev is not None:
         ud = getattr(_keypad_vdev, "user_data", None)
         if ud is not None:
@@ -164,7 +159,7 @@ class InputBridge:
 
         import display_driver
 
-        display_driver._keypad_cb = _mapped_keypad_cb
+        _find_keypad_indev()
         if _keypad_vdev is not None:
             _keypad_vdev.subscribe(_mapped_keypad_cb)
 

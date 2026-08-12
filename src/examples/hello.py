@@ -24,7 +24,7 @@ https://www.youtube.com/watch?v=atBa0BYPAAc
 
 """
 
-from board_config import runtime
+from app_runtime import runtime
 
 from random import getrandbits
 

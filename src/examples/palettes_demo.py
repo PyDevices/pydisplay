@@ -3,7 +3,8 @@
 """
 palettes_demo.py — Palette walk cycling wheel → cube → material (no env vars).
 """
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 from pygraphics import FrameBuffer, RGB565
 from palettes import get_palette
 

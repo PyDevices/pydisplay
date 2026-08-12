@@ -228,7 +228,7 @@ Prefer TestPyPI native builds for `pygraphics` and `usdl2` when available.
 
 Quick setup: `bash scripts/setup_sibling_repos.sh` (clones current `main`,
 writes `.pth` files). The harness auto-discovers the same paths via
-`sibling_repos.py`. `pdwidgets` also needs pydisplay's `src/lib` on path
+`sibling_repos.py`. `pdwidgets` also needs micropython-hardware's `lib` on path
 (the harness adds it).
 
 ### Known pre-existing failures (not environment bugs)

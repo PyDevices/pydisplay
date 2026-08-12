@@ -23,7 +23,8 @@ This blocks the browser event loop. PyScript needs `async def`, `await`, and yie
 ## Port pattern
 
 ```python
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 import multimer
 
 async def main():
@@ -80,4 +81,4 @@ Regenerate manifest after adding examples: `./scripts/install_refresh_manifests.
 
 ## Reference
 
-- [API reference (core)](../reference/) → `eventsys`, `displaydev.psdisplay`
+- [micropython-hardware product source](https://github.com/PyDevices/micropython-hardware)

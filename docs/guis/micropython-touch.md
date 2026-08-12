@@ -6,7 +6,7 @@
 
 | Component | Location | Notes |
 |-----------|----------|-------|
-| `board_config.py` | `board_configs/` or `src/lib/` | display + `eventsys.Runtime` |
+| `board_config.py` | `micropython-hardware/board_configs/` | display + neutral touch capability |
 | `touch_setup.py` | `src/utils/` | Fetches touch GUI; mouse/touch `Poller` → `Display(ssd, tpad)` |
 | `fetch_ph_gui.py` | `src/utils/` | mip install into `utils/gui/` + FrameBuffer patches |
 | `displaybuf.py` | `src/utils/` | `ssd` framebuffer |

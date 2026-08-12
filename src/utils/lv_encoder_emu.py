@@ -7,14 +7,14 @@ Stand-in for hardware ``machine.Encoder`` / ``rotaryio`` while developing on
 desktop (SDL/PG), PyScript, or Jupyter. Each :class:`EncoderEmu` owns:
 
 * a :class:`SoftEncoder` (position + pushbutton state)
-* an eventsys :class:`~eventsys.EncoderDevice` registered on ``runtime``
+* a ``display_driver.EncoderInput`` registered on its LVGL runtime
 * an LVGL emulator UI (← / Enter / →) on a secondary displaydev surface,
   in a private focus group (not the app default)
 
 Multiple emulators may coexist in one app (one window/canvas each)::
 
-    from board_config import runtime
     import display_driver  # primary LVGL first
+    from display_driver import runtime
     from lv_encoder_emu import EncoderEmu
 
     emu_a = EncoderEmu(runtime, title="Enc A")
@@ -99,24 +99,26 @@ def make_emu_display(
             None,
         )
     if name == "PSDisplay":
+        from display_driver import HostInput
+
         from displaydev.psdisplay import PSDisplay
-        import eventsys
 
         # Per-canvas drain (PSDisplay owns PSDevices). Separate HostEventsDevice
         # from the primary — not a second PG/SDL-style shared pump.
         cid = canvas_id if canvas_id is not None else "aux_canvas"
         dd = PSDisplay(cid, width, height)
-        host = eventsys.HostEventsDevice(host_read=dd.get_events, display=dd)
+        host = HostInput(host_read=dd.get_events, display=dd)
         return dd, [host]
     if name == "JNDisplay":
+        from display_driver import HostInput
+
         from displaydev.jndisplay import JNDisplay
-        import eventsys
 
         dd = JNDisplay(width, height)
         # Eagerly create JNDevices (widget) before LVGL attach; drain stays
         # on the display for the aux HostEventsDevice.
         dd.get_events()
-        host = eventsys.HostEventsDevice(host_read=dd.get_events, display=dd)
+        host = HostInput(host_read=dd.get_events, display=dd)
         return dd, [host]
     raise ValueError(f"lv_encoder_emu: unsupported backend {name!r}")
 
@@ -149,13 +151,13 @@ def _mk_emu_button(parent, symbol, group, *, on_short=None, on_repeat=None, pres
 
 
 class EncoderEmu:
-    """One emulated encoder: secondary surface + LVGL UI + eventsys device.
+    """One emulated encoder: secondary surface + LVGL UI + local input device.
 
     Call after ``import display_driver`` so the primary LVGL display exists.
     The encoder indev is attached to ``target_lv_display`` (default: primary).
 
     Args:
-        runtime: ``board_config.runtime`` (or any :class:`eventsys.Runtime`).
+        runtime: ``display_driver.runtime``.
         display: Existing secondary displaydev driver, or ``None`` to create one.
         attach_devices: Host devices for ``display_driver.attach`` (PS/JN);
             ignored when ``display`` is created by :func:`make_emu_display`.
@@ -220,7 +222,7 @@ class EncoderEmu:
 
     @property
     def device(self):
-        """Registered eventsys :class:`~eventsys.EncoderDevice`."""
+        """Registered ``display_driver.EncoderInput``."""
         return self._device
 
     @property

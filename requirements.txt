@@ -1,10 +1,13 @@
 --index-url https://test.pypi.org/simple/
 
-pygraphics>=0.0.31
+pydevices-events>=0.0.16
+pydevices-keys>=0.0.16
+pydevices-multimer>=0.0.16
+pydevices-displaydev>=0.0.16
+pydevices-audiodev>=0.0.16
+pydevices-eventsys>=0.0.16
+pydevices-pygraphics>=0.0.32
+pydevices-palettes>=0.0.8
+pydevices-pdwidgets>=0.0.15
+pydevices-desktop>=0.0.16
 pydevices-lvgl>=9.5.25
-multimer>=0.0.39
-eventsys>=0.0.39
-displaysys>=0.0.39
-palettes>=0.0.7
-pdwidgets>=0.0.14
-pydisplay-desktop>=0.0.15

@@ -32,7 +32,8 @@ This page is a **router** for the main pydisplay workflows. In every case, the u
 A simple app usually follows this shape:
 
 ```python
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime  # optional non-LVGL coordinator used by these examples
 
 # draw once or on each refresh
 # runtime.on(...)
@@ -42,5 +43,5 @@ runtime.run_forever()
 ## Reference
 
 - [Examples catalog](examples/index.md)
-- [API reference (core)](reference/)
+- [Product API and board docs](https://pydevices.github.io/micropython-hardware/)
 - [Troubleshooting](troubleshooting.md)

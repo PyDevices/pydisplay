@@ -28,7 +28,7 @@ https://github.com/erikflowers/weather-icons and is licensed under SIL OFL 1.1
 
 """
 
-from board_config import runtime
+from app_runtime import runtime
 
 import tft_config
 import tft_bitmap

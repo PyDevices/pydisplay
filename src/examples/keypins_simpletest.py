@@ -1,5 +1,5 @@
 # gallery: skip
-from board_config import runtime
+from app_runtime import runtime
 from keypins import KeyPins
 
 import keys

@@ -1,18 +1,20 @@
-From a full clone, after [display dependencies](../guides/desktop-cpython.md#dependencies) are installed:
+Clone the examples, create a virtual environment, and install the published
+product packages:
 
 ```bash
 git clone https://github.com/PyDevices/pydisplay.git
-cd pydisplay/src
-export PYTHONPATH=.:lib:utils
-python3 examples/pydisplay_demo.py
+cd pydisplay
+python3 -m venv .venv
+.venv/bin/pip install --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ -r requirements.txt
+cd src
+../.venv/bin/python examples/pydisplay_demo.py
 ```
 
-A window should open with the pydisplay demo (touch or click **Rotate** / **Color**; the tips list scrolls). See the [**pydisplay_demo** guide](../examples/pydisplay_demo.md) for a full walkthrough. To start your own app, copy the [**App starter**](../examples/app-starter.md) boilerplate.
+A window should open with the demo. Touch or click **Rotate** and **Color**;
+the tips list scrolls. See the [pydisplay_demo guide](../examples/pydisplay_demo.md)
+for a walkthrough or copy the [App starter](../examples/app-starter.md).
 
-Prefer the REPL? Run `python3 -i` instead and import the demo (never a bare `import pydisplay_demo` — it lives under `examples/`):
-
-```python
->>> from examples import pydisplay_demo
-```
-
-Same `PYTHONPATH`, same `cd src`, different interpreter: `micropython examples/pydisplay_demo.py` on Unix MicroPython, `python.exe examples\pydisplay_demo.py` with `set PYTHONPATH=.;lib;utils` on Windows, and `circuitpython examples/pydisplay_demo.py` on CircuitPython Unix.
+On Windows, use `.venv\Scripts\python.exe`. For source-checkout development,
+clone `micropython-hardware` as a sibling and use `utils.path` or add its `lib`,
+`utils`, and `drivers/display` directories to the interpreter path.

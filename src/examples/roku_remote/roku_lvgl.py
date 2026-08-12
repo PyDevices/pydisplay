@@ -40,7 +40,8 @@ if _EXAMPLES not in sys.path:
 import board_config  # noqa: E402 — before display_driver so LVGL wiring sees it
 import display_driver  # noqa: E402 — wires LVGL display/input into the runtime
 import lvgl as lv  # noqa: E402
-from board_config import display_drv, runtime  # noqa: E402
+from board_config import display_drv  # noqa: E402
+from display_driver import runtime  # noqa: E402
 from roku_engine import (  # noqa: E402
     FRONTEND_BUTTONS,
     app_label,

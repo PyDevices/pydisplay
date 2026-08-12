@@ -11,7 +11,7 @@ except ImportError:
         return seq[0]
 
 
-from board_config import runtime
+from app_runtime import runtime
 from color_setup import ssd as canvas
 from pygraphics import BMP565
 

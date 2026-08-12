@@ -54,7 +54,7 @@ plugins:
 - mkdocstrings:
     handlers:
       python:
-        paths: [src/lib, src/utils]
+        paths: [src/utils]
         options:
           show_source: false
           show_bases: false
@@ -140,7 +140,6 @@ nav:
     - eventsys: reference/overviews/eventsys.md
     - graphics: reference/overviews/graphics.md
     - multimer: reference/overviews/multimer.md
-  - Core modules: reference/
   - Utils API: reference/utils/
 
 markdown_extensions:

@@ -30,7 +30,8 @@ mpremote mip install --index "https://PyDevices.github.io/micropython-lib/mip/Py
 
 **Core:**
 
-- `displaydev` (full package — all backends), `events`, `keys`, `eventsys`, `pygraphics`, `multimer`
+- `displaydev`, `audiodev`, `events`, `keys`, optional `eventsys`, `multimer`,
+  `pygraphics`, `palettes`, and `pdwidgets`
 
 **Drivers** (examples):
 

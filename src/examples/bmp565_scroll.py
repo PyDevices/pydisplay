@@ -1,6 +1,7 @@
 # deps: pygraphics
 # gallery: binaries
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 from pygraphics import BMP565
 
 display_drv.rotation = 0

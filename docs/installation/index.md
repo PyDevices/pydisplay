@@ -14,9 +14,10 @@ For recommended board setup flows, see [micropython-hardware install workflows](
 
 ## What gets installed
 
-**Core libraries** (micropython-lib MIP / TestPyPI; `eventsys` source is `src/lib/`):
+**Product libraries** (canonical source in [micropython-hardware](https://github.com/PyDevices/micropython-hardware), published through MIP and TestPyPI):
 
-- `eventsys` — input events and Runtime (`src/lib/eventsys`)
+- `eventsys` — optional application event traffic controller
+- `audiodev` — portable PCM audio interfaces
 - `displaydev` — display drivers (BusDisplay, SDLDisplay, PGDisplay, etc.) from [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
 - `multimer` — cross-platform timers; see [multimer](../concepts/multimer.md) (micropython-hardware)
 - `events` / `keys` — event types and key codes (micropython-hardware)
@@ -37,7 +38,7 @@ For recommended board setup flows, see [micropython-hardware install workflows](
 
 - Optional prebuilt `board_config.py` packages per hardware — see [board configs](https://pydevices.github.io/micropython-hardware/board-configs.html) and [install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html)
 - Display and touch drivers under that repo’s `drivers/`
-- Desktop SDL (`usdl2`) via the MIP desktop board package or [`pydisplay-desktop`](https://pydevices.github.io/micropython-hardware/pydisplay-desktop.html) on TestPyPI
+- Desktop SDL (`usdl2`) via the MIP desktop board package or [`pydevices-desktop`](https://pydevices.github.io/micropython-hardware/pydevices-desktop.html) on TestPyPI
 
 ## PyPI / pip (TestPyPI)
 
@@ -47,13 +48,13 @@ Pure-Python CPython wheels are on [TestPyPI](https://test.pypi.org/) for maintai
 pip install \
   -i https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
-  displaydev
+  pydevices-desktop pydevices-eventsys
 ```
 
-- **`-i` TestPyPI** — primary index for PyDevices packages (`displaydev`, `eventsys`, `pydisplay-desktop`, …; Android APK builds also use TestPyPI `usdl2` wheels).
+- **`-i` TestPyPI** — primary index for prefixed PyDevices distributions (`pydevices-displaydev`, `pydevices-eventsys`, `pydevices-desktop`, …).
 - **`--extra-index-url` PyPI** — secondary index for dependencies published only on [pypi.org](https://pypi.org) (for example `pygame-ce` when using `PGDisplay`; still `import pygame` at runtime).
 
-Omitting either index causes `pip` to fail: TestPyPI-only packages are not on PyPI, and PyPI-only deps are not on TestPyPI. Full explanation: [Publishing micropython-lib — two-index pip install](../publishing-micropython-lib.md#two-index-pip-install-required).
+Omitting either index causes `pip` to fail: TestPyPI-only packages are not on PyPI, and PyPI-only dependencies are not on TestPyPI. See [product package publishing](../publishing-micropython-lib.md).
 
 For day-to-day desktop work without pip, use a [full clone](full-clone.md) or [desktop quick start](../guides/desktop-cpython.md).
 

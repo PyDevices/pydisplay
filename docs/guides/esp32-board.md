@@ -82,4 +82,4 @@ discovery. Details: [MicroPython platform notes](../platforms/micropython.md#bac
 
 ## Reference
 
-- [API reference (core)](../reference/) → `displaydev`, `eventsys`
+- [micropython-hardware product docs](https://pydevices.github.io/micropython-hardware/)

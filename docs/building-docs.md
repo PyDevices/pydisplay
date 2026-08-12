@@ -30,7 +30,7 @@ One-shot production build (output in `site/`):
 | [`mkdocs.yml`](https://github.com/PyDevices/pydisplay/blob/main/mkdocs.yml) | Site config, theme, navigation |
 | [`docs/requirements.txt`](https://github.com/PyDevices/pydisplay/blob/main/docs/requirements.txt) | Python packages for MkDocs and plugins |
 | [`.readthedocs.yaml`](https://github.com/PyDevices/pydisplay/blob/main/.readthedocs.yaml) | ReadTheDocs build settings (same deps) |
-| [`scripts/mkdocs_gen_ref_pages.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/mkdocs_gen_ref_pages.py) | Auto-generates API reference stubs from `src/lib/` and `src/utils/` |
+| [`scripts/mkdocs_gen_ref_pages.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/mkdocs_gen_ref_pages.py) | Auto-generates API reference stubs for pydisplay's `src/utils/` application helpers |
 
 Hand-authored pages live under `docs/` and follow a **Try → Quick start → Install → Learn → Reference** structure (see `mkdocs.yml` nav).
 

@@ -23,7 +23,7 @@ gradient.  Then repeatedly draws a borders around the display in the same colors
 
 """
 
-from board_config import runtime
+from app_runtime import runtime
 
 import tft_config
 import tft_text

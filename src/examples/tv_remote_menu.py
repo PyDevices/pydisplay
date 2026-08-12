@@ -13,7 +13,8 @@ focus; Enter selects; Escape / AC Back quits (same as eventsys quit path).
 Desktop keyboards stand in for remotes during development.
 """
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 
 from displaydev import color565
 import keys

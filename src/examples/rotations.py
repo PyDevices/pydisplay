@@ -7,7 +7,8 @@ Rotates the display 0, 90, 180, and 270 degrees and displays the rotation
 number and the color of the display background.
 """
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 from pygraphics import Draw, text16
 from palettes import get_palette
 

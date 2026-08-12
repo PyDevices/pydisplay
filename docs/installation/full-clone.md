@@ -1,53 +1,67 @@
 # Full clone
 
-Best for development, running all examples, and desktop testing with CPython or MicroPython on Unix.
+A pydisplay clone contains examples, application helpers, documentation, and the
+PyScript/PWA site. Reusable product libraries are installed packages or come
+from a sibling `micropython-hardware` checkout.
 
 ## Download
 
 ```bash
 git clone https://github.com/PyDevices/pydisplay.git
-cd pydisplay/src
+cd pydisplay
 ```
-
-Or download the [zip archive](https://github.com/PyDevices/pydisplay/archive/refs/heads/main.zip) and extract it.
 
 ## Layout
 
-The `src/` directory mirrors what a device filesystem looks like after installing packages:
-
+```text
+pydisplay/
+├── src/examples/       # portable demos and applications
+├── src/utils/          # example and GUI integration helpers
+├── web/pyscript/       # live gallery and reusable PWA shell
+├── packages/           # GitHub MIP manifests for examples/helpers
+└── tools/              # cross-runtime test harnesses
 ```
-src/
-├── lib/                 # eventsys
-├── examples/            # demo scripts
-├── utils/               # pydisplay helpers — path.py, color_setup, tft_config, gui/, …
+
+For a complete editable workspace:
+
+```bash
+git clone https://github.com/PyDevices/micropython-hardware.git
+git clone https://github.com/PyDevices/pydisplay.git
 ```
 
-Clone [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
-next to this repo for `displaydev`, `events`, `keys`, `multimer`, and portable
-`utils/` (`byteswap`, `mip`, …). `path.py` prepends that sibling tree.
-
-Optional third-party add-ons (not in git): copy [Nano-GUI](../guis/nano-gui.md) `gui/` into `utils/gui/`.
+Keep the two repositories as siblings. `src/utils/path.py` recognizes that
+layout and adds the product `lib`, `utils`, display, and audio source trees.
 
 ## Run on desktop
 
-Preferred: set `PYTHONPATH=.:lib:utils` (MicroPython: `MICROPYPATH` instead), `cd src`, and run the interpreter directly on a file — no path bootstrap needed. See [Desktop CPython quick start](../guides/desktop-cpython.md) for dependencies and first run.
+The simplest route installs the TestPyPI products into a virtual environment:
+
+```bash
+cd pydisplay
+python3 -m venv .venv
+.venv/bin/pip install --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ -r requirements.txt
+cd src
+../.venv/bin/python examples/pydisplay_demo.py
+```
+
+See [Desktop CPython](../guides/desktop-cpython.md) for system dependencies and
+editable source paths.
 
 ## Run on a microcontroller
 
-See [ESP32 board quick start](../guides/esp32-board.md) for MIP install and `mpremote` workflow.
+Install product and board packages using the
+[micropython-hardware workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html),
+then install pydisplay's `examples.json` and `utils.json` when desired. See the
+[ESP32 guide](../guides/esp32-board.md).
 
-## utils/path.py
+## Regenerate gallery manifests
 
-`utils/path.py` prepends `lib/`, `utils/`, and cwd to `sys.path` so imports like `import displaydev` work without installing into `/lib` on the device. It never adds `examples/` — example scripts are always reached as `from examples import <name>` / `import examples.<name>`, not by putting `examples/` on `sys.path`.
-
-On desktop, prefer setting `PYTHONPATH`/`MICROPYPATH` (see above) so you never need to import it. `utils/path.py` is for targets where environment variables are unavailable or not set as recommended: a bare device REPL, or a `boot.py`/`main.py` entry point, when `utils/` is present on the device. Omit `utils/` and `import utils.path` entirely if everything is installed flat into `/lib` — that's already on `sys.path`.
-
-## Regenerating package manifests
-
-If you edit files under `src/`, maintainers should run from the repo root:
+When example or utility files change, maintainers run:
 
 ```bash
 ./scripts/install_refresh_manifests.sh
+python scripts/gallery_generator.py
 ```
 
-This updates `packages/*.json` and `web/pyscript/micropython.toml`. See [tools/README.md](https://github.com/PyDevices/pydisplay/blob/main/tools/README.md).
+Product publishing and MIP synchronization are owned by micropython-hardware.

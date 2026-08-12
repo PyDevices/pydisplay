@@ -1,6 +1,10 @@
 {
   "urls": [
     [
+      "app_runtime.py",
+      "github:PyDevices/pydisplay/src/utils/app_runtime.py"
+    ],
+    [
       "audio.py",
       "github:PyDevices/pydisplay/src/utils/audio.py"
     ],

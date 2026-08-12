@@ -22,7 +22,7 @@ Draws lines and rectangles in random colors at random locations on the display.
 
 """
 
-from board_config import runtime
+from app_runtime import runtime
 
 from random import getrandbits
 

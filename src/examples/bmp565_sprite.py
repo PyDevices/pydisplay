@@ -10,7 +10,8 @@ except ImportError:
         return seq[0]
 
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 from pygraphics import BMP565
 
 image = BMP565("examples/assets/warrior.bmp", streamed=True)

@@ -4,7 +4,7 @@ Cross-platform input events with PyGame/SDL2-style types. `eventsys` is the
 poller and device mux (`Runtime`, `HostEventsDevice`, …). Event type constants
 and namedtuples live in `events`; SDL key codes live in `keys`.
 
-For board wiring, auto-refresh, and the `runtime = None` rule, see **[Runtime](runtime.md)**.
+For board wiring and application-owned coordinator setup, see **[Runtime](runtime.md)**.
 
 ## Quick start — poll loop
 
@@ -111,8 +111,8 @@ runtime.on_device(eventsys.JOYSTICK, lambda e: print(e))
 
 When constructed with `display=`, the runtime handles quit implicitly: on
 `events.QUIT` it runs `before_quit` (if set), then `display.quit()`, then
-stops the shared timer. Set `runtime.before_quit` for LVGL teardown before the
-display is released.
+stops the shared timer. Set `runtime.before_quit` for application-specific
+teardown before the display is released. LVGL uses its own coordinator.
 
 ```python
 runtime.before_quit = _lvgl_shutdown
@@ -123,7 +123,8 @@ events (the auto-service still handles host QUIT when you call `poll` or run
 `run_forever`):
 
 ```python
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 
 while not runtime.quit_requested:
     draw_frame()
@@ -163,10 +164,11 @@ Use `eventsys.capabilities()` to inspect the dialect and built-in device list.
 
 ## pydisplay integration
 
-pydisplay wires a `HostEventsDevice` and implicit quit cleanup in
-`board_config.py` via `eventsys.Runtime(...)`. Display-only MCU configs set
-`runtime = None`. See [Runtime](runtime.md), [Architecture](architecture.md),
-and [Displays](displays.md).
+pydisplay's `app_runtime` explicitly constructs
+`eventsys.Runtime.from_board_config(board_config)` for non-LVGL examples.
+Board configs expose neutral hardware capabilities and never instantiate a
+runtime. Display-only apps may omit eventsys; LVGL uses `display_driver`.
+See [Runtime](runtime.md), [Architecture](architecture.md), and [Displays](displays.md).
 
 ## Next
 
@@ -176,4 +178,4 @@ and [Displays](displays.md).
 
 ## API reference
 
-[API reference (core)](../reference/) → `eventsys`.
+[eventsys source and product docs](https://github.com/PyDevices/micropython-hardware/tree/main/lib/eventsys).

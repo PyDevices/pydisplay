@@ -2,7 +2,8 @@
 # gallery: binaries
 from collections import namedtuple
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 from pygraphics import BMP565
 
 point = namedtuple("point", "x y")

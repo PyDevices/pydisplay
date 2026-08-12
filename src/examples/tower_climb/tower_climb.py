@@ -23,7 +23,8 @@ _PKG_DIR = _pkg_dir(__file__)
 if _PKG_DIR not in sys.path:
     sys.path.insert(0, _PKG_DIR)
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 from displaydev import color565
 import keys
 from pygraphics import BMP565, FrameBuffer, RGB565, rect, text8

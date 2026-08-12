@@ -44,11 +44,9 @@ peterhinch_packages = {
 }
 
 # list of package directories, dependencies and extra files in that package.
-# eventsys installs from the micropython-lib MIP index — do not emit
-# packages/eventsys.json. It still appears here so PyScript mounts stay generated.
 # displaydev / multimer / events / keys / portable utils (byteswap, mip, …)
 # live in micropython-hardware and are installed via mip or pip
-# (gallery: desktop board_config deps; PyScript mounts via toml_only_mounts).
+# (gallery: desktop board_config deps; PyScript mounts selected product sources).
 # Sister packages (pygraphics, usdl2, palettes, pdwidgets, lvgl) are not from
 # this repo: frozen in firmware, or TestPyPI / MIP when needed (see url_maker.py).
 packages = [
@@ -58,12 +56,7 @@ packages = [
         [],
     ],
     ["examples", [], []],
-    ["lib/eventsys", [], []],
 ]
-
-# Emit packages/*.json only for GitHub-MIP / PyScript demo bundles.
-# These names stay in `packages` for toml mounts but must not get a JSON file.
-MIP_INDEX_ONLY = frozenset({"eventsys"})
 
 # Packages omitted from web/pyscript/micropython.toml (PyScript mounts utils for browser examples).
 toml_exclude = ["examples"]
@@ -146,6 +139,24 @@ def add_pyscript_file(repo_relative_path: str, mount: str) -> None:
 
 for rel_path, mount in toml_only_mounts:
     add_pyscript_file(rel_path, mount)
+
+# eventsys is an optional product package owned by micropython-hardware. The
+# gallery mounts it as a baseline dependency for non-LVGL examples, but the
+# virtual URL remains ./src/lib/eventsys/... for both the local server and the
+# assembled Pages tree.
+hardware_candidates = (
+    Path(repo_dir).resolve().parent / "micropython-hardware" / "lib" / "eventsys",
+    Path(repo_dir).resolve() / "micropython-hardware" / "lib" / "eventsys",
+)
+hardware_eventsys = next((path for path in hardware_candidates if path.is_dir()), None)
+if hardware_eventsys is None:
+    tried = ", ".join(str(path) for path in hardware_candidates)
+    raise SystemExit(f"missing micropython-hardware eventsys source (tried {tried})")
+for source_path in sorted(hardware_eventsys.rglob("*.py")):
+    relative = source_path.relative_to(hardware_eventsys).as_posix()
+    parent = relative.rsplit("/", 1)[0] if "/" in relative else ""
+    mount = f"/lib/eventsys/{parent}/" if parent else "/lib/eventsys/"
+    add_pyscript_file(f"src/lib/eventsys/{relative}", mount)
 master_toml.append("")
 
 # Iterate over the packages and create the package files
@@ -212,14 +223,9 @@ manual_package_stems = {
     "micropython-nano-gui",
     "micropython-touch",
 }
-reserved_package_names = set(package_dicts) | manual_package_stems | set(MIP_INDEX_ONLY)
+reserved_package_names = set(package_dicts) | manual_package_stems | {"eventsys"}
 for package_name, contents in package_dicts.items():
     package_file = output_dir + packages_dir + package_name + ".json"
-    if package_name in MIP_INDEX_ONLY:
-        if os.path.isfile(package_file):
-            os.remove(package_file)
-            print(f"removed packages/{package_name}.json (use micropython-lib MIP index)")
-        continue
     with open(package_file, "w") as f:
         json.dump(contents, f, indent=2)
 

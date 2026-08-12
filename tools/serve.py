@@ -51,6 +51,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # Hardware-owned utils (mip, byteswap, …) are mounted at ./src/utils/ in
 # PyScript configs but live in the sibling checkout — not in this repo.
 _HW_UTILS = REPO_ROOT.parent / "micropython-hardware" / "utils"
+_HW_EVENTSYS = REPO_ROOT.parent / "micropython-hardware" / "lib" / "eventsys"
 _HW_UTIL_FILES = frozenset(
     {
         "byteswap.py",
@@ -129,9 +130,22 @@ class DemoRequestHandler(SimpleHTTPRequestHandler):
 
     def translate_path(self, path: str) -> str:
         mapped = super().translate_path(path)
-        name = Path(mapped).name
-        if name in _HW_UTIL_FILES and Path(mapped).parent.name == "utils":
+        mapped_path = Path(mapped)
+        name = mapped_path.name
+        if name in _HW_UTIL_FILES and mapped_path.parent.name == "utils":
             hw = _HW_UTILS / name
+            if hw.is_file():
+                return str(hw)
+        try:
+            marker = mapped_path.parts.index("eventsys")
+        except ValueError:
+            marker = -1
+        if marker >= 0 and mapped_path.parts[marker - 2 : marker + 1] == (
+            "src",
+            "lib",
+            "eventsys",
+        ):
+            hw = _HW_EVENTSYS.joinpath(*mapped_path.parts[marker + 1 :])
             if hw.is_file():
                 return str(hw)
         return mapped

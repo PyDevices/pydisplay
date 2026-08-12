@@ -1,84 +1,113 @@
 # Architecture
 
-pydisplay is a **foundation layer** — display drivers, input events, drawing primitives, and board wiring. It is not a GUI toolkit. Your app (or a third-party GUI library) sits on top.
+PyDevices separates reusable product code from application examples:
+
+- [`micropython-hardware`](https://github.com/PyDevices/micropython-hardware)
+  owns portable interfaces, hardware drivers, board wiring, and releases.
+- `pydisplay` owns examples, application helpers, integration docs, and the
+  PyScript/PWA gallery.
 
 ## Component diagram
 
 ```mermaid
 flowchart TB
-  subgraph config [Configuration]
+  subgraph product [micropython-hardware product]
     BC[board_config.py]
-    DD[display driver module]
-    TD[touch driver module]
-  end
-  subgraph core [Core libraries]
-    DS[displaydev]
-    ES[eventsys]
+    DD[displaydev]
+    AD[audiodev]
+    EV[events and keys]
     MT[multimer]
+    ES[eventsys optional]
+    DR[board configs and drivers]
   end
-  subgraph sister [Sister packages]
-    GR[pygraphics optional]
+  subgraph coordinator [application-owned coordinator]
+    AR[app_runtime for non-LVGL]
+    LR[display_driver for LVGL]
   end
-  subgraph app [Your code]
-    EX[examples / your app]
-    GUI[LVGL Nano-GUI pdwidgets etc]
+  subgraph showcase [pydisplay showcase]
+    EX[examples]
+    UT[application utilities]
+    PW[PyScript gallery and PWA]
   end
-  BC --> DS
-  BC --> ES
-  DD --> DS
-  TD --> ES
-  DS --> EX
-  ES --> EX
-  MT --> EX
-  DS --> GUI
-  ES --> GUI
-  MT --> GUI
-  GR --> EX
-  GR --> GUI
+
+  DR --> BC
+  BC --> DD
+  BC --> AD
+  EV --> ES
+  MT --> ES
+  BC --> AR
+  ES --> AR
+  BC --> LR
+  MT --> LR
+  AR --> EX
+  LR --> EX
+  DD --> EX
+  AD --> EX
+  EX --> PW
+  UT --> EX
 ```
 
-## What each piece does
+## Responsibilities
 
 | Piece | Role |
-|-------|------|
-| **`board_config.py`** | Wires pins / host display, creates `display_drv` and optional `runtime`. One file per hardware target. Desktop hosts use `displaydev.auto.AutoDisplay`. End-device roles and lazy extras: [Board devices](https://pydevices.github.io/micropython-hardware/board-devices.html). |
-| **`boarddev`** | Shared lazy-bind helper for optional `board_devices` modules (proof / graduated boards). |
-| **`displaydev`** | Display backends (`BusDisplay`, `SDLDisplay`, `PGDisplay`, `PSDisplay`, `JNDisplay`, `FBDisplay`) with a unified drawing API. Optional host selection is `from displaydev.auto import AutoDisplay` only. |
-| **`eventsys`** | `Runtime` pumps input and dispatches PyGame/SDL2-style events to callbacks; prefer `runtime.on(...)` + `runtime.run_forever()`. |
-| **`pygraphics`** | Sister package ([PyDevices/pygraphics](https://github.com/PyDevices/pygraphics)) — optional helpers on top of `framebuf` (rounded rects, gradients, `Area` bounding boxes). Install from the [micropython-lib MIP index](../installation/mip-micropython-lib.md); see [graphics](graphics.md). |
-| **`multimer`** | Cross-platform `Timer` / `AsyncTimer`, ticks/sleep, and `asyncio` exposure. |
-| **`utils`** | Optional shims and integrations (`displaybuf`, config templates, GUI fetch helpers). |
+|---|---|
+| `board_config.py` | Creates hardware interfaces such as `display_drv` and exports neutral input/timing capabilities. It does not create an application runtime. |
+| `displaydev` | Cross-platform display interfaces and desktop/browser backends. |
+| `audiodev` | Cross-platform audio output/input interfaces and host backends. |
+| `events` / `keys` | Shared event types, key codes, modifiers, and matching helpers. |
+| `multimer` | Cross-platform `Timer`, `AsyncTimer`, ticks, sleep, and asyncio exposure. |
+| `eventsys` | Optional event traffic controller for applications that want the supplied dispatcher and input adapters. |
+| `app_runtime` | pydisplay's non-LVGL opt-in: creates an `eventsys.Runtime` from the selected board config and adds gallery test behavior. |
+| `display_driver` | LVGL-specific coordinator shared by the binding repos; bridges LVGL to `displaydev` and `multimer` without importing `eventsys`. |
+| `utils` | Example helpers and third-party GUI integration adapters. |
 
-## Typical boot sequence
+## Non-LVGL boot sequence
 
-1. Install packages (MIP, clone, or Wokwi `mip.install`).
-2. Import or install `board_config.py` for your hardware.
-3. `board_config` constructs `display_drv` and `runtime` (or `runtime = None` on display-only MCU boards).
-4. Build the UI, subscribe callbacks, then `runtime.run_forever()` (hosted backends refresh via `Runtime` when `needs_refresh` is true).
+1. Install the product packages and a board config.
+2. Import `display_drv` from `board_config`.
+3. Import `runtime` from pydisplay's `app_runtime`, or create your own
+   `eventsys.Runtime.from_board_config(board_config)`.
+4. Build the UI, register callbacks, and run the coordinator.
 
 ```python
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 
 display_drv.fill_rect(0, 0, 10, 10, 0xF800)
 display_drv.show()
 
+
 def on_click(event):
-    ...  # handle touch, keys, etc.
+    ...
+
 
 runtime.on(runtime.events.MOUSEBUTTONDOWN, on_click)
 runtime.run_forever()
 ```
 
-See [Runtime](runtime.md), [multimer](multimer.md), and [Events](events.md).
+`eventsys` is optional product functionality: applications may supply a
+different dispatcher or event loop instead.
 
-On desktop, `AutoDisplay` selects `PGDisplay` (CPython, PyGame) or `SDLDisplay` (SDL2). On ESP32, `BusDisplay` talks to the panel over SPI or I80. See [Portability & platforms](../platforms/index.md) for the full backend matrix.
+## LVGL boot sequence
 
-For a complete minimal app using this pattern (plus scrolling and timers), see [**pydisplay_demo**](../examples/pydisplay_demo.md).
+LVGL applications import the coordinator supplied with the binding:
+
+```python
+from board_config import display_drv
+from display_driver import runtime
+
+runtime.run_forever()
+```
+
+The LVGL coordinator owns tick/task handling, display presentation, input-device
+adapters, and quit lifecycle. It consumes neutral board-config exports and
+`multimer`; it does not depend on `eventsys`.
 
 ## Where to go next
 
-- [Displays](displays.md) — pick a display driver class
-- [Runtime](runtime.md) — board_config contract, auto-refresh, quit lifecycle
-- [Events](events.md) — devices, subscribe, `run_forever`
-- [Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html) — find or add hardware wiring
-- [API reference (core)](../reference/) — method signatures
+- [Runtime](runtime.md) — optional eventsys application coordination
+- [Events](events.md) — event model and devices
+- [Displays](displays.md) — display interfaces
+- [multimer](multimer.md) — portable timers
+- [Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html) — hardware wiring
+- [Examples](../examples/index.md) — complete applications

@@ -23,7 +23,7 @@ Smoothly scrolls mirrored rainbow colored random curves across the display.
 
 """
 
-from board_config import runtime
+from app_runtime import runtime
 
 import math
 from random import getrandbits

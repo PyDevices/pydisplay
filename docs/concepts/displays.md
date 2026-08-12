@@ -1,6 +1,8 @@
 # Displays
 
-pydisplay provides several display driver classes. All expose a drawing surface compatible with MicroPython's `framebuf` API.
+The `displaydev` product package in micropython-hardware provides several
+display driver classes. All expose a drawing surface compatible with
+MicroPython's `framebuf` API; pydisplay demonstrates them.
 
 See [Architecture](architecture.md) for how drivers connect to `board_config.py`.
 
@@ -31,7 +33,7 @@ For microcontrollers on **MicroPython and CircuitPython**.
 
 SDL2 desktop backend (CPython, MicroPython Unix, CircuitPython Unix). Uses an SDL texture as GRAM. It is the default on MicroPython Unix and available on CPython via `board_configs/sdldisplay/`.
 
-SDL2 bindings for **`SDLDisplay`**: `import usdl2` from [`pydisplay-desktop`](https://pydevices.github.io/micropython-hardware/pydisplay-desktop.html) (TestPyPI) or the MIP desktop board package in [micropython-hardware](https://github.com/PyDevices/micropython-hardware) (`drivers/usdl2.py`). A native `usdl2` module is used when already present in the firmware or environment. See [MicroPython — Desktop SDL](../platforms/micropython.md#desktop-sdl-usdl2).
+SDL2 bindings for **`SDLDisplay`**: `import usdl2` from [`pydevices-desktop`](https://pydevices.github.io/micropython-hardware/pydevices-desktop.html) (TestPyPI) or the MIP desktop board package in [micropython-hardware](https://github.com/PyDevices/micropython-hardware) (`drivers/usdl2.py`). A native `usdl2` module is used when already present in the firmware or environment. See [MicroPython — Desktop SDL](../platforms/micropython.md#desktop-sdl-usdl2).
 
 ### WinDisplay
 
@@ -193,4 +195,4 @@ Known issues: Unix SDL rotation clears the screen; scrolling while rotated has e
 
 ## API reference
 
-[API reference (core)](../reference/) → `displaydev`.
+[displaydev source and product docs](https://github.com/PyDevices/micropython-hardware/tree/main/drivers/display/displaydev).

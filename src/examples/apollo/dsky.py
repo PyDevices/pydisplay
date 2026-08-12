@@ -5,7 +5,8 @@ Apollo Guidance Computer DSKY Emulator
 Image source:  https://commons.wikimedia.org/wiki/File:Apollo_DSKY_interface.svg
 """
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 from eventsys.touch_keypad import TouchKeypad
 from pygraphics import Area, BMP565
 

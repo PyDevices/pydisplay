@@ -1,16 +1,12 @@
 # Tests
 
-Stdlib `unittest` for pydisplay-owned packages: [`eventsys`](../src/lib/eventsys)
-and `src/utils`, plus gallery/tooling helpers.
+This suite covers the pydisplay-owned examples, utilities, PyScript gallery,
+and developer tooling.
 
-`displaydev`, `multimer`, `events`, `keys`, `boarddev`, `audiodev`, and
-portable `utils` (`mip`, `byteswap`, …) are tested in
-[micropython-hardware](https://github.com/PyDevices/micropython-hardware)
-(`tests/`). This suite still needs a sibling (or nested) hardware checkout so
-`eventsys` can import `events`, `keys`, and `multimer`.
-
-[`_env.py`](_env.py) puts `src/lib`, `src/utils`, and hardware `lib/` +
-`utils/` on `sys.path`.
+Product-library tests moved with their sources to
+[`micropython-hardware/tests`](https://github.com/PyDevices/micropython-hardware/tree/main/tests),
+including `eventsys`, `displaydev`, `audiodev`, `multimer`, `events`, `keys`,
+and `boarddev`.
 
 ## Running
 
@@ -20,22 +16,14 @@ From the repository root:
 python -m unittest discover -s tests -v
 ```
 
-## What is covered
+The test environment adds the sibling `micropython-hardware` product paths so
+the example and tooling tests exercise canonical sources rather than copied
+libraries.
 
-| Module | Area |
-|--------|------|
-| `test_devices.py` | `Runtime` and Queue/Touch/Encoder/Keypad devices |
-| `test_joystick.py` | `JoystickDevice` with a mock driver |
-| `test_eventsys_quit.py` | quit chords via `HostEventsDevice` |
-| `test_eventsys_capabilities.py` | eventsys capability flags |
-| `test_eventsys_interactive.py` | interactive / REPL runtime helpers |
-| `test_auto_refresh.py` | runtime-owned display auto-refresh (uses `multimer`) |
-| `test_standalone.py` | `eventsys` imports with none of the rest of pydisplay on the path |
-| `test_audio_utils.py` | `src/utils/audio.py` mixer/notes (not `audiodev`) |
-| `test_url_maker.py` | PyScript URL helpers |
-| `test_gallery_frame.py` / `test_gallery_screenshots.py` | gallery generator |
-| `test_screenshot_tool.py` / `test_record_tool.py` | desktop screenshot/record tools |
-| `test_peterhinch_page.py` | Peter Hinch gallery page |
+## What remains here
 
-Device tests drive `poll()` with scripted `read` callbacks from
-[`_support.py`](_support.py), so they run without hardware.
+- `src/utils/audio.py` mixer and note helpers
+- PyScript URL, loader, gallery, and PWA generation
+- screenshot and recording tools
+- Peter Hinch gallery integration
+- example manifest and harness behavior

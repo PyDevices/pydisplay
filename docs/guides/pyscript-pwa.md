@@ -301,7 +301,10 @@ Pushes to `main` that touch `web/**` or `src/**` run [Deploy PyScript site to Gi
 
 1. Verifies generated manifests are fresh (`install_refresh_manifests.sh --audit`, `gallery_generator.py --check`).
 2. Copies `web/pyscript/*` into `_site/pyscript/`.
-3. Copies `src/lib`, `src/utils`, and examples into `_site/pyscript/src/`, then overlays hardware-owned utils (`mip.py`, `byteswap`, …) from a micropython-hardware checkout.
+3. Copies `src/utils` and examples into `_site/pyscript/src/`, adds canonical
+   `eventsys` from a micropython-hardware checkout at the gallery's virtual
+   `src/lib/eventsys` URL, and overlays hardware-owned utilities (`mip.py`,
+   `byteswap`, …).
 4. Stamps `CACHE_NAME` in `_site/pyscript/sw.js` from shell content
    (`pyscript_stamp_pwa_cache.py`).
 5. Publishes to the `gh-pages` branch.

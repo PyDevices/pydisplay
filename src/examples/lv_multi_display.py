@@ -8,10 +8,9 @@ reusable :class:`lv_encoder_emu.EncoderEmu` stand-in for hardware
 ``machine.Encoder`` / ``rotaryio`` on MCU boards.
 """
 
-from board_config import runtime
-
 import display_driver  # noqa: F401 — primary LVGL + event loop
 import lvgl as lv
+from display_driver import runtime
 from lv_encoder_emu import EncoderEmu
 
 # Soft encoder emulator on a secondary surface; EncoderDevice drives primary LVGL.

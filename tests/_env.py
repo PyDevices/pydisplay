@@ -1,27 +1,14 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Shared test bootstrap that puts pydisplay packages on ``sys.path``.
-
-Puts ``src/lib`` (``eventsys``) and ``src/utils`` on ``sys.path`` without
-installing anything. When a sibling (or nested) ``micropython-hardware`` tree
-is present, ``lib/`` (``events``, ``keys``, ``multimer``) and ``utils/``
-(``byteswap``, ``mip``, …) are added so ``eventsys`` and display helpers can
-import their hardware dependencies.
-
-    import _env  # noqa: F401
-    import eventsys
-"""
+"""Put pydisplay utilities and canonical sibling products on ``sys.path``."""
 
 import os
 import sys
 
 _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-_SRC_LIB = os.path.join(_REPO_ROOT, "src", "lib")
 _SRC_UTILS = os.path.join(_REPO_ROOT, "src", "utils")
 
-if _SRC_LIB not in sys.path:
-    sys.path.insert(0, _SRC_LIB)
 if _SRC_UTILS not in sys.path:
     sys.path.insert(0, _SRC_UTILS)
 
@@ -42,20 +29,7 @@ for _hw in _HARDWARE_ROOT_CANDIDATES:
             sys.path.insert(0, _hw_utils)
         break
 
-#: Directories to put on ``PYTHONPATH`` / ``sys.path`` in subprocess probes.
-PATH_ENTRIES = [_SRC_LIB, _SRC_UTILS]
 if _HARDWARE_ROOT:
-    for _extra in (
-        os.path.join(_HARDWARE_ROOT, "lib"),
-        os.path.join(_HARDWARE_ROOT, "utils"),
-        os.path.join(_HARDWARE_ROOT, "drivers", "display"),
-    ):
-        if os.path.isdir(_extra) and _extra not in PATH_ENTRIES:
-            PATH_ENTRIES.append(_extra)
-
-#: Absolute path to the ``eventsys`` package directory.
-EVENTSYS_DIR = os.path.join(_SRC_LIB, "eventsys")
-
-#: Shared ``events.py`` / ``keys.py`` (micropython-hardware/lib).
-EVENTS_PY = os.path.join(_HARDWARE_ROOT, "lib", "events.py") if _HARDWARE_ROOT else ""
-KEYS_PY = os.path.join(_HARDWARE_ROOT, "lib", "keys.py") if _HARDWARE_ROOT else ""
+    _hw_display = os.path.join(_HARDWARE_ROOT, "drivers", "display")
+    if os.path.isdir(_hw_display) and _hw_display not in sys.path:
+        sys.path.insert(0, _hw_display)

@@ -22,7 +22,8 @@ if _EXAMPLES not in sys.path:
 
 import display_driver  # wires LVGL display/input into the runtime
 import lvgl as lv
-from board_config import display_drv, runtime
+from board_config import display_drv
+from display_driver import runtime
 from calc_engine import CalcEngine
 
 # Button grid (last row: two wide buttons).
@@ -232,7 +233,7 @@ def build_ui():
 
 build_ui()
 
-# Canonical entry: display_driver wired LVGL into the shared runtime at import;
+# Canonical entry: display_driver wired LVGL into its own runtime at import;
 # run_forever() keeps the app alive (or returns immediately in a signal-driven
 # interactive REPL).
 runtime.run_forever()

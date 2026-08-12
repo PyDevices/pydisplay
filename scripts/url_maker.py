@@ -89,7 +89,12 @@ _WHEEL_REWRITE: dict[str, str | None] = {
     "lvgl": "pydevices-lvgl",
     "pydeviceslvgl": "pydevices-lvgl",
     "display_driver": "pydevices-lvgl",  # bundled in the wheel
-    "pygraphics": "pygraphics",  # TestPyPI project now provides native/wasm builds
+    "pygraphics": "pydevices-pygraphics",
+    "palettes": "pydevices-palettes",
+    "pdwidgets": "pydevices-pdwidgets",
+    "eventsys": "pydevices-eventsys",
+    "multimer": "pydevices-multimer",
+    "displaydev": "pydevices-displaydev",
     "usdl2-py": "usdl2",  # prefer native TestPyPI wheel when available
 }
 
@@ -179,8 +184,8 @@ def _apply_channel(
             seen.add(resolved)
             out.append(resolved)
     # palettes / pdwidgets need pygraphics; prefer the native TestPyPI build.
-    if channel == "wheels" and pull_pygraphics and "pygraphics" not in seen:
-        out.append("pygraphics")
+    if channel == "wheels" and pull_pygraphics and "pydevices-pygraphics" not in seen:
+        out.append("pydevices-pygraphics")
     return out
 
 

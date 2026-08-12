@@ -1,6 +1,7 @@
 # 🎨 App starter
 
-Copy one of the scripts below to start your first pydisplay app. Each is a single file that uses only **`src/lib`** modules — no `utils`, no `tft_config`, no `displaybuf`.
+Copy the script below to start your first app with the published product packages
+and pydisplay's small `app_runtime` helper.
 
 | Use this | When you want… |
 |----------|----------------|
@@ -9,8 +10,9 @@ Copy one of the scripts below to start your first pydisplay app. Each is a singl
 
 ## Prerequisites
 
-- A working [board config](https://pydevices.github.io/micropython-hardware/board-configs.html) on your path (from a [full clone](../installation/full-clone.md) or MIP install).
-- In a development clone, set `PYTHONPATH` (CPython/CircuitPython) or `MICROPYPATH` (MicroPython) to `.:lib:utils` and run from `src/` so `board_config` and friends resolve.
+- A working [board config](https://pydevices.github.io/micropython-hardware/board-configs.html) on your path.
+- Product packages installed from TestPyPI/MIP, or a sibling `micropython-hardware` development checkout.
+- `src/utils` on the path so `app_runtime` resolves.
 
 Save the boilerplate as `main.py` (or any name you prefer) and run it from the REPL or as your device's entry point.
 
@@ -25,11 +27,12 @@ hosts do not arm a sync timer before the loop is running.
 """
 my_app.py — starting point for a pydisplay app.
 
-Copy and rename to build your own project. Uses board_config, graphics,
-and eventsys only.
+Copy and rename to build your own project. Uses board_config, pygraphics,
+and the optional eventsys coordinator selected by app_runtime.
 """
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 from pygraphics import Area
 
 # --- customize: colors and layout ---
@@ -69,7 +72,7 @@ The boilerplate imports `Area` from `pygraphics` **only for hit-testing**. `disp
 `displaydev` and `eventsys` do not depend on `pygraphics`. If you want a stack with no `pygraphics` import — or you install only those packages — keep the tuple from `fill_rect` and test clicks directly:
 
 ```python
-# displaydev + eventsys only — no graphics import
+# displaydev + eventsys only — no pygraphics import
 button = None  # (x, y, w, h)
 
 
@@ -90,7 +93,7 @@ def hit(rect, pos):
 
 def handle_event(e):
     global pressed
-    if e.type == eventsys.MOUSEBUTTONDOWN:
+    if e.type == runtime.events.MOUSEBUTTONDOWN:
         if hit(button, e.pos):
             pressed = not pressed
             redraw()
@@ -103,20 +106,19 @@ Stick with `from pygraphics import Area` when you also use rectangle helpers fro
 From a [full clone](../installation/full-clone.md), save the boilerplate as `src/main.py`, then set `PYTHONPATH`/`MICROPYPATH`, `cd src`, and run it directly — no path bootstrap needed:
 
 ```bash
-cd src
-export PYTHONPATH=.:lib:utils
-python3 main.py
+cd pydisplay/src
+PYTHONPATH=.:utils ../.venv/bin/python main.py
 ```
 
-Desktop (SDL board config) — put `board_configs/sdldisplay` ahead of the default on the path:
+With sibling source checkouts instead of installed packages:
 
 ```bash
-cd src
-export PYTHONPATH=../board_configs/sdldisplay:.:lib:utils
+cd pydisplay/src
+export PYTHONPATH=.:utils:../../micropython-hardware/lib:../../micropython-hardware/drivers/display
 python3 main.py
 ```
 
-On MCU, install the matching [board config](https://pydevices.github.io/micropython-hardware/board-configs.html), copy or symlink it as `board_config.py`, and run `main.py` from flash or the REPL. For fallback path handling, see [Utils path setup](../utils.md#path-setup) and [README path environment forms](../../README.md#321-path-environment-forms).
+On MCU, install the matching [board config](https://pydevices.github.io/micropython-hardware/board-configs.html), the optional `eventsys` package, and pydisplay's `utils` package, then run `main.py` from flash or the REPL. For fallback path handling, see [Utils path setup](../utils.md#path-setup).
 
 **Interact:** tap or click the centered rectangle — it toggles between red and green.
 
@@ -138,8 +140,8 @@ keys, encoders, and other devices — see [Events](../concepts/events.md).
 
 `runtime.run_forever()` keeps the app live on every host — see
 [Runtime](../concepts/runtime.md) and [multimer](../concepts/multimer.md).
-PyScript and Jupyter always construct `runtime` with `timer_async=True`; desktop
-defaults to sync unless `PYDISPLAY_TIMER_ASYNC=1` is set before `board_config` loads.
+PyScript and Jupyter board configs export `timer_async=True`; desktop defaults
+to sync unless `PYDISPLAY_TIMER_ASYNC=1` is set before the coordinator is created.
 
 ## Customize
 

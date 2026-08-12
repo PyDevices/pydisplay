@@ -17,7 +17,8 @@ Portability is PyDisplay's defining feature. Write your display, input, and timi
 The same import works on every platform:
 
 ```python
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 ```
 
 What changes is which **display backend** is used — `displaydev.auto.AutoDisplay` on desktop / PyScript / Jupyter (via the desktop `board_config`), or an explicit per-board config on hardware:
@@ -26,7 +27,7 @@ What changes is which **display backend** is used — `displaydev.auto.AutoDispl
 |---------|---------|-------------|
 | `BusDisplay` | MicroPython / CircuitPython MCUs (SPI / I80) | [board config](https://pydevices.github.io/micropython-hardware/board-configs.html) |
 | `FBDisplay` | CircuitPython framebuffer displays (RGB, USB video) | board config |
-| `SDLDisplay` | CPython, MicroPython Unix, CircuitPython Unix (SDL2); Android APK; [Linux KMS](cpython-desktop.md#linux-kms-no-window-manager) | auto / `board_configs/sdldisplay/` · `sdldisplay/linux_kms/` |
+| `SDLDisplay` | CPython, MicroPython Unix, CircuitPython Unix (SDL2); Android APK; [Linux KMS](cpython-desktop.md#linux-kms) | auto / `board_configs/sdldisplay/` · `sdldisplay/linux_kms/` |
 | `WinDisplay` | Windows CPython (native Win32 via `uwin32`) | auto (first on `win32`) / `board_configs/windisplay/` |
 | `PGDisplay` | CPython desktop (PyGame) | auto / `board_configs/pgdisplay/` |
 | `PSDisplay` | [PyScript](pyscript.md) browser canvas and [PWAs](pwa.md) | auto |

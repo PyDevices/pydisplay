@@ -5,7 +5,8 @@ pydisplay works with CircuitPython using Adafruit bus drivers and `framebufferio
 ## Getting started
 
 1. Confirm your display works with Adafruit CircuitPython libraries and DisplayIO first.
-2. Copy needed directories from `src/lib/` to your board (`displaydev`, `eventsys`, etc.).
+2. Install the needed unprefixed packages from the PyDevices MIP index
+   (`displaydev`, optional `eventsys`, `multimer`, and dependencies).
 3. Create or adapt a `board_config.py` — use existing configs as templates:
 
 | Config | Use case |
@@ -20,9 +21,8 @@ CircuitPython configs live under [`board_configs/cp/`](https://github.com/PyDevi
 
 CP configs do **not** ship `board_devices.py` or lazy `DEVICES` — CircuitPython’s
 native `board` module covers pins/buses. Each CP `board_config.py` provides
-`display_drv`, `runtime`, and eager runtime-wired inputs only (`touch`,
-`keypad`, `encoder`, `joystick` when present), using the same contract names as
-MicroPython.
+`display_drv` and neutral input readers/capabilities when present. The
+application instantiates `eventsys` or uses LVGL's `display_driver`.
 
 ## BusDisplay on CircuitPython
 
@@ -49,7 +49,7 @@ When the unix firmware is built with [displayif](https://github.com/PyDevices/di
 and wins over MIP `lib/usdl2.py`. Otherwise install the MIP desktop board package
 from [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
 (`board_configs/desktop`, which includes `drivers/usdl2.py`), or on CPython use
-[`pydisplay-desktop`](https://pydevices.github.io/micropython-hardware/pydisplay-desktop.html)
+[`pydevices-desktop`](https://pydevices.github.io/micropython-hardware/pydevices-desktop.html)
 from TestPyPI. Install `libsdl2-dev` on the host so the SDL library is available.
 
 For a local CircuitPython unix binary, clone as siblings and build the coverage

@@ -55,8 +55,11 @@ On hosted pydisplay apps, prefer `runtime.run_forever()` (or `runtime.poll()` in
 
 ```python
 import multimer
+import board_config
+import eventsys
 from multimer import asyncio
-from board_config import runtime
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 async def main():
     tim = multimer.AsyncTimer(-1)
@@ -176,7 +179,12 @@ both report a loop that is not there (or miss one that is).
 
 ## pydisplay integration
 
-pydisplay owns the shared periodic timer through `eventsys.Runtime` (`on_tick`, auto-refresh when `display_drv.needs_refresh`). Apps normally poll via `runtime.poll()` / `run_forever` rather than allocating their own display-refresh timer. Use `Timer` when `runtime.timer_async` is false and `AsyncTimer` when it is true (PyScript/Jupyter; desktop override via `PYDISPLAY_TIMER_ASYNC`). See [Runtime](runtime.md) and [Displays — timing](displays.md#timing).
+When selected, `eventsys.Runtime` owns the application's shared periodic timer
+(`on_tick` and hosted display refresh). Apps normally use `runtime.poll()` or
+`run_forever()` rather than allocating another refresh timer. LVGL instead owns
+its tick/task timer through `display_driver`. Use `Timer` when
+`runtime.timer_async` is false and `AsyncTimer` when it is true. See
+[Runtime](runtime.md) and [Displays — timing](displays.md#timing).
 
 ## Internals (contributors)
 
@@ -299,10 +307,10 @@ Desktop SDL2 access is shared between display and timer code:
 
 | Consumer | Import chain |
 |----------|--------------|
-| `displaydev.sdldisplay` | built-in / env `usdl2` → desktop board / `pydisplay-desktop` |
+| `displaydev.sdldisplay` | built-in / env `usdl2` → desktop board / `pydevices-desktop` |
 | `multimer` SDL backend | `usdl2` (native or pure-Python desktop binding) |
 
-Both prefer a native **`usdl2`** module when it is frozen or already present. Otherwise the pure-Python binding from [`pydisplay-desktop`](https://pydevices.github.io/micropython-hardware/pydisplay-desktop.html) / the MIP desktop board (`drivers/usdl2.py`) provides `import usdl2`. See [Displays — SDLDisplay](displays.md#sdldisplay) and [MicroPython — Desktop SDL](../platforms/micropython.md#desktop-sdl-usdl2).
+Both prefer a native **`usdl2`** module when it is frozen or already present. Otherwise the pure-Python binding from [`pydevices-desktop`](https://pydevices.github.io/micropython-hardware/pydevices-desktop.html) / the MIP desktop board (`drivers/usdl2.py`) provides `import usdl2`. See [Displays — SDLDisplay](displays.md#sdldisplay) and [MicroPython — Desktop SDL](../platforms/micropython.md#desktop-sdl-usdl2).
 
 ## Next
 

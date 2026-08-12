@@ -5,15 +5,19 @@ on:
     branches:
       - main
     paths:
-      - 'src/lib/**'
       - 'src/utils/**'
+      - 'src/examples/**'
       - 'tests/**'
+      - 'scripts/**'
+      - 'web/pyscript/**'
       - '.github/workflows/tests.yml'
   pull_request:
     paths:
-      - 'src/lib/**'
       - 'src/utils/**'
+      - 'src/examples/**'
       - 'tests/**'
+      - 'scripts/**'
+      - 'web/pyscript/**'
       - '.github/workflows/tests.yml'
   workflow_dispatch:
 
@@ -23,15 +27,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Checkout micropython-hardware (events/keys/multimer/utils)
+      - name: Checkout canonical product packages
         uses: actions/checkout@v4
         with:
           repository: PyDevices/micropython-hardware
           path: micropython-hardware
           sparse-checkout: |
-            lib/events.py
-            lib/keys.py
-            lib/multimer
+            drivers/display/displaydev
+            drivers/audio/audiodev
+            lib
             utils
           sparse-checkout-cone-mode: false
 

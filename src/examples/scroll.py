@@ -25,7 +25,7 @@ Only works with fonts with heights that are even multiples of the screen height,
 
 """
 
-from board_config import runtime
+from app_runtime import runtime
 
 import tft_text
 import tft_config

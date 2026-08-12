@@ -36,7 +36,8 @@ gc.collect()
 mem = mem_free()
 print(f"Free memory at start: {mem:,}")
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 import dsky
 import time
 

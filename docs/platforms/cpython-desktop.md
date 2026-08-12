@@ -1,144 +1,93 @@
 # CPython desktop
 
-Platform-specific notes for SDL2, PyGame, and OS dependencies. **First run:** use the [Desktop CPython quick start](../guides/desktop-cpython.md).
+CPython uses the same `displaydev` interfaces and examples as embedded targets.
+The desktop board config is published by micropython-hardware in the
+`pydevices-desktop` TestPyPI distribution.
 
-## Dependencies
+## Install
 
-Install SDL2 development libraries (Linux/macOS) or PyGame (Windows fallback). The [desktop quick start](../guides/desktop-cpython.md) links here for OS-specific packages.
+```bash
+git clone https://github.com/PyDevices/pydisplay.git
+cd pydisplay
+python3 -m venv .venv
+.venv/bin/pip install --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple/ -r requirements.txt
+cd src
+../.venv/bin/python examples/pydisplay_demo.py
+```
 
-## Linux (including WSL)
+`AutoDisplay` selects WinDisplay on supported Windows hosts, PGDisplay when
+`pygame-ce` is available, and otherwise SDLDisplay through `usdl2`.
 
-Install SDL2 development libraries, then run as above.
+## Linux and WSL
 
-**Debian / Ubuntu / WSL:**
+Install SDL2 and venv support before the Python packages:
 
 ```bash
 sudo apt update
 sudo apt install libsdl2-dev python3-venv
-git clone https://github.com/PyDevices/pydisplay.git
-cd pydisplay/src
-export PYTHONPATH=.:lib:utils
-python3 examples/pydisplay_demo.py
 ```
 
-**Fedora:**
-
-```bash
-sudo dnf install SDL2-devel
-```
-
-If SDL2 fails or is unavailable, use PyGame instead — see [PGDisplay fallback](#pgdisplay-fallback) below.
-
-## macOS
-
-```bash
-brew install sdl2
-git clone https://github.com/PyDevices/pydisplay.git
-cd pydisplay/src
-export PYTHONPATH=.:lib:utils
-python3 examples/pydisplay_demo.py
-```
-
-Default **`multimer.Timer`** on CPython follows the shared auto chain but
-**skips `sdl2` when pygame is importable** (so `PGDisplay` does not share a
-process with usdl2 timers). Without pygame, macOS may select **`sdl2`** when
-`usdl2` is present, else **`threading`**, then **`polling`**. See
-[multimer](../concepts/multimer.md).
+Fedora uses `SDL2-devel`; macOS users can install `sdl2` with Homebrew. Headless
+CI can set `SDL_VIDEODRIVER=dummy` and `SDL_AUDIODRIVER=dummy`.
 
 ## Windows
 
-SDL2 native libraries can be awkward on Windows. Recommended path:
+Install Python from python.org and use the same two-index pip command with
+`.venv\Scripts\python.exe`. `pygame-ce` is generally the easiest window backend.
+WSL is also supported for the Linux workflow.
 
-1. Install [Python 3](https://www.python.org/downloads/) (check "Add to PATH").
-2. Use **PGDisplay** (PyGame) instead of SDL2 — see below.
-3. Or develop in **WSL** with the Linux instructions above.
+## Editable source checkout
 
-Default **`multimer.Timer`** on CPython Windows: with pygame installed,
-**`threading`** so `PGDisplay` is safe; without pygame, **`sdl2`** when
-`usdl2` is available (matches `SDLDisplay`). MicroPython Windows
-auto-selects **`sdl2`** when `usdl2` is present, and **`polling`** when it
-is not (no `threading` on that port). Full GUI/console matrix:
-[multimer — desktop auto-selection](../concepts/multimer.md#desktop-auto-selection-matrix).
-
-## PGDisplay fallback
-
-PyGame CE (`pygame-ce` on PyPI; `import pygame`) is easier to install and avoids some SDL2 issues (especially on Windows and Chromebooks):
+Clone `micropython-hardware` beside `pydisplay` and put these canonical trees on
+`PYTHONPATH`:
 
 ```bash
-pip install pygame-ce
-```
-
-Use the PyGame board config. From a clone, copy or symlink before running:
-
-```bash
-cp ../board_configs/pgdisplay/board_config.py lib/board_config.py
 cd pydisplay/src
-export PYTHONPATH=.:lib:utils
+export PYTHONPATH=.:utils:../../micropython-hardware/lib:../../micropython-hardware/utils:../../micropython-hardware/drivers/display:../../micropython-hardware/drivers/audio
 python3 examples/pydisplay_demo.py
 ```
 
-Or install via MIP on MicroPython Unix:
+To select a specific host config, add the desired
+`micropython-hardware/board_configs/...` directory before the other entries.
 
-```python
-mip.install("github:PyDevices/micropython-hardware/board_configs/pgdisplay")
-```
+| Config | Display |
+|---|---|
+| `board_configs/desktop` | AutoDisplay |
+| `board_configs/sdldisplay` | SDLDisplay |
+| `board_configs/pgdisplay` | PGDisplay |
+| `board_configs/windisplay` | WinDisplay |
 
-| Config path | Display class |
-|-------------|---------------|
-| `board_configs/sdldisplay/` | `SDLDisplay` (SDL2) |
-| `board_configs/pgdisplay/` | `PGDisplay` (PyGame) |
-| `board_configs/windisplay/` | `WinDisplay` (Windows CPython) |
+## Runtime and timers
 
-The default desktop bundle (`board_configs/desktop/`) uses `displaydev.auto.AutoDisplay`, which selects `WinDisplay` on Windows CPython when `uwin32` imports, then `PGDisplay` when PyGame is installed, otherwise `SDLDisplay`.
+The board config exports host input and `timer_async` preferences but no
+runtime. Non-LVGL examples instantiate optional eventsys through `app_runtime`;
+LVGL examples use `display_driver`.
 
-## MicroPython on Unix
+`multimer` selects an appropriate host backend. It avoids mixing the SDL timer
+backend into pygame processes and falls back to threading or polling where
+needed. See [multimer](../concepts/multimer.md) for the detailed matrix.
 
-Same layout as CPython, but use the MicroPython interpreter and `MICROPYPATH` instead of `PYTHONPATH`:
+## MicroPython and CircuitPython on Unix
 
-```bash
-cd pydisplay/src
-export MICROPYPATH=.:lib:utils
-micropython examples/pydisplay_demo.py
-```
+Use the same source layout with `MICROPYPATH` and the desired interpreter. The
+desktop MIP board package supplies `board_config.py` and `usdl2.py` when a native
+`usdl2` module is not frozen into the firmware.
 
-Install SDL2/PyGame for your OS first; MicroPython Unix builds vary in bundled modules.
+## Linux KMS
+
+For Linux without X11/Wayland, install the
+`board_configs/sdldisplay/linux_kms` board config. It sets
+`SDL_VIDEODRIVER=kmsdrm` before SDL initializes. The host needs an SDL build with
+KMSDRM support, access to `/dev/dri`, and no competing DRM master.
+
+| Path | Selection | Use case |
+|---|---|---|
+| Normal desktop | X11/Wayland default | Desktop session |
+| KMS | `SDL_VIDEODRIVER=kmsdrm` | Direct scanout without a window manager |
+| Headless CI | `SDL_VIDEODRIVER=dummy` | Automated tests |
 
 ## Input
 
-Mouse events map to touch events. Keyboard and encoder devices work on desktop the same as on embedded targets.
-
-## Linux KMS (no window manager)
-
-For embedded Linux **without** X11/Wayland (Pi console, kiosk, headless HDMI), use SDL’s **kmsdrm** video driver with the existing `SDLDisplay` + `usdl2` stack — not a native `/dev/fb0` path.
-
-**Board config:** `board_configs/sdldisplay/linux_kms/` sets `SDL_VIDEODRIVER=kmsdrm` before `SDLDisplay` initializes and opens a fullscreen window.
-
-```bash
-# Install the KMS config (clone or MIP), then run as usual from src/
-cp ../board_configs/sdldisplay/linux_kms/board_config.py lib/board_config.py
-# or: mip.install("github:PyDevices/micropython-hardware/board_configs/sdldisplay/linux_kms")
-cd pydisplay/src
-export PYTHONPATH=.:lib:utils
-python3 examples/pydisplay_demo.py
-```
-
-**Prerequisites**
-
-- `libsdl2` built with the **kmsdrm** backend (stock Debian/Raspberry Pi OS packages usually are)
-- Access to `/dev/dri/*` (user in `video` / `render` group, or root)
-- A free VT / no competing DRM master (stop the desktop session first)
-- Input via SDL (evdev keyboards, mice, gamepads)
-
-**Contrast**
-
-| Path | Env / config | Use when |
-|------|----------------|----------|
-| Desktop Linux (this page above) | default SDL (x11/wayland) | Normal desktop session |
-| **KMS** | `SDL_VIDEODRIVER=kmsdrm` + `sdldisplay/linux_kms` | No WM; direct scanout |
-| Headless CI | `SDL_VIDEODRIVER=dummy` | No display hardware |
-
-Native Linux fbdev/DRM modules are **out of scope** until this SDL KMS path is insufficient.
-
-## Single-board computers
-
-CircuitPython with Blinka on Raspberry Pi and similar boards is planned but not fully tested. For **CPython + HDMI without a desktop**, prefer [Linux KMS](#linux-kms-no-window-manager) above. Track other SBC work on [GitHub Issues](https://github.com/PyDevices/pydisplay/issues).
+Mouse input maps to touch-style events. Keyboard, encoder, and joystick adapters
+use the same application-facing event model as embedded boards.

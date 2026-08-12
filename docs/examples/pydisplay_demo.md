@@ -3,7 +3,7 @@
 !!! tip "Need a minimal template?"
     Copy the [**App starter**](app-starter.md) boilerplate to begin your first app without rotation or scrolling.
 
-[`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py) is the recommended feature demo for pydisplay. It is a single file that uses only **`src/lib`** modules — no `utils`, no `tft_config`, no `displaybuf`.
+[`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py) is the recommended feature demo. It uses published product packages plus pydisplay's explicit `app_runtime` helper.
 
 It demonstrates:
 
@@ -20,16 +20,15 @@ Desktop-oriented sync demo (not in the PyScript gallery; see the async variant b
 From a [full clone](../installation/full-clone.md), set `PYTHONPATH`/`MICROPYPATH`, `cd src`, then run the example directly:
 
 ```bash
-cd src
-export PYTHONPATH=.:lib:utils
-python3 examples/pydisplay_demo.py
+cd pydisplay/src
+../.venv/bin/python examples/pydisplay_demo.py
 ```
 
-Desktop (SDL board config) — put `board_configs/sdldisplay` ahead of the default on the path:
+With sibling source checkouts instead of installed packages:
 
 ```bash
-cd src
-export PYTHONPATH=../board_configs/sdldisplay:.:lib:utils
+cd pydisplay/src
+export PYTHONPATH=.:utils:../../micropython-hardware/lib:../../micropython-hardware/drivers/display
 python3 examples/pydisplay_demo.py
 ```
 
@@ -68,7 +67,7 @@ Constants in the script: `TOP = 36`, `BOT = 20`, `ROW = 20` (height of each tip 
 | Import | Role |
 |--------|------|
 | `board_config.display_drv` | Platform display driver (SDL, BusDisplay, …) |
-| `board_config.runtime` | Input event runtime (touch / mouse) |
+| `app_runtime.runtime` | Example-owned input event runtime (touch / mouse) |
 | `displaydev.color565` | RGB → RGB565 color values |
 | `pygraphics.Area` | Rectangle hit-testing for buttons |
 | `pygraphics.Font`, `FrameBuffer`, `RGB565` | Text rendered in RAM, blitted once |

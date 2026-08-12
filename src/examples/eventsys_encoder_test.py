@@ -2,7 +2,8 @@
 A simple test of an encoder in eventsys.
 """
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 
 color_byte = 1
 bg_color = 0xFF00

@@ -34,7 +34,7 @@ def _ensure_user_micropy_lib(env: dict) -> None:
 
     A shell ``MICROPYPATH=.:lib:utils`` *replaces* the interpreter default path,
     which drops both ``.frozen`` (lvgl / ``display_driver``) and
-    ``~/.micropython/lib`` (``board_config`` from pydisplay-desktop / mip).
+    ``~/.micropython/lib`` (``board_config`` from pydevices-desktop / mip).
     Append those entries when missing so subprocess runtimes still resolve them
     after the working-tree ``lib/`` prefix.
     """

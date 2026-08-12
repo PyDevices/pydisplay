@@ -23,7 +23,7 @@ Writes "Hello!" in a tiny font in random colors at random locations on the Displ
 
 """
 
-from board_config import runtime
+from app_runtime import runtime
 
 from random import getrandbits
 

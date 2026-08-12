@@ -22,11 +22,12 @@ periodic render ticks). Build the UI, then keep the app alive with
 ```python
 import board_config
 import pdwidgets as pd
+from app_runtime import runtime
 
-display = pd.Display(board_config.display_drv, board_config.runtime)
+display = pd.Display(board_config.display_drv, runtime)
 screen = pd.Screen(display)
 # ... build UI ...
-board_config.runtime.run_forever()
+runtime.run_forever()
 ```
 
 pdwidgets owns no timer of its own — frames are driven from the shared runtime

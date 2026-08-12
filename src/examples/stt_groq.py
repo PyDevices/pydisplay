@@ -14,6 +14,7 @@ if not GROQ_API_KEY:
     raise RuntimeError("GROQ_API_KEY is not set in the environment")
 
 import board_config as bc
+from app_runtime import runtime
 from stt import GroqSTT, STTClient
 
 
@@ -48,14 +49,14 @@ def _desktop():
         global _recording
         if event.key != keys.K_LCTRL:
             return
-        held[0] = event.type == bc.runtime.events.KEYDOWN
+        held[0] = event.type == runtime.events.KEYDOWN
         if held[0] and not _recording:
             _recording = True
             _thread.start_new_thread(_transcribe, (lambda: held[0],))
 
-    bc.runtime.on([bc.runtime.events.KEYDOWN, bc.runtime.events.KEYUP], on_key)
+    runtime.on([runtime.events.KEYDOWN, runtime.events.KEYUP], on_key)
     print("stt_groq: hold Left Ctrl to talk; release to transcribe")
-    bc.runtime.run_forever()
+    runtime.run_forever()
 
 
 def _microcontroller():
@@ -69,7 +70,7 @@ def _microcontroller():
             _recording = True
             _transcribe(pressed)
         try:
-            bc.runtime.poll()
+            runtime.poll()
         except AttributeError:
             pass
         if hasattr(time, "sleep_ms"):

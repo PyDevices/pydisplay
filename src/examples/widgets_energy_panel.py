@@ -12,6 +12,7 @@ alert threshold.
 import random
 
 import board_config
+from app_runtime import runtime
 import pdwidgets as pd
 
 pd.DEBUG = False
@@ -27,9 +28,9 @@ try:
 except Exception:
     pass
 
-display = pd.Display(display_drv, board_config.runtime)
+display = pd.Display(display_drv, runtime)
 pal = display.pal
-runtime = board_config.runtime
+runtime = runtime
 
 W = display.width
 H = display.height

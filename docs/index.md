@@ -1,58 +1,63 @@
-# PyDisplay
+# PyDisplay examples and integrations
 
-**Write your graphics code once. Run it everywhere Python runs.**
+**See the portable PyDevices driver stack in action.**
 
-PyDisplay is the portable foundation layer for Python graphics — **display drivers, unified input events, drawing primitives, fonts, palettes, and cross-platform timers** behind a single API. The same drawing code runs unchanged on a microcontroller, on your desktop, in a web browser, and inside a Jupyter Notebook. The published packages are pure-Python: CPython wheels are published on TestPyPI, and MicroPython packages are served through micropython-lib / MIP.
+This site documents the examples, third-party GUI integrations, and PyScript
+gallery in the `pydisplay` repository. Reusable package source, hardware drivers,
+board configs, and publishing live in
+[`micropython-hardware`](https://github.com/PyDevices/micropython-hardware).
 
-The mental model is simple: import ``board_config`` for ``display_drv`` and ``runtime``, draw into the display using the usual framebuffer-style calls, handle input with the shared runtime, and keep the app alive with ``runtime.run_forever()``. That pattern scales from a one-file demo to a larger widget stack.
-
-PyDisplay is a *foundation*, not a GUI toolkit. Use it directly for simple UIs, or as the backend for [LVGL](guis/lvgl.md), [Nano-GUI](guis/nano-gui.md), [Micro-GUI](guis/micro-gui.md), [MicroPython-Touch](guis/micropython-touch.md), [pdwidgets](guis/pywidgets.md), or your own widget library.
+The same examples can run on MicroPython, CircuitPython, and CPython across
+microcontrollers, desktop hosts, browsers, Android, Wokwi, and Jupyter notebooks.
 
 !!! warning "Alpha quality"
-    PyDisplay is under active development. APIs and documentation are still evolving. [Feedback and pull requests](contributing.md) are welcome.
+    The organization is being prepared for its first external users, so names
+    and APIs may still evolve.
 
 | ![paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/paint.png) | ![tiny_toasters](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/tiny_toasters.gif) |
 |:--:|:--:|
 | `paint.py` | `tiny_toasters.py` |
 
-More in the [screenshot gallery](screenshots/README.md).
+More examples are in the [screenshot gallery](screenshots/README.md).
 
-## It runs everywhere
-
-Portability is PyDisplay's headline feature — MicroPython, CircuitPython, and
-CPython across MCU, desktop, browser (PyScript / Wokwi), and Jupyter. Develop on
-your laptop with a mouse, then deploy the *same* code to a touchscreen on an
-ESP32. Full matrix and backend notes: **[Portability & platforms](platforms/index.md)**.
-
-## 🚀 Get started
+## Start here
 
 | I want to… | Start here |
-|------------|------------|
-| Try it with no install | [Try PyDisplay](try/index.md) |
-| Install the browser gallery as an app | [Where PWAs run](platforms/pwa.md) |
+|---|---|
+| Run an example without installing anything | [Live PyScript gallery](https://PyDevices.github.io/pydisplay/pyscript/) |
+| Make my own browser-installable app | [PyScript PWA guide](guides/pyscript-pwa.md) |
+| Install product packages or configure a board | [micropython-hardware workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html) |
+| Run the examples on desktop | [Desktop CPython guide](guides/desktop-cpython.md) |
 | Run on an ESP32 / MicroPython board | [ESP32 board guide](guides/esp32-board.md) |
-| Develop on desktop (CPython) | [Desktop CPython guide](guides/desktop-cpython.md) |
-| See every starting path | [Getting started](getting-started.md) |
-| Understand the design | [Architecture](concepts/architecture.md) |
+| Browse every example | [Example catalog](examples/index.md) |
+| Understand the application wiring | [Architecture](concepts/architecture.md) |
 
-## Key features
+## Product and showcase
 
-- **One API, every platform** — `framebuf`-compatible drawing on MicroPython, CircuitPython, and CPython.
-- **Unified input** — touch, mouse, keyboard, keypad, rotary encoder, and joystick all arrive as the same PyGame/SDL2-style [events](concepts/events.md).
-- **Cross-platform timers** — [`multimer`](concepts/multimer.md) gives you `machine.Timer`-style and `asyncio` timers even on hosts that have neither.
-- **Installable browser apps** — the [PyScript gallery](https://PyDevices.github.io/pydisplay/pyscript/) is a [Progressive Web App](platforms/pwa.md) (desktop, Android Chrome, iOS home screen).
-- **Batteries included** — 30 board configs, 60+ [examples](examples/index.md), a [browser demo](https://PyDevices.github.io/pydisplay/pyscript/), and a [Wokwi](guides/wokwi.md) project.
-- **Flexible install** — [full clone](installation/full-clone.md), one-line [MIP packages](installation/mip-github.md), or precompiled `.mpy` bytecode.
+`micropython-hardware` is the product repository. It owns `displaydev`,
+`audiodev`, `events`, `keys`, `multimer`, optional `eventsys`, board configs,
+board devices, hardware drivers, and their TestPyPI/MIP release automation.
 
-## Build GUIs on top of it
+`pydisplay` is the showcase. It owns examples, application utilities, integration
+guides, the PyScript gallery, and the reusable PWA shell.
 
-PyDisplay is the graphics, input, and timing backend for a growing family of LVGL bindings — [lvgl-micropython](https://github.com/PyDevices/lvgl-micropython), [lvgl-circuitpython](https://github.com/PyDevices/lvgl-circuitpython), and [lvgl-python](https://github.com/PyDevices/lvgl-python). You can build an LVGL app in pure Python, **develop it interactively in a Jupyter Notebook**, and run the identical code on a microcontroller. See [Ecosystem & sister projects](ecosystem.md).
+Board configs export hardware capabilities but do not instantiate an application
+runtime. Non-LVGL examples explicitly import `runtime` from `app_runtime`; LVGL
+examples import `runtime` from `display_driver`, whose implementation is shared
+by the LVGL binding repositories and is independent of `eventsys`.
+
+## Package naming
+
+TestPyPI distribution names use `pydevices-` (for example,
+`pydevices-displaydev`). Python imports and MIP package names stay unprefixed
+(`import displaydev`, `mip.install("displaydev", ...)`). See the
+[installation guide](installation/index.md) for the complete mapping.
 
 ## Quick links
 
-| Resource | URL |
-|----------|-----|
-| Browser demo | [PyDevices.github.io/pydisplay/pyscript/](https://PyDevices.github.io/pydisplay/pyscript/) |
-| Source | [github.com/PyDevices/pydisplay](https://github.com/PyDevices/pydisplay) |
-| MIP package index | [PyDevices micropython-lib](https://PyDevices.github.io/micropython-lib/mip/PyDevices) |
-| Issues & roadmap | [GitHub Issues](https://github.com/PyDevices/pydisplay/issues) |
+| Resource | Link |
+|---|---|
+| Browser gallery | [PyDevices.github.io/pydisplay/pyscript](https://PyDevices.github.io/pydisplay/pyscript/) |
+| Product source | [PyDevices/micropython-hardware](https://github.com/PyDevices/micropython-hardware) |
+| Example source | [PyDevices/pydisplay](https://github.com/PyDevices/pydisplay) |
+| MIP index | [PyDevices micropython-lib](https://PyDevices.github.io/micropython-lib/mip/PyDevices) |

@@ -27,7 +27,7 @@ https://www.youtube.com/watch?v=2cnAhEucPD4
 
 """
 
-from board_config import runtime
+from app_runtime import runtime
 
 from multimer import ticks_add, ticks_diff, ticks_ms
 

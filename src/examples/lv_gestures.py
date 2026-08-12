@@ -27,12 +27,10 @@ else:
 if _src not in sys.path:
     sys.path.insert(0, _src)
 
-from board_config import display_drv, runtime  # noqa: E402
-
-if runtime is not None and "display_driver" not in sys.modules:
-    runtime.stop_timer()
-
+from board_config import display_drv  # noqa: E402
+import display_driver as dd  # noqa: E402
 import lvgl as lv  # noqa: E402
+from display_driver import runtime  # noqa: E402
 
 # Struct present when LV_USE_GESTURE_RECOGNITION is on (all ports).
 _GESTURE_OK = hasattr(lv, "indev_touch_data_t") and hasattr(lv, "INDEV_GESTURE")
@@ -53,8 +51,6 @@ def _event_pinch_scale(e):
 
 
 def build_ui():
-    import display_driver as dd
-
     inst = dd.event_loop.current_instance()
     if inst is not None:
         inst.disable()
@@ -103,15 +99,13 @@ def build_ui():
         }
 
         def _pointer_dev():
-            import eventsys
-
             drv = getattr(dd, "_driver_ref", None)
             if drv is not None:
                 for vd in getattr(drv, "virtual_devices", ()) or ():
                     for d in getattr(vd, "devices", ()) or ():
-                        if getattr(d, "type", None) == eventsys.POINTER:
+                        if getattr(d, "type", None) == dd.POINTER:
                             return d
-            if runtime is not None and getattr(runtime, "touch_dev", None) is not None:
+            if getattr(runtime, "touch_dev", None) is not None:
                 return runtime.touch_dev
             return None
 
@@ -212,5 +206,4 @@ def build_ui():
 # the app alive or returns immediately on an interactive REPL with a
 # self-driving timer.
 build_ui()
-if runtime is not None:
-    runtime.run_forever()
+runtime.run_forever()

@@ -163,7 +163,7 @@ _src = (_root + "/src") if _root not in (".", "") else "src"
 _src_lib = _src + "/lib"
 _src_utils = _src + "/utils"
 _hw_lib = _root + "/../micropython-hardware/lib"
-# Prefer src/lib so eventsys/displaydev resolve from repo root or src/.
+# Prefer the canonical micropython-hardware checkout for eventsys/displaydev.
 for _p in (_hw_lib, _src_lib, _src_utils, _src, _tools):
     if _p and _p not in sys.path:
         sys.path.insert(0, _p)
@@ -487,14 +487,15 @@ def print_fixes():
 # Interactive host probe
 # ---------------------------------------------------------------------------
 def run_interactive(show_lvgl=False):
-    from board_config import runtime
-
     if show_lvgl:
         if not _try_import_lvgl_mapper():
             print("WARN: --lvgl requested but display_driver/lvgl unavailable")
             show_lvgl = False
         else:
             print("LVGL mapper: display_driver._lv_key_from_event")
+        from display_driver import runtime
+    else:
+        from app_runtime import runtime
 
     downs = {}
     pressed = set()

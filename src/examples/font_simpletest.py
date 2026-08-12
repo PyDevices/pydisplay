@@ -12,7 +12,8 @@ Cycles three rendering paths in succession (no env vars):
   displaybuf   — full-screen DisplayBuffer + dirty show (utils)
 """
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 from random import getrandbits
 from pygraphics import Font, FrameBuffer, RGB565
 from palettes import get_palette

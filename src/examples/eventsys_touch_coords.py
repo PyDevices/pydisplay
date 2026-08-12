@@ -4,7 +4,8 @@
 
 import sys
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 import eventsys
 import events
 

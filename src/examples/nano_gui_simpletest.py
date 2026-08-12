@@ -9,7 +9,7 @@ https://github.com/peterhinch/micropython-nano-gui/tree/master?tab=readme-ov-fil
 ``fetch_ph_gui`` (via the matching setup module) installs the GUI on desktop and in the browser.
 """
 
-from board_config import runtime
+from app_runtime import runtime
 from color_setup import ssd  # Create a display instance
 from gui.core.colors import RED, BLUE, GREEN
 from gui.core.nanogui import refresh

@@ -6,15 +6,22 @@ Must stay importable on MicroPython, CircuitPython, and CPython.
 """
 
 
+def current_runtime():
+    """Return the runtime selected by the current application."""
+    import sys
+
+    display_driver = sys.modules.get("display_driver")
+    if display_driver is not None:
+        runtime = getattr(display_driver, "runtime", None)
+        if runtime is not None:
+            return runtime
+    from app_runtime import runtime
+
+    return runtime
+
+
 def queue_device():
-    from board_config import runtime
-
-    import eventsys
-
-    for dev in runtime.devices:
-        if dev.type == eventsys.HOST:
-            return dev
-    return None
+    return getattr(current_runtime(), "host_dev", None)
 
 
 def host_point(x, y):
@@ -69,9 +76,7 @@ def service_host_events(count=15, delay_s=0.02, broker_poll=True):
     runtime = None
     if broker_poll:
         try:
-            from board_config import runtime as _broker
-
-            runtime = _broker
+            runtime = current_runtime()
         except Exception:
             runtime = None
 
@@ -181,9 +186,7 @@ def inject_quit(*, broker_poll=True, pump_count=15, pump_delay=0.02, lvgl=False,
             service_host_events(pump_count, pump_delay, broker_poll=broker_poll)
         if broker_poll:
             try:
-                from board_config import runtime
-
-                runtime.poll()
+                current_runtime().poll()
             except Exception:
                 pass
     finally:

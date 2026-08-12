@@ -23,9 +23,13 @@ See **[Run the notebook interactively](jupyter-run.md)** for install commands, `
 
 1. `pip install pillow ipywidgets ipyevents jupyterlab`
 2. Open [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb) from the repo clone, or generate one with `./bin/jupyter.sh <example>`.
-3. Run cells top to bottom. The board-config cell prefers `PYTHONPATH`/`MICROPYPATH` set to `.:lib:utils` with the kernel `cwd` under `src/` (`./bin/jupyter.sh` sets this for you); for fallback when environment variables are unavailable or not set as recommended, see [Utils path setup](../utils.md#path-setup).
+3. Run cells top to bottom. `./bin/jupyter.sh` configures pydisplay utilities and
+   installed or sibling product packages. For fallback path discovery, see
+   [Utils path setup](../utils.md#path-setup).
 
-Board config: `board_configs/jndisplay/board_config.py` (registers `JNDevices` as a `QUEUE` device).
+Board config: `micropython-hardware/board_configs/jndisplay/board_config.py`.
+It exports the Jupyter display and host reader; `app_runtime` registers the
+corresponding host device.
 
 Touch examples (e.g. [`eventsys_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_touch_test.py)) render a single interactive **ipywidgets Image** — click on that widget.
 
@@ -33,7 +37,10 @@ Touch examples (e.g. [`eventsys_touch_test.py`](https://github.com/PyDevices/pyd
 
 ## Async execution model
 
-The Jupyter board config constructs `runtime` with `timer_async=True`. Touch-driven examples use `runtime.timer_async` to run an `asyncio` main loop instead of a blocking one, because the notebook kernel already drives an event loop and `ipyevents` callbacks (mouse events) are only delivered when control returns to it.
+The Jupyter board config exports `timer_async=True`; the application coordinator
+consumes that preference. Touch-driven examples use `runtime.timer_async` to run
+an `asyncio` main loop because the notebook kernel already drives an event loop
+and widget callbacks are delivered only when control returns to it.
 
 Examples keep the app alive with **`runtime.run_forever()`** (subscribe callbacks, then run). For a custom async `main()`, use **`runtime.run_async(main)`** rather than `asyncio.run(main())`. On Jupyter the kernel already has a running loop, so `run_async` schedules `main` as a background task and returns immediately (the cell finishes while the coroutine continues). On desktop/MCU with no loop running yet, it blocks via `asyncio.run`. Calling `asyncio.run(main())` directly in a notebook raises `RuntimeError: asyncio.run() cannot be called from a running event loop`.
 

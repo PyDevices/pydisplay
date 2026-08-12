@@ -8,7 +8,7 @@ pydisplay does **not** vendor Nano-GUI in the git repo. [`color_setup.py`](https
 
 | Component | Location | Notes |
 |-----------|----------|-------|
-| `board_config.py` | `board_configs/` or `src/lib/` | pydisplay display and touch setup |
+| `board_config.py` | `micropython-hardware/board_configs/` | display and neutral touch setup |
 | `color_setup.py` | `src/utils/` | Ships with pydisplay — fetches nano-gui, creates `ssd` |
 | `fetch_ph_gui.py` | `src/utils/` | mip install + FrameBuffer patches |
 | `gui/` | `src/utils/gui/` | **Upstream** — installed by fetch (not in git) |

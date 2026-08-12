@@ -1,6 +1,6 @@
 # Docstring conventions
 
-Public API docstrings in `src/lib/` and `src/utils/` are rendered on [ReadTheDocs](https://pydisplay.readthedocs.io) via mkdocstrings. Follow these rules so generated reference pages stay accurate.
+Public helper docstrings in `src/utils/` are rendered on [ReadTheDocs](https://pydisplay.readthedocs.io) via mkdocstrings. Product API documentation and source live in `micropython-hardware`. Follow these rules so generated reference pages stay accurate.
 
 ## Style
 

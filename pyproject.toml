@@ -82,7 +82,7 @@ lint.ignore = [
   "W191",  # tab-indent, redundant when using formatter
 ]
 line-length = 99
-target-version = "py38"  # walrus operator (:=) used throughout src/lib
+target-version = "py38"  # keep utilities compatible with MicroPython-era Python syntax
 
 
 [tool.ruff.lint.isort]

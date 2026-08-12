@@ -52,23 +52,27 @@ MCU MicroPython.
 
 ## Unix (desktop MicroPython)
 
-Same workflow as [CPython desktop](cpython-desktop.md): `cd src`, set `MICROPYPATH=.:lib:utils`, and run `micropython examples/<name>.py` instead of `python3 examples/<name>.py`.
+Use the same sibling source layout as [CPython desktop](cpython-desktop.md), set
+`MICROPYPATH` to pydisplay's `src`/`utils` plus the canonical hardware source
+trees, and run `micropython examples/<name>.py`.
 
-Use `board_configs/sdldisplay/` or the default `src/lib/board_config.py` for SDL2-based desktop display.
+Install the desktop MIP board package or select a
+`micropython-hardware/board_configs/sdldisplay` config for SDL2 output.
 
 ## Desktop SDL (`usdl2`)
 
 `SDLDisplay` and the `multimer` `sdl2` timer backend import **`usdl2`** (an SDL2 subset). On desktop hosts, install it with the rest of the desktop board stack:
 
-- **CPython:** [`pydisplay-desktop`](https://pydevices.github.io/micropython-hardware/pydisplay-desktop.html) from TestPyPI (two-index pip — see [publishing](../publishing-micropython-lib.md#two-index-pip-install-required)), which bundles `usdl2` with the desktop `board_config`
+- **CPython:** [`pydevices-desktop`](https://pydevices.github.io/micropython-hardware/pydevices-desktop.html) from TestPyPI (use the [two-index install](../installation/index.md#pypi--pip-testpypi)), which bundles `usdl2` with the desktop `board_config`
 - **MicroPython / CircuitPython Unix (and `micropython.exe`):** the MIP desktop board package from [micropython-hardware](https://github.com/PyDevices/micropython-hardware) (`board_configs/desktop`, which pulls in `drivers/usdl2.py`)
 
-When a native `usdl2` module is already present in the firmware or environment, that build is used; otherwise the pure-Python binding from `pydisplay-desktop` / the MIP desktop board provides `import usdl2`. Desktop MicroPython / CircuitPython unix firmware that includes [displayif](https://github.com/PyDevices/displayif) freezes native `usdl2` (it wins over MIP `lib/usdl2.py`). Timer auto-selection is unchanged (`multimer` still prefers `_librt` or threading backends first on each platform).
+When a native `usdl2` module is already present in the firmware or environment, that build is used; otherwise the pure-Python binding from `pydevices-desktop` / the MIP desktop board provides `import usdl2`. Desktop MicroPython / CircuitPython unix firmware that includes [displayif](https://github.com/PyDevices/displayif) freezes native `usdl2` (it wins over MIP `lib/usdl2.py`). Timer auto-selection is unchanged (`multimer` still prefers `_librt` or threading backends first on each platform).
 
 ## Frozen firmware
 
-The repo-root `manifest.py` lists packages for frozen MicroPython builds and
-**freezes `asyncio` on unix and windows ports** (required for `multimer.AsyncTimer`).
+The product repo's `micropython-hardware/manifest.py` lists the canonical core
+packages for frozen MicroPython builds. Upstream port manifests remain
+responsible for `asyncio` where `multimer.AsyncTimer` is needed.
 
 Clone this repo as a sibling of `micropython/` (and any native usermods such as
 [pygraphics](https://github.com/PyDevices/pygraphics)),
@@ -79,14 +83,15 @@ enables `MICROPY_PY_ASYNCIO` and `select` (e.g. `dev`):
 ```bash
 # workspace/
 #   micropython/
-#   pydisplay/     ← this repo
-#   graphics/      ← optional
+#   micropython-hardware/  ← product packages
+#   pydisplay/             ← examples
+#   pygraphics/            ← optional native module
 
 cd micropython/ports/unix
-make USER_C_MODULES=../../.. FROZEN_MANIFEST=../../../pydisplay/manifest.py
+make USER_C_MODULES=../../.. FROZEN_MANIFEST=../../../micropython-hardware/manifest.py
 
 cd micropython/ports/windows
-make USER_C_MODULES=../../.. FROZEN_MANIFEST=../../../pydisplay/manifest.py
+make USER_C_MODULES=../../.. FROZEN_MANIFEST=../../../micropython-hardware/manifest.py
 # use a board/variant that enables asyncio/select as needed
 ```
 

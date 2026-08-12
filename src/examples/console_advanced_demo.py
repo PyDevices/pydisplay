@@ -73,7 +73,7 @@ console.label(Console.LEFT, platform, pal.RED)
 display_drv.show()
 
 if _test_mode:
-    from board_config import runtime
+    from app_runtime import runtime
 
     console.write("console_advanced_demo: smoke test\n", pal.GREEN)
     display_drv.show()

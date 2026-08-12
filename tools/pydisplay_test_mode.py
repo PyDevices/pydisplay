@@ -31,11 +31,12 @@ def check_deadline():
     # import used to start the clock, fire with no runtime, set
     # ``_deadline_fired``, then never quit once the blocking loop started.
     try:
-        import board_config
+        import sys
 
-        rt = getattr(board_config, "runtime", None)
+        module = sys.modules.get("display_driver") or sys.modules.get("app_runtime")
+        rt = getattr(module, "runtime", None) if module is not None else None
     except Exception:
-        return False
+        rt = None
     if rt is None or not getattr(rt, "_blocking_run_forever", False):
         return False
     if getattr(rt, "_quit_requested", False):

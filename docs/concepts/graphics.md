@@ -280,4 +280,4 @@ See [Drawing and fonts](drawing-and-fonts.md) for the wider pydisplay drawing st
 
 - [Graphics files](graphics-files.md) — loaders and BMP565
 - [Displays](displays.md)
-- [API reference](../reference/) → `pygraphics`
+- [pygraphics source and API](https://github.com/PyDevices/pygraphics)

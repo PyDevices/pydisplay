@@ -6,7 +6,8 @@ Testris game implemented in MicroPython by Brad Barnett.
 """
 
 # For the display & optional touch drivers
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 from displaydev import alloc_buffer
 from eventsys.touch_keypad import TouchKeypad
 from eventsys.joystick_keys import JoystickKeys
