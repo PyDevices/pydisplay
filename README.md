@@ -20,7 +20,7 @@ for the PyDevices driver ecosystem. The reusable product source lives in
 - `displaydev` and `audiodev` provide portable display and audio interfaces.
 - `events`, `keys`, and `multimer` provide shared event, key, and timing primitives.
 - `eventsys` is an optional application traffic controller for non-LVGL apps.
-- `board_configs`, `board_devices`, and hardware drivers connect those interfaces
+- `board_configs`, `board_peripherals`, and hardware drivers connect those interfaces
   to real boards and desktop/browser hosts.
 
 Those libraries are designed to work across MicroPython, CircuitPython, and

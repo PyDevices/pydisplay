@@ -13,7 +13,7 @@
 #
 # Requires: python3, pip. Uses two-index install (TestPyPI primary, PyPI secondary).
 # Install usdl2 explicitly — it is not a pip dependency of displaydev.
-# See docs/publishing-micropython-lib.md#two-index-pip-install-required
+# See https://pydevices.github.io/pydevices/publishing.html
 
 set -euo pipefail
 

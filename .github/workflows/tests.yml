@@ -33,8 +33,8 @@ jobs:
           repository: PyDevices/pydevices
           path: pydevices
           sparse-checkout: |
-            drivers/display/displaydev
-            drivers/audio/audiodev
+            lib/displaydev
+            lib/audiodev
             lib
             utils
           sparse-checkout-cone-mode: false

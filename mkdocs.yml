@@ -131,7 +131,6 @@ nav:
     - Contributing: contributing.md
     - Docstring conventions: contributing/docstrings.md
     - Building docs: building-docs.md
-    - Publishing micropython-lib: publishing-micropython-lib.md
     - Getting help: getting-help.md
     - Troubleshooting: troubleshooting.md
 - API reference:

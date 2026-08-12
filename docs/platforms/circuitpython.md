@@ -19,7 +19,7 @@ pydevices-examples works with CircuitPython using Adafruit bus drivers and `fram
 
 CircuitPython configs live under [`board_configs/cp/`](https://github.com/PyDevices/pydevices/tree/main/board_configs/cp) in pydevices. MicroPython configs stay at the top level of `board_configs/` (not under an `mp/` folder).
 
-CP configs do **not** ship `board_devices.py` or lazy `DEVICES` — CircuitPython’s
+CP configs do **not** ship `board_peripherals.py` or lazy `PERIPHERALS` — CircuitPython’s
 native `board` module covers pins/buses. Each CP `board_config.py` provides
 `display_drv` and neutral input readers/capabilities when present. The
 application instantiates `eventsys` or uses LVGL's `display_driver`.

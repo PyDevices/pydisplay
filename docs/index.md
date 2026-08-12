@@ -36,7 +36,7 @@ More examples are in the [screenshot gallery](screenshots/README.md).
 
 `pydevices` is the product repository. It owns `displaydev`,
 `audiodev`, `events`, `keys`, `multimer`, optional `eventsys`, board configs,
-board devices, hardware drivers, and their TestPyPI/MIP release automation.
+board peripherals, hardware drivers, and their TestPyPI/MIP release automation.
 
 `pydevices-examples` is the showcase. It owns examples, application utilities, integration
 guides, the PyScript gallery, and the reusable PWA shell.

@@ -54,7 +54,7 @@ pip install \
 - **`-i` TestPyPI** — primary index for prefixed PyDevices distributions (`pydevices-displaydev`, `pydevices-eventsys`, `pydevices-desktop`, …).
 - **`--extra-index-url` PyPI** — secondary index for dependencies published only on [pypi.org](https://pypi.org) (for example `pygame-ce` when using `PGDisplay`; still `import pygame` at runtime).
 
-Omitting either index causes `pip` to fail: TestPyPI-only packages are not on PyPI, and PyPI-only dependencies are not on TestPyPI. See [product package publishing](../publishing-micropython-lib.md).
+Omitting either index causes `pip` to fail: TestPyPI-only packages are not on PyPI, and PyPI-only dependencies are not on TestPyPI. See the [product package publishing guide](https://pydevices.github.io/pydevices/publishing.html).
 
 For day-to-day desktop work without pip, use a [full clone](full-clone.md) or [desktop quick start](../guides/desktop-cpython.md).
 

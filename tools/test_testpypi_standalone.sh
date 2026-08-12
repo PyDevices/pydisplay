@@ -8,7 +8,7 @@
 #   ./tools/test_testpypi_standalone.sh
 #   ./tools/test_testpypi_standalone.sh --desktop   # also SDL + pygame stacks
 #
-# See docs/publishing-micropython-lib.md#two-index-pip-install-required
+# See https://pydevices.github.io/pydevices/publishing.html
 
 set -euo pipefail
 

@@ -1,12 +1,12 @@
 # gallery: skip
-"""Play PCM through a PCMInput into board_devices.audio_out (hearable).
+"""Play PCM through a PCMInput into board_peripherals.audio_out (hearable).
 
 Default (hearable on all hosts): write a 440 Hz tone via
 audiodev.emulated_audio WAV devices, read it back with the same PCMInput
-contract as audio_in, play on audio_out. Also opens board_devices.audio_in()
+contract as audio_in, play on audio_out. Also opens board_peripherals.audio_in()
 briefly to prove the host mic factory.
 
-Live mic path: pass --live to record ~3 s from board_devices.audio_in and play
+Live mic path: pass --live to record ~3 s from board_peripherals.audio_in and play
 that buffer back.
 """
 
@@ -70,7 +70,7 @@ def _self_feed(out, fmt):
 
 
 def _probe_audio_in():
-    import board_devices
+    import board_peripherals
 
     try:
         import pyscript  # noqa: F401
@@ -80,7 +80,7 @@ def _probe_audio_in():
     except Exception:
         pass
 
-    mic = board_devices.audio_in()
+    mic = board_peripherals.audio_in()
     print(
         "audio_in opened:",
         mic.format.channels,
@@ -131,18 +131,18 @@ def main(argv=None):
         "live=" + str(live),
     )
 
-    import board_devices
+    import board_peripherals
 
-    backend = getattr(board_devices, "_select_backend", lambda: "?")()
-    print("board_devices backend:", backend)
+    backend = getattr(board_peripherals, "_select_backend", lambda: "?")()
+    print("board_peripherals backend:", backend)
 
-    out = board_devices.audio_out()
+    out = board_peripherals.audio_out()
     fmt = out.format
     print("format:", fmt.channels, fmt.rate, fmt.bits, fmt.signed)
 
     try:
         if live:
-            mic = board_devices.audio_in()
+            mic = board_peripherals.audio_in()
             print("audio_in format:", mic.format.channels, mic.format.rate, mic.format.bits)
             _live_capture_playback(out, mic, fmt, seconds=3.0)
         else:

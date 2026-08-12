@@ -195,4 +195,4 @@ Known issues: Unix SDL rotation clears the screen; scrolling while rotated has e
 
 ## API reference
 
-[displaydev source and product docs](https://github.com/PyDevices/pydevices/tree/main/drivers/display/displaydev).
+[displaydev source and product docs](https://github.com/PyDevices/pydevices/tree/main/lib/displaydev).

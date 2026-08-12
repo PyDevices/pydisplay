@@ -1,5 +1,5 @@
 # gallery: skip
-"""440 Hz tone smoke test for board_devices.audio_out (no display/runtime)."""
+"""440 Hz tone smoke test for board_peripherals.audio_out (no display/runtime)."""
 
 import math
 import struct
@@ -9,14 +9,14 @@ import time
 
 def main():
     print(
-        "tone test (board_devices only, long) starting:",
+        "tone test (board_peripherals only, long) starting:",
         sys.implementation.name,
         sys.platform,
     )
 
-    import board_devices
+    import board_peripherals
 
-    out = board_devices.audio_out()
+    out = board_peripherals.audio_out()
     fmt = out.format
     print("format:", fmt.channels, fmt.rate, fmt.bits, fmt.signed)
 

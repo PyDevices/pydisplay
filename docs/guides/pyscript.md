@@ -106,4 +106,4 @@ Matrix notes (serve.py, Playwright install, `needs_playwright`):
 
 ## Reference
 
-- [displaydev source](https://github.com/PyDevices/pydevices/tree/main/drivers/display/displaydev)
+- [displaydev source](https://github.com/PyDevices/pydevices/tree/main/lib/displaydev)
