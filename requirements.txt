@@ -10,4 +10,4 @@ pydevices-pygraphics>=0.0.32
 pydevices-palettes>=0.0.8
 pydevices-pdwidgets>=0.0.15
 pydevices-desktop>=0.0.16
-pydevices-lvgl>=9.5.25
+pydevices-lvgl>=9.5.26
