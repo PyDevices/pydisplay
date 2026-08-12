@@ -12,7 +12,7 @@
 | `displaybuf.py` | `src/utils/` | `ssd` framebuffer |
 | `uctypes.py` | `src/utils/` | CircuitPython shim for `writer.py` |
 
-Upstream renamed `hardware_setup.py` → `touch_setup.py` (Dec 2024). pydisplay follows that name. Do **not** install upstream `drivers/` or `touch/` packages for the pydisplay bridge — input comes from `eventsys`.
+Upstream renamed `hardware_setup.py` → `touch_setup.py` (Dec 2024). pydisplay follows that name. Do **not** install upstream `drivers/` or `touch/` packages for the bridge — input comes from the selected board config and, for non-LVGL apps, the application-owned `eventsys` runtime.
 
 ## Config
 

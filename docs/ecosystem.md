@@ -4,7 +4,7 @@ PyDisplay is the graphics, input-event, and timing backend for the wider PyDevic
 
 ## LVGL sister projects
 
-Three sister projects wire PyDisplay into [LVGL](https://lvgl.io/) — the popular C graphics library — so you can build LVGL applications in pure Python. They use PyDisplay for the display flush, input events, and timing on each runtime:
+Three sister projects wire the PyDevices portable stack into [LVGL](https://lvgl.io/) — the popular C graphics library — so you can build LVGL applications in pure Python. They use `displaydev`, neutral board input, and `multimer` on each runtime, while pydisplay hosts the examples:
 
 | Project | Runtime | Role |
 |---------|---------|------|
