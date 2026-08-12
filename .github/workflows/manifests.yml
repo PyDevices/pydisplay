@@ -31,6 +31,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Checkout micropython-hardware product sources
+        uses: actions/checkout@v4
+        with:
+          repository: PyDevices/micropython-hardware
+          path: micropython-hardware
+          sparse-checkout: |
+            lib/eventsys
+          sparse-checkout-cone-mode: false
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
