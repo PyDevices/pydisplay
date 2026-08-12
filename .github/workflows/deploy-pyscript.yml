@@ -32,6 +32,7 @@ jobs:
           sparse-checkout: |
             utils
             lib/eventsys
+            lib/multimer
 
       - uses: actions/setup-python@v5
         with:
