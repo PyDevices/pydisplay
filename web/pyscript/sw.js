@@ -44,6 +44,8 @@ const NETWORK_FIRST_ASSETS = [
   './pyodide.html',
   './mp.html',
   './py.html',
+  './peterhinch.html',
+  './harness.html',
 ];
 
 const RUNTIME_ORIGINS = [

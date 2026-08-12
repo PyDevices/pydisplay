@@ -50,11 +50,11 @@ plugins:
     include_source: true
     execute: false
     include: ["platforms/jupyter-notebook.ipynb"]
-    ignore: ["src/*.ipynb", ".venv*/**/*.ipynb"]
+    ignore: ["lib/*.ipynb", ".venv*/**/*.ipynb"]
 - mkdocstrings:
     handlers:
       python:
-        paths: [src/utils]
+        paths: [lib/utils]
         options:
           show_source: false
           show_bases: false

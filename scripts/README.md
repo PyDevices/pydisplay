@@ -29,10 +29,10 @@ python scripts/gallery_generator.py --check
 ```
 
 `install_gen_manifests.py` enumerates pydevices-examples applications/utilities and the
-canonical sibling `pydevices/lib/{eventsys,multimer}` sources. The gallery keeps
-the historical virtual URLs `./src/lib/eventsys/...` and `./src/lib/multimer/...`,
-but pydevices-examples does not own second copies. The local server and Pages
-workflow map those URLs to the product source.
+canonical sibling `pydevices/lib/{eventsys,multimer}` sources. The gallery mounts
+them at `./lib/eventsys/...` and `./lib/multimer/...` (same browser tree as
+utils/examples). The local server and Pages workflow map those URLs to the
+product source.
 
 Normal gallery generation captures missing 240×320 thumbnails. Existing
 `web/pyscript/thumbnails/*.png` files are preserved; `--check` never launches

@@ -24,10 +24,10 @@ args = parser.parse_args()
 package_ver = "0.0.1"
 repo_url = "github:PyDevices/pydevices-examples/"
 repo_dir = os.getcwd() + "/"
-# Checkout tree (was historically named src/). Browser URLs stay under
-# web/pyscript/src/ via symlink → ../../lib (and the same layout on Pages).
+# Checkout tree and browser URLs both use lib/ (web/pyscript/lib → ../../lib
+# locally; deploy assembles the same layout under _site/pyscript/lib/).
 src_dir = "lib/"
-pyscript_url_dir = "src/"
+pyscript_url_dir = "lib/"
 output_dir = repo_dir
 packages_dir = "packages/"
 toml_full_path = output_dir + "web/pyscript/micropython.toml"
@@ -69,13 +69,13 @@ toml_exclude = ["examples"]
 # deploy-pyscript.yml map the URLs onto that tree so Pyodide can import mip
 # before other installs, and so keypins/wifi/byteswap examples resolve.
 toml_only_mounts: list[tuple[str, str]] = [
-    ("src/utils/byteswap.py", "/utils/"),
-    ("src/utils/frame_recorder.py", "/utils/"),
-    ("src/utils/keypins.py", "/utils/"),
-    ("src/utils/micropython.py", "/utils/"),
-    ("src/utils/mip.py", "/utils/"),
-    ("src/utils/viper_tools.py", "/utils/"),
-    ("src/utils/wifi.py", "/utils/"),
+    ("lib/utils/byteswap.py", "/utils/"),
+    ("lib/utils/frame_recorder.py", "/utils/"),
+    ("lib/utils/keypins.py", "/utils/"),
+    ("lib/utils/micropython.py", "/utils/"),
+    ("lib/utils/mip.py", "/utils/"),
+    ("lib/utils/viper_tools.py", "/utils/"),
+    ("lib/utils/wifi.py", "/utils/"),
 ]
 
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
@@ -109,7 +109,7 @@ def is_gitignored(path):
         return False
 
 
-# Paths in micropython.toml / pyodide.toml [files] — relative to web/pyscript/ (browser URL ./src/...).
+# Paths in micropython.toml / pyodide.toml [files] — relative to web/pyscript/ (browser URL ./lib/...).
 PYSCRIPT_TOML_SRC_PREFIX = "./"
 # Local interpreters under vendor/; PyScript config key replaces the CDN build.
 PYSCRIPT_INTERPRETER = "./vendor/micropython/micropython.mjs"
@@ -117,7 +117,7 @@ PYODIDE_INTERPRETER = "./vendor/pyodide/pyodide.mjs"
 
 
 def pyscript_toml_file_entry(browser_relative_path: str, mount: str) -> str:
-    """browser_relative_path e.g. src/utils/path.py; mount e.g. /utils/."""
+    """browser_relative_path e.g. lib/utils/path.py; mount e.g. /utils/."""
     return f'"{PYSCRIPT_TOML_SRC_PREFIX}{browser_relative_path}" = "{mount}"'
 
 
@@ -144,8 +144,8 @@ for rel_path, mount in toml_only_mounts:
     add_pyscript_file(rel_path, mount)
 
 # Optional product packages owned by pydevices. The gallery mounts them as a
-# baseline for non-LVGL examples (eventsys → multimer). Virtual URLs stay
-# ./src/lib/<pkg>/... for both the local server and the assembled Pages tree.
+# baseline for non-LVGL examples (eventsys → multimer). Browser URLs are
+# ./lib/<pkg>/... (serve.py remaps; deploy copies into _site/pyscript/lib/).
 _product_lib_root_candidates = (
     Path(repo_dir).resolve().parent / "pydevices" / "lib",
     Path(repo_dir).resolve() / "pydevices" / "lib",
@@ -162,7 +162,7 @@ for _pkg in ("eventsys", "multimer"):
         relative = source_path.relative_to(_pkg_root).as_posix()
         parent = relative.rsplit("/", 1)[0] if "/" in relative else ""
         mount = f"/lib/{_pkg}/{parent}/" if parent else f"/lib/{_pkg}/"
-        add_pyscript_file(f"src/lib/{_pkg}/{relative}", mount)
+        add_pyscript_file(f"lib/{_pkg}/{relative}", mount)
 master_toml.append("")
 # Iterate over the packages and create the package files
 for package_path, deps, extra_files in packages:
@@ -238,7 +238,7 @@ for package_name, contents in package_dicts.items():
 # Package JSON lives in packages/<name>.json and is served via web/pyscript/packages
 # (symlink → ../../packages). MicroPython mip resolves *file* URLs in the package
 # against the loader page base (…/web/pyscript/), not against packages/<name>.json —
-# same as the old web/pyscript/<name>.json layouts: use ./src/examples/….
+# same as the old web/pyscript/<name>.json layouts: use ./lib/examples/….
 # Only .py/.mpy/.json are listed (mip cannot install binary assets).
 examples_root = os.path.join(repo_dir, src_dir, "examples")
 example_package_names = []
@@ -263,7 +263,7 @@ for entry in sorted(os.listdir(examples_root)):
             rel_from_examples = os.path.relpath(full_file_path, examples_root).replace("\\", "/")
             # Loader page base is web/pyscript/ (see mip resolution); packages/ is only
             # where the manifest JSON is fetched from (via the symlink).
-            src_file = "./src/examples/" + rel_from_examples
+            src_file = "./lib/examples/" + rel_from_examples
             urls.append([rel_from_examples, src_file])
     package_file = output_dir + packages_dir + entry + ".json"
     if not urls:
@@ -277,9 +277,24 @@ for entry in sorted(os.listdir(examples_root)):
     example_package_names.append(entry)
 
 # Gallery loaders use `import ps_loader` (top-level); also mount at VFS root.
-add_pyscript_file("src/utils/ps_loader.py", "/")
+add_pyscript_file("lib/utils/ps_loader.py", "/")
 
-# web/pyscript/packages → ../../packages (same layout as web/pyscript/src).
+# web/pyscript/lib → ../../lib and web/pyscript/packages → ../../packages.
+pyscript_lib_link = os.path.join(output_dir, "web", "pyscript", "lib")
+lib_abs = os.path.join(output_dir, "lib")
+if os.path.islink(pyscript_lib_link) or os.path.exists(pyscript_lib_link):
+    if not os.path.islink(pyscript_lib_link):
+        raise SystemExit(f"{pyscript_lib_link} exists and is not a symlink")
+    if os.readlink(pyscript_lib_link) not in ("../../lib", lib_abs):
+        os.remove(pyscript_lib_link)
+        os.symlink("../../lib", pyscript_lib_link)
+else:
+    os.symlink("../../lib", pyscript_lib_link)
+# Drop the pre-rename browser symlink if still present.
+pyscript_src_link = os.path.join(output_dir, "web", "pyscript", "src")
+if os.path.islink(pyscript_src_link):
+    os.remove(pyscript_src_link)
+
 pyscript_packages_link = os.path.join(output_dir, "web", "pyscript", "packages")
 packages_abs = os.path.join(output_dir, packages_dir.rstrip("/"))
 if os.path.islink(pyscript_packages_link) or os.path.exists(pyscript_packages_link):

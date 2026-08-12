@@ -48,11 +48,11 @@ from pathlib import Path
 import sys
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-# Hardware-owned utils (mip, byteswap, …) are mounted at ./src/utils/ in
+# Hardware-owned utils (mip, byteswap, …) are mounted at ./lib/utils/ in
 # PyScript configs but live in the sibling checkout — not in this repo.
 _HW_UTILS = REPO_ROOT.parent / "pydevices" / "utils"
 _HW_LIB = REPO_ROOT.parent / "pydevices" / "lib"
-# Gallery VFS mounts under web/pyscript/src/lib/<pkg>/ (see install_gen_manifests).
+# Gallery VFS mounts under web/pyscript/lib/<pkg>/ (see install_gen_manifests).
 _HW_LIB_MOUNTS = frozenset({"eventsys", "multimer"})
 _HW_UTIL_FILES = frozenset(
     {
@@ -144,7 +144,8 @@ class DemoRequestHandler(SimpleHTTPRequestHandler):
                 marker = parts.index(pkg)
             except ValueError:
                 continue
-            if marker >= 2 and parts[marker - 2 : marker + 1] == ("src", "lib", pkg):
+            # .../web/pyscript/lib/{eventsys,multimer}/...
+            if marker >= 1 and parts[marker - 1] == "lib" and parts[marker] == pkg:
                 hw = _HW_LIB.joinpath(pkg, *parts[marker + 1 :])
                 if hw.is_file():
                     return str(hw)

@@ -63,8 +63,8 @@ def test_generated_configs_split_shared_files_from_gui_manifests():
     assert micropython == {"interpreter": "./vendor/micropython/micropython.mjs"}
     assert pyodide == {"interpreter": "./vendor/pyodide/pyodide.mjs"}
     assert set(shared) == {"files"}
-    assert "./src/lib/board_config.py" not in shared["files"]
-    assert shared["files"]["./src/lib/eventsys/__init__.py"] == "/lib/eventsys/"
+    assert "./lib/board_config.py" not in shared["files"]
+    assert shared["files"]["./lib/eventsys/__init__.py"] == "/lib/eventsys/"
 
     packages = {
         "nano": "micropython-nano-gui",
@@ -75,7 +75,7 @@ def test_generated_configs_split_shared_files_from_gui_manifests():
         config = json.loads((ROOT / "web" / "pyscript" / f"peterhinch-{gui}.json").read_text())
         manifest = json.loads((ROOT / "packages" / f"{package}.json").read_text())
         assert set(config) == {"files"}
-        assert "./src/lib/board_config.py" not in config["files"]
+        assert "./lib/board_config.py" not in config["files"]
         for destination, source in manifest["urls"]:
             github_path = source.removeprefix("github:")
             owner, repository, path = github_path.split("/", 2)

@@ -274,6 +274,10 @@ if "/" not in sys.path:
 import utils.path  # noqa: F401
 import ps_loader
 
+# Gallery wasm does not freeze displaydev; desktop board_config mip does.
+# Install before env_set, and before any import of board_config.
+ps_loader.ensure_board_config()
+
 from displaydev import env_set
 
 # Hinch demos use 320x240 (gallery default is 320x480).

@@ -1,10 +1,9 @@
 {
-  "include": ["src"],
+  "include": ["lib"],
   "extraPaths": [
-    "src",
-    "src/utils",
-    "src/examples",
-    "src/lib"
+    "lib",
+    "lib/utils",
+    "lib/examples"
   ],
   "stubPath": "tools/typings",
   "typeCheckingMode": "standard",

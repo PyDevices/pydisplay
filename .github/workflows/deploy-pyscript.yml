@@ -48,15 +48,14 @@ jobs:
         run: |
           mkdir -p _site/pyscript
           cp -r web/pyscript/* _site/pyscript/
-          # web/pyscript/src and web/pyscript/packages are symlinks for local
+          # web/pyscript/lib and web/pyscript/packages are symlinks for local
           # dev; replace with real trees for GitHub Pages.
-          rm -rf _site/pyscript/src _site/pyscript/packages
-          mkdir -p _site/pyscript/src _site/pyscript/packages
-          cp -r lib/utils _site/pyscript/src/
-          mkdir -p _site/pyscript/src/lib
-          cp -r pydevices/lib/eventsys pydevices/lib/multimer _site/pyscript/src/lib/
+          rm -rf _site/pyscript/lib _site/pyscript/src _site/pyscript/packages
+          mkdir -p _site/pyscript/lib _site/pyscript/packages
+          cp -r lib/utils _site/pyscript/lib/
+          cp -r pydevices/lib/eventsys pydevices/lib/multimer _site/pyscript/lib/
           # Hardware-owned helpers (mip.py, byteswap, …) — PyScript [files] still
-          # fetch them at src/utils/<name>.py (browser URL under web/pyscript/).
+          # fetch them at lib/utils/<name>.py (browser URL under web/pyscript/).
           cp pydevices/utils/byteswap.py \
              pydevices/utils/frame_recorder.py \
              pydevices/utils/keypins.py \
@@ -64,10 +63,10 @@ jobs:
              pydevices/utils/mip.py \
              pydevices/utils/viper_tools.py \
              pydevices/utils/wifi.py \
-             _site/pyscript/src/utils/
-          cp lib/jupyter_notebook.ipynb _site/pyscript/src/
-          python scripts/gallery_generator.py --copy-examples _site/pyscript/src/examples
-          # Example + lib MIP manifests; relative urls resolve via packages/ → ../src/
+             _site/pyscript/lib/utils/
+          cp lib/jupyter_notebook.ipynb _site/pyscript/lib/
+          python scripts/gallery_generator.py --copy-examples _site/pyscript/lib/examples
+          # Example + lib MIP manifests; relative urls resolve via packages/ → ../lib/
           cp packages/*.json _site/pyscript/packages/
           cp web/landing/index.html _site/index.html
           cp web/landing/site.css _site/site.css

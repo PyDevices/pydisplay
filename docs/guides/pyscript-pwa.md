@@ -304,14 +304,14 @@ Styles are in [`pwa.css`](https://github.com/PyDevices/pydevices-examples/blob/m
 
 ### GitHub Pages (this repo)
 
-Pushes to `main` that touch `web/**` or `src/**` run [Deploy PyScript site to GitHub Pages](https://github.com/PyDevices/pydevices-examples/blob/main/.github/workflows/deploy-pyscript.yml). The workflow:
+Pushes to `main` that touch `web/**` or `lib/**` run [Deploy PyScript site to GitHub Pages](https://github.com/PyDevices/pydevices-examples/blob/main/.github/workflows/deploy-pyscript.yml). The workflow:
 
 1. Verifies generated manifests are fresh (`install_refresh_manifests.sh --audit`, `gallery_generator.py --check`).
 2. Copies `web/pyscript/*` into `_site/pyscript/`.
-3. Copies `src/utils` and examples into `_site/pyscript/src/`, adds canonical
-   `eventsys` from a pydevices checkout at the gallery's virtual
-   `src/lib/eventsys` URL, and overlays hardware-owned utilities (`mip.py`,
-   `byteswap`, …).
+3. Copies `lib/utils` and examples into `_site/pyscript/lib/`, adds canonical
+   `eventsys` / `multimer` from a pydevices checkout at the gallery's
+   `lib/{eventsys,multimer}` URLs, and overlays hardware-owned utilities
+   (`mip.py`, `byteswap`, …).
 4. Stamps `CACHE_NAME` in `_site/pyscript/sw.js` from shell content
    (`pyscript_stamp_pwa_cache.py`).
 5. Publishes to the `gh-pages` branch.

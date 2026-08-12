@@ -537,7 +537,7 @@ def remove_stale_example_json(stale: list[str], check: bool) -> None:
         if not isinstance(urls, list) or not urls:
             continue
         first = urls[0]
-        # Legacy web/pyscript/<example>.json used ./src/examples/; ignore others.
+        # Legacy web/pyscript/<example>.json used ./lib/examples/; ignore others.
         url = str(first[1])
         if not (
             isinstance(first, list)
