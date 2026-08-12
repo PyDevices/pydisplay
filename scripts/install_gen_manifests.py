@@ -143,25 +143,27 @@ def add_pyscript_file(browser_relative_path: str, mount: str) -> None:
 for rel_path, mount in toml_only_mounts:
     add_pyscript_file(rel_path, mount)
 
-# eventsys is an optional product package owned by pydevices. The
-# gallery mounts it as a baseline dependency for non-LVGL examples, but the
-# virtual URL remains ./src/lib/eventsys/... for both the local server and the
-# assembled Pages tree.
-hardware_candidates = (
-    Path(repo_dir).resolve().parent / "pydevices" / "lib" / "eventsys",
-    Path(repo_dir).resolve() / "pydevices" / "lib" / "eventsys",
+# Optional product packages owned by pydevices. The gallery mounts them as a
+# baseline for non-LVGL examples (eventsys → multimer). Virtual URLs stay
+# ./src/lib/<pkg>/... for both the local server and the assembled Pages tree.
+_product_lib_root_candidates = (
+    Path(repo_dir).resolve().parent / "pydevices" / "lib",
+    Path(repo_dir).resolve() / "pydevices" / "lib",
 )
-hardware_eventsys = next((path for path in hardware_candidates if path.is_dir()), None)
-if hardware_eventsys is None:
-    tried = ", ".join(str(path) for path in hardware_candidates)
-    raise SystemExit(f"missing pydevices eventsys source (tried {tried})")
-for source_path in sorted(hardware_eventsys.rglob("*.py")):
-    relative = source_path.relative_to(hardware_eventsys).as_posix()
-    parent = relative.rsplit("/", 1)[0] if "/" in relative else ""
-    mount = f"/lib/eventsys/{parent}/" if parent else "/lib/eventsys/"
-    add_pyscript_file(f"src/lib/eventsys/{relative}", mount)
+_product_lib_root = next((path for path in _product_lib_root_candidates if path.is_dir()), None)
+if _product_lib_root is None:
+    tried = ", ".join(str(path) for path in _product_lib_root_candidates)
+    raise SystemExit(f"missing pydevices lib source (tried {tried})")
+for _pkg in ("eventsys", "multimer"):
+    _pkg_root = _product_lib_root / _pkg
+    if not _pkg_root.is_dir():
+        raise SystemExit(f"missing pydevices {_pkg} source at {_pkg_root}")
+    for source_path in sorted(_pkg_root.rglob("*.py")):
+        relative = source_path.relative_to(_pkg_root).as_posix()
+        parent = relative.rsplit("/", 1)[0] if "/" in relative else ""
+        mount = f"/lib/{_pkg}/{parent}/" if parent else f"/lib/{_pkg}/"
+        add_pyscript_file(f"src/lib/{_pkg}/{relative}", mount)
 master_toml.append("")
-
 # Iterate over the packages and create the package files
 for package_path, deps, extra_files in packages:
     # Define the package variables
@@ -226,7 +228,7 @@ manual_package_stems = {
     "micropython-nano-gui",
     "micropython-touch",
 }
-reserved_package_names = set(package_dicts) | manual_package_stems | {"eventsys"}
+reserved_package_names = set(package_dicts) | manual_package_stems | {"eventsys", "multimer"}
 for package_name, contents in package_dicts.items():
     package_file = output_dir + packages_dir + package_name + ".json"
     with open(package_file, "w") as f:

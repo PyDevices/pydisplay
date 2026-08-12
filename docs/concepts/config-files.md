@@ -3,18 +3,18 @@
 Board-specific setup lives in
 [`pydevices/board_configs`](https://github.com/PyDevices/pydevices/tree/main/board_configs).
 Application and third-party GUI adapters live in pydevices-examples's
-[`src/utils`](https://github.com/PyDevices/pydevices-examples/tree/main/lib/utils).
+[`lib/utils`](https://github.com/PyDevices/pydevices-examples/tree/main/lib/utils).
 
 | File | Location | Purpose |
 |---|---|---|
 | `board_config.py` | installed from `pydevices/board_configs` | Display, audio, input readers, and timing preference for one board/host |
-| `app_runtime.py` | `pydevices-examples/src/utils` | Optional non-LVGL `eventsys` runtime used by examples |
-| `path.py` | `pydevices-examples/src/utils` | Development-checkout path setup when packages are not installed |
-| `color_setup.py` | `pydevices-examples/src/utils` | Nano-GUI adapter |
-| `hardware_setup.py` | `pydevices-examples/src/utils` | Micro-GUI button/encoder adapter |
-| `touch_setup.py` | `pydevices-examples/src/utils` | MicroPython-Touch adapter |
-| `fetch_ph_gui.py` | `pydevices-examples/src/utils` | Installs one Peter Hinch GUI tree into `utils/gui` |
-| `tft_config.py` | `pydevices-examples/src/utils` | russhughes-style TFT example adapter |
+| `app_runtime.py` | `pydevices-examples/lib/utils` | Optional non-LVGL `eventsys` runtime used by examples |
+| `path.py` | `pydevices-examples/lib/utils` | Development-checkout path setup when packages are not installed |
+| `color_setup.py` | `pydevices-examples/lib/utils` | Nano-GUI adapter |
+| `hardware_setup.py` | `pydevices-examples/lib/utils` | Micro-GUI button/encoder adapter |
+| `touch_setup.py` | `pydevices-examples/lib/utils` | MicroPython-Touch adapter |
+| `fetch_ph_gui.py` | `pydevices-examples/lib/utils` | Installs one Peter Hinch GUI tree into `utils/gui` |
+| `tft_config.py` | `pydevices-examples/lib/utils` | russhughes-style TFT example adapter |
 
 ## `board_config.py`
 

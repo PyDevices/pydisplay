@@ -44,7 +44,7 @@ mip.install("github:PyDevices/pydevices-examples/packages/micropython-nano-gui.j
 Browser gallery: no special header — `color_setup` calls `fetch_ph_gui("micropython-nano-gui")` ([live loader](https://PyDevices.github.io/pydevices-examples/pyscript/micropython.html?modules=nano_gui_simpletest)).
 
 ```bash
-cd pydevices-examples/src
+cd pydevices-examples/lib
 micropython -i utils/path.py examples/nano_gui_simpletest.py
 ```
 

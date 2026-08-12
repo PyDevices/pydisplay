@@ -53,7 +53,7 @@ jobs:
           mkdir -p _site/pyscript/src _site/pyscript/packages
           cp -r lib/utils _site/pyscript/src/
           mkdir -p _site/pyscript/src/lib
-          cp -r pydevices/lib/eventsys _site/pyscript/src/lib/
+          cp -r pydevices/lib/eventsys pydevices/lib/multimer _site/pyscript/src/lib/
           # Hardware-owned helpers (mip.py, byteswap, …) — PyScript [files] still
           # fetch them at src/utils/<name>.py (browser URL under web/pyscript/).
           cp pydevices/utils/byteswap.py \

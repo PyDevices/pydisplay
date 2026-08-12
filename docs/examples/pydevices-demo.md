@@ -20,14 +20,14 @@ Desktop-oriented sync demo (not in the PyScript gallery; see the async variant b
 From a [full clone](../installation/full-clone.md), set `PYTHONPATH`/`MICROPYPATH`, `cd lib`, then run the example directly:
 
 ```bash
-cd pydevices-examples/src
+cd pydevices-examples/lib
 ../.venv/bin/python examples/pydevices_demo.py
 ```
 
 With sibling source checkouts instead of installed packages:
 
 ```bash
-cd pydevices-examples/src
+cd pydevices-examples/lib
 export PYTHONPATH=.:utils:../../pydevices/lib:../../pydevices/drivers/display
 python3 examples/pydevices_demo.py
 ```

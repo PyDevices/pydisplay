@@ -37,7 +37,11 @@ def check_deadline():
         rt = getattr(module, "runtime", None) if module is not None else None
     except Exception:
         rt = None
-    if rt is None or not getattr(rt, "_blocking_run_forever", False):
+    # eventsys.Runtime uses ``_blocking_run_forever``; LVGL display_driver.Runtime
+    # uses ``_blocking`` for the same "inside run_forever/run" gate.
+    if rt is None or not (
+        getattr(rt, "_blocking_run_forever", False) or getattr(rt, "_blocking", False)
+    ):
         return False
     if getattr(rt, "_quit_requested", False):
         _deadline_fired = True

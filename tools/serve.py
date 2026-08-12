@@ -51,7 +51,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # Hardware-owned utils (mip, byteswap, …) are mounted at ./src/utils/ in
 # PyScript configs but live in the sibling checkout — not in this repo.
 _HW_UTILS = REPO_ROOT.parent / "pydevices" / "utils"
-_HW_EVENTSYS = REPO_ROOT.parent / "pydevices" / "lib" / "eventsys"
+_HW_LIB = REPO_ROOT.parent / "pydevices" / "lib"
+# Gallery VFS mounts under web/pyscript/src/lib/<pkg>/ (see install_gen_manifests).
+_HW_LIB_MOUNTS = frozenset({"eventsys", "multimer"})
 _HW_UTIL_FILES = frozenset(
     {
         "byteswap.py",
@@ -136,18 +138,16 @@ class DemoRequestHandler(SimpleHTTPRequestHandler):
             hw = _HW_UTILS / name
             if hw.is_file():
                 return str(hw)
-        try:
-            marker = mapped_path.parts.index("eventsys")
-        except ValueError:
-            marker = -1
-        if marker >= 0 and mapped_path.parts[marker - 2 : marker + 1] == (
-            "src",
-            "lib",
-            "eventsys",
-        ):
-            hw = _HW_EVENTSYS.joinpath(*mapped_path.parts[marker + 1 :])
-            if hw.is_file():
-                return str(hw)
+        parts = mapped_path.parts
+        for pkg in _HW_LIB_MOUNTS:
+            try:
+                marker = parts.index(pkg)
+            except ValueError:
+                continue
+            if marker >= 2 and parts[marker - 2 : marker + 1] == ("src", "lib", pkg):
+                hw = _HW_LIB.joinpath(pkg, *parts[marker + 1 :])
+                if hw.is_file():
+                    return str(hw)
         return mapped
 
     def _log_debug(self, raw: bytes) -> None:

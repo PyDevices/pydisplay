@@ -173,7 +173,7 @@ def _setup_sibling_paths(src):
         sibling_repos = None
 
     if sibling_repos is not None:
-        # ``src`` is ``…/pydevices-examples/src``; repo root is its parent. Do not use
+        # ``src`` is ``…/pydevices-examples/lib``; repo root is its parent. Do not use
         # ``_dir_of(_join(src, ".."))`` — that leaves a literal ``..`` segment
         # and resolves to ``src`` again. Always Unix paths (not WSL UNC / U:).
         src = sibling_repos.unix_path(src)
@@ -190,28 +190,25 @@ def _setup_sibling_paths(src):
 def _setup_bootstrap(src, mode):
     """Ensure PyDevices packages resolve; prefer env PYTHONPATH/MICROPYPATH.
 
-    Headless skips display-oriented path setup. When env already seeds ``lib`` /
-    ``utils``, skip ``utils.path``. Fall back to ``import utils.path`` only if
-    ``displaydev`` is not importable (MCU-style / unset env).
+    Headless skips display-oriented path setup. When env already seeds product
+    packages / ``utils``, skip ``utils.path``. Fall back to ``import utils.path``
+    only if ``displaydev`` is not importable (MCU-style / unset env).
     """
     _setup_sibling_paths(src)
     if mode == "headless":
-        lib = _join(src, "lib")
-        if lib not in sys.path:
-            sys.path.insert(0, lib)
         return
 
-    try:
-        import displaydev  # noqa: F401
-
-        return
-    except ImportError:
-        pass
-
+    # Always apply utils.path: even when displaydev is pip-installed, checkout
+    # examples still need sibling ``pydevices/utils`` (keypins, mip, …) and
+    # ``utils/`` on sys.path. Import is idempotent about existing entries.
     try:
         import utils.path  # noqa: F401
     except Exception as exc:
-        raise RuntimeError("utils.path: {}".format(exc)) from exc
+        # Fall back only when utils.path is unavailable (MCU flat /lib install).
+        try:
+            import displaydev  # noqa: F401
+        except ImportError:
+            raise RuntimeError("utils.path: {}".format(exc)) from exc
 
 
 def _run_oneshot(script_path, timeout_s):
@@ -620,7 +617,7 @@ def main(argv=None):
         src = src.replace("\\", "/")
     if src not in sys.path:
         sys.path.insert(0, src)
-    if not _isdir(_join(src, "lib")):
+    if not _isdir(_join(src, "examples")):
         print("example_test_wrapper: cwd must be pydevices-examples/lib", file=sys.stderr)
         return 2
 

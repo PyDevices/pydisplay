@@ -7,7 +7,7 @@ Query keys:
   modules, manifests  — example stems / packages/<name>.json manifests
   deps                — MIP (MicroPython) or micropip (Pyodide) packages
   packages            — harness-only extra MIP index installs (legacy path)
-  debug, autotest, duration — harness / tooling flags
+  debug, autotest, duration, timeout — harness / tooling flags
 
 Exposes ``window.LoaderQuery``.
 */
@@ -46,7 +46,8 @@ Exposes ``window.LoaderQuery``.
      *   entryName: string|null,
      *   debug: boolean,
      *   autotest: boolean,
-     *   autotestDuration: number
+     *   autotestDuration: number,
+     *   autotestTimeout: number|null
      * }}
      */
     function parse(search) {
@@ -59,6 +60,7 @@ Exposes ``window.LoaderQuery``.
         var debug = false;
         var autotest = false;
         var autotestDuration = 5;
+        var autotestTimeout = null;
         var raw = String(search || '');
         if (raw.charAt(0) === '?') {
             raw = raw.slice(1);
@@ -100,6 +102,11 @@ Exposes ``window.LoaderQuery``.
                 if (!isNaN(n) && n > 0) {
                     autotestDuration = n;
                 }
+            } else if (key === 'timeout') {
+                var t = parseInt(val, 10);
+                if (!isNaN(t) && t > 0) {
+                    autotestTimeout = t;
+                }
             }
         });
         return {
@@ -112,6 +119,7 @@ Exposes ``window.LoaderQuery``.
             debug: debug,
             autotest: autotest,
             autotestDuration: autotestDuration,
+            autotestTimeout: autotestTimeout,
         };
     }
 
@@ -170,6 +178,8 @@ Exposes ``window.LoaderQuery``.
         w.__loaderAutotestDuration = String(
             plan.autotestDuration != null ? plan.autotestDuration : 5
         );
+        w.__loaderAutotestTimeout =
+            plan.autotestTimeout != null ? String(plan.autotestTimeout) : '';
         if (options.ready) {
             w.__loaderReady = true;
         }

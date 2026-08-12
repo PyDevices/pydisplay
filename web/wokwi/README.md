@@ -1,6 +1,6 @@
 # pydevices-examples on Wokwi (ESP32-S3 + ILI9341 touch)
 
-Browser project for [wokwi.com](https://wokwi.com): PyDevices core + `pygraphics` + Wokwi board config + [`testris`](../../src/examples/testris.py) (a touch + joystick Tetris demo).
+Browser project for [wokwi.com](https://wokwi.com): PyDevices core + `pygraphics` + Wokwi board config + [`testris`](../../lib/examples/testris.py) (a touch + joystick Tetris demo).
 
 **Guide:** [Wokwi simulator](../../docs/guides/wokwi.md) · **Hardware:** [Wokwi reference](https://pydevices.github.io/pydevices/wokwi.html)
 

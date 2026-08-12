@@ -27,7 +27,7 @@ workspace/
 └── pydevices-examples/
 ```
 
-Run from `pydevices-examples/src` after adding the canonical product paths:
+Run from `pydevices-examples/lib` after adding the canonical product paths:
 
 ```bash
 export PYTHONPATH=.:utils:../../pydevices/lib:../../pydevices/utils:../../pydevices/drivers/display:../../pydevices/drivers/audio

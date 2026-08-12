@@ -43,7 +43,7 @@ Clone `pydevices` beside `pydevices-examples` and put these canonical trees on
 `PYTHONPATH`:
 
 ```bash
-cd pydevices-examples/src
+cd pydevices-examples/lib
 export PYTHONPATH=.:utils:../../pydevices/lib:../../pydevices/utils:../../pydevices/drivers/display:../../pydevices/drivers/audio
 python3 examples/pydevices_demo.py
 ```

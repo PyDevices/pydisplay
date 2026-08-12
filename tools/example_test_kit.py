@@ -759,7 +759,10 @@ def run_pyscript_case(
 
     ensure_pyscript_server(port)
     query = pyscript_harness_query(example_id, example_meta)
-    url = f"http://127.0.0.1:{port}/web/pyscript/harness.html?{query}&autotest=1&duration={int(duration)}"
+    url = (
+        f"http://127.0.0.1:{port}/web/pyscript/harness.html?{query}"
+        f"&autotest=1&duration={int(duration)}&timeout={int(timeout)}"
+    )
 
     try:
         from pyscript_autotest import run_autotest
@@ -818,9 +821,10 @@ def run_pyscript_case(
 
 
 def _write_jupyter_notebook(example_id: str, example_meta: dict, duration_s: float) -> Path:
-    # Prefer dotted examples imports (cwd=lib, ``.`` on PYTHONPATH). Env is SoT;
-    # do not emit a utils.path bootstrap cell. Scripts outside ``lib/examples/``
-    # (e.g. tools/test_timers.py) are loaded by path.
+    # Prefer dotted examples imports (cwd=lib, ``.`` on PYTHONPATH). Always
+    # ``import utils.path`` so sibling ``utils/`` (keypins, mip, …) matches the
+    # subprocess wrapper. Scripts outside ``lib/examples/`` (e.g.
+    # tools/test_timers.py) are loaded by path.
     script = example_meta.get("script", f"examples/{example_id}.py")
     script_path = (SRC / script).resolve()
     try:
@@ -843,6 +847,7 @@ def _write_jupyter_notebook(example_id: str, example_meta: dict, duration_s: flo
         [
             "import sys",
             f"sys.path.insert(0, {tools_rel!r})",
+            "import utils.path  # noqa: F401",
             "import pydevices_test_mode",
             "pydevices_test_mode.ENABLED = True",
             f"pydevices_test_mode.DURATION_S = {duration_s}",

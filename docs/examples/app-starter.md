@@ -106,14 +106,14 @@ Stick with `from pygraphics import Area` when you also use rectangle helpers fro
 From a [full clone](../installation/full-clone.md), save the boilerplate as `lib/main.py`, then set `PYTHONPATH`/`MICROPYPATH`, `cd lib`, and run it directly — no path bootstrap needed:
 
 ```bash
-cd pydevices-examples/src
+cd pydevices-examples/lib
 PYTHONPATH=.:utils ../.venv/bin/python main.py
 ```
 
 With sibling source checkouts instead of installed packages:
 
 ```bash
-cd pydevices-examples/src
+cd pydevices-examples/lib
 export PYTHONPATH=.:utils:../../pydevices/lib:../../pydevices/drivers/display
 python3 main.py
 ```
