@@ -4,8 +4,8 @@
 
 This repo is the PyDevices examples, documentation, and PyScript gallery. The
 shareable product libraries live in sibling `pydevices`. There is no
-build step for examples. `web/pyscript/src` is a symlink to `../../src`, so
-editing `src/` updates the PyScript gallery too.
+build step for examples. `web/pyscript/src` is a symlink to `../../lib`, so
+editing `lib/` updates the PyScript gallery too.
 
 ### Environment
 
@@ -46,8 +46,8 @@ Board configs never own a runtime. `AutoDisplay` is imported from
 
 - Unit tests (stdlib `unittest`, no third-party runner needed):
   `.venv/bin/python -m unittest discover -s tests`
-- Lint/format: `.venv/bin/ruff check src tests board_configs` and
-  `.venv/bin/ruff format`. Note `pyproject.toml` **excludes `src/examples/**`**
+- Lint/format: `.venv/bin/ruff check lib tests board_configs` and
+  `.venv/bin/ruff format`. Note `pyproject.toml` **excludes `lib/examples/**`**
   (and a few others) from ruff, so example files are not linted/formatted; do not
   be surprised when `ruff format --check` on an example path reports a diff.
 - The pre-commit hooks (`.pre-commit-config.yaml`) are `ruff-check`,
@@ -110,7 +110,7 @@ passes `--timer-async`.
 
 ### Architecture note: timers and refresh
 
-- Non-LVGL examples opt into `eventsys.Runtime` in `src/utils/app_runtime.py`.
+- Non-LVGL examples opt into `eventsys.Runtime` in `lib/utils/app_runtime.py`.
   LVGL's frozen/bundled `display_driver` owns an independent coordinator and
   does not import `eventsys`. Both consume neutral board-config callables and
   use `multimer`; display drivers remain policy-free.

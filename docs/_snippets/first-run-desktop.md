@@ -7,7 +7,7 @@ cd pydevices-examples
 python3 -m venv .venv
 .venv/bin/pip install --index-url https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ -r requirements.txt
-cd src
+cd lib
 ../.venv/bin/python examples/pydevices_demo.py
 ```
 

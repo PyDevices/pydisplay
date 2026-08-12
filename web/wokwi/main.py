@@ -23,7 +23,7 @@ mip.install(
     target=TARGET,
 )
 # mip.install("pygraphics", index=MICROPYTHON_LIB, target=TARGET)
-mip.install(PYDEVICES_EXAMPLES + "/src/examples/testris.py", target=TARGET)
+mip.install(PYDEVICES_EXAMPLES + "/lib/examples/testris.py", target=TARGET)
 
 # isort: off
 if WOKWI:

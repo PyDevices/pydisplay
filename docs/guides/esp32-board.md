@@ -37,7 +37,7 @@ mpremote mip install --target "./utils" "github:PyDevices/pydevices-examples/pac
 
 ## 3. Run the demo
 
-From the repo `src/` on your PC:
+From the repo `lib/` on your PC:
 
 ```bash
 mpremote mount .

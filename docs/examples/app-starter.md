@@ -103,7 +103,7 @@ Stick with `from pygraphics import Area` when you also use rectangle helpers fro
 
 ## Run it
 
-From a [full clone](../installation/full-clone.md), save the boilerplate as `src/main.py`, then set `PYTHONPATH`/`MICROPYPATH`, `cd src`, and run it directly — no path bootstrap needed:
+From a [full clone](../installation/full-clone.md), save the boilerplate as `lib/main.py`, then set `PYTHONPATH`/`MICROPYPATH`, `cd lib`, and run it directly — no path bootstrap needed:
 
 ```bash
 cd pydevices-examples/src
@@ -147,7 +147,7 @@ to sync unless `PYDEVICES_TIMER_ASYNC=1` is set before the coordinator is create
 
 1. **Rename** the file and module docstring.
 2. **Layout** — add more `Area` regions, sprites, or shapes in `redraw()`.
-3. **Text** — for labels and lists, use `Font` + `FrameBuffer` + `blit_rect` ([Drawing and fonts](../concepts/drawing-and-fonts.md), [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/font_simpletest.py)).
+3. **Text** — for labels and lists, use `Font` + `FrameBuffer` + `blit_rect` ([Drawing and fonts](../concepts/drawing-and-fonts.md), [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/font_simpletest.py)).
 4. **Timers** — use `runtime.on_tick(callback, period=…, async_=runtime.timer_async)`; see [multimer](https://pydevices.github.io/pydevices/multimer.html) and [**pydevices_demo**](pydevices-demo.md).
 
 !!! tip "Next steps beyond this template"

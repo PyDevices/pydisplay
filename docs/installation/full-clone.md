@@ -15,8 +15,8 @@ cd pydevices-examples
 
 ```text
 pydevices-examples/
-├── src/examples/       # portable demos and applications
-├── src/utils/          # example and GUI integration helpers
+├── lib/examples/       # portable demos and applications
+├── lib/utils/          # example and GUI integration helpers
 ├── web/pyscript/       # live gallery and reusable PWA shell
 ├── packages/           # GitHub MIP manifests for examples/helpers
 └── tools/              # cross-runtime test harnesses
@@ -29,7 +29,7 @@ git clone https://github.com/PyDevices/pydevices.git
 git clone https://github.com/PyDevices/pydevices-examples.git
 ```
 
-Keep the two repositories as siblings. `src/utils/path.py` recognizes that
+Keep the two repositories as siblings. `lib/utils/path.py` recognizes that
 layout and adds the product `lib`, `utils`, display, and audio source trees.
 
 ## Run on desktop
@@ -41,7 +41,7 @@ cd pydevices-examples
 python3 -m venv .venv
 .venv/bin/pip install --index-url https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ -r requirements.txt
-cd src
+cd lib
 ../.venv/bin/python examples/pydevices_demo.py
 ```
 

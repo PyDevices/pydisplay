@@ -6,7 +6,7 @@ Run pydevices-examples on a simulated ESP32-S3 with an ILI9341 capacitive touch 
 
 **Who:** You want MCU-faithful testing (SPI display, I2C touch, MicroPython `machine` APIs) without flashing a board.
 
-**What you get:** [`testris`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/testris.py) — a Tetris-style game driven by the on-screen touch keypad. One `main.py`; full example catalog = uncomment two lines.
+**What you get:** [`testris`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/testris.py) — a Tetris-style game driven by the on-screen touch keypad. One `main.py`; full example catalog = uncomment two lines.
 
 **Prerequisites:**
 

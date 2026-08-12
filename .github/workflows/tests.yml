@@ -5,16 +5,16 @@ on:
     branches:
       - main
     paths:
-      - 'src/utils/**'
-      - 'src/examples/**'
+      - 'lib/utils/**'
+      - 'lib/examples/**'
       - 'tests/**'
       - 'scripts/**'
       - 'web/pyscript/**'
       - '.github/workflows/tests.yml'
   pull_request:
     paths:
-      - 'src/utils/**'
-      - 'src/examples/**'
+      - 'lib/utils/**'
+      - 'lib/examples/**'
       - 'tests/**'
       - 'scripts/**'
       - 'web/pyscript/**'

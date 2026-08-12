@@ -9,11 +9,11 @@
 # Usage (from repo root):
 #   ./bin/jupyter.sh examples/pydevices_demo.py
 #   ./bin/jupyter.sh -m examples.chango
-#   ./bin/jupyter.sh                          # open src/jupyter_notebook.ipynb (hub)
+#   ./bin/jupyter.sh                          # open lib/jupyter_notebook.ipynb (hub)
 #   ./bin/jupyter.sh examples/pydevices_demo.py --cursor  # open generated notebook in Cursor
 #   ./bin/jupyter.sh examples/pydevices_demo.py --no-open # generate notebook / start server only
 #
-# Browser mode starts JupyterLab with notebook-dir=src/ (see docs/platforms/jupyter-run.md).
+# Browser mode starts JupyterLab with notebook-dir=lib/ (see docs/platforms/jupyter-run.md).
 # Cursor mode skips the server and opens the notebook in the editor.
 #
 # Generated notebooks are always interactive Jupyter sessions (extra cells
@@ -26,7 +26,7 @@ set -euo pipefail
 # Resolve symlinks so ~/bin/jupyter.sh → …/pydevices-examples/bin/jupyter.sh finds the repo.
 _SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 PYDEVICES_EXAMPLES_ROOT="${PYDEVICES_EXAMPLES_ROOT:-$(cd "$_SCRIPT_DIR/.." && pwd)}"
-SRC="$PYDEVICES_EXAMPLES_ROOT/src"
+SRC="$PYDEVICES_EXAMPLES_ROOT/lib"
 HUB_NOTEBOOK="$SRC/jupyter_notebook.ipynb"
 VENV="${JUPYTER_VENV:-$PYDEVICES_EXAMPLES_ROOT/.venv}"
 DESKTOP_BOARD_CONFIG_MIP="github:PyDevices/pydevices/board_configs/desktop/package.json"
@@ -51,7 +51,7 @@ Mirrors micropython/micropython.exe's primary CLI shapes.
   <file>            generate + open a notebook that runs examples/<name>.py
                      (must be a file — a directory errors; use -m for packages)
   -m <module>       generate + open a notebook that runs examples.<name> or
-                     <name> (module or package under src/examples/). NOT a
+                     <name> (module or package under lib/examples/). NOT a
                      bare directory path.
   -c <code>         generate + open a notebook whose run cell is exactly
                      this code string (no examples import)
@@ -59,7 +59,7 @@ Mirrors micropython/micropython.exe's primary CLI shapes.
                      against a live kernel, so there's no separate
                      run-then-REPL step. Alone (no other entry), same as
                      no args: open the hub notebook.
-  (nothing)         open the hub notebook (src/jupyter_notebook.ipynb)
+  (nothing)         open the hub notebook (lib/jupyter_notebook.ipynb)
 
   --cursor          open in Cursor (no JupyterLab server)
   -p, --port PORT   JupyterLab port (default: 8888)
@@ -70,7 +70,7 @@ Generated notebooks import via \`from examples import <name>\` (or
 \`import examples.<a>.<b>\` for nested files) — never a bare \`import <name>\`
 and never a path-bootstrap cell. If PYTHONPATH is unset, jupyter.sh exports
 PYTHONPATH=".:lib:utils" plus sibling pydevices ``lib`` / ``utils`` /
-``drivers/display`` for the JupyterLab/kernel process (cwd=src) so
+``drivers/display`` for the JupyterLab/kernel process (cwd=lib) so
 \`import displaydev\`, \`import mip\`, etc. resolve without a bootstrap cell.
 Run notebooks also ensure a Jupyter board config is available by calling
 \`mip.install("${DESKTOP_BOARD_CONFIG_MIP}", target=".")\` when
@@ -153,8 +153,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ ! -d "$SRC/lib" ]]; then
-  echo "jupyter.sh: pydevices-examples src/ not found under $PYDEVICES_EXAMPLES_ROOT" >&2
+if [[ ! -d "$SRC" ]]; then
+  echo "jupyter.sh: pydevices-examples lib/ not found under $PYDEVICES_EXAMPLES_ROOT" >&2
   exit 1
 fi
 
@@ -261,7 +261,7 @@ PY
 }
 
 # -m examples.<name> or -m <name> — top-level module/package under
-# src/examples/, or a dotted path to a file nested in an example package.
+# lib/examples/, or a dotted path to a file nested in an example package.
 resolve_module_target() {
   local mod="$1"
 
@@ -296,7 +296,7 @@ resolve_module_target() {
   return 1
 }
 
-# <file> — must live under src/examples/ (a directory errors: use -m for packages).
+# <file> — must live under lib/examples/ (a directory errors: use -m for packages).
 resolve_file_target() {
   local file="$1"
   local resolved=""
@@ -325,7 +325,7 @@ resolve_file_target() {
   case "$resolved" in
     "$SRC"/*) rel="${resolved#"$SRC"/}" ;;
     *)
-      echo "jupyter.sh: '$file' is outside pydevices-examples src/ — jupyter.sh can only launch example modules (examples/<name>.py)" >&2
+      echo "jupyter.sh: '$file' is outside pydevices-examples lib/ — jupyter.sh can only launch example modules (examples/<name>.py)" >&2
       return 1
       ;;
   esac

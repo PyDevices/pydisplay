@@ -5,7 +5,7 @@ Temporary generator — remove after assets are approved.
 
 From repo root::
 
-  .venv/bin/python src/examples/tower_climb/assets/gen_tower_assets.py
+  .venv/bin/python lib/examples/tower_climb/assets/gen_tower_assets.py
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(ROOT / "src" / "lib"))
+sys.path.insert(0, str(ROOT / "lib"))
 
 from pygraphics._bmp565 import write_bmp565_file  # noqa: E402
 

@@ -56,7 +56,7 @@ Mirrors micropython/micropython.exe's primary CLI shapes.
                      Must be a file (a directory errors, like EISDIR); use
                      -m for packages.
   -m <module>       run examples.<name> or <name> — module or package under
-                     src/examples/, resolved the same way as <file>. NOT a
+                     lib/examples/, resolved the same way as <file>. NOT a
                      bare directory path.
   -c <code>         not implemented for PyScript — there is no code-string
                      loader hook (query params only name modules/manifests
@@ -290,13 +290,13 @@ lookup_or_build_url() {
   case "$kind" in
     manifest)
       if [[ -f "$PYDEVICES_EXAMPLES_ROOT/packages/${stem}.json" ]] \
-        && [[ -d "$PYDEVICES_EXAMPLES_ROOT/src/examples/${stem}" ]]; then
+        && [[ -d "$PYDEVICES_EXAMPLES_ROOT/lib/examples/${stem}" ]]; then
         printf 'micropython.html?manifests=%s\n' "$stem"
         return 0
       fi
       ;;
     module)
-      if [[ -f "$PYDEVICES_EXAMPLES_ROOT/src/examples/${stem}.py" ]]; then
+      if [[ -f "$PYDEVICES_EXAMPLES_ROOT/lib/examples/${stem}.py" ]]; then
         printf 'micropython.html?modules=%s\n' "$stem"
         return 0
       fi
@@ -310,7 +310,7 @@ lookup_or_build_url() {
 }
 
 # -m examples.<name> or -m <name> — top-level module/package under
-# src/examples/ only (real micropython -m also runs submodules, but pydevices-examples
+# lib/examples/ only (real micropython -m also runs submodules, but pydevices-examples
 # demos are single-file or a package entry point, so that's all we resolve).
 resolve_module_target() {
   local mod="$1"
@@ -327,9 +327,9 @@ resolve_module_target() {
     return 1
   fi
 
-  if [[ -f "$PYDEVICES_EXAMPLES_ROOT/src/examples/${stem}/__init__.py" ]]; then
+  if [[ -f "$PYDEVICES_EXAMPLES_ROOT/lib/examples/${stem}/__init__.py" ]]; then
     lookup_or_build_url "$stem" manifest
-  elif [[ -f "$PYDEVICES_EXAMPLES_ROOT/src/examples/${stem}.py" ]]; then
+  elif [[ -f "$PYDEVICES_EXAMPLES_ROOT/lib/examples/${stem}.py" ]]; then
     lookup_or_build_url "$stem" module
   else
     echo "pyscript.sh: no such module: examples.${stem}" >&2
@@ -339,7 +339,7 @@ resolve_module_target() {
   fi
 }
 
-# <file> — must be a flat file directly under src/examples/ (a directory, or
+# <file> — must be a flat file directly under lib/examples/ (a directory, or
 # a file nested inside an example package, errors: use -m for those).
 resolve_file_target() {
   local file="$1"
@@ -349,8 +349,8 @@ resolve_file_target() {
     resolved="$file"
   elif [[ -e "$file" ]]; then
     resolved="$(cd "$(dirname -- "$file")" && pwd)/$(basename -- "$file")"
-  elif [[ -e "$PYDEVICES_EXAMPLES_ROOT/src/$file" ]]; then
-    resolved="$PYDEVICES_EXAMPLES_ROOT/src/$file"
+  elif [[ -e "$PYDEVICES_EXAMPLES_ROOT/lib/$file" ]]; then
+    resolved="$PYDEVICES_EXAMPLES_ROOT/lib/$file"
   else
     echo "pyscript.sh: no such file: $file" >&2
     return 1
@@ -365,12 +365,12 @@ resolve_file_target() {
     return 1
   fi
 
-  local src="$PYDEVICES_EXAMPLES_ROOT/src"
+  local src="$PYDEVICES_EXAMPLES_ROOT/lib"
   local rel=""
   case "$resolved" in
     "$src"/*) rel="${resolved#"$src"/}" ;;
     *)
-      echo "pyscript.sh: '$file' is outside pydevices-examples src/ — pyscript can only launch example modules (examples/<name>.py)" >&2
+      echo "pyscript.sh: '$file' is outside pydevices-examples lib/ — pyscript can only launch example modules (examples/<name>.py)" >&2
       return 1
       ;;
   esac

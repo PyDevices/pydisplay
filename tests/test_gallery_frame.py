@@ -95,7 +95,7 @@ def test_mobile_gallery_uses_autohiding_app_drawer():
     assert ".gallery-sidebar.is-open" in css
     assert "transform: translateX(-105%);" in css
     assert "<h2>Apps</h2>" in source
-    assert "a curated list from <code>src/examples/</code>" in source
+    assert "a curated list from <code>lib/examples/</code>" in source
     assert ">Select</button>" in source
 
 
@@ -121,7 +121,7 @@ def test_runtime_loaders_show_two_cards_and_autorun():
 
 
 def test_runtime_loaders_set_browser_defaults_without_importing_board():
-    loader = (ROOT / "src" / "utils" / "ps_loader.py").read_text(encoding="utf-8")
+    loader = (ROOT / "lib" / "utils" / "ps_loader.py").read_text(encoding="utf-8")
     assert "BOARD_WIDTH = 320" in loader
     assert "BOARD_HEIGHT = 480" in loader
     assert 'env_set("PYDEVICES_WIDTH", BOARD_WIDTH)' in loader
@@ -133,7 +133,7 @@ def test_runtime_loaders_set_browser_defaults_without_importing_board():
 
 
 def test_car_cluster_forces_its_browser_resolution():
-    source = (ROOT / "src" / "examples" / "car_cluster" / "car_cluster.py").read_text(
+    source = (ROOT / "lib" / "examples" / "car_cluster" / "car_cluster.py").read_text(
         encoding="utf-8"
     )
     assert 'env_set("PYDEVICES_WIDTH", "1024")' in source
@@ -143,7 +143,7 @@ def test_car_cluster_forces_its_browser_resolution():
 
 
 def test_pixel_sim_demo_rotates_portrait_displays_before_layout():
-    source = (ROOT / "src" / "examples" / "pixel_sim_demos.py").read_text(encoding="utf-8")
+    source = (ROOT / "lib" / "examples" / "pixel_sim_demos.py").read_text(encoding="utf-8")
     orientation = source.index(
         "if _host_board.display_drv.width < _host_board.display_drv.height:"
     )
@@ -157,7 +157,7 @@ def test_pixel_sim_demo_rotates_portrait_displays_before_layout():
 
 
 def test_pyscript_loader_silences_installer_file_chatter():
-    loader = (ROOT / "src" / "utils" / "ps_loader.py").read_text(encoding="utf-8")
+    loader = (ROOT / "lib" / "utils" / "ps_loader.py").read_text(encoding="utf-8")
     assert "def _quiet_install(" in loader
     assert 'had_printer = hasattr(mip_mod, "print")' in loader
     assert "mip_mod.print = lambda *args, **print_kwargs: None" in loader

@@ -30,22 +30,22 @@ dist/
 .cursor/hinch_pkg_discovery/
 .cursor/skills/
 
-src/utils/gui
+lib/utils/gui
 web/pyscript/wheels
 
 *.code-workspace
 Untitled-*
 
 # Local examples (symlinks to sibling repos — see scripts/personal_examples.py)
-src/utils/spotapi
-src/examples/spotapi
-src/examples/spotify_remote
-src/examples/frogger
-src/examples/spotify_client
+lib/utils/spotapi
+lib/examples/spotapi
+lib/examples/spotify_remote
+lib/examples/frogger
+lib/examples/spotify_client
 
-src/run-*.ipynb
-src/run-*.nbconvert.ipynb
-pydevices-examples/src/.ipynb_checkpoints
+lib/run-*.ipynb
+lib/run-*.nbconvert.ipynb
+pydevices-examples/lib/.ipynb_checkpoints
 
 # CI / local sibling checkouts inside this workspace
 graphics/
@@ -73,7 +73,7 @@ docs/_build/
 /site
 .cache/
 
-src/lib/gui
+lib/lib/gui
 
 # Local PyScript MIP overrides (not deployed)
 web/pyscript/dev/

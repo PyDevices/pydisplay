@@ -17,7 +17,7 @@ _SPEC.loader.exec_module(record)
 class TestRecordTool(unittest.TestCase):
     def test_default_output_uses_docs_videos(self):
         self.assertEqual(
-            record._default_output("src/examples/bouncing_balls.py"),
+            record._default_output("lib/examples/bouncing_balls.py"),
             Path("docs/videos/bouncing_balls.mp4"),
         )
 

@@ -401,7 +401,7 @@ Point `start_url` at that page (or at a parametric loader URL with your module q
 
 The gallery loader accepts:
 
-- `?modules=stem1,stem2` — install `.py` files from `src/examples/`
+- `?modules=stem1,stem2` — install `.py` files from `lib/examples/`
 - `?manifests=name` — install a MIP JSON manifest from `packages/` (via `web/pyscript/packages`)
 
 For a dedicated PWA around one module, set:

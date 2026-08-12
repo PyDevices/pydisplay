@@ -20,7 +20,7 @@ Or use the helper script from the repo root (starts JupyterLab and opens a demo)
 ./bin/jupyter.sh calculator --cursor
 ```
 
-Generated demo notebooks are written to `src/run-{demo}.ipynb` (gitignored). The hub notebook is `src/jupyter_notebook.ipynb`.
+Generated demo notebooks are written to `lib/run-{demo}.ipynb` (gitignored). The hub notebook is `lib/jupyter_notebook.ipynb`.
 
 Open the URL printed in the terminal (for example `http://127.0.0.1:8888/lab/tree/run-calculator.ipynb`) in a browser, or use `--cursor` to open in the editor instead.
 
@@ -37,7 +37,7 @@ Select the **`.venv`** kernel (**Kernel → Change Kernel**), then run cells top
 
 No LVGL build is required for the pydevices-examples walkthrough in the notebook.
 
-Desktop `board_config` uses `displaydev.auto.AutoDisplay`, which detects Jupyter (`get_ipython()`) and selects **`JNDisplay`** with `timer_async=True`. The notebook must run with working directory under **`src/`**. Prefer `PYTHONPATH`/`MICROPYPATH` set to `.:lib:utils` for the kernel process (`./bin/jupyter.sh` exports it automatically); for fallback when environment variables are unavailable or not set as recommended, see [Utils path setup](../utils.md#path-setup). Either way, resolve example modules with `from examples import <name>` (or `import examples.<a>.<b>` for nested files) — never a bare `import <name>`.
+Desktop `board_config` uses `displaydev.auto.AutoDisplay`, which detects Jupyter (`get_ipython()`) and selects **`JNDisplay`** with `timer_async=True`. The notebook must run with working directory under **`lib/`**. Prefer `PYTHONPATH`/`MICROPYPATH` set to `.:lib:utils` for the kernel process (`./bin/jupyter.sh` exports it automatically); for fallback when environment variables are unavailable or not set as recommended, see [Utils path setup](../utils.md#path-setup). Either way, resolve example modules with `from examples import <name>` (or `import examples.<a>.<b>` for nested files) — never a bare `import <name>`.
 
 ## Touch input
 
@@ -49,7 +49,7 @@ After a cell runs, an **Image** widget appears below the output. **Click that wi
 
 You can run the same notebook in the editor instead of a browser tab:
 
-1. Open `src/jupyter_notebook.ipynb`.
+1. Open `lib/jupyter_notebook.ipynb`.
 2. Choose the `.venv` interpreter as the notebook kernel.
 3. If the widget area is blank, set [`jupyter.widgetScriptSources`](https://github.com/microsoft/vscode-jupyter/wiki/IPyWidget-Support-in-VS-Code-Python) to load widget JavaScript (this repo’s [`.vscode/settings.json`](https://github.com/PyDevices/pydevices-examples/blob/main/.vscode/settings.json) uses `jsdelivr.com` and `unpkg.com`).
 4. Reload the window, restart the kernel, and re-run.
@@ -62,7 +62,7 @@ One-shot example cells block until the drawing finishes; **Stop** works there.
 
 ## Download the notebook
 
-On the static [notebook preview page](jupyter-notebook.ipynb), use the **download** button at the top, or open [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydevices-examples/blob/main/src/jupyter_notebook.ipynb) on GitHub.
+On the static [notebook preview page](jupyter-notebook.ipynb), use the **download** button at the top, or open [`lib/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/jupyter_notebook.ipynb) on GitHub.
 
 ## More detail
 

@@ -48,7 +48,7 @@ cd pydevices-examples
 python3 -m venv .venv
 .venv/bin/pip install --index-url https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ -r requirements.txt
-cd src
+cd lib
 ../.venv/bin/python examples/pydevices_demo.py
 ```
 
@@ -120,8 +120,8 @@ packages remain conventional and unprefixed.
 
 | Path | Purpose |
 |---|---|
-| `src/examples/` | Portable examples and complete demo applications |
-| `src/utils/` | Example helpers and third-party GUI adapters |
+| `lib/examples/` | Portable examples and complete demo applications |
+| `lib/utils/` | Example helpers and third-party GUI adapters |
 | `web/pyscript/` | PyScript gallery and reusable PWA shell |
 | `docs/` | Integration, platform, example, and PWA documentation |
 | `tools/` | Cross-runtime example and LVGL test harnesses |
@@ -146,7 +146,7 @@ packages remain conventional and unprefixed.
 ```bash
 .venv/bin/python -m unittest discover -s tests
 .venv/bin/python -m pytest -s tests -q
-.venv/bin/ruff check src tests tools scripts
+.venv/bin/ruff check lib tests tools scripts
 ```
 
 See [AGENTS.md](AGENTS.md) and [tools/README.md](tools/README.md) for the

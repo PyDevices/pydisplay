@@ -3,7 +3,7 @@
 
 Only the precached shell assets listed in ``sw.js`` (``STATIC_ASSETS``) plus the
 service-worker source itself (with a stable ``CACHE_NAME`` placeholder) feed the
-hash. Example / ``src/`` / packages churn does **not** change the cache id, so
+hash. Example / ``lib/`` / packages churn does **not** change the cache id, so
 installed PWAs are not prompted to update on every Pages deploy.
 
 Usage::

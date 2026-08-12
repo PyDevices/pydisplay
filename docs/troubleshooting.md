@@ -10,7 +10,7 @@ Common problems when installing, importing, or running pydevices-examples.
 
 **Fix:**
 
-- **Full clone:** `cd src` and set `PYTHONPATH`/`MICROPYPATH` to `.:lib:utils` before running (preferred), or `import utils.path` if `utils/` is present and environment variables are unavailable or not set as recommended (see [Utils path setup](utils.md#path-setup)).
+- **Full clone:** `cd lib` and set `PYTHONPATH`/`MICROPYPATH` to `.:lib:utils` before running (preferred), or `import utils.path` if `utils/` is present and environment variables are unavailable or not set as recommended (see [Utils path setup](utils.md#path-setup)).
 - **Device:** install via [MIP](installation/mip-github.md) or [pydevices install workflows](https://pydevices.github.io/pydevices/install-workflows.html) into `/lib`.
 - **Examples under `mpremote mount .`:** `import utils.path` (see [Utils path setup](utils.md#path-setup)), then resolve demos as a package — `from examples import hello`, not a bare `import hello` (the mounted tree still nests `examples/`).
 
@@ -49,7 +49,7 @@ mip.install("github:PyDevices/pydevices/board_configs/sdldisplay")  # desktop SD
 
 1. Confirm SDL2 dev libraries are installed — see [Desktop CPython](guides/desktop-cpython.md).
 2. Try **PGDisplay** (PyGame) instead of SDL2.
-3. Run `python3 examples/hello.py` from `src/` (with `PYTHONPATH=.:lib:utils`) — a window should appear immediately.
+3. Run `python3 examples/hello.py` from `lib/` (with `PYTHONPATH=.:lib:utils`) — a window should appear immediately.
 
 ### Wrong colors or garbled pixels on MCU
 

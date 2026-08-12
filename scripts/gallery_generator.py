@@ -2,7 +2,7 @@
 """
 gallery_generator.py — refresh the pydevices-examples PyScript browser gallery.
 
-Default-includes every example **entry point** under ``src/examples/``:
+Default-includes every example **entry point** under ``lib/examples/``:
 
   - ``examples/<name>.py`` — single-file module
   - ``examples/<name>/<name>.py`` — package (preferred over ``__init__.py``)
@@ -56,7 +56,7 @@ from personal_examples import PERSONAL_EXAMPLE_DIRS  # noqa: E402
 from url_maker import urls_from_deps  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-EXAMPLES_DIR = REPO_ROOT / "src" / "examples"
+EXAMPLES_DIR = REPO_ROOT / "lib" / "examples"
 PYSCRIPT_DIR = REPO_ROOT / "web" / "pyscript"
 INDEX = PYSCRIPT_DIR / "index.html"
 THUMBNAILS_DIR = PYSCRIPT_DIR / "thumbnails"
@@ -99,7 +99,7 @@ LOCAL_IMPORT_RE = re.compile(
 
 
 class Example:
-    """One browser-gallery demo discovered from ``src/examples/``."""
+    """One browser-gallery demo discovered from ``lib/examples/``."""
 
     def __init__(self, name: str, source_rel: str, kind: str):
         self.name = name
@@ -358,7 +358,7 @@ def _is_personal_example(path: Path) -> bool:
 
 
 def example_py_files() -> list[Path]:
-    """Candidate entry ``*.py`` under ``src/examples/``, excluding personal trees."""
+    """Candidate entry ``*.py`` under ``lib/examples/``, excluding personal trees."""
     paths: list[Path] = []
     seen: set[str] = set()
     for path in sorted(EXAMPLES_DIR.rglob("*.py")):
@@ -537,7 +537,13 @@ def remove_stale_example_json(stale: list[str], check: bool) -> None:
         if not isinstance(urls, list) or not urls:
             continue
         first = urls[0]
-        if not (isinstance(first, list) and len(first) >= 2 and "src/examples/" in str(first[1])):
+        # Legacy web/pyscript/<example>.json used ./src/examples/; ignore others.
+        url = str(first[1])
+        if not (
+            isinstance(first, list)
+            and len(first) >= 2
+            and ("/examples/" in url or url.startswith("examples/"))
+        ):
             continue
         rel = str(path.relative_to(REPO_ROOT))
         if check:

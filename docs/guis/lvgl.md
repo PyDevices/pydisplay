@@ -41,7 +41,7 @@ import utils.path  # see ../utils.md#path-setup
 import lv_test_timer
 ```
 
-Requires LVGL-enabled firmware. See `src/examples/lv_test_timer.py` in the repo.
+Requires LVGL-enabled firmware. See `lib/examples/lv_test_timer.py` in the repo.
 
 ### 5. Faster ESP32 buses
 
@@ -65,7 +65,7 @@ Use **`runtime.timer_async`** (derived from `board_config.timer_async` or the di
 When **`runtime.timer_async` is true**, `display_driver` drives ticks and `display.show()` from its asynchronous LVGL refresh loop.
 
 Full apps typically build the UI then call **`runtime.run_forever()`** (see
-[`lv_test_timer.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/lv_test_timer.py)).
+[`lv_test_timer.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/lv_test_timer.py)).
 
 Desktop `board_config` reads **`PYDEVICES_TIMER_ASYNC`** for the PG/SDL
 branch (default from `AutoDisplay`, normally `False`). PyScript and Jupyter
@@ -81,14 +81,14 @@ Or set `PYDEVICES_TIMER_ASYNC=1` on the command line when launching the process.
 
 ## Timer test example
 
-[`lv_test_timer.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/lv_test_timer.py) is a single smoke test that follows **`runtime.timer_async`** via `runtime.run_forever()` (interactive and kit). It does **not** read or write environment variables — set `PYDEVICES_TIMER_ASYNC` in the parent process / shell if you want a specific desktop mode before `board_config` loads.
+[`lv_test_timer.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/lv_test_timer.py) is a single smoke test that follows **`runtime.timer_async`** via `runtime.run_forever()` (interactive and kit). It does **not** read or write environment variables — set `PYDEVICES_TIMER_ASYNC` in the parent process / shell if you want a specific desktop mode before `board_config` loads.
 
 The UI shows autodetected **runtime**, **OS**, **display** driver class, **timer** backend, **mode** (`sync`/`async`), and **LVGL** version, plus a seconds counter, spinning arc, and tap button.
 
 ### Automated kit mode
 
 ```bash
-cd src
+cd lib
 PYDEVICES_TIMER_ASYNC=0 .venv/bin/python examples/lv_test_timer.py kit
 PYDEVICES_TIMER_ASYNC=1 .venv/bin/python examples/lv_test_timer.py kit
 ```
@@ -107,7 +107,7 @@ Kit mode runs a timed LVGL timer + input check, prints a `KIT_RESULT=` JSON line
 | CPython (Windows) | `python.exe` on `PATH` |
 | CPython (Linux venv) | `.venv/bin/python` |
 
-Each run uses `cwd=src/`, opens a window for ~4 s of timer/click checks, then injected quit; the child should print `KIT_RESULT=` and exit 0. Missing executables are skipped (`missing` in the summary table).
+Each run uses `cwd=lib/`, opens a window for ~4 s of timer/click checks, then injected quit; the child should print `KIT_RESULT=` and exit 0. Missing executables are skipped (`missing` in the summary table).
 
 From the repository root:
 
@@ -116,7 +116,7 @@ python tools/run_desktop_lv_tests.py
 ./tools/run_desktop_lv_tests.py
 ```
 
-From `src/`:
+From `lib/`:
 
 ```bash
 ../tools/run_desktop_lv_tests.py

@@ -13,7 +13,7 @@ root = Path(__file__).parent.parent
 # to the canonical packages in sibling pydevices.
 SOURCE_TREES = (
     (
-        root / "src/utils",
+        root / "lib/utils",
         Path("reference", "utils"),
         ("utils",),
         ("",),
@@ -49,7 +49,7 @@ for src, ref_prefix, nav_prefix, path_entries in SOURCE_TREES:
         rel_parts = path.relative_to(src).parts
         if any(p in SKIP_DIR_NAMES for p in rel_parts):
             continue
-        if src == root / "src" / "utils" and any(p in ADD_ONS_SKIP_DIR_NAMES for p in rel_parts):
+        if src == root / "lib" / "utils" and any(p in ADD_ONS_SKIP_DIR_NAMES for p in rel_parts):
             continue
 
         module_path = path.relative_to(src).with_suffix("")

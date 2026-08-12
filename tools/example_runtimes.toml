@@ -9,7 +9,7 @@ duration_s = 2
 timeout_s = 15
 oneshot_timeout_s = 10
 
-# Subprocess interpreters — cwd is src/ unless noted.
+# Subprocess interpreters — cwd is lib/ unless noted.
 
 [runtimes.micropython]
 platform = "micropython"
@@ -17,7 +17,7 @@ display_backend = "SDLDisplay"
 available_on = ["linux", "wsl", "macos"]
 kind = "subprocess"
 command = ["micropython"]
-cwd = "src"
+cwd = "lib"
 resolve = ["PATH", "~/bin/micropython", "repo:bin/micropython"]
 setup_notes = "MicroPython unix build with SDL display support. Falls back to bin/micropython (committed copy) when ~/bin and PATH don't have it, e.g. in a Cursor Cloud checkout."
 
@@ -27,7 +27,7 @@ display_backend = "SDLDisplay"
 available_on = ["windows", "wsl"]
 kind = "subprocess"
 command = ["micropython.exe"]
-cwd = "src"
+cwd = "lib"
 resolve = ["PATH", "~/bin/micropython.exe", "repo:bin/micropython.exe"]
 setup_notes = "MicroPython Windows (.exe). Async modes may be limited. bin/micropython.exe is committed for completeness only — Cursor Cloud agents cannot execute Windows binaries, so this runtime is not part of the cloud matrix."
 timeout_s = 25
@@ -38,7 +38,7 @@ display_backend = "SDLDisplay"
 available_on = ["linux", "wsl", "macos"]
 kind = "subprocess"
 command = ["circuitpython"]
-cwd = "src"
+cwd = "lib"
 resolve = ["PATH", "~/bin/circuitpython", "repo:bin/circuitpython"]
 setup_notes = "CircuitPython unix with SDL. Falls back to bin/circuitpython (committed copy) when ~/bin and PATH don't have it, e.g. in a Cursor Cloud checkout."
 
@@ -48,7 +48,7 @@ display_backend = "SDLDisplay"
 available_on = ["linux", "wsl", "macos"]
 kind = "subprocess"
 command = [".venv/bin/python"]
-cwd = "src"
+cwd = "lib"
 resolve = ["repo:.venv/bin/python"]
 setup_notes = "Repo-root .venv (source .venv/bin/activate equivalent)."
 
@@ -58,7 +58,7 @@ display_backend = "SDLDisplay"
 available_on = ["windows", "wsl"]
 kind = "subprocess"
 command = ["python.exe"]
-cwd = "src"
+cwd = "lib"
 resolve = ["PATH", "~/bin/python.exe"]
 setup_notes = "Windows CPython on PATH."
 
@@ -82,7 +82,7 @@ kind = "jupyter"
 status = "active"
 command_template = ["./bin/jupyter.sh", "-m", "{example}", "--no-open"]
 cwd = "."
-setup_notes = "Requires .venv with jupyterlab, ipywidgets, ipyevents, pillow. Executes generated src/run-{example}.ipynb."
+setup_notes = "Requires .venv with jupyterlab, ipywidgets, ipyevents, pillow. Executes generated lib/run-{example}.ipynb."
 
 [runtimes.android]
 platform = "android"
@@ -91,7 +91,7 @@ available_on = ["wsl", "linux"]
 kind = "android"
 status = "active"
 command_template = ["../../pydevices-android-template/scripts/android.sh", "examples/{example}.py"]
-cwd = "src"
+cwd = "lib"
 # Emulator paint is slow; kit uses >=20s oneshot hold + observe (see example_test_kit).
 duration_s = 20
 timeout_s = 120

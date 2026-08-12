@@ -58,7 +58,7 @@ for mod in "${MODULES[@]}"; do
 done
 
 HW="$(cd "${ROOT}/../pydevices" 2>/dev/null && pwd || true)"
-export PYTHONPATH="${ROOT}/src/lib:${ROOT}/src/utils${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONPATH="${ROOT}/lib/lib:${ROOT}/lib/utils${PYTHONPATH:+:$PYTHONPATH}"
 if [[ -n "$HW" ]]; then
     export PYTHONPATH="${HW}/lib:${HW}/utils:${HW}/drivers/display:${PYTHONPATH}"
 fi

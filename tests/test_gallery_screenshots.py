@@ -44,7 +44,7 @@ class TestGalleryScreenshots(unittest.TestCase):
             run.assert_not_called()
 
     def test_capture_uses_repository_relative_source_path(self):
-        example = gallery.Example("demo", "src/examples/demo.py", "module")
+        example = gallery.Example("demo", "lib/examples/demo.py", "module")
         with tempfile.TemporaryDirectory() as tmp, mock.patch.object(
             gallery, "THUMBNAILS_DIR", Path(tmp)
         ), mock.patch.object(gallery.subprocess, "run") as run:

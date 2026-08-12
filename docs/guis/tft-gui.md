@@ -4,7 +4,7 @@ Many pydevices-examples applications were ported from [@russhughes st7789py_mpy]
 
 ## Config
 
-Use or adapt `tft_config.py` from [`src/utils/tft_config.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/utils/tft_config.py). Some example filenames were search-replaced during port — if an example fails to import config, compare with that file.
+Use or adapt `tft_config.py` from [`lib/utils/tft_config.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/utils/tft_config.py). Some example filenames were search-replaced during port — if an example fails to import config, compare with that file.
 
 ## Font and image tools
 

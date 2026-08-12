@@ -26,7 +26,7 @@ Manual URLs (when the server is already running):
 |------|-----------|
 | Calculator | [127.0.0.1:8000/web/pyscript/harness.html?modules=calc_graphics,calc_engine](http://127.0.0.1:8000/web/pyscript/harness.html?modules=calc_graphics,calc_engine) |
 
-After editing files under `src/`, refresh the PyScript file manifest:
+After editing files under `lib/`, refresh the PyScript file manifest:
 
 ```bash
 ./scripts/install_refresh_manifests.sh

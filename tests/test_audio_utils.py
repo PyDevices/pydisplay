@@ -1,14 +1,14 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Unit tests for ``src/utils/audio.py`` (no real audio device)."""
+"""Unit tests for ``lib/utils/audio.py`` (no real audio device)."""
 
 from pathlib import Path
 import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-UTILS = ROOT / "src" / "utils"
+UTILS = ROOT / "lib" / "utils"
 if str(UTILS) not in sys.path:
     sys.path.insert(0, str(UTILS))
 

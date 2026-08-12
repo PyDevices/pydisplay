@@ -1,4 +1,4 @@
-"""Local-only trees under ``src/examples/`` — symlinks or gitignored checkouts.
+"""Local-only trees under ``lib/examples/`` — symlinks or gitignored checkouts.
 
 Never included in ``packages/examples.json``, PyScript gallery generation, or CI.
 """

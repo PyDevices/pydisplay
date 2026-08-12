@@ -28,4 +28,4 @@ See [palettes docs](https://palettes.readthedocs.io) for full API reference.
 
 ## Examples
 
-Palette demos remain in `src/examples/palettes_demo.py`, `graphics_simpletest.py`, `feathers.py`, and others in this repo.
+Palette demos remain in `lib/examples/palettes_demo.py`, `graphics_simpletest.py`, `feathers.py`, and others in this repo.

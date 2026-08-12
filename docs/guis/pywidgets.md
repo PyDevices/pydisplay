@@ -38,10 +38,10 @@ See [pdwidgets docs](https://pdwidgets.readthedocs.io) for full API reference.
 
 ## Examples
 
-Widget demos live in pydevices-examples's `src/examples/` — for example
-[`widgets_clinic_queue.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/widgets_clinic_queue.py),
-[`widgets_energy_panel.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/widgets_energy_panel.py),
-[`widgets_locker_kiosk.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/widgets_locker_kiosk.py),
+Widget demos live in pydevices-examples's `lib/examples/` — for example
+[`widgets_clinic_queue.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/widgets_clinic_queue.py),
+[`widgets_energy_panel.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/widgets_energy_panel.py),
+[`widgets_locker_kiosk.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/widgets_locker_kiosk.py),
 and `calc_widgets.py`.
 
 ## Icons

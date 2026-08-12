@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'web/**'
-      - 'src/**'
+      - 'lib/**'
       - 'packages/**'
       - 'scripts/install_gen_manifests.py'
       - 'scripts/install_refresh_manifests.sh'
@@ -51,11 +51,11 @@ jobs:
           # dev; replace with real trees for GitHub Pages.
           rm -rf _site/pyscript/src _site/pyscript/packages
           mkdir -p _site/pyscript/src _site/pyscript/packages
-          cp -r src/utils _site/pyscript/src/
+          cp -r lib/utils _site/pyscript/src/
           mkdir -p _site/pyscript/src/lib
           cp -r pydevices/lib/eventsys _site/pyscript/src/lib/
           # Hardware-owned helpers (mip.py, byteswap, …) — PyScript [files] still
-          # fetch them at src/utils/<name>.py.
+          # fetch them at src/utils/<name>.py (browser URL under web/pyscript/).
           cp pydevices/utils/byteswap.py \
              pydevices/utils/frame_recorder.py \
              pydevices/utils/keypins.py \
@@ -64,7 +64,7 @@ jobs:
              pydevices/utils/viper_tools.py \
              pydevices/utils/wifi.py \
              _site/pyscript/src/utils/
-          cp src/jupyter_notebook.ipynb _site/pyscript/src/
+          cp lib/jupyter_notebook.ipynb _site/pyscript/src/
           python scripts/gallery_generator.py --copy-examples _site/pyscript/src/examples
           # Example + lib MIP manifests; relative urls resolve via packages/ → ../src/
           cp packages/*.json _site/pyscript/packages/

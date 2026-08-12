@@ -1,19 +1,19 @@
 # 🎨 Examples catalog
 
-All examples live in [`src/examples/`](https://github.com/PyDevices/pydevices-examples/tree/main/src/examples/).
+All examples live in [`lib/examples/`](https://github.com/PyDevices/pydevices-examples/tree/main/lib/examples/).
 
 ```python
 mip.install("github:PyDevices/pydevices-examples/packages/examples.json", target="./examples")
 ```
 
-Preferred: set `PYTHONPATH`/`MICROPYPATH` to `.:lib:utils`, `cd src`, then run `python3 examples/<name>.py` (or `from examples import <name>` at the REPL) — see [full clone](../installation/full-clone.md).
+Preferred: set `PYTHONPATH`/`MICROPYPATH` to `.:lib:utils`, `cd lib`, then run `python3 examples/<name>.py` (or `from examples import <name>` at the REPL) — see [full clone](../installation/full-clone.md).
 
 !!! tip "Start here"
     New to pydevices-examples? Copy the [**App starter**](app-starter.md) boilerplate to begin your first app, then read the [**pydevices_demo** guide](pydevices-demo.md) for rotation, scrolling, and buffered text.
 
 ## PyScript gallery markers
 
-Every example **entry point** under `src/examples/` is included in the
+Every example **entry point** under `lib/examples/` is included in the
 [browser gallery](https://PyDevices.github.io/pydevices-examples/pyscript/) by default
 (`scripts/gallery_generator.py`):
 
@@ -44,17 +44,17 @@ Optional header comments (first 10 lines), one line per namespace:
 Hinch GUI demos need no package header — `fetch_ph_gui` installs via color/hardware/touch setup.
 
 ```bash
-rg '^# gallery:' src/examples/
-rg '^# deps:' src/examples/
-rg '^# modules:' src/examples/
-rg '^# manifests:' src/examples/
+rg '^# gallery:' lib/examples/
+rg '^# deps:' lib/examples/
+rg '^# modules:' lib/examples/
+rg '^# manifests:' lib/examples/
 ```
 
 See [PyScript local development](../guides/pyscript.md).
 
 ### Canonical patterns
 
-**`runtime.run_forever()` with callbacks** — [`hello.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/hello.py), [`scroll.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/scroll.py), [`pydevices_demo.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/pydevices_demo.py), [`calc_graphics.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/calc_graphics.py):
+**`runtime.run_forever()` with callbacks** — [`hello.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/hello.py), [`scroll.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/scroll.py), [`pydevices_demo.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/pydevices_demo.py), [`calc_graphics.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/calc_graphics.py):
 
 ```python
 from board_config import display_drv
@@ -67,7 +67,7 @@ runtime.on(runtime.events.MOUSEBUTTONDOWN, on_click)
 runtime.run_forever()
 ```
 
-**Event-driven poll** — [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/eventsys_encoder_test.py):
+**Event-driven poll** — [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/eventsys_encoder_test.py):
 
 ```python
 display_drv.show()  # after initial draw
@@ -78,9 +78,9 @@ while True:
             display_drv.show()
 ```
 
-**Forever LVGL / library-driven app** — [`lv_test_timer.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/lv_test_timer.py): build UI then `runtime.run_forever()`. Kit mode keeps a small sync/async wait for LVGL click injection.
+**Forever LVGL / library-driven app** — [`lv_test_timer.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/lv_test_timer.py): build UI then `runtime.run_forever()`. Kit mode keeps a small sync/async wait for LVGL click injection.
 
-**`tft_config` animation / one-shot** — subdirectory demos [`alien/alien.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/alien/alien.py), [`tiny_toasters/tiny_toasters.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/tiny_toasters/tiny_toasters.py), [`chango/chango.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/chango/chango.py):
+**`tft_config` animation / one-shot** — subdirectory demos [`alien/alien.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/alien/alien.py), [`tiny_toasters/tiny_toasters.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/tiny_toasters/tiny_toasters.py), [`chango/chango.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/chango/chango.py):
 
 ```python
 from app_runtime import runtime
@@ -89,9 +89,9 @@ tft.show()
 runtime.run_forever()
 ```
 
-**LVGL apps** — [`lv_test_timer.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/lv_test_timer.py): import `display_driver`, build UI, then `runtime.run_forever()`. See [LVGL guide](../guis/lvgl.md).
+**LVGL apps** — [`lv_test_timer.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/lv_test_timer.py): import `display_driver`, build UI, then `runtime.run_forever()`. See [LVGL guide](../guis/lvgl.md).
 
-**pdwidgets** — [`widgets_clinic_queue.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/widgets_clinic_queue.py) and related kiosk demos: build UI, then:
+**pdwidgets** — [`widgets_clinic_queue.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/widgets_clinic_queue.py) and related kiosk demos: build UI, then:
 
 ```python
 import board_config

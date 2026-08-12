@@ -3,7 +3,7 @@
 Board-specific setup lives in
 [`pydevices/board_configs`](https://github.com/PyDevices/pydevices/tree/main/board_configs).
 Application and third-party GUI adapters live in pydevices-examples's
-[`src/utils`](https://github.com/PyDevices/pydevices-examples/tree/main/src/utils).
+[`src/utils`](https://github.com/PyDevices/pydevices-examples/tree/main/lib/utils).
 
 | File | Location | Purpose |
 |---|---|---|

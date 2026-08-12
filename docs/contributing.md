@@ -17,7 +17,7 @@ python3 -m venv .venv-docs
 .venv-docs/bin/mkdocs serve    # http://127.0.0.1:8000
 ```
 
-After editing files under `src/` (or install pre-commit hooks — see below):
+After editing files under `lib/` (or install pre-commit hooks — see below):
 
 ```bash
 ./scripts/install_refresh_manifests.sh    # refresh packages/*.json and web/pyscript/micropython.toml
@@ -31,13 +31,13 @@ Optional — run codegen on commit (CI still audits if you skip this):
 ```
 
 Hooks refresh install manifests when `src/` changes and the PyScript gallery when
-`src/examples/` (or gallery scripts) change.
+`lib/examples/` (or gallery scripts) change.
 
 ## Pull request workflow
 
 1. Fork [PyDevices/pydevices-examples](https://github.com/PyDevices/pydevices-examples)
 2. Create a feature branch
-3. Make changes; run `./scripts/install_refresh_manifests.sh --audit` if you touched `src/` (or use pre-commit)
+3. Make changes; run `./scripts/install_refresh_manifests.sh --audit` if you touched `lib/` (or use pre-commit)
 4. For docs: see [Building docs](building-docs.md) — `mkdocs serve` and verify pages build
 5. Open a PR against `main` with a clear description
 

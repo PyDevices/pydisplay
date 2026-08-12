@@ -7,10 +7,10 @@
 | Component | Location | Notes |
 |-----------|----------|-------|
 | `board_config.py` | `pydevices/board_configs/` | display + neutral touch capability |
-| `touch_setup.py` | `src/utils/` | Fetches touch GUI; mouse/touch `Poller` → `Display(ssd, tpad)` |
-| `fetch_ph_gui.py` | `src/utils/` | mip install into `utils/gui/` + FrameBuffer patches |
-| `displaybuf.py` | `src/utils/` | `ssd` framebuffer |
-| `uctypes.py` | `src/utils/` | CircuitPython shim for `writer.py` |
+| `touch_setup.py` | `lib/utils/` | Fetches touch GUI; mouse/touch `Poller` → `Display(ssd, tpad)` |
+| `fetch_ph_gui.py` | `lib/utils/` | mip install into `utils/gui/` + FrameBuffer patches |
+| `displaybuf.py` | `lib/utils/` | `ssd` framebuffer |
+| `uctypes.py` | `lib/utils/` | CircuitPython shim for `writer.py` |
 
 Upstream renamed `hardware_setup.py` → `touch_setup.py` (Dec 2024). pydevices-examples follows that name. Do **not** install upstream `drivers/` or `touch/` packages for the bridge — input comes from the selected board config and, for non-LVGL apps, the application-owned `eventsys` runtime.
 
@@ -32,7 +32,7 @@ Or rely on `import touch_setup`.
 
 ## Example
 
-[`src/examples/touch_gui_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/touch_gui_simpletest.py) — framebuffer smoke test. Full demos: `import touch_setup` then `import gui.demos.simple`.
+[`lib/examples/touch_gui_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/touch_gui_simpletest.py) — framebuffer smoke test. Full demos: `import touch_setup` then `import gui.demos.simple`.
 
 Browser: `fetch_ph_gui` via `touch_setup` — [gallery loader](https://PyDevices.github.io/pydevices-examples/pyscript/micropython.html?modules=touch_gui_simpletest).
 

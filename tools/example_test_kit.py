@@ -56,7 +56,7 @@ def _ensure_user_micropy_lib(env: dict) -> None:
 
 REPO = Path(__file__).resolve().parent.parent
 TOOLS = REPO / "tools"
-SRC = REPO / "src"
+SRC = REPO / "lib"
 RUNTIMES_TOML = TOOLS / "example_runtimes.toml"
 MANIFEST_TOML = TOOLS / "example_test_manifest.toml"
 WRAPPER = TOOLS / "example_test_wrapper.py"
@@ -818,8 +818,8 @@ def run_pyscript_case(
 
 
 def _write_jupyter_notebook(example_id: str, example_meta: dict, duration_s: float) -> Path:
-    # Prefer dotted examples imports (cwd=src, ``.`` on PYTHONPATH). Env is SoT;
-    # do not emit a utils.path bootstrap cell. Scripts outside ``src/examples/``
+    # Prefer dotted examples imports (cwd=lib, ``.`` on PYTHONPATH). Env is SoT;
+    # do not emit a utils.path bootstrap cell. Scripts outside ``lib/examples/``
     # (e.g. tools/test_timers.py) are loaded by path.
     script = example_meta.get("script", f"examples/{example_id}.py")
     script_path = (SRC / script).resolve()

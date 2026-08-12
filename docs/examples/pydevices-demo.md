@@ -3,7 +3,7 @@
 !!! tip "Need a minimal template?"
     Copy the [**App starter**](app-starter.md) boilerplate to begin your first app without rotation or scrolling.
 
-[`pydevices_demo.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/pydevices_demo.py) is the recommended feature demo. It uses published product packages plus pydevices-examples's explicit `app_runtime` helper.
+[`pydevices_demo.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/pydevices_demo.py) is the recommended feature demo. It uses published product packages plus pydevices-examples's explicit `app_runtime` helper.
 
 It demonstrates:
 
@@ -17,7 +17,7 @@ Desktop-oriented sync demo (not in the PyScript gallery; see the async variant b
 
 ## Run it
 
-From a [full clone](../installation/full-clone.md), set `PYTHONPATH`/`MICROPYPATH`, `cd src`, then run the example directly:
+From a [full clone](../installation/full-clone.md), set `PYTHONPATH`/`MICROPYPATH`, `cd lib`, then run the example directly:
 
 ```bash
 cd pydevices-examples/src
@@ -32,7 +32,7 @@ export PYTHONPATH=.:utils:../../pydevices/lib:../../pydevices/drivers/display
 python3 examples/pydevices_demo.py
 ```
 
-Prefer the REPL? Run `python3 -i` and import from the `examples` package (never a bare `import pydevices_demo` from `src/`):
+Prefer the REPL? Run `python3 -i` and import from the `examples` package (never a bare `import pydevices_demo` from `lib/`):
 
 ```python
 >>> from examples import pydevices_demo
@@ -91,7 +91,7 @@ Runtime state lives in a small `state` dict:
 
 Drawing text directly on `display_drv` with `text16()` issues one `fill_rect` per font pixel — fine for tiny labels, slow for a full list.
 
-The demo follows [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/font_simpletest.py):
+The demo follows [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/font_simpletest.py):
 
 1. Allocate a reusable `_TEXT_BUF` sized for the longest tip line.
 2. Wrap a slice in `FrameBuffer`, fill the background, call `FONT.text()` into RAM.
@@ -227,10 +227,10 @@ Also **pause the scroll timer** during redraw. If `on_tick` runs in the middle o
 
 | Example | What it adds |
 |---------|----------------|
-| [`scroll_touch_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/scroll_touch_test.py) | Manual scroll with touch Up/Down in fixed bars |
-| [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/eventsys_encoder_test.py) | `vscsad` driven by a rotary encoder |
-| [`scroll.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/scroll.py) | Full-screen hardware scroll (`tft_config` stack) |
-| [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/font_simpletest.py) | Font + `FrameBuffer` + `blit_rect` pattern |
+| [`scroll_touch_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/scroll_touch_test.py) | Manual scroll with touch Up/Down in fixed bars |
+| [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/eventsys_encoder_test.py) | `vscsad` driven by a rotary encoder |
+| [`scroll.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/scroll.py) | Full-screen hardware scroll (`tft_config` stack) |
+| [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/font_simpletest.py) | Font + `FrameBuffer` + `blit_rect` pattern |
 
 ## multimer in this demo
 

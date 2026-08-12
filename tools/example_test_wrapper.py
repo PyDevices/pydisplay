@@ -621,7 +621,7 @@ def main(argv=None):
     if src not in sys.path:
         sys.path.insert(0, src)
     if not _isdir(_join(src, "lib")):
-        print("example_test_wrapper: cwd must be pydevices-examples/src", file=sys.stderr)
+        print("example_test_wrapper: cwd must be pydevices-examples/lib", file=sys.stderr)
         return 2
 
     script_path = args["script"]

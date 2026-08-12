@@ -24,7 +24,10 @@ args = parser.parse_args()
 package_ver = "0.0.1"
 repo_url = "github:PyDevices/pydevices-examples/"
 repo_dir = os.getcwd() + "/"
-src_dir = "src/"
+# Checkout tree (was historically named src/). Browser URLs stay under
+# web/pyscript/src/ via symlink → ../../lib (and the same layout on Pages).
+src_dir = "lib/"
+pyscript_url_dir = "src/"
 output_dir = repo_dir
 packages_dir = "packages/"
 toml_full_path = output_dir + "web/pyscript/micropython.toml"
@@ -113,9 +116,9 @@ PYSCRIPT_INTERPRETER = "./vendor/micropython/micropython.mjs"
 PYODIDE_INTERPRETER = "./vendor/pyodide/pyodide.mjs"
 
 
-def pyscript_toml_file_entry(repo_relative_path: str, mount: str) -> str:
-    """repo_relative_path e.g. src/utils/path.py; mount e.g. /utils/."""
-    return f'"{PYSCRIPT_TOML_SRC_PREFIX}{repo_relative_path}" = "{mount}"'
+def pyscript_toml_file_entry(browser_relative_path: str, mount: str) -> str:
+    """browser_relative_path e.g. src/utils/path.py; mount e.g. /utils/."""
+    return f'"{PYSCRIPT_TOML_SRC_PREFIX}{browser_relative_path}" = "{mount}"'
 
 
 package_dicts = {}
@@ -127,14 +130,14 @@ master_toml = [
 ]
 
 
-def add_pyscript_file(repo_relative_path: str, mount: str) -> None:
-    """Add one local source to both TOML and JSON-compatible file maps."""
+def add_pyscript_file(browser_relative_path: str, mount: str) -> None:
+    """Add one browser URL (under web/pyscript/) to TOML and JSON file maps."""
     # board_config is now delivered via board_configs/* packages, not web mounts.
-    if repo_relative_path.replace("\\", "/").endswith("/board_config.py"):
+    if browser_relative_path.replace("\\", "/").endswith("/board_config.py"):
         return
-    source = PYSCRIPT_TOML_SRC_PREFIX + repo_relative_path
+    source = PYSCRIPT_TOML_SRC_PREFIX + browser_relative_path
     master_files[source] = mount
-    master_toml.append(pyscript_toml_file_entry(repo_relative_path, mount))
+    master_toml.append(pyscript_toml_file_entry(browser_relative_path, mount))
 
 
 for rel_path, mount in toml_only_mounts:
@@ -181,7 +184,7 @@ for package_path, deps, extra_files in packages:
             if toml_dest_dir == "//":
                 toml_dest_dir = "/"
             add_pyscript_file(
-                os.path.relpath(full_file_path, repo_dir).replace("\\", "/"),
+                pyscript_url_dir + master_dest_file.replace("\\", "/"),
                 toml_dest_dir,
             )
 
@@ -211,7 +214,7 @@ for package_path, deps, extra_files in packages:
                 toml_dest_dir = "/".join(master_dest_file.split("/")[:-1])
                 if toml_dest_dir == "//":
                     toml_dest_dir = "/"
-                toml_src_file = src_dir + master_dest_file
+                toml_src_file = pyscript_url_dir + master_dest_file
                 add_pyscript_file(toml_src_file, f"/{toml_dest_dir}/")
 
     if package_name not in toml_exclude:

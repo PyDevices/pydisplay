@@ -25,12 +25,12 @@ class TestScreenshotTool(unittest.TestCase):
 
     def test_resolves_example_shorthand(self):
         repo_root = Path(__file__).resolve().parent.parent
-        expected = repo_root / "src" / "examples" / "logo.py"
+        expected = repo_root / "lib" / "examples" / "logo.py"
         self.assertEqual(screenshot._resolve_example("logo", repo_root), expected)
 
     def test_default_output_uses_docs_screenshots(self):
         self.assertEqual(
-            screenshot._default_output("src/examples/logo.py"),
+            screenshot._default_output("lib/examples/logo.py"),
             Path("docs/screenshots/logo.png"),
         )
 

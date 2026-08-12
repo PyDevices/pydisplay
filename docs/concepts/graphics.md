@@ -99,7 +99,7 @@ expected glyph count raises `RuntimeError`.
 
 Examples that load `.bin` fonts from disk: `font_simpletest.py` (cycles
 `string_blit` → `per_pixel` → `displaybuf`; PyScript copies ship under
-`src/examples/assets/` via `packages/examples.json`).
+`lib/examples/assets/` via `packages/examples.json`).
 
 ### Romfont `.bin` format
 
@@ -134,10 +134,10 @@ cycles different targets in one run. [`pydevices_demo`](../examples/pydevices-de
 | Pattern | Example | Background | Extra RAM | What hits the display | Typical sweet spot |
 |---------|---------|------------|-----------|----------------------|-------------------|
 | **Module helpers on canvas** | `pygraphics.text8(display_drv, …)` | Transparent (foreground pixels only) | None | One small `fill_rect` per lit pixel | Short labels, minimum RAM |
-| **String FB → one blit** | [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/font_simpletest.py) (`string_blit`) | **Opaque** — `fb.fill(bg)` before `font.text` | One buffer sized to the string (reusable slice is better; see pydevices_demo) | **One** `blit_rect` per string | Desktop/SDL (batch then `show()`), SPI panels when RAM is tight |
-| **Draw on `display_drv`** | [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/font_simpletest.py) (`per_pixel`) | Transparent | None | One `fill_rect` per lit pixel on the live driver | Simplest code path; **slowest** on MCU and desktop |
-| **Full-screen `DisplayBuffer` + dirty blit** | [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/font_simpletest.py) (`displaybuf`) | Transparent over existing buffer contents | **Full panel** `DisplayBuffer` | `display.show(dirty)` — one row `blit_rect` per dirty scanline | MCUs with enough RAM; many text updates; fastest of the three modes |
-| **Catalog / inspect fonts** | [`font_list.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/font_list.py) | Opaque row buffer | One strip `width × height` per font | One `blit_rect` per font row | Browsing `.bin` files on disk |
+| **String FB → one blit** | [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/font_simpletest.py) (`string_blit`) | **Opaque** — `fb.fill(bg)` before `font.text` | One buffer sized to the string (reusable slice is better; see pydevices_demo) | **One** `blit_rect` per string | Desktop/SDL (batch then `show()`), SPI panels when RAM is tight |
+| **Draw on `display_drv`** | [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/font_simpletest.py) (`per_pixel`) | Transparent | None | One `fill_rect` per lit pixel on the live driver | Simplest code path; **slowest** on MCU and desktop |
+| **Full-screen `DisplayBuffer` + dirty blit** | [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/font_simpletest.py) (`displaybuf`) | Transparent over existing buffer contents | **Full panel** `DisplayBuffer` | `display.show(dirty)` — one row `blit_rect` per dirty scanline | MCUs with enough RAM; many text updates; fastest of the three modes |
+| **Catalog / inspect fonts** | [`font_list.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/font_list.py) | Opaque row buffer | One strip `width × height` per font | One `blit_rect` per font row | Browsing `.bin` files on disk |
 
 #### Module helpers (`text8`, `text14`, `text16`)
 
@@ -217,13 +217,13 @@ display_drv.show()          # present on SDL; on raw SPI may follow panel habits
 | **SPI / parallel MCU panels** | Many drivers act on each `blit_rect` / `fill_rect` immediately. Favour **one blit per string** or **`DisplayBuffer.show(dirty)`** over `font.text(display_drv, …)`. |
 | **Skipping `show()`** | Only safe when your driver documents immediate updates. Per-pixel `font.text(display_drv, …)` is still slow on the bus even without `show()`. |
 
-Run the examples side by side from `src/`:
+Run the examples side by side from `lib/`:
 
 ```bash
 micropython examples/font_simpletest.py
 ```
 
-PyScript and the gallery load the same `.bin` assets from `src/examples/assets/` (see
+PyScript and the gallery load the same `.bin` assets from `lib/examples/assets/` (see
 [Catalog](../examples/index.md#drawing-and-fonts)).
 
 ## Image loaders

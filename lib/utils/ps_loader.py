@@ -12,7 +12,7 @@ firmware ``mip`` after ``utils.path``; Pyodide uses portable ``mip.py``
 
 MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
 # Install modules and manifests into cwd so ``import name`` / ``import pkg`` work
-# with ``/`` (or ``.``) on ``sys.path`` — same as desktop ``cd src``.
+# with ``/`` (or ``.``) on ``sys.path`` — same as desktop ``cd lib``.
 MANIFEST_MIP_TARGET = "."
 WHEEL_INDEX_URLS = (
     "https://test.pypi.org/simple/",
@@ -83,8 +83,9 @@ def manifest_url(name):
 
 def module_url(name):
     if _use_same_origin():
+        # Pages/local tree keeps the browser path web/pyscript/src/examples/.
         return _page_base() + "src/examples/" + name + ".py"
-    return "github:PyDevices/pydevices-examples/src/examples/" + name + ".py"
+    return "github:PyDevices/pydevices-examples/lib/examples/" + name + ".py"
 
 
 def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url_base=None):
@@ -140,7 +141,6 @@ def _import_firmware_mip():
     ``utils.path`` must run first so ``utils`` is appended, not prepended.
     """
     import mip
-
     import utils.path  # noqa: F401
 
     return mip
@@ -150,7 +150,6 @@ def _import_portable_mip():
     """Portable ``mip.py`` for Pyodide (no firmware ``mip``)."""
     _ensure_cwd()
     import mip
-
     import utils.path  # noqa: F401
 
     return mip

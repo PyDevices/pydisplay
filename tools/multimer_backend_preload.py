@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Apply in-process settings, then run a script in the same interpreter.
 
-Usage (cwd is ``src/``)::
+Usage (cwd is ``lib/``)::
 
     <python> ../tools/multimer_backend_preload.py [--env NAME=VALUE]... BACKEND SCRIPT [ARGS...]
 

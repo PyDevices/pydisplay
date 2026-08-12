@@ -48,13 +48,13 @@ Run from repo root unless noted:
 
 ```bash
 # Headless bot playtest (recommended smoke test)
-.venv/bin/python src/examples/tower_climb/tools/playtest.py
+.venv/bin/python lib/examples/tower_climb/tools/playtest.py
 
 # Regenerate BMP assets (CPython only)
-.venv/bin/python src/examples/tower_climb/assets/gen_tower_assets.py
+.venv/bin/python lib/examples/tower_climb/assets/gen_tower_assets.py
 
 # Play under PGDisplay (needs a display, e.g. DISPLAY=:1)
-cd src && PYTHONPATH=lib ../.venv/bin/python examples/tower_climb/tower_climb.py
+cd lib && PYTHONPATH=lib ../.venv/bin/python examples/tower_climb/tower_climb.py
 ```
 
 ## Recording: desktop capture vs PGDisplay frames
@@ -99,7 +99,7 @@ Properties:
 Typical invocation (what `record_win.sh` runs):
 
 ```bash
-cd src
+cd lib
 DISPLAY=:1 PYTHONPATH=lib \
   ../.venv/bin/python examples/tower_climb/tower_climb.py \
   --bot --hold-win \
@@ -151,8 +151,8 @@ tails the trace file in real time, prints climb progress every second, and
 **fails fast** if the bot stalls (no vertical improvement for 15s by default).
 
 ```bash
-.venv/bin/python src/examples/tower_climb/tools/playtest.py
-.venv/bin/python src/examples/tower_climb/tools/playtest.py --timeout 120 --stall-s 15
+.venv/bin/python lib/examples/tower_climb/tools/playtest.py
+.venv/bin/python lib/examples/tower_climb/tools/playtest.py --timeout 120 --stall-s 15
 ```
 
 Exit code 0 prints `OK: tree top reached` and a JSON summary.

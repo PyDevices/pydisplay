@@ -24,10 +24,10 @@ Self-tests (no window focus needed)::
     python tools/input_probe.py --selftest
     micropython tools/input_probe.py --selftest
 
-Interactive host dump (needs ``src/`` on path / ``board_config``; focus window)::
+Interactive host dump (needs ``lib/`` on path / ``board_config``; focus window)::
 
-    cd src && python ../tools/input_probe.py
-    cd src && micropython ../tools/input_probe.py
+    cd lib && python ../tools/input_probe.py
+    cd lib && micropython ../tools/input_probe.py
 
 Print the historical fix checklist::
 
@@ -35,7 +35,7 @@ Print the historical fix checklist::
 
 With LVGL mapping column (imports ``display_driver``)::
 
-    cd src && micropython ../tools/input_probe.py --lvgl
+    cd lib && micropython ../tools/input_probe.py --lvgl
 
 Quit: platform quit chord (usually Ctrl+Q).
 
@@ -159,7 +159,7 @@ import sys
 _file = __file__.replace("\\", "/")
 _tools = _file.rsplit("/", 1)[0] if "/" in _file else "."
 _root = _tools.rsplit("/", 1)[0] if "/" in _tools else "."
-_src = (_root + "/src") if _root not in (".", "") else "src"
+_src = (_root + "/lib") if _root not in (".", "") else "lib"
 _src_lib = _src + "/lib"
 _src_utils = _src + "/utils"
 _hw_lib = _root + "/../pydevices/lib"

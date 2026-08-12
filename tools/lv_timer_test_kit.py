@@ -2,7 +2,7 @@
 """
 Run the LVGL timer/input harness across desktop Python runtimes.
 
-Subprocesses run ``examples/lv_test_timer.py kit`` from ``src/`` (~4 s of
+Subprocesses run ``examples/lv_test_timer.py kit`` from ``lib/`` (~4 s of
 checks, then an injected ``events.Quit``). Each child prints ``KIT_RESULT=`` on
 stdout; exit code 0 is expected on success.
 
@@ -37,7 +37,7 @@ import sys
 import tempfile
 
 REPO = Path(__file__).resolve().parent.parent
-SRC = REPO / "src"
+SRC = REPO / "lib"
 TOOLS = REPO / "tools"
 HARNESS_ARG = "examples/lv_test_timer.py"
 RESULT_RE = re.compile(r"^KIT_RESULT=(.+)$", re.MULTILINE)

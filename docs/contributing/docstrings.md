@@ -1,6 +1,6 @@
 # Docstring conventions
 
-Public helper docstrings in `src/utils/` are rendered on [ReadTheDocs](https://pydisplay.readthedocs.io) via mkdocstrings. Product API documentation and source live in `pydevices`. Follow these rules so generated reference pages stay accurate.
+Public helper docstrings in `lib/utils/` are rendered on [ReadTheDocs](https://pydisplay.readthedocs.io) via mkdocstrings. Product API documentation and source live in `pydevices`. Follow these rules so generated reference pages stay accurate.
 
 ## Style
 

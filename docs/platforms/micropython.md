@@ -14,7 +14,7 @@ Platform notes for embedded MCUs and MicroPython on Unix. **Quick start:** [ESP3
 
 See [ESP32 board guide](../guides/esp32-board.md) for the full install and hello workflow.
 
-Brief version from the repo `src/` directory:
+Brief version from the repo `lib/` directory:
 
 ```bash
 mpremote mip install "github:PyDevices/pydevices/board_configs/busdisplay/i80/wt32sc01-plus"

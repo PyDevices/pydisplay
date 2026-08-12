@@ -114,7 +114,7 @@ def main(argv=None):
     _apply_display_overrides(args.resolution, args.scale)
     example = _resolve_example(args.example, repo_root)
     output = args.output.resolve()
-    os.chdir(repo_root / "src")
+    os.chdir(repo_root / "lib")
     ffmpeg_executable = importlib.import_module("frame_recorder").ffmpeg_executable
 
     if ffmpeg_executable() is None:

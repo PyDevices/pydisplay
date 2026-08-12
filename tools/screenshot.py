@@ -51,9 +51,9 @@ def _default_output(example):
 
 def _resolve_example(example, repo_root):
     path = Path(example)
-    candidates = (path, repo_root / "src" / "examples" / path)
+    candidates = (path, repo_root / "lib" / "examples" / path)
     if not path.suffix:
-        candidates += (repo_root / "src" / "examples" / f"{example}.py",)
+        candidates += (repo_root / "lib" / "examples" / f"{example}.py",)
     for candidate in candidates:
         if candidate.is_file():
             return candidate.resolve()
@@ -125,7 +125,7 @@ def _parse_args(argv=None):
 
 
 def _prepare_paths(repo_root):
-    src = repo_root / "src"
+    src = repo_root / "lib"
     tools = repo_root / "tools"
     hw = repo_root.parent / "pydevices"
     for path in (
@@ -210,7 +210,7 @@ def main(argv=None):
     _apply_display_overrides(args.resolution, args.scale)
     example = _resolve_example(args.example, repo_root)
     output = args.output.resolve()
-    os.chdir(repo_root / "src")
+    os.chdir(repo_root / "lib")
 
     deadline = time.monotonic() + args.delay
     _install_show_capture(deadline, output)

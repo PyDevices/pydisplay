@@ -21,7 +21,7 @@
 
 --8<-- "_snippets/pyscript-local.md"
 
-Examples in the [browser gallery](https://PyDevices.github.io/pydevices-examples/pyscript/) are copied to the deploy site and installed from the same origin on GitHub Pages. Locally, `tools/serve.py` serves your working tree — gallery pages load `src/examples/` via `web/pyscript/micropython.html?modules=…` / `?manifests=…` (MicroPython). Use `web/pyscript/pyodide.html` with the same query shape for Pyodide smoke tests (MIP JSON under `packages/` via the `web/pyscript/packages` symlink; no `?packages=`); it is not wired into the gallery. Non-gallery pages (`repl.html`, `editor.html`, `async.html`, `dom.html`) may still use `github:` installs.
+Examples in the [browser gallery](https://PyDevices.github.io/pydevices-examples/pyscript/) are copied to the deploy site and installed from the same origin on GitHub Pages. Locally, `tools/serve.py` serves your working tree — gallery pages load `lib/examples/` via `web/pyscript/micropython.html?modules=…` / `?manifests=…` (MicroPython). Use `web/pyscript/pyodide.html` with the same query shape for Pyodide smoke tests (MIP JSON under `packages/` via the `web/pyscript/packages` symlink; no `?packages=`); it is not wired into the gallery. Non-gallery pages (`repl.html`, `editor.html`, `async.html`, `dom.html`) may still use `github:` installs.
 
 ## Minimal teaching shells
 
@@ -52,7 +52,7 @@ callbacks so demos stay responsive. See [PyScript asyncio guide](pyscript-asynci
 
 ## Gallery examples
 
-Regenerate the card list with `python scripts/gallery_generator.py`. Every example entry under `src/examples/` is included by default.
+Regenerate the card list with `python scripts/gallery_generator.py`. Every example entry under `lib/examples/` is included by default.
 
 | Marker | Effect |
 |--------|--------|

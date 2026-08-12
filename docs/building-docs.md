@@ -30,7 +30,7 @@ One-shot production build (output in `site/`):
 | [`mkdocs.yml`](https://github.com/PyDevices/pydevices-examples/blob/main/mkdocs.yml) | Site config, theme, navigation |
 | [`docs/requirements.txt`](https://github.com/PyDevices/pydevices-examples/blob/main/docs/requirements.txt) | Python packages for MkDocs and plugins |
 | [`.readthedocs.yaml`](https://github.com/PyDevices/pydevices-examples/blob/main/.readthedocs.yaml) | ReadTheDocs build settings (same deps) |
-| [`scripts/mkdocs_gen_ref_pages.py`](https://github.com/PyDevices/pydevices-examples/blob/main/scripts/mkdocs_gen_ref_pages.py) | Auto-generates API reference stubs for pydevices-examples's `src/utils/` application helpers |
+| [`scripts/mkdocs_gen_ref_pages.py`](https://github.com/PyDevices/pydevices-examples/blob/main/scripts/mkdocs_gen_ref_pages.py) | Auto-generates API reference stubs for pydevices-examples's `lib/utils/` application helpers |
 
 Hand-authored pages live under `docs/` and follow a **Try → Quick start → Install → Learn → Reference** structure (see `mkdocs.yml` nav).
 
@@ -40,7 +40,7 @@ Shared copy-paste blocks: `docs/_snippets/` (included via pymdownx Snippets).
 
 ### Embedding the Jupyter notebook
 
-The example notebook ([`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydevices-examples/blob/main/src/jupyter_notebook.ipynb))
+The example notebook ([`lib/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/jupyter_notebook.ipynb))
 is rendered as a static docs page at [Platforms → Jupyter notebook](platforms/jupyter-notebook.ipynb).
 Users run it live via [Run the notebook interactively](platforms/jupyter-run.md).
 It is wired up with three pieces:
@@ -48,10 +48,10 @@ It is wired up with three pieces:
 | Piece | Role |
 |-------|------|
 | [`mkdocs-jupyter`](https://github.com/danielfrg/mkdocs-jupyter) (in `docs/requirements.txt`) | Converts `.ipynb` files into MkDocs pages |
-| [`scripts/mkdocs_gen_notebook_pages.py`](https://github.com/PyDevices/pydevices-examples/blob/main/scripts/mkdocs_gen_notebook_pages.py) | `mkdocs-gen-files` script that copies the notebook from `src/` into the docs tree at build time (MkDocs only renders files under `docs_dir`) |
+| [`scripts/mkdocs_gen_notebook_pages.py`](https://github.com/PyDevices/pydevices-examples/blob/main/scripts/mkdocs_gen_notebook_pages.py) | `mkdocs-gen-files` script that copies the notebook from `lib/` into the docs tree at build time (MkDocs only renders files under `docs_dir`) |
 | [`docs/overrides/main.html`](https://github.com/PyDevices/pydevices-examples/blob/main/docs/overrides/main.html) | Material theme override that adds a **Download notebook** button (uses `page.nb_url` from `include_source: true`) |
 
-The notebook keeps living in `src/` so it can still be **run** there against the
+The notebook keeps living in `lib/` so it can still be **run** there against the
 real source (relative imports like `import utils.path`). The committed copy has its
 outputs stripped (nbstripout), and the docs build sets `execute: false`, so the
 rendered page shows **markdown and code cells only** — no live output or the

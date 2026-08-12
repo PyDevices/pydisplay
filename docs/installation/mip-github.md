@@ -61,7 +61,7 @@ See the [board config index](https://pydevices.github.io/pydevices/board-configs
 `mip` can fetch any file from the repo by URL path:
 
 ```python
-mip.install("github:PyDevices/pydevices-examples/src/utils/path.py", target=".")
+mip.install("github:PyDevices/pydevices-examples/lib/utils/path.py", target=".")
 mip.install("github:PyDevices/pydevices/drivers/display/st7789.py", target="./drivers/display")
 ```
 

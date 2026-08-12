@@ -35,8 +35,8 @@ See [Run the notebook interactively](../docs/platforms/jupyter-run.md) and [PySc
 
 ```bash
 python tools/input_probe.py --selftest
-cd src && micropython ../tools/input_probe.py --selftest --lvgl
-cd src && python ../tools/input_probe.py   # interactive; focus the window
+cd lib && micropython ../tools/input_probe.py --selftest --lvgl
+cd lib && python ../tools/input_probe.py   # interactive; focus the window
 ```
 
 ## PyScript headless debug (Playwright)
