@@ -388,7 +388,7 @@ def install(package, index=None, target=None, version=None, mpy=None, url_base=N
         CPython, CircuitPython, and Pyodide.
     *url_base*
         When set, relative ``urls`` entries in a manifest resolve against this
-        base instead of the manifest JSON URL (gallery ``./src/…`` paths).
+        base instead of the manifest JSON URL (gallery ``./lib/…`` paths).
     """
     if index is None:
         index = _PACKAGE_INDEX

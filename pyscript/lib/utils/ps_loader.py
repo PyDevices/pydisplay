@@ -83,8 +83,8 @@ def manifest_url(name):
 
 def module_url(name):
     if _use_same_origin():
-        # Pages/local tree keeps the browser path web/pyscript/src/examples/.
-        return _page_base() + "src/examples/" + name + ".py"
+        # Pages/local tree keeps the browser path web/pyscript/lib/examples/.
+        return _page_base() + "lib/examples/" + name + ".py"
     return "github:PyDevices/pydevices-examples/lib/examples/" + name + ".py"
 
 
@@ -190,8 +190,11 @@ def _ensure_board_config(mip_mod, status=None, url_base=None):
 def ensure_board_config(status=None):
     """Ensure browser ``board_config`` (desktop package) is importable.
 
-    Call after ``utils.path`` (and any ``env_set`` size overrides) and before
-    importing demos or setup modules that ``import board_config``.
+    Call after ``utils.path`` and before ``from displaydev import env_set`` /
+    importing demos or setup modules that ``import board_config``. The desktop
+    package pulls in ``displaydev`` (not frozen in the gallery wasm). Set size
+    overrides with ``env_set`` after this returns and before the first
+    ``import board_config``.
     Same package as ``harness.html`` / gallery ``install_micropython``.
     """
     _ensure_cwd()

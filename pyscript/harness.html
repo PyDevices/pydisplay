@@ -309,9 +309,9 @@ def _manifest_url(name):
 
 def _module_url(name):
     if _use_same_origin():
-        # Pages/local tree keeps the browser path web/pyscript/src/examples/
+        # Pages/local tree keeps the browser path web/pyscript/lib/examples/
         # (symlink → repo lib/). GitHub MIP URLs use the repo lib/ path.
-        return _same_origin_base() + "src/examples/" + name + ".py"
+        return _same_origin_base() + "lib/examples/" + name + ".py"
     return "github:PyDevices/pydevices-examples/lib/examples/" + name + ".py"
 
 def _packages_from_entry(entry):

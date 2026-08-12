@@ -1,7 +1,7 @@
 /*! pydevices-examples PWA service worker — offline cache + COI headers for PyScript */
 /* CACHE_NAME is stamped at Pages deploy from a hash of STATIC_ASSETS + this
  * file (see scripts/pyscript_stamp_pwa_cache.py). Git keeps -dev for local serve. */
-const CACHE_NAME = 'pydevices-examples-pwa-2bd9944cadd0';
+const CACHE_NAME = 'pydevices-examples-pwa-9a25fb5f7332';
 
 const STATIC_ASSETS = [
   './index.html',
@@ -44,6 +44,8 @@ const NETWORK_FIRST_ASSETS = [
   './pyodide.html',
   './mp.html',
   './py.html',
+  './peterhinch.html',
+  './harness.html',
 ];
 
 const RUNTIME_ORIGINS = [
