@@ -4,7 +4,7 @@
 
 # TV remote / PyScript notes (webOS / Tizen)
 
-pydisplay on LG **webOS** and Samsung **Tizen** is **browser / PyScript only** —
+pydevices-examples on LG **webOS** and Samsung **Tizen** is **browser / PyScript only** —
 use `PSDisplay`, not native `SDLDisplay` / `usdl2`.
 
 ## Try the demo

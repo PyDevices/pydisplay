@@ -1,6 +1,6 @@
 {
-  "name": "PyDevices pydisplay",
-  "short_name": "pydisplay",
+  "name": "PyDevices pydevices-examples",
+  "short_name": "pydevices-examples",
   "description": "Cross-platform display and event drivers — PyScript Gallery in your browser.",
   "start_url": "./index.html",
   "scope": "./",

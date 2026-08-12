@@ -1666,7 +1666,7 @@ def _restart_is_jupyter():
 
 
 # Distinct from SDL window-close (usually 0) so a host shell can relaunch.
-# Supported desktop relaunch path — from ``pydisplay/src``:
+# Supported desktop relaunch path — from ``pydevices-examples/src``:
 #   while true; do micropython -m examples.roku_remote; [ $? -eq 42 ] || break; done
 # PowerShell:
 #   while ($true) { micropython -m examples.roku_remote; if ($LASTEXITCODE -ne 42) { break } }

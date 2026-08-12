@@ -43,19 +43,19 @@ def update():
         add(directory, front=True)
     add("lib", front=True)
     # Desktop sibling checkout: events.py / keys.py / multimer in hardware lib/.
-    for candidate in ("../micropython-hardware/lib", "../../micropython-hardware/lib"):
+    for candidate in ("../pydevices/lib", "../../pydevices/lib"):
         if _exists(candidate):
             add(candidate, front=True)
             break
     # byteswap, mip, viper_tools, keypins, wifi, frame_recorder, micropython shim.
-    for candidate in ("../micropython-hardware/utils", "../../micropython-hardware/utils"):
+    for candidate in ("../pydevices/utils", "../../pydevices/utils"):
         if _exists(candidate):
             add(candidate, front=True)
             break
     # displaydev package lives in hardware drivers/display/.
     for candidate in (
-        "../micropython-hardware/drivers/display",
-        "../../micropython-hardware/drivers/display",
+        "../pydevices/drivers/display",
+        "../../pydevices/drivers/display",
     ):
         if _exists(candidate):
             add(candidate, front=True)
@@ -64,9 +64,9 @@ def update():
         add(".frozen", front=True)
     add("", front=True)
     try:
-        import pydisplay_test_mode
+        import pydevices_test_mode
 
-        quiet = pydisplay_test_mode.ENABLED
+        quiet = pydevices_test_mode.ENABLED
     except ImportError:
         quiet = False
     if not quiet:

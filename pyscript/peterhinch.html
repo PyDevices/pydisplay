@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <script>try{if(localStorage.getItem('pydevices-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}</script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Peter Hinch demos — pydisplay MicroPython</title>
-    <meta name="description" content="Discover and run Peter Hinch GUI demos in the browser with pydisplay and MicroPython.">
+    <title>Peter Hinch demos — pydevices-examples MicroPython</title>
+    <meta name="description" content="Discover and run Peter Hinch GUI demos in the browser with pydevices-examples and MicroPython.">
     <link rel="icon" type="image/svg+xml" href="https://pydevices.github.io/assets/img/logo.svg">
     <link rel="manifest" href="./peterhinch-manifest.json">
     <meta name="theme-color" content="#f54e00">
@@ -254,7 +254,7 @@
             var packageLink = document.getElementById('package-link');
             packageLink.textContent = labels[gui];
             packageLink.href = repositories[gui];
-            document.title = labels[gui] + ' demos — pydisplay MicroPython';
+            document.title = labels[gui] + ' demos — pydevices-examples MicroPython';
         })();
     </script>
 
@@ -277,8 +277,8 @@ import ps_loader
 from displaydev import env_set
 
 # Hinch demos use 320x240 (gallery default is 320x480).
-env_set("PYDISPLAY_WIDTH", 320)
-env_set("PYDISPLAY_HEIGHT", 240)
+env_set("PYDEVICES_WIDTH", 320)
+env_set("PYDEVICES_HEIGHT", 240)
 
 
 def _log_print(*args, **kwargs):
@@ -463,7 +463,7 @@ asyncio.create_task(_boot())
             runtime.type = 'mpy';
             runtime.dataset.configs = [
                 './micropython.json',
-                './pydisplay.json',
+                './pydevices-examples.json',
                 './peterhinch-' + gui + '.json'
             ].join(' ');
         })();

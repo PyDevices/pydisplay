@@ -22,7 +22,7 @@ teardown). Desktop relaunch is a host shell loop on exit ``42`` only — there
 is no in-process ``execv``. PyScript / Jupyter only show ``reload page`` /
 ``restart kernel``. Soft-reset is not relied on (it does not re-run ``main.py``).
 
-Desktop launch from ``pydisplay/src`` (same for ``micropython``,
+Desktop launch from ``pydevices-examples/src`` (same for ``micropython``,
 ``micropython.exe``, ``circuitpython``, ``python``, ``python.exe``)::
 
     # once
@@ -69,10 +69,10 @@ _MCU_PLATFORMS = (
     "zephyr",
 )
 if getattr(sys, "platform", "") not in _MCU_PLATFORMS:
-    env_set("PYDISPLAY_WIDTH", _WIDTH)
-    env_set("PYDISPLAY_HEIGHT", _HEIGHT)
+    env_set("PYDEVICES_WIDTH", _WIDTH)
+    env_set("PYDEVICES_HEIGHT", _HEIGHT)
     if _SCALE is not None:
-        env_set("PYDISPLAY_SCALE", _SCALE)
+        env_set("PYDEVICES_SCALE", _SCALE)
 
 import roku_engine  # noqa: E402
 from roku_engine import (  # noqa: E402

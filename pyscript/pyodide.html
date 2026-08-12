@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <script>try{if(localStorage.getItem('pydevices-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}</script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Pyodide — pydisplay</title>
-    <meta name="description" content="Run pydisplay example modules and MIP manifests under Pyodide (CPython WASM).">
+    <title>Pyodide — pydevices-examples</title>
+    <meta name="description" content="Run pydevices-examples example modules and MIP manifests under Pyodide (CPython WASM).">
     <link rel="icon" type="image/svg+xml" href="https://pydevices.github.io/assets/img/logo.svg">
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#f54e00">
@@ -31,7 +31,7 @@
             <nav class="nav">
                 <a href="./index.html">Demos</a>
                 <a href="https://pydisplay.readthedocs.io">Docs</a>
-                <a href="https://github.com/PyDevices/pydisplay">GitHub</a>
+                <a href="https://github.com/PyDevices/pydevices-examples">GitHub</a>
             </nav>
             <div class="header-tools">
                 <button type="button" class="pwa-install-btn" id="pwa-install-btn">Install app</button>
@@ -119,7 +119,7 @@
                     <div class="meta-row"><span class="k">Source</span><span class="v" id="meta-source">—</span></div>
                 </div>
                 <div class="actions">
-                    <a class="btn" id="source-link" href="https://github.com/PyDevices/pydisplay/tree/main/src/examples" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> View source</a>
+                    <a class="btn" id="source-link" href="https://github.com/PyDevices/pydevices-examples/tree/main/src/examples" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> View source</a>
                     <a class="btn" href="./index.html">Back to demos</a>
                 </div>
             </aside>
@@ -129,7 +129,7 @@
 
     <footer class="site-footer">
         <div class="wrap">
-            <span>pydisplay &middot; <a href="https://github.com/PyDevices/pydisplay">PyDevices/pydisplay</a></span>
+            <span>pydevices-examples &middot; <a href="https://github.com/PyDevices/pydevices-examples">PyDevices/pydevices-examples</a></span>
             <span><a href="https://pydevices.github.io/">PyDevices</a></span>
         </div>
     </footer>
@@ -140,7 +140,7 @@
 
             function abortLoader(messageHtml) {
                 var main = document.querySelector('main.loader-main');
-                document.title = 'Invalid query — pydisplay Pyodide';
+                document.title = 'Invalid query — pydevices-examples Pyodide';
                 var meta = document.querySelector('meta[name="description"]');
                 if (meta) {
                     meta.content = 'Invalid Pyodide loader query.';
@@ -178,7 +178,7 @@
             var entry = plan.entryName;
             if (entry) {
                 var label = Q.titleCaseStem(entry);
-                document.title = label + ' — pydisplay Pyodide';
+                document.title = label + ' — pydevices-examples Pyodide';
                 var meta = document.querySelector('meta[name="description"]');
                 if (meta) {
                     meta.content = label + ': example under Pyodide.';
@@ -221,14 +221,14 @@
                 }
                 if (sourceLink) {
                     sourceLink.href = plan.entryKind === 'manifest'
-                        ? 'https://github.com/PyDevices/pydisplay/tree/main/src/examples/' + entry
-                        : 'https://github.com/PyDevices/pydisplay/blob/main/src/examples/' + entry + '.py';
+                        ? 'https://github.com/PyDevices/pydevices-examples/tree/main/src/examples/' + entry
+                        : 'https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/' + entry + '.py';
                 }
             }
         })();
     </script>
 
-    <script type="py" data-configs="./pyodide.json ./pydisplay.json" output="log">
+    <script type="py" data-configs="./pyodide.json ./pydevices-examples.json" output="log">
         import builtins
         import os
         import sys

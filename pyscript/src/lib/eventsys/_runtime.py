@@ -492,7 +492,7 @@ class Runtime:
         try:
             while not self._quit_requested:
                 await asyncio.sleep(tick_ms / 1000)
-                # Harness deadline hooks (pydisplay_test_mode) run from
+                # Harness deadline hooks (pydevices_test_mode) run from
                 # multimer.sleep_ms on the sync path; async run_forever must
                 # invoke them here — LVGL claims refresh so auto-service poll
                 # does not. App code should not rely on this hook.

@@ -1,4 +1,4 @@
-/*! pydisplay gallery loaders — hide the loading row when PyScript is ready or failed */
+/*! pydevices-examples gallery loaders — hide the loading row when PyScript is ready or failed */
 (function () {
   var runtime = document.body && document.body.getAttribute('data-loader-runtime');
   if (runtime !== 'mpy' && runtime !== 'py') {

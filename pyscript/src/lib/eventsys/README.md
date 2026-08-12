@@ -64,10 +64,10 @@ runtime.run_forever()
 
 - [Documentation — eventsys](https://pydisplay.readthedocs.io/en/latest/concepts/events/)
 - [Documentation — Runtime](https://pydisplay.readthedocs.io/en/latest/concepts/runtime/)
-- [Source](https://github.com/PyDevices/micropython-hardware)
-- [Issues](https://github.com/PyDevices/micropython-hardware/issues)
+- [Source](https://github.com/PyDevices/pydevices)
+- [Issues](https://github.com/PyDevices/pydevices/issues)
 - Related TestPyPI distributions: `pydevices-events`, `pydevices-keys`, `pydevices-multimer`, `pydevices-displaydev`
 
 ## License
 
-MIT — see [LICENSE](https://github.com/PyDevices/micropython-hardware/blob/main/LICENSE).
+MIT — see [LICENSE](https://github.com/PyDevices/pydevices/blob/main/LICENSE).

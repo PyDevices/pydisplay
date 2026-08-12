@@ -1,5 +1,5 @@
 /*
- * pydisplay PyScript demo — runtime/stage stylesheet
+ * pydevices-examples PyScript demo — runtime/stage stylesheet
  *
  * Loaded *in addition to* site.css (shared PyDevices chrome) by micropython.html
  * and pyodide.html. Everything here is specific to the parametric loader's

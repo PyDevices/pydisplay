@@ -7,7 +7,7 @@ Consolidates loader install logic for ``micropython.html``, ``pyodide.html``,
 ``mp.html``, and ``py.html``. Gallery pages call ``_ps_loader()`` on
 Run only (``import utils.path`` then ``import ps_loader``). MicroPython WASM uses
 firmware ``mip`` after ``utils.path``; Pyodide uses portable ``mip.py``
-(from micropython-hardware ``utils/``, mounted at ``/utils/``).
+(from pydevices ``utils/``, mounted at ``/utils/``).
 """
 
 MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
@@ -19,9 +19,7 @@ WHEEL_INDEX_URLS = (
     "https://pypi.org/simple/",
 )
 # Browser default board package (display + board_devices + audio drivers).
-DESKTOP_BOARD_CONFIG_PACKAGE = (
-    "github:PyDevices/micropython-hardware/board_configs/desktop/package.json"
-)
+DESKTOP_BOARD_CONFIG_PACKAGE = "github:PyDevices/pydevices/board_configs/desktop/package.json"
 # JSON API (not simple) — used to pin pyemscripten wasm wheels by direct URL.
 WHEEL_JSON_URL = "https://test.pypi.org/pypi/{package_name}/json"
 BOARD_WIDTH = 320
@@ -58,8 +56,8 @@ def set_board_defaults():
     """Set the gallery's browser defaults without importing board_config."""
     from displaydev import env_set
 
-    env_set("PYDISPLAY_WIDTH", BOARD_WIDTH)
-    env_set("PYDISPLAY_HEIGHT", BOARD_HEIGHT)
+    env_set("PYDEVICES_WIDTH", BOARD_WIDTH)
+    env_set("PYDEVICES_HEIGHT", BOARD_HEIGHT)
 
 
 def _page_base():
@@ -80,13 +78,13 @@ def _use_same_origin():
 def manifest_url(name):
     if _use_same_origin():
         return _page_base() + "packages/" + name + ".json"
-    return "github:PyDevices/pydisplay/packages/" + name + ".json"
+    return "github:PyDevices/pydevices-examples/packages/" + name + ".json"
 
 
 def module_url(name):
     if _use_same_origin():
         return _page_base() + "src/examples/" + name + ".py"
-    return "github:PyDevices/pydisplay/src/examples/" + name + ".py"
+    return "github:PyDevices/pydevices-examples/src/examples/" + name + ".py"
 
 
 def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url_base=None):
@@ -272,7 +270,7 @@ async def _pyemscripten_wheel_url(spec):
                     candidates.append(str(file_url))
     if not candidates:
         return None
-    # Prefer the ABI pydisplay vendors (pyemscripten_2026_0).
+    # Prefer the ABI pydevices-examples vendors (pyemscripten_2026_0).
     for preferred in candidates:
         if "pyemscripten_2026_0_wasm32" in preferred:
             return preferred

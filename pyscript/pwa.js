@@ -1,4 +1,4 @@
-/*! pydisplay PWA bootstrap — COI service worker registration + install/update UI */
+/*! pydevices-examples PWA bootstrap — COI service worker registration + install/update UI */
 (function () {
   var SW_URL = './sw.js';
   var SW_SCOPE = './';
@@ -208,7 +208,7 @@
       deferredPrompt = null;
       iosInstallHint = false;
       hideInstallButton(installBtn);
-      showToast('pydisplay installed — launch it from your home screen.');
+      showToast('pydevices-examples installed — launch it from your home screen.');
     });
   }
 

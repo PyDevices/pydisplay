@@ -20,9 +20,9 @@ _CORE_FILES = {
 }
 
 _PACKAGES = {
-    "micropython-nano-gui": "github:PyDevices/pydisplay/packages/micropython-nano-gui.json",
-    "micropython-micro-gui": "github:PyDevices/pydisplay/packages/micropython-micro-gui.json",
-    "micropython-touch": "github:PyDevices/pydisplay/packages/micropython-touch.json",
+    "micropython-nano-gui": "github:PyDevices/pydevices-examples/packages/micropython-nano-gui.json",
+    "micropython-micro-gui": "github:PyDevices/pydevices-examples/packages/micropython-micro-gui.json",
+    "micropython-touch": "github:PyDevices/pydevices-examples/packages/micropython-touch.json",
 }
 
 # colors.py imports SSD from color_setup, which re-enters fetch_ph_gui while
@@ -296,7 +296,7 @@ def fetch_ph_gui(which, apply_patches=True):
     call again with patches enabled.
 
     Uses ``mip.install`` (firmware on MicroPython; portable ``mip.py`` from
-    micropython-hardware ``utils/`` on CPython / Pyodide / CircuitPython).
+    pydevices ``utils/`` on CPython / Pyodide / CircuitPython).
     """
     global _IN_FETCH
 

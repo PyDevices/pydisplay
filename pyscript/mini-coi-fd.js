@@ -1,6 +1,6 @@
 /*! coi-serviceworker v0.1.7 - Guido Zuidhof and contributors, licensed under MIT */
 /*! mini-coi - Andrea Giammarchi and contributors, licensed under MIT */
-/** Back-compat shim: pydisplay now registers ./sw.js via pwa.js (COI + offline cache). */
+/** Back-compat shim: pydevices-examples now registers ./sw.js via pwa.js (COI + offline cache). */
 (({ document: d, navigator: { serviceWorker: s } }) => {
   if (!d) return;
   try { new SharedArrayBuffer(4, { maxByteLength: 8 }); }
