@@ -1,18 +1,18 @@
 # Ecosystem & sister projects
 
-PyDisplay is the graphics, input-event, and timing backend for the wider PyDevices ecosystem. Anything built on top of it inherits PyDisplay's [portability](platforms/index.md) across MicroPython, CircuitPython, and CPython.
+PyDevices is the graphics, input-event, and timing backend for the wider PyDevices ecosystem. Anything built on top of it inherits PyDevices's [portability](platforms/index.md) across MicroPython, CircuitPython, and CPython.
 
 ## LVGL sister projects
 
-Three sister projects wire the PyDevices portable stack into [LVGL](https://lvgl.io/) — the popular C graphics library — so you can build LVGL applications in pure Python. They use `displaydev`, neutral board input, and `multimer` on each runtime, while pydisplay hosts the examples:
+Three sister projects wire the PyDevices portable stack into [LVGL](https://lvgl.io/) — the popular C graphics library — so you can build LVGL applications in pure Python. They use `displaydev`, neutral board input, and `multimer` on each runtime, while pydevices-examples hosts the examples:
 
 | Project | Runtime | Role |
 |---------|---------|------|
-| [lvgl-micropython](https://github.com/PyDevices/lvgl-micropython) | MicroPython | LVGL bindings; PyDisplay drives display + input. |
-| [lvgl-circuitpython](https://github.com/PyDevices/lvgl-circuitpython) | CircuitPython | LVGL bindings backed by PyDisplay. |
-| [lvgl-python](https://github.com/PyDevices/lvgl-python) | CPython | LVGL bindings backed by PyDisplay. |
+| [lvgl-micropython](https://github.com/PyDevices/lvgl-micropython) | MicroPython | LVGL bindings; PyDevices drives display + input. |
+| [lvgl-circuitpython](https://github.com/PyDevices/lvgl-circuitpython) | CircuitPython | LVGL bindings backed by PyDevices. |
+| [lvgl-python](https://github.com/PyDevices/lvgl-python) | CPython | LVGL bindings backed by PyDevices. |
 
-Because all three share PyDisplay as the backend, the *same* LVGL Python code runs on a microcontroller, on the desktop, and — see below — in a notebook.
+Because all three share PyDevices as the backend, the *same* LVGL Python code runs on a microcontroller, on the desktop, and — see below — in a notebook.
 
 ### Develop LVGL apps in Jupyter Notebook
 
@@ -22,7 +22,7 @@ See the [LVGL guide](guis/lvgl.md) for wiring details and the [Jupyter platform 
 
 ## GUI library integration
 
-PyDisplay also drops in under other GUI stacks:
+PyDevices also drops in under other GUI stacks:
 
 | Library | Notes |
 |---------|-------|
@@ -31,13 +31,13 @@ PyDisplay also drops in under other GUI stacks:
 | [Micro-GUI](guis/micro-gui.md) | @peterhinch's button / encoder GUI. |
 | [MicroPython-Touch](guis/micropython-touch.md) | @peterhinch's touch GUI. |
 | [TFT / st7789py ports](guis/tft-gui.md) | russhughes-style font and bitmap rendering. |
-| [pdwidgets](https://github.com/PyDevices/pdwidgets) | Cross-platform widget toolkit for pydisplay. |
+| [pdwidgets](https://github.com/PyDevices/pdwidgets) | Cross-platform widget toolkit for PyDevices. |
 | [palettes](https://github.com/PyDevices/palettes) | Color palettes (`wheel`, `cube`, `material_design`). |
 
 ## Related PyDevices repositories
 
-- [pydisplay](https://github.com/PyDevices/pydisplay) — this project.
+- [pydevices-examples](https://github.com/PyDevices/pydevices-examples) — this project.
 - [palettes](https://github.com/PyDevices/palettes) — color palette toolkit.
-- [pdwidgets](https://github.com/PyDevices/pdwidgets) — widget toolkit for pydisplay.
+- [pdwidgets](https://github.com/PyDevices/pdwidgets) — widget toolkit for PyDevices.
 - [micropython-lib](https://github.com/PyDevices/micropython-lib) — precompiled MIP packages ([index](https://PyDevices.github.io/micropython-lib/mip/PyDevices)).
-- [displayif](https://github.com/PyDevices/displayif) — native MicroPython display interface modules for PyDisplay.
+- [displayif](https://github.com/PyDevices/displayif) — native MicroPython display interface modules for PyDevices.

@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <script>try{if(localStorage.getItem('pydevices-theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}</script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Loader — pydisplay MicroPython</title>
-    <meta name="description" content="Run pydisplay demos by name via the parametric PyScript loader.">
+    <title>Loader — pydevices-examples MicroPython</title>
+    <meta name="description" content="Run pydevices-examples demos by name via the parametric PyScript loader.">
     <link rel="icon" type="image/svg+xml" href="https://pydevices.github.io/assets/img/logo.svg">
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#f54e00">
@@ -31,7 +31,7 @@
             <nav class="nav">
                 <a href="./index.html">Demos</a>
                 <a href="https://pydisplay.readthedocs.io">Docs</a>
-                <a href="https://github.com/PyDevices/pydisplay">GitHub</a>
+                <a href="https://github.com/PyDevices/pydevices-examples">GitHub</a>
             </nav>
             <div class="header-tools">
                 <button type="button" class="pwa-install-btn" id="pwa-install-btn">Install app</button>
@@ -116,7 +116,7 @@
                     <div class="meta-row"><span class="k">Install</span><span class="v" id="meta-install">—</span></div>
                 </div>
                 <div class="actions">
-                    <a class="btn" id="source-link" href="https://github.com/PyDevices/pydisplay/tree/main/src/examples" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> View source</a>
+                    <a class="btn" id="source-link" href="https://github.com/PyDevices/pydevices-examples/tree/main/src/examples" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> View source</a>
                     <a class="btn" href="./index.html">Back to demos</a>
                 </div>
             </aside>
@@ -126,7 +126,7 @@
 
     <footer class="site-footer">
         <div class="wrap">
-            <span>pydisplay &middot; <a href="https://github.com/PyDevices/pydisplay">PyDevices/pydisplay</a></span>
+            <span>pydevices-examples &middot; <a href="https://github.com/PyDevices/pydevices-examples">PyDevices/pydevices-examples</a></span>
             <span><a href="https://pydevices.github.io/">PyDevices</a></span>
         </div>
     </footer>
@@ -138,7 +138,7 @@
             function abortLoader(bad) {
                 var main = document.querySelector('main.loader-main');
                 var names = bad.map(function (n) { return JSON.stringify(n); }).join(', ');
-                document.title = 'Invalid query — pydisplay MicroPython';
+                document.title = 'Invalid query — pydevices-examples MicroPython';
                 var meta = document.querySelector('meta[name="description"]');
                 if (meta) {
                     meta.content = 'Invalid parametric loader query.';
@@ -176,10 +176,10 @@
                     return;
                 }
                 var label = Q.titleCaseStem(entry);
-                document.title = label + ' — pydisplay MicroPython';
+                document.title = label + ' — pydevices-examples MicroPython';
                 var meta = document.querySelector('meta[name="description"]');
                 if (meta) {
-                    meta.content = label + ': a pydisplay demo running in the browser via PyScript.';
+                    meta.content = label + ': a pydevices-examples demo running in the browser via PyScript.';
                 }
                 var crumb = document.getElementById('crumb-name');
                 var title = document.getElementById('loader-title');
@@ -221,8 +221,8 @@
                 }
                 if (sourceLink) {
                     sourceLink.href = plan.entryKind === 'manifest'
-                        ? 'https://github.com/PyDevices/pydisplay/tree/main/src/examples/' + entry
-                        : 'https://github.com/PyDevices/pydisplay/blob/main/src/examples/' + entry + '.py';
+                        ? 'https://github.com/PyDevices/pydevices-examples/tree/main/src/examples/' + entry
+                        : 'https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/' + entry + '.py';
                 }
             }
 
@@ -230,7 +230,7 @@
         })();
     </script>
 
-    <script type="mpy" data-configs="./micropython.json ./pydisplay.json" output="log">
+    <script type="mpy" data-configs="./micropython.json ./pydevices-examples.json" output="log">
         import builtins
         import os
         import sys

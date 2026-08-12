@@ -1,34 +1,34 @@
 # ESP32 / MicroPython board
 
-**Who:** You have a MicroPython board (ESP32-S3, WT32-SC01, etc.) and want pydisplay running on hardware.
+**Who:** You have a MicroPython board (ESP32-S3, WT32-SC01, etc.) and want pydevices-examples running on hardware.
 
-**Prerequisites:** USB serial access, `mpremote` on your PC. No prior pydisplay install.
+**Prerequisites:** USB serial access, `mpremote` on your PC. No prior pydevices-examples install.
 
 ## 1. Pick a board config
 
-Find your hardware in [board configs](https://pydevices.github.io/micropython-hardware/board-configs.html). Example for WT32-SC01 Plus:
+Find your hardware in [board configs](https://pydevices.github.io/pydevices/board-configs.html). Example for WT32-SC01 Plus:
 
 ```
 board_configs/busdisplay/i80/wt32sc01-plus
 ```
 
-Don't see your board? Use the closest match or [contribute a config](https://pydevices.github.io/micropython-hardware/board-configs.html).
+Don't see your board? Use the closest match or [contribute a config](https://pydevices.github.io/pydevices/board-configs.html).
 
 ## 2. Install packages
 
-**Option A — micropython-hardware install workflows (recommended):**
+**Option A — pydevices install workflows (recommended):**
 
-Follow [install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html) for pip/mip setup on device or host.
+Follow [install workflows](https://pydevices.github.io/pydevices/install-workflows.html) for pip/mip setup on device or host.
 
 **Option B — MIP from your PC:**
 
 ```bash
 INDEX="https://PyDevices.github.io/micropython-lib/mip/PyDevices"
-mpremote mip install "github:PyDevices/micropython-hardware/board_configs/busdisplay/i80/wt32sc01-plus"
+mpremote mip install "github:PyDevices/pydevices/board_configs/busdisplay/i80/wt32sc01-plus"
 for pkg in displaydev events keys eventsys pygraphics multimer; do
   mpremote mip install --index "$INDEX" "$pkg"
 done
-mpremote mip install --target "./utils" "github:PyDevices/pydisplay/packages/utils.json"
+mpremote mip install --target "./utils" "github:PyDevices/pydevices-examples/packages/utils.json"
 ```
 
 **Option C — minimum packages only:**
@@ -47,16 +47,16 @@ At the device REPL:
 
 ```python
 import utils.path  # see ../utils.md#path-setup
-from examples import pydisplay_demo
+from examples import pydevices_demo
 ```
 
 Under a mounted dev tree, `examples/` stays a subdirectory — resolve it as a package (`from examples import <name>` / `import examples.<a>.<b>`), never a bare `import <name>`. If instead you MIP-installed `examples.json` with `target="."` (flat, no `examples/` subdirectory), the same demo is a bare import:
 
 ```python
-import pydisplay_demo
+import pydevices_demo
 ```
 
-See [**pydisplay_demo**](../examples/pydisplay_demo.md) for what the script demonstrates (clicks, rotation, scrolling). To start your own app, copy the [**App starter**](../examples/app-starter.md) boilerplate. Legacy `hello.py` uses `tft_config` if you are porting older st7789py examples.
+See [**pydevices_demo**](../examples/pydevices_demo.md) for what the script demonstrates (clicks, rotation, scrolling). To start your own app, copy the [**App starter**](../examples/app-starter.md) boilerplate. Legacy `hello.py` uses `tft_config` if you are porting older st7789py examples.
 
 ## 4. Try events
 
@@ -74,7 +74,7 @@ discovery. Details: [MicroPython platform notes](../platforms/micropython.md#bac
 ## Next
 
 - [**App starter**](../examples/app-starter.md) — copy-paste template for your first app
-- [**pydisplay_demo**](../examples/pydisplay_demo.md) — flagship feature demo (display, input, scroll)
+- [**pydevices_demo**](../examples/pydevices_demo.md) — flagship feature demo (display, input, scroll)
 - [Examples catalog](../examples/index.md) — suggested learning order
 - [Events concept](../concepts/events.md) — runtime poll loop
 - [MicroPython platform notes](../platforms/micropython.md) — bus drivers, frozen firmware
@@ -82,4 +82,4 @@ discovery. Details: [MicroPython platform notes](../platforms/micropython.md#bac
 
 ## Reference
 
-- [micropython-hardware product docs](https://pydevices.github.io/micropython-hardware/)
+- [pydevices product docs](https://pydevices.github.io/pydevices/)

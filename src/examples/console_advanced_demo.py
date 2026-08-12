@@ -50,9 +50,9 @@ except ImportError:
         pass
 
 try:
-    import pydisplay_test_mode
+    import pydevices_test_mode
 
-    _test_mode = pydisplay_test_mode.ENABLED
+    _test_mode = pydevices_test_mode.ENABLED
 except ImportError:
     _test_mode = False
 

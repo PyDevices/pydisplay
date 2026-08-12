@@ -1,6 +1,6 @@
 # ⚠️ Troubleshooting
 
-Common problems when installing, importing, or running pydisplay.
+Common problems when installing, importing, or running pydevices-examples.
 
 ## Import errors
 
@@ -11,18 +11,18 @@ Common problems when installing, importing, or running pydisplay.
 **Fix:**
 
 - **Full clone:** `cd src` and set `PYTHONPATH`/`MICROPYPATH` to `.:lib:utils` before running (preferred), or `import utils.path` if `utils/` is present and environment variables are unavailable or not set as recommended (see [Utils path setup](utils.md#path-setup)).
-- **Device:** install via [MIP](installation/mip-github.md) or [micropython-hardware install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html) into `/lib`.
+- **Device:** install via [MIP](installation/mip-github.md) or [pydevices install workflows](https://pydevices.github.io/pydevices/install-workflows.html) into `/lib`.
 - **Examples under `mpremote mount .`:** `import utils.path` (see [Utils path setup](utils.md#path-setup)), then resolve demos as a package — `from examples import hello`, not a bare `import hello` (the mounted tree still nests `examples/`).
 
 ### `ModuleNotFoundError: No module named 'board_config'`
 
 **Cause:** No `board_config.py` for your hardware.
 
-**Fix:** Install a [board config package](https://pydevices.github.io/micropython-hardware/board-configs.html) or copy one into `lib/`:
+**Fix:** Install a [board config package](https://pydevices.github.io/pydevices/board-configs.html) or copy one into `lib/`:
 
 ```python
 import mip
-mip.install("github:PyDevices/micropython-hardware/board_configs/sdldisplay")  # desktop SDL2
+mip.install("github:PyDevices/pydevices/board_configs/sdldisplay")  # desktop SDL2
 ```
 
 ### `ImportError: multimer is required for auto_refresh`
@@ -55,8 +55,8 @@ mip.install("github:PyDevices/micropython-hardware/board_configs/sdldisplay")  #
 
 **Fix:**
 
-1. Verify the correct [board config](https://pydevices.github.io/micropython-hardware/board-configs.html) for your wiring.
-2. Check `requires_byteswap` / `BusDisplay.disable_auto_byteswap()` — see [display drivers](https://pydevices.github.io/micropython-hardware/display-drivers.html).
+1. Verify the correct [board config](https://pydevices.github.io/pydevices/board-configs.html) for your wiring.
+2. Check `requires_byteswap` / `BusDisplay.disable_auto_byteswap()` — see [display drivers](https://pydevices.github.io/pydevices/display-drivers.html).
 3. Confirm SPI/I80 pins match your schematic.
 
 ### Touch coordinates wrong or inverted
@@ -109,7 +109,7 @@ show the square and are not laggy.** This reproduces identically in `micropython
 `micropython.exe`'s Linux counterpart under WSL, CircuitPython, and CPython
 `.venv`, regardless of display backend (`SDLDisplay` or `PGDisplay`/PyGame).
 
-**Cause:** This is **not a pydisplay bug**. It is WSLg's touch remoting: WSLg
+**Cause:** This is **not a pydevices-examples bug**. It is WSLg's touch remoting: WSLg
 forwards touch input from the Windows host to the Linux guest over the RDP
 Input Extension Protocol ([MS-RDPEI](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpei/)),
 which negotiates `CS_READY_FLAGS_SHOW_TOUCH_VISUALS` and applies Windows'
@@ -120,12 +120,12 @@ or the app.
 
 **Confirmed environmental, not app-level**, by reproducing the identical square
 + right-click-menu behavior in `mousepad` (GTK text editor, unrelated to
-pydisplay) under the same WSLg session. Disabling Windows' *Settings → Bluetooth
+pydevices-examples) under the same WSLg session. Disabling Windows' *Settings → Bluetooth
 & devices → Touch → "Press and hold for right-click"* did **not** remove it,
 which is consistent with the gesture being applied at the RDP/WSLg layer, not
 by the Windows touch-input stack the setting controls.
 
-**Fix:** None available from application code — pydisplay's SDL2/PyGame event
+**Fix:** None available from application code — pydevices-examples's SDL2/PyGame event
 handling already treats touch and mouse input identically; there is no
 touch-visual or gesture-disambiguation logic to disable on the app side. Native
 Windows apps (`micropython.exe`, `python.exe`) are unaffected because they

@@ -7,7 +7,7 @@ Magical Tree, and Crazy Climber.  Uses software vertical scrolling (no
 hardware ``vscsad`` / rotation tricks) so it runs on PGDisplay and SDLDisplay.
 
 Layout scales from the 320×480 reference to taller panels (480×800, 720×720, …).
-Built from the three core pydisplay libraries only.
+Built from the three core pydevices-examples libraries only.
 """
 
 import sys
@@ -725,9 +725,9 @@ def _draw_hud(p, altitude):
 
 def _skip_ui():
     try:
-        import pydisplay_test_mode
+        import pydevices_test_mode
 
-        return pydisplay_test_mode.ENABLED
+        return pydevices_test_mode.ENABLED
     except ImportError:
         return False
 

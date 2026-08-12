@@ -9,10 +9,10 @@ import time
 
 
 try:
-    import pydisplay_test_mode  # type: ignore[import-not-found]
+    import pydevices_test_mode  # type: ignore[import-not-found]
 
     TEST_DURATION_S = (
-        pydisplay_test_mode.DURATION_S if pydisplay_test_mode.ENABLED else None
+        pydevices_test_mode.DURATION_S if pydevices_test_mode.ENABLED else None
     )
 except ImportError:
     TEST_DURATION_S = None

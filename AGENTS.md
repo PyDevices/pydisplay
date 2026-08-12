@@ -3,7 +3,7 @@
 ## Cursor Cloud specific instructions
 
 This repo is the PyDevices examples, documentation, and PyScript gallery. The
-shareable product libraries live in sibling `micropython-hardware`. There is no
+shareable product libraries live in sibling `pydevices`. There is no
 build step for examples. `web/pyscript/src` is a symlink to `../../src`, so
 editing `src/` updates the PyScript gallery too.
 
@@ -11,7 +11,7 @@ editing `src/` updates the PyScript gallery too.
 
 `displaydev`, `audiodev`, optional `eventsys`, `multimer`, `events`, `keys`,
 and portable hardware utilities live in sibling
-[micropython-hardware](https://github.com/PyDevices/micropython-hardware), which
+[pydevices](https://github.com/PyDevices/pydevices), which
 also owns TestPyPI/MIP publishing. Non-LVGL examples explicitly import
 `runtime` from `app_runtime`; LVGL examples import it from `display_driver`.
 Board configs never own a runtime. `AutoDisplay` is imported from
@@ -31,7 +31,7 @@ Board configs never own a runtime. `AutoDisplay` is imported from
 - Desktop matrices use repo `.venv` (`cpython-venv`) plus interpreters on
   `PATH` / `bin/` (`micropython`, `circuitpython`, and when present
   `micropython.exe` / `python.exe`).   `./bin/jupyter.sh`, `./bin/pyscript.sh`, and
-  `android.sh` (`pydisplay_android/scripts/`, usually via `~/bin`) aid
+  `android.sh` (`pydevices-android-template/scripts/`, usually via `~/bin`) aid
   Jupyter, PyScript, and Android (adb stage onto `org.pydevices.launcher`;
   cwd paths like CLI Python — not PyScript gallery). Opt-in matrix:
   `tools/example_test_kit.py --only-runtime android …`.
@@ -63,7 +63,7 @@ Board configs never own a runtime. `AutoDisplay` is imported from
   per-example metadata: [`tools/example_test_manifest.toml`](tools/example_test_manifest.toml).
 - **Preferred thorough gate:** example-by-example with **all selected runtimes
   in parallel** (`--jobs 0`): **5** desktop for sync, **7** for async; both
-  `PYDISPLAY_TIMER_ASYNC=0` and `=1`, `--fail-fast`, line-buffered live log,
+  `PYDEVICES_TIMER_ASYNC=0` and `=1`, `--fail-fast`, line-buffered live log,
   fix after a failed example wave then resume — see
   [Preferred method](tools/README.md#preferred-method-parallel-runtimes-fail-fast-both-timer-modes)
   and [Windows PE under WSL](tools/README.md#windows-pe-under-wsl).
@@ -84,7 +84,7 @@ Board configs never own a runtime. `AutoDisplay` is imported from
   [Headless / CDP troubleshooting](docs/guides/pyscript.md#headless--cdp-troubleshooting)
   before poking the IDE browser.
 
-### `PYDISPLAY_TIMER_ASYNC` (agents / matrix)
+### `PYDEVICES_TIMER_ASYNC` (agents / matrix)
 
 Host defaults and env semantics:
 [Runtime — `timer_async`](docs/concepts/runtime.md#timer_async-in-srclibboard_configpy).
@@ -96,13 +96,13 @@ kit does this). That uses `env_set` and works for Windows PE under WSL without
 relying on OS environ. Shell export remains a valid host shortcut:
 
 ```bash
-PYDISPLAY_TIMER_ASYNC=1 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
+PYDEVICES_TIMER_ASYNC=1 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
   .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv
 ```
 
 `lv_test_timer.py` follows `runtime.timer_async` and does not set env vars.
 To force async on desktop for that example (or the LVGL kit), set
-`PYDISPLAY_TIMER_ASYNC=1` on the parent process before launch, or use a kit that
+`PYDEVICES_TIMER_ASYNC=1` on the parent process before launch, or use a kit that
 passes `--timer-async`.
 
 **`micropython.exe` matrix:** no `threading` / `_thread`. See

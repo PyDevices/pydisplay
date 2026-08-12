@@ -45,7 +45,7 @@
       if (window.parent !== window && height > 0) {
         var width = Math.ceil(device.getBoundingClientRect().width);
         window.parent.postMessage(
-          { type: "pydisplay-runtime-size", height: height, width: width },
+          { type: "pydevices-examples-runtime-size", height: height, width: width },
           window.location.origin
         );
       }

@@ -1,4 +1,4 @@
-# pydisplay `tools/`
+# pydevices-examples `tools/`
 
 Developer workflow only — local servers, test harnesses, and IDE typings. For repo maintenance see [`scripts/README.md`](../scripts/README.md).
 
@@ -82,13 +82,13 @@ concrete launcher used in automation.
 For thorough verification (timer/multimer/runtime changes, or “run the full
 matrix”), prefer **example-by-example**, **all selected runtimes in parallel**
 per example (`--jobs 0`, default), **`--fail-fast`**, and **both**
-`PYDISPLAY_TIMER_ASYNC` modes as separate kit runs.
+`PYDEVICES_TIMER_ASYNC` modes as separate kit runs.
 
 | Mode | Runtimes |
 |------|----------|
-| Sync (`PYDISPLAY_TIMER_ASYNC=0`) | **5** desktop SDL: `micropython`, `micropython.exe`, `circuitpython`, `cpython-venv`, `python.exe` |
-| Async (`PYDISPLAY_TIMER_ASYNC=1`) | **7** — the five above plus `pyscript`, `jupyter` |
-| Android (opt-in) | `android` — `pydisplay_android/scripts/android.sh` (or `~/bin/android.sh`) + emulator/device + `org.pydevices.launcher` APK; **not** in the default 5/7 lists (`--only-runtime android`) |
+| Sync (`PYDEVICES_TIMER_ASYNC=0`) | **5** desktop SDL: `micropython`, `micropython.exe`, `circuitpython`, `cpython-venv`, `python.exe` |
+| Async (`PYDEVICES_TIMER_ASYNC=1`) | **7** — the five above plus `pyscript`, `jupyter` |
+| Android (opt-in) | `android` — `pydevices-android-template/scripts/android.sh` (or `~/bin/android.sh`) + emulator/device + `org.pydevices.launcher` APK; **not** in the default 5/7 lists (`--only-runtime android`) |
 
 Default timing is already short (`duration_s=2`, `timeout_s=15` in the
 runtimes/manifest defaults). After each example’s parallel wave finishes, if
@@ -99,7 +99,7 @@ any cell failed, stop before the next example; fix the root cause, then resume.
 python tools/serve.py   # separate terminal; reuse if already on :8000
 
 export SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy PYTHONUNBUFFERED=1
-mkdir -p /tmp/pydisplay-matrix
+mkdir -p /tmp/pydevices-examples-matrix
 
 SYNC_RT="micropython micropython.exe circuitpython cpython-venv python.exe"
 ASYNC_RT="$SYNC_RT pyscript jupyter"
@@ -107,18 +107,18 @@ ASYNC_RT="$SYNC_RT pyscript jupyter"
 set -o pipefail   # keep kit exit status through tee
 
 # Sync — 5 runtimes concurrently per example
-PYDISPLAY_TIMER_ASYNC=0 stdbuf -oL -eL \
+PYDEVICES_TIMER_ASYNC=0 stdbuf -oL -eL \
   .venv/bin/python tools/example_test_kit.py --no-unit-tests --fail-fast \
   --only-runtime $SYNC_RT \
-  --results-json /tmp/pydisplay-matrix/sync.json \
-  2>&1 | stdbuf -oL -eL tee /tmp/pydisplay-matrix/sync.log
+  --results-json /tmp/pydevices-examples-matrix/sync.json \
+  2>&1 | stdbuf -oL -eL tee /tmp/pydevices-examples-matrix/sync.log
 
 # After sync is clean — async, all 7
-PYDISPLAY_TIMER_ASYNC=1 stdbuf -oL -eL \
+PYDEVICES_TIMER_ASYNC=1 stdbuf -oL -eL \
   .venv/bin/python tools/example_test_kit.py --no-unit-tests --fail-fast \
   --only-runtime $ASYNC_RT \
-  --results-json /tmp/pydisplay-matrix/async.json \
-  2>&1 | stdbuf -oL -eL tee /tmp/pydisplay-matrix/async.log
+  --results-json /tmp/pydevices-examples-matrix/async.json \
+  2>&1 | stdbuf -oL -eL tee /tmp/pydevices-examples-matrix/async.log
 ```
 
 Live log lines: `Running <example> @ N runtime(s) in parallel...`, then
@@ -162,7 +162,7 @@ SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
 Unix subprocesses see that shell export. Windows `.exe` behavior is different —
 see [Windows PE under WSL](#windows-pe-under-wsl).
 
-**Async timers on desktop:** the kit forwards `PYDISPLAY_TIMER_ASYNC` as wrapper
+**Async timers on desktop:** the kit forwards `PYDEVICES_TIMER_ASYNC` as wrapper
 `--timer-async` (uses `env_set`, works for Windows PE under WSL). Shell export
 is the preferred way to select mode for a full kit run (see Preferred method
 above). Semantics: [Runtime — timer_async](../docs/concepts/runtime.md#timer_async-in-srclibboard_configpy).
@@ -185,7 +185,7 @@ Windows window stays up past `duration_s` / until the kit `timeout_s`, the
 example is still running (you can interact with it); the harness timed out
 waiting for cooperative quit / `EXAMPLE_RESULT`. PE child output is captured
 via temp files so a timeout kill does not wipe stdout the way pipes often did.
-Fix the quit path (wrapper deadline / `pydisplay_test_mode` / inject) rather
+Fix the quit path (wrapper deadline / `pydevices_test_mode` / inject) rather
 than treating PE as “failed to launch.”
 
 **Scheduling:** with `--order examples` and `--jobs 0` (default), **all**
@@ -214,7 +214,7 @@ After usermod changes that affect these binaries or PyScript vendor wasm, see
 
 **`micropython.exe` matrix:** no `threading` / `_thread`. The example wrapper
 uses a `Runtime.poll` deadline quit (not a multimer SDL quit timer). With
-`pydisplay_test_mode.ENABLED`, `Runtime` skips auto-refresh wiring so examples
+`pydevices_test_mode.ENABLED`, `Runtime` skips auto-refresh wiring so examples
 that call `show()` themselves avoid a competing SDL refresh timer. WSL PE
 scheduling and SDL env rules:
 [Windows PE under WSL](#windows-pe-under-wsl).
@@ -228,14 +228,14 @@ Prefer TestPyPI native builds for `pygraphics` and `usdl2` when available.
 
 Quick setup: `bash scripts/setup_sibling_repos.sh` (clones current `main`,
 writes `.pth` files). The harness auto-discovers the same paths via
-`sibling_repos.py`. `pdwidgets` also needs micropython-hardware's `lib` on path
+`sibling_repos.py`. `pdwidgets` also needs pydevices's `lib` on path
 (the harness adds it).
 
 ### Known pre-existing failures (not environment bugs)
 
 - `nano_gui_simpletest` needs the matching Hinch `gui/` package.
 - `tools/png_test.py` in **pdwidgets** (PNG probe) needs `PDWIDGETS_PNG_DIR` /
-  material-design-icons and a sibling pydisplay checkout.
+  material-design-icons and a sibling pydevices-examples checkout.
 
 ### PyScript matrix
 
@@ -289,7 +289,7 @@ Installs `displaydev`, `usdl2`, `pygraphics`, and `pydevices-lvgl` (no version p
 | Script | Purpose |
 |--------|---------|
 | [`quit_inject.py`](quit_inject.py) | Inject quit into running examples (used by the example harness) |
-| [`pydisplay_test_mode.py`](pydisplay_test_mode.py) | Test-mode env for examples |
+| [`pydevices_test_mode.py`](pydevices_test_mode.py) | Test-mode env for examples |
 | [`screenshot.py`](screenshot.py) | Run a desktop example and save its SDL2/pygame-ce window as PNG |
 | [`record.py`](record.py) | Run a desktop example and record its SDL2/pygame-ce window with FFmpeg |
 | [`typings/`](typings/) | MicroPython stdlib stubs + core package `.pyi` (see below) |

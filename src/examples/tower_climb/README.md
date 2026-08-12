@@ -1,6 +1,6 @@
 # tower_climb — developer notes
 
-This folder is a self-contained slice of the pydisplay repo: game source, assets,
+This folder is a self-contained slice of the pydevices-examples repo: game source, assets,
 trace hooks, and local tooling. It is meant to be movable out of the main tree
 later; paths are resolved from `__file__` via `_paths.py` rather than hard-coded
 repo locations.
@@ -79,14 +79,14 @@ trace to `trace/record.jsonl`.
 
 ### New method — logical framebuffer export (`tools/record_win.sh`)
 
-Implemented in pydisplay’s **PGDisplay** backend, driven from the game via
+Implemented in pydevices-examples’s **PGDisplay** backend, driven from the game via
 `--video PATH`:
 
 1. `tower_climb.py` calls `display_drv.open_frame_recorder(path, fps=…)` when
    `--video` is set.
 2. On every `PGDisplay.show()`, the driver exports the **logical** RGB24
    framebuffer (`_buffer`, 320×480 for this game) through
-   `FFmpegFrameRecorder` in micropython-hardware `utils/frame_recorder.py`.
+   `FFmpegFrameRecorder` in pydevices `utils/frame_recorder.py`.
 3. ffmpeg encodes raw RGB24 piped on stdin to H.264 MP4.
 
 Properties:
@@ -94,7 +94,7 @@ Properties:
 - One encoded frame per game `show()` — duration matches gameplay.
 - Resolution is the game’s logical size, not the scaled pygame window.
 - Supported by the desktop ``PGDisplay`` and ``SDLDisplay`` backends.
-- Unit tests: micropython-hardware `tests/test_pgdisplay_frame_recorder.py`.
+- Unit tests: pydevices `tests/test_pgdisplay_frame_recorder.py`.
 
 Typical invocation (what `record_win.sh` runs):
 
@@ -171,13 +171,13 @@ game does not need layout changes when art is regenerated.
 
 ## Repo integration (outside this folder)
 
-These pieces live in the main pydisplay tree and are **dependencies** if you
+These pieces live in the main pydevices-examples tree and are **dependencies** if you
 extract only `tower_climb/`:
 
 - `board_config`, `displaydev`, `eventsys`, `pygraphics`, `multimer`
 - `FFmpegFrameRecorder` / `PGDisplay.open_frame_recorder` (recording)
 - `tools/example_test_manifest.toml` entry for CI smoke tests
-- micropython-hardware `tests/test_pgdisplay_frame_recorder.py`
+- pydevices `tests/test_pgdisplay_frame_recorder.py`
 
 The example matrix runs via:
 

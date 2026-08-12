@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-gallery_generator.py — refresh the pydisplay PyScript browser gallery.
+gallery_generator.py — refresh the pydevices-examples PyScript browser gallery.
 
 Default-includes every example **entry point** under ``src/examples/``:
 
@@ -11,7 +11,7 @@ Default-includes every example **entry point** under ``src/examples/``:
 Optional headers (first 10 lines), one line per namespace::
 
   # deps: palettes, lvgl          — logical packages → ?deps= via url_maker
-  # utils: console, tft_config  — pydisplay utils modules (shown as badges)
+  # utils: console, tft_config  — pydevices-examples utils modules (shown as badges)
   # modules: calc_engine          — extra example .py stems (site)
   # manifests: alien              — site-served packages/<name>.json bundles
   # gallery: featured|skip|binaries|nochrome
@@ -574,7 +574,7 @@ def ensure_card_runtime_css(index_text: str) -> str:
 
 _HEADER_MOUNT = '<div id="pydevices-site-header"></div>'
 _FOOTER_MOUNT = '<div id="pydevices-site-footer"></div>'
-_PRODUCT_MARK = "https://pydevices.github.io/assets/img/products/pydisplay.svg"
+_PRODUCT_MARK = "https://pydevices.github.io/assets/img/products/pydevices-examples.svg"
 _CHROME_SCRIPTS = (
     '    <script src="./site-chrome.js"></script>\n    <script src="./theme-toggle.js"></script>\n'
 )

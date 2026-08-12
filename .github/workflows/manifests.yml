@@ -31,11 +31,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Checkout micropython-hardware product sources
+      - name: Checkout pydevices product sources
         uses: actions/checkout@v4
         with:
-          repository: PyDevices/micropython-hardware
-          path: micropython-hardware
+          repository: PyDevices/pydevices
+          path: pydevices
           sparse-checkout: |
             lib/eventsys
           sparse-checkout-cone-mode: false

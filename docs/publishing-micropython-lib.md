@@ -1,10 +1,10 @@
 # Product package publishing
 
-`pydisplay` is the examples, documentation, and PyScript showcase repository.
+`pydevices-examples` is the examples, documentation, and PyScript showcase repository.
 It does not publish the core hardware/runtime packages.
 
 The canonical release pipeline lives in
-[`micropython-hardware`](https://github.com/PyDevices/micropython-hardware):
+[`pydevices`](https://github.com/PyDevices/pydevices):
 
 - Source: `drivers/display/displaydev`, `drivers/audio/audiodev`, and `lib/`
 - MIP sync: `scripts/publish_sync_packages.sh`
@@ -56,5 +56,5 @@ mip.install("eventsys", index=INDEX)  # only when the app chooses it
 ```
 
 For maintainer release commands and validation steps, use
-[`micropython-hardware/docs/install-workflows.md`](https://github.com/PyDevices/micropython-hardware/blob/main/docs/install-workflows.md)
-and `micropython-hardware/docs/pydevices-desktop.md`.
+[`pydevices/docs/install-workflows.md`](https://github.com/PyDevices/pydevices/blob/main/docs/install-workflows.md)
+and `pydevices/docs/pydevices-desktop.md`.

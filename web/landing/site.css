@@ -2,7 +2,7 @@
  * PyDevices — shared org site chrome
  *
  * Design tokens + layout primitives shared by every PyDevices GitHub Pages
- * site (org root, lvgl-bindings, pydisplay, and the second-wave module
+ * site (org root, lvgl-bindings, pydevices-examples, and the second-wave module
  * pages). Keep this file focused on *chrome*: header/nav, hero, buttons,
  * cards, footer, typography. Project-specific / demo-runtime styles belong
  * in a local stylesheet loaded after this one.

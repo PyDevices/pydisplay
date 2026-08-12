@@ -90,9 +90,9 @@ class _Loop:
 
 def _test_key_for_test_mode(key=None):
     try:
-        import pydisplay_test_mode
+        import pydevices_test_mode
 
-        if pydisplay_test_mode.ENABLED:
+        if pydevices_test_mode.ENABLED:
             return key if key is not None else START
     except ImportError:
         pass
@@ -195,9 +195,9 @@ def _build_testris():  # noqa: C901, PLR0915
 
     # Define other constants
     try:
-        import pydisplay_test_mode
+        import pydevices_test_mode
 
-        show_splash_screen = not pydisplay_test_mode.ENABLED
+        show_splash_screen = not pydevices_test_mode.ENABLED
     except ImportError:
         show_splash_screen = True
 

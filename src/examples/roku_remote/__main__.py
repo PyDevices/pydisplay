@@ -5,7 +5,7 @@ side effect lives in :mod:`roku_remote` (also imported by ``__init__`` for
 plain ``import roku_remote`` / gallery). Re-import here is a no-op if
 ``__init__`` already ran the app to completion.
 
-From ``pydisplay/src`` (swap in ``micropython``, ``circuitpython``, ``python``, …)::
+From ``pydevices-examples/src`` (swap in ``micropython``, ``circuitpython``, ``python``, …)::
 
     micropython -m examples.roku_remote
     # relaunch on frontend switch (exit 42); stop on normal SDL quit (0)

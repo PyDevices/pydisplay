@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Verify PyDevices TestPyPI wheels import alone (no sibling pydisplay libs pre-installed).
+# Verify PyDevices TestPyPI wheels import alone (no sibling pydevices-examples libs pre-installed).
 #
 # Each package gets a fresh venv with only that wheel (+ pip-resolved deps from its
 # manifest). Fails if import or a minimal smoke check errors.
@@ -14,7 +14,7 @@ set -euo pipefail
 
 TESTPYPI_INDEX="${TESTPYPI_INDEX:-https://test.pypi.org/simple/}"
 PYPI_INDEX="${PYPI_INDEX:-https://pypi.org/simple/}"
-BASE_VENV="${TESTPYPI_STANDALONE_VENV:-/tmp/pydisplay-testpypi-standalone}"
+BASE_VENV="${TESTPYPI_STANDALONE_VENV:-/tmp/pydevices-examples-testpypi-standalone}"
 DESKTOP=0
 
 usage() {

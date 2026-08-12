@@ -49,7 +49,7 @@ while True:
     multimer.sleep_ms(1)
 ```
 
-On hosted pydisplay apps, prefer `runtime.run_forever()` (or `runtime.poll()` in a custom loop) instead of a bare busy loop — see [Runtime](runtime.md).
+On hosted pydevices-examples apps, prefer `runtime.run_forever()` (or `runtime.poll()` in a custom loop) instead of a bare busy loop — see [Runtime](runtime.md).
 
 ## Quick start — async
 
@@ -177,7 +177,7 @@ both report a loop that is not there (or miss one that is).
 3. **Timer deinited** — one-shot and `deinit()` stop callbacks.
 4. **Exception in callback** — exceptions propagate from the delivery path; fix the callback or catch inside it.
 
-## pydisplay integration
+## pydevices-examples integration
 
 When selected, `eventsys.Runtime` owns the application's shared periodic timer
 (`on_tick` and hosted display refresh). Apps normally use `runtime.poll()` or
@@ -310,7 +310,7 @@ Desktop SDL2 access is shared between display and timer code:
 | `displaydev.sdldisplay` | built-in / env `usdl2` → desktop board / `pydevices-desktop` |
 | `multimer` SDL backend | `usdl2` (native or pure-Python desktop binding) |
 
-Both prefer a native **`usdl2`** module when it is frozen or already present. Otherwise the pure-Python binding from [`pydevices-desktop`](https://pydevices.github.io/micropython-hardware/pydevices-desktop.html) / the MIP desktop board (`drivers/usdl2.py`) provides `import usdl2`. See [Displays — SDLDisplay](displays.md#sdldisplay) and [MicroPython — Desktop SDL](../platforms/micropython.md#desktop-sdl-usdl2).
+Both prefer a native **`usdl2`** module when it is frozen or already present. Otherwise the pure-Python binding from [`pydevices-desktop`](https://pydevices.github.io/pydevices/pydevices-desktop.html) / the MIP desktop board (`drivers/usdl2.py`) provides `import usdl2`. See [Displays — SDLDisplay](displays.md#sdldisplay) and [MicroPython — Desktop SDL](../platforms/micropython.md#desktop-sdl-usdl2).
 
 ## Next
 

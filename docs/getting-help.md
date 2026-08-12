@@ -3,21 +3,21 @@
 ## Documentation
 
 - [Getting started](getting-started.md) — path router
-- [Try pydisplay](try/index.md) — browser and Wokwi demos
+- [Try pydevices-examples](try/index.md) — browser and Wokwi demos
 - [Troubleshooting](troubleshooting.md) — common errors
 - [Installation](installation/index.md)
-- [Examples catalog](examples/index.md) — start with [**pydisplay_demo**](examples/pydisplay_demo.md)
+- [Examples catalog](examples/index.md) — start with [**pydevices_demo**](examples/pydevices_demo.md)
 - [API reference](reference/) — generated from source docstrings
 - [Building docs](building-docs.md) — `mkdocs serve` and ReadTheDocs
 
 ## GitHub
 
-- **Issues:** [github.com/PyDevices/pydisplay/issues](https://github.com/PyDevices/pydisplay/issues) — bugs, feature requests, missing board configs
+- **Issues:** [github.com/PyDevices/pydevices-examples/issues](https://github.com/PyDevices/pydevices-examples/issues) — bugs, feature requests, missing board configs
 - **Discussions:** use Issues if Discussions are not enabled on the repo
 
 ## Try without hardware
 
-- [Try pydisplay](try/index.md) — PyScript demo and Wokwi links
+- [Try pydevices-examples](try/index.md) — PyScript demo and Wokwi links
 
 ## Related projects
 

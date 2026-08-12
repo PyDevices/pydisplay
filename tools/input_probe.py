@@ -17,7 +17,7 @@ Plain (non-LVGL) apps consume layer 1→2 only via ``runtime.poll()`` /
 ``runtime.on(KEYDOWN, …)``. Do not "fix" typing in ``display_driver`` if
 raw eventsys already looks wrong.
 
-## Usage (from ``pydisplay`` repo root)
+## Usage (from ``pydevices-examples`` repo root)
 
 Self-tests (no window focus needed)::
 
@@ -162,8 +162,8 @@ _root = _tools.rsplit("/", 1)[0] if "/" in _tools else "."
 _src = (_root + "/src") if _root not in (".", "") else "src"
 _src_lib = _src + "/lib"
 _src_utils = _src + "/utils"
-_hw_lib = _root + "/../micropython-hardware/lib"
-# Prefer the canonical micropython-hardware checkout for eventsys/displaydev.
+_hw_lib = _root + "/../pydevices/lib"
+# Prefer the canonical pydevices checkout for eventsys/displaydev.
 for _p in (_hw_lib, _src_lib, _src_utils, _src, _tools):
     if _p and _p not in sys.path:
         sys.path.insert(0, _p)

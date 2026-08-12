@@ -2,7 +2,7 @@
 # deps: pygraphics
 # utils: hardware_setup, gui
 """
-micro_gui_simpletest.py - Smoke test for micropython-micro-gui on pydisplay.
+micro_gui_simpletest.py - Smoke test for micropython-micro-gui on pydevices-examples.
 
 ``hardware_setup`` fetches the GUI and creates ``Display`` with keyboard stand-ins.
 This oneshot only verifies the framebuffer path (full widget demos use Screen.change).

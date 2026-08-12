@@ -1,22 +1,22 @@
 # LVGL
 
-Use the PyDevices display, input, and timing packages with [LVGL](https://lvgl.io/) — build full LVGL applications in pure Python and explore them through pydisplay examples.
+Use the PyDevices display, input, and timing packages with [LVGL](https://lvgl.io/) — build full LVGL applications in pure Python and explore them through pydevices-examples.
 
 The PyDevices LVGL **sister projects** bundle this integration for each runtime: [lvgl-micropython](https://github.com/PyDevices/lvgl-micropython) (MicroPython), [lvgl-circuitpython](https://github.com/PyDevices/lvgl-circuitpython) (CircuitPython), and [lvgl-python](https://github.com/PyDevices/lvgl-python) (CPython). Because they share `displaydev`, neutral board capabilities, and `multimer`, the same LVGL Python code is portable across all three — and you can even **develop it interactively in [Jupyter Notebook](../platforms/jupyter.md)**. See [Ecosystem & sister projects](../ecosystem.md).
 
-The walkthrough below covers wiring pydisplay to LVGL manually (e.g. with upstream [lv_micropython](https://github.com/lvgl/lv_micropython)).
+The walkthrough below covers wiring pydevices-examples to LVGL manually (e.g. with upstream [lv_micropython](https://github.com/lvgl/lv_micropython)).
 
 ## Walkthrough
 
-### 1. Install minimum pydisplay packages
+### 1. Install minimum PyDevices packages
 
 --8<-- "_snippets/minimum-mip.md"
 
-Or follow [micropython-hardware install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html) for current board setup.
+Or follow [pydevices install workflows](https://pydevices.github.io/pydevices/install-workflows.html) for current board setup.
 
 ### 2. Build or obtain LVGL MicroPython firmware
 
-Follow upstream [lv_micropython](https://github.com/lvgl/lv_micropython) for your board. pydisplay supplies the flush and input glue via `board_config.py`; LVGL supplies the UI toolkit.
+Follow upstream [lv_micropython](https://github.com/lvgl/lv_micropython) for your board. pydevices-examples supplies the flush and input glue via `board_config.py`; LVGL supplies the UI toolkit.
 
 ### 3. Wire board_config to LVGL
 
@@ -58,30 +58,30 @@ Use **`runtime.timer_async`** (derived from `board_config.timer_async` or the di
 | `runtime.timer_async` | Use when |
 |---------------|----------|
 | `False` (desktop default) | MCU, MicroPython unix, CPython Linux — default `multimer.Timer` |
-| `True` | PyScript, Jupyter, or desktop with `PYDISPLAY_TIMER_ASYNC=1` — `multimer.AsyncTimer` |
+| `True` | PyScript, Jupyter, or desktop with `PYDEVICES_TIMER_ASYNC=1` — `multimer.AsyncTimer` |
 
 [`display_driver`](https://github.com/PyDevices/lvgl-bindings/blob/main/python/display_driver.py) passes this to `event_loop(asynchronous=runtime.timer_async)`.
 
 When **`runtime.timer_async` is true**, `display_driver` drives ticks and `display.show()` from its asynchronous LVGL refresh loop.
 
 Full apps typically build the UI then call **`runtime.run_forever()`** (see
-[`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py)).
+[`lv_test_timer.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/lv_test_timer.py)).
 
-Desktop `board_config` reads **`PYDISPLAY_TIMER_ASYNC`** for the PG/SDL
+Desktop `board_config` reads **`PYDEVICES_TIMER_ASYNC`** for the PG/SDL
 branch (default from `AutoDisplay`, normally `False`). PyScript and Jupyter
 always use `timer_async=True`. Force async on desktop before `board_config` loads:
 
 ```python
 import os
-os.environ["PYDISPLAY_TIMER_ASYNC"] = "1"
+os.environ["PYDEVICES_TIMER_ASYNC"] = "1"
 import display_driver
 ```
 
-Or set `PYDISPLAY_TIMER_ASYNC=1` on the command line when launching the process.
+Or set `PYDEVICES_TIMER_ASYNC=1` on the command line when launching the process.
 
 ## Timer test example
 
-[`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py) is a single smoke test that follows **`runtime.timer_async`** via `runtime.run_forever()` (interactive and kit). It does **not** read or write environment variables — set `PYDISPLAY_TIMER_ASYNC` in the parent process / shell if you want a specific desktop mode before `board_config` loads.
+[`lv_test_timer.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/lv_test_timer.py) is a single smoke test that follows **`runtime.timer_async`** via `runtime.run_forever()` (interactive and kit). It does **not** read or write environment variables — set `PYDEVICES_TIMER_ASYNC` in the parent process / shell if you want a specific desktop mode before `board_config` loads.
 
 The UI shows autodetected **runtime**, **OS**, **display** driver class, **timer** backend, **mode** (`sync`/`async`), and **LVGL** version, plus a seconds counter, spinning arc, and tap button.
 
@@ -89,15 +89,15 @@ The UI shows autodetected **runtime**, **OS**, **display** driver class, **timer
 
 ```bash
 cd src
-PYDISPLAY_TIMER_ASYNC=0 .venv/bin/python examples/lv_test_timer.py kit
-PYDISPLAY_TIMER_ASYNC=1 .venv/bin/python examples/lv_test_timer.py kit
+PYDEVICES_TIMER_ASYNC=0 .venv/bin/python examples/lv_test_timer.py kit
+PYDEVICES_TIMER_ASYNC=1 .venv/bin/python examples/lv_test_timer.py kit
 ```
 
-Kit mode runs a timed LVGL timer + input check, prints a `KIT_RESULT=` JSON line on stdout, then quits. Prefer [`tools/lv_timer_test_kit.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/lv_timer_test_kit.py) to drive sync/async across desktop runtimes.
+Kit mode runs a timed LVGL timer + input check, prints a `KIT_RESULT=` JSON line on stdout, then quits. Prefer [`tools/lv_timer_test_kit.py`](https://github.com/PyDevices/pydevices-examples/blob/main/tools/lv_timer_test_kit.py) to drive sync/async across desktop runtimes.
 
 ### Desktop test suite
 
-[`tools/run_desktop_lv_tests.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/run_desktop_lv_tests.py) runs the kit across **five desktop Python+LVGL executables** in sequence (ten subprocess runs total — `sync` and `async` per runtime).
+[`tools/run_desktop_lv_tests.py`](https://github.com/PyDevices/pydevices-examples/blob/main/tools/run_desktop_lv_tests.py) runs the kit across **five desktop Python+LVGL executables** in sequence (ten subprocess runs total — `sync` and `async` per runtime).
 
 | Executable | How resolved |
 |------------|--------------|
@@ -124,7 +124,7 @@ From `src/`:
 
 The script prints a summary table (`queued` / `async` columns) and writes full results to a JSON file. Exit code **1** if any run hangs, crashes, fails timers, or fails click checks (strict policy).
 
-For the full desktop matrix (micropython, circuitpython, cpython-venv, micropython.exe, python.exe × sync/async), use [`tools/lv_timer_test_kit.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/lv_timer_test_kit.py):
+For the full desktop matrix (micropython, circuitpython, cpython-venv, micropython.exe, python.exe × sync/async), use [`tools/lv_timer_test_kit.py`](https://github.com/PyDevices/pydevices-examples/blob/main/tools/lv_timer_test_kit.py):
 
 ```bash
 python tools/lv_timer_test_kit.py
@@ -134,7 +134,7 @@ python tools/lv_timer_test_kit.py --only cpython-venv --modes sync async
 
 The table shows the timer backend in each cell (e.g. `librt.Timer, ok` / `_async_timer, ok`).
 
-[`tools/run_desktop_lv_tests.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/run_desktop_lv_tests.py) is a shorter wrapper: same runtimes, **sync** and **async**, with strict click checks.
+[`tools/run_desktop_lv_tests.py`](https://github.com/PyDevices/pydevices-examples/blob/main/tools/run_desktop_lv_tests.py) is a shorter wrapper: same runtimes, **sync** and **async**, with strict click checks.
 
 ## Next
 

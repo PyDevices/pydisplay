@@ -1,12 +1,19 @@
 # Make your PyScript app a Progressive Web App (PWA)
 
-**Who:** You host a pydisplay (or other PyScript) demo on GitHub Pages — or any HTTPS origin — and want users to install it like a native app and run it offline after the first visit.
+**Who:** You host a pydevices-examples (or other PyScript) demo on GitHub Pages — or any HTTPS origin — and want users to install it like a native app and run it offline after the first visit.
 
 **Where PWAs run:** Platform notes — host matrix, install UX, PWA vs Android APK — live in [Progressive Web Apps](../platforms/pwa.md). This guide is the **how-to** (manifest, service worker, deploy).
 
 **Prerequisites:** A working PyScript HTML shell (see [PyScript guide](pyscript.md)). Basic familiarity with browser DevTools.
 
-**Live reference:** The [pydisplay PyScript gallery](https://pydevices.github.io/pydisplay/pyscript/) is a PWA. Open DevTools → **Application** to inspect its manifest and service worker, or click **Install app** in the header.
+**Live reference:** The [pydevices-examples PyScript gallery](https://pydevices.github.io/pydevices-examples/pyscript/) is a PWA. Open DevTools → **Application** to inspect its manifest and service worker, or click **Install app** in the header.
+
+!!! tip "Fastest path: use the template"
+    Create a repository from
+    [pydevices-pyscript-template](https://github.com/PyDevices/pydevices-pyscript-template),
+    edit `main.py`, and enable GitHub Pages with GitHub Actions. The template
+    pins both PyScript and a PyDevices release and includes the manifest,
+    service worker, icons, tests, and Pages workflow described below.
 
 ---
 
@@ -48,7 +55,7 @@ PyScript demos are heavier than typical static sites. Plan for these up front.
 
 MicroPython and Pyodide in the browser often need `SharedArrayBuffer`. That requires **cross-origin isolated** pages (`Cross-Origin-Opener-Policy` and `Cross-Origin-Embedder-Policy` headers).
 
-GitHub Pages does **not** send those headers by default. The pydisplay gallery solves this in **one** service worker (`web/pyscript/sw.js`) that:
+GitHub Pages does **not** send those headers by default. The pydevices-examples gallery solves this in **one** service worker (`web/pyscript/sw.js`) that:
 
 1. Intercepts fetches and adds COI headers to responses.
 2. Caches gallery assets for offline use.
@@ -77,14 +84,14 @@ Use **stale-while-revalidate** (serve cache immediately, refresh in background) 
 
 ## Files you need
 
-For a pydisplay-style deployment under `web/pyscript/`, these are the PWA files in this repository:
+For a pydevices-examples-style deployment under `web/pyscript/`, these are the PWA files in this repository:
 
 | File | Role |
 |------|------|
-| [`manifest.json`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/manifest.json) | Install metadata |
-| [`sw.js`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/sw.js) | COI headers + offline cache |
-| [`pwa.js`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/pwa.js) | Register `sw.js`, install button, offline toast |
-| [`pwa.css`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/pwa.css) | Styles for install button and toast |
+| [`manifest.json`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/manifest.json) | Install metadata |
+| [`sw.js`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/sw.js) | COI headers + offline cache |
+| [`pwa.js`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/pwa.js) | Register `sw.js`, install button, offline toast |
+| [`pwa.css`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/pwa.css) | Styles for install button and toast |
 | `icon-192.png`, `icon-512.png` | Launcher icons (PNG; manifest requires raster icons) |
 
 Gallery pages that include the full PWA UI: `index.html`, `micropython.html`, `pyodide.html`. Minimal shells (`editor.html`, `repl.html`, `async.html`, `dom.html`, `harness.html`) link the manifest and load `pwa.js` without the install button.
@@ -101,8 +108,8 @@ Use when users install the **whole demo hub** and pick a demo from the grid:
 
 ```json
 {
-  "name": "PyDevices pydisplay",
-  "short_name": "pydisplay",
+  "name": "PyDevices Gallery",
+  "short_name": "PyDevices",
   "description": "Cross-platform display and event drivers — PyScript demos in your browser.",
   "start_url": "./index.html",
   "scope": "./",
@@ -141,10 +148,10 @@ Use when the installed app should **always** launch the same demo, including que
 
 ```json
 {
-  "name": "pydisplay demo",
+  "name": "PyDevices Demo",
   "short_name": "Demo",
-  "description": "Flagship pydisplay board_config demo in the browser.",
-  "start_url": "./micropython.html?modules=pydisplay_demo",
+  "description": "Flagship PyDevices board_config demo in the browser.",
+  "start_url": "./micropython.html?modules=pydevices_demo",
   "scope": "./",
   "display": "standalone",
   "launch_handler": {
@@ -168,7 +175,7 @@ Use when the installed app should **always** launch the same demo, including que
 
 Provide at least **192×192** and **512×512** PNG files. Maskable icons (safe zone in the center) improve Android adaptive icons.
 
-You can adapt the [PyDevices logo SVG](https://github.com/PyDevices/pydisplay/blob/main/web/vendor/pydevices-chrome/logo.svg) or export PNGs from any design tool. The gallery icons live at `web/pyscript/icon-192.png` and `web/pyscript/icon-512.png`.
+You can adapt the [PyDevices logo SVG](https://github.com/PyDevices/pydevices-examples/blob/main/web/vendor/pydevices-chrome/logo.svg) or export PNGs from any design tool. The gallery icons live at `web/pyscript/icon-192.png` and `web/pyscript/icon-512.png`.
 
 ---
 
@@ -182,10 +189,10 @@ The service worker runs in the background. It can cache responses and, for PyScr
 2. **`activate`** — delete caches from older versions when you bump `CACHE_NAME`.
 3. **`fetch`** — cache-first with background revalidation for your origin and known CDN hosts; add COI headers where needed.
 
-Key constants from the pydisplay worker:
+Key constants from the pydevices-examples worker:
 
 ```javascript
-const CACHE_NAME = 'pydisplay-pwa-dev';  // stamped at Pages deploy (see below)
+const CACHE_NAME = 'pydevices-examples-pwa-dev';  // stamped at Pages deploy (see below)
 
 const STATIC_ASSETS = [
   './index.html',
@@ -233,12 +240,12 @@ Apply `withCoiHeaders` to **same-origin** responses (and shell assets) so `Share
 
 ### `CACHE_NAME` stamping at deploy
 
-Git keeps `CACHE_NAME = 'pydisplay-pwa-dev'` in `web/pyscript/sw.js`. The
-[Deploy PyScript site to GitHub Pages](https://github.com/PyDevices/pydisplay/blob/main/.github/workflows/deploy-pyscript.yml)
-workflow runs [`scripts/pyscript_stamp_pwa_cache.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/pyscript_stamp_pwa_cache.py)
+Git keeps `CACHE_NAME = 'pydevices-examples-pwa-dev'` in `web/pyscript/sw.js`. The
+[Deploy PyScript site to GitHub Pages](https://github.com/PyDevices/pydevices-examples/blob/main/.github/workflows/deploy-pyscript.yml)
+workflow runs [`scripts/pyscript_stamp_pwa_cache.py`](https://github.com/PyDevices/pydevices-examples/blob/main/scripts/pyscript_stamp_pwa_cache.py)
 on the assembled `_site/pyscript/` tree **before** publishing to `gh-pages`. The
 script hashes `STATIC_ASSETS` plus the service-worker source and rewrites
-`CACHE_NAME` to `pydisplay-pwa-<hash>` (12 hex chars).
+`CACHE_NAME` to `pydevices-examples-pwa-<hash>` (12 hex chars).
 
 That means:
 
@@ -249,10 +256,10 @@ That means:
   updates do not nag installed users on every push. Stale-while-revalidate still
   refreshes pages in the background.
 
-Local `python tools/serve.py` uses the git copy (`pydisplay-pwa-dev`); only the
+Local `python tools/serve.py` uses the git copy (`pydevices-examples-pwa-dev`); only the
 Pages artifact is stamped.
 
-See the full implementation: [`web/pyscript/sw.js`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/sw.js).
+See the full implementation: [`web/pyscript/sw.js`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/sw.js).
 
 ---
 
@@ -289,7 +296,7 @@ No extra HTML is required. `pwa.js` creates a `#pwa-toast` element on first use 
 - the service worker finishes its first activation;
 - the browser goes online or offline.
 
-Styles are in [`pwa.css`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/pwa.css).
+Styles are in [`pwa.css`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/pwa.css).
 
 ---
 
@@ -297,12 +304,12 @@ Styles are in [`pwa.css`](https://github.com/PyDevices/pydisplay/blob/main/web/p
 
 ### GitHub Pages (this repo)
 
-Pushes to `main` that touch `web/**` or `src/**` run [Deploy PyScript site to GitHub Pages](https://github.com/PyDevices/pydisplay/blob/main/.github/workflows/deploy-pyscript.yml). The workflow:
+Pushes to `main` that touch `web/**` or `src/**` run [Deploy PyScript site to GitHub Pages](https://github.com/PyDevices/pydevices-examples/blob/main/.github/workflows/deploy-pyscript.yml). The workflow:
 
 1. Verifies generated manifests are fresh (`install_refresh_manifests.sh --audit`, `gallery_generator.py --check`).
 2. Copies `web/pyscript/*` into `_site/pyscript/`.
 3. Copies `src/utils` and examples into `_site/pyscript/src/`, adds canonical
-   `eventsys` from a micropython-hardware checkout at the gallery's virtual
+   `eventsys` from a pydevices checkout at the gallery's virtual
    `src/lib/eventsys` URL, and overlays hardware-owned utilities (`mip.py`,
    `byteswap`, …).
 4. Stamps `CACHE_NAME` in `_site/pyscript/sw.js` from shell content
@@ -359,9 +366,9 @@ Use Chrome or Edge on desktop, Chrome on Android, or Safari on iOS. On iOS the *
 
 | Page | URL |
 |------|-----|
-| Gallery (PWA home) | [pyscript/](https://pydevices.github.io/pydisplay/pyscript/) |
-| Flagship demo | [micropython.html?modules=pydisplay_demo](https://pydevices.github.io/pydisplay/pyscript/micropython.html?modules=pydisplay_demo) |
-| Calculator | [micropython.html?modules=calc_graphics,calc_engine](https://pydevices.github.io/pydisplay/pyscript/micropython.html?modules=calc_graphics,calc_engine) |
+| Gallery (PWA home) | [pyscript/](https://pydevices.github.io/pydevices-examples/pyscript/) |
+| Flagship demo | [micropython.html?modules=pydevices_demo](https://pydevices.github.io/pydevices-examples/pyscript/micropython.html?modules=pydevices_demo) |
+| Calculator | [micropython.html?modules=calc_graphics,calc_engine](https://pydevices.github.io/pydevices-examples/pyscript/micropython.html?modules=calc_graphics,calc_engine) |
 
 ---
 
@@ -377,7 +384,7 @@ Use Chrome or Edge on desktop, Chrome on Android, or Safari on iOS. On iOS the *
 
 ### Minimal PyScript page (no gallery chrome)
 
-For a single-file demo like [`editor.html`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/editor.html):
+For a single-file demo like [`editor.html`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/editor.html):
 
 ```html
 <head>
@@ -411,7 +418,7 @@ Users who install get that module every time. To ship multiple installable apps 
 
 ### The problem
 
-Early pydisplay PWAs used a **fixed** `CACHE_NAME` (`pydisplay-pwa-dev`) that never
+Early pydevices-examples PWAs used a **fixed** `CACHE_NAME` (`pydevices-examples-pwa-dev`) that never
 changed between deploys. The `activate` handler only deletes caches whose names
 **differ** from the current `CACHE_NAME`:
 
@@ -480,7 +487,7 @@ missing `STATIC_ASSETS`. Remove the marker when restoring the normal worker.
 - [PyScript local development](pyscript.md) — run the gallery locally, gallery markers, deploy overview
 - [PyScript asyncio porting](pyscript-asyncio.md) — make examples work under PyScript's event loop
 - [PyScript platform notes](../platforms/pyscript.md) — board config and contribution pointers
-- [Try pydisplay](../try/index.md) — live demo links
+- [Try pydevices-examples](../try/index.md) — live demo links
 
 ## Reference (source files)
 

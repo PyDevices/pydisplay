@@ -30,16 +30,16 @@
     '<nav class="nav">' +
     '<a href="' +
     ROOT +
-    '/pydisplay/pyscript/">Gallery</a>' +
+    '/pydevices-examples/pyscript/">Gallery</a>' +
     '<a href="' +
     ROOT +
-    '/pydisplay/">PyDisplay</a>' +
+    '/pydevices-examples/">Examples</a>' +
     '<a href="' +
     ROOT +
     '/displayif/">DisplayIF</a>' +
     '<a href="' +
     ROOT +
-    '/micropython-hardware/">Drivers</a>' +
+    '/pydevices/">Drivers</a>' +
     '<a href="https://github.com/PyDevices">GitHub</a>' +
     "</nav>" +
     '<button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Toggle color theme">' +

@@ -5,7 +5,7 @@ displaydev provides display driver classes (`BusDisplay`, `SDLDisplay`, `PGDispl
 - [Displays concept](../../concepts/displays.md) — pick a driver
 - [Display backend internals](../../concepts/display-backends.md) — GRAM/present, 565 API, color conversion
 - [Architecture](../../concepts/architecture.md) — how board_config wires the display
-- [Display drivers (chips)](https://pydevices.github.io/micropython-hardware/display-drivers.html) — st7789, ili9341, etc.
+- [Display drivers (chips)](https://pydevices.github.io/pydevices/display-drivers.html) — st7789, ili9341, etc.
 
 ## Key entry points
 

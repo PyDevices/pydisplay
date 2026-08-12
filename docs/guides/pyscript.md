@@ -6,22 +6,22 @@
 
 ## Live demo (online)
 
-[PyDevices.github.io/pydisplay/pyscript/](https://PyDevices.github.io/pydisplay/pyscript/)
+[PyDevices.github.io/pydevices-examples/pyscript/](https://PyDevices.github.io/pydevices-examples/pyscript/)
 
 | Page | URL |
 |------|-----|
-| Calculator | [pyscript/micropython.html?modules=calc_graphics,calc_engine](https://PyDevices.github.io/pydisplay/pyscript/micropython.html?modules=calc_graphics,calc_engine) |
-| Editor | [pyscript/editor.html](https://PyDevices.github.io/pydisplay/pyscript/editor.html) |
-| REPL | [pyscript/repl.html](https://PyDevices.github.io/pydisplay/pyscript/repl.html) |
-| Async | [pyscript/async.html](https://PyDevices.github.io/pydisplay/pyscript/async.html) |
-| DOM | [pyscript/dom.html](https://PyDevices.github.io/pydisplay/pyscript/dom.html) |
-| Pyodide (modules / manifests) | [pyscript/pyodide.html?modules=calc_graphics,calc_engine](https://PyDevices.github.io/pydisplay/pyscript/pyodide.html?modules=calc_graphics,calc_engine) · [manifests=chango](https://PyDevices.github.io/pydisplay/pyscript/pyodide.html?manifests=chango) |
+| Calculator | [pyscript/micropython.html?modules=calc_graphics,calc_engine](https://PyDevices.github.io/pydevices-examples/pyscript/micropython.html?modules=calc_graphics,calc_engine) |
+| Editor | [pyscript/editor.html](https://PyDevices.github.io/pydevices-examples/pyscript/editor.html) |
+| REPL | [pyscript/repl.html](https://PyDevices.github.io/pydevices-examples/pyscript/repl.html) |
+| Async | [pyscript/async.html](https://PyDevices.github.io/pydevices-examples/pyscript/async.html) |
+| DOM | [pyscript/dom.html](https://PyDevices.github.io/pydevices-examples/pyscript/dom.html) |
+| Pyodide (modules / manifests) | [pyscript/pyodide.html?modules=calc_graphics,calc_engine](https://PyDevices.github.io/pydevices-examples/pyscript/pyodide.html?modules=calc_graphics,calc_engine) · [manifests=chango](https://PyDevices.github.io/pydevices-examples/pyscript/pyodide.html?manifests=chango) |
 
 ## Run locally
 
 --8<-- "_snippets/pyscript-local.md"
 
-Examples in the [browser gallery](https://PyDevices.github.io/pydisplay/pyscript/) are copied to the deploy site and installed from the same origin on GitHub Pages. Locally, `tools/serve.py` serves your working tree — gallery pages load `src/examples/` via `web/pyscript/micropython.html?modules=…` / `?manifests=…` (MicroPython). Use `web/pyscript/pyodide.html` with the same query shape for Pyodide smoke tests (MIP JSON under `packages/` via the `web/pyscript/packages` symlink; no `?packages=`); it is not wired into the gallery. Non-gallery pages (`repl.html`, `editor.html`, `async.html`, `dom.html`) may still use `github:` installs.
+Examples in the [browser gallery](https://PyDevices.github.io/pydevices-examples/pyscript/) are copied to the deploy site and installed from the same origin on GitHub Pages. Locally, `tools/serve.py` serves your working tree — gallery pages load `src/examples/` via `web/pyscript/micropython.html?modules=…` / `?manifests=…` (MicroPython). Use `web/pyscript/pyodide.html` with the same query shape for Pyodide smoke tests (MIP JSON under `packages/` via the `web/pyscript/packages` symlink; no `?packages=`); it is not wired into the gallery. Non-gallery pages (`repl.html`, `editor.html`, `async.html`, `dom.html`) may still use `github:` installs.
 
 ## Minimal teaching shells
 
@@ -29,10 +29,10 @@ These tiny pages sit beside the gallery loaders and each highlight one PyScript 
 
 | Page | Feature |
 |------|---------|
-| [`editor.html`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/editor.html) | `type="mpy-editor"` with hidden `setup` + shared `env` — editable lesson + Run |
-| [`repl.html`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/repl.html) | `terminal worker` + `code.interact` |
-| [`async.html`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/async.html) | `async` / `await` animation that yields to the browser |
-| [`dom.html`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/dom.html) | HTML button → Python via `create_proxy` |
+| [`editor.html`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/editor.html) | `type="mpy-editor"` with hidden `setup` + shared `env` — editable lesson + Run |
+| [`repl.html`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/repl.html) | `terminal worker` + `code.interact` |
+| [`async.html`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/async.html) | `async` / `await` animation that yields to the browser |
+| [`dom.html`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/dom.html) | HTML button → Python via `create_proxy` |
 
 ### REPL: worker vs main thread
 
@@ -48,7 +48,7 @@ Gallery loaders and the `async.html` / `dom.html` shells stay on the **main thre
 ## asyncio requirement
 
 PyScript runs on asyncio. Prefer `runtime.run_forever()` with `on` / `on_tick`
-callbacks so demos stay responsive. See [PyScript asyncio guide](pyscript-asyncio.md), or open [`async.html`](https://PyDevices.github.io/pydisplay/pyscript/async.html) for a minimal bouncing-square loop.
+callbacks so demos stay responsive. See [PyScript asyncio guide](pyscript-asyncio.md), or open [`async.html`](https://PyDevices.github.io/pydevices-examples/pyscript/async.html) for a minimal bouncing-square loop.
 
 ## Gallery examples
 
@@ -65,7 +65,7 @@ Regenerate the card list with `python scripts/gallery_generator.py`. Every examp
 
 Hinch GUI smokes (`nano_gui_simpletest`, `micro_gui_simpletest`, `touch_gui_simpletest`) rely on `fetch_ph_gui` from the matching setup module — no gallery package header. First open needs network; later loads in the same session reuse the VFS until reload.
 
-Featured starters: `pydisplay_demo`, `testris`. See `scripts/gallery_generator.py` and [examples catalog](../examples/index.md#pyscript-gallery-markers).
+Featured starters: `pydevices_demo`, `testris`. See `scripts/gallery_generator.py` and [examples catalog](../examples/index.md#pyscript-gallery-markers).
 
 ## Board config
 
@@ -101,9 +101,9 @@ Matrix notes (serve.py, Playwright install, `needs_playwright`):
 - [Make your PyScript app a PWA](pyscript-pwa.md)
 - [Where PWAs run](../platforms/pwa.md) — host matrix (desktop, Android, iOS, TVs)
 - [PyScript asyncio porting](pyscript-asyncio.md)
-- [Try pydisplay](../try/index.md)
+- [Try pydevices-examples](../try/index.md)
 - [Platform notes](../platforms/pyscript.md)
 
 ## Reference
 
-- [displaydev source](https://github.com/PyDevices/micropython-hardware/tree/main/drivers/display/displaydev)
+- [displaydev source](https://github.com/PyDevices/pydevices/tree/main/drivers/display/displaydev)

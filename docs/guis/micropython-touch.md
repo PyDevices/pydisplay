@@ -6,13 +6,13 @@
 
 | Component | Location | Notes |
 |-----------|----------|-------|
-| `board_config.py` | `micropython-hardware/board_configs/` | display + neutral touch capability |
+| `board_config.py` | `pydevices/board_configs/` | display + neutral touch capability |
 | `touch_setup.py` | `src/utils/` | Fetches touch GUI; mouse/touch `Poller` → `Display(ssd, tpad)` |
 | `fetch_ph_gui.py` | `src/utils/` | mip install into `utils/gui/` + FrameBuffer patches |
 | `displaybuf.py` | `src/utils/` | `ssd` framebuffer |
 | `uctypes.py` | `src/utils/` | CircuitPython shim for `writer.py` |
 
-Upstream renamed `hardware_setup.py` → `touch_setup.py` (Dec 2024). pydisplay follows that name. Do **not** install upstream `drivers/` or `touch/` packages for the bridge — input comes from the selected board config and, for non-LVGL apps, the application-owned `eventsys` runtime.
+Upstream renamed `hardware_setup.py` → `touch_setup.py` (Dec 2024). pydevices-examples follows that name. Do **not** install upstream `drivers/` or `touch/` packages for the bridge — input comes from the selected board config and, for non-LVGL apps, the application-owned `eventsys` runtime.
 
 ## Config
 
@@ -25,16 +25,16 @@ from gui.core.tgui import Screen, ssd
 
 ```python
 import mip
-mip.install("github:PyDevices/pydisplay/packages/micropython-touch.json", target="./utils")
+mip.install("github:PyDevices/pydevices-examples/packages/micropython-touch.json", target="./utils")
 ```
 
 Or rely on `import touch_setup`.
 
 ## Example
 
-[`src/examples/touch_gui_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/touch_gui_simpletest.py) — framebuffer smoke test. Full demos: `import touch_setup` then `import gui.demos.simple`.
+[`src/examples/touch_gui_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/touch_gui_simpletest.py) — framebuffer smoke test. Full demos: `import touch_setup` then `import gui.demos.simple`.
 
-Browser: `fetch_ph_gui` via `touch_setup` — [gallery loader](https://PyDevices.github.io/pydisplay/pyscript/micropython.html?modules=touch_gui_simpletest).
+Browser: `fetch_ph_gui` via `touch_setup` — [gallery loader](https://PyDevices.github.io/pydevices-examples/pyscript/micropython.html?modules=touch_gui_simpletest).
 
 ## See also
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-serve.py — local development server for the pydisplay PyScript site.
+serve.py — local development server for the pydevices-examples PyScript site.
 
 Point it at the repo root (the default) and it serves the static PyScript
 site the same way GitHub Pages does, but from the source tree so you can edit
@@ -50,8 +50,8 @@ import sys
 REPO_ROOT = Path(__file__).resolve().parent.parent
 # Hardware-owned utils (mip, byteswap, …) are mounted at ./src/utils/ in
 # PyScript configs but live in the sibling checkout — not in this repo.
-_HW_UTILS = REPO_ROOT.parent / "micropython-hardware" / "utils"
-_HW_EVENTSYS = REPO_ROOT.parent / "micropython-hardware" / "lib" / "eventsys"
+_HW_UTILS = REPO_ROOT.parent / "pydevices" / "utils"
+_HW_EVENTSYS = REPO_ROOT.parent / "pydevices" / "lib" / "eventsys"
 _HW_UTIL_FILES = frozenset(
     {
         "byteswap.py",
@@ -208,7 +208,7 @@ def main(argv: list[str] | None = None) -> int:
     httpd = ThreadingHTTPServer((args.bind, args.port), handler)
     base = f"http://{args.bind}:{args.port}"
 
-    print(f"pydisplay PyScript server — serving {root}")
+    print(f"pydevices-examples PyScript server — serving {root}")
     print(f"  cross-origin isolation: {'on' if DemoRequestHandler.coi_enabled else 'off'}")
     print(f"  debug log sink:         POST {base}{DEBUG_PREFIX}")
     print("")

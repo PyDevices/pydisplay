@@ -1,8 +1,8 @@
 # Portability & platforms
 
-Portability is PyDisplay's defining feature. Write your display, input, and timing code once against `board_config`, and it runs unchanged across every supported runtime and target below. This page is the single home for the platform matrix; each row links to platform-specific notes.
+Portability is PyDevices's defining feature. Write your display, input, and timing code once against `board_config`, and it runs unchanged across every supported runtime and target below. This page is the single home for the platform matrix; each row links to platform-specific notes.
 
-## Where PyDisplay runs
+## Where PyDevices runs
 
 | Runtime | Microcontrollers | Unix / Linux | Windows | Android | Browser / PWA | Jupyter Notebook |
 |---------|:----------------:|:------------:|:-------:|:-------:|:-------------:|:----------------:|
@@ -10,7 +10,7 @@ Portability is PyDisplay's defining feature. Write your display, input, and timi
 | **[CircuitPython](circuitpython.md)** | ✅ | ✅ | — | — | — | — |
 | **[CPython](cpython-desktop.md)** | — | ✅ | ✅ | ✅ [Android APK](android.md) | — | ✅ [Jupyter](jupyter.md) |
 
-**Installable browser apps:** the [PyScript gallery](https://pydevices.github.io/pydisplay/pyscript/) ships as a [Progressive Web App](pwa.md) — install it on desktop Chromium, Android Chrome, or iOS home screen. That is a major distribution path, not a demo-only trick. See [where PWAs run](pwa.md#where-pwas-run).
+**Installable browser apps:** the [PyScript gallery](https://pydevices.github.io/pydevices-examples/pyscript/) ships as a [Progressive Web App](pwa.md) — install it on desktop Chromium, Android Chrome, or iOS home screen. That is a major distribution path, not a demo-only trick. See [where PWAs run](pwa.md#where-pwas-run).
 
 ## How portability works
 
@@ -25,7 +25,7 @@ What changes is which **display backend** is used — `displaydev.auto.AutoDispl
 
 | Backend | Used on | Selected by |
 |---------|---------|-------------|
-| `BusDisplay` | MicroPython / CircuitPython MCUs (SPI / I80) | [board config](https://pydevices.github.io/micropython-hardware/board-configs.html) |
+| `BusDisplay` | MicroPython / CircuitPython MCUs (SPI / I80) | [board config](https://pydevices.github.io/pydevices/board-configs.html) |
 | `FBDisplay` | CircuitPython framebuffer displays (RGB, USB video) | board config |
 | `SDLDisplay` | CPython, MicroPython Unix, CircuitPython Unix (SDL2); Android APK; [Linux KMS](cpython-desktop.md#linux-kms) | auto / `board_configs/sdldisplay/` · `sdldisplay/linux_kms/` |
 | `WinDisplay` | Windows CPython (native Win32 via `uwin32`) | auto (first on `win32`) / `board_configs/windisplay/` |
@@ -50,4 +50,4 @@ See [Displays](../concepts/displays.md) for backend details and [Architecture](.
 
 ## Build GUIs across platforms
 
-Because the backend is portable, anything built on PyDisplay inherits that portability — including the [LVGL sister projects](../ecosystem.md) for MicroPython, CircuitPython, and CPython. You can even prototype an LVGL app in [Jupyter](jupyter.md) and run it unchanged on a microcontroller.
+Because the backend is portable, anything built on PyDevices inherits that portability — including the [LVGL sister projects](../ecosystem.md) for MicroPython, CircuitPython, and CPython. You can even prototype an LVGL app in [Jupyter](jupyter.md) and run it unchanged on a microcontroller.

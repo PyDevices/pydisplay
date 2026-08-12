@@ -41,9 +41,9 @@ def _wav_path():
     try:
         import tempfile
 
-        return os.path.join(tempfile.gettempdir(), "pydisplay_audio_in_self_feed.wav")
+        return os.path.join(tempfile.gettempdir(), "pydevices_examples_audio_in_self_feed.wav")
     except Exception:
-        return "pydisplay_audio_in_self_feed.wav"
+        return "pydevices_examples_audio_in_self_feed.wav"
 
 
 def _self_feed(out, fmt):

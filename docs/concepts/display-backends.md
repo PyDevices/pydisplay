@@ -1,13 +1,13 @@
 # Display backend internals
 
-This document explains how pydisplay **display drivers** relate to each other: the
+This document explains how pydevices-examples **display drivers** relate to each other: the
 shared **565 API contract**, the **two-stage draw/present** model used by desktop
 and browser simulators, **color conversion** strategies, and why each backend
 chose its implementation pattern.
 
 For a shorter “which driver do I pick?” guide, see [Displays](displays.md). For
-chip wiring and board configs, see [Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html)
-and [Display interfaces](https://pydevices.github.io/micropython-hardware/display-interfaces.html).
+chip wiring and board configs, see [Board configs](https://pydevices.github.io/pydevices/board-configs.html)
+and [Display interfaces](https://pydevices.github.io/pydevices/display-interfaces.html).
 
 ## The DisplayDriver API contract
 
@@ -83,7 +83,7 @@ Five simulators — **SDLDisplay**, **PGDisplay**, **WinDisplay**, **PSDisplay**
 
 Scroll emulation **requires** this split: you cannot draw directly on the window
 and still implement `vscroll` / `set_vscroll` correctly. See
-[pydisplay_demo](../examples/pydisplay_demo.md) for the redraw-at-`vscroll=0`
+[pydevices_demo](../examples/pydevices_demo.md) for the redraw-at-`vscroll=0`
 rule.
 
 **PixelDisplay** is different: there is no ILI9341 scroll model. Drawing updates
@@ -204,7 +204,7 @@ display_drv = PixelDisplay(_pixel_framebuf)
 
 **Use `display_drv` for all app drawing.** `_pixel_framebuf` is prefixed to
 discourage bypassing the DisplayDriver API (see
-[Board configs — Pixel configs](https://pydevices.github.io/micropython-hardware/board-configs.html#pixel--addressable-led-configs)).
+[Board configs — Pixel configs](https://pydevices.github.io/pydevices/board-configs.html#pixel--addressable-led-configs)).
 
 `PixelDisplay` exposes the usual **565 `DisplayDriver` API** (`color_depth=16`).
 The inner `PixelFramebuffer` stays **RGB888** for the strip; `fill_rect`,
@@ -244,7 +244,7 @@ Internal buffer format may remain 565 (SDL), RGB (JN), RGBA (PS), or RGB888
 ## Related reading
 
 - [Displays](displays.md) — pick a driver, input, scroll overview
-- [pydisplay_demo](../examples/pydisplay_demo.md) — scroll bands and redraw rules
+- [pydevices_demo](../examples/pydevices_demo.md) — scroll bands and redraw rules
 - [Architecture](architecture.md) — how `board_config` wires drivers
-- [Display interfaces](https://pydevices.github.io/micropython-hardware/display-interfaces.html) — hardware taxonomy
+- [Display interfaces](https://pydevices.github.io/pydevices/display-interfaces.html) — hardware taxonomy
 - `tests/test_color.py` — `color_rgb` / `color565` contract tests

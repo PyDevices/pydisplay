@@ -1,17 +1,17 @@
 # 🎨 App starter
 
 Copy the script below to start your first app with the published product packages
-and pydisplay's small `app_runtime` helper.
+and pydevices-examples's small `app_runtime` helper.
 
 | Use this | When you want… |
 |----------|----------------|
 | **App starter** (this page) | A minimal template: draw the UI, handle clicks, `runtime.run_forever()` |
-| [**pydisplay_demo**](pydisplay_demo.md) | A feature tour: rotation, hardware scrolling, buffered text, timers |
+| [**pydevices_demo**](pydevices_demo.md) | A feature tour: rotation, hardware scrolling, buffered text, timers |
 
 ## Prerequisites
 
-- A working [board config](https://pydevices.github.io/micropython-hardware/board-configs.html) on your path.
-- Product packages installed from TestPyPI/MIP, or a sibling `micropython-hardware` development checkout.
+- A working [board config](https://pydevices.github.io/pydevices/board-configs.html) on your path.
+- Product packages installed from TestPyPI/MIP, or a sibling `pydevices` development checkout.
 - `src/utils` on the path so `app_runtime` resolves.
 
 Save the boilerplate as `main.py` (or any name you prefer) and run it from the REPL or as your device's entry point.
@@ -25,7 +25,7 @@ hosts do not arm a sync timer before the loop is running.
 
 ```python
 """
-my_app.py — starting point for a pydisplay app.
+my_app.py — starting point for a pydevices-examples app.
 
 Copy and rename to build your own project. Uses board_config, pygraphics,
 and the optional eventsys coordinator selected by app_runtime.
@@ -106,19 +106,19 @@ Stick with `from pygraphics import Area` when you also use rectangle helpers fro
 From a [full clone](../installation/full-clone.md), save the boilerplate as `src/main.py`, then set `PYTHONPATH`/`MICROPYPATH`, `cd src`, and run it directly — no path bootstrap needed:
 
 ```bash
-cd pydisplay/src
+cd pydevices-examples/src
 PYTHONPATH=.:utils ../.venv/bin/python main.py
 ```
 
 With sibling source checkouts instead of installed packages:
 
 ```bash
-cd pydisplay/src
-export PYTHONPATH=.:utils:../../micropython-hardware/lib:../../micropython-hardware/drivers/display
+cd pydevices-examples/src
+export PYTHONPATH=.:utils:../../pydevices/lib:../../pydevices/drivers/display
 python3 main.py
 ```
 
-On MCU, install the matching [board config](https://pydevices.github.io/micropython-hardware/board-configs.html), the optional `eventsys` package, and pydisplay's `utils` package, then run `main.py` from flash or the REPL. For fallback path handling, see [Utils path setup](../utils.md#path-setup).
+On MCU, install the matching [board config](https://pydevices.github.io/pydevices/board-configs.html), the optional `eventsys` package, and pydevices-examples's `utils` package, then run `main.py` from flash or the REPL. For fallback path handling, see [Utils path setup](../utils.md#path-setup).
 
 **Interact:** tap or click the centered rectangle — it toggles between red and green.
 
@@ -141,23 +141,23 @@ keys, encoders, and other devices — see [Events](../concepts/events.md).
 `runtime.run_forever()` keeps the app live on every host — see
 [Runtime](../concepts/runtime.md) and [multimer](../concepts/multimer.md).
 PyScript and Jupyter board configs export `timer_async=True`; desktop defaults
-to sync unless `PYDISPLAY_TIMER_ASYNC=1` is set before the coordinator is created.
+to sync unless `PYDEVICES_TIMER_ASYNC=1` is set before the coordinator is created.
 
 ## Customize
 
 1. **Rename** the file and module docstring.
 2. **Layout** — add more `Area` regions, sprites, or shapes in `redraw()`.
-3. **Text** — for labels and lists, use `Font` + `FrameBuffer` + `blit_rect` ([Drawing and fonts](../concepts/drawing-and-fonts.md), [`font_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/font_simpletest.py)).
-4. **Timers** — use `runtime.on_tick(callback, period=…, async_=runtime.timer_async)`; see [multimer](../concepts/multimer.md) and [**pydisplay_demo**](pydisplay_demo.md).
+3. **Text** — for labels and lists, use `Font` + `FrameBuffer` + `blit_rect` ([Drawing and fonts](../concepts/drawing-and-fonts.md), [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/font_simpletest.py)).
+4. **Timers** — use `runtime.on_tick(callback, period=…, async_=runtime.timer_async)`; see [multimer](../concepts/multimer.md) and [**pydevices_demo**](pydevices_demo.md).
 
 !!! tip "Next steps beyond this template"
-    - **Rotation and hardware scroll** — [pydisplay_demo](pydisplay_demo.md)
+    - **Rotation and hardware scroll** — [pydevices_demo](pydevices_demo.md)
     - **Event types and runtime** — [Events](../concepts/events.md), [Runtime](../concepts/runtime.md)
     - **All example scripts** — [Examples catalog](index.md)
 
 ## Related docs
 
-- [Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html) — choose and customize `board_config.py`
+- [Board configs](https://pydevices.github.io/pydevices/board-configs.html) — choose and customize `board_config.py`
 - [Architecture](../concepts/architecture.md) — how board_config, displaydev, and eventsys fit together
-- [pydisplay_demo](pydisplay_demo.md) — flagship feature demo (rotation, scroll, buffered text)
+- [pydevices_demo](pydevices_demo.md) — flagship feature demo (rotation, scroll, buffered text)
 - [Examples catalog](index.md) — full list of scripts

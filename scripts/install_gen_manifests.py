@@ -22,7 +22,7 @@ args = parser.parse_args()
 
 # Define constants
 package_ver = "0.0.1"
-repo_url = "github:PyDevices/pydisplay/"
+repo_url = "github:PyDevices/pydevices-examples/"
 repo_dir = os.getcwd() + "/"
 src_dir = "src/"
 output_dir = repo_dir
@@ -31,7 +31,7 @@ toml_full_path = output_dir + "web/pyscript/micropython.toml"
 pyodide_toml_path = output_dir + "web/pyscript/pyodide.toml"
 micropython_json_path = output_dir + "web/pyscript/micropython.json"
 pyodide_json_path = output_dir + "web/pyscript/pyodide.json"
-pydisplay_json_path = output_dir + "web/pyscript/pydisplay.json"
+examples_json_path = output_dir + "web/pyscript/pydevices-examples.json"
 peterhinch_config_paths = {
     "nano": output_dir + "web/pyscript/peterhinch-nano.json",
     "micro": output_dir + "web/pyscript/peterhinch-micro.json",
@@ -45,14 +45,14 @@ peterhinch_packages = {
 
 # list of package directories, dependencies and extra files in that package.
 # displaydev / multimer / events / keys / portable utils (byteswap, mip, …)
-# live in micropython-hardware and are installed via mip or pip
+# live in pydevices and are installed via mip or pip
 # (gallery: desktop board_config deps; PyScript mounts selected product sources).
 # Sister packages (pygraphics, usdl2, palettes, pdwidgets, lvgl) are not from
 # this repo: frozen in firmware, or TestPyPI / MIP when needed (see url_maker.py).
 packages = [
     [
         "utils",
-        [["github:PyDevices/micropython-hardware/packages/utils.json", "main"]],
+        [["github:PyDevices/pydevices/packages/utils.json", "main"]],
         [],
     ],
     ["examples", [], []],
@@ -62,7 +62,7 @@ packages = [
 toml_exclude = ["examples"]
 
 # PyScript [files] mounts that are not part of any mip package JSON.
-# These modules live in micropython-hardware/utils. Local serve.py and
+# These modules live in pydevices/utils. Local serve.py and
 # deploy-pyscript.yml map the URLs onto that tree so Pyodide can import mip
 # before other installs, and so keypins/wifi/byteswap examples resolve.
 toml_only_mounts: list[tuple[str, str]] = [
@@ -140,18 +140,18 @@ def add_pyscript_file(repo_relative_path: str, mount: str) -> None:
 for rel_path, mount in toml_only_mounts:
     add_pyscript_file(rel_path, mount)
 
-# eventsys is an optional product package owned by micropython-hardware. The
+# eventsys is an optional product package owned by pydevices. The
 # gallery mounts it as a baseline dependency for non-LVGL examples, but the
 # virtual URL remains ./src/lib/eventsys/... for both the local server and the
 # assembled Pages tree.
 hardware_candidates = (
-    Path(repo_dir).resolve().parent / "micropython-hardware" / "lib" / "eventsys",
-    Path(repo_dir).resolve() / "micropython-hardware" / "lib" / "eventsys",
+    Path(repo_dir).resolve().parent / "pydevices" / "lib" / "eventsys",
+    Path(repo_dir).resolve() / "pydevices" / "lib" / "eventsys",
 )
 hardware_eventsys = next((path for path in hardware_candidates if path.is_dir()), None)
 if hardware_eventsys is None:
     tried = ", ".join(str(path) for path in hardware_candidates)
-    raise SystemExit(f"missing micropython-hardware eventsys source (tried {tried})")
+    raise SystemExit(f"missing pydevices eventsys source (tried {tried})")
 for source_path in sorted(hardware_eventsys.rglob("*.py")):
     relative = source_path.relative_to(hardware_eventsys).as_posix()
     parent = relative.rsplit("/", 1)[0] if "/" in relative else ""
@@ -309,7 +309,7 @@ def github_mip_raw_url(source: str) -> str:
     return f"https://raw.githubusercontent.com/{owner}/{repository}/master/{path}"
 
 
-# JSON configs keep runtimes separate from the shared pydisplay filesystem so a
+# JSON configs keep runtimes separate from the shared pydevices-examples filesystem so a
 # page can compose the runtime it needs before PyScript starts.
 with open(micropython_json_path, "w") as f:
     json.dump({"interpreter": PYSCRIPT_INTERPRETER}, f, indent=2)
@@ -317,7 +317,7 @@ with open(micropython_json_path, "w") as f:
 with open(pyodide_json_path, "w") as f:
     json.dump({"interpreter": PYODIDE_INTERPRETER}, f, indent=2)
     f.write("\n")
-with open(pydisplay_json_path, "w") as f:
+with open(examples_json_path, "w") as f:
     json.dump({"files": master_files}, f, indent=2)
     f.write("\n")
 

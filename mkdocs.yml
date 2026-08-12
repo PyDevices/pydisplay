@@ -1,6 +1,6 @@
-site_name: pydisplay
+site_name: PyDevices Examples
 site_url: https://pydisplay.readthedocs.io
-repo_url: https://github.com/PyDevices/pydisplay/
+repo_url: https://github.com/PyDevices/pydevices-examples/
 edit_uri: edit/main/docs/
 copyright: "Copyright 2024, Brad Barnett"
 docs_dir: docs
@@ -73,9 +73,9 @@ plugins:
 nav:
 - Home: index.md
 - User guide:
-  - Try pydisplay:
+  - Try PyDevices:
     - Overview: try/index.md
-    - Wokwi details: https://pydevices.github.io/micropython-hardware/wokwi.html
+    - Wokwi details: https://pydevices.github.io/pydevices/wokwi.html
   - Quick start:
     - Router: getting-started.md
     - ESP32 / MicroPython board: guides/esp32-board.md
@@ -90,7 +90,7 @@ nav:
     - GitHub MIP: installation/mip-github.md
     - micropython-lib MIP: installation/mip-micropython-lib.md
   - Hardware setup:
-    - Overview (micropython-hardware): hardware/index.md
+    - Overview (pydevices): hardware/index.md
   - Learn:
     - Architecture: concepts/architecture.md
     - Displays: concepts/displays.md
@@ -114,7 +114,7 @@ nav:
     - PyScript: platforms/pyscript.md
   - Examples:
     - App starter: examples/app-starter.md
-    - pydisplay_demo: examples/pydisplay_demo.md
+    - pydevices_demo: examples/pydevices_demo.md
     - Catalog: examples/index.md
     - Live demos: examples/live-demos.md
   - Ecosystem & GUIs:

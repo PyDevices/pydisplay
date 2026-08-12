@@ -19,7 +19,7 @@ set -euo pipefail
 
 TESTPYPI_INDEX="${TESTPYPI_INDEX:-https://test.pypi.org/simple/}"
 PYPI_INDEX="${PYPI_INDEX:-https://pypi.org/simple/}"
-VENV="${TESTPYPI_VENV:-/tmp/pydisplay-testpypi-venv}"
+VENV="${TESTPYPI_VENV:-/tmp/pydevices-examples-testpypi-venv}"
 KEEP=0
 HEADLESS=0
 
@@ -32,7 +32,7 @@ Create a venv, pip-install TestPyPI desktop packages (no version pins), and smok
   displaydev  usdl2  pygraphics  pydevices-lvgl
 
 Environment:
-  TESTPYPI_VENV   venv directory (default: /tmp/pydisplay-testpypi-venv)
+  TESTPYPI_VENV   venv directory (default: /tmp/pydevices-examples-testpypi-venv)
   TESTPYPI_INDEX  primary pip index (default: TestPyPI)
   PYPI_INDEX      extra-index-url (default: PyPI)
 

@@ -30,8 +30,8 @@ jobs:
       - name: Checkout canonical product packages
         uses: actions/checkout@v4
         with:
-          repository: PyDevices/micropython-hardware
-          path: micropython-hardware
+          repository: PyDevices/pydevices
+          path: pydevices
           sparse-checkout: |
             drivers/display/displaydev
             drivers/audio/audiodev

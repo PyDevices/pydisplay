@@ -1,6 +1,6 @@
 # PyScript asyncio porting
 
-**Who:** You want an existing pydisplay example to run in the browser via PyScript.
+**Who:** You want an existing pydevices-examples example to run in the browser via PyScript.
 
 **Prerequisites:** [PyScript local setup](pyscript.md). Read [Events concept](../concepts/events.md) first.
 
@@ -60,7 +60,7 @@ For periodic callbacks, use `multimer.AsyncTimer` inside `async def main()` afte
 
 Try via: `web/pyscript/micropython.html?modules=eventsys_simpletest`
 
-Minimal shell (no query string): open [`async.html`](https://PyDevices.github.io/pydisplay/pyscript/async.html) — a bouncing square that yields with `await multimer.sleep_ms(16)`.
+Minimal shell (no query string): open [`async.html`](https://PyDevices.github.io/pydevices-examples/pyscript/async.html) — a bouncing square that yields with `await multimer.sleep_ms(16)`.
 
 ## Common failures
 
@@ -75,10 +75,10 @@ Regenerate manifest after adding examples: `./scripts/install_refresh_manifests.
 ## Next
 
 - [multimer](../concepts/multimer.md)
-- [Try pydisplay](../try/index.md)
+- [Try pydevices-examples](../try/index.md)
 - [Troubleshooting](../troubleshooting.md)
 - [Contributing](../contributing.md) — PyScript PRs welcome
 
 ## Reference
 
-- [micropython-hardware product source](https://github.com/PyDevices/micropython-hardware)
+- [pydevices product source](https://github.com/PyDevices/pydevices)

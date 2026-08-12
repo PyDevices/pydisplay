@@ -9,7 +9,7 @@ import unittest
 _TOOLS = Path(__file__).resolve().parent.parent / "tools"
 if str(_TOOLS) not in sys.path:
     sys.path.insert(0, str(_TOOLS))
-_SPEC = importlib.util.spec_from_file_location("pydisplay_record_tool", _TOOLS / "record.py")
+_SPEC = importlib.util.spec_from_file_location("pydevices_record_tool", _TOOLS / "record.py")
 record = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(record)
 

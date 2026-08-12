@@ -55,7 +55,7 @@
             }
         })();
     </script>
-    <script type="mpy" data-configs="./micropython.json ./pydisplay.json" output="log">
+    <script type="mpy" data-configs="./micropython.json ./pydevices-examples.json" output="log">
 import builtins
 from js import document
 import os
@@ -220,16 +220,16 @@ def _install_test_mode():
     if not _autotest_enabled():
         return
 
-    class _PyDisplayTestMode:
+    class _PyDevicesTestMode:
         pass
 
-    mode = _PyDisplayTestMode()
+    mode = _PyDevicesTestMode()
     mode.ENABLED = True
     # Soak is driven by Playwright; do not auto-quit via deadline hook.
     mode.DURATION_S = 86400
     mode._start_s = None
     mode._deadline_fired = False
-    sys.modules["pydisplay_test_mode"] = mode
+    sys.modules["pydevices_test_mode"] = mode
 
 def _parse_comma(raw):
     names = []
@@ -254,7 +254,7 @@ def _loader_plan():
     return modules, manifests, packages, deps, entry
 
 MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
-DESKTOP_BOARD_CONFIG_PACKAGE = "github:PyDevices/micropython-hardware/board_configs/desktop/package.json"
+DESKTOP_BOARD_CONFIG_PACKAGE = "github:PyDevices/pydevices/board_configs/desktop/package.json"
 
 def _same_origin_base():
     path = document.location.pathname
@@ -267,12 +267,12 @@ def _use_same_origin():
 def _manifest_url(name):
     if _use_same_origin():
         return _same_origin_base() + "packages/" + name + ".json"
-    return "github:PyDevices/pydisplay/packages/" + name + ".json"
+    return "github:PyDevices/pydevices-examples/packages/" + name + ".json"
 
 def _module_url(name):
     if _use_same_origin():
         return _same_origin_base() + "src/examples/" + name + ".py"
-    return "github:PyDevices/pydisplay/src/examples/" + name + ".py"
+    return "github:PyDevices/pydevices-examples/src/examples/" + name + ".py"
 
 def _packages_from_entry(entry):
     for path in ("examples/" + entry + ".py", entry + ".py"):

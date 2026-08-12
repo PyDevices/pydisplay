@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 # SPDX-License-Identifier: MIT
-"""Vendor Adafruit CircuitPython display/touch drivers into pydisplay."""
+"""Vendor Adafruit CircuitPython display/touch drivers into pydevices-examples."""
 
 from __future__ import annotations
 

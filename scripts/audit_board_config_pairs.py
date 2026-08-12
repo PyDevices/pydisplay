@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 # SPDX-License-Identifier: MIT
-"""Audit MicroPython / CircuitPython board_config sibling pairs."""
+"""Audit MicroPython / CircuitPython board_config sibling pairs.
+
+Board configs export hardware capabilities only. Application-level traffic
+controllers such as ``eventsys.Runtime`` must be constructed by the app.
+"""
 
 from __future__ import annotations
 
@@ -11,8 +15,8 @@ import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-# Board configs live in sibling micropython-hardware (fallback: local stub).
-BOARD_ROOT = ROOT.parent / "micropython-hardware" / "board_configs"
+# Board configs live in sibling pydevices (fallback: local stub).
+BOARD_ROOT = ROOT.parent / "pydevices" / "board_configs"
 if not BOARD_ROOT.is_dir():
     BOARD_ROOT = ROOT / "board_configs"
 
@@ -38,12 +42,12 @@ def _pairs(root: Path) -> list[tuple[Path, Path]]:
     return pairs
 
 
-def _has_broker(text: str) -> bool:
-    return bool(re.search(r"\bbroker\s*=|eventsys\.Broker|broker\.create", text))
-
-
-def _has_runtime(text: str) -> bool:
-    return "runtime" in text
+def _owns_event_runtime(text: str) -> bool:
+    return bool(
+        re.search(r"^\s*(?:import\s+eventsys\b|from\s+eventsys\b)", text, re.MULTILINE)
+        or re.search(r"^\s*(?:runtime|broker)\s*=", text, re.MULTILINE)
+        or re.search(r"\beventsys\.(?:Runtime|Broker)\b|\bbroker\.create\b", text)
+    )
 
 
 def _touch_kind(text: str) -> str:
@@ -93,10 +97,8 @@ def audit_pair(mp_path: Path, cp_path: Path) -> list[str]:
     cp_text = cp_path.read_text(encoding="utf-8")
 
     for label, text in (("MP", mp_text), ("CP", cp_text)):
-        if _has_broker(text):
-            issues.append(f"{rel}: {label} still uses Broker API")
-        if not _has_runtime(text):
-            issues.append(f"{rel}: {label} missing runtime export")
+        if _owns_event_runtime(text):
+            issues.append(f"{rel}: {label} owns application event runtime")
 
     mp_touch = _touch_kind(mp_text)
     cp_touch = _touch_kind(cp_text)

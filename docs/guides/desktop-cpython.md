@@ -23,15 +23,15 @@ To edit product code and examples together, clone them as siblings:
 
 ```text
 workspace/
-├── micropython-hardware/
-└── pydisplay/
+├── pydevices/
+└── pydevices-examples/
 ```
 
-Run from `pydisplay/src` after adding the canonical product paths:
+Run from `pydevices-examples/src` after adding the canonical product paths:
 
 ```bash
-export PYTHONPATH=.:utils:../../micropython-hardware/lib:../../micropython-hardware/utils:../../micropython-hardware/drivers/display:../../micropython-hardware/drivers/audio
-python3 examples/pydisplay_demo.py
+export PYTHONPATH=.:utils:../../pydevices/lib:../../pydevices/utils:../../pydevices/drivers/display:../../pydevices/drivers/audio
+python3 examples/pydevices_demo.py
 ```
 
 `import utils.path` performs the same sibling discovery on targets where setting

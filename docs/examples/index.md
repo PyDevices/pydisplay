@@ -1,20 +1,20 @@
 # 🎨 Examples catalog
 
-All examples live in [`src/examples/`](https://github.com/PyDevices/pydisplay/tree/main/src/examples/).
+All examples live in [`src/examples/`](https://github.com/PyDevices/pydevices-examples/tree/main/src/examples/).
 
 ```python
-mip.install("github:PyDevices/pydisplay/packages/examples.json", target="./examples")
+mip.install("github:PyDevices/pydevices-examples/packages/examples.json", target="./examples")
 ```
 
 Preferred: set `PYTHONPATH`/`MICROPYPATH` to `.:lib:utils`, `cd src`, then run `python3 examples/<name>.py` (or `from examples import <name>` at the REPL) — see [full clone](../installation/full-clone.md).
 
 !!! tip "Start here"
-    New to pydisplay? Copy the [**App starter**](app-starter.md) boilerplate to begin your first app, then read the [**pydisplay_demo** guide](pydisplay_demo.md) for rotation, scrolling, and buffered text.
+    New to pydevices-examples? Copy the [**App starter**](app-starter.md) boilerplate to begin your first app, then read the [**pydevices_demo** guide](pydevices_demo.md) for rotation, scrolling, and buffered text.
 
 ## PyScript gallery markers
 
 Every example **entry point** under `src/examples/` is included in the
-[browser gallery](https://PyDevices.github.io/pydisplay/pyscript/) by default
+[browser gallery](https://PyDevices.github.io/pydevices-examples/pyscript/) by default
 (`scripts/gallery_generator.py`):
 
 | Entry | Kind |
@@ -54,7 +54,7 @@ See [PyScript local development](../guides/pyscript.md).
 
 ### Canonical patterns
 
-**`runtime.run_forever()` with callbacks** — [`hello.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/hello.py), [`scroll.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll.py), [`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py), [`calc_graphics.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/calc_graphics.py):
+**`runtime.run_forever()` with callbacks** — [`hello.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/hello.py), [`scroll.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/scroll.py), [`pydevices_demo.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/pydevices_demo.py), [`calc_graphics.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/calc_graphics.py):
 
 ```python
 from board_config import display_drv
@@ -67,7 +67,7 @@ runtime.on(runtime.events.MOUSEBUTTONDOWN, on_click)
 runtime.run_forever()
 ```
 
-**Event-driven poll** — [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_encoder_test.py):
+**Event-driven poll** — [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/eventsys_encoder_test.py):
 
 ```python
 display_drv.show()  # after initial draw
@@ -78,9 +78,9 @@ while True:
             display_drv.show()
 ```
 
-**Forever LVGL / library-driven app** — [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py): build UI then `runtime.run_forever()`. Kit mode keeps a small sync/async wait for LVGL click injection.
+**Forever LVGL / library-driven app** — [`lv_test_timer.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/lv_test_timer.py): build UI then `runtime.run_forever()`. Kit mode keeps a small sync/async wait for LVGL click injection.
 
-**`tft_config` animation / one-shot** — subdirectory demos [`alien/alien.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/alien/alien.py), [`tiny_toasters/tiny_toasters.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/tiny_toasters/tiny_toasters.py), [`chango/chango.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/chango/chango.py):
+**`tft_config` animation / one-shot** — subdirectory demos [`alien/alien.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/alien/alien.py), [`tiny_toasters/tiny_toasters.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/tiny_toasters/tiny_toasters.py), [`chango/chango.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/chango/chango.py):
 
 ```python
 from app_runtime import runtime
@@ -89,9 +89,9 @@ tft.show()
 runtime.run_forever()
 ```
 
-**LVGL apps** — [`lv_test_timer.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/lv_test_timer.py): import `display_driver`, build UI, then `runtime.run_forever()`. See [LVGL guide](../guis/lvgl.md).
+**LVGL apps** — [`lv_test_timer.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/lv_test_timer.py): import `display_driver`, build UI, then `runtime.run_forever()`. See [LVGL guide](../guis/lvgl.md).
 
-**pdwidgets** — [`widgets_clinic_queue.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/widgets_clinic_queue.py) and related kiosk demos: build UI, then:
+**pdwidgets** — [`widgets_clinic_queue.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/widgets_clinic_queue.py) and related kiosk demos: build UI, then:
 
 ```python
 import board_config
@@ -117,14 +117,14 @@ runtime.run_forever()
 | Step | Script | Platforms | Packages | Screenshot |
 |------|--------|-----------|----------|------------|
 | 0 | [**App starter**](app-starter.md) (doc boilerplate) | CPython · MCU · PyScript | core | — |
-| 1 | [`pydisplay_demo.py`](pydisplay_demo.md) | CPython · MCU | core | — |
-| 2 | `color_test.py` | CPython · MCU | core | [color_test](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/color_test.png) |
+| 1 | [`pydevices_demo.py`](pydevices_demo.md) | CPython · MCU | core | — |
+| 2 | `color_test.py` | CPython · MCU | core | [color_test](https://raw.githubusercontent.com/PyDevices/pydevices-examples/main/docs/screenshots/color_test.png) |
 | 3 | `eventsys_simpletest.py` | CPython · MCU · PyScript | core | — |
-| 4 | `framebuf_simpletest.py` | CPython · MCU | core | [framebuf](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/framebuf_simpletest.png) |
+| 4 | `framebuf_simpletest.py` | CPython · MCU | core | [framebuf](https://raw.githubusercontent.com/PyDevices/pydevices-examples/main/docs/screenshots/framebuf_simpletest.png) |
 | 5 | `graphics_simpletest.py` | CPython · MCU | core | — |
 | 6 | `eventsys_touch_test.py` | CPython · MCU | core | — |
 | 7 | `calc_graphics.py` | CPython · PyScript | core | — |
-| 8 | `paint.py` | CPython · PyScript | core | [paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/paint.png) |
+| 8 | `paint.py` | CPython · PyScript | core | [paint](https://raw.githubusercontent.com/PyDevices/pydevices-examples/main/docs/screenshots/paint.png) |
 | 9 | `widgets_clinic_queue.py` | CPython · MCU | utils | — |
 
 PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-asyncio.md).
@@ -134,7 +134,7 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | Resource | Description | Platforms | Packages |
 |----------|-------------|-----------|----------|
 | [**App starter**](app-starter.md) | Copy-paste app boilerplate (doc only) | CPython · MCU · PyScript | core |
-| [`pydisplay_demo.py`](pydisplay_demo.md) | Clicks, rotation, scroll (`runtime.run_forever`) | CPython · MCU · PyScript | core |
+| [`pydevices_demo.py`](pydevices_demo.md) | Clicks, rotation, scroll (`runtime.run_forever`) | CPython · MCU · PyScript | core |
 | `hello.py` | Minimal text (`tft_config`) | CPython · MCU · Wokwi | core |
 | `color_test.py` | Color bars | CPython · MCU | core |
 | `logo.py` | Logo drawing | CPython · MCU | core |
@@ -218,4 +218,4 @@ Runnable demos in subfolders use the same entry rules (`<name>/<name>.py` or `__
 
 ## Screenshots and live demos
 
-See [Try pydisplay](../try/index.md) for the full gallery and browser/Wokwi demos.
+See [Try pydevices-examples](../try/index.md) for the full gallery and browser/Wokwi demos.

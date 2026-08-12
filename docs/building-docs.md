@@ -27,10 +27,10 @@ One-shot production build (output in `site/`):
 
 | File | Role |
 |------|------|
-| [`mkdocs.yml`](https://github.com/PyDevices/pydisplay/blob/main/mkdocs.yml) | Site config, theme, navigation |
-| [`docs/requirements.txt`](https://github.com/PyDevices/pydisplay/blob/main/docs/requirements.txt) | Python packages for MkDocs and plugins |
-| [`.readthedocs.yaml`](https://github.com/PyDevices/pydisplay/blob/main/.readthedocs.yaml) | ReadTheDocs build settings (same deps) |
-| [`scripts/mkdocs_gen_ref_pages.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/mkdocs_gen_ref_pages.py) | Auto-generates API reference stubs for pydisplay's `src/utils/` application helpers |
+| [`mkdocs.yml`](https://github.com/PyDevices/pydevices-examples/blob/main/mkdocs.yml) | Site config, theme, navigation |
+| [`docs/requirements.txt`](https://github.com/PyDevices/pydevices-examples/blob/main/docs/requirements.txt) | Python packages for MkDocs and plugins |
+| [`.readthedocs.yaml`](https://github.com/PyDevices/pydevices-examples/blob/main/.readthedocs.yaml) | ReadTheDocs build settings (same deps) |
+| [`scripts/mkdocs_gen_ref_pages.py`](https://github.com/PyDevices/pydevices-examples/blob/main/scripts/mkdocs_gen_ref_pages.py) | Auto-generates API reference stubs for pydevices-examples's `src/utils/` application helpers |
 
 Hand-authored pages live under `docs/` and follow a **Try → Quick start → Install → Learn → Reference** structure (see `mkdocs.yml` nav).
 
@@ -40,7 +40,7 @@ Shared copy-paste blocks: `docs/_snippets/` (included via pymdownx Snippets).
 
 ### Embedding the Jupyter notebook
 
-The example notebook ([`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb))
+The example notebook ([`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydevices-examples/blob/main/src/jupyter_notebook.ipynb))
 is rendered as a static docs page at [Platforms → Jupyter notebook](platforms/jupyter-notebook.ipynb).
 Users run it live via [Run the notebook interactively](platforms/jupyter-run.md).
 It is wired up with three pieces:
@@ -48,8 +48,8 @@ It is wired up with three pieces:
 | Piece | Role |
 |-------|------|
 | [`mkdocs-jupyter`](https://github.com/danielfrg/mkdocs-jupyter) (in `docs/requirements.txt`) | Converts `.ipynb` files into MkDocs pages |
-| [`scripts/mkdocs_gen_notebook_pages.py`](https://github.com/PyDevices/pydisplay/blob/main/scripts/mkdocs_gen_notebook_pages.py) | `mkdocs-gen-files` script that copies the notebook from `src/` into the docs tree at build time (MkDocs only renders files under `docs_dir`) |
-| [`docs/overrides/main.html`](https://github.com/PyDevices/pydisplay/blob/main/docs/overrides/main.html) | Material theme override that adds a **Download notebook** button (uses `page.nb_url` from `include_source: true`) |
+| [`scripts/mkdocs_gen_notebook_pages.py`](https://github.com/PyDevices/pydevices-examples/blob/main/scripts/mkdocs_gen_notebook_pages.py) | `mkdocs-gen-files` script that copies the notebook from `src/` into the docs tree at build time (MkDocs only renders files under `docs_dir`) |
+| [`docs/overrides/main.html`](https://github.com/PyDevices/pydevices-examples/blob/main/docs/overrides/main.html) | Material theme override that adds a **Download notebook** button (uses `page.nb_url` from `include_source: true`) |
 
 The notebook keeps living in `src/` so it can still be **run** there against the
 real source (relative imports like `import utils.path`). The committed copy has its
@@ -97,7 +97,7 @@ Harmless for now — RTD pauses search indexing on inactive projects. After docs
 
 ## Publish to ReadTheDocs
 
-The public docs URL is **https://pydisplay.readthedocs.io**. ReadTheDocs reads [`.readthedocs.yaml`](https://github.com/PyDevices/pydisplay/blob/main/.readthedocs.yaml) from the repo and runs the same MkDocs build as locally.
+The public docs URL is **https://pydisplay.readthedocs.io**. ReadTheDocs reads [`.readthedocs.yaml`](https://github.com/PyDevices/pydevices-examples/blob/main/.readthedocs.yaml) from the repo and runs the same MkDocs build as locally.
 
 ### Org GitHub App (required)
 
@@ -108,16 +108,16 @@ installed on the org with access to **all repositories** (see
 That app delivers push/PR events to RTD — do **not** add a manual
 `readthedocs.org/api/v2/webhook/...` hook on the repo.
 
-Sibling docs projects on the same app: **pydisplay**, **pygraphics**,
+Sibling docs projects on the same app: **pydevices-examples**, **pygraphics**,
 **palettes**, **pdwidgets**.
 
 ### First-time setup (new project)
 
 1. Go to [readthedocs.org](https://readthedocs.org) and sign in with **GitHub**
-   (an account that can see `PyDevices/pydisplay`).
+   (an account that can see `PyDevices/pydevices-examples`).
 2. Open the [Read the Docs dashboard](https://app.readthedocs.org/dashboard/)
    and click **Add project**.
-3. Search for **`PyDevices/pydisplay`** and import it.
+3. Search for **`PyDevices/pydevices-examples`** and import it.
    - If the repo does not appear, confirm the
      [GitHub App installation](https://github.com/organizations/PyDevices/settings/installations/149173814)
      includes this repository, then use **Refresh your repositories** on RTD.
@@ -137,7 +137,7 @@ Sibling docs projects on the same app: **pydisplay**, **pygraphics**,
 ### Migrating a legacy (webhook) project to the GitHub App
 
 Older imports used a per-repo webhook under GitHub **Settings → Webhooks**.
-Those PyDevices docs projects (**pydisplay**, **palettes**, **pdwidgets**) have
+Those PyDevices docs projects (**pydevices-examples**, **palettes**, **pdwidgets**) have
 been migrated to the org GitHub App via
 [Migrate to GitHub App](https://app.readthedocs.org/accounts/migrate-to-github-app/);
 legacy webhooks are removed. New projects should use the App from the start
@@ -166,10 +166,10 @@ In RTD project **Admin** → **Preview documentation from pull requests**, enabl
 | URL | Content |
 |-----|---------|
 | [pydisplay.readthedocs.io](https://pydisplay.readthedocs.io) | Full MkDocs site (Material theme) |
-| [PyDevices.github.io/pydisplay/](https://PyDevices.github.io/pydisplay/) | Landing page with links to docs and demo |
-| [PyDevices.github.io/pydisplay/pyscript/](https://PyDevices.github.io/pydisplay/pyscript/) | PyScript calculator / REPL / test pages |
+| [PyDevices.github.io/pydevices-examples/](https://PyDevices.github.io/pydevices-examples/) | Landing page with links to docs and demo |
+| [PyDevices.github.io/pydevices-examples/pyscript/](https://PyDevices.github.io/pydevices-examples/pyscript/) | PyScript calculator / REPL / test pages |
 
-Pushes to `main` trigger an automatic RTD rebuild and the [deploy-demo workflow](https://github.com/PyDevices/pydisplay/blob/main/.github/workflows/deploy-demo.yml) for GitHub Pages.
+Pushes to `main` trigger an automatic RTD rebuild and the [deploy-demo workflow](https://github.com/PyDevices/pydevices-examples/blob/main/.github/workflows/deploy-demo.yml) for GitHub Pages.
 
 ### Check GitHub Actions from the CLI
 
@@ -192,4 +192,4 @@ Useful after pushing doc or demo changes to confirm the Pages deploy succeeded.
 
 ## Maintainer reference
 
-More on regenerating packages and micropython-lib publishing: [tools/README.md](https://github.com/PyDevices/pydisplay/blob/main/tools/README.md#documentation-site).
+More on regenerating packages and micropython-lib publishing: [tools/README.md](https://github.com/PyDevices/pydevices-examples/blob/main/tools/README.md#documentation-site).

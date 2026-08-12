@@ -3,7 +3,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-DEST="${PYDISPLAY_SIBLINGS_DIR:-/tmp/pydevices-siblings}"
+DEST="${PYDEVICES_SIBLINGS_DIR:-/tmp/pydevices-siblings}"
 mkdir -p "$DEST"
 
 clone_or_update() {
@@ -31,10 +31,10 @@ echo "$PDWIDGETS/lib" >"$SITE/pdwidgets.pth"
 echo "$GRAPHICS/lib" >"$SITE/pygraphics.pth"
 echo "$USDL2/lib" >"$SITE/usdl2.pth"
 
-export PYDISPLAY_PALETTES_LIB="$PALETTES/lib"
-export PYDISPLAY_PDWIDGETS_LIB="$PDWIDGETS/lib"
-export PYDISPLAY_PYGRAPHICS_LIB="$GRAPHICS/lib"
-export PYDISPLAY_USDL2_LIB="$USDL2/lib"
+export PYDEVICES_PALETTES_LIB="$PALETTES/lib"
+export PYDEVICES_PDWIDGETS_LIB="$PDWIDGETS/lib"
+export PYDEVICES_PYGRAPHICS_LIB="$GRAPHICS/lib"
+export PYDEVICES_USDL2_LIB="$USDL2/lib"
 
 echo "palettes:  $PALETTES/lib"
 echo "pdwidgets: $PDWIDGETS/lib"

@@ -14,7 +14,7 @@ new ``#log`` lines are mirrored to stdout in real time.
 
 Usage:
   .venv/bin/python tools/pyscript_autotest.py \\
-    'http://127.0.0.1:8000/web/pyscript/harness.html?modules=pydisplay_demo&autotest=1&duration=5'
+    'http://127.0.0.1:8000/web/pyscript/harness.html?modules=pydevices_demo&autotest=1&duration=5'
 """
 
 from __future__ import annotations

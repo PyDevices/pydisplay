@@ -1,18 +1,18 @@
 # Utils
 
-Optional extensions in [`src/utils/`](https://github.com/PyDevices/pydisplay/tree/main/src/utils/). Not required for basic display and event use. API docs: [Utils Reference](reference/utils/).
+Optional extensions in [`src/utils/`](https://github.com/PyDevices/pydevices-examples/tree/main/src/utils/). Not required for basic display and event use. API docs: [Utils Reference](reference/utils/).
 
 MCU / host helpers that used to live here (`byteswap`, `viper_tools`, `mip`,
 `micropython` shim, `keypins`, `wifi`, `frame_recorder`) are in
-[micropython-hardware `utils/`](https://github.com/PyDevices/micropython-hardware/tree/main/utils).
+[pydevices `utils/`](https://github.com/PyDevices/pydevices/tree/main/utils).
 `packages/utils.json` depends on that tree; a sibling checkout is on
-`sys.path` via [`path.py`](https://github.com/PyDevices/pydisplay/blob/main/src/utils/path.py).
+`sys.path` via [`path.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/utils/path.py).
 
 ## Install
 
 ```python
 import mip
-mip.install("github:PyDevices/pydisplay/packages/utils.json", target="./utils")
+mip.install("github:PyDevices/pydevices-examples/packages/utils.json", target="./utils")
 ```
 
 ## Path setup

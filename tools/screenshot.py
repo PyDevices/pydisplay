@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a pydisplay example and save its desktop window as a PNG.
+"""Run a pydevices-examples example and save its desktop window as a PNG.
 
 Examples:
     python tools/screenshot.py hello.py
@@ -86,10 +86,10 @@ def _apply_display_overrides(resolution, scale):
 
     if resolution is not None:
         width, height = resolution
-        env_set("PYDISPLAY_WIDTH", width)
-        env_set("PYDISPLAY_HEIGHT", height)
+        env_set("PYDEVICES_WIDTH", width)
+        env_set("PYDEVICES_HEIGHT", height)
     if scale is not None:
-        env_set("PYDISPLAY_SCALE", scale)
+        env_set("PYDEVICES_SCALE", scale)
 
 
 def _parse_args(argv=None):
@@ -127,7 +127,7 @@ def _parse_args(argv=None):
 def _prepare_paths(repo_root):
     src = repo_root / "src"
     tools = repo_root / "tools"
-    hw = repo_root.parent / "micropython-hardware"
+    hw = repo_root.parent / "pydevices"
     for path in (
         str(tools),
         str(src),

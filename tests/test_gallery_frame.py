@@ -124,8 +124,8 @@ def test_runtime_loaders_set_browser_defaults_without_importing_board():
     loader = (ROOT / "src" / "utils" / "ps_loader.py").read_text(encoding="utf-8")
     assert "BOARD_WIDTH = 320" in loader
     assert "BOARD_HEIGHT = 480" in loader
-    assert 'env_set("PYDISPLAY_WIDTH", BOARD_WIDTH)' in loader
-    assert 'env_set("PYDISPLAY_HEIGHT", BOARD_HEIGHT)' in loader
+    assert 'env_set("PYDEVICES_WIDTH", BOARD_WIDTH)' in loader
+    assert 'env_set("PYDEVICES_HEIGHT", BOARD_HEIGHT)' in loader
     for name in ("micropython.html", "pyodide.html", "mp.html", "py.html"):
         source = (ROOT / "web" / "pyscript" / name).read_text(encoding="utf-8")
         assert "ps_loader.set_board_defaults()" in source
@@ -136,10 +136,10 @@ def test_car_cluster_forces_its_browser_resolution():
     source = (ROOT / "src" / "examples" / "car_cluster" / "car_cluster.py").read_text(
         encoding="utf-8"
     )
-    assert 'env_set("PYDISPLAY_WIDTH", "1024")' in source
-    assert 'env_set("PYDISPLAY_HEIGHT", "512")' in source
-    assert 'if env_get("PYDISPLAY_WIDTH")' not in source
-    assert 'if env_get("PYDISPLAY_HEIGHT")' not in source
+    assert 'env_set("PYDEVICES_WIDTH", "1024")' in source
+    assert 'env_set("PYDEVICES_HEIGHT", "512")' in source
+    assert 'if env_get("PYDEVICES_WIDTH")' not in source
+    assert 'if env_get("PYDEVICES_HEIGHT")' not in source
 
 
 def test_pixel_sim_demo_rotates_portrait_displays_before_layout():
@@ -177,7 +177,7 @@ def test_gallery_uses_local_theme_toggle_and_syncs_the_frame():
     assert 'id="runtime-toggle"' not in source
     assert "applyThemeToFrames(next)" in theme
     assert 'document.querySelectorAll("iframe")' in theme
-    assert "assets/img/products/pydisplay.svg" in source
+    assert "assets/img/products/pydevices-examples.svg" in source
 
 
 def test_runtime_frame_and_sidebar_follow_content_height():

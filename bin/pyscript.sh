@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start pydisplay's PyScript dev server and open a demo in the browser.
+# Start pydevices-examples's PyScript dev server and open a demo in the browser.
 #
 # Mirrors the primary CLI shapes of unix/micropython.exe:
 #
@@ -23,11 +23,11 @@
 
 set -euo pipefail
 
-# Resolve symlinks so ~/bin/pyscript.sh → …/pydisplay/bin/pyscript.sh finds the repo.
+# Resolve symlinks so ~/bin/pyscript.sh → …/pydevices-examples/bin/pyscript.sh finds the repo.
 _SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
-PYDISPLAY_ROOT="${PYDISPLAY_ROOT:-$(cd "$_SCRIPT_DIR/.." && pwd)}"
-SERVE="$PYDISPLAY_ROOT/tools/serve.py"
-PYSCRIPT_DIR="$PYDISPLAY_ROOT/web/pyscript"
+PYDEVICES_EXAMPLES_ROOT="${PYDEVICES_EXAMPLES_ROOT:-$(cd "$_SCRIPT_DIR/.." && pwd)}"
+SERVE="$PYDEVICES_EXAMPLES_ROOT/tools/serve.py"
+PYSCRIPT_DIR="$PYDEVICES_EXAMPLES_ROOT/web/pyscript"
 INDEX="$PYSCRIPT_DIR/index.html"
 PORT=8000
 FILE_ARG=""
@@ -84,7 +84,7 @@ If something is already listening on PORT, reuse it (do not bind again).
 Use --kill-port when you want a fresh serve.py on that port.
 
 Environment:
-  PYDISPLAY_ROOT    pydisplay clone (default: parent of bin/)
+  PYDEVICES_EXAMPLES_ROOT    pydevices-examples clone (default: parent of bin/)
 
 Examples:
   ./bin/pyscript.sh examples/calc_lvgl.py
@@ -289,14 +289,14 @@ lookup_or_build_url() {
 
   case "$kind" in
     manifest)
-      if [[ -f "$PYDISPLAY_ROOT/packages/${stem}.json" ]] \
-        && [[ -d "$PYDISPLAY_ROOT/src/examples/${stem}" ]]; then
+      if [[ -f "$PYDEVICES_EXAMPLES_ROOT/packages/${stem}.json" ]] \
+        && [[ -d "$PYDEVICES_EXAMPLES_ROOT/src/examples/${stem}" ]]; then
         printf 'micropython.html?manifests=%s\n' "$stem"
         return 0
       fi
       ;;
     module)
-      if [[ -f "$PYDISPLAY_ROOT/src/examples/${stem}.py" ]]; then
+      if [[ -f "$PYDEVICES_EXAMPLES_ROOT/src/examples/${stem}.py" ]]; then
         printf 'micropython.html?modules=%s\n' "$stem"
         return 0
       fi
@@ -310,7 +310,7 @@ lookup_or_build_url() {
 }
 
 # -m examples.<name> or -m <name> — top-level module/package under
-# src/examples/ only (real micropython -m also runs submodules, but pydisplay
+# src/examples/ only (real micropython -m also runs submodules, but pydevices-examples
 # demos are single-file or a package entry point, so that's all we resolve).
 resolve_module_target() {
   local mod="$1"
@@ -327,9 +327,9 @@ resolve_module_target() {
     return 1
   fi
 
-  if [[ -f "$PYDISPLAY_ROOT/src/examples/${stem}/__init__.py" ]]; then
+  if [[ -f "$PYDEVICES_EXAMPLES_ROOT/src/examples/${stem}/__init__.py" ]]; then
     lookup_or_build_url "$stem" manifest
-  elif [[ -f "$PYDISPLAY_ROOT/src/examples/${stem}.py" ]]; then
+  elif [[ -f "$PYDEVICES_EXAMPLES_ROOT/src/examples/${stem}.py" ]]; then
     lookup_or_build_url "$stem" module
   else
     echo "pyscript.sh: no such module: examples.${stem}" >&2
@@ -349,8 +349,8 @@ resolve_file_target() {
     resolved="$file"
   elif [[ -e "$file" ]]; then
     resolved="$(cd "$(dirname -- "$file")" && pwd)/$(basename -- "$file")"
-  elif [[ -e "$PYDISPLAY_ROOT/src/$file" ]]; then
-    resolved="$PYDISPLAY_ROOT/src/$file"
+  elif [[ -e "$PYDEVICES_EXAMPLES_ROOT/src/$file" ]]; then
+    resolved="$PYDEVICES_EXAMPLES_ROOT/src/$file"
   else
     echo "pyscript.sh: no such file: $file" >&2
     return 1
@@ -365,12 +365,12 @@ resolve_file_target() {
     return 1
   fi
 
-  local src="$PYDISPLAY_ROOT/src"
+  local src="$PYDEVICES_EXAMPLES_ROOT/src"
   local rel=""
   case "$resolved" in
     "$src"/*) rel="${resolved#"$src"/}" ;;
     *)
-      echo "pyscript.sh: '$file' is outside pydisplay src/ — pyscript can only launch example modules (examples/<name>.py)" >&2
+      echo "pyscript.sh: '$file' is outside pydevices-examples src/ — pyscript can only launch example modules (examples/<name>.py)" >&2
       return 1
       ;;
   esac
@@ -563,7 +563,7 @@ echo "pyscript.sh: ${URL}"
 
 if [[ "$AUTOTEST" -eq 1 ]]; then
   # Prefer repo venv Playwright; fall back to python3 on PATH.
-  PY="${PYDISPLAY_ROOT}/.venv/bin/python"
+  PY="${PYDEVICES_EXAMPLES_ROOT}/.venv/bin/python"
   if [[ ! -x "$PY" ]]; then
     PY="python3"
   fi
@@ -572,7 +572,7 @@ if [[ "$AUTOTEST" -eq 1 ]]; then
   export PYSCRIPT_AUTOTEST_DURATION="$DURATION"
   export PYSCRIPT_AUTOTEST_TIMEOUT_S="$(( DURATION + 40 ))"
   set +e
-  "$PY" "${PYDISPLAY_ROOT}/tools/pyscript_autotest.py" "$URL" \
+  "$PY" "${PYDEVICES_EXAMPLES_ROOT}/tools/pyscript_autotest.py" "$URL" \
     --duration "$DURATION" \
     --timeout "$(( DURATION + 40 ))"
   rc=$?

@@ -19,9 +19,9 @@ class ExampleRuntime(eventsys.Runtime):
 
     def _perform_teardown(self):
         try:
-            import pydisplay_test_mode
+            import pydevices_test_mode
 
-            testing = pydisplay_test_mode.ENABLED
+            testing = pydevices_test_mode.ENABLED
         except ImportError:
             testing = False
         if not testing:
@@ -36,9 +36,9 @@ class ExampleRuntime(eventsys.Runtime):
 
 
 try:
-    import pydisplay_test_mode
+    import pydevices_test_mode
 
-    _options = {"refresh_period": 0} if pydisplay_test_mode.ENABLED else {}
+    _options = {"refresh_period": 0} if pydevices_test_mode.ENABLED else {}
 except ImportError:
     _options = {}
 

@@ -65,11 +65,11 @@ RESULT_RE = re.compile(r"^EXAMPLE_RESULT=(.+)$", re.MULTILINE)
 # Android logcat may carry either wrapper EXAMPLE_RESULT or lv_test_timer KIT_RESULT.
 ANDROID_RESULT_RE = re.compile(r"^(?:.*\s)?(?:EXAMPLE_RESULT|KIT_RESULT)=(.+)$", re.MULTILINE)
 ANDROID_PACKAGE_ID = os.environ.get("PACKAGE_ID", "org.pydevices.launcher")
-# Lives in sibling pydisplay_android (pydisplay/bin/android.sh is a thin shim).
+# Lives in sibling pydevices-android-template (pydevices-examples/bin/android.sh is a thin shim).
 ANDROID_SH = Path(
     os.environ.get(
         "ANDROID_SH",
-        str(REPO.parent / "pydisplay_android" / "scripts" / "android.sh"),
+        str(REPO.parent / "pydevices-android-template" / "scripts" / "android.sh"),
     )
 )
 # Short wall clocks: enough for inject/poll quit; override via --duration-s / --timeout-s.
@@ -456,7 +456,7 @@ def run_subprocess_case(
     apply_sibling_env(env, repo_root=str(REPO))
     _ensure_user_micropy_lib(env)
     # Windows PE under WSL cannot read Linux-exported env; pass via argv + env_set.
-    timer_async = env.get("PYDISPLAY_TIMER_ASYNC")
+    timer_async = env.get("PYDEVICES_TIMER_ASYNC")
     if timer_async is not None:
         cmd.extend(["--timer-async", str(timer_async)])
     multimer_backend = env.get("MULTIMER_BACKEND")
@@ -843,10 +843,10 @@ def _write_jupyter_notebook(example_id: str, example_meta: dict, duration_s: flo
         [
             "import sys",
             f"sys.path.insert(0, {tools_rel!r})",
-            "import pydisplay_test_mode",
-            "pydisplay_test_mode.ENABLED = True",
-            f"pydisplay_test_mode.DURATION_S = {duration_s}",
-            "pydisplay_test_mode.install_deadline_hook()",
+            "import pydevices_test_mode",
+            "pydevices_test_mode.ENABLED = True",
+            f"pydevices_test_mode.DURATION_S = {duration_s}",
+            "pydevices_test_mode.install_deadline_hook()",
             "",
         ]
     )
@@ -881,7 +881,7 @@ def _write_jupyter_notebook(example_id: str, example_meta: dict, duration_s: flo
         "cells": cells,
     }
     # Unique path so concurrent matrix workers (runtime x timer_async) do not clobber.
-    mode = os.environ.get("PYDISPLAY_TIMER_ASYNC", "x")
+    mode = os.environ.get("PYDEVICES_TIMER_ASYNC", "x")
     out = SRC / f"run-{example_id}-async{mode}-{os.getpid()}.ipynb"
     out.write_text(json.dumps(nb, indent=1) + "\n", encoding="utf-8")
     return out
@@ -991,7 +991,7 @@ def run_android_case(
     duration: float,
     timeout: float,
 ) -> dict:
-    """Stage via pydisplay_android/scripts/android.sh; collect results from logcat."""
+    """Stage via pydevices-android-template/scripts/android.sh; collect results from logcat."""
     script = example_meta.get("script", f"examples/{example_id}.py")
     script_path = SRC / script
     if not script_path.is_file():
@@ -1437,7 +1437,9 @@ def compute_exit_code(rows: list[dict]) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Cross-runtime pydisplay example smoke tests")
+    parser = argparse.ArgumentParser(
+        description="Cross-runtime pydevices-examples example smoke tests"
+    )
     parser.add_argument(
         "--order",
         choices=("examples", "runtimes"),
@@ -1541,7 +1543,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     if args.curated_only:
         curated = {
-            "pydisplay_demo",
+            "pydevices_demo",
             "calc_graphics",
             "paint",
             "eventsys_simpletest",

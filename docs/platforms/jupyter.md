@@ -1,6 +1,6 @@
 # Jupyter Notebook
 
-Run pydisplay examples in VS Code or Jupyter with the `JNDisplay` backend.
+Run pydevices-examples applications in VS Code or Jupyter with the `JNDisplay` backend.
 
 !!! tip "Run it live"
     The [notebook preview](jupyter-notebook.ipynb) on ReadTheDocs is **not interactive**.
@@ -9,7 +9,7 @@ Run pydisplay examples in VS Code or Jupyter with the `JNDisplay` backend.
 !!! note "Read the notebook online"
     [Jupyter notebook](jupyter-notebook.ipynb) shows markdown and code cells only (not executed
     during the build). Use the **download** button on that page, or open
-    [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb)
+    [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydevices-examples/blob/main/src/jupyter_notebook.ipynb)
     from the repo.
 
 ## Limitations
@@ -22,16 +22,16 @@ Run pydisplay examples in VS Code or Jupyter with the `JNDisplay` backend.
 See **[Run the notebook interactively](jupyter-run.md)** for install commands, `./bin/jupyter.sh`, JupyterLab in the browser, and VS Code / Cursor widget settings. Summary:
 
 1. `pip install pillow ipywidgets ipyevents jupyterlab`
-2. Open [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydisplay/blob/main/src/jupyter_notebook.ipynb) from the repo clone, or generate one with `./bin/jupyter.sh <example>`.
-3. Run cells top to bottom. `./bin/jupyter.sh` configures pydisplay utilities and
+2. Open [`src/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydevices-examples/blob/main/src/jupyter_notebook.ipynb) from the repo clone, or generate one with `./bin/jupyter.sh <example>`.
+3. Run cells top to bottom. `./bin/jupyter.sh` configures pydevices-examples utilities and
    installed or sibling product packages. For fallback path discovery, see
    [Utils path setup](../utils.md#path-setup).
 
-Board config: `micropython-hardware/board_configs/jndisplay/board_config.py`.
+Board config: `pydevices/board_configs/jndisplay/board_config.py`.
 It exports the Jupyter display and host reader; `app_runtime` registers the
 corresponding host device.
 
-Touch examples (e.g. [`eventsys_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_touch_test.py)) render a single interactive **ipywidgets Image** — click on that widget.
+Touch examples (e.g. [`eventsys_touch_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/eventsys_touch_test.py)) render a single interactive **ipywidgets Image** — click on that widget.
 
 `JNDevices` captures mouse (motion/buttons), wheel, and keyboard input on that Image widget via `ipyevents`. The widget must be focused (clicked) to receive key events, and some keys may be consumed by the notebook front end. Quit uses `JNDisplay.quit_chord` (**Back** / `keys.K_AC_BACK` by default); reassign if the front end intercepts it. See [Displays → How displays expose input](../concepts/displays.md#how-displays-expose-input).
 
@@ -54,7 +54,7 @@ Interactive touch requires ipywidgets JavaScript loaded in the notebook UI. If y
 "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"]
 ```
 
-This repo’s [`.vscode/settings.json`](https://github.com/PyDevices/pydisplay/blob/main/.vscode/settings.json) includes that setting. Reload the window after changing it, then restart the kernel.
+This repo’s [`.vscode/settings.json`](https://github.com/PyDevices/pydevices-examples/blob/main/.vscode/settings.json) includes that setting. Reload the window after changing it, then restart the kernel.
 
 ## Stopping a running example
 

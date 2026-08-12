@@ -162,9 +162,9 @@ Use `eventsys.capabilities()` to inspect the dialect and built-in device list.
 
 **Joystick hats from analog sticks** — pass `emulate_digital=[(axis_x, axis_y), …]`.
 
-## pydisplay integration
+## pydevices-examples integration
 
-pydisplay's `app_runtime` explicitly constructs
+pydevices-examples's `app_runtime` explicitly constructs
 `eventsys.Runtime.from_board_config(board_config)` for non-LVGL examples.
 Board configs expose neutral hardware capabilities and never instantiate a
 runtime. Display-only apps may omit eventsys; LVGL uses `display_driver`.
@@ -178,4 +178,4 @@ See [Runtime](runtime.md), [Architecture](architecture.md), and [Displays](displ
 
 ## API reference
 
-[eventsys source and product docs](https://github.com/PyDevices/micropython-hardware/tree/main/lib/eventsys).
+[eventsys source and product docs](https://github.com/PyDevices/pydevices/tree/main/lib/eventsys).

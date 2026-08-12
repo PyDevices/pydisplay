@@ -2,30 +2,30 @@
 
 Experimental browser support via [PyScript](https://pyscript.net/) and `displaydev.psdisplay.PSDisplay`.
 
-**Quick start:** [PyScript guide](../guides/pyscript.md) and [Try pydisplay](../try/index.md).
+**Quick start:** [PyScript guide](../guides/pyscript.md) and [Try pydevices-examples](../try/index.md).
 
 **Installable / offline (major feature):** The live gallery is a [Progressive Web App](pwa.md). Read [where PWAs run](pwa.md#where-pwas-run) for the host matrix (desktop Chromium, Android Chrome, iOS home screen, TV web). Build your own with the [PyScript PWA guide](../guides/pyscript-pwa.md).
 
 **Asyncio porting:** [PyScript asyncio guide](../guides/pyscript-asyncio.md).
 
 !!! warning "Work in progress"
-    PyScript support is experimental. The [browser gallery](https://PyDevices.github.io/pydisplay/pyscript/) ships curated `async` and `all` examples (Run-gated). Other scripts may still use blocking `while True` loops and need asyncio porting — see [PyScript asyncio guide](../guides/pyscript-asyncio.md).
+    PyScript support is experimental. The [browser gallery](https://PyDevices.github.io/pydevices-examples/pyscript/) ships curated `async` and `all` examples (Run-gated). Other scripts may still use blocking `while True` loops and need asyncio porting — see [PyScript asyncio guide](../guides/pyscript-asyncio.md).
 
 ## Board config
 
-`micropython-hardware/board_configs/psdisplay/board_config.py` — 320×480 canvas
+`pydevices/board_configs/psdisplay/board_config.py` — 320×480 canvas
 with neutral PSDevices host input. Non-LVGL examples attach it through
 `app_runtime`; LVGL uses `display_driver`.
 
 ## Apple mobile (iOS / iPadOS)
 
-There is no native iOS app on the foreseeable roadmap. Use **Mobile Safari** (or another WebKit browser) with the [PyScript gallery](https://PyDevices.github.io/pydisplay/pyscript/), optionally **Add to Home Screen** as a [PWA](pwa.md#apple-mobile-ios--ipados).
+There is no native iOS app on the foreseeable roadmap. Use **Mobile Safari** (or another WebKit browser) with the [PyScript gallery](https://PyDevices.github.io/pydevices-examples/pyscript/), optionally **Add to Home Screen** as a [PWA](pwa.md#apple-mobile-ios--ipados).
 
 ## Smart TVs (webOS / Tizen)
 
-Browser / PyScript only — see [PWA — Smart TVs](pwa.md#smart-tvs-webos--tizen) and the [`tv_remote_menu`](https://PyDevices.github.io/pydisplay/pyscript/micropython.html?modules=tv_remote_menu) example. Do not expect `SDLDisplay` on those OS shells.
+Browser / PyScript only — see [PWA — Smart TVs](pwa.md#smart-tvs-webos--tizen) and the [`tv_remote_menu`](https://PyDevices.github.io/pydevices-examples/pyscript/micropython.html?modules=tv_remote_menu) example. Do not expect `SDLDisplay` on those OS shells.
 
 ## Contributing
 
-Pull requests for `displaydev/psdisplay.py` belong in micropython-hardware;
+Pull requests for `displaydev/psdisplay.py` belong in pydevices;
 asyncio example ports and files under `web/pyscript/` belong here.

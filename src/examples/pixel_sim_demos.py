@@ -49,9 +49,9 @@ GRID_W = display_drv.width
 GRID_H = display_drv.height
 
 try:
-    import pydisplay_test_mode  # type: ignore[import-not-found]
+    import pydevices_test_mode  # type: ignore[import-not-found]
 
-    _TEST_DURATION_S = pydisplay_test_mode.DURATION_S if pydisplay_test_mode.ENABLED else None
+    _TEST_DURATION_S = pydevices_test_mode.DURATION_S if pydevices_test_mode.ENABLED else None
 except ImportError:
     _TEST_DURATION_S = None
 
@@ -104,7 +104,7 @@ _FONT_H = 8
 _SCROLL_Y = (GRID_H - _FONT_H) // 2
 _SCROLL_FRAME_MS = 28
 _SCROLL_STEP = 4
-_SCROLL_TEXT = "PyDisplay!"
+_SCROLL_TEXT = "PyDevices!"
 _SCROLL_SRC_W = len(_SCROLL_TEXT) * _CHAR_W
 _SKY_TOP = 0xFB60
 _SKY_BOTTOM = 0x480F

@@ -1,6 +1,6 @@
 # Docstring conventions
 
-Public helper docstrings in `src/utils/` are rendered on [ReadTheDocs](https://pydisplay.readthedocs.io) via mkdocstrings. Product API documentation and source live in `micropython-hardware`. Follow these rules so generated reference pages stay accurate.
+Public helper docstrings in `src/utils/` are rendered on [ReadTheDocs](https://pydisplay.readthedocs.io) via mkdocstrings. Product API documentation and source live in `pydevices`. Follow these rules so generated reference pages stay accurate.
 
 ## Style
 
@@ -36,7 +36,7 @@ See also: https://pydisplay.readthedocs.io/en/latest/concepts/displays/
 | `Raises` | When callers must handle errors |
 | `Example` | Non-obvious usage only |
 
-## pydisplay-specific notes
+## pydevices-examples-specific notes
 
 - **`Area` returns:** Drawing helpers that return dirty regions use `pygraphics.Area` (`x`, `y`, `w`, `h`).
 - **Runtime:** Document poll/subscribe patterns; link to [Events concept](../concepts/events.md).

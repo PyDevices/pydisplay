@@ -28,7 +28,7 @@ def test_page_selects_a_gui_specific_micropython_config_before_core_loads():
     source = _source()
     runtime = source.index('<script id="hinch-runtime" type="text/plain"')
     runtime_config = source.index("'./micropython.json'")
-    shared_config = source.index("'./pydisplay.json'")
+    shared_config = source.index("'./pydevices-examples.json'")
     gui_config = source.index("'./peterhinch-' + gui + '.json'")
     loader = source.index('<script type="module" src="./pyscript-json-config.js"></script>')
     assert runtime < runtime_config < shared_config < gui_config < loader
@@ -59,7 +59,7 @@ def test_bare_url_defaults_to_touch_gui():
 def test_generated_configs_split_shared_files_from_gui_manifests():
     micropython = json.loads((ROOT / "web" / "pyscript" / "micropython.json").read_text())
     pyodide = json.loads((ROOT / "web" / "pyscript" / "pyodide.json").read_text())
-    shared = json.loads((ROOT / "web" / "pyscript" / "pydisplay.json").read_text())
+    shared = json.loads((ROOT / "web" / "pyscript" / "pydevices-examples.json").read_text())
     assert micropython == {"interpreter": "./vendor/micropython/micropython.mjs"}
     assert pyodide == {"interpreter": "./vendor/pyodide/pyodide.mjs"}
     assert set(shared) == {"files"}
@@ -97,7 +97,7 @@ def test_gallery_pages_compose_generated_json_configs():
     }
     for filename, runtime in pages.items():
         source = (ROOT / "web" / "pyscript" / filename).read_text()
-        assert f'data-configs="./{runtime}.json ./pydisplay.json"' in source
+        assert f'data-configs="./{runtime}.json ./pydevices-examples.json"' in source
         assert '<script type="module" src="./pyscript-json-config.js"></script>' in source
         assert ".toml" not in source
         assert 'src="./vendor/core.js"' not in source
@@ -126,8 +126,8 @@ def test_demo_list_is_reused_across_fresh_interpreter_reloads():
 
 def test_display_size_is_overridden_before_setup_import():
     source = _source()
-    width = source.index('env_set("PYDISPLAY_WIDTH", 320)')
-    height = source.index('env_set("PYDISPLAY_HEIGHT", 240)')
+    width = source.index('env_set("PYDEVICES_WIDTH", 320)')
+    height = source.index('env_set("PYDEVICES_HEIGHT", 240)')
     setup_import = source.index("__import__(setup)")
     assert width < setup_import
     assert height < setup_import

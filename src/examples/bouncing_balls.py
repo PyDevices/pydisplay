@@ -5,7 +5,7 @@ bouncing_balls.py
 
 Animate colored balls bouncing inside the display.
 
-Inspired by Pimoroni's ``balls_demo.py``, adapted for pydisplay's
+Inspired by Pimoroni's ``balls_demo.py``, adapted for pydevices-examples's
 ``board_config.display_drv`` and ``pygraphics`` module so the same script runs on
 desktop (SDL/Pygame), MCU, and PyScript.
 

@@ -1,14 +1,14 @@
 # Android (CPython)
 
-Platform notes for building pydisplay APKs with **python-for-android** and **buildozer**.
+Platform notes for building pydevices-examples APKs with **python-for-android** and **buildozer**.
 
 For an **installable browser app** on Android phones (Chrome home screen, no APK), see [Progressive Web Apps](pwa.md) — that path uses PyScript/`PSDisplay`, not this APK stack.
 
 ## Overview
 
-On Android there is no MicroPython port. pydisplay runs under **CPython** in a **python-for-android** APK with the **SDL2 bootstrap** (no Kivy). Native `libSDL2.so` comes from p4a’s `sdl2` recipe. The `import usdl2` API is the pure-Python binding shipped in [pydevices-desktop](https://test.pypi.org/project/pydevices-desktop/) (ctypes against that library). `displaydev.auto.AutoDisplay` selects **`AndroidSDLDisplay`** (`SDL_WINDOW_SHOWN` / HIGHDPI; not `FULLSCREEN_DESKTOP` — that resizes the Activity surface after GL buffers exist and yields a black screen after splash).
+On Android there is no MicroPython port. pydevices-examples runs under **CPython** in a **python-for-android** APK with the **SDL2 bootstrap** (no Kivy). Native `libSDL2.so` comes from p4a’s `sdl2` recipe. The `import usdl2` API is the pure-Python binding shipped in [pydevices-desktop](https://test.pypi.org/project/pydevices-desktop/) (ctypes against that library). `displaydev.auto.AutoDisplay` selects **`AndroidSDLDisplay`** (`SDL_WINDOW_SHOWN` / HIGHDPI; not `FULLSCREEN_DESKTOP` — that resizes the Activity surface after GL buffers exist and yields a black screen after splash).
 
-APK integration — template app, build scripts, and p4a recipes — lives in [**pydisplay_android**](https://github.com/PyDevices/pydisplay_android).
+APK integration — template app, build scripts, and p4a recipes — lives in [**pydevices-android-template**](https://github.com/PyDevices/pydevices-android-template).
 
 The default APK is **PyDevices Launcher** (`org.pydevices.launcher`): a baked LVGL home that fetches examples on button press (`mip` / `pip`). It does **not** auto-fetch on launch.
 
@@ -17,7 +17,7 @@ The default APK is **PyDevices Launcher** (`org.pydevices.launcher`): a baked LV
 Clone the Android packaging repo (TestPyPI supplies the wheels; a sibling `lvgl-python` clone is optional for local development):
 
 ```bash
-git clone https://github.com/PyDevices/pydisplay_android.git
+git clone https://github.com/PyDevices/pydevices-android-template.git
 ```
 
 ## Quick start
@@ -25,7 +25,7 @@ git clone https://github.com/PyDevices/pydisplay_android.git
 Prerequisites: [Android SDK + NDK](https://python-for-android.readthedocs.io/en/latest/quickstart.html), Ubuntu/WSL build tools.
 
 ```bash
-cd pydisplay_android
+cd pydevices-android-template
 ./build_android.sh
 ./scripts/emulator.sh   # with an AVD already running
 # or: adb install -r p4a_app/bin/*.apk
@@ -36,16 +36,16 @@ Package id: `org.pydevices.launcher` (home-screen label: **PyDevices Launcher**)
 Desktop smoke test (Xvfb, before building an APK):
 
 ```bash
-cd pydisplay_android
+cd pydevices-android-template
 ./scripts/test_desktop.sh
 ```
 
 ## Stage an example over adb (`android.sh`)
 
-Host tool: [`pydisplay_android/scripts/android.sh`](https://github.com/PyDevices/pydisplay_android/blob/main/scripts/android.sh) (on PATH as `~/bin/android.sh` in Brad’s layout; `pydisplay/bin/android.sh` is a thin shim). Stages a **cwd path** onto the installed launcher and relaunches — same shape as CLI `python` / `micropython`, **not** [pyscript.sh](../../bin/pyscript.sh) gallery lookup.
+Host tool: [`pydevices-android-template/scripts/android.sh`](https://github.com/PyDevices/pydevices-android-template/blob/main/scripts/android.sh) (on PATH as `~/bin/android.sh` in Brad’s layout; `pydevices-examples/bin/android.sh` is a thin shim). Stages a **cwd path** onto the installed launcher and relaunches — same shape as CLI `python` / `micropython`, **not** [pyscript.sh](../../bin/pyscript.sh) gallery lookup.
 
 ```bash
-cd pydisplay/src
+cd pydevices-examples/src
 android.sh examples/lv_test_timer.py
 android.sh examples/paint.py
 android.sh --clear
@@ -95,14 +95,14 @@ TTY / editing aim for MicroPython REPL parity:
 
 `help()`, `help("modules")` (top-level names, 4×18 columns), and `help(obj)` follow MicroPython’s help style. Auto-indent after `:` on compound statements.
 
-Each launch hot-syncs `boot.py`, `stdio_sidecar.py`, and `mp_*.py` from a sibling `pydisplay_android` checkout (when present) and drops stale bytecode that would otherwise shadow updates. Optional: `--kit`, `--deps` / `--modules` / `--manifests`. Matrix: `tools/example_test_kit.py --only-runtime android …`.
+Each launch hot-syncs `boot.py`, `stdio_sidecar.py`, and `mp_*.py` from a sibling `pydevices-android-template` checkout (when present) and drops stale bytecode that would otherwise shadow updates. Optional: `--kit`, `--deps` / `--modules` / `--manifests`. Matrix: `tools/example_test_kit.py --only-runtime android …`.
 
 The boot-entrypoint Java patch requires an APK rebuild (`./build_android.sh`); hot-sync alone cannot retarget an older package that still launches `main.py` first.
 ## LVGL on Android
 
 Prebuilt **`pydevices-lvgl`** wheels for Android are on [TestPyPI](https://test.pypi.org/project/pydevices-lvgl/) and are included in the launcher APK (`pydeviceslvgl` in `buildozer.spec`). The home UI is LVGL; buttons can `mip.install` examples such as `lv_test_timer` from GitHub with `index=` the [PyDevices MIP index](https://PyDevices.github.io/micropython-lib/mip/PyDevices).
 
-See [pydisplay_android README](https://github.com/PyDevices/pydisplay_android/blob/main/README.md) for entry points (`main.py` / `launcher.py`) and recipe details. Display wiring uses the MCU-shaped `board_config` from **pydevices-desktop** (`AutoDisplay` and neutral input readers). LVGL owns its runtime in `display_driver`; non-LVGL apps may instantiate optional `eventsys`. Set `PYDISPLAY_WIDTH` / `HEIGHT` / `SCALE` in `main.py` (phone defaults are already set for Android).
+See [pydevices-android-template README](https://github.com/PyDevices/pydevices-android-template/blob/main/README.md) for entry points (`main.py` / `launcher.py`) and recipe details. Display wiring uses the MCU-shaped `board_config` from **pydevices-desktop** (`AutoDisplay` and neutral input readers). LVGL owns its runtime in `display_driver`; non-LVGL apps may instantiate optional `eventsys`. Set `PYDEVICES_WIDTH` / `HEIGHT` / `SCALE` in `main.py` (phone defaults are already set for Android).
 
 ## Orientation (MCU-like)
 
@@ -112,7 +112,7 @@ See [pydisplay_android README](https://github.com/PyDevices/pydisplay_android/bl
 - `720×1280` → portrait Activity  
 - `rotation = 90` on a portrait panel swaps logical size → landscape Activity  
 
-Tilting the phone does **not** change orientation (same contract as an SPI LCD on a board). The user turns the device to match the app. After an aspect change (e.g. `tft_config.WIDE`), `AndroidSDLDisplay` rebinds the logical texture and letterboxes with `RenderSetLogicalSize` (CreateWindow scale is forced to 1 so a stale tall window cannot clip landscape content). Desktop chrome fitting / `PYDISPLAY_SCALE` do not drive the Android window size. Desktop `SDLDisplay` still uses software `RenderCopyEx` rotation.
+Tilting the phone does **not** change orientation (same contract as an SPI LCD on a board). The user turns the device to match the app. After an aspect change (e.g. `tft_config.WIDE`), `AndroidSDLDisplay` rebinds the logical texture and letterboxes with `RenderSetLogicalSize` (CreateWindow scale is forced to 1 so a stale tall window cannot clip landscape content). Desktop chrome fitting / `PYDEVICES_SCALE` do not drive the Android window size. Desktop `SDLDisplay` still uses software `RenderCopyEx` rotation.
 
 ## Timers
 
@@ -126,13 +126,13 @@ On Android, **multimer** skips auto **`sdl2`** (CPython `SDL_AddTimer` is not on
 
 Same CPython + SDL2 APK stack as phones, with **leanback** packaging and landscape framebuffer env for 10-foot UI.
 
-**Packaging** ([pydisplay_android](https://github.com/PyDevices/pydisplay_android)):
+**Packaging** ([pydevices-android-template](https://github.com/PyDevices/pydevices-android-template)):
 
 - `p4a_app/intent_filters_tv.xml` — `LEANBACK_LAUNCHER` so the app appears on the TV launcher (phone `LAUNCHER` remains).
 - `p4a_app/tv_features.xml` — `android.software.leanback` and `android.hardware.touchscreen` with `required="false"` so non-touch sticks can install.
 - `scripts/emulator_tv.sh` — install/launch helper for android-tv AVDs.
 
-**Framebuffer:** import `board_config_tv` from `main.py` before the entry (sets `PYDISPLAY_WIDTH=1280`, `HEIGHT=720`), or set those env vars yourself. Phone defaults stay portrait 720×1280 from `main.py`.
+**Framebuffer:** import `board_config_tv` from `main.py` before the entry (sets `PYDEVICES_WIDTH=1280`, `HEIGHT=720`), or set those env vars yourself. Phone defaults stay portrait 720×1280 from `main.py`.
 
 **Remote → eventsys** (SDL Android keyboard map; no extra remap required today):
 
@@ -150,4 +150,4 @@ TV **web** browsers (webOS / Tizen) are a different path — PyScript / [PWA](pw
 
 ## Your own app
 
-Use `pydisplay_android/p4a_app/` as the template: customize `launcher.py` (or stage examples with `android.sh`), set `PYDISPLAY_*` for your panel size, add TestPyPI packages to `buildozer.spec`, and keep `p4a.local_recipes` pointed at this repo's `p4a_recipes/`. Do not ship a local `board_config.py` that shadows pydevices-desktop’s module.
+Use `pydevices-android-template/p4a_app/` as the template: customize `launcher.py` (or stage examples with `android.sh`), set `PYDEVICES_*` for your panel size, add TestPyPI packages to `buildozer.spec`, and keep `p4a.local_recipes` pointed at this repo's `p4a_recipes/`. Do not ship a local `board_config.py` that shadows pydevices-desktop’s module.

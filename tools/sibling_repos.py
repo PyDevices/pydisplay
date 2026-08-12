@@ -3,7 +3,7 @@ Discover palettes / pdwidgets / pygraphics / usdl2 sibling repo ``lib`` director
 for the example harness.
 
 Search order per package:
-  1. ``PYDISPLAY_<PKG>_LIB`` (optional override; ``PYDISPLAY_PALETTES_SRC`` etc.
+  1. ``PYDEVICES_<PKG>_LIB`` (optional override; ``PYDEVICES_PALETTES_SRC`` etc.
      still accepted as aliases)
   2. ``/agent/repos/<pkg>/lib``
   3. ``~/gh/pydevices/<pkg>/lib``
@@ -16,21 +16,21 @@ import os
 
 _SIBLING_PACKAGES = ("palettes", "pdwidgets", "pygraphics", "usdl2")
 _ENV_KEYS = {
-    "palettes": "PYDISPLAY_PALETTES_LIB",
-    "pdwidgets": "PYDISPLAY_PDWIDGETS_LIB",
-    "pygraphics": "PYDISPLAY_PYGRAPHICS_LIB",
-    "usdl2": "PYDISPLAY_USDL2_LIB",
+    "palettes": "PYDEVICES_PALETTES_LIB",
+    "pdwidgets": "PYDEVICES_PDWIDGETS_LIB",
+    "pygraphics": "PYDEVICES_PYGRAPHICS_LIB",
+    "usdl2": "PYDEVICES_USDL2_LIB",
 }
 # Backward-compatible aliases (older harness / docs used *_SRC).
 _ENV_ALIASES = {
-    "palettes": ("PYDISPLAY_PALETTES_SRC",),
-    "pdwidgets": ("PYDISPLAY_PDWIDGETS_SRC",),
+    "palettes": ("PYDEVICES_PALETTES_SRC",),
+    "pdwidgets": ("PYDEVICES_PDWIDGETS_SRC",),
     "pygraphics": (
-        "PYDISPLAY_GRAPHICS_LIB",
-        "PYDISPLAY_GRAPHICS_SRC",
-        "PYDISPLAY_PYGRAPHICS_SRC",
+        "PYDEVICES_GRAPHICS_LIB",
+        "PYDEVICES_GRAPHICS_SRC",
+        "PYDEVICES_PYGRAPHICS_SRC",
     ),
-    "usdl2": ("PYDISPLAY_USDL2_SRC",),
+    "usdl2": ("PYDEVICES_USDL2_SRC",),
 }
 _PATHSEP = getattr(os, "pathsep", ":")
 

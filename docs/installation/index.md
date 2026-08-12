@@ -1,6 +1,6 @@
 # Installation overview
 
-pydisplay supports three install channels. Pick based on whether you need the full repo, source files on device, or precompiled bytecode.
+pydevices-examples supports three install channels. Pick based on whether you need the full repo, source files on device, or precompiled bytecode.
 
 ## Comparison
 
@@ -10,17 +10,17 @@ pydisplay supports three install channels. Pick based on whether you need the fu
 | [GitHub MIP](mip-github.md) | Source `.py` | `mip` / `mpremote mip` | Optional (`examples.json`) | Yes (`utils.json`) |
 | [micropython-lib MIP](mip-micropython-lib.md) | Precompiled `.mpy` | `mip` with custom index | No | No |
 
-For recommended board setup flows, see [micropython-hardware install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html).
+For recommended board setup flows, see [pydevices install workflows](https://pydevices.github.io/pydevices/install-workflows.html).
 
 ## What gets installed
 
-**Product libraries** (canonical source in [micropython-hardware](https://github.com/PyDevices/micropython-hardware), published through MIP and TestPyPI):
+**Product libraries** (canonical source in [pydevices](https://github.com/PyDevices/pydevices), published through MIP and TestPyPI):
 
 - `eventsys` — optional application event traffic controller
 - `audiodev` — portable PCM audio interfaces
-- `displaydev` — display drivers (BusDisplay, SDLDisplay, PGDisplay, etc.) from [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
-- `multimer` — cross-platform timers; see [multimer](../concepts/multimer.md) (micropython-hardware)
-- `events` / `keys` — event types and key codes (micropython-hardware)
+- `displaydev` — display drivers (BusDisplay, SDLDisplay, PGDisplay, etc.) from [pydevices](https://github.com/PyDevices/pydevices)
+- `multimer` — cross-platform timers; see [multimer](../concepts/multimer.md) (pydevices)
+- `events` / `keys` — event types and key codes (pydevices)
 
 **Sister packages** (separate repos, installed from the same [micropython-lib MIP index](mip-micropython-lib.md)):
 
@@ -30,15 +30,15 @@ For recommended board setup flows, see [micropython-hardware install workflows](
 
 **Optional packages:**
 
-- `utils` — optional extensions (framebuf shim, console, displaybuf, tft_config, …); `byteswap` / `mip` / `viper_tools` / `keypins` / `wifi` / `frame_recorder` come from [micropython-hardware `utils/`](https://github.com/PyDevices/micropython-hardware/tree/main/utils)
+- `utils` — optional extensions (framebuf shim, console, displaybuf, tft_config, …); `byteswap` / `mip` / `viper_tools` / `keypins` / `wifi` / `frame_recorder` come from [pydevices `utils/`](https://github.com/PyDevices/pydevices/tree/main/utils)
 - `examples` — demo scripts
-- Bus/touch helpers — see [micropython-hardware packages](https://github.com/PyDevices/micropython-hardware/tree/main/packages)
+- Bus/touch helpers — see [pydevices packages](https://github.com/PyDevices/pydevices/tree/main/packages)
 
-**Board support** ([micropython-hardware](https://github.com/PyDevices/micropython-hardware)):
+**Board support** ([pydevices](https://github.com/PyDevices/pydevices)):
 
-- Optional prebuilt `board_config.py` packages per hardware — see [board configs](https://pydevices.github.io/micropython-hardware/board-configs.html) and [install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html)
+- Optional prebuilt `board_config.py` packages per hardware — see [board configs](https://pydevices.github.io/pydevices/board-configs.html) and [install workflows](https://pydevices.github.io/pydevices/install-workflows.html)
 - Display and touch drivers under that repo’s `drivers/`
-- Desktop SDL (`usdl2`) via the MIP desktop board package or [`pydevices-desktop`](https://pydevices.github.io/micropython-hardware/pydevices-desktop.html) on TestPyPI
+- Desktop SDL (`usdl2`) via the MIP desktop board package or [`pydevices-desktop`](https://pydevices.github.io/pydevices/pydevices-desktop.html) on TestPyPI
 
 ## PyPI / pip (TestPyPI)
 
@@ -60,7 +60,7 @@ For day-to-day desktop work without pip, use a [full clone](full-clone.md) or [d
 
 ## After installing
 
-1. Provide your own `board_config.py` for your hardware, or optionally install a prebuilt board package from micropython-hardware.
+1. Provide your own `board_config.py` for your hardware, or optionally install a prebuilt board package from pydevices.
 2. Follow the quick start for your platform:
    - [ESP32 / MCU](../guides/esp32-board.md)
    - [Desktop CPython](../guides/desktop-cpython.md)

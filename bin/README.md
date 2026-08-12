@@ -6,14 +6,14 @@
 |--------|------|
 | [`pyscript.sh`](pyscript.sh) | Local PyScript gallery / demo server (`./bin/pyscript.sh …`) |
 | [`jupyter.sh`](jupyter.sh) | JupyterLab / Cursor notebooks (`./bin/jupyter.sh …`) |
-| [`android.sh`](android.sh) | Thin shim → [`pydisplay_android/scripts/android.sh`](../../pydisplay_android/scripts/android.sh) (prefer `~/bin/android.sh` on PATH) |
+| [`android.sh`](android.sh) | Thin shim → [`pydevices-android-template/scripts/android.sh`](../../pydevices-android-template/scripts/android.sh) (prefer `~/bin/android.sh` on PATH) |
 
 Supporting Python still lives under `tools/` (e.g. `tools/serve.py`, `tools/pyscript_autotest.py`).
 
 ## Prebuilt runtime binaries
 
 Committed copies of the desktop MicroPython/CircuitPython (and Windows
-MicroPython, for completeness) unix executables built with pydisplay's
+MicroPython, for completeness) unix executables built with pydevices-examples's
 required native modules (notably [pygraphics](https://github.com/PyDevices/pygraphics)).
 They exist so that environments without a local firmware build — most
 importantly **Cursor Cloud agents** — can run the example test matrix without

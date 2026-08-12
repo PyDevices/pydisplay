@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run pydisplay examples in Jupyter (desktop / ipywidgets).
+# Run pydevices-examples applications in Jupyter (desktop / ipywidgets).
 #
 # Mirrors the primary CLI shapes of unix/micropython.exe:
 #
@@ -7,11 +7,11 @@
 #   micropython -i …    # REPL after running command/module/file
 #
 # Usage (from repo root):
-#   ./bin/jupyter.sh examples/pydisplay_demo.py
+#   ./bin/jupyter.sh examples/pydevices_demo.py
 #   ./bin/jupyter.sh -m examples.chango
 #   ./bin/jupyter.sh                          # open src/jupyter_notebook.ipynb (hub)
-#   ./bin/jupyter.sh examples/pydisplay_demo.py --cursor  # open generated notebook in Cursor
-#   ./bin/jupyter.sh examples/pydisplay_demo.py --no-open # generate notebook / start server only
+#   ./bin/jupyter.sh examples/pydevices_demo.py --cursor  # open generated notebook in Cursor
+#   ./bin/jupyter.sh examples/pydevices_demo.py --no-open # generate notebook / start server only
 #
 # Browser mode starts JupyterLab with notebook-dir=src/ (see docs/platforms/jupyter-run.md).
 # Cursor mode skips the server and opens the notebook in the editor.
@@ -23,13 +23,13 @@
 
 set -euo pipefail
 
-# Resolve symlinks so ~/bin/jupyter.sh → …/pydisplay/bin/jupyter.sh finds the repo.
+# Resolve symlinks so ~/bin/jupyter.sh → …/pydevices-examples/bin/jupyter.sh finds the repo.
 _SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
-PYDISPLAY_ROOT="${PYDISPLAY_ROOT:-$(cd "$_SCRIPT_DIR/.." && pwd)}"
-SRC="$PYDISPLAY_ROOT/src"
+PYDEVICES_EXAMPLES_ROOT="${PYDEVICES_EXAMPLES_ROOT:-$(cd "$_SCRIPT_DIR/.." && pwd)}"
+SRC="$PYDEVICES_EXAMPLES_ROOT/src"
 HUB_NOTEBOOK="$SRC/jupyter_notebook.ipynb"
-VENV="${JUPYTER_VENV:-$PYDISPLAY_ROOT/.venv}"
-DESKTOP_BOARD_CONFIG_MIP="github:PyDevices/micropython-hardware/board_configs/desktop/package.json"
+VENV="${JUPYTER_VENV:-$PYDEVICES_EXAMPLES_ROOT/.venv}"
+DESKTOP_BOARD_CONFIG_MIP="github:PyDevices/pydevices/board_configs/desktop/package.json"
 PYDEVICES_MIP_INDEX="https://PyDevices.github.io/micropython-lib/mip/PyDevices"
 TESTPYPI_INDEX="https://test.pypi.org/simple/"
 PORT=8888
@@ -69,7 +69,7 @@ Mirrors micropython/micropython.exe's primary CLI shapes.
 Generated notebooks import via \`from examples import <name>\` (or
 \`import examples.<a>.<b>\` for nested files) — never a bare \`import <name>\`
 and never a path-bootstrap cell. If PYTHONPATH is unset, jupyter.sh exports
-PYTHONPATH=".:lib:utils" plus sibling micropython-hardware ``lib`` / ``utils`` /
+PYTHONPATH=".:lib:utils" plus sibling pydevices ``lib`` / ``utils`` /
 ``drivers/display`` for the JupyterLab/kernel process (cwd=src) so
 \`import displaydev\`, \`import mip\`, etc. resolve without a bootstrap cell.
 Run notebooks also ensure a Jupyter board config is available by calling
@@ -80,13 +80,13 @@ The Jupyter environment itself must already have any example dependencies
 installed before `jupyter.sh` is launched.
 
 Environment:
-  PYDISPLAY_ROOT    pydisplay clone (default: parent of bin/)
+  PYDEVICES_EXAMPLES_ROOT    pydevices-examples clone (default: parent of bin/)
   JUPYTER_VENV      Python venv with jupyter deps (default: .venv)
 
 Examples:
-  ./bin/jupyter.sh examples/pydisplay_demo.py
+  ./bin/jupyter.sh examples/pydevices_demo.py
   ./bin/jupyter.sh -m examples.chango
-  ./bin/jupyter.sh examples/pydisplay_demo.py --cursor
+  ./bin/jupyter.sh examples/pydevices_demo.py --cursor
   ./bin/jupyter.sh -c "from examples import chango"
 
 Requires (in JUPYTER_VENV):
@@ -154,12 +154,12 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ ! -d "$SRC/lib" ]]; then
-  echo "jupyter.sh: pydisplay src/ not found under $PYDISPLAY_ROOT" >&2
+  echo "jupyter.sh: pydevices-examples src/ not found under $PYDEVICES_EXAMPLES_ROOT" >&2
   exit 1
 fi
 
 if [[ -z "${PYTHONPATH:-}" ]]; then
-  HW="$(cd "$PYDISPLAY_ROOT/../micropython-hardware" 2>/dev/null && pwd || true)"
+  HW="$(cd "$PYDEVICES_EXAMPLES_ROOT/../pydevices" 2>/dev/null && pwd || true)"
   HW_PATH=""
   if [[ -n "$HW" && -d "$HW/utils" ]]; then
     HW_PATH=":$HW/lib:$HW/utils:$HW/drivers/display"
@@ -187,9 +187,9 @@ ensure_jupyter_deps() {
   cat >&2 <<EOF
 jupyter.sh: Jupyter venv not found: $VENV
 
-Create it from the pydisplay repo root:
+Create it from the pydevices-examples repo root:
 
-  cd $PYDISPLAY_ROOT
+  cd $PYDEVICES_EXAMPLES_ROOT
   python3 -m venv .venv
   .venv/bin/pip install pillow ipywidgets ipyevents jupyterlab
 
@@ -242,12 +242,12 @@ map_wheel_deps() {
     printf '\n'
     return 0
   fi
-  PYDISPLAY_ROOT="$PYDISPLAY_ROOT" DEPS_CSV="$deps_csv" "$VENV/bin/python" <<'PY'
+  PYDEVICES_EXAMPLES_ROOT="$PYDEVICES_EXAMPLES_ROOT" DEPS_CSV="$deps_csv" "$VENV/bin/python" <<'PY'
 import os
 import sys
 from urllib.parse import parse_qs
 
-root = os.environ["PYDISPLAY_ROOT"]
+root = os.environ["PYDEVICES_EXAMPLES_ROOT"]
 deps_csv = os.environ.get("DEPS_CSV", "")
 deps = tuple(d.strip() for d in deps_csv.split(",") if d.strip())
 sys.path.insert(0, os.path.join(root, "scripts"))
@@ -325,7 +325,7 @@ resolve_file_target() {
   case "$resolved" in
     "$SRC"/*) rel="${resolved#"$SRC"/}" ;;
     *)
-      echo "jupyter.sh: '$file' is outside pydisplay src/ — jupyter.sh can only launch example modules (examples/<name>.py)" >&2
+      echo "jupyter.sh: '$file' is outside pydevices-examples src/ — jupyter.sh can only launch example modules (examples/<name>.py)" >&2
       return 1
       ;;
   esac
@@ -370,7 +370,7 @@ bootstrap = [
     "from pathlib import Path",
     "",
     "# Ensure desktop board_config is present for notebook runs.",
-  "scratch = Path(os.environ.get('PYDISPLAY_JUPYTER_SCRATCH', Path.home() / '.cache' / 'pydisplay' / 'jupyter'))",
+  "scratch = Path(os.environ.get('PYDEVICES_JUPYTER_SCRATCH', Path.home() / '.cache' / 'pydevices-examples' / 'jupyter'))",
     "scratch.mkdir(parents=True, exist_ok=True)",
     "sys.path.insert(0, str(scratch))",
     "try:",
@@ -405,7 +405,7 @@ cells = [
         "id": "intro",
         "metadata": {},
         "source": [
-            f"# pydisplay — {title}\n",
+            f"# pydevices-examples — {title}\n",
             "\n",
             "Generated by `./bin/jupyter.sh`. Click the **ipywidgets Image** for touch input.\n",
             "\n",

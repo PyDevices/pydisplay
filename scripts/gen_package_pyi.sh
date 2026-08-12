@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Regenerate IDE type stubs for the three core pydisplay packages into tools/typings/.
+# Regenerate IDE type stubs for three core PyDevices packages into tools/typings/.
 #
 # Usage:
 #   ./scripts/gen_package_pyi.sh
@@ -57,7 +57,7 @@ for mod in "${MODULES[@]}"; do
     rm -f "${OUT}/${mod}.pyi"
 done
 
-HW="$(cd "${ROOT}/../micropython-hardware" 2>/dev/null && pwd || true)"
+HW="$(cd "${ROOT}/../pydevices" 2>/dev/null && pwd || true)"
 export PYTHONPATH="${ROOT}/src/lib:${ROOT}/src/utils${PYTHONPATH:+:$PYTHONPATH}"
 if [[ -n "$HW" ]]; then
     export PYTHONPATH="${HW}/lib:${HW}/utils:${HW}/drivers/display:${PYTHONPATH}"

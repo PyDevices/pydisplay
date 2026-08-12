@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a pydisplay example immediately and record its desktop window.
+"""Run a pydevices-examples example immediately and record its desktop window.
 
 Examples:
     python tools/record.py bouncing_balls

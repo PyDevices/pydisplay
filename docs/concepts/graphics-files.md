@@ -1,6 +1,6 @@
 # Graphics files
 
-Two layers: **pygraphics package loaders** (eager, full image in RAM) and **pydisplay add-ons** (streaming and TFT-specific helpers).
+Two layers: **pygraphics package loaders** (eager, full image in RAM) and **pydevices-examples add-ons** (streaming and TFT-specific helpers).
 
 ## pygraphics package loaders
 
@@ -59,4 +59,4 @@ From @russhughes st7789py_mpy:
 
 ## PNG
 
-Experimental support in utils — probe with [`tools/png_test.py`](https://github.com/PyDevices/pdwidgets/blob/main/tools/png_test.py) in the pdwidgets repo (CPython only; requires sibling pydisplay, `pypng`, and a local checkout of [material-design-icons](https://github.com/google/material-design-icons) with its `png/` tree, or `PDWIDGETS_PNG_DIR`).
+Experimental support in utils — probe with [`tools/png_test.py`](https://github.com/PyDevices/pdwidgets/blob/main/tools/png_test.py) in the pdwidgets repo (CPython only; requires sibling pydevices-examples, `pypng`, and a local checkout of [material-design-icons](https://github.com/google/material-design-icons) with its `png/` tree, or `PDWIDGETS_PNG_DIR`).

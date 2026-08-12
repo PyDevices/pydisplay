@@ -24,11 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Checkout micropython-hardware (product sources for PyScript mounts)
+      - name: Checkout pydevices (product sources for PyScript mounts)
         uses: actions/checkout@v4
         with:
-          repository: PyDevices/micropython-hardware
-          path: micropython-hardware
+          repository: PyDevices/pydevices
+          path: pydevices
           sparse-checkout: |
             utils
             lib/eventsys
@@ -53,16 +53,16 @@ jobs:
           mkdir -p _site/pyscript/src _site/pyscript/packages
           cp -r src/utils _site/pyscript/src/
           mkdir -p _site/pyscript/src/lib
-          cp -r micropython-hardware/lib/eventsys _site/pyscript/src/lib/
+          cp -r pydevices/lib/eventsys _site/pyscript/src/lib/
           # Hardware-owned helpers (mip.py, byteswap, …) — PyScript [files] still
           # fetch them at src/utils/<name>.py.
-          cp micropython-hardware/utils/byteswap.py \
-             micropython-hardware/utils/frame_recorder.py \
-             micropython-hardware/utils/keypins.py \
-             micropython-hardware/utils/micropython.py \
-             micropython-hardware/utils/mip.py \
-             micropython-hardware/utils/viper_tools.py \
-             micropython-hardware/utils/wifi.py \
+          cp pydevices/utils/byteswap.py \
+             pydevices/utils/frame_recorder.py \
+             pydevices/utils/keypins.py \
+             pydevices/utils/micropython.py \
+             pydevices/utils/mip.py \
+             pydevices/utils/viper_tools.py \
+             pydevices/utils/wifi.py \
              _site/pyscript/src/utils/
           cp src/jupyter_notebook.ipynb _site/pyscript/src/
           python scripts/gallery_generator.py --copy-examples _site/pyscript/src/examples

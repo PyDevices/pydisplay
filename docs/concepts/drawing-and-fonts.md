@@ -2,7 +2,7 @@
 
 **Start here for the `pygraphics` library:** [graphics](graphics.md) — quick start, FrameBuffer vs Draw, Area bounds, fonts, and loaders.
 
-This page covers how `pygraphics` fits into the wider pydisplay stack.
+This page covers how `pygraphics` fits into the wider pydevices-examples stack.
 
 ## Which API?
 

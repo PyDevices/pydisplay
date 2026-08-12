@@ -1,8 +1,8 @@
 # Progressive Web Apps (PWA)
 
-Installable, offline-capable PyScript apps are a **major pydisplay feature** — the same `PSDisplay` demos you open in a browser tab can be installed like a native app on phones, tablets, and desktops.
+Installable, offline-capable PyScript apps are a **major pydevices-examples feature** — the same `PSDisplay` demos you open in a browser tab can be installed like a native app on phones, tablets, and desktops.
 
-**Live gallery (already a PWA):** [pydevices.github.io/pydisplay/pyscript/](https://pydevices.github.io/pydisplay/pyscript/)
+**Live gallery (already a PWA):** [pydevices.github.io/pydevices-examples/pyscript/](https://pydevices.github.io/pydevices-examples/pyscript/)
 
 **How to build one:** [Make your PyScript app a PWA](../guides/pyscript-pwa.md) — this page is about **where** those apps run and how install UX differs by host.
 
@@ -34,7 +34,7 @@ A PWA is still a website on HTTPS. Python runs inside the page; the browser owns
 | **LG webOS / Samsung Tizen (TV browsers)** | Host web app / browser only | In-browser or platform web-app packaging | **Web path only** — no native `SDLDisplay` on TV OS shells |
 
 !!! tip "Try the live gallery"
-    Open the [PyScript gallery](https://pydevices.github.io/pydisplay/pyscript/) on the device you care about, then use that host’s install path from the table.
+    Open the [PyScript gallery](https://pydevices.github.io/pydevices-examples/pyscript/) on the device you care about, then use that host’s install path from the table.
 
 ---
 
@@ -75,7 +75,7 @@ Deploy-time `CACHE_NAME` hashing and the July 2026 legacy-cache migration are do
 
 | | **PWA (this page)** | **Android APK** |
 |--|---------------------|-----------------|
-| Runtime | PyScript in the browser / WebView | CPython in [pydisplay_android](https://github.com/PyDevices/pydisplay_android) |
+| Runtime | PyScript in the browser / WebView | CPython in [pydevices-android-template](https://github.com/PyDevices/pydevices-android-template) |
 | Display | `PSDisplay` | `SDLDisplay` + `usdl2` |
 | Distribution | HTTPS URL + install/home screen | Play / sideload APK |
 | Best for | Zero-install demos, cross-OS shareable links, offline gallery | Store packaging, deeper device integration |
@@ -86,9 +86,9 @@ Phone Android APK notes: [Android platform guide](android.md). Android TV / Fire
 
 ## Apple mobile (iOS / iPadOS)
 
-There is **no** native iOS pydisplay app on the foreseeable roadmap. Apple phones and tablets use:
+There is **no** native iOS pydevices-examples app on the foreseeable roadmap. Apple phones and tablets use:
 
-- **Mobile Safari** (or another WebKit browser) → [PyScript gallery](https://pydevices.github.io/pydisplay/pyscript/) in a tab, and/or
+- **Mobile Safari** (or another WebKit browser) → [PyScript gallery](https://pydevices.github.io/pydevices-examples/pyscript/) in a tab, and/or
 - **Add to Home Screen** → installed PWA-style icon launching the same `PSDisplay` site.
 
 That is the supported Apple mobile path: browser + optional home-screen install, not App Store packaging.
@@ -97,9 +97,9 @@ That is the supported Apple mobile path: browser + optional home-screen install,
 
 ## Smart TVs (webOS / Tizen)
 
-LG webOS and Samsung Tizen ship Chromium-based browsers and encourage **web apps**. pydisplay’s TV story is the same PyScript/`PSDisplay` stack (large UI, remote keys) — **not** a native SDL build on those OS shells. A hosted gallery or TV web-app package can reuse the PWA assets; treat installability as host-specific.
+LG webOS and Samsung Tizen ship Chromium-based browsers and encourage **web apps**. pydevices-examples’s TV story is the same PyScript/`PSDisplay` stack (large UI, remote keys) — **not** a native SDL build on those OS shells. A hosted gallery or TV web-app package can reuse the PWA assets; treat installability as host-specific.
 
-**Example:** [`tv_remote_menu`](https://pydevices.github.io/pydisplay/pyscript/micropython.html?modules=tv_remote_menu) — large-row D-pad menu. Remote key notes: [`web/pyscript/tv/README.md`](https://github.com/PyDevices/pydisplay/blob/main/web/pyscript/tv/README.md).
+**Example:** [`tv_remote_menu`](https://pydevices.github.io/pydevices-examples/pyscript/micropython.html?modules=tv_remote_menu) — large-row D-pad menu. Remote key notes: [`web/pyscript/tv/README.md`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/tv/README.md).
 
 TV Back (`BrowserBack` / `GoBack` / `Back`) maps to `keys.K_AC_BACK` so `PSDisplay.quit_chord` matches Android remotes.
 
@@ -115,4 +115,4 @@ Native Android TV / Fire OS APKs are separate — see [Android TV / Fire OS](and
 | [Make your PyScript app a PWA](../guides/pyscript-pwa.md) | Manifest, service worker, COI, deploy, troubleshooting |
 | [Portability & platforms](index.md) | Full runtime × target matrix |
 | [Android](android.md) | Native APK path (contrast with PWA) |
-| [Try pydisplay](../try/index.md) | Live demo links |
+| [Try pydevices-examples](../try/index.md) | Live demo links |

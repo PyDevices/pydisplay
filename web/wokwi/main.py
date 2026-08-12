@@ -11,18 +11,19 @@ if WOKWI:
 import mip
 
 MICROPYTHON_LIB = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
-HARDWARE = "github:PyDevices/micropython-hardware"
-PYDISPLAY = "github:PyDevices/pydisplay"
+PYDEVICES = "github:PyDevices/pydevices"
+PYDEVICES_EXAMPLES = "github:PyDevices/pydevices-examples"
 
 # index= is required so bare deps like "displaydev" resolve from PyDevices MIP
-# (not micropython.org). displaydev → eventsys → multimer via package deps.
+# (not micropython.org). The application installs optional eventsys explicitly
+# when it needs the non-LVGL event traffic controller.
 mip.install(
-    HARDWARE + "/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/",
+    PYDEVICES + "/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/",
     index=MICROPYTHON_LIB,
     target=TARGET,
 )
 # mip.install("pygraphics", index=MICROPYTHON_LIB, target=TARGET)
-mip.install(PYDISPLAY + "/src/examples/testris.py", target=TARGET)
+mip.install(PYDEVICES_EXAMPLES + "/src/examples/testris.py", target=TARGET)
 
 # isort: off
 if WOKWI:

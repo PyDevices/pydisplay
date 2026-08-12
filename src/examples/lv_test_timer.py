@@ -16,8 +16,8 @@ injection because LVGL owns the host queue.
 
 Parent may set before launch:
 
-* ``PYDISPLAY_TIMER_ASYNC`` — desktop sync/async timers (``board_config``)
-* ``PYDISPLAY_LV_ROTATION`` — ``0``/``90``/``180``/``270`` applied to
+* ``PYDEVICES_TIMER_ASYNC`` — desktop sync/async timers (``board_config``)
+* ``PYDEVICES_LV_ROTATION`` — ``0``/``90``/``180``/``270`` applied to
   ``display_drv.rotation`` before ``display_driver`` import
 """
 
@@ -42,7 +42,7 @@ from board_config import display_drv
 from displaydev import env_get
 
 # Optional logical orientation for LVGL (hw MADCTL/SDL/PG or software rotate).
-_lv_rot = env_get("PYDISPLAY_LV_ROTATION")
+_lv_rot = env_get("PYDEVICES_LV_ROTATION")
 if _lv_rot is not None and str(_lv_rot).strip() != "":
     try:
         display_drv.rotation = int(str(_lv_rot).strip())

@@ -1,13 +1,13 @@
-# 🚀 Try pydisplay
+# 🚀 Try pydevices-examples
 
-Evaluate pydisplay without installing anything on your machine.
+Evaluate pydevices-examples without installing anything on your machine.
 
 ## Choose a demo
 
 | Path | Best for | Start here |
 |------|----------|------------|
-| **Browser (PyScript)** | Quick look, touch UI in the tab | [Live demo hub](https://PyDevices.github.io/pydisplay/pyscript/) |
-| **Installable PWA** | Home-screen / standalone app on phone or desktop | [Where PWAs run](../platforms/pwa.md) · [Install the gallery](https://PyDevices.github.io/pydisplay/pyscript/) |
+| **Browser (PyScript)** | Quick look, touch UI in the tab | [Live demo hub](https://PyDevices.github.io/pydevices-examples/pyscript/) |
+| **Installable PWA** | Home-screen / standalone app on phone or desktop | [Where PWAs run](../platforms/pwa.md) · [Install the gallery](https://PyDevices.github.io/pydevices-examples/pyscript/) |
 | **Wokwi simulator** | ESP32 + ILI9341 without hardware | [Wokwi guide](../guides/wokwi.md) · [`wokwi/`](../../web/wokwi/) |
 | **Screenshot gallery** | See what examples look like | [Gallery below](#screenshot-gallery) |
 
@@ -15,16 +15,16 @@ Evaluate pydisplay without installing anything on your machine.
 
 ### Live demo (online)
 
-**Hub:** [PyDevices.github.io/pydisplay/pyscript/](https://PyDevices.github.io/pydisplay/pyscript/) — also an installable [PWA](../platforms/pwa.md) (**Install app** in the header on Chromium; on iOS use Share → Add to Home Screen).
+**Hub:** [PyDevices.github.io/pydevices-examples/pyscript/](https://PyDevices.github.io/pydevices-examples/pyscript/) — also an installable [PWA](../platforms/pwa.md) (**Install app** in the header on Chromium; on iOS use Share → Add to Home Screen).
 
 | Link | Description |
 |------|-------------|
-| [Calculator](https://PyDevices.github.io/pydisplay/pyscript/micropython.html?modules=calc_graphics,calc_engine) | Pocket calculator (graphics) |
-| [REPL](https://PyDevices.github.io/pydisplay/pyscript/repl.html) | Interactive REPL + canvas |
-| [Editor](https://PyDevices.github.io/pydisplay/pyscript/editor.html) | `mpy-editor` with hidden `setup` + editable lesson |
-| [Async](https://PyDevices.github.io/pydisplay/pyscript/async.html) | Non-blocking animation with `await` |
-| [DOM](https://PyDevices.github.io/pydisplay/pyscript/dom.html) | HTML button → Python via `create_proxy` |
-| [Pyodide](https://PyDevices.github.io/pydisplay/pyscript/pyodide.html?manifests=chango) | Modules / MIP manifests under Pyodide (dev tool) |
+| [Calculator](https://PyDevices.github.io/pydevices-examples/pyscript/micropython.html?modules=calc_graphics,calc_engine) | Pocket calculator (graphics) |
+| [REPL](https://PyDevices.github.io/pydevices-examples/pyscript/repl.html) | Interactive REPL + canvas |
+| [Editor](https://PyDevices.github.io/pydevices-examples/pyscript/editor.html) | `mpy-editor` with hidden `setup` + editable lesson |
+| [Async](https://PyDevices.github.io/pydevices-examples/pyscript/async.html) | Non-blocking animation with `await` |
+| [DOM](https://PyDevices.github.io/pydevices-examples/pyscript/dom.html) | HTML button → Python via `create_proxy` |
+| [Pyodide](https://PyDevices.github.io/pydevices-examples/pyscript/pyodide.html?manifests=chango) | Modules / MIP manifests under Pyodide (dev tool) |
 
 ### Run locally
 
@@ -33,7 +33,7 @@ Evaluate pydisplay without installing anything on your machine.
 Full guide (asyncio porting, compatible examples, board config): [PyScript local development](../guides/pyscript.md).
 
 !!! note "Browser gallery"
-    The [live demo hub](https://PyDevices.github.io/pydisplay/pyscript/) lists every example entry by default (opt out with `# gallery: skip`). Click **Run** on each page. Prefer `runtime.run_forever()` with callbacks so demos stay responsive. See [PyScript asyncio guide](../guides/pyscript-asyncio.md).
+    The [live demo hub](https://PyDevices.github.io/pydevices-examples/pyscript/) lists every example entry by default (opt out with `# gallery: skip`). Click **Run** on each page. Prefer `runtime.run_forever()` with callbacks so demos stay responsive. See [PyScript asyncio guide](../guides/pyscript-asyncio.md).
 
 ## Wokwi (simulator)
 
@@ -45,7 +45,7 @@ Full example catalog: uncomment the two `utils` / `examples` lines in `main.py` 
 
 | | |
 |--|--|
-| ![tiny_toasters](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/tiny_toasters.gif) | ![paint](https://raw.githubusercontent.com/PyDevices/pydisplay/main/docs/screenshots/paint.png) |
+| ![tiny_toasters](https://raw.githubusercontent.com/PyDevices/pydevices-examples/main/docs/screenshots/tiny_toasters.gif) | ![paint](https://raw.githubusercontent.com/PyDevices/pydevices-examples/main/docs/screenshots/paint.png) |
 
 Full gallery (all screenshots): [docs/screenshots/README.md](../screenshots/README.md).
 

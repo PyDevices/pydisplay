@@ -27,14 +27,14 @@ import time
 
 
 def _bootstrap_src_path():
-    """Allow the timer probe to use a sibling micropython-hardware checkout."""
+    """Allow the timer probe to use a sibling pydevices checkout."""
     f = __file__.replace("\\", "/")
     if f.endswith(".py"):
         f = f[:-3]
     if f.endswith("/tools/test_timers"):
-        lib = f[: -len("/pydisplay/tools/test_timers")] + "/micropython-hardware/lib"
+        lib = f[: -len("/pydevices-examples/tools/test_timers")] + "/pydevices/lib"
     else:
-        lib = "../micropython-hardware/lib"
+        lib = "../pydevices/lib"
     try:
         os.stat(lib)
     except Exception:

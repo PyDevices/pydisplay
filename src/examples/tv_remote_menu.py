@@ -36,7 +36,7 @@ SURFACE = color565(0x2A, 0x29, 0x26)
 ITEMS = (
     "Watch demos",
     "Settings",
-    "About pydisplay",
+    "About pydevices-examples",
     "Quit",
 )
 

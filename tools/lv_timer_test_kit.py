@@ -7,7 +7,7 @@ checks, then an injected ``events.Quit``). Each child prints ``KIT_RESULT=`` on
 stdout; exit code 0 is expected on success.
 
 The example follows ``runtime.timer_async`` (it does not set env vars). This kit
-sets ``PYDISPLAY_TIMER_ASYNC`` in the child environment so ``board_config``
+sets ``PYDEVICES_TIMER_ASYNC`` in the child environment so ``board_config``
 constructs sync or async timers; modes are ``sync`` and ``async``.
 
 From repo root:
@@ -176,13 +176,13 @@ def run_case(
     preload = os.path.relpath(TOOLS / "multimer_backend_preload.py", SRC)
     cmd = [*cmd_base, preload]
     if timer_async is not None:
-        cmd += ["--env", f"PYDISPLAY_TIMER_ASYNC={timer_async}"]
+        cmd += ["--env", f"PYDEVICES_TIMER_ASYNC={timer_async}"]
     cmd += [backend or "-", HARNESS_ARG, "kit"]
     env = os.environ.copy()
     if backend:
         env["MULTIMER_BACKEND"] = backend
     if timer_async is not None:
-        env["PYDISPLAY_TIMER_ASYNC"] = timer_async
+        env["PYDEVICES_TIMER_ASYNC"] = timer_async
     run_cwd = str(cwd or SRC)
     try:
         proc = subprocess.run(

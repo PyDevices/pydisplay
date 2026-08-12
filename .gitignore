@@ -45,11 +45,11 @@ src/examples/spotify_client
 
 src/run-*.ipynb
 src/run-*.nbconvert.ipynb
-pydisplay/src/.ipynb_checkpoints
+pydevices-examples/src/.ipynb_checkpoints
 
 # CI / local sibling checkouts inside this workspace
 graphics/
-micropython-hardware/
+pydevices/
 
 # Extra Python / docs tooling
 *$py.class

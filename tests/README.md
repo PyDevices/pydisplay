@@ -1,10 +1,10 @@
 # Tests
 
-This suite covers the pydisplay-owned examples, utilities, PyScript gallery,
+This suite covers the pydevices-examples-owned examples, utilities, PyScript gallery,
 and developer tooling.
 
 Product-library tests moved with their sources to
-[`micropython-hardware/tests`](https://github.com/PyDevices/micropython-hardware/tree/main/tests),
+[`pydevices/tests`](https://github.com/PyDevices/pydevices/tree/main/tests),
 including `eventsys`, `displaydev`, `audiodev`, `multimer`, `events`, `keys`,
 and `boarddev`.
 
@@ -16,7 +16,7 @@ From the repository root:
 python -m unittest discover -s tests -v
 ```
 
-The test environment adds the sibling `micropython-hardware` product paths so
+The test environment adds the sibling `pydevices` product paths so
 the example and tooling tests exercise canonical sources rather than copied
 libraries.
 

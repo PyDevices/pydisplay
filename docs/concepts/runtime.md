@@ -21,7 +21,7 @@ Board configs do not import `eventsys` and do not export `runtime`.
 
 ## Non-LVGL examples
 
-pydisplay's examples opt into the optional event traffic controller through the
+pydevices-examples's examples opt into the optional event traffic controller through the
 application helper:
 
 ```python
@@ -33,7 +33,7 @@ runtime.run_forever()
 
 `app_runtime` calls `eventsys.Runtime.from_board_config(board_config)` and adds
 only gallery/example test behavior. Reusable `eventsys` remains independent of
-pydisplay.
+pydevices-examples.
 
 For your own app, instantiate the coordinator directly:
 
@@ -120,7 +120,7 @@ Board configs publish a neutral `timer_async` preference. Current defaults are:
 | Host | Value |
 |---|---|
 | PyScript / Jupyter | `True` |
-| PG/SDL desktop | `False`, optionally overridden by `PYDISPLAY_TIMER_ASYNC` |
+| PG/SDL desktop | `False`, optionally overridden by `PYDEVICES_TIMER_ASYNC` |
 | MCU board config | selected by that config |
 
 Examples do not read the environment variable directly. The selected
@@ -162,4 +162,4 @@ On `QUIT`, eventsys runs its optional `before_quit` hook, releases the display,
 and stops its timer. `runtime.quit_requested` remains true after the first quit.
 
 See [Events](events.md), [Architecture](architecture.md), and
-[Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html).
+[Board configs](https://pydevices.github.io/pydevices/board-configs.html).

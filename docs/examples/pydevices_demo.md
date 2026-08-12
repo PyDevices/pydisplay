@@ -1,9 +1,9 @@
-# 🎨 pydisplay_demo
+# 🎨 pydevices_demo
 
 !!! tip "Need a minimal template?"
     Copy the [**App starter**](app-starter.md) boilerplate to begin your first app without rotation or scrolling.
 
-[`pydisplay_demo.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/pydisplay_demo.py) is the recommended feature demo. It uses published product packages plus pydisplay's explicit `app_runtime` helper.
+[`pydevices_demo.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/pydevices_demo.py) is the recommended feature demo. It uses published product packages plus pydevices-examples's explicit `app_runtime` helper.
 
 It demonstrates:
 
@@ -20,25 +20,25 @@ Desktop-oriented sync demo (not in the PyScript gallery; see the async variant b
 From a [full clone](../installation/full-clone.md), set `PYTHONPATH`/`MICROPYPATH`, `cd src`, then run the example directly:
 
 ```bash
-cd pydisplay/src
-../.venv/bin/python examples/pydisplay_demo.py
+cd pydevices-examples/src
+../.venv/bin/python examples/pydevices_demo.py
 ```
 
 With sibling source checkouts instead of installed packages:
 
 ```bash
-cd pydisplay/src
-export PYTHONPATH=.:utils:../../micropython-hardware/lib:../../micropython-hardware/drivers/display
-python3 examples/pydisplay_demo.py
+cd pydevices-examples/src
+export PYTHONPATH=.:utils:../../pydevices/lib:../../pydevices/drivers/display
+python3 examples/pydevices_demo.py
 ```
 
-Prefer the REPL? Run `python3 -i` and import from the `examples` package (never a bare `import pydisplay_demo` from `src/`):
+Prefer the REPL? Run `python3 -i` and import from the `examples` package (never a bare `import pydevices_demo` from `src/`):
 
 ```python
->>> from examples import pydisplay_demo
+>>> from examples import pydevices_demo
 ```
 
-On MCU, install the matching [board config](https://pydevices.github.io/micropython-hardware/board-configs.html), copy or symlink it as `board_config.py`, and run the script from `main.py` or the REPL the same way. If `examples.json` was installed with `target="."` (flat, no `examples/` subdirectory on the device), `import pydisplay_demo` is a bare import there.
+On MCU, install the matching [board config](https://pydevices.github.io/pydevices/board-configs.html), copy or symlink it as `board_config.py`, and run the script from `main.py` or the REPL the same way. If `examples.json` was installed with `target="."` (flat, no `examples/` subdirectory on the device), `import pydevices_demo` is a bare import there.
 
 **Interact:** tap or click **Rotate** and **Color** in the top bar. The tips list in the middle scrolls automatically.
 
@@ -91,7 +91,7 @@ Runtime state lives in a small `state` dict:
 
 Drawing text directly on `display_drv` with `text16()` issues one `fill_rect` per font pixel — fine for tiny labels, slow for a full list.
 
-The demo follows [`font_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/font_simpletest.py):
+The demo follows [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/font_simpletest.py):
 
 1. Allocate a reusable `_TEXT_BUF` sized for the longest tip line.
 2. Wrap a slice in `FrameBuffer`, fill the background, call `FONT.text()` into RAM.
@@ -143,13 +143,13 @@ main()
 
 **Color** pauses scroll, advances `color_i`, `redraw()`, resumes scroll.
 
-`periodic()` in [`multimer`](../concepts/multimer.md) hands out the next available timer id (`-1` on RP2). pydisplay drivers use it for `auto_refresh`, so app timers created afterward do not collide.
+`periodic()` in [`multimer`](../concepts/multimer.md) hands out the next available timer id (`-1` on RP2). pydevices-examples drivers use it for `auto_refresh`, so app timers created afterward do not collide.
 
 ---
 
 ## How scrolling works
 
-Many TFT controllers (and pydisplay’s SDL desktop driver) mimic the **ILI9341-style vertical scroll** model. The framebuffer is treated as a cylinder: you define which rows are “fixed” on screen and which rows form a **scroll window**, then you change **where that window starts** in GRAM without redrawing every pixel.
+Many TFT controllers (and pydevices-examples’s SDL desktop driver) mimic the **ILI9341-style vertical scroll** model. The framebuffer is treated as a cylinder: you define which rows are “fixed” on screen and which rows form a **scroll window**, then you change **where that window starts** in GRAM without redrawing every pixel.
 
 ### Three regions: TFA, VSA, BFA
 
@@ -227,10 +227,10 @@ Also **pause the scroll timer** during redraw. If `on_tick` runs in the middle o
 
 | Example | What it adds |
 |---------|----------------|
-| [`scroll_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll_touch_test.py) | Manual scroll with touch Up/Down in fixed bars |
-| [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_encoder_test.py) | `vscsad` driven by a rotary encoder |
-| [`scroll.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll.py) | Full-screen hardware scroll (`tft_config` stack) |
-| [`font_simpletest.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/font_simpletest.py) | Font + `FrameBuffer` + `blit_rect` pattern |
+| [`scroll_touch_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/scroll_touch_test.py) | Manual scroll with touch Up/Down in fixed bars |
+| [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/eventsys_encoder_test.py) | `vscsad` driven by a rotary encoder |
+| [`scroll.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/scroll.py) | Full-screen hardware scroll (`tft_config` stack) |
+| [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/font_simpletest.py) | Font + `FrameBuffer` + `blit_rect` pattern |
 
 ## multimer in this demo
 
@@ -245,12 +245,12 @@ See [multimer](../concepts/multimer.md) for timer backends and `timer_async`.
 
 ## Async / PyScript
 
-`pydisplay_demo.py` ends with `runtime.run_forever()` — the same entry on
+`pydevices_demo.py` ends with `runtime.run_forever()` — the same entry on
 desktop, PyScript, and Jupyter (`runtime.timer_async` is handled inside Runtime).
 
 ## Related docs
 
-- [Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html) — choose and customize `board_config.py`
+- [Board configs](https://pydevices.github.io/pydevices/board-configs.html) — choose and customize `board_config.py`
 - [Events](../concepts/events.md) — `runtime.poll()` and device types
 - [Displays](../concepts/displays.md) — driver overview and rotation notes
 - [Examples catalog](index.md) — full list of scripts

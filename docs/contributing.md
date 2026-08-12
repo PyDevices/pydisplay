@@ -1,9 +1,9 @@
 # 🤝 Contributing
 
-pydisplay is the examples, integration documentation, and PyScript gallery.
+pydevices-examples is the examples, integration documentation, and PyScript gallery.
 Examples, app helpers, gallery changes, and related docs are welcome here.
 Reusable drivers, board configs, and product libraries belong in
-[`micropython-hardware`](https://github.com/PyDevices/micropython-hardware).
+[`pydevices`](https://github.com/PyDevices/pydevices).
 
 ## Development setup
 
@@ -35,7 +35,7 @@ Hooks refresh install manifests when `src/` changes and the PyScript gallery whe
 
 ## Pull request workflow
 
-1. Fork [PyDevices/pydisplay](https://github.com/PyDevices/pydisplay)
+1. Fork [PyDevices/pydevices-examples](https://github.com/PyDevices/pydevices-examples)
 2. Create a feature branch
 3. Make changes; run `./scripts/install_refresh_manifests.sh --audit` if you touched `src/` (or use pre-commit)
 4. For docs: see [Building docs](building-docs.md) — `mkdocs serve` and verify pages build
@@ -62,9 +62,9 @@ Public API docstrings: [Docstring conventions](contributing/docstrings.md).
 ## Documentation
 
 **Maintainer releases:** reusable product publishing is owned by
-[`micropython-hardware`](https://github.com/PyDevices/micropython-hardware/blob/main/docs/publishing.md)
-and each companion package repo. pydisplay publishes documentation and the
-PyScript showcase; see [`scripts/README.md`](https://github.com/PyDevices/pydisplay/blob/main/scripts/README.md).
+[`pydevices`](https://github.com/PyDevices/pydevices/blob/main/docs/publishing.md)
+and each companion package repo. pydevices-examples publishes documentation and the
+PyScript showcase; see [`scripts/README.md`](https://github.com/PyDevices/pydevices-examples/blob/main/scripts/README.md).
 
 ## License
 

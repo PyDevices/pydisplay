@@ -2,7 +2,7 @@
 # deps: pygraphics
 # utils: touch_setup, gui
 """
-touch_gui_simpletest.py - Smoke test for micropython-touch on pydisplay.
+touch_gui_simpletest.py - Smoke test for micropython-touch on pydevices-examples.
 
 ``touch_setup`` fetches the GUI and creates ``Display`` with a mouse/touch Poller.
 This oneshot only verifies the framebuffer path (full widget demos use Screen.change).

@@ -119,12 +119,12 @@ class UrlMakerTests(unittest.TestCase):
     def test_github_passthrough_on_deps(self):
         q = url(
             modules=("x",),
-            deps=("github:PyDevices/pydisplay/packages/foo.json",),
+            deps=("github:PyDevices/pydevices-examples/packages/foo.json",),
             runtime="micropython",
         )
         self.assertEqual(
             q,
-            "?modules=x&deps=github:PyDevices/pydisplay/packages/foo.json",
+            "?modules=x&deps=github:PyDevices/pydevices-examples/packages/foo.json",
         )
 
     def test_rewrite_helpers(self):

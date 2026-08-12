@@ -1,6 +1,6 @@
 # palettes
 
-Color palette toolkit for pydisplay — now a separate package.
+Color palette toolkit for PyDevices — now a separate package.
 
 Install from [PyDevices/palettes](https://github.com/PyDevices/palettes):
 

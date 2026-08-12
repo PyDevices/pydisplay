@@ -43,10 +43,10 @@ input_map.capture_virtual_devices()
 
 from displaydev import env_bool, env_get, env_set
 
-env_set("PYDISPLAY_WIDTH", "1024")
-env_set("PYDISPLAY_HEIGHT", "512")
-if env_get("PYDISPLAY_SCALE") is None:
-    env_set("PYDISPLAY_SCALE", "1")
+env_set("PYDEVICES_WIDTH", "1024")
+env_set("PYDEVICES_HEIGHT", "512")
+if env_get("PYDEVICES_SCALE") is None:
+    env_set("PYDEVICES_SCALE", "1")
 
 import display_driver  # noqa: E402 — wires LVGL into the shared runtime
 import lvgl as lv  # noqa: E402

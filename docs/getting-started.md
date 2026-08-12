@@ -1,13 +1,13 @@
 # 🚀 Getting started
 
-This page is a **router** for the main pydisplay workflows. In every case, the underlying pattern is the same: connect to a display backend through ``board_config``, draw to the frame buffer, subscribe to input events, and keep the runtime alive.
+This page is a **router** for the main pydevices-examples workflows. In every case, the underlying pattern is the same: connect to a display backend through ``board_config``, draw to the frame buffer, subscribe to input events, and keep the runtime alive.
 
 ## Try without installing
 
 | Path | Guide |
 |------|-------|
-| Browser demo | [Try pydisplay → PyScript](try/index.md#pyscript-browser) |
-| Wokwi simulator | [Try pydisplay → Wokwi](try/index.md#wokwi-simulator) |
+| Browser demo | [Try pydevices-examples → PyScript](try/index.md#pyscript-browser) |
+| Wokwi simulator | [Try pydevices-examples → Wokwi](try/index.md#wokwi-simulator) |
 
 ## Quick start (install locally)
 
@@ -23,9 +23,9 @@ This page is a **router** for the main pydisplay workflows. In every case, the u
 ## Learn the model
 
 - [**App starter**](examples/app-starter.md) — copy-paste template for your first app (display, clicks, main loop)
-- [**pydisplay_demo**](examples/pydisplay_demo.md) — feature tour (rotation, scrolling, buffered text, multimer)
+- [**pydevices_demo**](examples/pydevices_demo.md) — feature tour (rotation, scrolling, buffered text, multimer)
 - [Architecture](concepts/architecture.md) — how ``board_config``, ``displaydev``, and ``eventsys`` fit together
-- [Portability & platforms](platforms/index.md) — where pydisplay runs and how the backend is chosen
+- [Portability & platforms](platforms/index.md) — where pydevices-examples runs and how the backend is chosen
 - [Ecosystem & sister projects](ecosystem.md) — LVGL in Python, GUIs, Jupyter
 - [Installation overview](installation/index.md) — MIP vs full clone vs TestPyPI / micropython-lib
 
@@ -43,5 +43,5 @@ runtime.run_forever()
 ## Reference
 
 - [Examples catalog](examples/index.md)
-- [Product API and board docs](https://pydevices.github.io/micropython-hardware/)
+- [Product API and board docs](https://pydevices.github.io/pydevices/)
 - [Troubleshooting](troubleshooting.md)

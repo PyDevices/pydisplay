@@ -9,8 +9,8 @@ nav = mkdocs_gen_files.Nav()
 
 root = Path(__file__).parent.parent
 
-# pydisplay documents its application helpers. Product API documentation belongs
-# to the canonical packages in sibling micropython-hardware.
+# pydevices-examples documents its application helpers. Product API documentation belongs
+# to the canonical packages in sibling pydevices.
 SOURCE_TREES = (
     (
         root / "src/utils",

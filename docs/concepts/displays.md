@@ -1,8 +1,8 @@
 # Displays
 
-The `displaydev` product package in micropython-hardware provides several
+The `displaydev` product package in pydevices provides several
 display driver classes. All expose a drawing surface compatible with
-MicroPython's `framebuf` API; pydisplay demonstrates them.
+MicroPython's `framebuf` API; pydevices-examples demonstrates them.
 
 See [Architecture](architecture.md) for how drivers connect to `board_config.py`.
 
@@ -18,7 +18,7 @@ See [Architecture](architecture.md) for how drivers connect to `board_config.py`
 | Jupyter notebook | `JNDisplay` | `board_configs/jndisplay/` |
 | PyScript browser | `PSDisplay` | `board_configs/psdisplay/` |
 
-Install the matching [board config](https://pydevices.github.io/micropython-hardware/board-configs.html) — it constructs the driver for you.
+Install the matching [board config](https://pydevices.github.io/pydevices/board-configs.html) — it constructs the driver for you.
 
 ## Display classes
 
@@ -33,7 +33,7 @@ For microcontrollers on **MicroPython and CircuitPython**.
 
 SDL2 desktop backend (CPython, MicroPython Unix, CircuitPython Unix). Uses an SDL texture as GRAM. It is the default on MicroPython Unix and available on CPython via `board_configs/sdldisplay/`.
 
-SDL2 bindings for **`SDLDisplay`**: `import usdl2` from [`pydevices-desktop`](https://pydevices.github.io/micropython-hardware/pydevices-desktop.html) (TestPyPI) or the MIP desktop board package in [micropython-hardware](https://github.com/PyDevices/micropython-hardware) (`drivers/usdl2.py`). A native `usdl2` module is used when already present in the firmware or environment. See [MicroPython — Desktop SDL](../platforms/micropython.md#desktop-sdl-usdl2).
+SDL2 bindings for **`SDLDisplay`**: `import usdl2` from [`pydevices-desktop`](https://pydevices.github.io/pydevices/pydevices-desktop.html) (TestPyPI) or the MIP desktop board package in [pydevices](https://github.com/PyDevices/pydevices) (`drivers/usdl2.py`). A native `usdl2` module is used when already present in the firmware or environment. See [MicroPython — Desktop SDL](../platforms/micropython.md#desktop-sdl-usdl2).
 
 ### WinDisplay
 
@@ -70,7 +70,7 @@ platform exposes:
 
 Either way your handler sees the same `events` objects, so application
 code never needs to know which backend is active. Desktop board configs also use
-`timer_async=env_bool("PYDISPLAY_TIMER_ASYNC", display_drv.requires_async_timer)`
+`timer_async=env_bool("PYDEVICES_TIMER_ASYNC", display_drv.requires_async_timer)`
 (`requires_async_timer` is `True` only on PS/JN). `eventsys.Runtime` raises if
 `timer_async=False` while any attached display has `requires_async_timer`.
 
@@ -167,7 +167,7 @@ Anything you can draw on implements the framebuf API:
 
 ## Timing
 
-pydisplay does not include a task scheduler. Options:
+pydevices-examples does not include a task scheduler. Options:
 
 - **`asyncio`** — works on CPython, MicroPython, and PyScript (required there)
 - **[multimer](multimer.md)** — cross-platform `Timer` for sync loops; `AsyncTimer` for async/PyScript apps
@@ -176,23 +176,23 @@ pydisplay does not include a task scheduler. Options:
 
 Many drivers expose **ILI9341-style** vertical scroll: a top fixed band (TFA), a scrollable middle (VSA), and a bottom fixed band (BFA). You define regions with `set_vscroll(tfa, bfa)` or `vscrdef`, then move content with the `vscroll` property (wrapper around `vscsad`).
 
-The [**pydisplay_demo**](../examples/pydisplay_demo.md) guide explains this model with diagrams, covers drawing at `vscroll = 0` during redraw, and shows auto-scroll with `multimer`.
+The [**pydevices_demo**](../examples/pydevices_demo.md) guide explains this model with diagrams, covers drawing at `vscroll = 0` during redraw, and shows auto-scroll with `multimer`.
 
-Related examples: [`scroll_touch_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/scroll_touch_test.py) (touch Up/Down), [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/eventsys_encoder_test.py) (encoder).
+Related examples: [`scroll_touch_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/scroll_touch_test.py) (touch Up/Down), [`eventsys_encoder_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/eventsys_encoder_test.py) (encoder).
 
 ## Rotation
 
 BusDisplay uses CircuitPython-style rotation degrees (`0`, `90`, `180`, `270`).
 
-Known issues: Unix SDL rotation clears the screen; scrolling while rotated has edge cases on desktop and MCU — track work on [GitHub Issues](https://github.com/PyDevices/pydisplay/issues).
+Known issues: Unix SDL rotation clears the screen; scrolling while rotated has edge cases on desktop and MCU — track work on [GitHub Issues](https://github.com/PyDevices/pydevices-examples/issues).
 
 ## Next
 
 - [Display backend internals](display-backends.md) — GRAM/present model, 565 API, color conversion per backend
 - [Events](events.md)
 - [Drawing and fonts](drawing-and-fonts.md)
-- [Display drivers (chips)](https://pydevices.github.io/micropython-hardware/display-drivers.html)
+- [Display drivers (chips)](https://pydevices.github.io/pydevices/display-drivers.html)
 
 ## API reference
 
-[displaydev source and product docs](https://github.com/PyDevices/micropython-hardware/tree/main/drivers/display/displaydev).
+[displaydev source and product docs](https://github.com/PyDevices/pydevices/tree/main/drivers/display/displaydev).

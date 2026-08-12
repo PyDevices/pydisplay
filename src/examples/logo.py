@@ -3,11 +3,11 @@
 logo.py
 =======
 
-Draws the PyDevices logo using only pydisplay's own graphics primitives -- no SVG import or renderer needed.
+Draws the PyDevices logo using only pydevices-examples's own graphics primitives -- no SVG import or renderer needed.
 
 Shapes are stacked the same way the original logo.py stacked circles: draw
 a big filled shape, then a smaller filled shape of a different color on
-top of it, and so on. That means this runs anywhere pydisplay runs,
+top of it, and so on. That means this runs anywhere pydevices-examples runs,
 including microcontrollers.
 
 Coordinates are lifted from assets/img/logo.svg's 64x64 viewBox (in the

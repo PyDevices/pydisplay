@@ -32,9 +32,9 @@ import tft_text
 import tft_config
 
 try:
-    import pydisplay_test_mode
+    import pydevices_test_mode
 
-    _iterations = 4 if pydisplay_test_mode.ENABLED else 128
+    _iterations = 4 if pydevices_test_mode.ENABLED else 128
 except ImportError:
     _iterations = 128
 

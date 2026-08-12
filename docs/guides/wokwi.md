@@ -1,12 +1,12 @@
 # Wokwi simulator
 
-Run pydisplay on a simulated ESP32-S3 with an ILI9341 capacitive touch display — no hardware required.
+Run pydevices-examples on a simulated ESP32-S3 with an ILI9341 capacitive touch display — no hardware required.
 
 **In-repo project:** [`wokwi/`](../../web/wokwi/)
 
 **Who:** You want MCU-faithful testing (SPI display, I2C touch, MicroPython `machine` APIs) without flashing a board.
 
-**What you get:** [`testris`](https://github.com/PyDevices/pydisplay/blob/main/src/examples/testris.py) — a Tetris-style game driven by the on-screen touch keypad. One `main.py`; full example catalog = uncomment two lines.
+**What you get:** [`testris`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/testris.py) — a Tetris-style game driven by the on-screen touch keypad. One `main.py`; full example catalog = uncomment two lines.
 
 **Prerequisites:**
 
@@ -34,7 +34,7 @@ The browser sim ships MicroPython — no local tools or firmware download needed
 | **User action** | Use `main.py` as committed | Uncomment `utils` + `examples` lines |
 | **First boot** | ~30 s | Several minutes |
 | **Demo** | `testris` | Same + full `examples/` catalog |
-| **Also enables** | — | `hello.py`, bmp565, `pydisplay_demo`, LVGL prep, etc. |
+| **Also enables** | — | `hello.py`, bmp565, `pydevices_demo`, LVGL prep, etc. |
 
 ---
 
@@ -51,13 +51,13 @@ The `testris` game appears and responds to the on-screen touch keypad; serial ha
 | `board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3` | FT6X36 (default) |
 | `board_configs/busdisplay/spi/wokwi_ili9341_esp32s3_no_touch` | None — use if touch is not wired |
 
-Hardware details: [Wokwi reference](https://pydevices.github.io/micropython-hardware/wokwi.html).
+Hardware details: [Wokwi reference](https://pydevices.github.io/pydevices/wokwi.html).
 
 ---
 
 ## Next
 
 - [ESP32 board guide](esp32-board.md) — same workflow on real hardware
-- [Try pydisplay](../try/index.md) — PyScript browser demo
-- [pydisplay_demo example](../examples/pydisplay_demo.md)
+- [Try pydevices-examples](../try/index.md) — PyScript browser demo
+- [pydevices_demo example](../examples/pydevices_demo.md)
 - [Desktop CPython](desktop-cpython.md)

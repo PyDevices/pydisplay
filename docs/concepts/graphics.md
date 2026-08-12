@@ -3,7 +3,7 @@
 Cross-platform 2D drawing: framebuf-compatible buffers, shape primitives that return **Area** bounds, fonts, and image loaders. One import works on MicroPython, CircuitPython, and CPython.
 
 !!! note "Sister package"
-    `pygraphics` is a separate package from [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics), not part of the pydisplay repo. Install it from the [micropython-lib MIP index](../installation/mip-micropython-lib.md) (`mip.install("pygraphics", index=…)`) or [TestPyPI](../installation/index.md#pypi-pip-testpypi). pydisplay's `utils` (`displaybuf`, `framebuf` shim, `tft_text`, …) import `pygraphics` at runtime.
+    `pygraphics` is a separate package from [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics), not part of the pydevices-examples repo. Install it from the [micropython-lib MIP index](../installation/mip-micropython-lib.md) (`mip.install("pygraphics", index=…)`) or [TestPyPI](../installation/index.md#pypi-pip-testpypi). pydevices-examples's `utils` (`displaybuf`, `framebuf` shim, `tft_text`, …) import `pygraphics` at runtime.
 
 ## Quick start
 
@@ -128,13 +128,13 @@ and heights 8/14/16, use `pygraphics.text8` / `text14` / `text16` or `pygraphics
 controls transparency, RAM use, and how much data hits the panel bus.
 
 The multipath `font_simpletest.py` example uses the same `Font` + romfont `.bin` files but
-cycles different targets in one run. [`pydisplay_demo`](../examples/pydisplay_demo.md) follows the
+cycles different targets in one run. [`pydevices_demo`](../examples/pydevices_demo.md) follows the
 **string framebuffer + one blit** pattern (`string_blit`).
 
 | Pattern | Example | Background | Extra RAM | What hits the display | Typical sweet spot |
 |---------|---------|------------|-----------|----------------------|-------------------|
 | **Module helpers on canvas** | `pygraphics.text8(display_drv, …)` | Transparent (foreground pixels only) | None | One small `fill_rect` per lit pixel | Short labels, minimum RAM |
-| **String FB → one blit** | [`font_simpletest.py`](../examples/font_simpletest.py) (`string_blit`) | **Opaque** — `fb.fill(bg)` before `font.text` | One buffer sized to the string (reusable slice is better; see pydisplay_demo) | **One** `blit_rect` per string | Desktop/SDL (batch then `show()`), SPI panels when RAM is tight |
+| **String FB → one blit** | [`font_simpletest.py`](../examples/font_simpletest.py) (`string_blit`) | **Opaque** — `fb.fill(bg)` before `font.text` | One buffer sized to the string (reusable slice is better; see pydevices_demo) | **One** `blit_rect` per string | Desktop/SDL (batch then `show()`), SPI panels when RAM is tight |
 | **Draw on `display_drv`** | [`font_simpletest.py`](../examples/font_simpletest.py) (`per_pixel`) | Transparent | None | One `fill_rect` per lit pixel on the live driver | Simplest code path; **slowest** on MCU and desktop |
 | **Full-screen `DisplayBuffer` + dirty blit** | [`font_simpletest.py`](../examples/font_simpletest.py) (`displaybuf`) | Transparent over existing buffer contents | **Full panel** `DisplayBuffer` | `display.show(dirty)` — one row `blit_rect` per dirty scanline | MCUs with enough RAM; many text updates; fastest of the three modes |
 | **Catalog / inspect fonts** | [`font_list.py`](../examples/font_list.py) | Opaque row buffer | One strip `width × height` per font | One `blit_rect` per font row | Browsing `.bin` files on disk |
@@ -173,7 +173,7 @@ display_drv.show()         # SDL/pygame: present the frame
   this batches well. On **MCU** panels that flush each `blit_rect` immediately, this still beats
   per-pixel drawing because the bus sees one contiguous block per string.
 - Production apps often keep a **reusable** buffer sized for the longest line (see
-  [pydisplay_demo](../examples/pydisplay_demo.md)) instead of allocating every frame like the
+  [pydevices_demo](../examples/pydevices_demo.md)) instead of allocating every frame like the
   simpletest does.
 
 #### Direct draw on `display_drv` (`per_pixel`)
@@ -262,7 +262,7 @@ with draw.clip(10, 10, 50, 40):
 
 For streaming/large BMP assets, use `pygraphics.BMP565` (sliceable, optional streaming reads) — see [Graphics files](graphics-files.md).
 
-## pydisplay integration
+## pydevices-examples integration
 
 | Need | Use |
 |------|-----|
@@ -270,7 +270,7 @@ For streaming/large BMP assets, use `pygraphics.BMP565` (sliceable, optional str
 | TFT proportional fonts | `tft_text` / `tft_write` add-ons |
 | Large BMP sprites | `pygraphics.BMP565` |
 
-See [Drawing and fonts](drawing-and-fonts.md) for the wider pydisplay drawing stack.
+See [Drawing and fonts](drawing-and-fonts.md) for the wider pydevices-examples drawing stack.
 
 ## FAQ
 

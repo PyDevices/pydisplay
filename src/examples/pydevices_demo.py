@@ -1,7 +1,7 @@
 # gallery: featured
 # deps: pygraphics
 """
-pydisplay_demo.py — flagship board_config demo: clicks, rotation, scrolling.
+pydevices_demo.py — flagship board_config demo: clicks, rotation, scrolling.
 
 Setup + callbacks, then ``runtime.run_forever()``. Uses only published product modules
 (board_config, graphics, multimer, eventsys).
@@ -38,7 +38,7 @@ ACCENTS = (
 )
 
 TIPS = (
-    "Welcome to pydisplay!",
+    "Welcome to pydevices-examples!",
     "Runs on MCU & desktop.",
     "Tap Rotate to turn",
     "the screen around.",

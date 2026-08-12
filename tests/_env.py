@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Put pydisplay utilities and canonical sibling products on ``sys.path``."""
+"""Put pydevices-examples utilities and canonical sibling products on ``sys.path``."""
 
 import os
 import sys
@@ -13,8 +13,8 @@ if _SRC_UTILS not in sys.path:
     sys.path.insert(0, _SRC_UTILS)
 
 _HARDWARE_ROOT_CANDIDATES = (
-    os.path.join(_REPO_ROOT, "..", "micropython-hardware"),
-    os.path.join(_REPO_ROOT, "micropython-hardware"),
+    os.path.join(_REPO_ROOT, "..", "pydevices"),
+    os.path.join(_REPO_ROOT, "pydevices"),
 )
 _HARDWARE_ROOT = None
 for _hw in _HARDWARE_ROOT_CANDIDATES:

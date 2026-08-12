@@ -1,6 +1,6 @@
 # CircuitPython
 
-pydisplay works with CircuitPython using Adafruit bus drivers and `framebufferio`.
+pydevices-examples works with CircuitPython using Adafruit bus drivers and `framebufferio`.
 
 ## Getting started
 
@@ -17,7 +17,7 @@ pydisplay works with CircuitPython using Adafruit bus drivers and `framebufferio
 | `board_configs/cp/pixeldisplay/neopixel_8x4` | NeoPixel 8×4 grid |
 | `board_configs/cp/pixeldisplay/dotstar_12x6` | DotStar 12×6 grid |
 
-CircuitPython configs live under [`board_configs/cp/`](https://github.com/PyDevices/micropython-hardware/tree/main/board_configs/cp) in micropython-hardware. MicroPython configs stay at the top level of `board_configs/` (not under an `mp/` folder).
+CircuitPython configs live under [`board_configs/cp/`](https://github.com/PyDevices/pydevices/tree/main/board_configs/cp) in pydevices. MicroPython configs stay at the top level of `board_configs/` (not under an `mp/` folder).
 
 CP configs do **not** ship `board_devices.py` or lazy `DEVICES` — CircuitPython’s
 native `board` module covers pins/buses. Each CP `board_config.py` provides
@@ -28,7 +28,7 @@ application instantiates `eventsys` or uses LVGL's `display_driver`.
 
 SPI and I80 displays use `displaydev.busdisplay.BusDisplay` with Adafruit FourWire / ParallelBus drivers.
 
-Chip drivers import pydisplay's BusDisplay:
+Chip drivers import pydevices-examples's BusDisplay:
 
 ```python
 from displaydev.busdisplay import BusDisplay
@@ -47,9 +47,9 @@ CircuitPython on Unix can use **`SDLDisplay`**, which imports **`usdl2`**.
 When the unix firmware is built with [displayif](https://github.com/PyDevices/displayif)
 (`./apply_cp_patches.sh` then the unix coverage build), native `usdl2` is frozen
 and wins over MIP `lib/usdl2.py`. Otherwise install the MIP desktop board package
-from [micropython-hardware](https://github.com/PyDevices/micropython-hardware)
+from [pydevices](https://github.com/PyDevices/pydevices)
 (`board_configs/desktop`, which includes `drivers/usdl2.py`), or on CPython use
-[`pydevices-desktop`](https://pydevices.github.io/micropython-hardware/pydevices-desktop.html)
+[`pydevices-desktop`](https://pydevices.github.io/pydevices/pydevices-desktop.html)
 from TestPyPI. Install `libsdl2-dev` on the host so the SDL library is available.
 
 For a local CircuitPython unix binary, clone as siblings and build the coverage
@@ -62,7 +62,7 @@ workspace/
   displayif/              # native usdl2 (apply_cp_patches.sh)
   lvgl-circuitpython/   # optional LVGL
   pygraphics/             # optional native pygraphics
-  pydisplay/              # this repo
+  pydevices-examples/              # this repo
 ```
 
 ```bash
@@ -77,7 +77,7 @@ to `~/bin/circuitpython`.
 
 ### Frozen asyncio (required for multimer.AsyncTimer)
 
-CircuitPython unix pydisplay builds must **freeze** Adafruit's `asyncio` and
+CircuitPython unix pydevices-examples builds must **freeze** Adafruit's `asyncio` and
 `adafruit_ticks` libraries into the firmware — do not rely on
 `circup install asyncio` at runtime.
 

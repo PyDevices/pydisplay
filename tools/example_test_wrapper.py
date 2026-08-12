@@ -4,8 +4,8 @@ Subprocess entry point for one cross-runtime example smoke test.
 
 Invoked from src/ by example_test_kit.py:
 
-    micropython ../tools/example_test_wrapper.py pydisplay_demo \\
-        --script examples/pydisplay_demo.py --kind loop --duration 5
+    micropython ../tools/example_test_wrapper.py pydevices_demo \\
+        --script examples/pydevices_demo.py --kind loop --duration 5
 
 Prints EXAMPLE_RESULT={...} on stdout before exit.
 """
@@ -81,7 +81,7 @@ _MULTIMER_TEST_TIMERS = []
 
 
 def _trace(msg):
-    if _env_get("PYDISPLAY_TEST_TRACE"):
+    if _env_get("PYDEVICES_TEST_TRACE"):
         print("example_test_wrapper: {}".format(msg), file=sys.stderr)
 
 
@@ -173,7 +173,7 @@ def _setup_sibling_paths(src):
         sibling_repos = None
 
     if sibling_repos is not None:
-        # ``src`` is ``…/pydisplay/src``; repo root is its parent. Do not use
+        # ``src`` is ``…/pydevices-examples/src``; repo root is its parent. Do not use
         # ``_dir_of(_join(src, ".."))`` — that leaves a literal ``..`` segment
         # and resolves to ``src`` again. Always Unix paths (not WSL UNC / U:).
         src = sibling_repos.unix_path(src)
@@ -181,14 +181,14 @@ def _setup_sibling_paths(src):
         sibling_repos.prepend_sibling_sys_path(repo_root=repo_root)
         return
 
-    for key in ("PYDISPLAY_PALETTES_SRC", "PYDISPLAY_PDWIDGETS_SRC"):
+    for key in ("PYDEVICES_PALETTES_SRC", "PYDEVICES_PDWIDGETS_SRC"):
         path = _env_get(key)
         if path and _isdir(path) and path not in sys.path:
             sys.path.insert(0, path)
 
 
 def _setup_bootstrap(src, mode):
-    """Ensure pydisplay packages resolve; prefer env PYTHONPATH/MICROPYPATH.
+    """Ensure PyDevices packages resolve; prefer env PYTHONPATH/MICROPYPATH.
 
     Headless skips display-oriented path setup. When env already seeds ``lib`` /
     ``utils``, skip ``utils.path``. Fall back to ``import utils.path`` only if
@@ -283,7 +283,7 @@ def _install_poll_deadline_quit(duration_s, injected=None):
     except Exception:
         return False
     runtime_cls = eventsys.Runtime
-    if getattr(runtime_cls, "_pydisplay_poll_deadline_armed", False):
+    if getattr(runtime_cls, "_pydevices_poll_deadline_armed", False):
         return True
     deadline = _monotonic() + duration_s
     state = {"fired": False}
@@ -293,9 +293,9 @@ def _install_poll_deadline_quit(duration_s, injected=None):
         if not state["fired"] and _monotonic() >= deadline:
             state["fired"] = True
             try:
-                import pydisplay_test_mode
+                import pydevices_test_mode
 
-                if pydisplay_test_mode.ENABLED:
+                if pydevices_test_mode.ENABLED:
                     self._handle_quit()
                     if injected is not None:
                         injected[0] = True
@@ -312,7 +312,7 @@ def _install_poll_deadline_quit(duration_s, injected=None):
         return orig_poll(self)
 
     runtime_cls.poll = poll
-    runtime_cls._pydisplay_poll_deadline_armed = True
+    runtime_cls._pydevices_poll_deadline_armed = True
     return True
 
 
@@ -406,11 +406,11 @@ def _run_bounded_main_thread(script_path, kind, duration_s, timeout_s, quit_mode
     else:
         # quit=poll (or cooperative LVGL): deadline hook installed in main().
         try:
-            import pydisplay_test_mode
+            import pydevices_test_mode
 
-            pydisplay_test_mode.ENABLED = True
-            pydisplay_test_mode.DURATION_S = duration_s
-            pydisplay_test_mode.install_deadline_hook()
+            pydevices_test_mode.ENABLED = True
+            pydevices_test_mode.DURATION_S = duration_s
+            pydevices_test_mode.install_deadline_hook()
         except ImportError:
             pass
 
@@ -581,13 +581,13 @@ def _subprocess_hard_exit(code, *, headless=False):
     if headless:
         os._exit(code)
     try:
-        import pydisplay_test_mode
+        import pydevices_test_mode
 
-        if pydisplay_test_mode.ENABLED:
+        if pydevices_test_mode.ENABLED:
             os._exit(code)
     except ImportError:
         pass
-    # Reached only when pydisplay_test_mode is unavailable, i.e. not under this
+    # Reached only when pydevices_test_mode is unavailable, i.e. not under this
     # harness: let the display release SDL before the process disappears.
     try:
         from board_config import display_drv
@@ -621,7 +621,7 @@ def main(argv=None):
     if src not in sys.path:
         sys.path.insert(0, src)
     if not _isdir(_join(src, "lib")):
-        print("example_test_wrapper: cwd must be pydisplay/src", file=sys.stderr)
+        print("example_test_wrapper: cwd must be pydevices-examples/src", file=sys.stderr)
         return 2
 
     script_path = args["script"]
@@ -644,10 +644,10 @@ def main(argv=None):
         return 1
 
     try:
-        import pydisplay_test_mode
+        import pydevices_test_mode
 
-        pydisplay_test_mode.ENABLED = True
-        pydisplay_test_mode.DURATION_S = args["duration"]
+        pydevices_test_mode.ENABLED = True
+        pydevices_test_mode.DURATION_S = args["duration"]
     except Exception:
         pass
 
@@ -679,15 +679,15 @@ def main(argv=None):
             if key:
                 env_set(key, value)
         if args.get("timer_async") is not None:
-            env_set("PYDISPLAY_TIMER_ASYNC", args["timer_async"])
+            env_set("PYDEVICES_TIMER_ASYNC", args["timer_async"])
 
     # Install the deadline hook AFTER bootstrap: it imports multimer, which is
     # only on sys.path once _setup_bootstrap has run. The hook drives quit for
     # the canonical no-loop idiom (runtime auto-service / run_forever).
     try:
-        import pydisplay_test_mode
+        import pydevices_test_mode
 
-        pydisplay_test_mode.install_deadline_hook()
+        pydevices_test_mode.install_deadline_hook()
     except Exception:
         pass
 

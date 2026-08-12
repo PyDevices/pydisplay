@@ -2,16 +2,16 @@
 
 PyDevices separates reusable product code from application examples:
 
-- [`micropython-hardware`](https://github.com/PyDevices/micropython-hardware)
+- [`pydevices`](https://github.com/PyDevices/pydevices)
   owns portable interfaces, hardware drivers, board wiring, and releases.
-- `pydisplay` owns examples, application helpers, integration docs, and the
+- `pydevices-examples` owns examples, application helpers, integration docs, and the
   PyScript/PWA gallery.
 
 ## Component diagram
 
 ```mermaid
 flowchart TB
-  subgraph product [micropython-hardware product]
+  subgraph product [pydevices product]
     BC[board_config.py]
     DD[displaydev]
     AD[audiodev]
@@ -24,7 +24,7 @@ flowchart TB
     AR[app_runtime for non-LVGL]
     LR[display_driver for LVGL]
   end
-  subgraph showcase [pydisplay showcase]
+  subgraph showcase [pydevices-examples showcase]
     EX[examples]
     UT[application utilities]
     PW[PyScript gallery and PWA]
@@ -57,7 +57,7 @@ flowchart TB
 | `events` / `keys` | Shared event types, key codes, modifiers, and matching helpers. |
 | `multimer` | Cross-platform `Timer`, `AsyncTimer`, ticks, sleep, and asyncio exposure. |
 | `eventsys` | Optional event traffic controller for applications that want the supplied dispatcher and input adapters. |
-| `app_runtime` | pydisplay's non-LVGL opt-in: creates an `eventsys.Runtime` from the selected board config and adds gallery test behavior. |
+| `app_runtime` | pydevices-examples's non-LVGL opt-in: creates an `eventsys.Runtime` from the selected board config and adds gallery test behavior. |
 | `display_driver` | LVGL-specific coordinator shared by the binding repos; bridges LVGL to `displaydev` and `multimer` without importing `eventsys`. |
 | `utils` | Example helpers and third-party GUI integration adapters. |
 
@@ -65,7 +65,7 @@ flowchart TB
 
 1. Install the product packages and a board config.
 2. Import `display_drv` from `board_config`.
-3. Import `runtime` from pydisplay's `app_runtime`, or create your own
+3. Import `runtime` from pydevices-examples's `app_runtime`, or create your own
    `eventsys.Runtime.from_board_config(board_config)`.
 4. Build the UI, register callbacks, and run the coordinator.
 
@@ -109,5 +109,5 @@ adapters, and quit lifecycle. It consumes neutral board-config exports and
 - [Events](events.md) — event model and devices
 - [Displays](displays.md) — display interfaces
 - [multimer](multimer.md) — portable timers
-- [Board configs](https://pydevices.github.io/micropython-hardware/board-configs.html) — hardware wiring
+- [Board configs](https://pydevices.github.io/pydevices/board-configs.html) — hardware wiring
 - [Examples](../examples/index.md) — complete applications

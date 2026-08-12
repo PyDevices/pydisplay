@@ -2,7 +2,7 @@
 """Refresh repo-root requirements.txt TestPyPI floors to latest versions.
 
 Used by:
-  - Cursor sessionStart hook (when workspace is pydisplay)
+  - Cursor sessionStart hook (when workspace is pydevices-examples)
   - Agent after tagging a TestPyPI-publishing repo (CLI: --force)
   - publish_release_tag.sh pre-bump (CLI: --set name=X.Y.Z ...)
 
@@ -74,11 +74,11 @@ def _paths_from_payload(payload: dict) -> list[str]:
     return paths
 
 
-def _is_pydisplay_workspace(paths: list[str]) -> bool:
+def _is_pydevices_examples_workspace(paths: list[str]) -> bool:
     for path in paths:
         norm = os.path.normpath(os.path.expanduser(path))
         base = os.path.basename(norm.rstrip(os.sep))
-        if base == "pydisplay":
+        if base == "pydevices-examples":
             return True
         if (
             os.path.isfile(os.path.join(norm, "requirements.txt"))
@@ -93,7 +93,7 @@ def _requirements_path(paths: list[str]) -> str:
     for path in paths:
         norm = os.path.normpath(os.path.expanduser(path))
         candidate = os.path.join(norm, "requirements.txt")
-        if os.path.basename(norm.rstrip(os.sep)) == "pydisplay" and os.path.isdir(norm):
+        if os.path.basename(norm.rstrip(os.sep)) == "pydevices-examples" and os.path.isdir(norm):
             return candidate
         if os.path.isfile(os.path.join(norm, "tools", "example_runtimes.toml")):
             return candidate
@@ -227,7 +227,7 @@ def main() -> int:
     payload = _load_stdin() if not force else {}
     paths = _paths_from_payload(payload)
 
-    if not force and not _is_pydisplay_workspace(paths):
+    if not force and not _is_pydevices_examples_workspace(paths):
         print("{}")
         return 0
 
@@ -257,7 +257,7 @@ def main() -> int:
         json.dumps(
             {
                 "additional_context": (
-                    "Refreshed pydisplay/requirements.txt TestPyPI floors to latest: "
+                    "Refreshed pydevices-examples/requirements.txt TestPyPI floors to latest: "
                     + ", ".join(f"{n}>={versions[n]}" for n in PACKAGE_ORDER)
                 )
             }

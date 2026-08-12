@@ -1,19 +1,19 @@
 # CPython desktop
 
 CPython uses the same `displaydev` interfaces and examples as embedded targets.
-The desktop board config is published by micropython-hardware in the
+The desktop board config is published by pydevices in the
 `pydevices-desktop` TestPyPI distribution.
 
 ## Install
 
 ```bash
-git clone https://github.com/PyDevices/pydisplay.git
-cd pydisplay
+git clone https://github.com/PyDevices/pydevices-examples.git
+cd pydevices-examples
 python3 -m venv .venv
 .venv/bin/pip install --index-url https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ -r requirements.txt
 cd src
-../.venv/bin/python examples/pydisplay_demo.py
+../.venv/bin/python examples/pydevices_demo.py
 ```
 
 `AutoDisplay` selects WinDisplay on supported Windows hosts, PGDisplay when
@@ -39,17 +39,17 @@ WSL is also supported for the Linux workflow.
 
 ## Editable source checkout
 
-Clone `micropython-hardware` beside `pydisplay` and put these canonical trees on
+Clone `pydevices` beside `pydevices-examples` and put these canonical trees on
 `PYTHONPATH`:
 
 ```bash
-cd pydisplay/src
-export PYTHONPATH=.:utils:../../micropython-hardware/lib:../../micropython-hardware/utils:../../micropython-hardware/drivers/display:../../micropython-hardware/drivers/audio
-python3 examples/pydisplay_demo.py
+cd pydevices-examples/src
+export PYTHONPATH=.:utils:../../pydevices/lib:../../pydevices/utils:../../pydevices/drivers/display:../../pydevices/drivers/audio
+python3 examples/pydevices_demo.py
 ```
 
 To select a specific host config, add the desired
-`micropython-hardware/board_configs/...` directory before the other entries.
+`pydevices/board_configs/...` directory before the other entries.
 
 | Config | Display |
 |---|---|

@@ -7,7 +7,7 @@ Clone the repo. From the **repository root** (not `src/`):
 ./bin/pyscript.sh calculator --no-open
 ```
 
-The script runs [`tools/serve.py`](https://github.com/PyDevices/pydisplay/blob/main/tools/serve.py) with Cross-Origin-Isolation headers required by PyScript, reuses a healthy server on port 8000 when one is already running, and opens the browser automatically.
+The script runs [`tools/serve.py`](https://github.com/PyDevices/pydevices-examples/blob/main/tools/serve.py) with Cross-Origin-Isolation headers required by PyScript, reuses a healthy server on port 8000 when one is already running, and opens the browser automatically.
 
 | Page | Command | Purpose |
 |------|---------|---------|

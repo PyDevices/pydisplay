@@ -17,7 +17,7 @@ mip.install("displaydev", index="https://PyDevices.github.io/micropython-lib/mip
 
 On **PyScript MicroPython** (`micropython.html`, `mp.html`), `?deps=` installs
 use the **bytecode** channel via ``utils/ps_loader.py`` (firmware ``mip`` on
-MicroPython). Pyodide uses portable ``mip.py`` from micropython-hardware
+MicroPython). Pyodide uses portable ``mip.py`` from pydevices
 ``utils/`` for manifests and modules.
 
 With `mpremote`:
@@ -48,7 +48,7 @@ These must come from GitHub:
 - `spibus`, `i80bus` (viper not supported in micropython-lib packaging)
 - Board config packages (use GitHub `board_configs/.../package.json`)
 
-For combined board + package setup, use [micropython-hardware install workflows](https://pydevices.github.io/micropython-hardware/install-workflows.html).
+For combined board + package setup, use [pydevices install workflows](https://pydevices.github.io/pydevices/install-workflows.html).
 
 ## Verify install
 

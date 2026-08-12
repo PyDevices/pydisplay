@@ -11,7 +11,7 @@ PYTHON="${REPO_ROOT}/.venv/bin/python"
 
 OUT="${TOWER_CLIMB_VIDEO:-/opt/cursor/artifacts/tower-climb-bot-win.mp4}"
 TRACE="${TOWER_CLIMB_TRACE:-$PKG_DIR/trace/record-win.jsonl}"
-VIDEO_FPS="${PYDISPLAY_VIDEO_FPS:-12}"
+VIDEO_FPS="${PYDEVICES_VIDEO_FPS:-12}"
 MAX_WAIT="${TOWER_CLIMB_RECORD_MAX_WAIT:-180}"
 mkdir -p "$(dirname "$OUT")" "$(dirname "$TRACE")"
 rm -f "$OUT" "$TRACE"

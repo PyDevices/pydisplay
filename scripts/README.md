@@ -1,21 +1,21 @@
-# pydisplay scripts
+# pydevices-examples scripts
 
 These scripts maintain the examples, utility manifests, documentation, and
 PyScript/PWA gallery. Product publishing scripts live in sibling
-`micropython-hardware`.
+`pydevices`.
 
 ## GitHub Actions
 
 | Workflow | Trigger | Purpose |
 |---|---|---|
 | `manifests.yml` | relevant source/config paths + manual | Verify example, utility, and gallery manifests |
-| `tests.yml` | examples, utils, tests, scripts, gallery + manual | Run pydisplay tests against canonical hardware packages |
+| `tests.yml` | examples, utils, tests, scripts, gallery + manual | Run pydevices-examples tests against canonical hardware packages |
 | `docs.yml` | docs, MkDocs config/helpers + manual | Verify the integration docs build |
 | `deploy-pyscript.yml` | gallery/example paths + manual | Assemble and publish the browser showcase |
 
-pydisplay has no package-release workflow. Tags here do not publish reusable
+pydevices-examples has no package-release workflow. Tags here do not publish reusable
 libraries. Core TestPyPI and MIP releases are tagged and published from
-`micropython-hardware`; companion repos publish their own prefixed distributions.
+`pydevices`; companion repos publish their own prefixed distributions.
 
 ## Normal maintenance
 
@@ -28,9 +28,9 @@ python scripts/gallery_generator.py
 python scripts/gallery_generator.py --check
 ```
 
-`install_gen_manifests.py` enumerates pydisplay examples/utilities and the
-canonical sibling `micropython-hardware/lib/eventsys` source. The gallery keeps
-the historical virtual URL `./src/lib/eventsys/...`, but pydisplay does not own
+`install_gen_manifests.py` enumerates pydevices-examples applications/utilities and the
+canonical sibling `pydevices/lib/eventsys` source. The gallery keeps
+the historical virtual URL `./src/lib/eventsys/...`, but pydevices-examples does not own
 a second eventsys copy. The local server and Pages workflow map that URL to the
 hardware source.
 
@@ -44,7 +44,7 @@ examples.
 |---|---|---|
 | `install_` | `install_gen_manifests.py`, `install_refresh_manifests.sh` | Example/helper manifests and gallery mounts |
 | `pyscript_` | cache/version helpers | Build the deployable PWA |
-| `mkdocs_` | reference/notebook generators | Build pydisplay integration docs |
+| `mkdocs_` | reference/notebook generators | Build pydevices-examples integration docs |
 | `gen_` | `gen_package_pyi.sh` | Generate editor stubs from canonical sibling product sources |
 
 ## Package ownership
@@ -59,7 +59,7 @@ manual Peter Hinch integration manifests also remain here:
 Core packages (`displaydev`, `audiodev`, `events`, `keys`, `multimer`, and
 optional `eventsys`) come from the unprefixed PyDevices MIP index or prefixed
 TestPyPI distributions. Board configs and drivers come from
-micropython-hardware. Companion packages (`pygraphics`, `palettes`, `pdwidgets`,
+pydevices. Companion packages (`pygraphics`, `palettes`, `pdwidgets`,
 and LVGL) come from their own repositories.
 
 ## Publishing names

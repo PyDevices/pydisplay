@@ -14,7 +14,7 @@ Usage::
     # Local check (writes into web/pyscript — usually skip; leave -dev):
     python scripts/pyscript_stamp_pwa_cache.py web/pyscript --check
 
-Deploy stamps a short hash; source in git keeps ``pydisplay-pwa-dev``.
+Deploy stamps a short hash; source in git keeps ``pydevices-examples-pwa-dev``.
 
 When ``sw.js`` contains ``MIGRATION: cache-purge`` (one-deploy cache purge for
 legacy installs), stamping is skipped. See ``docs/guides/pyscript-pwa.md``
@@ -36,7 +36,7 @@ STATIC_ASSETS_RE = re.compile(
     re.DOTALL,
 )
 ASSET_STRING_RE = re.compile(r"""['"](\./[^'"]+)['"]""")
-PLACEHOLDER_CACHE = "pydisplay-pwa-__SHELL_HASH__"
+PLACEHOLDER_CACHE = "pydevices-examples-pwa-__SHELL_HASH__"
 MIGRATION_MARKER = "MIGRATION: cache-purge"
 # Gallery cards churn on many pushes; strip generated demos so they don't force
 # installed PWAs to prompt. ``index.html`` is network-first in ``sw.js`` so card
@@ -116,7 +116,7 @@ def stamp(pyscript_dir: Path, *, check: bool) -> str:
         print("migration sw.js — skipping CACHE_NAME stamp")
         return "migration"
     digest = shell_hash(pyscript_dir)
-    cache_name = f"pydisplay-pwa-{digest}"
+    cache_name = f"pydevices-examples-pwa-{digest}"
     new_text, n = CACHE_NAME_RE.subn(
         rf"\g<1>{cache_name}\g<3>",
         sw_text,
