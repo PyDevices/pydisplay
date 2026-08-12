@@ -8,9 +8,9 @@ Pick an effect with ``DEMO`` (``scroll``, ``plasma``, ``fire``, ``matrix``,
 ``runtime.poll()`` every frame so the desktop window stays closable.
 
 **Simulator (default):** set ``PYTHONPATH``/``MICROPYPATH`` to ``.:lib:utils`` and run
-directly from ``src/``::
+directly from ``lib/``::
 
-    cd src && PYTHONPATH=.:lib:utils python examples/pixel_sim_demos.py
+    cd lib && PYTHONPATH=.:lib:utils python examples/pixel_sim_demos.py
 
 Or from the REPL: ``from examples import pixel_sim_demos``.
 

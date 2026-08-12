@@ -1,5 +1,5 @@
 # Why this hub: roadmap TV web path is PyScript-only (no native SDL on webOS /
-# Tizen). Python demos live under src/examples/ so the gallery loader can see
+# Tizen). Python demos live under lib/examples/ so the gallery loader can see
 # them; this folder holds remote-key notes for TV browsers.
 
 # TV remote / PyScript notes (webOS / Tizen)
