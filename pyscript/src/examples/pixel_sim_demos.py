@@ -14,7 +14,8 @@ directly from ``src/``::
 
 Or from the REPL: ``from examples import pixel_sim_demos``.
 
-**Real PixelDisplay hardware:** use ``from board_config import display_drv, runtime``
+**Real PixelDisplay hardware:** import ``display_drv`` from ``board_config`` and
+``runtime`` from ``app_runtime``.
 instead of ``from pixel_sim import …`` (your hardware ``board_config`` must wire
 ``PixelDisplay``).
 
@@ -37,7 +38,8 @@ if _host_board.display_drv.width < _host_board.display_drv.height:
     _host_board.display_drv.rotation = (_host_board.display_drv.rotation + 90) % 360
 
 # Uncomment one and only one of the following two lines
-#from board_config import display_drv, runtime
+# from board_config import display_drv
+# from app_runtime import runtime
 from pixel_sim import display_drv, runtime
 
 # scroll | plasma | fire | matrix | starfield | reel

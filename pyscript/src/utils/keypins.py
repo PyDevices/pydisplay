@@ -5,11 +5,13 @@
 A class to make keypad keys appear as pins on a microcontroller.
 
 Usage:
-    from board_config import display_drv, runtime
+    import board_config
+    import eventsys
     import keys
     from keypins import KeyPins
 
 
+    runtime = eventsys.Runtime.from_board_config(board_config)
     buttons = KeyPins(
         left=keys.K_LEFT,
         right=keys.K_RIGHT,

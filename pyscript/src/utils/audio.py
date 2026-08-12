@@ -9,7 +9,8 @@ that exposes a PCMOutput-compatible device (``format``, ``write``, ``close``).
 
 Typical instrument / game loop::
 
-    from board_config import runtime, audio_out
+    from board_config import audio_out
+    from app_runtime import runtime
     from audio import AudioEngine
 
     eng = AudioEngine(audio_out)

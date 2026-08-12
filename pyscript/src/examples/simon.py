@@ -16,7 +16,8 @@ Timed flashes are tick-driven (no blocking ``sleep_ms``) so they remain visible
 under ``timer_async`` hosts such as PyScript.
 """
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 from random import getrandbits
 
 import eventsys

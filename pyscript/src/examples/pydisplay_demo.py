@@ -3,11 +3,12 @@
 """
 pydisplay_demo.py — flagship board_config demo: clicks, rotation, scrolling.
 
-Setup + callbacks, then ``runtime.run_forever()``. Uses only src/lib modules
+Setup + callbacks, then ``runtime.run_forever()``. Uses only published product modules
 (board_config, graphics, multimer, eventsys).
 """
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 
 from displaydev import color565
 from pygraphics import RGB565, Area, Font, FrameBuffer

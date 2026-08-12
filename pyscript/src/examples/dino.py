@@ -28,7 +28,8 @@ if _host_board.display_drv.width < _host_board.display_drv.height:
     _host_board.display_drv.rotation = (_host_board.display_drv.rotation + 90) % 360
 
 # For real PixelDisplay hardware, replace this import with:
-# from board_config import display_drv, runtime
+# from board_config import display_drv
+# from app_runtime import runtime
 from pixel_sim import display_drv, runtime  # noqa: E402
 
 WIDTH = display_drv.width

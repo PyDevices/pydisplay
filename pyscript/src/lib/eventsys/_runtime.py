@@ -152,7 +152,7 @@ class _DisplayRefreshPaused:
 
 
 class Runtime:
-    """Board runtime: input devices, shared timer, display refresh, and quit lifecycle.
+    """Optional app runtime: devices, shared timer, display refresh, and quit lifecycle.
 
     ``multimer`` is imported lazily when the shared timer starts so ``eventsys``
     remains importable without it. Event types and key codes are the shared
@@ -160,6 +160,60 @@ class Runtime:
     """
 
     events = events
+
+    @classmethod
+    def from_board_config(cls, board_config, **overrides):
+        """Create an app-owned runtime from neutral board hardware exports.
+
+        A board config describes hardware; it deliberately does not instantiate
+        ``eventsys``. Applications that want this traffic controller opt in::
+
+            import board_config
+            import eventsys
+
+            runtime = eventsys.Runtime.from_board_config(board_config)
+
+        Recognized board attributes are ``display_drv``, ``host_read``,
+        ``touch_read``, ``touch_rotation_table``, ``timer_async``,
+        ``keypad_read``, ``encoder_read``, ``encoder_button_read``,
+        ``joystick_driver``, and ``joystick_emulate_digital``. Keyword
+        ``overrides`` replace constructor values before the runtime is created.
+        """
+        display = getattr(board_config, "display_drv", None)
+        values = {
+            "displays": [display] if display is not None else None,
+            "host_read": getattr(board_config, "host_read", None),
+            "touch_read": getattr(board_config, "touch_read", None),
+            "touch_rotation_table": getattr(board_config, "touch_rotation_table", None),
+            "timer_async": getattr(
+                board_config,
+                "timer_async",
+                bool(getattr(display, "requires_async_timer", False)),
+            ),
+        }
+        values.update(overrides)
+        runtime = cls(**values)
+
+        keypad_read = getattr(board_config, "keypad_read", None)
+        if keypad_read is not None:
+            runtime.add_keypad(keypad_read)
+
+        encoder_read = getattr(board_config, "encoder_read", None)
+        if encoder_read is not None:
+            runtime.add_encoder(
+                encoder_read,
+                button_read=getattr(board_config, "encoder_button_read", None),
+            )
+
+        joystick_driver = getattr(board_config, "joystick_driver", None)
+        if joystick_driver is not None:
+            joystick_kwargs = {}
+            emulate_digital = getattr(board_config, "joystick_emulate_digital", None)
+            if emulate_digital is not None:
+                joystick_kwargs["emulate_digital"] = emulate_digital
+            runtime.add_joystick(joystick_driver=joystick_driver, **joystick_kwargs)
+
+        return runtime
 
     def __init__(
         self,
@@ -417,28 +471,6 @@ class Runtime:
         if self._pending_timer_async and self._timer is None:
             self.start_timer(async_=True)
 
-    @staticmethod
-    def _arm_lvgl_event_loop():
-        """Start LVGL ``display_driver.event_loop`` once an asyncio loop is running.
-
-        ``import display_driver`` with ``timer_async`` defers ``event_loop.arm()``
-        until a running loop exists. The already-running host-loop branch of
-        :meth:`run_forever` did that; :meth:`run` (``asyncio.run`` path used on
-        CircuitPython and desktop ``timer_async``) must too — otherwise LVGL
-        never gets ``task_handler`` / flush and the panel stays blank.
-        """
-        try:
-            import sys as _sys
-
-            _dd = _sys.modules.get("display_driver")
-            if _dd is None:
-                return
-            _inst = _dd.event_loop.current_instance()
-            if _inst is not None:
-                _inst.arm()
-        except Exception:
-            pass
-
     async def run(self, tick_ms=SERVICE_TICK_MS):
         """Run the app until quit — asyncio-native entry for ``timer_async`` apps.
 
@@ -456,7 +488,6 @@ class Runtime:
         from multimer import asyncio
 
         self.arm_async_refresh()
-        self._arm_lvgl_event_loop()
         self._blocking_run_forever = True
         try:
             while not self._quit_requested:
@@ -503,11 +534,6 @@ class Runtime:
         if self._timer_async:
             if self._event_loop_running():
                 self.arm_async_refresh()
-                # LVGL display_driver may defer event_loop.arm() when import ran
-                # without a real get_running_loop() (e.g. sync MicroPython Run
-                # click). Arm it here so task_handler/flush can run. No-op if
-                # display_driver is unused or already armed.
-                self._arm_lvgl_event_loop()
                 return
             from multimer import asyncio
 
@@ -952,20 +978,9 @@ class Runtime:
             return
         # Auto-service the shared timer (poll/pump/drain + device dispatch) even
         # when no display needs periodic refresh, so input and QUIT work in the
-        # canonical no-loop idiom. Always armed — including under test mode,
-        # since the harness now relies on it too; apps that poll() themselves
-        # make it back off (``_app_drives_poll``) and GUI layers via
-        # ``_refresh_claim``.
+        # canonical no-loop idiom. Apps that poll() themselves make it back off
+        # (``_app_drives_poll``), as do GUI layers via ``_refresh_claim``.
         self._arm_service()
-        try:
-            import pydisplay_test_mode
-
-            # Test mode still skips the periodic refresh show-timer so examples
-            # that call show() themselves avoid a competing refresh.
-            if pydisplay_test_mode.ENABLED:
-                return
-        except ImportError:
-            pass
         needs = any(getattr(d, "needs_refresh", False) for d in self._displays)
         if refresh_period is None:
             wire = needs
@@ -1124,17 +1139,6 @@ class Runtime:
         self._quit_requested = True
         self._pending_teardown = False
         self._teardown_oneshot_armed = False
-        try:
-            import pydisplay_test_mode
-
-            if pydisplay_test_mode.ENABLED:
-                # Still run before_quit (autotest / LVGL hooks); skip display.quit only.
-                if self._before_quit is not None:
-                    self._before_quit()
-                self.stop_timer()
-                return
-        except ImportError:
-            pass
         if self._before_quit is not None:
             self._before_quit()
         # Stop the shared timer *before* releasing the display so no in-flight

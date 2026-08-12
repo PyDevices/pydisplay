@@ -17,7 +17,8 @@ _EXAMPLES = __file__.replace("\\", "/").rsplit("/", 1)[0]
 if _EXAMPLES not in sys.path:
     sys.path.insert(0, _EXAMPLES)
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 from calc_engine import CalcEngine
 import keys
 from pygraphics import RGB565, FrameBuffer

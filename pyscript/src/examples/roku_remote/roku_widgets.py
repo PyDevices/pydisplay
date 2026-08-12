@@ -35,6 +35,7 @@ if _EXAMPLES not in sys.path:
     sys.path.insert(0, _EXAMPLES)
 
 import board_config
+from app_runtime import runtime
 import pdwidgets as pd
 import keys
 from roku_engine import (
@@ -99,8 +100,8 @@ class _RemoteUI:
                 pd.Display.tick_period = 50
         except Exception:
             pass
-        self.display = pd.Display(board_config.display_drv, board_config.runtime)
-        self.runtime = board_config.runtime
+        self.display = pd.Display(board_config.display_drv, runtime)
+        self.runtime = runtime
         pal = self.display.pal
         self.W = self.display.width
         self.H = self.display.height
@@ -1610,7 +1611,7 @@ def create(engine=None, start_page="devices"):
 def run(engine=None, start_page="devices"):
     """Create the UI and hand control to ``runtime.run_forever()``."""
     create(engine=engine, start_page=start_page)
-    board_config.runtime.run_forever()
+    runtime.run_forever()
 
 
 # Direct import / example kit: auto-start. ``roku_remote`` owns launch when set.

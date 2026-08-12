@@ -1,6 +1,8 @@
 # eventsys
 
-Cross-platform input events with PyGame/SDL2-style types — touch, mouse, keyboard, keypad, encoder, and joystick unified under one `Runtime`.
+Optional cross-platform event traffic controller for applications using PyGame/SDL2-style events. It unifies touch, mouse, keyboard, keypad, encoder, and joystick input under one app-owned `Runtime`.
+
+`eventsys` is not part of a board definition and is not required by LVGL. Board configs expose hardware and read callables; a non-LVGL app can choose `eventsys`, provide another coordinator, or handle those devices directly.
 
 ## Install
 
@@ -12,12 +14,12 @@ This package is published as a pure-Python wheel to TestPyPI.
 pip install \
   -i https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
-  eventsys
+  pydevices-eventsys
 ```
 
 Why both indexes: [two-index pip install](https://pydisplay.readthedocs.io/en/latest/publishing-micropython-lib/#two-index-pip-install-required).
 
-Pulls in [multimer](https://test.pypi.org/project/multimer/) for shared timers used by `Runtime`, plus [pydisplay-events](https://test.pypi.org/project/pydisplay-events/) and [pydisplay-keys](https://test.pypi.org/project/pydisplay-keys/).
+Pulls in `pydevices-multimer` for shared timers used by `Runtime`, plus `pydevices-events` and `pydevices-keys`. Python imports remain `multimer`, `events`, and `keys`.
 
 ### MicroPython (MIP)
 
@@ -32,10 +34,9 @@ mip.install("eventsys", index="https://PyDevices.github.io/micropython-lib/mip/P
 ```python
 import events
 import eventsys
+import board_config
 
-runtime = eventsys.Runtime()
-keypad = eventsys.KeypadDevice(read=lambda: pressed_keys)  # set of key codes
-runtime.register(keypad)
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 while True:
     for event in runtime.poll():
@@ -54,19 +55,19 @@ runtime.run_forever()
 
 ## What you get
 
-- `Runtime` — poll / subscribe, display refresh wiring, sync and async keep-alive
+- `Runtime` — an optional app-level traffic controller with poll / subscribe, display refresh wiring, and sync/async keep-alive
 - Devices: `TouchDevice`, `KeypadDevice`, `EncoderDevice`, `JoystickDevice`, `HostEventsDevice`
 - Optional mappers: `eventsys.touch_keypad`, `eventsys.joystick_keys`
-- Event types/key codes: install [`pydisplay-events`](https://test.pypi.org/project/pydisplay-events/) and [`pydisplay-keys`](https://test.pypi.org/project/pydisplay-keys/) (`import events`, `import keys`)
+- Event types/key codes: install `pydevices-events` and `pydevices-keys` (`import events`, `import keys`)
 
 ## Links
 
 - [Documentation — eventsys](https://pydisplay.readthedocs.io/en/latest/concepts/events/)
 - [Documentation — Runtime](https://pydisplay.readthedocs.io/en/latest/concepts/runtime/)
-- [Source](https://github.com/PyDevices/pydisplay)
-- [Issues](https://github.com/PyDevices/pydisplay/issues)
-- Related: [pydisplay-events](https://test.pypi.org/project/pydisplay-events/), [pydisplay-keys](https://test.pypi.org/project/pydisplay-keys/), [multimer](https://test.pypi.org/project/multimer/), [displaydev](https://test.pypi.org/project/displaydev/)
+- [Source](https://github.com/PyDevices/micropython-hardware)
+- [Issues](https://github.com/PyDevices/micropython-hardware/issues)
+- Related TestPyPI distributions: `pydevices-events`, `pydevices-keys`, `pydevices-multimer`, `pydevices-displaydev`
 
 ## License
 
-MIT — see [LICENSE](https://github.com/PyDevices/pydisplay/blob/main/LICENSE).
+MIT — see [LICENSE](https://github.com/PyDevices/micropython-hardware/blob/main/LICENSE).

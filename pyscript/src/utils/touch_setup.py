@@ -11,7 +11,8 @@ Usage:
 
 import sys
 
-from board_config import display_drv, runtime
+from app_runtime import runtime
+from board_config import display_drv
 from displaybuf import DisplayBuffer as SSD
 
 import multimer

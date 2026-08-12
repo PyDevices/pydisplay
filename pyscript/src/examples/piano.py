@@ -10,13 +10,14 @@ portrait panel 90 degrees into landscape.
 
 from audio import AudioEngine, midi_to_hz
 import board_config
+from app_runtime import runtime
 import board_devices
 
 import keys
 from pygraphics import Draw
 
 display_drv = board_config.display_drv
-runtime = board_config.runtime
+runtime = runtime
 # Built here rather than taken from board_config so it can ask for the
 # interactive profile: the default is buffered for throughput, which a synth
 # writing at realtime pays as note-to-sound delay.

@@ -7,15 +7,11 @@ before constructing the widget.
 """
 
 import math
-import sys
 import time
 
-from board_config import display_drv, runtime
-
-if runtime is not None and "display_driver" not in sys.modules:
-    runtime.stop_timer()
-
-import display_driver  # noqa: F401
+from board_config import display_drv
+import display_driver
+from display_driver import runtime
 import lvgl as lv
 
 try:

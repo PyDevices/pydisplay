@@ -29,7 +29,8 @@ if _src and _src not in sys.path:
 if _PKG not in sys.path:
     sys.path.insert(0, _PKG)
 
-from board_config import runtime  # noqa: E402
+import display_driver  # noqa: E402, F401
+from display_driver import runtime  # noqa: E402
 import lvgl as lv  # noqa: E402
 
 import events  # noqa: E402

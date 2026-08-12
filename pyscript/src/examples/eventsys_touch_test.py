@@ -6,7 +6,8 @@ Sets the rotation to each of 4 possible values and asks the user to touch the re
 Then it prints the touch_rotation_table that should be set in board_config.py.
 """
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 import eventsys
 from pygraphics import round_rect, text16
 

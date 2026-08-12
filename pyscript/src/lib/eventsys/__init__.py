@@ -2,14 +2,15 @@
 #
 # SPDX-License-Identifier: MIT
 """
-eventsys — input Runtime and device adapters for *Python.
+eventsys — optional application event traffic controller for *Python.
 
 Quick start::
 
+    import board_config
     import events
     import eventsys
 
-    runtime = eventsys.Runtime()
+    runtime = eventsys.Runtime.from_board_config(board_config)
     keypad = eventsys.KeypadDevice(read=lambda: pressed_keys)
     runtime.register(keypad)
 

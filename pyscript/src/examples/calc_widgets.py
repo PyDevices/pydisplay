@@ -21,12 +21,13 @@ if _EXAMPLES not in sys.path:
     sys.path.insert(0, _EXAMPLES)
 
 import board_config
+from app_runtime import runtime
 import pdwidgets as pd
 from calc_engine import CalcEngine
 
 pd.DEBUG = False
 
-display = pd.Display(board_config.display_drv, board_config.runtime)
+display = pd.Display(board_config.display_drv, runtime)
 pal = display.pal
 
 W = display.width
@@ -199,4 +200,4 @@ screen.visible = True
 # Display construction, so this just keeps the app alive. run_forever() blocks
 # when run as a program and returns immediately in an interactive REPL on
 # signal-driven backends, so the same call is always correct.
-board_config.runtime.run_forever()
+runtime.run_forever()

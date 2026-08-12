@@ -50,7 +50,8 @@ if env_get("PYDISPLAY_SCALE") is None:
 
 import display_driver  # noqa: E402 — wires LVGL into the shared runtime
 import lvgl as lv  # noqa: E402
-from board_config import display_drv, runtime  # noqa: E402
+from board_config import display_drv  # noqa: E402
+from display_driver import runtime  # noqa: E402
 
 import focus_nav  # noqa: E402
 import input_map  # noqa: E402

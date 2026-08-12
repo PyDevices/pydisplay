@@ -10,7 +10,8 @@ except ImportError:
         return sequence[0]
 
 
-from board_config import display_drv, runtime
+from board_config import display_drv
+from app_runtime import runtime
 import gc
 import time
 
