@@ -2,7 +2,7 @@
 """
 Simon — classic memory game for round (and rectangular) displays.
 
-Uses pydisplay ``pygraphics`` (not LVGL) plus ``eventsys`` touch. Designed as a
+Uses PyDevices ``pygraphics`` (not LVGL) plus ``eventsys`` touch. Designed as a
 light-RAM display/touch driver demo: draws directly to the bus display with no
 full-frame buffer.
 
