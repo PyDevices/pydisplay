@@ -8,7 +8,7 @@ Evaluate pydevices-examples without installing anything on your machine.
 |------|----------|------------|
 | **Browser (PyScript)** | Quick look, touch UI in the tab | [Live demo hub](https://PyDevices.github.io/pydevices-examples/pyscript/) |
 | **Installable PWA** | Home-screen / standalone app on phone or desktop | [Where PWAs run](../platforms/pwa.md) · [Install the gallery](https://PyDevices.github.io/pydevices-examples/pyscript/) |
-| **Wokwi simulator** | ESP32 + ILI9341 without hardware | [Wokwi guide](../guides/wokwi.md) · [`wokwi/`](../../web/wokwi/) |
+| **Wokwi simulator** | ESP32 + ILI9341 without hardware | [Wokwi guide](../guides/wokwi.md) · [`web/wokwi/`](https://github.com/PyDevices/pydevices-examples/tree/main/web/wokwi) |
 | **Screenshot gallery** | See what examples look like | [Gallery below](#screenshot-gallery) |
 
 ## PyScript (browser)
@@ -37,7 +37,7 @@ Full guide (asyncio porting, compatible examples, board config): [PyScript local
 
 ## Wokwi (simulator)
 
-Copy [`wokwi/`](../../web/wokwi/) `main.py` and `diagram.json` into a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3).
+Copy [`web/wokwi/`](https://github.com/PyDevices/pydevices-examples/tree/main/web/wokwi) `main.py` and `diagram.json` into a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3).
 
 Full example catalog: uncomment the two `utils` / `examples` lines in `main.py` (see [Wokwi guide](../guides/wokwi.md)).
 

@@ -136,14 +136,14 @@ main()
 - **`setup_scroll()`** — calls `display_drv.set_vscroll(TOP, BOT)` to define fixed regions.
 - **`periodic(on_tick, period=40)`** — allocates the next timer id after `display_drv` (SDLDisplay `auto_refresh` already took id 1 via `periodic(show, …)`). No need to pick a timer number yourself.
 - **`on_tick(_=None)`** — every 40 ms, increments `state["scroll"]` and sets `display_drv.vscroll`. The optional timer argument matches the `machine.Timer` / `periodic` callback contract.
-- **`run_forever(handle_events)`** — cooperative main loop that polls input and yields to the timer backend ([multimer](../concepts/multimer.md)).
+- **`run_forever(handle_events)`** — cooperative main loop that polls input and yields to the timer backend ([multimer](https://pydevices.github.io/pydevices/multimer.html)).
 - **`runtime.poll()`** (inside `handle_events`) — returns touch/mouse events; the demo handles `MOUSEBUTTONDOWN` only.
 
 **Rotate** pauses scroll, updates `display_drv.rotation`, resets scroll to 0, calls `setup_scroll()` and `redraw()`, then resumes scroll.
 
 **Color** pauses scroll, advances `color_i`, `redraw()`, resumes scroll.
 
-`periodic()` in [`multimer`](../concepts/multimer.md) hands out the next available timer id (`-1` on RP2). pydevices-examples drivers use it for `auto_refresh`, so app timers created afterward do not collide.
+`periodic()` in [`multimer`](https://pydevices.github.io/pydevices/multimer.html) hands out the next available timer id (`-1` on RP2). pydevices-examples drivers use it for `auto_refresh`, so app timers created afterward do not collide.
 
 ---
 
@@ -241,7 +241,7 @@ runtime timer the way many real apps should:
 runtime.run_forever()  # auto-service dispatches input; on_tick drives animation
 ```
 
-See [multimer](../concepts/multimer.md) for timer backends and `timer_async`.
+See [multimer](https://pydevices.github.io/pydevices/multimer.html) for timer backends and `timer_async`.
 
 ## Async / PyScript
 
@@ -251,6 +251,6 @@ desktop, PyScript, and Jupyter (`runtime.timer_async` is handled inside Runtime)
 ## Related docs
 
 - [Board configs](https://pydevices.github.io/pydevices/board-configs.html) — choose and customize `board_config.py`
-- [Events](../concepts/events.md) — `runtime.poll()` and device types
-- [Displays](../concepts/displays.md) — driver overview and rotation notes
+- [Events](https://pydevices.github.io/pydevices/eventsys.html) — `runtime.poll()` and device types
+- [Displays](https://pydevices.github.io/pydevices/displaydev.html) — driver overview and rotation notes
 - [Examples catalog](index.md) — full list of scripts

@@ -12,7 +12,7 @@ cd src
 ```
 
 A window should open with the demo. Touch or click **Rotate** and **Color**;
-the tips list scrolls. See the [pydevices_demo guide](../examples/pydevices_demo.md)
+the tips list scrolls. See the [pydevices_demo guide](../examples/pydevices-demo.md)
 for a walkthrough or copy the [App starter](../examples/app-starter.md).
 
 On Windows, use `.venv\Scripts\python.exe`. For source-checkout development,

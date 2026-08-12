@@ -47,6 +47,6 @@ coordinator from `display_driver`.
 ## Next
 
 - [App starter](../examples/app-starter.md)
-- [Architecture](../concepts/architecture.md)
+- [Architecture](https://pydevices.github.io/pydevices/architecture.html)
 - [Examples](../examples/index.md)
 - [ESP32 guide](esp32-board.md)

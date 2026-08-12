@@ -19,7 +19,7 @@ For recommended board setup flows, see [pydevices install workflows](https://pyd
 - `eventsys` — optional application event traffic controller
 - `audiodev` — portable PCM audio interfaces
 - `displaydev` — display drivers (BusDisplay, SDLDisplay, PGDisplay, etc.) from [pydevices](https://github.com/PyDevices/pydevices)
-- `multimer` — cross-platform timers; see [multimer](../concepts/multimer.md) (pydevices)
+- `multimer` — cross-platform timers; see [multimer](https://pydevices.github.io/pydevices/multimer.html) (pydevices)
 - `events` / `keys` — event types and key codes (pydevices)
 
 **Sister packages** (separate repos, installed from the same [micropython-lib MIP index](mip-micropython-lib.md)):

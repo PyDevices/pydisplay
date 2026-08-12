@@ -7,7 +7,7 @@ quit from another thread; call :func:`install_deadline_hook` so
 ``multimer.sleep_ms`` / ``Runtime.poll`` cooperatively exit after ``DURATION_S``.
 
 The underlying API is ``multimer.set_deadline_hook`` — development and
-troubleshooting only; see docs/concepts/multimer.md.
+troubleshooting only; see https://pydevices.github.io/pydevices/multimer.html.
 """
 
 ENABLED = False

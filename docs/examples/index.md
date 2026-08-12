@@ -9,7 +9,7 @@ mip.install("github:PyDevices/pydevices-examples/packages/examples.json", target
 Preferred: set `PYTHONPATH`/`MICROPYPATH` to `.:lib:utils`, `cd src`, then run `python3 examples/<name>.py` (or `from examples import <name>` at the REPL) — see [full clone](../installation/full-clone.md).
 
 !!! tip "Start here"
-    New to pydevices-examples? Copy the [**App starter**](app-starter.md) boilerplate to begin your first app, then read the [**pydevices_demo** guide](pydevices_demo.md) for rotation, scrolling, and buffered text.
+    New to pydevices-examples? Copy the [**App starter**](app-starter.md) boilerplate to begin your first app, then read the [**pydevices_demo** guide](pydevices-demo.md) for rotation, scrolling, and buffered text.
 
 ## PyScript gallery markers
 
@@ -117,7 +117,7 @@ runtime.run_forever()
 | Step | Script | Platforms | Packages | Screenshot |
 |------|--------|-----------|----------|------------|
 | 0 | [**App starter**](app-starter.md) (doc boilerplate) | CPython · MCU · PyScript | core | — |
-| 1 | [`pydevices_demo.py`](pydevices_demo.md) | CPython · MCU | core | — |
+| 1 | [`pydevices_demo.py`](pydevices-demo.md) | CPython · MCU | core | — |
 | 2 | `color_test.py` | CPython · MCU | core | [color_test](https://raw.githubusercontent.com/PyDevices/pydevices-examples/main/docs/screenshots/color_test.png) |
 | 3 | `eventsys_simpletest.py` | CPython · MCU · PyScript | core | — |
 | 4 | `framebuf_simpletest.py` | CPython · MCU | core | [framebuf](https://raw.githubusercontent.com/PyDevices/pydevices-examples/main/docs/screenshots/framebuf_simpletest.png) |
@@ -134,7 +134,7 @@ PyScript requires asyncio — see [PyScript asyncio guide](../guides/pyscript-as
 | Resource | Description | Platforms | Packages |
 |----------|-------------|-----------|----------|
 | [**App starter**](app-starter.md) | Copy-paste app boilerplate (doc only) | CPython · MCU · PyScript | core |
-| [`pydevices_demo.py`](pydevices_demo.md) | Clicks, rotation, scroll (`runtime.run_forever`) | CPython · MCU · PyScript | core |
+| [`pydevices_demo.py`](pydevices-demo.md) | Clicks, rotation, scroll (`runtime.run_forever`) | CPython · MCU · PyScript | core |
 | `hello.py` | Minimal text (`tft_config`) | CPython · MCU · Wokwi | core |
 | `color_test.py` | Color bars | CPython · MCU | core |
 | `logo.py` | Logo drawing | CPython · MCU | core |

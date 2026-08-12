@@ -96,7 +96,7 @@ git clone https://github.com/adafruit/Adafruit_CircuitPython_Ticks.git
 mkdir -p cp-user-config
 # Create cp-user-config/user_post_mpconfigport.mk so FROZEN_MPY_DIRS points at
 # those clones and MICROPY_PY_ASYNCIO / select / traceback are enabled.
-# See [multimer](../concepts/multimer.md).
+# See [multimer](https://pydevices.github.io/pydevices/multimer.html).
 
 cd circuitpython/ports/unix && make -j VARIANT=coverage -I ../../../../cp-user-config
 ```

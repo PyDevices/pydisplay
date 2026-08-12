@@ -4,7 +4,7 @@ Browser project for [wokwi.com](https://wokwi.com): PyDevices core + `pygraphics
 
 **Guide:** [Wokwi simulator](../../docs/guides/wokwi.md) · **Hardware:** [Wokwi reference](https://pydevices.github.io/pydevices/wokwi.html)
 
-Board config: [`wokwi_ili9341_ft6x36_esp32s3`](../../board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3/)
+Board config: [`wokwi_ili9341_ft6x36_esp32s3`](https://github.com/PyDevices/pydevices/tree/main/board_configs/busdisplay/spi/wokwi_ili9341_ft6x36_esp32s3)
 
 ## Files
 

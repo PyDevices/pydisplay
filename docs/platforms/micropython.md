@@ -63,7 +63,7 @@ Install the desktop MIP board package or select a
 
 `SDLDisplay` and the `multimer` `sdl2` timer backend import **`usdl2`** (an SDL2 subset). On desktop hosts, install it with the rest of the desktop board stack:
 
-- **CPython:** [`pydevices-desktop`](https://pydevices.github.io/pydevices/pydevices-desktop.html) from TestPyPI (use the [two-index install](../installation/index.md#pypi--pip-testpypi)), which bundles `usdl2` with the desktop `board_config`
+- **CPython:** [`pydevices-desktop`](https://pydevices.github.io/pydevices/pydevices-desktop.html) from TestPyPI (use the [two-index install](../installation/index.md#pypi-pip-testpypi)), which bundles `usdl2` with the desktop `board_config`
 - **MicroPython / CircuitPython Unix (and `micropython.exe`):** the MIP desktop board package from [pydevices](https://github.com/PyDevices/pydevices) (`board_configs/desktop`, which pulls in `drivers/usdl2.py`)
 
 When a native `usdl2` module is already present in the firmware or environment, that build is used; otherwise the pure-Python binding from `pydevices-desktop` / the MIP desktop board provides `import usdl2`. Desktop MicroPython / CircuitPython unix firmware that includes [displayif](https://github.com/PyDevices/displayif) freezes native `usdl2` (it wins over MIP `lib/usdl2.py`). Timer auto-selection is unchanged (`multimer` still prefers `_librt` or threading backends first on each platform).
@@ -97,4 +97,5 @@ make USER_C_MODULES=../../.. FROZEN_MANIFEST=../../../pydevices/manifest.py
 
 ([cmods](https://github.com/PyDevices/cmods) `./build_mp.sh` is an optional convenience wrapper for the same sibling layout — not required.)
 
-See [multimer](../concepts/multimer.md) and [tools/README.md](../../tools/README.md).
+See [multimer](https://pydevices.github.io/pydevices/multimer.html) and the
+[example test tools](https://github.com/PyDevices/pydevices-examples/blob/main/tools/README.md).

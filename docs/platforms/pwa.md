@@ -29,7 +29,7 @@ A PWA is still a website on HTTPS. Python runs inside the page; the browser owns
 | **Chrome / Edge (Windows, macOS, Linux)** | Address-bar install icon or **Install app**; `beforeinstallprompt` | Standalone app window | Best-supported desktop path |
 | **Chrome on Android** | **Install app** / Add to Home screen | Launcher icon; standalone | Phone/tablet web install — not the same as the [Android APK](android.md) |
 | **Chromebook (Chrome OS)** | Same as desktop Chrome | Launcher / shelf icon | Treat as Chromium desktop |
-| **Safari on iOS / iPadOS** | **Share → Add to Home Screen** (no programmatic prompt) | Home-screen icon; opens fullscreen-ish WebKit | See [Apple mobile](#apple-mobile-ios--ipados) |
+| **Safari on iOS / iPadOS** | **Share → Add to Home Screen** (no programmatic prompt) | Home-screen icon; opens fullscreen-ish WebKit | See [Apple mobile](#apple-mobile-ios-ipados) |
 | **Firefox / Safari (desktop)** | Limited or no Chromium-style install prompt | Often stays a bookmark / tab | Gallery still runs in-tab; install polish is Chromium-first |
 | **LG webOS / Samsung Tizen (TV browsers)** | Host web app / browser only | In-browser or platform web-app packaging | **Web path only** — no native `SDLDisplay` on TV OS shells |
 
@@ -55,7 +55,7 @@ Safari never fires `beforeinstallprompt`. The gallery button shows a short **Sha
 | **Tab** | Normal browser chrome; URL bar visible |
 | **Installed standalone** | App-like window; gallery keeps same-origin demo links in one window (Chromium would otherwise open a new app window for `target="_blank"`) |
 
-Details and manifest/`pwa.js` behavior: [PWA guide — wire pages](../guides/pyscript-pwa.md#step-3--wire-your-html-pages).
+Details and manifest/`pwa.js` behavior: [PWA guide — wire pages](../guides/pyscript-pwa.md#step-3-link-the-manifest-and-register-the-worker).
 
 ---
 
@@ -103,7 +103,7 @@ LG webOS and Samsung Tizen ship Chromium-based browsers and encourage **web apps
 
 TV Back (`BrowserBack` / `GoBack` / `Back`) maps to `keys.K_AC_BACK` so `PSDisplay.quit_chord` matches Android remotes.
 
-Native Android TV / Fire OS APKs are separate — see [Android TV / Fire OS](android.md#android-tv--fire-os).
+Native Android TV / Fire OS APKs are separate — see [Android TV / Fire OS](android.md#android-tv-fire-os).
 
 ---
 

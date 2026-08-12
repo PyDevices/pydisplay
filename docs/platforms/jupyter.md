@@ -33,7 +33,7 @@ corresponding host device.
 
 Touch examples (e.g. [`eventsys_touch_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/eventsys_touch_test.py)) render a single interactive **ipywidgets Image** — click on that widget.
 
-`JNDevices` captures mouse (motion/buttons), wheel, and keyboard input on that Image widget via `ipyevents`. The widget must be focused (clicked) to receive key events, and some keys may be consumed by the notebook front end. Quit uses `JNDisplay.quit_chord` (**Back** / `keys.K_AC_BACK` by default); reassign if the front end intercepts it. See [Displays → How displays expose input](../concepts/displays.md#how-displays-expose-input).
+`JNDevices` captures mouse (motion/buttons), wheel, and keyboard input on that Image widget via `ipyevents`. The widget must be focused (clicked) to receive key events, and some keys may be consumed by the notebook front end. Quit uses `JNDisplay.quit_chord` (**Back** / `keys.K_AC_BACK` by default); reassign if the front end intercepts it. See [Displays → How displays expose input](https://pydevices.github.io/pydevices/displaydev.html#how-displays-expose-input).
 
 ## Async execution model
 
@@ -44,7 +44,7 @@ and widget callbacks are delivered only when control returns to it.
 
 Examples keep the app alive with **`runtime.run_forever()`** (subscribe callbacks, then run). For a custom async `main()`, use **`runtime.run_async(main)`** rather than `asyncio.run(main())`. On Jupyter the kernel already has a running loop, so `run_async` schedules `main` as a background task and returns immediately (the cell finishes while the coroutine continues). On desktop/MCU with no loop running yet, it blocks via `asyncio.run`. Calling `asyncio.run(main())` directly in a notebook raises `RuntimeError: asyncio.run() cannot be called from a running event loop`.
 
-Custom wait-for-touch loops yield with `await multimer.sleep_ms(0)` each iteration so the kernel can dispatch widget events between polls. See [Runtime](../concepts/runtime.md) and [multimer](../concepts/multimer.md) (`AsyncTimer`, `sleep_ms`).
+Custom wait-for-touch loops yield with `await multimer.sleep_ms(0)` each iteration so the kernel can dispatch widget events between polls. See [Runtime](https://pydevices.github.io/pydevices/application-runtime.html) and [multimer](https://pydevices.github.io/pydevices/multimer.html) (`AsyncTimer`, `sleep_ms`).
 
 ## Cursor / VS Code widget rendering
 

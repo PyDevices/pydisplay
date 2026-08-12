@@ -78,8 +78,8 @@ Prefer Playwright helpers over poking the IDE browser when demos hang:
 
 | Script | Purpose |
 |--------|---------|
-| [`tools/ps_debug.py`](../../tools/ps_debug.py) | CDP console + network probe for a harness/load URL |
-| [`tools/ps_shot.py`](../../tools/ps_shot.py) | Timed screenshot with a hard kill if Chromium stalls |
+| [`tools/ps_debug.py`](https://github.com/PyDevices/pydevices-examples/blob/main/tools/ps_debug.py) | CDP console + network probe for a harness/load URL |
+| [`tools/ps_shot.py`](https://github.com/PyDevices/pydevices-examples/blob/main/tools/ps_shot.py) | Timed screenshot with a hard kill if Chromium stalls |
 
 ```bash
 python tools/serve.py   # separate terminal
@@ -94,7 +94,7 @@ never yields. Prefer `runtime.run_forever()` / async sleep patterns from the
 `ps_debug.py` before assuming a gallery or package map regression.
 
 Matrix notes (serve.py, Playwright install, `needs_playwright`):
-[tools/README.md — Example test matrix](../../tools/README.md#example-test-matrix).
+[tools/README.md — Example test matrix](https://github.com/PyDevices/pydevices-examples/blob/main/tools/README.md#example-test-matrix).
 
 ## Next
 

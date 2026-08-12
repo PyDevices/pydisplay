@@ -6,7 +6,7 @@
 - [Try pydevices-examples](try/index.md) — browser and Wokwi demos
 - [Troubleshooting](troubleshooting.md) — common errors
 - [Installation](installation/index.md)
-- [Examples catalog](examples/index.md) — start with [**pydevices_demo**](examples/pydevices_demo.md)
+- [Examples catalog](examples/index.md) — start with [**pydevices_demo**](examples/pydevices-demo.md)
 - [API reference](reference/) — generated from source docstrings
 - [Building docs](building-docs.md) — `mkdocs serve` and ReadTheDocs
 

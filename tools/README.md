@@ -165,7 +165,7 @@ see [Windows PE under WSL](#windows-pe-under-wsl).
 **Async timers on desktop:** the kit forwards `PYDEVICES_TIMER_ASYNC` as wrapper
 `--timer-async` (uses `env_set`, works for Windows PE under WSL). Shell export
 is the preferred way to select mode for a full kit run (see Preferred method
-above). Semantics: [Runtime — timer_async](../docs/concepts/runtime.md#timer_async-in-srclibboard_configpy).
+above). Semantics: [Runtime — timer_async](https://pydevices.github.io/pydevices/application-runtime.html#timer_async-in-srclibboard_configpy).
 
 ### Windows PE under WSL
 
@@ -260,7 +260,7 @@ Headless needs Playwright (`.venv/bin/pip install -r requirements-dev.txt` and
 `--multimer-backend` to the wrapper). Both call `multimer.use_backend()` inside
 the child, so they also work for the Windows `.exe` runtimes, which cannot read
 WSL-exported env vars. Runtimes lacking that backend report `unavailable` and do
-not fail the run. Semantics: [multimer — Overriding the backend](../docs/concepts/multimer.md#overriding-the-backend).
+not fail the run. Semantics: [multimer — Overriding the backend](https://pydevices.github.io/pydevices/multimer.html#overriding-the-backend).
 
 ## TestPyPI desktop smoke test
 
@@ -315,7 +315,7 @@ the binary-bundled ``imageio-ffmpeg`` Python package.
 
 ### IDE typings (`tools/typings/`)
 
-`stubPath` for Pylance / pyright ([`.vscode/settings.json`](../.vscode/settings.json), [`pyrightconfig.json`](../pyrightconfig.json)):
+`stubPath` for Pylance / pyright (`.vscode/settings.json`, [`pyrightconfig.json`](../pyrightconfig.json)):
 
 | Content | Source |
 |---------|--------|
@@ -323,4 +323,4 @@ the binary-bundled ``imageio-ffmpeg`` Python package.
 | `displaydev` / `eventsys` / `multimer` / `events` / `keys` | committed package trees / modules; regenerate with [`../scripts/gen_package_pyi.sh`](../scripts/gen_package_pyi.sh) |
 | `lvgl` | committed `tools/typings/lvgl.pyi` (from `cmods/lvgl-bindings/generated/lvgl.pyi`) |
 
-Confirm **Python: Select Interpreter** → `.venv/bin/python`. Cursor uses **cursorpyright** with `stubPath` / `typeshedPaths` → `tools/typings` (see [`.vscode/settings.json`](../.vscode/settings.json)).
+Confirm **Python: Select Interpreter** → `.venv/bin/python`. Cursor uses **cursorpyright** with `stubPath` / `typeshedPaths` → `tools/typings` (configured in a local `.vscode/settings.json` when present).

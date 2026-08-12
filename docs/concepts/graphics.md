@@ -128,16 +128,16 @@ and heights 8/14/16, use `pygraphics.text8` / `text14` / `text16` or `pygraphics
 controls transparency, RAM use, and how much data hits the panel bus.
 
 The multipath `font_simpletest.py` example uses the same `Font` + romfont `.bin` files but
-cycles different targets in one run. [`pydevices_demo`](../examples/pydevices_demo.md) follows the
+cycles different targets in one run. [`pydevices_demo`](../examples/pydevices-demo.md) follows the
 **string framebuffer + one blit** pattern (`string_blit`).
 
 | Pattern | Example | Background | Extra RAM | What hits the display | Typical sweet spot |
 |---------|---------|------------|-----------|----------------------|-------------------|
 | **Module helpers on canvas** | `pygraphics.text8(display_drv, …)` | Transparent (foreground pixels only) | None | One small `fill_rect` per lit pixel | Short labels, minimum RAM |
-| **String FB → one blit** | [`font_simpletest.py`](../examples/font_simpletest.py) (`string_blit`) | **Opaque** — `fb.fill(bg)` before `font.text` | One buffer sized to the string (reusable slice is better; see pydevices_demo) | **One** `blit_rect` per string | Desktop/SDL (batch then `show()`), SPI panels when RAM is tight |
-| **Draw on `display_drv`** | [`font_simpletest.py`](../examples/font_simpletest.py) (`per_pixel`) | Transparent | None | One `fill_rect` per lit pixel on the live driver | Simplest code path; **slowest** on MCU and desktop |
-| **Full-screen `DisplayBuffer` + dirty blit** | [`font_simpletest.py`](../examples/font_simpletest.py) (`displaybuf`) | Transparent over existing buffer contents | **Full panel** `DisplayBuffer` | `display.show(dirty)` — one row `blit_rect` per dirty scanline | MCUs with enough RAM; many text updates; fastest of the three modes |
-| **Catalog / inspect fonts** | [`font_list.py`](../examples/font_list.py) | Opaque row buffer | One strip `width × height` per font | One `blit_rect` per font row | Browsing `.bin` files on disk |
+| **String FB → one blit** | [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/font_simpletest.py) (`string_blit`) | **Opaque** — `fb.fill(bg)` before `font.text` | One buffer sized to the string (reusable slice is better; see pydevices_demo) | **One** `blit_rect` per string | Desktop/SDL (batch then `show()`), SPI panels when RAM is tight |
+| **Draw on `display_drv`** | [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/font_simpletest.py) (`per_pixel`) | Transparent | None | One `fill_rect` per lit pixel on the live driver | Simplest code path; **slowest** on MCU and desktop |
+| **Full-screen `DisplayBuffer` + dirty blit** | [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/font_simpletest.py) (`displaybuf`) | Transparent over existing buffer contents | **Full panel** `DisplayBuffer` | `display.show(dirty)` — one row `blit_rect` per dirty scanline | MCUs with enough RAM; many text updates; fastest of the three modes |
+| **Catalog / inspect fonts** | [`font_list.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/font_list.py) | Opaque row buffer | One strip `width × height` per font | One `blit_rect` per font row | Browsing `.bin` files on disk |
 
 #### Module helpers (`text8`, `text14`, `text16`)
 
@@ -173,7 +173,7 @@ display_drv.show()         # SDL/pygame: present the frame
   this batches well. On **MCU** panels that flush each `blit_rect` immediately, this still beats
   per-pixel drawing because the bus sees one contiguous block per string.
 - Production apps often keep a **reusable** buffer sized for the longest line (see
-  [pydevices_demo](../examples/pydevices_demo.md)) instead of allocating every frame like the
+  [pydevices_demo](../examples/pydevices-demo.md)) instead of allocating every frame like the
   simpletest does.
 
 #### Direct draw on `display_drv` (`per_pixel`)
@@ -279,5 +279,5 @@ See [Drawing and fonts](drawing-and-fonts.md) for the wider pydevices-examples d
 ## Next
 
 - [Graphics files](graphics-files.md) — loaders and BMP565
-- [Displays](displays.md)
+- [Displays](https://pydevices.github.io/pydevices/displaydev.html)
 - [pygraphics source and API](https://github.com/PyDevices/pygraphics)

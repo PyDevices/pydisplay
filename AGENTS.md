@@ -87,7 +87,7 @@ Board configs never own a runtime. `AutoDisplay` is imported from
 ### `PYDEVICES_TIMER_ASYNC` (agents / matrix)
 
 Host defaults and env semantics:
-[Runtime — `timer_async`](docs/concepts/runtime.md#timer_async-in-srclibboard_configpy).
+[Runtime — `timer_async`](https://pydevices.github.io/pydevices/application-runtime.html#timer_async-in-srclibboard_configpy).
 Examples never read this variable — only library `board_config` and harnesses
 that call `displaydev.env_set`.
 
@@ -142,7 +142,7 @@ App pattern: queue work and drain on the main tick — see `roku_widgets` /
   timer kit covers dedicated click checks — its daemon-thread quit injection is
   incompatible with the generic example matrix for some ports.
 - **`multimer` is fragile** — before editing hardware `lib/multimer/`, read
-  [multimer concepts](docs/concepts/multimer.md) and follow the local Cursor
+  [multimer concepts](https://pydevices.github.io/pydevices/multimer.html) and follow the local Cursor
   rule `multimer-fragile` (thinking model, small diffs, revert failures). Do not
   duplicate that rule text in this repo.
 
@@ -157,8 +157,8 @@ LVGL and mpftp soft-reset:
   and firmware.
 - Symptom table, wrap architecture, and bring-up methods live in the sibling
   displayif repo:
-  [`SOFT_RESET_AND_BRINGUP.md`](https://github.com/PyDevices/displayif/blob/main/docs/SOFT_RESET_AND_BRINGUP.md)
-  (local: `../cmods/displayif/docs/SOFT_RESET_AND_BRINGUP.md` or
+  [`soft-reset-and-bring-up.md`](https://github.com/PyDevices/displayif/blob/main/docs/soft-reset-and-bring-up.md)
+  (local: `../cmods/displayif/docs/soft-reset-and-bring-up.md` or
   `~/gh/pydevices/cmods/displayif/…`). Start at displayif `AGENTS.md`.
 - Do not leave flash-backed debug logs on the touch/refresh path (looks like
   flicker). Fix displayif/bindings root causes rather than board_config

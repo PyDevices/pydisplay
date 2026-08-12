@@ -138,6 +138,6 @@ The table shows the timer backend in each cell (e.g. `librt.Timer, ok` / `_async
 
 ## Next
 
-- [Architecture](../concepts/architecture.md)
-- [Events](../concepts/events.md)
-- [API reference → displaydev](../reference/overviews/displaydev.md)
+- [Architecture](https://pydevices.github.io/pydevices/architecture.html)
+- [Events](https://pydevices.github.io/pydevices/eventsys.html)
+- [displaydev product guide](https://pydevices.github.io/pydevices/displaydev.html)

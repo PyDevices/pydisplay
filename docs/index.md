@@ -30,7 +30,7 @@ More examples are in the [screenshot gallery](screenshots/README.md).
 | Run the examples on desktop | [Desktop CPython guide](guides/desktop-cpython.md) |
 | Run on an ESP32 / MicroPython board | [ESP32 board guide](guides/esp32-board.md) |
 | Browse every example | [Example catalog](examples/index.md) |
-| Understand the application wiring | [Architecture](concepts/architecture.md) |
+| Understand the application wiring | [Architecture](https://pydevices.github.io/pydevices/architecture.html) |
 
 ## Product and showcase
 

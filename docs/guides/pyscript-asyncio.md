@@ -2,7 +2,7 @@
 
 **Who:** You want an existing pydevices-examples example to run in the browser via PyScript.
 
-**Prerequisites:** [PyScript local setup](pyscript.md). Read [Events concept](../concepts/events.md) first.
+**Prerequisites:** [PyScript local setup](pyscript.md). Read [Events concept](https://pydevices.github.io/pydevices/eventsys.html) first.
 
 ## Why asyncio?
 
@@ -74,7 +74,7 @@ Regenerate manifest after adding examples: `./scripts/install_refresh_manifests.
 
 ## Next
 
-- [multimer](../concepts/multimer.md)
+- [multimer](https://pydevices.github.io/pydevices/multimer.html)
 - [Try pydevices-examples](../try/index.md)
 - [Troubleshooting](../troubleshooting.md)
 - [Contributing](../contributing.md) — PyScript PRs welcome

@@ -44,7 +44,7 @@ plugins:
     - scripts/mkdocs_gen_ref_pages.py
     - scripts/mkdocs_gen_notebook_pages.py
 - literate-nav:
-    nav_file: SUMMARY.md
+    nav_file: summary.md
 - section-index
 - mkdocs-jupyter:
     include_source: true
@@ -90,13 +90,13 @@ nav:
     - GitHub MIP: installation/mip-github.md
     - micropython-lib MIP: installation/mip-micropython-lib.md
   - Hardware setup:
-    - Overview (pydevices): hardware/index.md
+    - Overview (pydevices): https://pydevices.github.io/pydevices/README.html
   - Learn:
-    - Architecture: concepts/architecture.md
-    - Displays: concepts/displays.md
-    - Events: concepts/events.md
-    - Runtime: concepts/runtime.md
-    - multimer: concepts/multimer.md
+    - Architecture (pydevices): https://pydevices.github.io/pydevices/architecture.html
+    - Displays (pydevices): https://pydevices.github.io/pydevices/displaydev.html
+    - Events (pydevices): https://pydevices.github.io/pydevices/eventsys.html
+    - Runtime (pydevices): https://pydevices.github.io/pydevices/application-runtime.html
+    - multimer (pydevices): https://pydevices.github.io/pydevices/multimer.html
     - Drawing and fonts: concepts/drawing-and-fonts.md
     - Graphics: concepts/graphics.md
     - Graphics files: concepts/graphics-files.md
@@ -114,7 +114,7 @@ nav:
     - PyScript: platforms/pyscript.md
   - Examples:
     - App starter: examples/app-starter.md
-    - pydevices_demo: examples/pydevices_demo.md
+    - pydevices demo: examples/pydevices-demo.md
     - Catalog: examples/index.md
     - Live demos: examples/live-demos.md
   - Ecosystem & GUIs:
@@ -134,11 +134,6 @@ nav:
     - Getting help: getting-help.md
     - Troubleshooting: troubleshooting.md
 - API reference:
-  - Package overviews:
-    - displaydev: reference/overviews/displaydev.md
-    - eventsys: reference/overviews/eventsys.md
-    - graphics: reference/overviews/graphics.md
-    - multimer: reference/overviews/multimer.md
   - Utils API: reference/utils/
 
 markdown_extensions:

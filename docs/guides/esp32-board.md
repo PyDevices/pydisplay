@@ -56,7 +56,7 @@ Under a mounted dev tree, `examples/` stays a subdirectory — resolve it as a p
 import pydevices_demo
 ```
 
-See [**pydevices_demo**](../examples/pydevices_demo.md) for what the script demonstrates (clicks, rotation, scrolling). To start your own app, copy the [**App starter**](../examples/app-starter.md) boilerplate. Legacy `hello.py` uses `tft_config` if you are porting older st7789py examples.
+See [**pydevices_demo**](../examples/pydevices-demo.md) for what the script demonstrates (clicks, rotation, scrolling). To start your own app, copy the [**App starter**](../examples/app-starter.md) boilerplate. Legacy `hello.py` uses `tft_config` if you are porting older st7789py examples.
 
 ## 4. Try events
 
@@ -74,9 +74,9 @@ discovery. Details: [MicroPython platform notes](../platforms/micropython.md#bac
 ## Next
 
 - [**App starter**](../examples/app-starter.md) — copy-paste template for your first app
-- [**pydevices_demo**](../examples/pydevices_demo.md) — flagship feature demo (display, input, scroll)
+- [**pydevices_demo**](../examples/pydevices-demo.md) — flagship feature demo (display, input, scroll)
 - [Examples catalog](../examples/index.md) — suggested learning order
-- [Events concept](../concepts/events.md) — runtime poll loop
+- [Events concept](https://pydevices.github.io/pydevices/eventsys.html) — runtime poll loop
 - [MicroPython platform notes](../platforms/micropython.md) — bus drivers, frozen firmware
 - [Troubleshooting](../troubleshooting.md)
 

@@ -66,7 +66,7 @@ LVGL examples use `display_driver`.
 
 `multimer` selects an appropriate host backend. It avoids mixing the SDL timer
 backend into pygame processes and falls back to threading or polling where
-needed. See [multimer](../concepts/multimer.md) for the detailed matrix.
+needed. See [multimer](https://pydevices.github.io/pydevices/multimer.html) for the detailed matrix.
 
 ## MicroPython and CircuitPython on Unix
 

@@ -39,7 +39,7 @@ See also: https://pydisplay.readthedocs.io/en/latest/concepts/displays/
 ## pydevices-examples-specific notes
 
 - **`Area` returns:** Drawing helpers that return dirty regions use `pygraphics.Area` (`x`, `y`, `w`, `h`).
-- **Runtime:** Document poll/subscribe patterns; link to [Events concept](../concepts/events.md).
+- **Runtime:** Document poll/subscribe patterns; link to [Events concept](https://pydevices.github.io/pydevices/eventsys.html).
 - **Private API:** Names starting with `_` are excluded from mkdocstrings output; minimal or no docstrings are fine.
   Document public methods that live on private implementation bases when they surface via inheritance
   (e.g. `multimer.Timer` ← `_TimerCore.init` / `deinit` with `inherited_members: true`).

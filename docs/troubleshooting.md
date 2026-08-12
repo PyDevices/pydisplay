@@ -98,7 +98,7 @@ kill; the kit now captures PE output to temp files.
 
 **Fix:** restore real Windows video for PE (no `SDL_*` forward); fix the quit
 path so the example exits and prints `EXAMPLE_RESULT`. Details:
-[tools/README.md — Windows PE under WSL](../tools/README.md#windows-pe-under-wsl).
+[tools/README.md — Windows PE under WSL](https://github.com/PyDevices/pydevices-examples/blob/main/tools/README.md#windows-pe-under-wsl).
 
 ### Square/box artifact and touch-drag lag on long presses (touchscreen, Ubuntu/WSLg)
 
@@ -139,7 +139,7 @@ testing.
 
 ### Simulation starts but display stays blank
 
-**Fix:** Use files from [`wokwi/`](../../web/wokwi/). Confirm `main.py` installs the core packages and the Wokwi board config before `import testris`.
+**Fix:** Use files from [`web/wokwi/`](https://github.com/PyDevices/pydevices-examples/tree/main/web/wokwi). Confirm `main.py` installs the core packages and the Wokwi board config before `import testris`.
 
 ### `IndexError` on last keypad row (`TouchKeypad`)
 

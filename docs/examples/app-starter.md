@@ -6,7 +6,7 @@ and pydevices-examples's small `app_runtime` helper.
 | Use this | When you want… |
 |----------|----------------|
 | **App starter** (this page) | A minimal template: draw the UI, handle clicks, `runtime.run_forever()` |
-| [**pydevices_demo**](pydevices_demo.md) | A feature tour: rotation, hardware scrolling, buffered text, timers |
+| [**pydevices_demo**](pydevices-demo.md) | A feature tour: rotation, hardware scrolling, buffered text, timers |
 
 ## Prerequisites
 
@@ -134,12 +134,12 @@ Recreate `Area` objects whenever you change layout (same pattern as real apps wi
 
 Per-event handling stays in callbacks registered with `runtime.on(...)`. The
 starter handles `MOUSEBUTTONDOWN` only. Add more `runtime.on` subscriptions for
-keys, encoders, and other devices — see [Events](../concepts/events.md).
+keys, encoders, and other devices — see [Events](https://pydevices.github.io/pydevices/eventsys.html).
 
 ### Main loop
 
 `runtime.run_forever()` keeps the app live on every host — see
-[Runtime](../concepts/runtime.md) and [multimer](../concepts/multimer.md).
+[Runtime](https://pydevices.github.io/pydevices/application-runtime.html) and [multimer](https://pydevices.github.io/pydevices/multimer.html).
 PyScript and Jupyter board configs export `timer_async=True`; desktop defaults
 to sync unless `PYDEVICES_TIMER_ASYNC=1` is set before the coordinator is created.
 
@@ -148,16 +148,16 @@ to sync unless `PYDEVICES_TIMER_ASYNC=1` is set before the coordinator is create
 1. **Rename** the file and module docstring.
 2. **Layout** — add more `Area` regions, sprites, or shapes in `redraw()`.
 3. **Text** — for labels and lists, use `Font` + `FrameBuffer` + `blit_rect` ([Drawing and fonts](../concepts/drawing-and-fonts.md), [`font_simpletest.py`](https://github.com/PyDevices/pydevices-examples/blob/main/src/examples/font_simpletest.py)).
-4. **Timers** — use `runtime.on_tick(callback, period=…, async_=runtime.timer_async)`; see [multimer](../concepts/multimer.md) and [**pydevices_demo**](pydevices_demo.md).
+4. **Timers** — use `runtime.on_tick(callback, period=…, async_=runtime.timer_async)`; see [multimer](https://pydevices.github.io/pydevices/multimer.html) and [**pydevices_demo**](pydevices-demo.md).
 
 !!! tip "Next steps beyond this template"
-    - **Rotation and hardware scroll** — [pydevices_demo](pydevices_demo.md)
-    - **Event types and runtime** — [Events](../concepts/events.md), [Runtime](../concepts/runtime.md)
+    - **Rotation and hardware scroll** — [pydevices_demo](pydevices-demo.md)
+    - **Event types and runtime** — [Events](https://pydevices.github.io/pydevices/eventsys.html), [Runtime](https://pydevices.github.io/pydevices/application-runtime.html)
     - **All example scripts** — [Examples catalog](index.md)
 
 ## Related docs
 
 - [Board configs](https://pydevices.github.io/pydevices/board-configs.html) — choose and customize `board_config.py`
-- [Architecture](../concepts/architecture.md) — how board_config, displaydev, and eventsys fit together
-- [pydevices_demo](pydevices_demo.md) — flagship feature demo (rotation, scroll, buffered text)
+- [Architecture](https://pydevices.github.io/pydevices/architecture.html) — how board_config, displaydev, and eventsys fit together
+- [pydevices_demo](pydevices-demo.md) — flagship feature demo (rotation, scroll, buffered text)
 - [Examples catalog](index.md) — full list of scripts

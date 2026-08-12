@@ -2,7 +2,7 @@
 
 Run pydevices-examples on a simulated ESP32-S3 with an ILI9341 capacitive touch display — no hardware required.
 
-**In-repo project:** [`wokwi/`](../../web/wokwi/)
+**In-repo project:** [`web/wokwi/`](https://github.com/PyDevices/pydevices-examples/tree/main/web/wokwi)
 
 **Who:** You want MCU-faithful testing (SPI display, I2C touch, MicroPython `machine` APIs) without flashing a board.
 
@@ -18,7 +18,7 @@ Run pydevices-examples on a simulated ESP32-S3 with an ILI9341 capacitive touch 
 ## Run in the browser
 
 1. Create a [new ESP32-S3 MicroPython project](https://wokwi.com/projects/new/micropython-esp32-s3).
-2. Replace **diagram.json** and **main.py** with the files from [`wokwi/`](../../web/wokwi/).
+2. Replace **diagram.json** and **main.py** with the files from [`web/wokwi/`](https://github.com/PyDevices/pydevices-examples/tree/main/web/wokwi).
 3. Start the simulation. Serial shows `mip` downloads, then `testris` appears.
 
 **Full install:** uncomment the two `utils` / `examples` lines in `main.py` before starting (several-minute first boot).
@@ -59,5 +59,5 @@ Hardware details: [Wokwi reference](https://pydevices.github.io/pydevices/wokwi.
 
 - [ESP32 board guide](esp32-board.md) — same workflow on real hardware
 - [Try pydevices-examples](../try/index.md) — PyScript browser demo
-- [pydevices_demo example](../examples/pydevices_demo.md)
+- [pydevices_demo example](../examples/pydevices-demo.md)
 - [Desktop CPython](desktop-cpython.md)

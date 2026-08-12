@@ -42,7 +42,7 @@ cd pydevices-android-template
 
 ## Stage an example over adb (`android.sh`)
 
-Host tool: [`pydevices-android-template/scripts/android.sh`](https://github.com/PyDevices/pydevices-android-template/blob/main/scripts/android.sh) (on PATH as `~/bin/android.sh` in Brad’s layout; `pydevices-examples/bin/android.sh` is a thin shim). Stages a **cwd path** onto the installed launcher and relaunches — same shape as CLI `python` / `micropython`, **not** [pyscript.sh](../../bin/pyscript.sh) gallery lookup.
+Host tool: [`pydevices-android-template/scripts/android.sh`](https://github.com/PyDevices/pydevices-android-template/blob/main/scripts/android.sh) (on PATH as `~/bin/android.sh` in Brad’s layout; `pydevices-examples/bin/android.sh` is a thin shim). Stages a **cwd path** onto the installed launcher and relaunches — same shape as CLI `python` / `micropython`, **not** [`pyscript.sh`](https://github.com/PyDevices/pydevices-examples/blob/main/bin/pyscript.sh) gallery lookup.
 
 ```bash
 cd pydevices-examples/src
@@ -116,7 +116,7 @@ Tilting the phone does **not** change orientation (same contract as an SPI LCD o
 
 ## Timers
 
-On Android, **multimer** skips auto **`sdl2`** (CPython `SDL_AddTimer` is not on the GLES thread → `EGL_BAD_ACCESS`). Auto-select falls through to **`threading`**; the launcher also sets `MULTIMER_BACKEND=threading`. See [multimer](../concepts/multimer.md).
+On Android, **multimer** skips auto **`sdl2`** (CPython `SDL_AddTimer` is not on the GLES thread → `EGL_BAD_ACCESS`). Auto-select falls through to **`threading`**; the launcher also sets `MULTIMER_BACKEND=threading`. See [multimer](https://pydevices.github.io/pydevices/multimer.html).
 
 ## Audio (lazy `audio_out`)
 

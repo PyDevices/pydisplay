@@ -19,11 +19,11 @@ with neutral PSDevices host input. Non-LVGL examples attach it through
 
 ## Apple mobile (iOS / iPadOS)
 
-There is no native iOS app on the foreseeable roadmap. Use **Mobile Safari** (or another WebKit browser) with the [PyScript gallery](https://PyDevices.github.io/pydevices-examples/pyscript/), optionally **Add to Home Screen** as a [PWA](pwa.md#apple-mobile-ios--ipados).
+There is no native iOS app on the foreseeable roadmap. Use **Mobile Safari** (or another WebKit browser) with the [PyScript gallery](https://PyDevices.github.io/pydevices-examples/pyscript/), optionally **Add to Home Screen** as a [PWA](pwa.md#apple-mobile-ios-ipados).
 
 ## Smart TVs (webOS / Tizen)
 
-Browser / PyScript only — see [PWA — Smart TVs](pwa.md#smart-tvs-webos--tizen) and the [`tv_remote_menu`](https://PyDevices.github.io/pydevices-examples/pyscript/micropython.html?modules=tv_remote_menu) example. Do not expect `SDLDisplay` on those OS shells.
+Browser / PyScript only — see [PWA — Smart TVs](pwa.md#smart-tvs-webos-tizen) and the [`tv_remote_menu`](https://PyDevices.github.io/pydevices-examples/pyscript/micropython.html?modules=tv_remote_menu) example. Do not expect `SDLDisplay` on those OS shells.
 
 ## Contributing
 
