@@ -2,7 +2,7 @@
 # Smoke-test PyDevices desktop wheels from TestPyPI in a throwaway venv.
 #
 # Installs displaydev (full package + board_config), usdl2, pygraphics,
-# and lvgl-cpython, then runs a short import/draw check (opens a real SDL window by default).
+# and pydevices-lvgl, then runs a short import/draw check (opens a real SDL window by default).
 #
 # Usage (from repo root):
 #   ./tools/test_testpypi_desktop.sh
@@ -29,7 +29,7 @@ Usage: ./tools/test_testpypi_desktop.sh [--headless] [--keep]
 
 Create a venv, pip-install TestPyPI desktop packages (no version pins), and smoke-test:
 
-  displaydev  usdl2  pygraphics  lvgl-cpython
+  displaydev  usdl2  pygraphics  pydevices-lvgl
 
 Environment:
   TESTPYPI_VENV   venv directory (default: /tmp/pydisplay-testpypi-venv)
@@ -77,7 +77,7 @@ python3 -m venv "$VENV"
     displaydev \
     usdl2 \
     pygraphics \
-    lvgl-cpython
+    pydevices-lvgl
 
 echo "--- installed ---"
 "$VENV/bin/pip" freeze | sort

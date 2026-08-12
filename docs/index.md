@@ -46,7 +46,7 @@ ESP32. Full matrix and backend notes: **[Portability & platforms](platforms/inde
 
 ## Build GUIs on top of it
 
-PyDisplay is the graphics, input, and timing backend for a growing family of LVGL bindings — [lv_micropython_cmod](https://github.com/PyDevices/lv_micropython_cmod), [lv_circuitpython_mod](https://github.com/PyDevices/lv_circuitpython_mod), and [lv_cpython_mod](https://github.com/PyDevices/lv_cpython_mod). You can build an LVGL app in pure Python, **develop it interactively in a Jupyter Notebook**, and run the identical code on a microcontroller. See [Ecosystem & sister projects](ecosystem.md).
+PyDisplay is the graphics, input, and timing backend for a growing family of LVGL bindings — [lvgl-micropython](https://github.com/PyDevices/lvgl-micropython), [lvgl-circuitpython](https://github.com/PyDevices/lvgl-circuitpython), and [lvgl-python](https://github.com/PyDevices/lvgl-python). You can build an LVGL app in pure Python, **develop it interactively in a Jupyter Notebook**, and run the identical code on a microcontroller. See [Ecosystem & sister projects](ecosystem.md).
 
 ## Quick links
 

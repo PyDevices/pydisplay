@@ -76,7 +76,7 @@ Typical runtime: **~10–20 minutes**.
     displaydev
   ```
 
-  Fuller desktop stack smoke test (`displaydev`, `pydisplay-desktop`, `pygraphics`, `lvgl-cpython`, `board_config` draw):
+  Fuller desktop stack smoke test (`displaydev`, `pydisplay-desktop`, `pygraphics`, `pydevices-lvgl`, `board_config` draw):
   this uses the native TestPyPI `pygraphics` build, while MicroPython MIP uses
   the pure-Python `pygraphics` package from micropython-lib.
 

@@ -273,7 +273,7 @@ not fail the run. Semantics: [multimer — Overriding the backend](../docs/conce
 ./tools/test_testpypi_desktop.sh --headless   # CI / SSH without DISPLAY
 ```
 
-Installs `displaydev`, `usdl2`, `pygraphics`, and `lvgl-cpython` (no version pins). See [Publishing micropython-lib — verify after publish](../docs/publishing-micropython-lib.md#4-verify).
+Installs `displaydev`, `usdl2`, `pygraphics`, and `pydevices-lvgl` (no version pins). See [Publishing micropython-lib — verify after publish](../docs/publishing-micropython-lib.md#4-verify).
 
 | Script | Purpose |
 |--------|---------|
@@ -321,6 +321,6 @@ the binary-bundled ``imageio-ffmpeg`` Python package.
 |---------|--------|
 | MicroPython stdlib stubs | committed under `tools/typings/` |
 | `displaydev` / `eventsys` / `multimer` / `events` / `keys` | committed package trees / modules; regenerate with [`../scripts/gen_package_pyi.sh`](../scripts/gen_package_pyi.sh) |
-| `lvgl` | committed `tools/typings/lvgl.pyi` (from `cmods/lv_bindings/generated/lvgl.pyi`) |
+| `lvgl` | committed `tools/typings/lvgl.pyi` (from `cmods/lvgl-bindings/generated/lvgl.pyi`) |
 
 Confirm **Python: Select Interpreter** → `.venv/bin/python`. Cursor uses **cursorpyright** with `stubPath` / `typeshedPaths` → `tools/typings` (see [`.vscode/settings.json`](../.vscode/settings.json)).

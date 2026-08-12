@@ -1,7 +1,7 @@
 --index-url https://test.pypi.org/simple/
 
 pygraphics>=0.0.31
-lvgl-cpython>=9.5.24
+pydevices-lvgl>=9.5.25
 multimer>=0.0.39
 eventsys>=0.0.39
 displaysys>=0.0.39

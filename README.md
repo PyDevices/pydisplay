@@ -29,7 +29,7 @@ Develop and debug on your laptop with a mouse, then deploy the *same* code to a 
 
 ### Build real GUIs on top of it
 
-PyDisplay is the graphics, input, and timing backend for a growing family of projects. The sister projects **[lv_micropython_cmod](https://github.com/PyDevices/lv_micropython_cmod)**, **[lv_circuitpython_mod](https://github.com/PyDevices/lv_circuitpython_mod)**, and **[lv_cpython_mod](https://github.com/PyDevices/lv_cpython_mod)** wire PyDisplay into [LVGL](https://lvgl.io/) for MicroPython, CircuitPython, and CPython respectively. That means you can build a polished LVGL application in pure Python — and **you can even develop your LVGL apps interactively in a Jupyter Notebook**, then run the identical code on a microcontroller.
+PyDisplay is the graphics, input, and timing backend for a growing family of projects. The sister projects **[lvgl-micropython](https://github.com/PyDevices/lvgl-micropython)**, **[lvgl-circuitpython](https://github.com/PyDevices/lvgl-circuitpython)**, and **[lvgl-python](https://github.com/PyDevices/lvgl-python)** wire PyDisplay into [LVGL](https://lvgl.io/) for MicroPython, CircuitPython, and CPython respectively. That means you can build a polished LVGL application in pure Python — and **you can even develop your LVGL apps interactively in a Jupyter Notebook**, then run the identical code on a microcontroller.
 
 It also drops straight in under [Nano-GUI](https://github.com/peterhinch/micropython-nano-gui), [MicroPython-Touch](https://github.com/peterhinch/micropython-touch), russhughes-style TFT/`st7789py` apps, the sister **[pdwidgets](https://github.com/PyDevices/pdwidgets)** toolkit, or your own widget library.
 

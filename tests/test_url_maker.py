@@ -54,7 +54,7 @@ class UrlMakerTests(unittest.TestCase):
         self.assertEqual(out["micropython"], "?modules=calc_lvgl,calc_engine")
         self.assertEqual(
             out["pyodide"],
-            "?modules=calc_lvgl,calc_engine&deps=lvgl-cpython",
+            "?modules=calc_lvgl,calc_engine&deps=pydevices-lvgl",
         )
 
     def test_run_shell_also_uses_deps_key(self):
@@ -66,7 +66,7 @@ class UrlMakerTests(unittest.TestCase):
         self.assertEqual(out["micropython"], "?manifests=car_cluster")
         self.assertEqual(
             out["pyodide"],
-            "?manifests=car_cluster&deps=lvgl-cpython",
+            "?manifests=car_cluster&deps=pydevices-lvgl",
         )
 
     def test_pygraphics_prefers_native_wheel(self):
@@ -125,9 +125,9 @@ class UrlMakerTests(unittest.TestCase):
         )
 
     def test_rewrite_helpers(self):
-        self.assertEqual(rewrite_wheel("lvgl"), "lvgl-cpython")
+        self.assertEqual(rewrite_wheel("lvgl"), "pydevices-lvgl")
         self.assertIsNone(rewrite_mip("lvgl"))
-        self.assertEqual(rewrite_wheel("display_driver"), "lvgl-cpython")
+        self.assertEqual(rewrite_wheel("display_driver"), "pydevices-lvgl")
         self.assertIsNone(rewrite_mip("display_driver"))
         self.assertEqual(rewrite_wheel("usdl2-py"), "usdl2")
         self.assertEqual(rewrite_mip("usdl2-py"), "usdl2")

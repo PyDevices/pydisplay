@@ -8,9 +8,9 @@ Three sister projects wire PyDisplay into [LVGL](https://lvgl.io/) — the popul
 
 | Project | Runtime | Role |
 |---------|---------|------|
-| [lv_micropython_cmod](https://github.com/PyDevices/lv_micropython_cmod) | MicroPython | LVGL bindings; PyDisplay drives display + input. |
-| [lv_circuitpython_mod](https://github.com/PyDevices/lv_circuitpython_mod) | CircuitPython | LVGL bindings backed by PyDisplay. |
-| [lv_cpython_mod](https://github.com/PyDevices/lv_cpython_mod) | CPython | LVGL bindings backed by PyDisplay. |
+| [lvgl-micropython](https://github.com/PyDevices/lvgl-micropython) | MicroPython | LVGL bindings; PyDisplay drives display + input. |
+| [lvgl-circuitpython](https://github.com/PyDevices/lvgl-circuitpython) | CircuitPython | LVGL bindings backed by PyDisplay. |
+| [lvgl-python](https://github.com/PyDevices/lvgl-python) | CPython | LVGL bindings backed by PyDisplay. |
 
 Because all three share PyDisplay as the backend, the *same* LVGL Python code runs on a microcontroller, on the desktop, and — see below — in a notebook.
 

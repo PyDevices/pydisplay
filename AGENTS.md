@@ -130,12 +130,12 @@ App pattern: queue work and drain on the main tick — see `roku_widgets` /
 ### LVGL
 
 - Install the CPython LVGL binding from TestPyPI (import name `lvgl`):
-  `.venv/bin/pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ lvgl-cpython`
-  (see https://github.com/PyDevices/lv_cpython_mod). The update script installs it.
-- `display_driver` (frozen in MP/CP LVGL firmwares; bundled with `lvgl-cpython`)
+  `.venv/bin/pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ pydevices-lvgl`
+  (see https://github.com/PyDevices/lvgl-python). The update script installs it.
+- `display_driver` (frozen in MP/CP LVGL firmwares; bundled with `pydevices-lvgl`)
   owns the LVGL `event_loop` (tick via `runtime.on_tick`, `asyncio` from
   `multimer`) and claims runtime display refresh so LVGL presents frames from
-  `task_handler`. SoT: [lv_bindings](https://github.com/PyDevices/lv_bindings)
+  `task_handler`. SoT: [lvgl-bindings](https://github.com/PyDevices/lvgl-bindings)
   `python/display_driver.py` — not shipped from this repo.
 - Test LVGL timers with `tools/lv_timer_test_kit.py` (modes: `sync`, `async`).
   Headless: `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/lv_timer_test_kit.py --only cpython-venv`.

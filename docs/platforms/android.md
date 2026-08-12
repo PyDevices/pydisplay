@@ -14,7 +14,7 @@ The default APK is **PyDevices Launcher** (`org.pydevices.launcher`): a baked LV
 
 ## Workspace
 
-Clone the Android packaging repo (TestPyPI supplies the wheels; a sibling `lv_cpython_mod` clone is optional for local development):
+Clone the Android packaging repo (TestPyPI supplies the wheels; a sibling `lvgl-python` clone is optional for local development):
 
 ```bash
 git clone https://github.com/PyDevices/pydisplay_android.git
@@ -100,7 +100,7 @@ Each launch hot-syncs `boot.py`, `stdio_sidecar.py`, and `mp_*.py` from a siblin
 The boot-entrypoint Java patch requires an APK rebuild (`./build_android.sh`); hot-sync alone cannot retarget an older package that still launches `main.py` first.
 ## LVGL on Android
 
-Prebuilt **`lvgl-cpython`** wheels for Android are on [TestPyPI](https://test.pypi.org/project/lvgl-cpython/) and are included in the launcher APK (`lvglcpython` in `buildozer.spec`). The home UI is LVGL; buttons can `mip.install` examples such as `lv_test_timer` from GitHub with `index=` the [PyDevices MIP index](https://PyDevices.github.io/micropython-lib/mip/PyDevices).
+Prebuilt **`pydevices-lvgl`** wheels for Android are on [TestPyPI](https://test.pypi.org/project/pydevices-lvgl/) and are included in the launcher APK (`pydeviceslvgl` in `buildozer.spec`). The home UI is LVGL; buttons can `mip.install` examples such as `lv_test_timer` from GitHub with `index=` the [PyDevices MIP index](https://PyDevices.github.io/micropython-lib/mip/PyDevices).
 
 See [pydisplay_android README](https://github.com/PyDevices/pydisplay_android/blob/main/README.md) for entry points (`main.py` / `launcher.py`) and recipe details. Display wiring uses the MCU-shaped `board_config` from **pydisplay-desktop** (`AutoDisplay` + `Runtime`); set `PYDISPLAY_WIDTH` / `HEIGHT` / `SCALE` in `main.py` (phone defaults are already set for Android).
 

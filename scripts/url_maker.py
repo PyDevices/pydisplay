@@ -43,7 +43,7 @@ PROFILES: dict[str, frozenset[str]] = {
             "eventsys",
             "board_config",
             "lvgl",
-            "lvgl-cpython",
+            "pydevices-lvgl",
             "display_driver",
             "palettes",
             "pdwidgets",
@@ -66,7 +66,7 @@ PROFILES: dict[str, frozenset[str]] = {
         {
             "pygraphics",
             "lvgl",
-            "lvgl-cpython",
+            "pydevices-lvgl",
             "display_driver",
             "palettes",
             "pdwidgets",
@@ -79,16 +79,16 @@ PROFILES: dict[str, frozenset[str]] = {
 # Runtime-aware rewrites: logical name → install name (or None to omit).
 _MIP_REWRITE: dict[str, str | None] = {
     "lvgl": None,  # C-only; no MIP package
-    "lvgl-cpython": None,
-    "display_driver": None,  # ships with LVGL firmware / lvgl-cpython wheel
+    "pydevices-lvgl": None,
+    "display_driver": None,  # ships with LVGL firmware / pydevices-lvgl wheel
     "pygraphics": "pygraphics",  # micropython-lib package (pure Python)
     "usdl2-py": "usdl2",  # same import name on MIP (PyDevices/usdl2)
 }
 
 _WHEEL_REWRITE: dict[str, str | None] = {
-    "lvgl": "lvgl-cpython",
-    "lvglcpython": "lvgl-cpython",
-    "display_driver": "lvgl-cpython",  # bundled in the wheel
+    "lvgl": "pydevices-lvgl",
+    "pydeviceslvgl": "pydevices-lvgl",
+    "display_driver": "pydevices-lvgl",  # bundled in the wheel
     "pygraphics": "pygraphics",  # TestPyPI project now provides native/wasm builds
     "usdl2-py": "usdl2",  # prefer native TestPyPI wheel when available
 }

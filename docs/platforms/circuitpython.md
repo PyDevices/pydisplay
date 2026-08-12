@@ -60,7 +60,7 @@ native `usdl2`):
 workspace/
   circuitpython/
   displayif/              # native usdl2 (apply_cp_patches.sh)
-  lv_circuitpython_mod/   # optional LVGL
+  lvgl-circuitpython/   # optional LVGL
   pygraphics/             # optional native pygraphics
   pydisplay/              # this repo
 ```
@@ -84,7 +84,7 @@ CircuitPython unix pydisplay builds must **freeze** Adafruit's `asyncio` and
 ```
 workspace/
   circuitpython/
-  lv_circuitpython_mod/
+  lvgl-circuitpython/
   Adafruit_CircuitPython_asyncio/
   Adafruit_CircuitPython_Ticks/
   cp-user-config/user_post_mpconfigport.mk
@@ -102,7 +102,7 @@ cd circuitpython/ports/unix && make -j VARIANT=coverage -I ../../../../cp-user-c
 ```
 
 When using [cmods](https://github.com/PyDevices/cmods) `build_cp.sh`, it passes `-I cp-user-config/` (workspace sibling) when that
-directory exists. See [lv_circuitpython_mod README](https://github.com/PyDevices/lv_circuitpython_mod).
+directory exists. See [lvgl-circuitpython README](https://github.com/PyDevices/lvgl-circuitpython).
 
 `multimer` supplies Adafruit-compatible `ticks_*` helpers for application code;
 frozen asyncio still uses `adafruit_ticks` internally unless the build is customized.
