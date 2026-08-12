@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Portable app-level audio helpers for ``board_devices.audio_out``.
+"""Portable app-level audio helpers for ``board_peripherals.audio_out``.
 
 Soft-synth mixer + one-shot SFX on top of the PCM ``audio_out`` contract.
 Works on CPython, MicroPython, CircuitPython, PyScript, and Jupyter — anything

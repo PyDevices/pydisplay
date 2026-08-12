@@ -11,7 +11,7 @@ portrait panel 90 degrees into landscape.
 from audio import AudioEngine, midi_to_hz
 import board_config
 from app_runtime import runtime
-import board_devices
+import board_peripherals
 
 import keys
 from pygraphics import Draw
@@ -21,7 +21,7 @@ runtime = runtime
 # Built here rather than taken from board_config so it can ask for the
 # interactive profile: the default is buffered for throughput, which a synth
 # writing at realtime pays as note-to-sound delay.
-audio_out = board_devices.audio_out(latency="low")
+audio_out = board_peripherals.audio_out(latency="low")
 
 # Landscape keyboard target.
 if display_drv.width < display_drv.height:
