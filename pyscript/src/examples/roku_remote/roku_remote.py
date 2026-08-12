@@ -22,7 +22,7 @@ teardown). Desktop relaunch is a host shell loop on exit ``42`` only — there
 is no in-process ``execv``. PyScript / Jupyter only show ``reload page`` /
 ``restart kernel``. Soft-reset is not relied on (it does not re-run ``main.py``).
 
-Desktop launch from ``pydevices-examples/src`` (same for ``micropython``,
+Desktop launch from ``pydevices-examples/lib`` (same for ``micropython``,
 ``micropython.exe``, ``circuitpython``, ``python``, ``python.exe``)::
 
     # once

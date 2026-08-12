@@ -29,6 +29,13 @@ _PACKAGES = {
 # gui.core.* is mid-import during patching. Treat nested calls as success.
 _IN_FETCH = False
 
+# Cross-process lock directory under utils/ — parallel matrix runtimes share
+# this tree and otherwise race on empty/install of utils/gui/.
+_LOCK_NAME = ".gui_fetch_lock"
+_LOCK_WAIT_S = 90
+_LOCK_POLL_S = 0.1
+_LOCK_PID_NAME = "pid"
+
 
 def _utils_dir():
     # CPython (esp. Windows PE under WSL UNC) needs native separators so mip
@@ -50,6 +57,133 @@ def _gui_dir():
 
         return os.path.join(_utils_dir(), "gui")
     return _utils_dir() + "/gui"
+
+
+def _lock_path():
+    import sys
+
+    base = _utils_dir()
+    if sys.implementation.name == "cpython":
+        import os
+
+        return os.path.join(base, _LOCK_NAME)
+    return base + "/" + _LOCK_NAME
+
+
+def _lock_pid_path():
+    import sys
+
+    if sys.implementation.name == "cpython":
+        import os
+
+        return os.path.join(_lock_path(), _LOCK_PID_NAME)
+    return _lock_path() + "/" + _LOCK_PID_NAME
+
+
+def _pid_alive(pid):
+    """Best-effort: True if ``pid`` looks alive; False if clearly dead."""
+    if pid is None or pid <= 0:
+        return False
+    try:
+        import os
+
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
+    except Exception:
+        # MicroPython may lack kill(0); treat unknown as alive so we wait.
+        return True
+
+
+def _read_lock_pid():
+    path = _lock_pid_path()
+    try:
+        with open(path) as fh:
+            return int(fh.read().strip())
+    except Exception:
+        return None
+
+
+def _write_lock_pid():
+    import os
+
+    path = _lock_pid_path()
+    try:
+        with open(path, "w") as fh:
+            fh.write(str(os.getpid()))
+    except Exception:
+        pass
+
+
+def _force_clear_lock():
+    """Remove a lock dir left by a crashed / killed matrix worker."""
+    path = _lock_path()
+    pid_path = _lock_pid_path()
+    try:
+        import os
+
+        try:
+            os.remove(pid_path)
+        except OSError:
+            pass
+        os.rmdir(path)
+        return
+    except Exception:
+        pass
+    try:
+        import uos
+
+        try:
+            uos.remove(pid_path)
+        except OSError:
+            pass
+        uos.rmdir(path)
+    except Exception:
+        pass
+
+
+def _acquire_gui_lock():
+    """Exclusive mkdir lock; returns True if acquired within ``_LOCK_WAIT_S``.
+
+    Writes a pid file so a later waiter can steal the lock if the holder died
+    (fail-fast matrix kills leave empty ``.gui_fetch_lock`` dirs behind).
+    """
+    import time
+
+    path = _lock_path()
+    deadline = time.time() + _LOCK_WAIT_S
+    stole = False
+    while time.time() < deadline:
+        try:
+            import os
+
+            os.mkdir(path)
+            _write_lock_pid()
+            return True
+        except OSError:
+            pass
+        except ImportError:
+            try:
+                import uos
+
+                uos.mkdir(path)
+                _write_lock_pid()
+                return True
+            except OSError:
+                pass
+        holder = _read_lock_pid()
+        # Empty/stale lock (no pid, or dead holder): steal once per wait.
+        if not stole and (holder is None or not _pid_alive(holder)):
+            stole = True
+            _force_clear_lock()
+            continue
+        time.sleep(_LOCK_POLL_S)
+    return False
+
+
+def _release_gui_lock():
+    _force_clear_lock()
 
 
 def _detect_core():
@@ -308,6 +442,20 @@ def fetch_ph_gui(which, apply_patches=True):
     if _IN_FETCH:
         return _detect_core() == which
 
+    # Fast path without lock when the desired core is already present.
+    if _detect_core() == which:
+        if apply_patches:
+            _apply_patches(which)
+        return True
+
+    if not _acquire_gui_lock():
+        # Another process may have finished installing while we waited.
+        if _detect_core() == which:
+            if apply_patches:
+                _apply_patches(which)
+            return True
+        return False
+
     _IN_FETCH = True
     try:
         present = _detect_core()
@@ -337,3 +485,4 @@ def fetch_ph_gui(which, apply_patches=True):
         return False
     finally:
         _IN_FETCH = False
+        _release_gui_lock()

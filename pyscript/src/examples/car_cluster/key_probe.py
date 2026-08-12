@@ -3,7 +3,7 @@
 """
 key_probe.py — print key codes from the host event pump.
 
-Run from pydevices-examples/src::
+Run from pydevices-examples/lib::
 
     python examples/car_cluster/key_probe.py
 
