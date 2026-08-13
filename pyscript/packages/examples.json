@@ -145,6 +145,10 @@
       "github:PyDevices/pydevices-examples/lib/examples/lv_gestures.py"
     ],
     [
+      "lv_interactive_test.py",
+      "github:PyDevices/pydevices-examples/lib/examples/lv_interactive_test.py"
+    ],
+    [
       "lv_multi_display.py",
       "github:PyDevices/pydevices-examples/lib/examples/lv_multi_display.py"
     ],
