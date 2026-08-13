@@ -38,6 +38,7 @@ jobs:
           path: pydevices
           sparse-checkout: |
             lib/eventsys
+            lib/multimer
           sparse-checkout-cone-mode: false
 
       - uses: actions/setup-python@v5
