@@ -39,5 +39,5 @@ PyDevices also drops in under other GUI stacks:
 - [pydevices-examples](https://github.com/PyDevices/pydevices-examples) — this project.
 - [palettes](https://github.com/PyDevices/palettes) — color palette toolkit.
 - [pdwidgets](https://github.com/PyDevices/pdwidgets) — widget toolkit for PyDevices.
-- [micropython-lib](https://github.com/PyDevices/micropython-lib) — precompiled MIP packages ([index](https://PyDevices.github.io/micropython-lib/mip/PyDevices)).
+- [micropython-lib](https://github.com/PyDevices/micropython-lib) — precompiled MIP packages ([index](https://PyDevices.github.io/mip)).
 - [displayif](https://github.com/PyDevices/displayif) — native MicroPython display interface modules for PyDevices.

@@ -60,7 +60,7 @@ micropython-lib index, then install a board package:
 ```python
 import mip
 
-INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+INDEX = "https://PyDevices.github.io/mip"
 mip.install("displaydev", index=INDEX)
 mip.install("eventsys", index=INDEX)  # optional; used by these non-LVGL examples
 ```
@@ -129,7 +129,7 @@ packages remain conventional and unprefixed.
 
 ## Related repositories
 
-- [pydevices](https://github.com/PyDevices/pydevices) — canonical product source and publishing owner
+- [pydevices](https://github.com/PyDevices/pydevices) — canonical product source and core driver package home
 - [micropython-lib](https://github.com/PyDevices/micropython-lib) — PyDevices MIP index fork
 - [lvgl-bindings](https://github.com/PyDevices/lvgl-bindings) — shared LVGL binding and `display_driver` source
 - [lvgl-micropython](https://github.com/PyDevices/lvgl-micropython),

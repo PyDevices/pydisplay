@@ -2,7 +2,7 @@
  * PyDevices — shared org site chrome
  *
  * Design tokens + layout primitives shared by every PyDevices GitHub Pages
- * site (org root, lv_bindings, pydevices-examples, and the second-wave module
+ * site (org root, lvgl-bindings, pydevices-examples, and the second-wave module
  * pages). Keep this file focused on *chrome*: header/nav, hero, buttons,
  * cards, footer, typography. Project-specific / demo-runtime styles belong
  * in a local stylesheet loaded after this one.
@@ -45,6 +45,27 @@
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, Menlo, Consolas, monospace;
+
+  /* Tier-specific visual design tokens */
+  --tier-1-amber: #f59e0b;
+  --tier-1-bg: rgba(245, 158, 11, 0.08);
+  --tier-1-border: rgba(245, 158, 11, 0.4);
+
+  --tier-2-emerald: #10b981;
+  --tier-2-bg: rgba(16, 185, 129, 0.08);
+  --tier-2-border: rgba(16, 185, 129, 0.4);
+
+  --tier-3-blue: #3b82f6;
+  --tier-3-bg: rgba(59, 130, 246, 0.08);
+  --tier-3-border: rgba(59, 130, 246, 0.4);
+
+  --tier-4-purple: #8b5cf6;
+  --tier-4-bg: rgba(139, 92, 246, 0.08);
+  --tier-4-border: rgba(139, 92, 246, 0.4);
+
+  --tier-5-steel: #06b6d4;
+  --tier-5-bg: rgba(6, 182, 212, 0.08);
+  --tier-5-border: rgba(6, 182, 212, 0.4);
 }
 
 :root[data-theme="light"] {
@@ -66,6 +87,13 @@
   --shadow: 0 18px 44px rgba(32, 24, 12, 0.1);
   --shadow-soft: 0 6px 18px rgba(32, 24, 12, 0.06);
   --hover-border: #d9cfba;
+
+  /* Light theme tier adjustments */
+  --tier-1-bg: rgba(245, 158, 11, 0.1);
+  --tier-2-bg: rgba(16, 185, 129, 0.1);
+  --tier-3-bg: rgba(59, 130, 246, 0.1);
+  --tier-4-bg: rgba(139, 92, 246, 0.1);
+  --tier-5-bg: rgba(6, 182, 212, 0.1);
 }
 
 * {
@@ -382,17 +410,17 @@ pre code {
   margin: 0;
   flex: 1 1 auto;
   min-width: 0;
-  font-size: clamp(2.2rem, 5.2vw, 3.4rem);
-  letter-spacing: -0.02em;
-  line-height: 1.06;
+  font-size: clamp(1.6rem, 3.2vw, 2.1rem);
+  letter-spacing: -0.015em;
+  line-height: 1.15;
   color: var(--ink);
 }
 
 .hero p {
   margin: 0;
-  max-width: 680px;
+  max-width: 100%;
   color: var(--ink-soft);
-  font-size: 1.12rem;
+  font-size: 1.08rem;
   line-height: 1.55;
   text-align: left;
 }
@@ -737,6 +765,583 @@ pre code {
   margin: 0 0 12px;
   font-size: 1.1rem;
   color: var(--ink);
+}
+
+/* ---------- Tier-Specific Visual Contrast Card Styles ---------- */
+
+.card-tier-1 {
+  border-color: var(--tier-1-border);
+  background: linear-gradient(180deg, var(--tier-1-bg), var(--panel));
+}
+.card-tier-1::before {
+  background: linear-gradient(90deg, var(--tier-1-amber), transparent 75%);
+  opacity: 0.8;
+}
+.card-tier-1:hover {
+  border-color: var(--tier-1-amber);
+  box-shadow: 0 12px 30px rgba(245, 158, 11, 0.15);
+}
+.card-tier-1 .icon, .card-tier-1 .card-icon {
+  color: var(--tier-1-amber);
+  background: rgba(245, 158, 11, 0.12);
+  border-color: var(--tier-1-border);
+}
+.tag-tier-1 {
+  color: var(--tier-1-amber);
+  border-color: var(--tier-1-border);
+  background: var(--tier-1-bg);
+}
+
+.card-tier-2 {
+  border-color: var(--tier-2-border);
+  background: linear-gradient(180deg, var(--tier-2-bg), var(--panel));
+}
+.card-tier-2::before {
+  background: linear-gradient(90deg, var(--tier-2-emerald), transparent 75%);
+  opacity: 0.8;
+}
+.card-tier-2:hover {
+  border-color: var(--tier-2-emerald);
+  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.15);
+}
+.card-tier-2 .icon, .card-tier-2 .card-icon {
+  color: var(--tier-2-emerald);
+  background: rgba(16, 185, 129, 0.12);
+  border-color: var(--tier-2-border);
+}
+.tag-tier-2 {
+  color: var(--tier-2-emerald);
+  border-color: var(--tier-2-border);
+  background: var(--tier-2-bg);
+}
+
+.card-tier-3 {
+  border-color: var(--tier-3-border);
+  background: linear-gradient(180deg, var(--tier-3-bg), var(--panel));
+}
+.card-tier-3::before {
+  background: linear-gradient(90deg, var(--tier-3-blue), transparent 75%);
+  opacity: 0.8;
+}
+.card-tier-3:hover {
+  border-color: var(--tier-3-blue);
+  box-shadow: 0 12px 30px rgba(59, 130, 246, 0.15);
+}
+.card-tier-3 .icon, .card-tier-3 .card-icon {
+  color: var(--tier-3-blue);
+  background: rgba(59, 130, 246, 0.12);
+  border-color: var(--tier-3-border);
+}
+.tag-tier-3 {
+  color: var(--tier-3-blue);
+  border-color: var(--tier-3-border);
+  background: var(--tier-3-bg);
+}
+
+.card-tier-4 {
+  border-color: var(--tier-4-border);
+  background: linear-gradient(180deg, var(--tier-4-bg), var(--panel));
+}
+.card-tier-4::before {
+  background: linear-gradient(90deg, var(--tier-4-purple), transparent 75%);
+  opacity: 0.8;
+}
+.card-tier-4:hover {
+  border-color: var(--tier-4-purple);
+  box-shadow: 0 12px 30px rgba(139, 92, 246, 0.15);
+}
+.card-tier-4 .icon, .card-tier-4 .card-icon {
+  color: var(--tier-4-purple);
+  background: rgba(139, 92, 246, 0.12);
+  border-color: var(--tier-4-border);
+}
+.tag-tier-4 {
+  color: var(--tier-4-purple);
+  border-color: var(--tier-4-border);
+  background: var(--tier-4-bg);
+}
+
+.card-tier-5 {
+  border-color: var(--tier-5-border);
+  background: linear-gradient(180deg, var(--tier-5-bg), var(--panel));
+}
+.card-tier-5::before {
+  background: linear-gradient(90deg, var(--tier-5-steel), transparent 75%);
+  opacity: 0.8;
+}
+.card-tier-5:hover {
+  border-color: var(--tier-5-steel);
+  box-shadow: 0 12px 30px rgba(6, 182, 212, 0.15);
+}
+.card-tier-5 .icon, .card-tier-5 .card-icon {
+  color: var(--tier-5-steel);
+  background: rgba(6, 182, 212, 0.12);
+  border-color: var(--tier-5-border);
+}
+.tag-tier-5 {
+  color: var(--tier-5-steel);
+  border-color: var(--tier-5-border);
+  background: var(--tier-5-bg);
+}
+
+/* Ecosystem Stats Bar */
+.stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+
+.stat-pill strong {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.stat-pill .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+.stat-pill .dot.gold { background: var(--tier-1-amber); box-shadow: 0 0 8px var(--tier-1-amber); }
+.stat-pill .dot.green { background: var(--tier-2-emerald); box-shadow: 0 0 8px var(--tier-2-emerald); }
+.stat-pill .dot.blue { background: var(--tier-3-blue); box-shadow: 0 0 8px var(--tier-3-blue); }
+
+/* ---------- Interactive Tree Navigation Component ---------- */
+.tree-container {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 36px;
+}
+
+.tree-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.tree-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tree-search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 320px;
+}
+
+.tree-search {
+  width: 100%;
+  padding: 8px 12px 8px 34px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-family: var(--font);
+}
+
+.tree-search:focus {
+  outline: none;
+  border-color: var(--accent-strong);
+  box-shadow: 0 0 0 3px rgba(245, 78, 0, 0.15);
+}
+
+.tree-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.tree-view {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.92rem;
+}
+
+.tree-branch {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--bg-soft);
+  overflow: hidden;
+}
+
+.tree-branch-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  color: var(--ink);
+  transition: background 0.16s ease;
+}
+
+.tree-branch-header:hover {
+  background: var(--panel-2);
+}
+
+.tree-toggle-icon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
+  color: var(--muted);
+}
+
+.tree-branch.open .tree-toggle-icon {
+  transform: rotate(90deg);
+}
+
+.tree-branch-children {
+  display: none;
+  padding: 4px 10px 10px 28px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.tree-branch.open .tree-branch-children {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+  padding-top: 10px;
+}
+
+.tree-leaf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border-soft);
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  transition: all 0.16s ease;
+}
+
+.tree-leaf:hover {
+  border-color: var(--hover-border);
+  color: var(--ink);
+  text-decoration: none;
+  transform: translateX(2px);
+}
+
+.tree-leaf-name {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tree-leaf-desc {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* Tree Overlay Modal */
+.tree-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.tree-modal-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tree-modal {
+  width: min(720px, 94vw);
+  max-height: 85vh;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tree-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.tree-modal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.tree-modal-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+}
+
+.tree-modal-close:hover {
+  color: var(--ink);
+  background: var(--panel-2);
+}
+
+.tree-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Runtime Matrix Table */
+.matrix-wrap {
+  overflow-x: auto;
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.matrix-table th, .matrix-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.matrix-table th {
+  background: var(--panel-2);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.88rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.matrix-table tr:last-child td {
+  border-bottom: none;
+}
+
+.matrix-table .check {
+  color: var(--good);
+  font-weight: bold;
+}
+
+.matrix-table .dash {
+  color: var(--muted);
+}
+
+/* ---------- Custom Component Layouts (Non-Card Layouts) ---------- */
+
+/* 1. Color Swatch Grid (palettes) */
+.swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.swatch-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.16s ease, border-color 0.16s ease;
+}
+
+.swatch-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--tier-2-emerald);
+}
+
+.swatch-preview {
+  height: 80px;
+  width: 100%;
+  display: flex;
+}
+
+.swatch-bar {
+  flex: 1;
+  height: 100%;
+}
+
+.swatch-info {
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.swatch-name {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.swatch-code {
+  font-family: var(--mono);
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+/* 2. Feature Matrix & Specification Table (pygraphics, displayif, pydevices) */
+.spec-block {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 24px;
+  margin: 20px 0;
+  box-shadow: var(--shadow-soft);
+}
+
+.spec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.spec-item {
+  border-left: 3px solid var(--accent);
+  padding-left: 14px;
+}
+
+.spec-item.tier-1 { border-left-color: var(--tier-1-amber); }
+.spec-item.tier-2 { border-left-color: var(--tier-2-emerald); }
+.spec-item.tier-3 { border-left-color: var(--tier-3-blue); }
+.spec-item.tier-4 { border-left-color: var(--tier-4-purple); }
+.spec-item.tier-5 { border-left-color: var(--tier-5-steel); }
+
+.spec-item h4 {
+  margin: 0 0 6px;
+  font-size: 1.02rem;
+  color: var(--ink);
+}
+
+.spec-item p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+/* 3. Workbench IDE Layout (mpftp) */
+.workbench-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #14110d;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin: 24px 0;
+}
+
+.workbench-bar {
+  background: #1c1712;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.workbench-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+}
+.workbench-dot.red { background: #ef5c4e; }
+.workbench-dot.yellow { background: #e8b34e; }
+.workbench-dot.green { background: #3ecf95; }
+
+.workbench-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+}
+
+@media (max-width: 768px) {
+  .workbench-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.workbench-pane {
+  background: #14110d;
+  padding: 16px;
+}
+
+.workbench-pane h4 {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: var(--tier-5-steel);
+  font-family: var(--mono);
+  text-transform: uppercase;
+}
+
+/* 4. Code Playground & Snippet Showcase */
+.code-block-wrap {
+  position: relative;
+  margin: 16px 0;
+}
+
+.code-badge {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 0.72rem;
+  font-family: var(--mono);
+  color: var(--muted);
+  text-transform: uppercase;
 }
 
 /* ---------- Footer ---------- */

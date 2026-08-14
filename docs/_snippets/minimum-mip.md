@@ -1,6 +1,6 @@
 ```python
 import mip
-INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+INDEX = "https://PyDevices.github.io/mip"
 mip.install("displaydev", index=INDEX)
 mip.install("eventsys", index=INDEX)
 mip.install("github:PyDevices/pydevices/board_configs/<your_board>")

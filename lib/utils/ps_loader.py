@@ -10,7 +10,7 @@ firmware ``mip`` after ``utils.path``; Pyodide uses portable ``mip.py``
 (from pydevices ``utils/``, mounted at ``/utils/``).
 """
 
-MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+MIP_LIB_INDEX = "https://PyDevices.github.io/mip"
 # Install modules and manifests into cwd so ``import name`` / ``import pkg`` work
 # with ``/`` (or ``.``) on ``sys.path`` — same as desktop ``cd lib``.
 MANIFEST_MIP_TARGET = "."

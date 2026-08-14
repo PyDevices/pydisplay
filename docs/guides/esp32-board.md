@@ -23,7 +23,7 @@ Follow [install workflows](https://pydevices.github.io/pydevices/install-workflo
 **Option B — MIP from your PC:**
 
 ```bash
-INDEX="https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+INDEX="https://PyDevices.github.io/mip"
 mpremote mip install "github:PyDevices/pydevices/board_configs/busdisplay/i80/wt32sc01-plus"
 for pkg in displaydev events keys eventsys pygraphics multimer; do
   mpremote mip install --index "$INDEX" "$pkg"

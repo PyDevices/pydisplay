@@ -8,9 +8,9 @@ if WOKWI:
     TARGET = "lib"
 
 
-import mip
+import mip  # noqa: E402
 
-MICROPYTHON_LIB = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+MICROPYTHON_LIB = "https://PyDevices.github.io/mip"
 PYDEVICES = "github:PyDevices/pydevices"
 PYDEVICES_EXAMPLES = "github:PyDevices/pydevices-examples"
 

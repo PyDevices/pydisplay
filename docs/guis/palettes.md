@@ -6,7 +6,7 @@ Install from [PyDevices/palettes](https://github.com/PyDevices/palettes):
 
 ```python
 import mip
-mip.install("palettes", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
+mip.install("palettes", index="https://PyDevices.github.io/mip")
 ```
 
 Documentation: [palettes.readthedocs.io](https://palettes.readthedocs.io)

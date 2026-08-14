@@ -6,7 +6,7 @@ Install from [PyDevices/pdwidgets](https://github.com/PyDevices/pdwidgets):
 
 ```python
 import mip
-mip.install("pdwidgets", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
+mip.install("pdwidgets", index="https://PyDevices.github.io/mip")
 ```
 
 Documentation: [pdwidgets.readthedocs.io](https://pdwidgets.readthedocs.io)

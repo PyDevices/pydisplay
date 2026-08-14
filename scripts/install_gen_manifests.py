@@ -30,15 +30,15 @@ src_dir = "lib/"
 pyscript_url_dir = "lib/"
 output_dir = repo_dir
 packages_dir = "packages/"
-toml_full_path = output_dir + "web/pyscript/micropython.toml"
-pyodide_toml_path = output_dir + "web/pyscript/pyodide.toml"
-micropython_json_path = output_dir + "web/pyscript/micropython.json"
-pyodide_json_path = output_dir + "web/pyscript/pyodide.json"
-examples_json_path = output_dir + "web/pyscript/pydevices-examples.json"
+toml_full_path = output_dir + ".site/pyscript/micropython.toml"
+pyodide_toml_path = output_dir + ".site/pyscript/pyodide.toml"
+micropython_json_path = output_dir + ".site/pyscript/micropython.json"
+pyodide_json_path = output_dir + ".site/pyscript/pyodide.json"
+examples_json_path = output_dir + ".site/pyscript/pydevices-examples.json"
 peterhinch_config_paths = {
-    "nano": output_dir + "web/pyscript/peterhinch-nano.json",
-    "micro": output_dir + "web/pyscript/peterhinch-micro.json",
-    "touch": output_dir + "web/pyscript/peterhinch-touch.json",
+    "nano": output_dir + ".site/pyscript/peterhinch-nano.json",
+    "micro": output_dir + ".site/pyscript/peterhinch-micro.json",
+    "touch": output_dir + ".site/pyscript/peterhinch-touch.json",
 }
 peterhinch_packages = {
     "nano": "micropython-nano-gui",
@@ -61,7 +61,7 @@ packages = [
     ["examples", [], []],
 ]
 
-# Packages omitted from web/pyscript/micropython.toml (PyScript mounts utils for browser examples).
+# Packages omitted from .site/pyscript/micropython.toml (PyScript mounts utils for browser examples).
 toml_exclude = ["examples"]
 
 # PyScript [files] mounts that are not part of any mip package JSON.
@@ -109,7 +109,7 @@ def is_gitignored(path):
         return False
 
 
-# Paths in micropython.toml / pyodide.toml [files] — relative to web/pyscript/ (browser URL ./lib/...).
+# Paths in micropython.toml / pyodide.toml [files] — relative to .site/pyscript/ (browser URL ./lib/...).
 PYSCRIPT_TOML_SRC_PREFIX = "./"
 # Local interpreters under vendor/; PyScript config key replaces the CDN build.
 PYSCRIPT_INTERPRETER = "./vendor/micropython/micropython.mjs"
@@ -131,7 +131,7 @@ master_toml = [
 
 
 def add_pyscript_file(browser_relative_path: str, mount: str) -> None:
-    """Add one browser URL (under web/pyscript/) to TOML and JSON file maps."""
+    """Add one browser URL (under .site/pyscript/) to TOML and JSON file maps."""
     # board_config is now delivered via board_configs/* packages, not web mounts.
     if browser_relative_path.replace("\\", "/").endswith("/board_config.py"):
         return
@@ -235,10 +235,10 @@ for package_name, contents in package_dicts.items():
         json.dump(contents, f, indent=2)
 
 # One MIP manifest per examples/<subdir>/ (for PyScript ?manifests= and GitHub mip).
-# Package JSON lives in packages/<name>.json and is served via web/pyscript/packages
+# Package JSON lives in packages/<name>.json and is served via .site/pyscript/packages
 # (symlink → ../../packages). MicroPython mip resolves *file* URLs in the package
-# against the loader page base (…/web/pyscript/), not against packages/<name>.json —
-# same as the old web/pyscript/<name>.json layouts: use ./lib/examples/….
+# against the loader page base (…/.site/pyscript/), not against packages/<name>.json —
+# same as the old .site/pyscript/<name>.json layouts: use ./lib/examples/….
 # Only .py/.mpy/.json are listed (mip cannot install binary assets).
 examples_root = os.path.join(repo_dir, src_dir, "examples")
 example_package_names = []
@@ -261,7 +261,7 @@ for entry in sorted(os.listdir(examples_root)):
             if is_gitignored(full_file_path):
                 continue
             rel_from_examples = os.path.relpath(full_file_path, examples_root).replace("\\", "/")
-            # Loader page base is web/pyscript/ (see mip resolution); packages/ is only
+            # Loader page base is .site/pyscript/ (see mip resolution); packages/ is only
             # where the manifest JSON is fetched from (via the symlink).
             src_file = "./lib/examples/" + rel_from_examples
             urls.append([rel_from_examples, src_file])
@@ -279,8 +279,8 @@ for entry in sorted(os.listdir(examples_root)):
 # Gallery loaders use `import ps_loader` (top-level); also mount at VFS root.
 add_pyscript_file("lib/utils/ps_loader.py", "/")
 
-# web/pyscript/lib → ../../lib and web/pyscript/packages → ../../packages.
-pyscript_lib_link = os.path.join(output_dir, "web", "pyscript", "lib")
+# .site/pyscript/lib → ../../lib and .site/pyscript/packages → ../../packages.
+pyscript_lib_link = os.path.join(output_dir, ".site", "pyscript", "lib")
 lib_abs = os.path.join(output_dir, "lib")
 if os.path.islink(pyscript_lib_link) or os.path.exists(pyscript_lib_link):
     if not os.path.islink(pyscript_lib_link):
@@ -291,11 +291,11 @@ if os.path.islink(pyscript_lib_link) or os.path.exists(pyscript_lib_link):
 else:
     os.symlink("../../lib", pyscript_lib_link)
 # Drop the pre-rename browser symlink if still present.
-pyscript_src_link = os.path.join(output_dir, "web", "pyscript", "src")
+pyscript_src_link = os.path.join(output_dir, ".site", "pyscript", "src")
 if os.path.islink(pyscript_src_link):
     os.remove(pyscript_src_link)
 
-pyscript_packages_link = os.path.join(output_dir, "web", "pyscript", "packages")
+pyscript_packages_link = os.path.join(output_dir, ".site", "pyscript", "packages")
 packages_abs = os.path.join(output_dir, packages_dir.rstrip("/"))
 if os.path.islink(pyscript_packages_link) or os.path.exists(pyscript_packages_link):
     if not os.path.islink(pyscript_packages_link):

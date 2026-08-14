@@ -5,14 +5,14 @@ Precompiled `.mpy` packages from the [PyDevices micropython-lib](https://github.
 ## Package index URL
 
 ```
-https://PyDevices.github.io/micropython-lib/mip/PyDevices
+https://PyDevices.github.io/mip
 ```
 
 ## Install a package
 
 ```python
 import mip
-mip.install("displaydev", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
+mip.install("displaydev", index="https://PyDevices.github.io/mip")
 ```
 
 On **PyScript MicroPython** (`micropython.html`, `mp.html`), `?deps=` installs
@@ -23,7 +23,7 @@ MicroPython). Pyodide uses portable ``mip.py`` from pydevices
 With `mpremote`:
 
 ```bash
-mpremote mip install --index "https://PyDevices.github.io/micropython-lib/mip/PyDevices" displaydev
+mpremote mip install --index "https://PyDevices.github.io/mip" displaydev
 ```
 
 ## Available packages
@@ -54,7 +54,7 @@ For combined board + package setup, use [pydevices install workflows](https://py
 
 ```python
 import mip
-mip.install("displaydev", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
+mip.install("displaydev", index="https://PyDevices.github.io/mip")
 import displaydev
 print(displaydev)
 ```
