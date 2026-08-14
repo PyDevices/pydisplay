@@ -26,7 +26,7 @@ platform = "micropython"
 display_backend = "SDLDisplay"
 available_on = ["windows", "wsl"]
 kind = "subprocess"
-command = ["micropython.exe"]
+command = ["micropython.exe", "-X", "heapsize=64M"]
 cwd = "lib"
 resolve = ["PATH", "~/bin/micropython.exe", "repo:bin/micropython.exe"]
 setup_notes = "MicroPython Windows (.exe). Async modes may be limited. bin/micropython.exe is committed for completeness only — Cursor Cloud agents cannot execute Windows binaries, so this runtime is not part of the cloud matrix."

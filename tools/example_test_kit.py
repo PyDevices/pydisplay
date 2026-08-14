@@ -435,23 +435,27 @@ def run_subprocess_case(
     kind = example_meta.get("kind", "loop")
     quit_mode = example_meta.get("quit", "poll")
     bootstrap = example_meta.get("bootstrap", "full")
-    cmd = [
-        exe,
-        wrapper_rel,
-        example_id,
-        "--script",
-        script,
-        "--kind",
-        kind,
-        "--quit",
-        quit_mode,
-        "--bootstrap",
-        bootstrap,
-        "--duration",
-        str(duration),
-        "--timeout",
-        str(timeout),
-    ]
+    cmd = [exe]
+    if runtime_id == "micropython.exe":
+        cmd.extend(["-X", "heapsize=64M"])
+    cmd.extend(
+        [
+            wrapper_rel,
+            example_id,
+            "--script",
+            script,
+            "--kind",
+            kind,
+            "--quit",
+            quit_mode,
+            "--bootstrap",
+            bootstrap,
+            "--duration",
+            str(duration),
+            "--timeout",
+            str(timeout),
+        ]
+    )
     env = os.environ.copy()
     apply_sibling_env(env, repo_root=str(REPO))
     _ensure_user_micropy_lib(env)
