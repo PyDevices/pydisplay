@@ -1,14 +1,19 @@
-# pydevices-examples utils
+# Utils
 
-The files in this folder extend the functionality of pydevices-examples. They are not required for the basic functionality of pydevices-examples, but they can be useful for some applications.  Some of these files are not written by the author of pydevices-examples, but are included here for convenience.  Many of the examples
-in the examples folder use these files.
-
-Preferred: set `PYTHONPATH` (CPython) or `MICROPYPATH` (MicroPython/CircuitPython) to `.:lib:utils` and run from `lib/` — no import needed. This package is optional; example scripts never import `utils.path` themselves.
-
-Without those env vars (a bare device REPL, or `boot.py`/`main.py` on a device that keeps `utils/`), set up the path explicitly:
+Portable helpers shared by board configs and [pydevices-examples](https://github.com/PyDevices/pydevices-examples).
+Install onto `utils/` (or `.` if that directory is already on `sys.path`):
 
 ```python
-import utils.path  # adds cwd, lib/, and utils/ to sys.path
+import mip
+mip.install("github:PyDevices/pydevices/packages/utils.json", target="./utils")
 ```
 
-You may instead copy any of the files or directories to a location in your path such as `/lib`.
+| Module | Role |
+|--------|------|
+| `byteswap.py` | Fast 16-bit pixel swap (numpy/ulab, else `viper_tools`) for `displaydev` |
+| `viper_tools.py` | `@micropython.viper` bodies (`byteswap`, displaybuf bounce, tft glyph pack) |
+| `mip.py` | Portable `mip` for CPython / CircuitPython / Pyodide (firmware `mip` wins on MicroPython) |
+| `micropython.py` | CPython shim (`const` / `viper` / `native`) so MCU modules load |
+| `keypins.py` | Key codes as pin-like objects (needs `events` + `keys` on the path) |
+| `wifi.py` | MicroPython `network.WLAN` shim with a CircuitPython-shaped `wifi.radio` |
+| `frame_recorder.py` | `FFmpegFrameRecorder` for desktop `PGDisplay` / `SDLDisplay` video |
