@@ -237,26 +237,38 @@ def _http_get(url):
 
 
 def _http_get_json(url):
-    raw = _http_get(url)
-    if isinstance(raw, bytes):
-        raw = raw.decode("utf-8")
-    return json.loads(raw)
+    try:
+        raw = _http_get(url)
+        if isinstance(raw, bytes):
+            raw = raw.decode("utf-8")
+        if not raw or raw.strip().startswith(("<", "<!DOCTYPE", "<html")):
+            return None
+        return json.loads(raw)
+    except Exception:
+        return None
 
 
 def _fetch_url(url, version=None):
     """Resolve github:/gitlab:/codeberg: then return bytes (or read local path)."""
-    if url.startswith(("codeberg:", "github:", "gitlab:")):
-        return _http_get(_rewrite_url(url, version))
-    if url.startswith(("http://", "https://")):
-        return _http_get(url)
-    if "\\" in url:
-        raise ValueError('Use "/" instead of "\\" in file URLs: ' + repr(url))
-    with open(url, "rb") as f:
-        return f.read()
+    try:
+        if url.startswith(("codeberg:", "github:", "gitlab:")):
+            return _http_get(_rewrite_url(url, version))
+        if url.startswith(("http://", "https://")):
+            return _http_get(url)
+        if "\\" in url:
+            raise ValueError('Use "/" instead of "\\" in file URLs: ' + repr(url))
+        with open(url, "rb") as f:
+            return f.read()
+    except Exception:
+        return None
 
 
 def _download_file(url, dest, version=None):
     data = _fetch_url(url, version)
+    if data is None or (isinstance(data, bytes) and data.startswith(b"<!DOCTYPE")):
+        print("File not found:", url)
+        print("Package may be partially installed")
+        return
     print("Installing:", dest)
     parent = dest.replace("\\", "/").rsplit("/", 1)
     if len(parent) == 2 and parent[0]:
@@ -304,11 +316,20 @@ def _install_json(package_json_url, index, target, version, mpy, url_base=None):
         else:
             fetch = package_json_url
         package_json = _http_get_json(fetch)
+        if package_json is None:
+            print("Package not found:", package_json_url)
+            print("Package may be partially installed")
+            return
         base_url = package_json_url.rpartition("/")[0]
     elif package_json_url.endswith(".json"):
-        with open(package_json_url, "r") as f:
-            package_json = json.load(f)
-        base_url = package_json_url.replace("\\", "/").rpartition("/")[0]
+        try:
+            with open(package_json_url, "r") as f:
+                package_json = json.load(f)
+            base_url = package_json_url.replace("\\", "/").rpartition("/")[0]
+        except Exception:
+            print("Package not found:", package_json_url)
+            print("Package may be partially installed")
+            return
     else:
         raise ValueError("Invalid url for package: " + package_json_url)
 
@@ -331,7 +352,11 @@ def _install_json(package_json_url, index, target, version, mpy, url_base=None):
         _download_file(url, fs_target_path, version)
 
     for dep, dep_version in package_json.get("deps", ()):
-        install(dep, index=index, target=target, version=dep_version, mpy=mpy, url_base=url_base)
+        try:
+            install(dep, index=index, target=target, version=dep_version, mpy=mpy, url_base=url_base)
+        except Exception as e:
+            print("Package not found or failed:", dep, e)
+            print("Package may be partially installed")
 
 
 def _install_package(package, index, target, version, mpy, url_base=None):
