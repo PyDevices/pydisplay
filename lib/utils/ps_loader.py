@@ -156,13 +156,8 @@ def _import_portable_mip():
 
 
 def _refresh_path_after_install():
-    """Re-run ``utils.path.update`` after mip may have created ``lib`` / ``utils``.
-
-    ``utils.path`` often runs before installs exist; only existing dirs are added.
-    """
-    import utils.path
-
-    utils.path.update()
+    """Ensure ``utils.path`` is imported."""
+    import utils.path  # noqa: F401
 
 
 def _has_board_config():
