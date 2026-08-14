@@ -22,7 +22,7 @@ PYSCRIPT_JSON_CONFIGS=(
     web/pyscript/peterhinch-touch.json
 )
 
-# PyDevices product packages (displaydev/eventsys/multimer) are micropython-lib only.
+# PyDevices product packages (displaydev/eventsys/multimer) are MIP only.
 # Sister packages (pygraphics / usdl2 / palettes / pdwidgets / lvgl): frozen in
 # firmware, or TestPyPI / MIP when needed — not packages/*.json from this repo.
 GENERATED_LIB_PACKAGES=(
@@ -61,7 +61,7 @@ Legacy TOML configs are generated only when explicitly requested:
   python3 scripts/install_gen_manifests.py --toml
 
 `eventsys` is not emitted as packages/eventsys.json — install from
-the micropython-lib MIP index (`displaydev` / `multimer` / `events` / `keys`
+the PyDevices MIP index (`displaydev` / `multimer` / `events` / `keys`
 come from pydevices via that same index). Sister packages
 (pygraphics / palettes / pdwidgets / lvgl / usdl2) may be frozen in MP WASM;
 gallery deps skip those for MicroPython (see scripts/url_maker.py). Pyodide /

@@ -8,7 +8,7 @@ pydevices-examples supports three install channels. Pick based on whether you ne
 |---------|--------|--------------|-------------------|------------------|
 | [Full clone](full-clone.md) | Entire repo | `git clone` | Yes | Yes |
 | [GitHub MIP](mip-github.md) | Source `.py` | `mip` / `mpremote mip` | Optional (`examples.json`) | Yes (`utils.json`) |
-| [micropython-lib MIP](mip-micropython-lib.md) | Precompiled `.mpy` | `mip` with custom index | No | No |
+| [PyDevices MIP](mip-micropython-lib.md) | Precompiled `.mpy` | `mip` with custom index | No | No |
 
 For recommended board setup flows, see [pydevices install workflows](https://pydevices.github.io/pydevices/install-workflows.html).
 
@@ -22,7 +22,7 @@ For recommended board setup flows, see [pydevices install workflows](https://pyd
 - `multimer` — cross-platform timers; see [multimer](https://pydevices.github.io/pydevices/multimer.html) (pydevices)
 - `events` / `keys` — event types and key codes (pydevices)
 
-**Sister packages** (separate repos, installed from the same [micropython-lib MIP index](mip-micropython-lib.md)):
+**Sister packages** (separate repos, installed from the same [PyDevices MIP index](mip-micropython-lib.md)):
 
 - `pygraphics` — extended drawing helpers ([PyDevices/pygraphics](https://github.com/PyDevices/pygraphics)); see [graphics](../concepts/graphics.md)
 - `palettes` — color palettes ([PyDevices/palettes](https://github.com/PyDevices/palettes)); see [palettes guide](../guis/palettes.md)

@@ -3,7 +3,7 @@
 Cross-platform 2D drawing: framebuf-compatible buffers, shape primitives that return **Area** bounds, fonts, and image loaders. One import works on MicroPython, CircuitPython, and CPython.
 
 !!! note "Sister package"
-    `pygraphics` is a separate package from [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics), not part of the pydevices-examples repo. Install it from the [micropython-lib MIP index](../installation/mip-micropython-lib.md) (`mip.install("pygraphics", index=…)`) or [TestPyPI](../installation/index.md#pypi-pip-testpypi). pydevices-examples's `utils` (`displaybuf`, `framebuf` shim, `tft_text`, …) import `pygraphics` at runtime.
+    `pygraphics` is a separate package from [PyDevices/pygraphics](https://github.com/PyDevices/pygraphics), not part of the pydevices-examples repo. Install it from the [PyDevices MIP index](../installation/mip-micropython-lib.md) (`mip.install("pygraphics", index=…)`) or [TestPyPI](../installation/index.md#pypi-pip-testpypi). pydevices-examples's `utils` (`displaybuf`, `framebuf` shim, `tft_text`, …) import `pygraphics` at runtime.
 
 ## Quick start
 

@@ -1,6 +1,6 @@
-# micropython-lib MIP
+# PyDevices MIP
 
-Precompiled `.mpy` packages from the [PyDevices micropython-lib](https://github.com/PyDevices/micropython-lib) fork, served via a static MIP index.
+Precompiled `.mpy` packages from the [PyDevices mip](https://github.com/PyDevices/mip) fork, served via a static MIP index.
 
 ## Package index URL
 
@@ -45,7 +45,7 @@ Package names **never contain `/`**. Paths with `/` are GitHub repo installs —
 These must come from GitHub:
 
 - `utils`, `examples`
-- `spibus`, `i80bus` (viper not supported in micropython-lib packaging)
+- `spibus`, `i80bus` (viper not supported in MIP packaging)
 - Board config packages (use GitHub `board_configs/.../package.json`)
 
 For combined board + package setup, use [pydevices install workflows](https://pydevices.github.io/pydevices/install-workflows.html).

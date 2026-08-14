@@ -88,7 +88,7 @@ nav:
     - Choose a method: installation/index.md
     - Full clone: installation/full-clone.md
     - GitHub MIP: installation/mip-github.md
-    - micropython-lib MIP: installation/mip-micropython-lib.md
+    - PyDevices MIP: installation/mip-micropython-lib.md
   - Hardware setup:
     - Overview (pydevices): https://pydevices.github.io/pydevices/README.html
   - Learn:

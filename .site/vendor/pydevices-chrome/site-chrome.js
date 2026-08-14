@@ -111,7 +111,7 @@
     '<div class="tree-branch open">' +
     '<div class="tree-branch-header"><svg class="tree-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg> 📁 5: Developer Tools & Infrastructure</div>' +
     '<div class="tree-branch-children">' +
-    '<a class="tree-leaf" href="https://pydevices.github.io/micropython-lib/"><span class="tree-leaf-name">micropython-lib</span><span class="tag tag-tier-5">PyDevices MIP Index</span></a>' +
+    '<a class="tree-leaf" href="https://pydevices.github.io/mip/"><span class="tree-leaf-name">mip</span><span class="tag tag-tier-5">PyDevices MIP Index</span></a>' +
     '<a class="tree-leaf" href="https://pydevices.github.io/cmods/"><span class="tree-leaf-name">cmods</span><span class="tag tag-tier-5">Build Workspace</span></a>' +
     '<a class="tree-leaf" href="https://pydevices.github.io/mpftp/"><span class="tree-leaf-name">mpftp</span><span class="tag tag-tier-5">REPL / Transfer Tool</span></a>' +
     '</div>' +

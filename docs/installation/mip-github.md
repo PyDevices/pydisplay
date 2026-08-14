@@ -4,9 +4,9 @@ Install source `.py` files directly from the pydevices-examples GitHub repositor
 
 Core libraries (`displaydev`, `eventsys`, `multimer`, `pygraphics`,
 `palettes`, `pdwidgets`) are **not** published as `packages/*.json` here —
-use the [micropython-lib MIP index](mip-micropython-lib.md) instead.
+use the [PyDevices MIP index](mip-micropython-lib.md) instead.
 Desktop `usdl2` comes with the pydevices MIP desktop board package
-(or `pydevices-desktop` on TestPyPI), not as a core micropython-lib package.
+(or `pydevices-desktop` on TestPyPI), not as a core MIP package.
 
 ## What remains on GitHub MIP
 
@@ -68,5 +68,5 @@ mip.install("github:PyDevices/pydevices/drivers/display/st7789.py", target="./dr
 ## Notes
 
 - Packages use **source** `.py` files (not `.mpy` bytecode).
-- `spibus` and `i80bus` (in pydevices) use `@micropython.viper` and are only available via GitHub, not micropython-lib.
+- `spibus` and `i80bus` (in pydevices) use `@micropython.viper` and are only available via GitHub, not mip.
 - After install, see [Utils path setup](../utils.md#path-setup) when environment variables are unavailable or not set as recommended. Skip this if everything lives flat under `/lib`.

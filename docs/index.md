@@ -60,4 +60,4 @@ TestPyPI distribution names use `pydevices-` (for example,
 | Browser gallery | [PyDevices.github.io/pydevices-examples/pyscript](https://PyDevices.github.io/pydevices-examples/pyscript/) |
 | Product source | [PyDevices/pydevices](https://github.com/PyDevices/pydevices) |
 | Example source | [PyDevices/pydevices-examples](https://github.com/PyDevices/pydevices-examples) |
-| MIP index | [PyDevices micropython-lib](https://PyDevices.github.io/mip) |
+| MIP index | [PyDevices MIP](https://pydevices.github.io/mip) |

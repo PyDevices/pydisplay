@@ -46,6 +46,6 @@ Third-party trees copied locally (not in `utils.json`):
 |------|---------|
 | `gui/` | Peter Hinch GUIs — install via [`fetch_ph_gui`](guis/nano-gui.md); gitignored; one of nano / micro / touch at a time |
 
-Many examples in `lib/examples/` depend on utils. They are excluded from the micropython-lib packages — install from GitHub only.
+Many examples in `lib/examples/` depend on utils. They are excluded from the MIP packages — install from GitHub only.
 
 Some files are third-party ports included for convenience; see file headers for attribution.

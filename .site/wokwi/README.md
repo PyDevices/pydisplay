@@ -21,7 +21,7 @@ Board config: [`wokwi_ili9341_ft6x36_esp32s3`](https://github.com/PyDevices/pyde
 
 ## Quick try (default)
 
-Use `main.py` as committed. On first boot, `mip` downloads PyDevices core + `pygraphics` from the micropython-lib index (network required). You should see the **testris** game running — drive it with the on-screen touch keypad.
+Use `main.py` as committed. On first boot, `mip` downloads PyDevices core + `pygraphics` from the PyDevices MIP index (network required). You should see the **testris** game running — drive it with the on-screen touch keypad.
 
 ## Full install
 

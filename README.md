@@ -55,7 +55,7 @@ cd lib
 On Windows, use the equivalent `.venv\Scripts\python.exe` commands.
 
 For MicroPython, install unprefixed MIP package names from the PyDevices
-micropython-lib index, then install a board package:
+PyDevices MIP index, then install a board package:
 
 ```python
 import mip
@@ -130,7 +130,7 @@ packages remain conventional and unprefixed.
 ## Related repositories
 
 - [pydevices](https://github.com/PyDevices/pydevices) — canonical product source and core driver package home
-- [micropython-lib](https://github.com/PyDevices/micropython-lib) — PyDevices MIP index fork
+- [mip](https://github.com/PyDevices/mip) — PyDevices MIP index fork
 - [lvgl-bindings](https://github.com/PyDevices/lvgl-bindings) — shared LVGL binding and `display_driver` source
 - [lvgl-micropython](https://github.com/PyDevices/lvgl-micropython),
   [lvgl-circuitpython](https://github.com/PyDevices/lvgl-circuitpython), and

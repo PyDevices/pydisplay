@@ -222,7 +222,7 @@ for package_path, deps, extra_files in packages:
     if package_name not in toml_exclude:
         master_toml.append("")
 
-# Write the package .json files (GitHub MIP only — not micropython-lib cores).
+# Write the package .json files (GitHub MIP only — not mip cores).
 manual_package_stems = {
     "micropython-micro-gui",
     "micropython-nano-gui",
