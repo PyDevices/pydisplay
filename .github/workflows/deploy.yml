@@ -32,8 +32,6 @@ jobs:
           path: pydevices
           sparse-checkout: |
             utils
-            lib/eventsys
-            lib/multimer
 
       - uses: actions/setup-python@v5
         with:
@@ -53,7 +51,6 @@ jobs:
           rm -rf _site/pyscript/lib _site/pyscript/src _site/pyscript/packages _site/pyscript/wheels
           mkdir -p _site/pyscript/lib _site/pyscript/packages
           cp -r lib/utils _site/pyscript/lib/
-          cp -r pydevices/lib/eventsys pydevices/lib/multimer _site/pyscript/lib/
           # Hardware-owned helpers (mip.py, byteswap, …)
           cp pydevices/utils/byteswap.py \
              pydevices/utils/frame_recorder.py \
@@ -63,7 +60,6 @@ jobs:
              pydevices/utils/viper_tools.py \
              pydevices/utils/wifi.py \
              _site/pyscript/lib/utils/
-          cp lib/jupyter_notebook.ipynb _site/pyscript/lib/
           python scripts/gallery_generator.py --copy-examples _site/pyscript/lib/examples
           cp -r packages/* _site/pyscript/packages/
           touch _site/.nojekyll
