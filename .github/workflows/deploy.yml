@@ -5,14 +5,15 @@ on:
     branches:
       - main
     paths:
+      - '.site/**'
       - 'web/**'
+      - '.github/workflows/deploy.yml'
       - 'lib/**'
       - 'packages/**'
       - 'scripts/install_gen_manifests.py'
       - 'scripts/install_refresh_manifests.sh'
       - 'scripts/gallery_generator.py'
       - 'scripts/pyscript_stamp_pwa_cache.py'
-      - '.github/workflows/deploy-pyscript.yml'
   workflow_dispatch:
 
 permissions:
@@ -67,10 +68,9 @@ jobs:
           cp lib/jupyter_notebook.ipynb _site/pyscript/lib/
           python scripts/gallery_generator.py --copy-examples _site/pyscript/lib/examples
           # Example + lib MIP manifests; relative urls resolve via packages/ → ../lib/
-          cp packages/*.json _site/pyscript/packages/
-          cp web/landing/index.html _site/index.html
-          cp web/landing/site.css _site/site.css
-          cp .nojekyll _site/
+          cp -r .site/* _site/ 2>/dev/null || true
+          cp .site/landing/index.html _site/index.html 2>/dev/null || true
+          touch _site/.nojekyll
           # Stamp CACHE_NAME from a hash of the PWA shell (STATIC_ASSETS + sw.js).
           # Example/src churn alone does not change the id — installed apps are
           # only prompted when the offline shell actually changes.

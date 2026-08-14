@@ -13,7 +13,7 @@
  *   https://pydevices.github.io/assets/js/site-chrome.js
  */
 (function () {
-  var LOGO = "https://pydevices.github.io/assets/img/logo.svg";
+  var LOGO = "https://pydevices.github.io/img/logo.svg";
   var ROOT = "https://pydevices.github.io";
 
   var HEADER =
@@ -136,7 +136,7 @@
     }
     if (!document.querySelector('script[src*="tree-nav.js"]')) {
       var script = document.createElement('script');
-      script.src = ROOT + '/assets/js/tree-nav.js';
+      script.src = ROOT + '/vendor/pydevices-chrome/tree-nav.js';
       document.head.appendChild(script);
     }
   }
