@@ -50,7 +50,7 @@ jobs:
           mkdir -p _site
           cp -r .site/* _site/
           # Replace symlinks inside _site/pyscript with real trees for GitHub Pages
-          rm -rf _site/pyscript/lib _site/pyscript/src _site/pyscript/packages
+          rm -rf _site/pyscript/lib _site/pyscript/src _site/pyscript/packages _site/pyscript/wheels
           mkdir -p _site/pyscript/lib _site/pyscript/packages
           cp -r lib/utils _site/pyscript/lib/
           cp -r pydevices/lib/eventsys pydevices/lib/multimer _site/pyscript/lib/
