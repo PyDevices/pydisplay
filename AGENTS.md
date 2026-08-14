@@ -4,7 +4,7 @@
 
 This repo is the PyDevices examples, documentation, and PyScript gallery. The
 shareable product libraries live in sibling `pydevices`. There is no
-build step for examples. `web/pyscript/lib` is a symlink to `../../lib`, so
+build step for examples. `.site/pyscript/lib` is a symlink to `../../lib`, so
 editing `lib/` updates the PyScript gallery too.
 
 ### Environment

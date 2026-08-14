@@ -21,7 +21,7 @@
 
 --8<-- "_snippets/pyscript-local.md"
 
-Examples in the [browser gallery](https://PyDevices.github.io/pydevices-examples/pyscript/) are copied to the deploy site and installed from the same origin on GitHub Pages. Locally, `tools/serve.py` serves your working tree — gallery pages load `lib/examples/` via `web/pyscript/micropython.html?modules=…` / `?manifests=…` (MicroPython). Use `web/pyscript/pyodide.html` with the same query shape for Pyodide smoke tests (MIP JSON under `packages/` via the `web/pyscript/packages` symlink; no `?packages=`); it is not wired into the gallery. Non-gallery pages (`repl.html`, `editor.html`, `async.html`, `dom.html`) may still use `github:` installs.
+Examples in the [browser gallery](https://PyDevices.github.io/pydevices-examples/pyscript/) are copied to the deploy site and installed from the same origin on GitHub Pages. Locally, `tools/serve.py` serves your working tree — gallery pages load `lib/examples/` via `.site/pyscript/micropython.html?modules=…` / `?manifests=…` (MicroPython). Use `.site/pyscript/pyodide.html` with the same query shape for Pyodide smoke tests (MIP JSON under `packages/` via the `.site/pyscript/packages` symlink; no `?packages=`); it is not wired into the gallery. Non-gallery pages (`repl.html`, `editor.html`, `async.html`, `dom.html`) may still use `github:` installs.
 
 ## Minimal teaching shells
 
@@ -29,10 +29,10 @@ These tiny pages sit beside the gallery loaders and each highlight one PyScript 
 
 | Page | Feature |
 |------|---------|
-| [`editor.html`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/editor.html) | `type="mpy-editor"` with hidden `setup` + shared `env` — editable lesson + Run |
-| [`repl.html`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/repl.html) | `terminal worker` + `code.interact` |
-| [`async.html`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/async.html) | `async` / `await` animation that yields to the browser |
-| [`dom.html`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/dom.html) | HTML button → Python via `create_proxy` |
+| [`editor.html`](https://github.com/PyDevices/pydevices-examples/blob/main/.site/pyscript/editor.html) | `type="mpy-editor"` with hidden `setup` + shared `env` — editable lesson + Run |
+| [`repl.html`](https://github.com/PyDevices/pydevices-examples/blob/main/.site/pyscript/repl.html) | `terminal worker` + `code.interact` |
+| [`async.html`](https://github.com/PyDevices/pydevices-examples/blob/main/.site/pyscript/async.html) | `async` / `await` animation that yields to the browser |
+| [`dom.html`](https://github.com/PyDevices/pydevices-examples/blob/main/.site/pyscript/dom.html) | HTML button → Python via `create_proxy` |
 
 ### REPL: worker vs main thread
 
@@ -84,7 +84,7 @@ Prefer Playwright helpers over poking the IDE browser when demos hang:
 ```bash
 python tools/serve.py   # separate terminal
 .venv/bin/python tools/ps_debug.py \
-  'http://127.0.0.1:8000/web/pyscript/harness.html?modules=calc_graphics,calc_engine&autotest=1' 20
+  'http://127.0.0.1:8000/.site/pyscript/harness.html?modules=calc_graphics,calc_engine&autotest=1' 20
 ```
 
 **Common wedge:** sync `multimer.sleep_ms` (or other blocking sleep) on the

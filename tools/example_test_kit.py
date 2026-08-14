@@ -561,7 +561,7 @@ _server_pid: int | None = None
 def _server_ready(port: int = PYSCRIPT_PORT) -> bool:
     try:
         with urllib.request.urlopen(
-            f"http://127.0.0.1:{port}/web/pyscript/harness.html", timeout=2
+            f"http://127.0.0.1:{port}/.site/pyscript/harness.html", timeout=2
         ) as resp:
             return resp.status == 200
     except (urllib.error.URLError, TimeoutError, OSError, ConnectionError):
@@ -760,7 +760,7 @@ def run_pyscript_case(
     ensure_pyscript_server(port)
     query = pyscript_harness_query(example_id, example_meta)
     url = (
-        f"http://127.0.0.1:{port}/web/pyscript/harness.html?{query}"
+        f"http://127.0.0.1:{port}/.site/pyscript/harness.html?{query}"
         f"&autotest=1&duration={int(duration)}&timeout={int(timeout)}"
     )
 

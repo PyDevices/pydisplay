@@ -18,7 +18,7 @@ Optional headers (first 10 lines), one line per namespace::
 
 MIP manifests for package examples live in ``packages/<name>.json`` (generated
 by ``scripts/install_gen_manifests.py``). PyScript loads them via the
-``web/pyscript/packages`` symlink as ``?manifests=<name>``.
+``.site/pyscript/packages`` symlink as ``?manifests=<name>``.
 
 ``# gallery: nochrome`` keeps the demo in the gallery but links the minimal
 ``mp.html`` / ``py.html`` shells (no gallery chrome) — useful for
@@ -26,9 +26,9 @@ large landscape demos.
 
 Then:
 
-  - Updates gallery cards in ``web/pyscript/index.html`` (``GEN:demos`` markers)
+  - Updates gallery cards in ``.site/pyscript/index.html`` (``GEN:demos`` markers)
   - Enforces shared org chrome mounts via ``ensure_site_chrome``
-  - Deletes stale ``web/pyscript/*.html`` from the old per-demo page generator
+  - Deletes stale ``.site/pyscript/*.html`` from the old per-demo page generator
 
 Each card links both runtimes (MicroPython + Pyodide) with filtered queries
 from ``url_maker``. Hinch GUIs are not listed in headers — ``fetch_ph_gui``
@@ -57,7 +57,7 @@ from url_maker import urls_from_deps  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES_DIR = REPO_ROOT / "lib" / "examples"
-PYSCRIPT_DIR = REPO_ROOT / "web" / "pyscript"
+PYSCRIPT_DIR = REPO_ROOT / ".site" / "pyscript"
 INDEX = PYSCRIPT_DIR / "index.html"
 THUMBNAILS_DIR = PYSCRIPT_DIR / "thumbnails"
 SCREENSHOT_TOOL = REPO_ROOT / "tools" / "screenshot.py"
@@ -524,7 +524,7 @@ def remove_stale_demo_html(stale: list[str], check: bool) -> None:
 
 
 def remove_stale_example_json(stale: list[str], check: bool) -> None:
-    """Remove leftover web/pyscript/<example>.json (now generated under packages/)."""
+    """Remove leftover .site/pyscript/<example>.json (now generated under packages/)."""
     keep = {"manifest"}  # PWA web app manifest
     for path in PYSCRIPT_DIR.glob("*.json"):
         if path.stem in keep:
@@ -537,7 +537,7 @@ def remove_stale_example_json(stale: list[str], check: bool) -> None:
         if not isinstance(urls, list) or not urls:
             continue
         first = urls[0]
-        # Legacy web/pyscript/<example>.json used ./lib/examples/; ignore others.
+        # Legacy .site/pyscript/<example>.json used ./lib/examples/; ignore others.
         url = str(first[1])
         if not (
             isinstance(first, list)

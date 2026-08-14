@@ -55,7 +55,7 @@ PyScript demos are heavier than typical static sites. Plan for these up front.
 
 MicroPython and Pyodide in the browser often need `SharedArrayBuffer`. That requires **cross-origin isolated** pages (`Cross-Origin-Opener-Policy` and `Cross-Origin-Embedder-Policy` headers).
 
-GitHub Pages does **not** send those headers by default. The pydevices-examples gallery solves this in **one** service worker (`web/pyscript/sw.js`) that:
+GitHub Pages does **not** send those headers by default. The pydevices-examples gallery solves this in **one** service worker (`.site/pyscript/sw.js`) that:
 
 1. Intercepts fetches and adds COI headers to responses.
 2. Caches gallery assets for offline use.
@@ -84,14 +84,14 @@ Use **stale-while-revalidate** (serve cache immediately, refresh in background) 
 
 ## Files you need
 
-For a pydevices-examples-style deployment under `web/pyscript/`, these are the PWA files in this repository:
+For a pydevices-examples-style deployment under `.site/pyscript/`, these are the PWA files in this repository:
 
 | File | Role |
 |------|------|
-| [`manifest.json`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/manifest.json) | Install metadata |
-| [`sw.js`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/sw.js) | COI headers + offline cache |
-| [`pwa.js`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/pwa.js) | Register `sw.js`, install button, offline toast |
-| [`pwa.css`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/pwa.css) | Styles for install button and toast |
+| [`manifest.json`](https://github.com/PyDevices/pydevices-examples/blob/main/.site/pyscript/manifest.json) | Install metadata |
+| [`sw.js`](https://github.com/PyDevices/pydevices-examples/blob/main/.site/pyscript/sw.js) | COI headers + offline cache |
+| [`pwa.js`](https://github.com/PyDevices/pydevices-examples/blob/main/.site/pyscript/pwa.js) | Register `sw.js`, install button, offline toast |
+| [`pwa.css`](https://github.com/PyDevices/pydevices-examples/blob/main/.site/pyscript/pwa.css) | Styles for install button and toast |
 | `icon-192.png`, `icon-512.png` | Launcher icons (PNG; manifest requires raster icons) |
 
 Gallery pages that include the full PWA UI: `index.html`, `micropython.html`, `pyodide.html`. Minimal shells (`editor.html`, `repl.html`, `async.html`, `dom.html`, `harness.html`) link the manifest and load `pwa.js` without the install button.
@@ -167,7 +167,7 @@ Use when the installed app should **always** launch the same demo, including que
 ```
 
 !!! tip "`start_url` and `scope`"
-    - **`scope`** — URL prefix the PWA owns. Usually `"./"` for everything under `web/pyscript/`.
+    - **`scope`** — URL prefix the PWA owns. Usually `"./"` for everything under `.site/pyscript/`.
     - **`start_url`** — page opened when the user taps the home-screen icon. Include `?modules=` or `?manifests=` when you want a fixed entry demo.
     - Paths are relative to the manifest file location.
 
@@ -175,7 +175,7 @@ Use when the installed app should **always** launch the same demo, including que
 
 Provide at least **192×192** and **512×512** PNG files. Maskable icons (safe zone in the center) improve Android adaptive icons.
 
-You can adapt the [PyDevices logo SVG](https://github.com/PyDevices/pydevices-examples/blob/main/web/vendor/pydevices-chrome/logo.svg) or export PNGs from any design tool. The gallery icons live at `web/pyscript/icon-192.png` and `web/pyscript/icon-512.png`.
+You can adapt the [PyDevices logo SVG](https://github.com/PyDevices/pydevices-examples/blob/main/web/vendor/pydevices-chrome/logo.svg) or export PNGs from any design tool. The gallery icons live at `.site/pyscript/icon-192.png` and `.site/pyscript/icon-512.png`.
 
 ---
 
@@ -240,7 +240,7 @@ Apply `withCoiHeaders` to **same-origin** responses (and shell assets) so `Share
 
 ### `CACHE_NAME` stamping at deploy
 
-Git keeps `CACHE_NAME = 'pydevices-examples-pwa-dev'` in `web/pyscript/sw.js`. The
+Git keeps `CACHE_NAME = 'pydevices-examples-pwa-dev'` in `.site/pyscript/sw.js`. The
 [Deploy PyScript site to GitHub Pages](https://github.com/PyDevices/pydevices-examples/blob/main/.github/workflows/deploy-pyscript.yml)
 workflow runs [`scripts/pyscript_stamp_pwa_cache.py`](https://github.com/PyDevices/pydevices-examples/blob/main/scripts/pyscript_stamp_pwa_cache.py)
 on the assembled `_site/pyscript/` tree **before** publishing to `gh-pages`. The
@@ -259,7 +259,7 @@ That means:
 Local `python tools/serve.py` uses the git copy (`pydevices-examples-pwa-dev`); only the
 Pages artifact is stamped.
 
-See the full implementation: [`web/pyscript/sw.js`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/sw.js).
+See the full implementation: [`.site/pyscript/sw.js`](https://github.com/PyDevices/pydevices-examples/blob/main/.site/pyscript/sw.js).
 
 ---
 
@@ -296,7 +296,7 @@ No extra HTML is required. `pwa.js` creates a `#pwa-toast` element on first use 
 - the service worker finishes its first activation;
 - the browser goes online or offline.
 
-Styles are in [`pwa.css`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/pwa.css).
+Styles are in [`pwa.css`](https://github.com/PyDevices/pydevices-examples/blob/main/.site/pyscript/pwa.css).
 
 ---
 
@@ -307,7 +307,7 @@ Styles are in [`pwa.css`](https://github.com/PyDevices/pydevices-examples/blob/m
 Pushes to `main` that touch `web/**` or `lib/**` run [Deploy PyScript site to GitHub Pages](https://github.com/PyDevices/pydevices-examples/blob/main/.github/workflows/deploy-pyscript.yml). The workflow:
 
 1. Verifies generated manifests are fresh (`install_refresh_manifests.sh --audit`, `gallery_generator.py --check`).
-2. Copies `web/pyscript/*` into `_site/pyscript/`.
+2. Copies `.site/pyscript/*` into `_site/pyscript/`.
 3. Copies `lib/utils` and examples into `_site/pyscript/lib/`, adds canonical
    `eventsys` / `multimer` from a pydevices checkout at the gallery's
    `lib/{eventsys,multimer}` URLs, and overlays hardware-owned utilities
@@ -376,7 +376,7 @@ Use Chrome or Edge on desktop, Chrome on Android, or Safari on iOS. On iOS the *
 
 ### Fork or copy the PWA bundle
 
-1. Copy `manifest.json`, `sw.js`, `pwa.js`, `pwa.css`, and icon PNGs into your `web/pyscript/` tree (or equivalent).
+1. Copy `manifest.json`, `sw.js`, `pwa.js`, `pwa.css`, and icon PNGs into your `.site/pyscript/` tree (or equivalent).
 2. Edit `manifest.json` — name, colors, `start_url`.
 3. Edit `STATIC_ASSETS` in `sw.js` — list only pages and styles **you** ship.
 4. Add the `<head>` links and `pwa.js` script to your HTML shells.
@@ -384,7 +384,7 @@ Use Chrome or Edge on desktop, Chrome on Android, or Safari on iOS. On iOS the *
 
 ### Minimal PyScript page (no gallery chrome)
 
-For a single-file demo like [`editor.html`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/editor.html):
+For a single-file demo like [`editor.html`](https://github.com/PyDevices/pydevices-examples/blob/main/.site/pyscript/editor.html):
 
 ```html
 <head>
@@ -402,7 +402,7 @@ Point `start_url` at that page (or at a parametric loader URL with your module q
 The gallery loader accepts:
 
 - `?modules=stem1,stem2` — install `.py` files from `lib/examples/`
-- `?manifests=name` — install a MIP JSON manifest from `packages/` (via `web/pyscript/packages`)
+- `?manifests=name` — install a MIP JSON manifest from `packages/` (via `.site/pyscript/packages`)
 
 For a dedicated PWA around one module, set:
 
@@ -493,9 +493,9 @@ missing `STATIC_ASSETS`. Remove the marker when restoring the normal worker.
 
 | Topic | Location |
 |-------|----------|
-| Manifest | `web/pyscript/manifest.json` |
-| Service worker | `web/pyscript/sw.js` |
-| Client bootstrap + UI | `web/pyscript/pwa.js`, `web/pyscript/pwa.css` |
+| Manifest | `.site/pyscript/manifest.json` |
+| Service worker | `.site/pyscript/sw.js` |
+| Client bootstrap + UI | `.site/pyscript/pwa.js`, `.site/pyscript/pwa.css` |
 | Deploy workflow | `.github/workflows/deploy-pyscript.yml` |
 | `CACHE_NAME` stamp script | `scripts/pyscript_stamp_pwa_cache.py` |
 | Gallery generator | `scripts/gallery_generator.py` |

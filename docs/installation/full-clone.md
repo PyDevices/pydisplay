@@ -17,7 +17,7 @@ cd pydevices-examples
 pydevices-examples/
 ├── lib/examples/       # portable demos and applications
 ├── lib/utils/          # example and GUI integration helpers
-├── web/pyscript/       # live gallery and reusable PWA shell
+├── .site/pyscript/       # live gallery and reusable PWA shell
 ├── packages/           # GitHub MIP manifests for examples/helpers
 └── tools/              # cross-runtime test harnesses
 ```

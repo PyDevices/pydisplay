@@ -28,4 +28,4 @@ Browser / PyScript only — see [PWA — Smart TVs](pwa.md#smart-tvs-webos-tizen
 ## Contributing
 
 Pull requests for `displaydev/psdisplay.py` belong in pydevices;
-asyncio example ports and files under `web/pyscript/` belong here.
+asyncio example ports and files under `.site/pyscript/` belong here.

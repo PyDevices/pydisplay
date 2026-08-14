@@ -47,16 +47,14 @@ jobs:
 
       - name: Assemble GitHub Pages site
         run: |
-          mkdir -p _site/pyscript
-          cp -r web/pyscript/* _site/pyscript/
-          # web/pyscript/lib and web/pyscript/packages are symlinks for local
-          # dev; replace with real trees for GitHub Pages.
+          mkdir -p _site
+          cp -r .site/* _site/
+          # Replace symlinks inside _site/pyscript with real trees for GitHub Pages
           rm -rf _site/pyscript/lib _site/pyscript/src _site/pyscript/packages
           mkdir -p _site/pyscript/lib _site/pyscript/packages
           cp -r lib/utils _site/pyscript/lib/
           cp -r pydevices/lib/eventsys pydevices/lib/multimer _site/pyscript/lib/
-          # Hardware-owned helpers (mip.py, byteswap, …) — PyScript [files] still
-          # fetch them at lib/utils/<name>.py (browser URL under web/pyscript/).
+          # Hardware-owned helpers (mip.py, byteswap, …)
           cp pydevices/utils/byteswap.py \
              pydevices/utils/frame_recorder.py \
              pydevices/utils/keypins.py \
@@ -67,12 +65,9 @@ jobs:
              _site/pyscript/lib/utils/
           cp lib/jupyter_notebook.ipynb _site/pyscript/lib/
           python scripts/gallery_generator.py --copy-examples _site/pyscript/lib/examples
-          # Example + lib MIP manifests; relative urls resolve via packages/ → ../lib/
-          cp -r .site/* _site/ 2>/dev/null || true
+          cp -r packages/* _site/pyscript/packages/
           touch _site/.nojekyll
           # Stamp CACHE_NAME from a hash of the PWA shell (STATIC_ASSETS + sw.js).
-          # Example/src churn alone does not change the id — installed apps are
-          # only prompted when the offline shell actually changes.
           python scripts/pyscript_stamp_pwa_cache.py _site/pyscript
 
       - name: Deploy to gh-pages

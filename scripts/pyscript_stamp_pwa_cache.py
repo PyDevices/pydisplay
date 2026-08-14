@@ -11,8 +11,8 @@ Usage::
     # Deploy (after assembling _site/pyscript):
     python scripts/pyscript_stamp_pwa_cache.py _site/pyscript
 
-    # Local check (writes into web/pyscript — usually skip; leave -dev):
-    python scripts/pyscript_stamp_pwa_cache.py web/pyscript --check
+    # Local check (writes into .site/pyscript — usually skip; leave -dev):
+    python scripts/pyscript_stamp_pwa_cache.py .site/pyscript --check
 
 Deploy stamps a short hash; source in git keeps ``pydevices-examples-pwa-dev``.
 

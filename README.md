@@ -122,7 +122,7 @@ packages remain conventional and unprefixed.
 |---|---|
 | `lib/examples/` | Portable examples and complete demo applications |
 | `lib/utils/` | Example helpers and third-party GUI adapters |
-| `web/pyscript/` | PyScript gallery and reusable PWA shell |
+| `.site/pyscript/` | PyScript gallery and reusable PWA shell |
 | `docs/` | Integration, platform, example, and PWA documentation |
 | `tools/` | Cross-runtime example and LVGL test harnesses |
 | `packages/` | GitHub MIP manifests for examples and helpers |

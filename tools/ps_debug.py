@@ -23,7 +23,7 @@ from playwright.sync_api import sync_playwright
 URL = (
     sys.argv[1]
     if len(sys.argv) > 1
-    else ("http://127.0.0.1:8000/web/pyscript/harness.html?modules=bouncing_balls&debug=1")
+    else ("http://127.0.0.1:8000/.site/pyscript/harness.html?modules=bouncing_balls&debug=1")
 )
 TIMEOUT_SEC = int(sys.argv[2]) if len(sys.argv) > 2 else 25
 

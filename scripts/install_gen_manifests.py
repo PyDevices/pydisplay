@@ -24,7 +24,7 @@ args = parser.parse_args()
 package_ver = "0.0.1"
 repo_url = "github:PyDevices/pydevices-examples/"
 repo_dir = os.getcwd() + "/"
-# Checkout tree and browser URLs both use lib/ (web/pyscript/lib → ../../lib
+# Checkout tree and browser URLs both use lib/ (.site/pyscript/lib → ../../lib
 # locally; deploy assembles the same layout under _site/pyscript/lib/).
 src_dir = "lib/"
 pyscript_url_dir = "lib/"

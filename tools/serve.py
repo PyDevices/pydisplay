@@ -8,9 +8,9 @@ and refresh:
 
     python tools/serve.py
     # then open:
-    #   http://127.0.0.1:8000/web/pyscript/index.html       (gallery)
-    #   http://127.0.0.1:8000/web/pyscript/micropython.html?modules=calc_graphics,calc_engine
-    #   http://127.0.0.1:8000/web/landing/index.html      (marketing landing)
+    #   http://127.0.0.1:8000/.site/pyscript/index.html       (gallery)
+    #   http://127.0.0.1:8000/.site/pyscript/micropython.html?modules=calc_graphics,calc_engine
+    #   http://127.0.0.1:8000/.site/landing/index.html      (marketing landing)
 
 Why a custom server instead of `python -m http.server`?
 
@@ -52,7 +52,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # PyScript configs but live in the sibling checkout — not in this repo.
 _HW_UTILS = REPO_ROOT.parent / "pydevices" / "utils"
 _HW_LIB = REPO_ROOT.parent / "pydevices" / "lib"
-# Gallery VFS mounts under web/pyscript/lib/<pkg>/ (see install_gen_manifests).
+# Gallery VFS mounts under .site/pyscript/lib/<pkg>/ (see install_gen_manifests).
 _HW_LIB_MOUNTS = frozenset({"eventsys", "multimer"})
 _HW_UTIL_FILES = frozenset(
     {
@@ -144,7 +144,7 @@ class DemoRequestHandler(SimpleHTTPRequestHandler):
                 marker = parts.index(pkg)
             except ValueError:
                 continue
-            # .../web/pyscript/lib/{eventsys,multimer}/...
+            # .../.site/pyscript/lib/{eventsys,multimer}/...
             if marker >= 1 and parts[marker - 1] == "lib" and parts[marker] == pkg:
                 hw = _HW_LIB.joinpath(pkg, *parts[marker + 1 :])
                 if hw.is_file():
@@ -214,13 +214,13 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  debug log sink:         POST {base}{DEBUG_PREFIX}")
     print("")
     print("Open one of:")
-    print(f"  {base}/web/pyscript/index.html")
-    print(f"  {base}/web/pyscript/micropython.html?modules=calc_graphics,calc_engine")
-    print(f"  {base}/web/pyscript/pyodide.html?modules=calc_lvgl,calc_engine")
-    print(f"  {base}/web/pyscript/harness.html?modules=calc_graphics,calc_engine")
-    print(f"  {base}/web/pyscript/mp.html?modules=hello")
-    print(f"  {base}/web/pyscript/py.html?modules=hello&deps=palettes,pygraphics")
-    print(f"  {base}/web/landing/index.html")
+    print(f"  {base}/.site/pyscript/index.html")
+    print(f"  {base}/.site/pyscript/micropython.html?modules=calc_graphics,calc_engine")
+    print(f"  {base}/.site/pyscript/pyodide.html?modules=calc_lvgl,calc_engine")
+    print(f"  {base}/.site/pyscript/harness.html?modules=calc_graphics,calc_engine")
+    print(f"  {base}/.site/pyscript/mp.html?modules=hello")
+    print(f"  {base}/.site/pyscript/py.html?modules=hello&deps=palettes,pygraphics")
+    print(f"  {base}/.site/landing/index.html")
     print("")
     print(PAGE_SNIPPET)
     print("Press Ctrl+C to stop.")

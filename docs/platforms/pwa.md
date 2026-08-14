@@ -99,7 +99,7 @@ That is the supported Apple mobile path: browser + optional home-screen install,
 
 LG webOS and Samsung Tizen ship Chromium-based browsers and encourage **web apps**. pydevices-examples’s TV story is the same PyScript/`PSDisplay` stack (large UI, remote keys) — **not** a native SDL build on those OS shells. A hosted gallery or TV web-app package can reuse the PWA assets; treat installability as host-specific.
 
-**Example:** [`tv_remote_menu`](https://pydevices.github.io/pydevices-examples/pyscript/micropython.html?modules=tv_remote_menu) — large-row D-pad menu. Remote key notes: [`web/pyscript/tv/README.md`](https://github.com/PyDevices/pydevices-examples/blob/main/web/pyscript/tv/README.md).
+**Example:** [`tv_remote_menu`](https://pydevices.github.io/pydevices-examples/pyscript/micropython.html?modules=tv_remote_menu) — large-row D-pad menu. Remote key notes: [`.site/pyscript/tv/README.md`](https://github.com/PyDevices/pydevices-examples/blob/main/.site/pyscript/tv/README.md).
 
 TV Back (`BrowserBack` / `GoBack` / `Back`) maps to `keys.K_AC_BACK` so `PSDisplay.quit_chord` matches Android remotes.
 

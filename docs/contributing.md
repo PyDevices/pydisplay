@@ -20,7 +20,7 @@ python3 -m venv .venv-docs
 After editing files under `lib/` (or install pre-commit hooks — see below):
 
 ```bash
-./scripts/install_refresh_manifests.sh    # refresh packages/*.json and web/pyscript/micropython.toml
+./scripts/install_refresh_manifests.sh    # refresh packages/*.json and .site/pyscript/micropython.toml
 ```
 
 Optional — run codegen on commit (CI still audits if you skip this):
