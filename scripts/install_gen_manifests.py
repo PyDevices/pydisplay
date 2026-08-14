@@ -143,26 +143,6 @@ def add_pyscript_file(browser_relative_path: str, mount: str) -> None:
 for rel_path, mount in toml_only_mounts:
     add_pyscript_file(rel_path, mount)
 
-# Optional product packages owned by pydevices. The gallery mounts them as a
-# baseline for non-LVGL examples (eventsys → multimer). Browser URLs are
-# ./lib/<pkg>/... (serve.py remaps; deploy copies into _site/pyscript/lib/).
-_product_lib_root_candidates = (
-    Path(repo_dir).resolve().parent / "pydevices" / "lib",
-    Path(repo_dir).resolve() / "pydevices" / "lib",
-)
-_product_lib_root = next((path for path in _product_lib_root_candidates if path.is_dir()), None)
-if _product_lib_root is None:
-    tried = ", ".join(str(path) for path in _product_lib_root_candidates)
-    raise SystemExit(f"missing pydevices lib source (tried {tried})")
-for _pkg in ("eventsys", "multimer"):
-    _pkg_root = _product_lib_root / _pkg
-    if not _pkg_root.is_dir():
-        raise SystemExit(f"missing pydevices {_pkg} source at {_pkg_root}")
-    for source_path in sorted(_pkg_root.rglob("*.py")):
-        relative = source_path.relative_to(_pkg_root).as_posix()
-        parent = relative.rsplit("/", 1)[0] if "/" in relative else ""
-        mount = f"/lib/{_pkg}/{parent}/" if parent else f"/lib/{_pkg}/"
-        add_pyscript_file(f"lib/{_pkg}/{relative}", mount)
 master_toml.append("")
 # Iterate over the packages and create the package files
 for package_path, deps, extra_files in packages:
