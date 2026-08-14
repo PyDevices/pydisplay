@@ -52,14 +52,7 @@ jobs:
           mkdir -p _site/pyscript/lib _site/pyscript/packages
           cp -r lib/utils _site/pyscript/lib/
           # Hardware-owned helpers (mip.py, byteswap, …)
-          cp pydevices/utils/byteswap.py \
-             pydevices/utils/frame_recorder.py \
-             pydevices/utils/keypins.py \
-             pydevices/utils/micropython.py \
-             pydevices/utils/mip.py \
-             pydevices/utils/viper_tools.py \
-             pydevices/utils/wifi.py \
-             _site/pyscript/lib/utils/
+          cp -r pydevices/utils/* _site/pyscript/lib/utils/
           python scripts/gallery_generator.py --copy-examples _site/pyscript/lib/examples
           cp -r packages/* _site/pyscript/packages/
           touch _site/.nojekyll
