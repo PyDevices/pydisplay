@@ -69,7 +69,6 @@ jobs:
           python scripts/gallery_generator.py --copy-examples _site/pyscript/lib/examples
           # Example + lib MIP manifests; relative urls resolve via packages/ → ../lib/
           cp -r .site/* _site/ 2>/dev/null || true
-          cp .site/landing/index.html _site/index.html 2>/dev/null || true
           touch _site/.nojekyll
           # Stamp CACHE_NAME from a hash of the PWA shell (STATIC_ASSETS + sw.js).
           # Example/src churn alone does not change the id — installed apps are
