@@ -26,7 +26,7 @@ Pulls in `pydevices-multimer` for shared timers used by `Runtime`, plus `pydevic
 ```python
 import mip
 
-mip.install("eventsys", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
+mip.install("eventsys", index="https://PyDevices.github.io/mip")
 ```
 
 ## Quick start

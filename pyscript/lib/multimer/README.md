@@ -24,7 +24,7 @@ Why both indexes: [two-index pip install](https://pydisplay.readthedocs.io/en/la
 ```python
 import mip
 
-mip.install("multimer", index="https://PyDevices.github.io/micropython-lib/mip/PyDevices")
+mip.install("multimer", index="https://PyDevices.github.io/mip")
 ```
 
 ## Quick start

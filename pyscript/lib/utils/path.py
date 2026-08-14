@@ -3,8 +3,28 @@
 import os
 import sys
 
+
+def _env_get(name):
+    """Portable getenv (CPython / MicroPython / CircuitPython)."""
+    environ = getattr(os, "environ", None)
+    if environ is not None:
+        try:
+            val = environ.get(name)
+            if val:
+                return val
+        except Exception:
+            pass
+    getenv = getattr(os, "getenv", None)
+    if getenv is not None:
+        try:
+            return getenv(name)
+        except Exception:
+            return None
+    return None
+
+
 # Get user home directory portably without os.path
-home = os.getenv("HOME") or os.getenv("USERPROFILE") or "~"
+home = _env_get("HOME") or _env_get("USERPROFILE") or "~"
 home = home.replace("\\", "/").rstrip("/")
 user_lib = home + "/.micropython/lib"
 

@@ -10,7 +10,7 @@ firmware ``mip`` after ``utils.path``; Pyodide uses portable ``mip.py``
 (from pydevices ``utils/``, mounted at ``/utils/``).
 """
 
-MIP_LIB_INDEX = "https://PyDevices.github.io/micropython-lib/mip/PyDevices"
+MIP_LIB_INDEX = "https://PyDevices.github.io/mip"
 # Install modules and manifests into cwd so ``import name`` / ``import pkg`` work
 # with ``/`` (or ``.``) on ``sys.path`` — same as desktop ``cd lib``.
 MANIFEST_MIP_TARGET = "."
@@ -156,13 +156,8 @@ def _import_portable_mip():
 
 
 def _refresh_path_after_install():
-    """Re-run ``utils.path.update`` after mip may have created ``lib`` / ``utils``.
-
-    ``utils.path`` often runs before installs exist; only existing dirs are added.
-    """
-    import utils.path
-
-    utils.path.update()
+    """Ensure ``utils.path`` is imported."""
+    import utils.path  # noqa: F401
 
 
 def _has_board_config():
