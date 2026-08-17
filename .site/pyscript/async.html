@@ -11,7 +11,7 @@
         <script type="mpy" data-configs="./micropython.json ./pydevices-examples.json">
             import utils.path
             from board_config import display_drv, runtime
-            import multimer
+            from multimer import asyncio
 
             x, y = 20, 20
             dx, dy = 3, 2
@@ -31,7 +31,7 @@
                         dy = -dy
                     display_drv.fill_rect(x, y, size, size, color)
                     display_drv.show()
-                    await multimer.sleep_ms(16)
+                    await asyncio.sleep(0.016)
 
             runtime.run_async(main)
         </script>

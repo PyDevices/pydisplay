@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Run tools/test_timers.py on all desktop subprocess runtimes.
+Run the sibling core pydevices timer probe on all desktop subprocess runtimes.
 
 Always includes micropython.exe and python.exe from ~/bin (via example_runtimes.toml).
 
@@ -50,7 +50,7 @@ PROBE_COLUMNS = (
     "machine.Timer",
     "AsyncTimer",
     "AsyncTimer (yield loop)",
-    "multimer.Timer (default)",
+    "multimer.auto.Timer",
 )
 
 # Desktop subprocess runtimes for timer probes (order matches typical dev setup).
@@ -100,7 +100,7 @@ def _write_report(rows: list[dict]) -> None:
         f"Generated: {datetime.now(tz=UTC).date().isoformat()}  ",
         'Command: `export PATH="$HOME/bin:$PATH" && python tools/run_test_timers.py`',
         "",
-        "Probes public multimer APIs only (`Timer`, `AsyncTimer`, plus hardware `machine.Timer` when present).",
+        "Runs `pydevices/tools/test_timers.py` and probes public multimer APIs only (`Timer`, `AsyncTimer`, plus hardware `machine.Timer` when present).",
         "",
         "## Summary matrix",
         "",

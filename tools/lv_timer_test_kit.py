@@ -174,7 +174,7 @@ def run_case(
     # async column. The process env is still set for code that reads os.environ.
     timer_async = {"async": "1", "sync": "0"}.get(mode)
     preload = os.path.relpath(TOOLS / "multimer_backend_preload.py", SRC)
-    cmd = [*cmd_base, preload]
+    cmd = [*cmd_base, preload, "--source-workspace"]
     if timer_async is not None:
         cmd += ["--env", f"PYDEVICES_TIMER_ASYNC={timer_async}"]
     cmd += [backend or "-", HARNESS_ARG, "kit"]

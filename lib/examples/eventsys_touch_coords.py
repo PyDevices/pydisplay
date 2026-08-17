@@ -9,10 +9,7 @@ from app_runtime import runtime
 import eventsys
 import events
 
-try:
-    from multimer import sleep_ms
-except ImportError:
-    from time import sleep_ms  # type: ignore
+from multimer import auto as timer
 
 FG, BG, ARM = 0xFFFF, 0x0000, 12
 W, H = display_drv.width, display_drv.height
@@ -68,14 +65,14 @@ def _on_up(e):
             % (gx, gy, tx, ty, gx - tx, gy - ty)
         )
         idx += 1
-        sleep_ms(400)
+        timer.sleep_ms(400)
         if idx >= len(TARGETS):
             _out("done %s" % (results,))
             display_drv.fill_rect(0, 0, W, H, BG)
             display_drv.show()
         else:
             _show()
-            sleep_ms(400)
+            timer.sleep_ms(400)
     finally:
         _busy = False
 

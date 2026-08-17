@@ -46,7 +46,7 @@ new thread from a soft timer or input callback — that overflows the stack
 (`Stack protection fault` in task `mp_thread`).
 
 Queue the work and run it on the main tick instead: `eventsys.Runtime.on_tick`,
-an LVGL `lv.timer`, or a soft `multimer.Timer` pump. Keep UI mutations on that
+an LVGL `lv.timer`, or a soft `multimer.auto.Timer` pump. Keep UI mutations on that
 same main path. Desktop CPython can still use threads; this constraint is for
 MCU MicroPython.
 

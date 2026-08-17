@@ -40,7 +40,7 @@ from board_config import display_drv
 from app_runtime import runtime
 import keys
 from pygraphics import RGB565, Area, FrameBuffer
-from multimer import Timer
+from multimer import auto as timer
 from roku_engine import (
     FRONTEND_BUTTONS,
     app_label,
@@ -220,7 +220,7 @@ class _Remote:
 
         self.buttons = []
         self._by_id = {}
-        self._status_timer = Timer(-1)
+        self._status_timer = timer.Timer(-1)
         self._pending_status = None
         self._pending_state = None
         self._playback_busy = False
@@ -308,7 +308,7 @@ class _Remote:
         # Must not call Timer.deinit from this callback (librt deadlock).
         try:
             self._status_timer.init(
-                mode=Timer.PERIODIC,
+                mode=timer.Timer.PERIODIC,
                 period=250,
                 callback=self._status_pump,
                 hard=False,

@@ -9,7 +9,14 @@
 # short pause between (same patterns formerly in bmp565_blit.py).
 from board_config import display_drv
 from pygraphics import BMP565, hline
-from multimer import sleep_ms
+
+try:
+    from time import sleep_ms
+except ImportError:
+    from time import sleep
+
+    def sleep_ms(milliseconds):
+        sleep(milliseconds / 1000)
 
 
 try:

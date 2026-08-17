@@ -22,13 +22,11 @@ from app_runtime import runtime
 from board_config import display_drv
 from displaybuf import DisplayBuffer as SSD
 
-import multimer
 import pygraphics
 
 # Peter Hinch's GUI modules import framebuf directly. Use the same FrameBuffer
 # implementation as DisplayBuffer so Writer glyph buffers can be blitted to ssd.
 sys.modules["framebuf"] = pygraphics
-multimer.install_asyncio_compat()
 
 # format = SSD.GS4_HMSB
 # format = SSD.GS8

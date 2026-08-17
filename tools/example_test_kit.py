@@ -827,8 +827,8 @@ def run_pyscript_case(
 def _write_jupyter_notebook(example_id: str, example_meta: dict, duration_s: float) -> Path:
     # Prefer dotted examples imports (cwd=lib, ``.`` on PYTHONPATH). Always
     # ``import utils.path`` so sibling ``utils/`` (keypins, mip, …) matches the
-    # subprocess wrapper. Scripts outside ``lib/examples/`` (e.g.
-    # tools/test_timers.py) are loaded by path.
+    # subprocess wrapper. Scripts outside ``lib/examples/`` (such as the
+    # sibling core timer probe) are loaded by path.
     script = example_meta.get("script", f"examples/{example_id}.py")
     script_path = (SRC / script).resolve()
     try:

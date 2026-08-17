@@ -57,7 +57,7 @@ Use **`runtime.timer_async`** (derived from `board_config.timer_async` or the di
 
 | `runtime.timer_async` | Use when |
 |---------------|----------|
-| `False` (desktop default) | MCU, MicroPython unix, CPython Linux — default `multimer.Timer` |
+| `False` (desktop default) | MCU, MicroPython unix, CPython Linux — `multimer.auto.Timer` |
 | `True` | PyScript, Jupyter, or desktop with `PYDEVICES_TIMER_ASYNC=1` — `multimer.AsyncTimer` |
 
 [`display_driver`](https://github.com/PyDevices/lvgl-bindings/blob/main/python/display_driver.py) passes this to `event_loop(asynchronous=runtime.timer_async)`.
