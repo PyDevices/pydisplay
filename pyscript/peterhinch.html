@@ -466,13 +466,14 @@ asyncio.create_task(_boot())
             const runtime = document.getElementById('hinch-runtime');
             runtime.type = 'mpy';
             runtime.dataset.configs = [
-                './micropython.json',
-                './pydevices-examples.json',
-                './peterhinch-' + gui + '.json'
+                './micropython.toml',
+                'https://raw.githubusercontent.com/PyDevices/pydevices/main/pydevices-desktop.toml',
+                './pydevices-examples.toml',
+                './peterhinch-' + gui + '.toml'
             ].join(' ');
         })();
     </script>
-    <script type="module" src="./pyscript-json-config.js"></script>
+    <script type="module" src="./pyscript-config.js"></script>
 
     <script>
         (function () {

@@ -24,7 +24,7 @@
     Q.publish(plan);
 })();
 </script>
-<script type="mpy" data-configs="./micropython.json ./pydevices-examples.json" output="log">
+<script type="mpy" data-configs="./micropython.toml https://raw.githubusercontent.com/PyDevices/pydevices/main/pydevices-desktop.toml ./pydevices-examples.toml" output="log">
 import builtins
 import os
 import sys
@@ -73,6 +73,6 @@ def _run():
 
 _run()
 </script>
-<script type="module" src="./pyscript-json-config.js"></script>
+<script type="module" src="./pyscript-config.js"></script>
 </body>
 </html>

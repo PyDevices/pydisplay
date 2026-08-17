@@ -1,7 +1,7 @@
 /*! pydevices-examples PWA service worker — offline cache + COI headers for PyScript */
 /* CACHE_NAME is stamped at Pages deploy from a hash of STATIC_ASSETS + this
  * file (see scripts/pyscript_stamp_pwa_cache.py). Git keeps -dev for local serve. */
-const CACHE_NAME = 'pydevices-examples-pwa-bc19f00511c4';
+const CACHE_NAME = 'pydevices-examples-pwa-535046c4bd33';
 
 const STATIC_ASSETS = [
   './index.html',
@@ -14,9 +14,9 @@ const STATIC_ASSETS = [
   './manifest.json',
   './peterhinch-manifest.json',
   './peterhinch.html',
-  './peterhinch-nano.json',
-  './peterhinch-micro.json',
-  './peterhinch-touch.json',
+  './peterhinch-nano.toml',
+  './peterhinch-micro.toml',
+  './peterhinch-touch.toml',
   './icon-192.png',
   './icon-512.png',
   './site.css',
@@ -28,11 +28,11 @@ const STATIC_ASSETS = [
   './pwa.js',
   './loader-ready.js',
   './loader-query.js',
-  './pyscript-json-config.js',
+  './pyscript-config.js',
   './mini-coi-fd.js',
-  './micropython.json',
-  './pyodide.json',
-  './pydevices-examples.json',
+  './micropython.toml',
+  './pyodide.toml',
+  './pydevices-examples.toml',
 ];
 
 // Loader HTML + gallery index change often; fetch network-first so deps/

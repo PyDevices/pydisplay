@@ -8,7 +8,7 @@
     </head>
     <body>
         <canvas id="display_canvas" width="1" height="1" style="background-color: black; border:2px solid black;"></canvas>
-        <script type="mpy" data-configs="./micropython.json ./pydevices-examples.json">
+        <script type="mpy" data-configs="./micropython.toml https://raw.githubusercontent.com/PyDevices/pydevices/main/pydevices-desktop.toml ./pydevices-examples.toml">
             import utils.path
             from board_config import display_drv, runtime
             from multimer import asyncio
@@ -35,6 +35,6 @@
 
             runtime.run_async(main)
         </script>
-        <script type="module" src="./pyscript-json-config.js"></script>
+        <script type="module" src="./pyscript-config.js"></script>
     </body>
 </html>

@@ -1,16 +1,14 @@
-# Desktop utility modules
+# pydevices-examples utils
 
-Every non-debris runtime module placed directly under this directory is
-automatically included in both the pip and MIP `pydevices-desktop` packages and
-in `pydevices-desktop.toml`. Utilities do not publish as separate packages.
+The files in this folder extend the functionality of pydevices-examples. They are not required for the basic functionality of pydevices-examples, but they can be useful for some applications.  Some of these files are not written by the author of pydevices-examples, but are included here for convenience.  Many of the examples
+in the examples folder use these files.
 
-| Module | Role |
-|---|---|
-| `mip.py` | Portable `mip` for CPython, CircuitPython, and Pyodide |
-| `micropython.py` | CPython compatibility shim for common MicroPython decorators and helpers |
-| `frame_recorder.py` | FFmpeg recording for desktop displays |
-| `usdl2.py` | Pure-Python SDL2 FFI fallback |
-| `uwin32.py` | Pure-Python Win32 FFI fallback |
+Preferred: set `PYTHONPATH` (CPython) or `MICROPYPATH` (MicroPython/CircuitPython) to `.:lib:utils` and run from `lib/` — no import needed. This package is optional; example scripts never import `utils.path` themselves.
 
-Firmware-frozen modules resolve before `lib` in the documented preferred
-`MICROPYPATH`, so bundled fallbacks do not replace native firmware modules.
+Without those env vars (a bare device REPL, or `boot.py`/`main.py` on a device that keeps `utils/`), set up the path explicitly:
+
+```python
+import utils.path  # adds cwd, lib/, and utils/ to sys.path
+```
+
+You may instead copy any of the files or directories to a location in your path such as `/lib`.
