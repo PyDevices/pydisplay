@@ -32,10 +32,10 @@ Board configs never own a runtime. `AutoDisplay` is imported from
   If built-in browser subagents are unavailable or have driver issues, run browser tests headlessly
   via `.venv/bin/python tools/test_html_shells.py` or `.venv/bin/python` using `from playwright.async_api import async_playwright`.
 - Desktop matrices use repo `.venv` (`cpython-venv`) plus interpreters on
-  `PATH` / `bin/` (`micropython`, `circuitpython`, and when present
-  `micropython.exe` / `python.exe`).   `./bin/jupyter.sh`, `./bin/pyscript.sh`, and
-  `android.sh` (`pydevices-android-template/scripts/`, usually via `~/bin`) aid
-  Jupyter, PyScript, and Android (adb stage onto `org.pydevices.launcher`;
+  `PATH` (`micropython`, `circuitpython`, and when present
+  `micropython.exe` / `python.exe`). `jupyter.py` (from `pydevices/bin`), `./scripts/pyscript.sh`, and
+  `android.py` (from `pydevices/bin`, on `PATH`) aid
+  Jupyter, PyScript, and Android (adb stage onto `org.pydevices.runner`;
   cwd paths like CLI Python — not PyScript gallery). Opt-in matrix:
   `tools/example_test_kit.py --only-runtime android …`.
 - The desktop display backend on CPython on Windows is `PGDisplay` (pygame-ce;

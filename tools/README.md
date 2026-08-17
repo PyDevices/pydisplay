@@ -7,8 +7,8 @@ Developer workflow only — local servers, test harnesses, and IDE typings. For 
 | Script | Purpose |
 |--------|---------|
 | [`serve.py`](serve.py) | HTTP server with Cross-Origin-Isolation headers |
-| [`pyscript.sh`](../bin/pyscript.sh) | Open one example in the browser — `./bin/pyscript.sh calculator` |
-| [`jupyter.sh`](../bin/jupyter.sh) | JupyterLab or Cursor notebooks — `./bin/jupyter.sh calculator` |
+| [`pyscript.sh`](../scripts/pyscript.sh) | Open one example in the browser — `./scripts/pyscript.sh calculator` |
+| `jupyter.py` | Standalone Jupyter runner (on PATH from `pydevices/bin`) — `jupyter.py paint.py` |
 
 From repo root:
 
@@ -21,8 +21,8 @@ python tools/serve.py
 # http://127.0.0.1:8000/web/pyscript/index.html
 # http://127.0.0.1:8000/web/pyscript/micropython.html?modules=calc_graphics,calc_engine
 
-./bin/pyscript.sh calculator
-./bin/jupyter.sh calculator --cursor
+./scripts/pyscript.sh calculator
+jupyter.py lib/examples/paint.py
 ```
 
 See [Run the notebook interactively](../docs/platforms/jupyter-run.md) and [PyScript local development](../docs/guides/pyscript.md).
@@ -90,7 +90,7 @@ per example (`--jobs 0`, default), **`--fail-fast`**, and **both**
 |------|----------|
 | Sync (`PYDEVICES_TIMER_ASYNC=0`) | **5** desktop SDL: `micropython`, `micropython.exe`, `circuitpython`, `cpython-venv`, `python.exe` |
 | Async (`PYDEVICES_TIMER_ASYNC=1`) | **7** — the five above plus `pyscript`, `jupyter` |
-| Android (opt-in) | `android` — `pydevices-android-template/scripts/android.sh` (or `~/bin/android.sh`) + emulator/device + `org.pydevices.launcher` APK; **not** in the default 5/7 lists (`--only-runtime android`) |
+| Android (opt-in) | `android` — `pydevices/bin/android.py` (or `~/bin/android.py` on PATH) + emulator/device + `org.pydevices.runner` APK; **not** in the default 5/7 lists (`--only-runtime android`) |
 
 Default timing is already short (`duration_s=2`, `timeout_s=15` in the
 runtimes/manifest defaults). After each example’s parallel wave finishes, if
@@ -207,12 +207,10 @@ wrap when useful. PyScript/Playwright does not need Xvfb.
 ### Interpreters and binaries
 
 Desktop matrices use repo `.venv` (`cpython-venv`) plus interpreters on
-`PATH` / `~/bin` / committed `repo:bin/` (`micropython`, `circuitpython`; see
-[`bin/README.md`](../bin/README.md)). `micropython.exe` / `python.exe` are
+`PATH` / `~/bin` (`micropython`, `circuitpython`). `micropython.exe` / `python.exe` are
 Windows binaries and cannot run in a Linux cloud sandbox.
 
-After usermod changes that affect these binaries or PyScript vendor wasm, see
-[`bin/README.md`](../bin/README.md).
+After usermod changes that affect these binaries or PyScript vendor wasm, run `cmods/build_runtimes.sh`.
 
 **`micropython.exe` matrix:** no `threading` / `_thread`. The example wrapper
 uses a `Runtime.poll` deadline quit (not a multimer SDL quit timer). With

@@ -18,8 +18,8 @@ available_on = ["linux", "wsl", "macos"]
 kind = "subprocess"
 command = ["micropython"]
 cwd = "lib"
-resolve = ["PATH", "~/bin/micropython", "repo:bin/micropython"]
-setup_notes = "MicroPython unix build with SDL display support. Falls back to bin/micropython (committed copy) when ~/bin and PATH don't have it, e.g. in a Cursor Cloud checkout."
+resolve = ["PATH", "~/bin/micropython"]
+setup_notes = "MicroPython unix build with SDL display support resolved via PATH or ~/bin/micropython."
 
 [runtimes."micropython.exe"]
 platform = "micropython"
@@ -28,8 +28,8 @@ available_on = ["windows", "wsl"]
 kind = "subprocess"
 command = ["micropython.exe", "-X", "heapsize=64M"]
 cwd = "lib"
-resolve = ["PATH", "~/bin/micropython.exe", "repo:bin/micropython.exe"]
-setup_notes = "MicroPython Windows (.exe). Async modes may be limited. bin/micropython.exe is committed for completeness only — Cursor Cloud agents cannot execute Windows binaries, so this runtime is not part of the cloud matrix."
+resolve = ["PATH", "~/bin/micropython.exe"]
+setup_notes = "MicroPython Windows (.exe). Async modes may be limited. Resolved via PATH or ~/bin/micropython.exe."
 timeout_s = 25
 
 [runtimes.circuitpython]
@@ -39,8 +39,8 @@ available_on = ["linux", "wsl", "macos"]
 kind = "subprocess"
 command = ["circuitpython"]
 cwd = "lib"
-resolve = ["PATH", "~/bin/circuitpython", "repo:bin/circuitpython"]
-setup_notes = "CircuitPython unix with SDL. Falls back to bin/circuitpython (committed copy) when ~/bin and PATH don't have it, e.g. in a Cursor Cloud checkout."
+resolve = ["PATH", "~/bin/circuitpython"]
+setup_notes = "CircuitPython unix with SDL resolved via PATH or ~/bin/circuitpython."
 
 [runtimes.cpython-venv]
 platform = "cpython"
@@ -70,7 +70,7 @@ display_backend = "PSDisplay"
 available_on = ["linux", "wsl", "macos", "windows"]
 kind = "pyscript"
 status = "active"
-command_template = ["./bin/pyscript.sh", "-m", "{example}", "--no-open"]
+command_template = ["./scripts/pyscript.sh", "-m", "{example}", "--no-open"]
 cwd = "."
 setup_notes = "Requires tools/serve.py on port 8000. Autotest uses harness.html?autotest=1. Headless: .venv/bin/pip install -r requirements-dev.txt && .venv/bin/playwright install chromium"
 
@@ -80,9 +80,9 @@ display_backend = "JNDisplay"
 available_on = ["linux", "wsl", "macos"]
 kind = "jupyter"
 status = "active"
-command_template = ["./bin/jupyter.sh", "-m", "{example}", "--no-open"]
-cwd = "."
-setup_notes = "Requires .venv with jupyterlab, ipywidgets, ipyevents, pillow. Executes generated lib/run-{example}.ipynb."
+command_template = ["jupyter.py", "examples/{example}.py", "--no-open"]
+cwd = "lib"
+setup_notes = "Requires .venv with jupyterlab, ipywidgets, ipyevents, pillow. Host tool: jupyter.py (on PATH)."
 
 [runtimes.android]
 platform = "android"
@@ -96,4 +96,4 @@ cwd = "lib"
 duration_s = 20
 timeout_s = 120
 oneshot_timeout_s = 45
-setup_notes = "Requires adb.exe (WSL) or adb, a connected emulator/device, and the PyDevices Runner APK. Host tool: pydevices/bin/android.py (on PATH). Opt in with --only-runtime android (not in the default 5/7 desktop matrix)."
+setup_notes = "Requires adb.exe (WSL) or adb, a connected emulator/device, and the PyDevices Runner APK. Host tool: android.py (on PATH). Opt in with --only-runtime android (not in the default 5/7 desktop matrix)."

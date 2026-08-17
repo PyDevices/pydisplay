@@ -38,35 +38,9 @@ API reference pages under `reference/` and `reference/utils/` are generated at b
 
 Shared copy-paste blocks: `docs/_snippets/` (included via pymdownx Snippets).
 
-### Embedding the Jupyter notebook
+### Jupyter notebooks
 
-The example notebook ([`lib/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/jupyter_notebook.ipynb))
-is rendered as a static docs page at [Platforms → Jupyter notebook](platforms/jupyter-notebook.ipynb).
-Users run it live via [Run the notebook interactively](platforms/jupyter-run.md).
-It is wired up with three pieces:
-
-| Piece | Role |
-|-------|------|
-| [`mkdocs-jupyter`](https://github.com/danielfrg/mkdocs-jupyter) (in `docs/requirements.txt`) | Converts `.ipynb` files into MkDocs pages |
-| [`scripts/mkdocs_gen_notebook_pages.py`](https://github.com/PyDevices/pydevices-examples/blob/main/scripts/mkdocs_gen_notebook_pages.py) | `mkdocs-gen-files` script that copies the notebook from `lib/` into the docs tree at build time (MkDocs only renders files under `docs_dir`) |
-| [`docs/overrides/main.html`](https://github.com/PyDevices/pydevices-examples/blob/main/docs/overrides/main.html) | Material theme override that adds a **Download notebook** button (uses `page.nb_url` from `include_source: true`) |
-
-The notebook keeps living in `lib/` so it can still be **run** there against the
-real source (relative imports like `import utils.path`). The committed copy has its
-outputs stripped (nbstripout), and the docs build sets `execute: false`, so the
-rendered page shows **markdown and code cells only** — no live output or the
-interactive touch widget.
-
-!!! note "Why the docs don't execute the notebook"
-    Executing it at build time would need the `JNDisplay` backend,
-    `ipywidgets`/`ipyevents`, and a running asyncio event loop with an interactive
-    display — none of which work in a headless ReadTheDocs builder. To see live
-    output, run the notebook locally (see
-    [Run the notebook interactively](platforms/jupyter-run.md)).
-
-To embed another notebook, add its path to `scripts/mkdocs_gen_notebook_pages.py` (or a
-similar gen-files script), reference the copied path in the `nav:` in `mkdocs.yml`,
-and add it to the `include:` list of the `mkdocs-jupyter` plugin.
+Interactive Jupyter notebooks are generated on demand from example scripts using `jupyter.py` (e.g. `jupyter.py calculator`). Users run examples live via [Run the notebook interactively](platforms/jupyter-run.md).
 
 ### Troubleshooting
 

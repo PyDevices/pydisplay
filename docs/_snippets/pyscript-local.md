@@ -1,19 +1,19 @@
 Clone the repo. From the **repository root** (not `src/`):
 
 ```bash
-./bin/pyscript.sh calculator
-./bin/pyscript.sh chango
-./bin/pyscript.sh                    # gallery (.site/pyscript/index.html)
-./bin/pyscript.sh calculator --no-open
+./scripts/pyscript.sh calculator
+./scripts/pyscript.sh chango
+./scripts/pyscript.sh                    # gallery (.site/pyscript/index.html)
+./scripts/pyscript.sh calculator --no-open
 ```
 
 The script runs [`tools/serve.py`](https://github.com/PyDevices/pydevices-examples/blob/main/tools/serve.py) with Cross-Origin-Isolation headers required by PyScript, reuses a healthy server on port 8000 when one is already running, and opens the browser automatically.
 
 | Page | Command | Purpose |
 |------|---------|---------|
-| Calculator | `./bin/pyscript.sh calculator` | Run one example by module name |
-| Chango | `./bin/pyscript.sh chango` | Manifest demo (`packages/chango.json`) |
-| Gallery | `./bin/pyscript.sh` | Example card grid |
+| Calculator | `./scripts/pyscript.sh calculator` | Run one example by module name |
+| Chango | `./scripts/pyscript.sh chango` | Manifest demo (`packages/chango.json`) |
+| Gallery | `./scripts/pyscript.sh` | Example card grid |
 | REPL | open `http://127.0.0.1:8000/.site/pyscript/repl.html` | REPL + canvas (`terminal worker`) |
 | Editor | open `http://127.0.0.1:8000/.site/pyscript/editor.html` | `mpy-editor` with hidden `setup` + editable lesson |
 | Async | open `http://127.0.0.1:8000/.site/pyscript/async.html` | Non-blocking animation with `await` |
@@ -35,7 +35,7 @@ After editing files under `lib/`, refresh the PyScript file manifest:
 That updates `.site/pyscript/micropython.toml` and `.site/pyscript/pyodide.toml`, which mount `lib/` and `utils/` into the browser.
 
 !!! tip "Port 8000"
-    `mkdocs serve` also defaults to port 8000. Stop one server before starting the other, or pass a different port: `./bin/pyscript.sh calculator -p 8080`.
+    `mkdocs serve` also defaults to port 8000. Stop one server before starting the other, or pass a different port: `./scripts/pyscript.sh calculator -p 8080`.
 
 !!! tip "Plain http.server"
-    `python -m http.server` works for static HTML but lacks the COI headers PyScript needs for some features. Prefer `./bin/pyscript.sh`.
+    `python -m http.server` works for static HTML but lacks the COI headers PyScript needs for some features. Prefer `./scripts/pyscript.sh`.

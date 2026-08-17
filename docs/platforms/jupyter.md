@@ -3,14 +3,7 @@
 Run pydevices-examples applications in VS Code or Jupyter with the `JNDisplay` backend.
 
 !!! tip "Run it live"
-    The [notebook preview](jupyter-notebook.ipynb) on ReadTheDocs is **not interactive**.
-    Follow **[Run the notebook interactively](jupyter-run.md)** for JupyterLab or VS Code setup.
-
-!!! note "Read the notebook online"
-    [Jupyter notebook](jupyter-notebook.ipynb) shows markdown and code cells only (not executed
-    during the build). Use the **download** button on that page, or open
-    [`lib/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/jupyter_notebook.ipynb)
-    from the repo.
+    Follow **[Run the notebook interactively](jupyter-run.md)** for JupyterLab or VS Code setup and launching examples with `jupyter.py`.
 
 ## Limitations
 
@@ -19,11 +12,11 @@ Run pydevices-examples applications in VS Code or Jupyter with the `JNDisplay` b
 
 ## Setup
 
-See **[Run the notebook interactively](jupyter-run.md)** for install commands, `./bin/jupyter.sh`, JupyterLab in the browser, and VS Code / Cursor widget settings. Summary:
+See **[Run the notebook interactively](jupyter-run.md)** for install commands, `jupyter.py`, JupyterLab in the browser, and VS Code / Cursor widget settings. Summary:
 
 1. `pip install pillow ipywidgets ipyevents jupyterlab`
-2. Open [`lib/jupyter_notebook.ipynb`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/jupyter_notebook.ipynb) from the repo clone, or generate one with `./bin/jupyter.sh <example>`.
-3. Run cells top to bottom. `./bin/jupyter.sh` configures pydevices-examples utilities and
+2. Generate and run any example with `jupyter.py <example>`.
+3. Run cells top to bottom. `jupyter.py` configures pydevices-examples utilities and
    installed or sibling product packages. For fallback path discovery, see
    [Utils path setup](../utils.md#path-setup).
 

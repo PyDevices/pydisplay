@@ -42,7 +42,7 @@ cd pydevices-android-template
 
 ## Stage an example over adb (`android.py`)
 
-Host tool: [`pydevices/bin/android.py`](https://github.com/PyDevices/pydevices/blob/main/bin/android.py) (on PATH). Stages a **cwd path** onto the installed Runner APK (`org.pydevices.runner`) and relaunches — same shape as CLI `python` / `micropython`, **not** [`pyscript.sh`](https://github.com/PyDevices/pydevices-examples/blob/main/bin/pyscript.sh) gallery lookup.
+Host tool: [`pydevices/bin/android.py`](https://github.com/PyDevices/pydevices/blob/main/bin/android.py) (on PATH). Stages a **cwd path** onto the installed Runner APK (`org.pydevices.runner`) and relaunches — same shape as CLI `python` / `micropython`, **not** [`pyscript.sh`](https://github.com/PyDevices/pydevices-examples/blob/main/scripts/pyscript.sh) gallery lookup.
 
 ```bash
 cd pydevices-examples/lib
@@ -72,7 +72,7 @@ Startup matches MicroPython: the Runner APK's packaged **`boot.py`** does env / 
 | Script running (oneshot or `run_forever` loop) | Stdio only — prints and `input()` in this terminal; **no** `>>>` yet |
 | Oneshot / falls off the bottom | Banner + `>>>` automatically |
 | Looping entry + **Ctrl+C** | `KeyboardInterrupt`, then banner + `>>>` (same as desktop `-i` with the threading timer) |
-| Bare `android.sh -i` | Clean `>>>` (`main.py` removed for this session) |
+| Bare `android.py -i` | Clean `>>>` (`main.py` removed for this session) |
 
 With `multimer` **threading** (`timer_async=False`, Android’s usual path) there is no MicroPython soft-IRQ into the REPL mid-loop — matching `micropython.exe -i` on Windows desktop. MicroPython’s **signals** / `machine.Timer` path can return from `run_forever` immediately so `>>>` coexists with ticks; Android does not try to fake that.
 
@@ -150,4 +150,4 @@ TV **web** browsers (webOS / Tizen) are a different path — PyScript / [PWA](pw
 
 ## Your own app
 
-Use `pydevices-android-template/p4a_app/` as the template: customize `launcher.py` (or stage examples with `android.sh`), set `PYDEVICES_*` for your panel size, add TestPyPI packages to `buildozer.spec`, and keep `p4a.local_recipes` pointed at this repo's `p4a_recipes/`. Do not ship a local `board_config.py` that shadows pydevices-desktop’s module.
+Use `pydevices-android-template/p4a_app/` as the template: customize `launcher.py` (or stage examples with `android.py`), set `PYDEVICES_*` for your panel size, add TestPyPI packages to `buildozer.spec`, and keep `p4a.local_recipes` pointed at this repo's `p4a_recipes/`. Do not ship a local `board_config.py` that shadows pydevices-desktop’s module.
