@@ -47,17 +47,12 @@ peterhinch_packages = {
 }
 
 # list of package directories, dependencies and extra files in that package.
-# displaydev / multimer / events / keys / portable utils (byteswap, mip, …)
-# live in pydevices and are installed via mip or pip
+# Product libraries live in pydevices and are installed via mip or pip
 # (gallery: desktop board_config deps; PyScript mounts selected product sources).
-# Sister packages (pygraphics, usdl2, palettes, pdwidgets, lvgl) are not from
+# Sister packages (pygraphics, palettes, pdwidgets, lvgl) are not from
 # this repo: frozen in firmware, or TestPyPI / MIP when needed (see url_maker.py).
 packages = [
-    [
-        "utils",
-        [["github:PyDevices/pydevices/packages/utils.json", "main"]],
-        [],
-    ],
+    ["utils", [], []],
     ["examples", [], []],
 ]
 
@@ -65,17 +60,14 @@ packages = [
 toml_exclude = ["examples"]
 
 # PyScript [files] mounts that are not part of any mip package JSON.
-# These modules live in pydevices/utils. Local serve.py and
-# deploy-pyscript.yml map the URLs onto that tree so Pyodide can import mip
-# before other installs, and so keypins/wifi/byteswap examples resolve.
+# These product modules live in pydevices/utils. Local serve.py and
+# deploy-pyscript.yml map the URLs onto that tree for the legacy JSON configs.
+# Example-owned keypins, wifi, and viper_tools are discovered from lib/utils.
 toml_only_mounts: list[tuple[str, str]] = [
     ("lib/utils/byteswap.py", "/utils/"),
     ("lib/utils/frame_recorder.py", "/utils/"),
-    ("lib/utils/keypins.py", "/utils/"),
     ("lib/utils/micropython.py", "/utils/"),
     ("lib/utils/mip.py", "/utils/"),
-    ("lib/utils/viper_tools.py", "/utils/"),
-    ("lib/utils/wifi.py", "/utils/"),
 ]
 
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}

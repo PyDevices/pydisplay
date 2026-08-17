@@ -37,6 +37,10 @@
       "github:PyDevices/pydevices-examples/lib/utils/itertools.py"
     ],
     [
+      "keypins.py",
+      "github:PyDevices/pydevices-examples/lib/utils/keypins.py"
+    ],
+    [
       "lv_encoder_emu.py",
       "github:PyDevices/pydevices-examples/lib/utils/lv_encoder_emu.py"
     ],
@@ -83,6 +87,14 @@
     [
       "uctypes.py",
       "github:PyDevices/pydevices-examples/lib/utils/uctypes.py"
+    ],
+    [
+      "viper_tools.py",
+      "github:PyDevices/pydevices-examples/lib/utils/viper_tools.py"
+    ],
+    [
+      "wifi.py",
+      "github:PyDevices/pydevices-examples/lib/utils/wifi.py"
     ],
     [
       "fonts/__init__.py",
@@ -145,11 +157,6 @@
       "github:PyDevices/pydevices-examples/lib/utils/pixel_sim/board_config.py"
     ]
   ],
-  "deps": [
-    [
-      "github:PyDevices/pydevices/packages/utils.json",
-      "main"
-    ]
-  ],
+  "deps": [],
   "version": "0.0.1"
 }

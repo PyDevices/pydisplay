@@ -48,7 +48,7 @@ from pathlib import Path
 import sys
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-# Hardware-owned utils (mip, byteswap, …) are mounted at ./lib/utils/ in
+# Product-owned desktop modules are mounted at ./lib/utils/ in the legacy
 # PyScript configs but live in the sibling checkout — not in this repo.
 _HW_UTILS = REPO_ROOT.parent / "pydevices" / "utils"
 _HW_LIB = REPO_ROOT.parent / "pydevices" / "lib"
@@ -58,11 +58,8 @@ _HW_UTIL_FILES = frozenset(
     {
         "byteswap.py",
         "frame_recorder.py",
-        "keypins.py",
         "micropython.py",
         "mip.py",
-        "viper_tools.py",
-        "wifi.py",
     }
 )
 

@@ -30,7 +30,9 @@ For recommended board setup flows, see [pydevices install workflows](https://pyd
 
 **Optional packages:**
 
-- `utils` — optional extensions (framebuf shim, console, displaybuf, tft_config, …); `byteswap` / `mip` / `viper_tools` / `keypins` / `wifi` / `frame_recorder` come from [pydevices `utils/`](https://github.com/PyDevices/pydevices/tree/main/utils)
+- `utils` — example extensions (framebuf shim, console, displaybuf, tft_config,
+  `viper_tools`, `keypins`, `wifi`, …). Product-owned desktop modules are
+  installed by `pydevices-desktop`.
 - `examples` — demo scripts
 - Bus/touch helpers — see [pydevices packages](https://github.com/PyDevices/pydevices/tree/main/packages)
 
@@ -48,7 +50,7 @@ Pure-Python CPython wheels are on [TestPyPI](https://test.pypi.org/) for maintai
 pip install \
   -i https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
-  pydevices-desktop pydevices-eventsys
+  pydevices-desktop
 ```
 
 - **`-i` TestPyPI** — primary index for prefixed PyDevices distributions (`pydevices-displaydev`, `pydevices-eventsys`, `pydevices-desktop`, …).

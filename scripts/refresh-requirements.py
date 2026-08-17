@@ -4,7 +4,7 @@
 Used by:
   - Cursor sessionStart hook (when workspace is pydevices-examples)
   - Agent after tagging a TestPyPI-publishing repo (CLI: --force)
-  - the product repository's publish_release_tag.sh pre-bump (CLI: --set name=X.Y.Z ...)
+  - product release preparation (CLI: --set name=X.Y.Z ...)
 
 Preserves package install order and ``--index-url``. Only rewrites ``name>=ver``
 lines for known packages. Fail-open: exits 0 with ``{}`` on any error

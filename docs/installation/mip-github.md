@@ -40,11 +40,9 @@ Example:
 mip.install("github:PyDevices/pydevices-examples/packages/utils.json", target="./utils")
 ```
 
-Bus / touch / chip-helper MIP packages (`spibus`, `i80bus`, `i2cbus`,
-`tt21100`, …) and portable helpers (`byteswap`, `mip`, `viper_tools`,
-`keypins`, `wifi`, `frame_recorder`) live in
-[`pydevices/packages/`](https://github.com/PyDevices/pydevices/tree/main/packages)
-(`utils.json` is a dependency of pydevices-examples `packages/utils.json`).
+`keypins`, `wifi`, and the optional source-only `viper_tools` accelerator are
+included directly in the examples `utils.json`. Product libraries and desktop
+modules are installed through `pydevices` or `pydevices-desktop`.
 
 ## Board configs
 
