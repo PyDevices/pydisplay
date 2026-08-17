@@ -78,9 +78,13 @@ from pathlib import Path
 import sys
 path = Path(sys.argv[1])
 text = path.read_text(encoding="utf-8")
-needle = "sleep_ms: Incomplete"
+needle = "\n__all__ = "
 if "asyncio: Incomplete" not in text and needle in text:
-    text = text.replace(needle, "asyncio: Incomplete\n" + needle, 1)
+    text = text.replace(
+        needle,
+        "\nfrom _typeshed import Incomplete\n\nasyncio: Incomplete\n" + needle,
+        1,
+    )
 text = "\n".join(
     line
     for line in text.splitlines()

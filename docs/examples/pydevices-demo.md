@@ -11,7 +11,7 @@ It demonstrates:
 - **Input** — touch or mouse clicks via `eventsys` and `pygraphics.Area`
 - **Rotation** — `display_drv.rotation` in 90° steps
 - **Hardware-style scrolling** — fixed top/bottom chrome with a scrolling middle panel
-- **Timers** — `multimer.Timer` with a `run_forever` / poll main loop
+- **Timers** — `eventsys.Runtime` using the opt-in `multimer.auto` provider
 
 Desktop-oriented sync demo (not in the PyScript gallery; see the async variant below).
 
@@ -71,7 +71,7 @@ Constants in the script: `TOP = 36`, `BOT = 20`, `ROW = 20` (height of each tip 
 | `displaydev.color565` | RGB → RGB565 color values |
 | `pygraphics.Area` | Rectangle hit-testing for buttons |
 | `pygraphics.Font`, `FrameBuffer`, `RGB565` | Text rendered in RAM, blitted once |
-| `multimer.Timer`, `run_forever`, `sleep_ms` | Periodic scroll + main loop |
+| `eventsys.Runtime` / `multimer.auto` | Periodic scroll + main loop |
 
 ## Code walkthrough
 

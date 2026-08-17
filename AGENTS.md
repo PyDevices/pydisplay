@@ -46,8 +46,9 @@ Board configs never own a runtime. `AutoDisplay` is imported from
 
 - Unit tests (stdlib `unittest`, no third-party runner needed):
   `.venv/bin/python -m unittest discover -s tests`
-- Lint/format: `.venv/bin/ruff check lib tests board_configs` and
-  `.venv/bin/ruff format`. Note `pyproject.toml` **excludes `lib/examples/**`**
+- Lint/format: `.venv/bin/ruff check --force-exclude --extend-exclude '*.ipynb' lib tests tools`
+  and `.venv/bin/ruff format --check --force-exclude --extend-exclude '*.ipynb' lib tests tools`.
+  Note `pyproject.toml` **excludes `lib/examples/**`**
   (and a few others) from ruff, so example files are not linted/formatted; do not
   be surprised when `ruff format --check` on an example path reports a diff.
 - The pre-commit hooks (`.pre-commit-config.yaml`) are `ruff-check`,
@@ -135,7 +136,7 @@ App pattern: queue work and drain on the main tick — see `roku_widgets` /
   `python/display_driver.py` — not shipped from this repo.
 - Test LVGL timers with `tools/lv_timer_test_kit.py` (modes: `sync`, `async`).
   Headless: `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy .venv/bin/python tools/lv_timer_test_kit.py --only cpython-venv`.
-- Non-obvious: the sync `multimer.Timer` backend on CPython/Linux delivers via a
+- Non-obvious: the sync `multimer.auto.Timer` provider on CPython/Linux delivers via a
   main-thread signal handler. LVGL is not re-entrant, so the app loop must not
   touch LVGL/pygame concurrently while that tick runs; LVGL examples use
   cooperative deadline/`time.sleep` (sync) or `asyncio.sleep` (async). The LVGL

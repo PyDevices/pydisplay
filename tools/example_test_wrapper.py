@@ -72,6 +72,27 @@ def _env_get(key):
     return None
 
 
+def _env_set(key, value):
+    """Set a real process environment value on CPython and small ports."""
+    changed = False
+    environ = getattr(os, "environ", None)
+    if environ is not None:
+        try:
+            environ[key] = value
+            changed = True
+        except Exception:
+            pass
+    putenv = getattr(os, "putenv", None)
+    if putenv is not None:
+        try:
+            putenv(key, value)
+            changed = True
+        except Exception:
+            pass
+    if not changed:
+        raise ImportError("process environment cannot be changed")
+
+
 _TOOLS = _dir_of(__file__)
 if _TOOLS not in sys.path:
     sys.path.insert(0, _TOOLS)
@@ -190,12 +211,18 @@ def _setup_sibling_paths(src):
 def _setup_bootstrap(src, mode):
     """Ensure PyDevices packages resolve; prefer env PYTHONPATH/MICROPYPATH.
 
-    Headless skips display-oriented path setup. When env already seeds product
-    packages / ``utils``, skip ``utils.path``. Fall back to ``import utils.path``
-    only if ``displaydev`` is not importable (MCU-style / unset env).
+    Headless uses the sibling core checkout when present, then skips
+    display-oriented path setup. When env already seeds product packages /
+    ``utils``, skip ``utils.path``. Fall back to ``import utils.path`` only if
+    ``displaydev`` is not importable (MCU-style / unset env).
     """
     _setup_sibling_paths(src)
     if mode == "headless":
+        repo_root = _dir_of(src)
+        workspace_root = _dir_of(repo_root)
+        core_lib = _join(workspace_root, "pydevices", "lib")
+        if _isdir(core_lib) and core_lib not in sys.path:
+            sys.path.insert(0, core_lib)
         return
 
     # Always apply utils.path: even when displaydev is pip-installed, checkout
@@ -330,11 +357,8 @@ def _start_multimer_quit_schedule(duration_s, quit_mode, kind, injected):
     try:
         import quit_inject
 
-        import multimer
-        from multimer import Timer
+        from multimer import auto as timer
     except ImportError:
-        return False
-    if Timer is None:
         return False
     try:
         quit_inject.queue_device()
@@ -350,17 +374,17 @@ def _start_multimer_quit_schedule(duration_s, quit_mode, kind, injected):
 
     touch_delay = _touch_delay_s(duration_s)
     if quit_mode == "inject" and touch_delay > 0:
-        touch_timer = Timer(-1)
+        touch_timer = timer.Timer(-1)
         touch_timer.init(
-            mode=Timer.ONE_SHOT,
+            mode=timer.Timer.ONE_SHOT,
             period=int(touch_delay * 1000),
             callback=on_touch,
         )
         _MULTIMER_TEST_TIMERS.append(touch_timer)
 
-    quit_timer = Timer(-1)
+    quit_timer = timer.Timer(-1)
     quit_timer.init(
-        mode=Timer.ONE_SHOT,
+        mode=timer.Timer.ONE_SHOT,
         period=int(duration_s * 1000),
         callback=on_quit,
     )
@@ -688,16 +712,18 @@ def main(argv=None):
     except Exception:
         pass
 
-    # multimer.use_backend works on hosts that cannot read exported env vars
-    # (Windows PE under WSL), so prefer it over MULTIMER_BACKEND here. A backend
-    # this host cannot provide is a skip, not a failure — sweeps ask every
-    # runtime for every backend.
+    # MULTIMER_BACKEND is the sole auto-provider override. Set it inside the
+    # child because Windows PE launched from WSL cannot see the parent's
+    # exported environment. A provider this host cannot supply is a skip, not
+    # a failure — sweeps ask every runtime for every provider.
     if args.get("multimer_backend") is not None:
-        import multimer
-
         try:
-            multimer.use_backend(args["multimer_backend"])
-        except (ImportError, ValueError) as exc:
+            _env_set("MULTIMER_BACKEND", args["multimer_backend"])
+            from multimer import auto as timer
+
+            if timer.name != args["multimer_backend"]:
+                raise RuntimeError("multimer.auto was already selected as {!r}".format(timer.name))
+        except (ImportError, RuntimeError, ValueError) as exc:
             _print_result(
                 {
                     "example": args["example"],

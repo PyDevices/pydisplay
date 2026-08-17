@@ -25,14 +25,14 @@ This blocks the browser event loop. PyScript needs `async def`, `await`, and yie
 ```python
 from board_config import display_drv
 from app_runtime import runtime
-import multimer
+from multimer import asyncio
 
 async def main():
     while True:
         for event in runtime.poll():
             ...  # handle event
         display_drv.show()
-        await multimer.sleep_ms(0)  # yield to the event loop
+        await asyncio.sleep(0)  # yield to the event loop
 
 runtime.run_async(main)
 ```
@@ -46,7 +46,7 @@ runtime.run_forever()
 
 ## Runtime polling
 
-If `runtime.poll()` is synchronous, call it inside the async loop and **await a yield each iteration** so touch redraw and timers run. Use `await multimer.sleep_ms(0)` — no need to import asyncio.
+If `runtime.poll()` is synchronous, call it inside the async loop and **await a yield each iteration** so touch redraw and timers run. Import the portable event-loop module with `from multimer import asyncio`, then use `await asyncio.sleep(0)`.
 
 For periodic callbacks, use `multimer.AsyncTimer` inside `async def main()` after the loop is running.
 
@@ -60,7 +60,7 @@ For periodic callbacks, use `multimer.AsyncTimer` inside `async def main()` afte
 
 Try via: `.site/pyscript/micropython.html?modules=eventsys_simpletest`
 
-Minimal shell (no query string): open [`async.html`](https://PyDevices.github.io/pydevices-examples/pyscript/async.html) — a bouncing square that yields with `await multimer.sleep_ms(16)`.
+Minimal shell (no query string): open [`async.html`](https://PyDevices.github.io/pydevices-examples/pyscript/async.html) — a bouncing square that yields with `await asyncio.sleep(0.016)`.
 
 ## Common failures
 

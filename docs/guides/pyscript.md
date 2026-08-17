@@ -87,7 +87,7 @@ python tools/serve.py   # separate terminal
   'http://127.0.0.1:8000/.site/pyscript/harness.html?modules=calc_graphics,calc_engine&autotest=1' 20
 ```
 
-**Common wedge:** sync `multimer.sleep_ms` (or other blocking sleep) on the
+**Common wedge:** sync provider `timer.sleep_ms` (or other blocking sleep) on the
 **main thread** often stalls `page.evaluate` and screenshots — the browser
 never yields. Prefer `runtime.run_forever()` / async sleep patterns from the
 [asyncio guide](pyscript-asyncio.md). Capture console/CDP output with

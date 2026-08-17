@@ -33,7 +33,7 @@ What changes is which **display backend** is used — `displaydev.auto.AutoDispl
 | `PSDisplay` | [PyScript](pyscript.md) browser canvas and [PWAs](pwa.md) | auto |
 | `JNDisplay` | [Jupyter Notebook](jupyter.md) | auto |
 
-Input is just as portable: a mouse on the desktop, a finger on a touchscreen, and a tap in the browser all arrive as the same [events](https://pydevices.github.io/pydevices/eventsys.html). Timers come from [`multimer`](https://pydevices.github.io/pydevices/multimer.html), which picks a backend (`machine.Timer`, librt, win32, threads, polling, SDL, or `asyncio`) to suit the host.
+Input is just as portable: a mouse on the desktop, a finger on a touchscreen, and a tap in the browser all arrive as the same [events](https://pydevices.github.io/pydevices/eventsys.html). These examples opt into [`multimer.auto`](https://pydevices.github.io/pydevices/multimer.html), which selects a provider (`machine.Timer`, librt, win32, threads, polling, SDL, or `asyncio`) to suit the host.
 
 See [Displays](https://pydevices.github.io/pydevices/displaydev.html) for backend details and [Architecture](https://pydevices.github.io/pydevices/architecture.html) for how the pieces fit together.
 

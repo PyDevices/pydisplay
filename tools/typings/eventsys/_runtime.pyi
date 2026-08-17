@@ -25,6 +25,8 @@ class _DisplayRefreshPaused:
 
 class Runtime:
     events = events
+    @classmethod
+    def from_board_config(cls, board_config, **overrides): ...
     devices: Incomplete
     host_dev: Incomplete
     touch_dev: Incomplete

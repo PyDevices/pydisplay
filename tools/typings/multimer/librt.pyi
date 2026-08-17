@@ -1,9 +1,14 @@
 import ctypes
-from .._core import _TimerCore
-from _typeshed import Incomplete
+from ._core import _TimerCore
 
-libc: Incomplete
-librt: Incomplete
+__all__ = ['Timer', 'is_async', 'name', 'pump', 'sleep_ms', 'uses_interrupts']
+
+name: str
+uses_interrupts: bool
+is_async: bool
+
+def pump() -> None: ...
+def sleep_ms(ms) -> None: ...
 librt = libc
 
 class _timespec(ctypes.Structure): ...

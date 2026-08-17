@@ -22,7 +22,7 @@ from app_runtime import runtime
 from calc_engine import CalcEngine
 import keys
 from pygraphics import RGB565, FrameBuffer
-from multimer import Timer
+from multimer import auto as timer
 from palettes import get_palette
 from eventsys.touch_keypad import TouchKeypad
 
@@ -119,7 +119,7 @@ class _Calculator:
         # have no grid cell so the touch mapping never indexes them.
         keypad_keys = [None] * self.COLS + list(_CODES) + list(_KEY_ALIASES.keys())
         self._pending_release = None
-        self._release_timer = Timer(-1)
+        self._release_timer = timer.Timer(-1)
         self.keypad = TouchKeypad(
             runtime,
             0,
@@ -262,7 +262,7 @@ class _Calculator:
             self._handle_press(col, row, label)
             self._pending_release = (col, row, label)
             self._release_timer.init(
-                mode=Timer.ONE_SHOT, period=150, callback=self._release
+                mode=timer.Timer.ONE_SHOT, period=150, callback=self._release
             )
             return
         # Keyboard alias / digit without a grid cell — feed the engine only.

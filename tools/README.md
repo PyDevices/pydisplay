@@ -31,13 +31,15 @@ See [Run the notebook interactively](../docs/platforms/jupyter-run.md) and [PySc
 
 | Script | Purpose |
 |--------|---------|
-| [`input_probe.py`](input_probe.py) | Cross-backend keyboard/keypad diagnostic + selftests (eventsys + optional LVGL map) |
+| [`lvgl_input_probe.py`](lvgl_input_probe.py) | LVGL keypad-mapping diagnostic + selftests |
 
 ```bash
-python tools/input_probe.py --selftest
-cd lib && micropython ../tools/input_probe.py --selftest --lvgl
-cd lib && python ../tools/input_probe.py   # interactive; focus the window
+micropython tools/lvgl_input_probe.py --selftest
+cd lib && micropython ../tools/lvgl_input_probe.py   # interactive; focus the window
 ```
+
+The core displaydev/eventsys probe is owned by
+[`pydevices/tools/input_probe.py`](https://github.com/PyDevices/pydevices/blob/main/tools/input_probe.py).
 
 ## PyScript headless debug (Playwright)
 
@@ -251,38 +253,21 @@ Headless needs Playwright (`.venv/bin/pip install -r requirements-dev.txt` and
 |--------|---------|
 | [`run_desktop_lv_tests.py`](run_desktop_lv_tests.py) | LVGL desktop matrix (sync/async, strict clicks) |
 | [`lv_timer_test_kit.py`](lv_timer_test_kit.py) | Full LVGL timer matrix (sync/async, all runtimes) |
-| [`run_test_timers.py`](run_test_timers.py) | multimer backend probes |
-| [`test_timers.py`](test_timers.py) | Host timer probes |
+| [`run_test_timers.py`](run_test_timers.py) | Run the sibling core multimer timer probe across desktop runtimes |
 | [`multimer_backend_preload.py`](multimer_backend_preload.py) | Force one multimer backend, then run a script |
 
-**Comparing multimer backends:** `lv_timer_test_kit.py --backend NAME` (or
+**Comparing multimer providers:** `lv_timer_test_kit.py --backend NAME` (or
 `example_test_kit.py` with `MULTIMER_BACKEND` set, which forwards
-`--multimer-backend` to the wrapper). Both call `multimer.use_backend()` inside
-the child, so they also work for the Windows `.exe` runtimes, which cannot read
-WSL-exported env vars. Runtimes lacking that backend report `unavailable` and do
-not fail the run. Semantics: [multimer — Overriding the backend](https://pydevices.github.io/pydevices/multimer.html#overriding-the-backend).
+`--multimer-backend` to the wrapper). Both set `MULTIMER_BACKEND` inside the
+child before importing `multimer.auto`, so they also work for the Windows
+`.exe` runtimes, which cannot read WSL-exported env vars. Runtimes lacking that
+provider report `unavailable` and do not fail the run. See the
+[multimer automatic-selection documentation](https://pydevices.github.io/pydevices/multimer.html#automatic-selection).
 
-## TestPyPI desktop smoke test
-
-| Script | Purpose |
-|--------|---------|
-| [`test_testpypi_desktop.sh`](test_testpypi_desktop.sh) | Fresh venv, two-index pip install, `board_config` + SDL draw check |
-
-```bash
-./tools/test_testpypi_desktop.sh              # real SDL window
-./tools/test_testpypi_desktop.sh --headless   # CI / SSH without DISPLAY
-```
-
-Installs `displaydev`, `usdl2`, `pygraphics`, and `pydevices-lvgl` (no version pins). See the [product publishing guide](https://pydevices.github.io/pydevices/publishing.html).
-
-| Script | Purpose |
-|--------|---------|
-| [`test_testpypi_standalone.sh`](test_testpypi_standalone.sh) | Per-package TestPyPI venv import smoke (`multimer`, `displaydev`, `eventsys`, `pygraphics`; `--desktop` adds backend stacks) |
-
-```bash
-./tools/test_testpypi_standalone.sh
-./tools/test_testpypi_standalone.sh --desktop
-```
+TestPyPI package smoke tests are owned by the repositories that publish the
+packages: core checks live in
+[`pydevices/tools/test_testpypi_standalone.sh`](https://github.com/PyDevices/pydevices/blob/main/tools/test_testpypi_standalone.sh),
+and pygraphics has its own standalone wheel check.
 
 ## Other dev aids
 
