@@ -35,7 +35,10 @@ import sys
 from random import getrandbits
 import tft_bitmap
 import tft_config
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 palette = tft_config.palette
 sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])

@@ -23,7 +23,10 @@ Smoothly scrolls mirrored rainbow colored random curves across the display.
 
 """
 
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 import math
 from random import getrandbits

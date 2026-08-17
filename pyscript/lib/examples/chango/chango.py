@@ -31,7 +31,10 @@ sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
 import chango_16 as font_16
 import chango_32 as font_32
 import chango_64 as font_64
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 import tft_config
 import tft_write
 

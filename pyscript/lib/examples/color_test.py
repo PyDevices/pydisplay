@@ -23,7 +23,10 @@ gradient.  Then repeatedly draws a borders around the display in the same colors
 
 """
 
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 import tft_config
 import tft_text

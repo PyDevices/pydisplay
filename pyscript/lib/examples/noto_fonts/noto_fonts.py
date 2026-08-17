@@ -29,7 +29,10 @@ The fonts were converted from True Type fonts using the
 import sys
 
 import tft_config
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 palette = tft_config.palette
 sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])

@@ -10,7 +10,10 @@ portrait panel 90 degrees into landscape.
 
 from audio import AudioEngine, midi_to_hz
 import board_config
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 import board_peripherals
 
 import keys

@@ -17,7 +17,10 @@ under ``timer_async`` hosts such as PyScript.
 """
 
 from board_config import display_drv
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 from random import getrandbits
 
 import eventsys

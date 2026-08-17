@@ -18,7 +18,10 @@ if _EXAMPLES not in sys.path:
     sys.path.insert(0, _EXAMPLES)
 
 from board_config import display_drv
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 from calc_engine import CalcEngine
 import keys
 from pygraphics import RGB565, FrameBuffer

@@ -15,7 +15,7 @@ directly from ``lib/``::
 Or from the REPL: ``from examples import pixel_sim_demos``.
 
 **Real PixelDisplay hardware:** import ``display_drv`` from ``board_config`` and
-``runtime`` from ``app_runtime``.
+``eventsys.Runtime.from_board_config(board_config)``.
 instead of ``from pixel_sim import …`` (your hardware ``board_config`` must wire
 ``PixelDisplay``).
 
@@ -39,7 +39,7 @@ if _host_board.display_drv.width < _host_board.display_drv.height:
 
 # Uncomment one and only one of the following two lines
 # from board_config import display_drv
-# from app_runtime import runtime
+# runtime = eventsys.Runtime.from_board_config(board_config)
 from pixel_sim import display_drv, runtime
 
 # scroll | plasma | fire | matrix | starfield | reel

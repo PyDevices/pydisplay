@@ -20,12 +20,14 @@ Grid size defaults to 64x16; override with ``PIXEL_SIM_WIDTH`` /
 
 import os
 
-from app_runtime import runtime as _host_runtime  # noqa: E402
-import board_config as _host  # noqa: E402
+import board_config as _host
 
 from displaydev import color565, color_rgb
 from displaydev.pixeldisplay import PixelDisplay
+import eventsys
 import pygraphics
+
+_host_runtime = eventsys.Runtime.from_board_config(_host)
 
 
 def _env_int(name, default):
