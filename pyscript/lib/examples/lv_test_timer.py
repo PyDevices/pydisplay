@@ -37,9 +37,9 @@ if _tools not in sys.path:
 import json
 import time
 
-import multimer
 from board_config import display_drv
 from displaydev import env_get
+from multimer import auto as timer
 
 # Optional logical orientation for LVGL (hw MADCTL/SDL/PG or software rotate).
 _lv_rot = env_get("PYDEVICES_LV_ROTATION")
@@ -132,9 +132,9 @@ def _timer_type():
     except AttributeError:
         pass
     try:
-        from multimer import AsyncTimer, Timer
+        from multimer import AsyncTimer
 
-        return _format_timer_type(AsyncTimer if runtime.timer_async else Timer)
+        return _format_timer_type(AsyncTimer if runtime.timer_async else timer.Timer)
     except ImportError:
         return "?"
 
@@ -288,7 +288,7 @@ def _inject_click(cx, cy):
         while (pending or get_state()["taps"] < 1) and time.time() < deadline:
             # Pump: the host queue is drained from the runtime tick, which
             # pump-based backends only deliver while the main thread sleeps here.
-            multimer.sleep_ms(10)
+            timer.sleep_ms(10)
     finally:
         queue_dev._read = orig_read
     return get_state()["taps"]
@@ -365,10 +365,10 @@ def _run_kit_sync():
     deadline = time.time() + _DURATION_S
     clicked_taps = None
     while time.time() < deadline:
-        # multimer.sleep_ms, not time.sleep: pump-based backends (threading on
+        # timer.sleep_ms, not time.sleep: pump-based backends (threading on
         # CircuitPython / Windows CPython, SDL2) deliver callbacks only
         # while the main thread pumps. For librt this resolves to a plain sleep.
-        multimer.sleep_ms(10)
+        timer.sleep_ms(10)
         if clicked_taps is None and get_state()["seconds"] >= 2:
             cx, cy = _button_center(btn)
             clicked_taps = _inject_click(cx, cy)

@@ -32,7 +32,7 @@ SOFTWARE.
 import gc
 import io
 
-from multimer import Timer
+from multimer import auto as timer
 
 try:
     import pygraphics as framebuf
@@ -145,8 +145,8 @@ class Console(io.IOBase):
                 self._char_buf, self._cwidth, self._lheight, format
             )
 
-        if Timer:  # If the Timer class is available
-            self._timer = Timer(-1)
+        if timer.Timer:  # If the Timer class is available
+            self._timer = timer.Timer(-1)
         else:
             self._timer = None
 
@@ -170,7 +170,11 @@ class Console(io.IOBase):
                 self._write_label(pos, params[0], params[1], params[2])
 
         if self._timer:
-            self._timer.init(mode=Timer.PERIODIC, period=self._timer_period, callback=self._tick)
+            self._timer.init(
+                mode=timer.Timer.PERIODIC,
+                period=self._timer_period,
+                callback=self._tick,
+            )
 
         self.cls()
 
