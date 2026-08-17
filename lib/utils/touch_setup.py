@@ -11,11 +11,14 @@ Usage:
 
 import sys
 
-from app_runtime import runtime
+import board_config
 from board_config import display_drv
 from displaybuf import DisplayBuffer as SSD
 
+import eventsys
 import pygraphics
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 # Peter Hinch's GUI modules import framebuf directly. Use the same FrameBuffer
 # implementation as DisplayBuffer so Writer glyph buffers can be blitted to ssd.

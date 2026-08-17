@@ -34,8 +34,16 @@ def check_deadline():
     try:
         import sys
 
-        module = sys.modules.get("display_driver") or sys.modules.get("app_runtime")
-        rt = getattr(module, "runtime", None) if module is not None else None
+        module = sys.modules.get("display_driver")
+        if module is not None and hasattr(module, "runtime"):
+            rt = getattr(module, "runtime", None)
+        else:
+            eventsys = sys.modules.get("eventsys")
+            rt = (
+                getattr(getattr(eventsys, "Runtime", None), "_current", None)
+                if eventsys is not None
+                else None
+            )
     except Exception:
         rt = None
     # eventsys.Runtime uses ``_blocking_run_forever``; LVGL display_driver.Runtime

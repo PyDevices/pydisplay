@@ -79,8 +79,11 @@ an application runtime.
 Non-LVGL examples in this repo opt into the optional `eventsys` coordinator:
 
 ```python
+import board_config
 from board_config import display_drv
-from app_runtime import runtime
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 runtime.run_forever()
 ```

@@ -9,9 +9,12 @@ that exposes a PCMOutput-compatible device (``format``, ``write``, ``close``).
 
 Typical instrument / game loop::
 
+    import board_config
     from board_config import audio_out
-    from app_runtime import runtime
+    import eventsys
     from audio import AudioEngine
+
+    runtime = eventsys.Runtime.from_board_config(board_config)
 
     eng = AudioEngine(audio_out)
     eng.attach(runtime)          # pumps mixed PCM on a timer

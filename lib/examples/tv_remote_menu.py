@@ -14,7 +14,10 @@ Desktop keyboards stand in for remotes during development.
 """
 
 from board_config import display_drv
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 from displaydev import color565
 import keys

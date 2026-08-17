@@ -28,7 +28,10 @@ https://github.com/erikflowers/weather-icons and is licensed under SIL OFL 1.1
 
 """
 
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 import tft_config
 import tft_bitmap

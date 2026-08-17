@@ -4,7 +4,10 @@
 palettes_demo.py — Palette walk cycling wheel → cube → material (no env vars).
 """
 from board_config import display_drv
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 from pygraphics import FrameBuffer, RGB565
 from palettes import get_palette
 

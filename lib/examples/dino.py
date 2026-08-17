@@ -29,7 +29,7 @@ if _host_board.display_drv.width < _host_board.display_drv.height:
 
 # For real PixelDisplay hardware, replace this import with:
 # from board_config import display_drv
-# from app_runtime import runtime
+# runtime = eventsys.Runtime.from_board_config(board_config)
 from pixel_sim import display_drv, runtime  # noqa: E402
 
 WIDTH = display_drv.width

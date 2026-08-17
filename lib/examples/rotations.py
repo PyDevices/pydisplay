@@ -8,7 +8,10 @@ number and the color of the display background.
 """
 
 from board_config import display_drv
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 from pygraphics import Draw, text16
 from palettes import get_palette
 

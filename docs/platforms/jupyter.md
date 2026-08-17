@@ -28,7 +28,7 @@ See **[Run the notebook interactively](jupyter-run.md)** for install commands, `
    [Utils path setup](../utils.md#path-setup).
 
 Board config: `pydevices/board_configs/jndisplay/board_config.py`.
-It exports the Jupyter display and host reader; `app_runtime` registers the
+It exports the Jupyter display and host reader; `eventsys.Runtime.from_board_config(board_config)` registers the
 corresponding host device.
 
 Touch examples (e.g. [`eventsys_touch_test.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/eventsys_touch_test.py)) render a single interactive **ipywidgets Image** — click on that widget.

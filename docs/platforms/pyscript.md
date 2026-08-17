@@ -15,7 +15,7 @@ Experimental browser support via [PyScript](https://pyscript.net/) and `displayd
 
 `pydevices/board_configs/psdisplay/board_config.py` — 320×480 canvas
 with neutral PSDevices host input. Non-LVGL examples attach it through
-`app_runtime`; LVGL uses `display_driver`.
+`eventsys.Runtime.from_board_config(board_config)`; LVGL uses `display_driver`.
 
 ## Apple mobile (iOS / iPadOS)
 

@@ -13,7 +13,10 @@ Cycles three rendering paths in succession (no env vars):
 """
 
 from board_config import display_drv
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 from random import getrandbits
 from pygraphics import Font, FrameBuffer, RGB565
 from palettes import get_palette

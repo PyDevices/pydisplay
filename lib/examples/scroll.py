@@ -25,7 +25,10 @@ Only works with fonts with heights that are even multiples of the screen height,
 
 """
 
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 import tft_text
 import tft_config

@@ -40,8 +40,8 @@ an environment variable is inconvenient.
 ## Input and runtime
 
 Mouse events map to the same event model as touch. The default board config
-exports `display_drv` and input readers; `app_runtime` instantiates the optional
-`eventsys` coordinator for non-LVGL examples. LVGL examples use the independent
+exports `display_drv` and input readers; non-LVGL examples instantiate the optional
+`eventsys.Runtime.from_board_config(board_config)` coordinator. LVGL examples use the independent
 coordinator from `display_driver`.
 
 ## Next

@@ -14,7 +14,10 @@ if not GROQ_API_KEY:
     raise RuntimeError("GROQ_API_KEY is not set in the environment")
 
 import board_config as bc
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 from stt import GroqSTT, STTClient
 
 

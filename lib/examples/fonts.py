@@ -27,7 +27,10 @@ https://www.youtube.com/watch?v=2cnAhEucPD4
 
 """
 
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 from multimer import ticks_add, ticks_diff, ticks_ms
 

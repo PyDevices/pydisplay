@@ -1,7 +1,7 @@
 # 🎨 App starter
 
 Copy the script below to start your first app with the published product packages
-and pydevices-examples's small `app_runtime` helper.
+and standard `eventsys.Runtime`.
 
 | Use this | When you want… |
 |----------|----------------|
@@ -12,7 +12,6 @@ and pydevices-examples's small `app_runtime` helper.
 
 - A working [board config](https://pydevices.github.io/pydevices/board-configs.html) on your path.
 - Product packages installed from TestPyPI/MIP, or a sibling `pydevices` development checkout.
-- `src/utils` on the path so `app_runtime` resolves.
 
 Save the boilerplate as `main.py` (or any name you prefer) and run it from the REPL or as your device's entry point.
 
@@ -28,12 +27,15 @@ hosts do not arm a sync timer before the loop is running.
 my_app.py — starting point for a pydevices-examples app.
 
 Copy and rename to build your own project. Uses board_config, pygraphics,
-and the optional eventsys coordinator selected by app_runtime.
+and eventsys.Runtime.
 """
 
+import board_config
 from board_config import display_drv
-from app_runtime import runtime
+import eventsys
 from pygraphics import Area
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 # --- customize: colors and layout ---
 BG = 0

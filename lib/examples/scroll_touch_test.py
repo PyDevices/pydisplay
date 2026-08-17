@@ -4,7 +4,10 @@
 # Vertical scroll + touch/click. Cycles display_drv ↔ DisplayBuffer on a timer
 # (no env vars). Chrome labels show which path is active (drv / dbuf).
 from board_config import display_drv
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 from pygraphics import Draw
 from palettes import get_palette
 from random import getrandbits

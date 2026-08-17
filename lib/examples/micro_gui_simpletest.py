@@ -9,7 +9,10 @@ This oneshot only verifies the framebuffer path (full widget demos use Screen.ch
 ``fetch_ph_gui`` (via the matching setup module) installs the GUI on desktop and in the browser.
 """
 
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 import hardware_setup  # noqa: F401 — fetch + Display
 from gui.core.ugui import ssd
 from gui.core.colors import RED, BLUE, GREEN

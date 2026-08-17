@@ -3,7 +3,10 @@ A simple test of an encoder in eventsys.
 """
 
 from board_config import display_drv
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 color_byte = 1
 bg_color = 0xFF00

@@ -22,7 +22,10 @@ Draws lines and rectangles in random colors at random locations on the display.
 
 """
 
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 from random import getrandbits
 

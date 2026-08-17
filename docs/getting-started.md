@@ -32,8 +32,11 @@ This page is a **router** for the main pydevices-examples workflows. In every ca
 A simple app usually follows this shape:
 
 ```python
+import board_config
 from board_config import display_drv
-from app_runtime import runtime  # optional non-LVGL coordinator used by these examples
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 # draw once or on each refresh
 # runtime.on(...)

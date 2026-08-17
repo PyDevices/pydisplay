@@ -73,7 +73,10 @@ console.label(Console.LEFT, platform, pal.RED)
 display_drv.show()
 
 if _test_mode:
-    from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
     console.write("console_advanced_demo: smoke test\n", pal.GREEN)
     display_drv.show()

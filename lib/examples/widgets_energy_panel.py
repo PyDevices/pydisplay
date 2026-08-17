@@ -12,7 +12,10 @@ alert threshold.
 import random
 
 import board_config
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 import pdwidgets as pd
 
 pd.DEBUG = False

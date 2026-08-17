@@ -42,7 +42,7 @@ board peripherals, hardware drivers, and their TestPyPI/MIP release automation.
 guides, the PyScript gallery, and the reusable PWA shell.
 
 Board configs export hardware capabilities but do not instantiate an application
-runtime. Non-LVGL examples explicitly import `runtime` from `app_runtime`; LVGL
+runtime. Non-LVGL examples instantiate `eventsys.Runtime.from_board_config(board_config)`; LVGL
 examples import `runtime` from `display_driver`, whose implementation is shared
 by the LVGL binding repositories and is independent of `eventsys`.
 

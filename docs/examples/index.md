@@ -57,8 +57,11 @@ See [PyScript local development](../guides/pyscript.md).
 **`runtime.run_forever()` with callbacks** — [`hello.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/hello.py), [`scroll.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/scroll.py), [`pydevices_demo.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/pydevices_demo.py), [`calc_graphics.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/calc_graphics.py):
 
 ```python
+import board_config
 from board_config import display_drv
-from app_runtime import runtime
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 def on_click(e):
     ...
@@ -83,7 +86,10 @@ while True:
 **`tft_config` animation / one-shot** — subdirectory demos [`alien/alien.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/alien/alien.py), [`tiny_toasters/tiny_toasters.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/tiny_toasters/tiny_toasters.py), [`chango/chango.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/chango/chango.py):
 
 ```python
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 tft.show()
 runtime.run_forever()
@@ -95,9 +101,10 @@ runtime.run_forever()
 
 ```python
 import board_config
+import eventsys
 import pdwidgets as pd
-from app_runtime import runtime
 
+runtime = eventsys.Runtime.from_board_config(board_config)
 display = pd.Display(board_config.display_drv, runtime)
 # ... widgets ...
 runtime.run_forever()

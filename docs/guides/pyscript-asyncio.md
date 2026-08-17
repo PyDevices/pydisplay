@@ -23,9 +23,12 @@ This blocks the browser event loop. PyScript needs `async def`, `await`, and yie
 ## Port pattern
 
 ```python
+import board_config
 from board_config import display_drv
-from app_runtime import runtime
+import eventsys
 from multimer import asyncio
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 
 async def main():
     while True:

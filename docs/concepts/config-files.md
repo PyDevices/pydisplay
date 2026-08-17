@@ -8,7 +8,6 @@ Application and third-party GUI adapters live in pydevices-examples's
 | File | Location | Purpose |
 |---|---|---|
 | `board_config.py` | installed from `pydevices/board_configs` | Display, audio, input readers, and timing preference for one board/host |
-| `app_runtime.py` | `pydevices-examples/lib/utils` | Optional non-LVGL `eventsys` runtime used by examples |
 | `path.py` | `pydevices-examples/lib/utils` | Development-checkout path setup when packages are not installed |
 | `color_setup.py` | `pydevices-examples/lib/utils` | Nano-GUI adapter |
 | `hardware_setup.py` | `pydevices-examples/lib/utils` | Micro-GUI button/encoder adapter |
@@ -30,13 +29,7 @@ available, they expose neutral capabilities such as `host_read`, `touch_read`,
 
 ## Runtime selection
 
-Non-LVGL pydevices-examples applications use:
-
-```python
-from app_runtime import runtime
-```
-
-An independent application can instantiate the optional coordinator directly:
+Non-LVGL applications instantiate the optional coordinator directly:
 
 ```python
 import board_config

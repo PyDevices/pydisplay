@@ -61,7 +61,7 @@ To select a specific host config, add the desired
 ## Runtime and timers
 
 The board config exports host input and `timer_async` preferences but no
-runtime. Non-LVGL examples instantiate optional eventsys through `app_runtime`;
+runtime. Non-LVGL examples instantiate optional eventsys via `eventsys.Runtime.from_board_config(board_config)`;
 LVGL examples use `display_driver`.
 
 `multimer` selects an appropriate host backend. It avoids mixing the SDL timer

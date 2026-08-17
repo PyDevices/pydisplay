@@ -11,7 +11,10 @@ except ImportError:
         return seq[0]
 
 
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 from color_setup import ssd as canvas
 from pygraphics import BMP565
 

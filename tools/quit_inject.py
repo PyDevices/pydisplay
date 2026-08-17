@@ -15,9 +15,11 @@ def current_runtime():
         runtime = getattr(display_driver, "runtime", None)
         if runtime is not None:
             return runtime
-    from app_runtime import runtime
+    eventsys = sys.modules.get("eventsys")
+    if eventsys is not None:
+        return getattr(getattr(eventsys, "Runtime", None), "_current", None)
 
-    return runtime
+    return None
 
 
 def queue_device():

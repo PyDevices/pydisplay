@@ -12,8 +12,8 @@ editing `lib/` updates the PyScript gallery too.
 `displaydev`, `audiodev`, optional `eventsys`, `multimer`, `events`, `keys`,
 and portable hardware utilities live in sibling
 [pydevices](https://github.com/PyDevices/pydevices), which
-also owns TestPyPI/MIP publishing. Non-LVGL examples explicitly import
-`runtime` from `app_runtime`; LVGL examples import it from `display_driver`.
+also owns TestPyPI/MIP publishing. Non-LVGL examples instantiate
+`eventsys.Runtime.from_board_config(board_config)`; LVGL examples import it from `display_driver`.
 Board configs never own a runtime. `AutoDisplay` is imported from
 `displaydev.auto` only.
 
@@ -114,7 +114,7 @@ passes `--timer-async`.
 
 ### Architecture note: timers and refresh
 
-- Non-LVGL examples opt into `eventsys.Runtime` in `lib/utils/app_runtime.py`.
+- Non-LVGL examples instantiate `eventsys.Runtime.from_board_config(board_config)`.
   LVGL's frozen/bundled `display_driver` owns an independent coordinator and
   does not import `eventsys`. Both consume neutral board-config callables and
   use `multimer`; display drivers remain policy-free.

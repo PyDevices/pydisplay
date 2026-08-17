@@ -21,9 +21,10 @@ periodic render ticks). Build the UI, then keep the app alive with
 
 ```python
 import board_config
+import eventsys
 import pdwidgets as pd
-from app_runtime import runtime
 
+runtime = eventsys.Runtime.from_board_config(board_config)
 display = pd.Display(board_config.display_drv, runtime)
 screen = pd.Screen(display)
 # ... build UI ...

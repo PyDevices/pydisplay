@@ -17,8 +17,11 @@ Portability is PyDevices's defining feature. Write your display, input, and timi
 The same import works on every platform:
 
 ```python
+import board_config
 from board_config import display_drv
-from app_runtime import runtime
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 ```
 
 What changes is which **display backend** is used — `displaydev.auto.AutoDisplay` on desktop / PyScript / Jupyter (via the desktop `board_config`), or an explicit per-board config on hardware:

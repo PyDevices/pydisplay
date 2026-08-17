@@ -6,7 +6,10 @@ Image source:  https://commons.wikimedia.org/wiki/File:Apollo_DSKY_interface.svg
 """
 
 from board_config import display_drv
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 from eventsys.touch_keypad import TouchKeypad
 from pygraphics import Area, BMP565
 

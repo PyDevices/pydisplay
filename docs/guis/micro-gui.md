@@ -7,7 +7,7 @@
 | Component | Location | Notes |
 |-----------|----------|-------|
 | `board_config.py` | `pydevices/board_configs/` | display + neutral input capabilities |
-| `hardware_setup.py` | `lib/utils/` | Fetches micro-gui; uses `app_runtime` devices to build `Display` |
+| `hardware_setup.py` | `lib/utils/` | Fetches micro-gui; uses `eventsys.Runtime` devices to build `Display` |
 | `fetch_ph_gui.py` | `lib/utils/` | mip install into `utils/gui/` + FrameBuffer patches |
 | `displaybuf.py` | `lib/utils/` | `ssd` framebuffer |
 | `uctypes.py` | `lib/utils/` | CircuitPython shim for `writer.py` |

@@ -1,7 +1,10 @@
 # gallery: skip
 # deps: pdwidgets
 import board_config
-from app_runtime import runtime
+import board_config
+import eventsys
+
+runtime = eventsys.Runtime.from_board_config(board_config)
 import eventsys
 import pdwidgets as pd
 

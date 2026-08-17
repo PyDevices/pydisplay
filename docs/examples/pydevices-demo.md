@@ -3,7 +3,7 @@
 !!! tip "Need a minimal template?"
     Copy the [**App starter**](app-starter.md) boilerplate to begin your first app without rotation or scrolling.
 
-[`pydevices_demo.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/pydevices_demo.py) is the recommended feature demo. It uses published product packages plus pydevices-examples's explicit `app_runtime` helper.
+[`pydevices_demo.py`](https://github.com/PyDevices/pydevices-examples/blob/main/lib/examples/pydevices_demo.py) is the recommended feature demo. It uses published product packages with direct `eventsys.Runtime` instantiation.
 
 It demonstrates:
 
@@ -67,7 +67,7 @@ Constants in the script: `TOP = 36`, `BOT = 20`, `ROW = 20` (height of each tip 
 | Import | Role |
 |--------|------|
 | `board_config.display_drv` | Platform display driver (SDL, BusDisplay, …) |
-| `app_runtime.runtime` | Example-owned input event runtime (touch / mouse) |
+| `eventsys.Runtime` | Application-owned input event runtime (touch / mouse) |
 | `displaydev.color565` | RGB → RGB565 color values |
 | `pygraphics.Area` | Rectangle hit-testing for buttons |
 | `pygraphics.Font`, `FrameBuffer`, `RGB565` | Text rendered in RAM, blitted once |
