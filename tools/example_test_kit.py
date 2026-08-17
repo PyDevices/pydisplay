@@ -65,13 +65,25 @@ RESULT_RE = re.compile(r"^EXAMPLE_RESULT=(.+)$", re.MULTILINE)
 # Android logcat may carry either wrapper EXAMPLE_RESULT or lv_test_timer KIT_RESULT.
 ANDROID_RESULT_RE = re.compile(r"^(?:.*\s)?(?:EXAMPLE_RESULT|KIT_RESULT)=(.+)$", re.MULTILINE)
 ANDROID_PACKAGE_ID = os.environ.get("PACKAGE_ID", "org.pydevices.launcher")
-# Lives in sibling pydevices-android-template (pydevices-examples/bin/android.sh is a thin shim).
-ANDROID_SH = Path(
-    os.environ.get(
-        "ANDROID_SH",
-        str(REPO.parent / "pydevices-android-template" / "scripts" / "android.sh"),
-    )
-)
+
+
+def _find_android_runner() -> Path:
+    env_runner = os.environ.get("ANDROID_RUNNER") or os.environ.get("ANDROID_SH")
+    if env_runner:
+        return Path(env_runner)
+    which_py = shutil.which("android.py")
+    if which_py:
+        return Path(which_py)
+    which_sh = shutil.which("android.sh")
+    if which_sh:
+        return Path(which_sh)
+    candidate_py = REPO.parent / "pydevices" / "bin" / "android.py"
+    if candidate_py.exists():
+        return candidate_py
+    return REPO.parent / "pydevices-android-runner" / "scripts" / "android.sh"
+
+
+ANDROID_SH = _find_android_runner()
 # Short wall clocks: enough for inject/poll quit; override via --duration-s / --timeout-s.
 DEFAULT_DURATION = 2
 DEFAULT_TIMEOUT = 15

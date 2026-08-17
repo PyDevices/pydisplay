@@ -40,30 +40,30 @@ cd pydevices-android-template
 ./scripts/test_desktop.sh
 ```
 
-## Stage an example over adb (`android.sh`)
+## Stage an example over adb (`android.py`)
 
-Host tool: [`pydevices-android-template/scripts/android.sh`](https://github.com/PyDevices/pydevices-android-template/blob/main/scripts/android.sh) (on PATH as `~/bin/android.sh` in Brad’s layout; `pydevices-examples/bin/android.sh` is a thin shim). Stages a **cwd path** onto the installed launcher and relaunches — same shape as CLI `python` / `micropython`, **not** [`pyscript.sh`](https://github.com/PyDevices/pydevices-examples/blob/main/bin/pyscript.sh) gallery lookup.
+Host tool: [`pydevices/bin/android.py`](https://github.com/PyDevices/pydevices/blob/main/bin/android.py) (on PATH). Stages a **cwd path** onto the installed Runner APK (`org.pydevices.runner`) and relaunches — same shape as CLI `python` / `micropython`, **not** [`pyscript.sh`](https://github.com/PyDevices/pydevices-examples/blob/main/bin/pyscript.sh) gallery lookup.
 
 ```bash
 cd pydevices-examples/lib
-android.sh examples/lv_test_timer.py
-android.sh examples/paint.py
-android.sh --clear
+android.py examples/lv_test_timer.py
+android.py examples/paint.py
+android.py --clear
 ```
 
-When stdin is a TTY, `android.sh` **stays attached** after launch and wires this terminal to the app’s `stdin` / `stdout` / `stderr` (prints, tracebacks, and `input()`). Use `--no-attach` for fire-and-forget (CI / the example matrix).
+When stdin is a TTY, `android.py` **stays attached** after launch and wires this terminal to the app’s `stdin` / `stdout` / `stderr` (prints, tracebacks, and `input()`). Use `--no-attach` for fire-and-forget (CI / the example matrix).
 
 ```bash
-android.sh -h                         # micropython-shaped help (-c / -m / file / -i / -X …)
-android.sh --version
-android.sh -c 'print(1+1)' -i
-android.sh -i                         # omit main.py → clean >>> (like firmware with no main)
-android.sh examples/paint.py -i       # oneshot: stdio, then >>> when it exits
-android.sh examples/lv_test_timer.py -i   # looping: Ctrl+C → KeyboardInterrupt → >>>
-android.sh --clear                    # restore packaged launcher main.py
+android.py -h                         # micropython-shaped help (-c / -m / file / -i / -X …)
+android.py --version
+android.py -c 'print(1+1)' -i
+android.py -i                         # omit main.py → clean >>> (like firmware with no main)
+android.py examples/paint.py -i       # oneshot: stdio, then >>> when it exits
+android.py examples/lv_test_timer.py -i   # looping: Ctrl+C → KeyboardInterrupt → >>>
+android.py --clear                    # restore default runner entry
 ```
 
-Startup matches MicroPython: packaged **`boot.py`** does env / path / stdio setup, then runs **`main.py`** if present, otherwise parks for the attach REPL. Upstream p4a/sdl2 hardcodes `main.py` as the Activity entry; `build_android.sh` patches `getEntryPoint` so **`boot.py` is preferred**. `android.sh` stages examples as `main.py` (`import <stem>`) plus `run/<stem>.py`; it hot-syncs `boot.py` + stdio helpers and does **not** overwrite a staged user `main.py`.
+Startup matches MicroPython: the Runner APK's packaged **`boot.py`** does env / path / stdio setup, then runs **`main.py`** if present, otherwise parks for the attach REPL. `android.py` stages examples as `main.py` (`import <stem>`) plus `run/<stem>.py`.
 
 ### Attach / `-i` (like `python -i` / `micropython -i`)
 
