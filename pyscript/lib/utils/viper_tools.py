@@ -15,6 +15,9 @@ if 0:
     class ptr16:
         pass
 
+    class uint:
+        pass
+
 
 @micropython.viper
 def byteswap_viper(buf: ptr8, buf_size: int):  # noqa: F821

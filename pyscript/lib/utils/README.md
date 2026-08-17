@@ -1,19 +1,16 @@
-# Utils
+# Desktop utility modules
 
-Portable helpers shared by board configs and [pydevices-examples](https://github.com/PyDevices/pydevices-examples).
-Install onto `utils/` (or `.` if that directory is already on `sys.path`):
-
-```python
-import mip
-mip.install("github:PyDevices/pydevices/packages/utils.json", target="./utils")
-```
+Every non-debris runtime module placed directly under this directory is
+automatically included in both the pip and MIP `pydevices-desktop` packages and
+in `pydevices-desktop.toml`. Utilities do not publish as separate packages.
 
 | Module | Role |
-|--------|------|
-| `byteswap.py` | Fast 16-bit pixel swap (numpy/ulab, else `viper_tools`) for `displaydev` |
-| `viper_tools.py` | `@micropython.viper` bodies (`byteswap`, displaybuf bounce, tft glyph pack) |
-| `mip.py` | Portable `mip` for CPython / CircuitPython / Pyodide (firmware `mip` wins on MicroPython) |
-| `micropython.py` | CPython shim (`const` / `viper` / `native`) so MCU modules load |
-| `keypins.py` | Key codes as pin-like objects (needs `events` + `keys` on the path) |
-| `wifi.py` | MicroPython `network.WLAN` shim with a CircuitPython-shaped `wifi.radio` |
-| `frame_recorder.py` | `FFmpegFrameRecorder` for desktop `PGDisplay` / `SDLDisplay` video |
+|---|---|
+| `mip.py` | Portable `mip` for CPython, CircuitPython, and Pyodide |
+| `micropython.py` | CPython compatibility shim for common MicroPython decorators and helpers |
+| `frame_recorder.py` | FFmpeg recording for desktop displays |
+| `usdl2.py` | Pure-Python SDL2 FFI fallback |
+| `uwin32.py` | Pure-Python Win32 FFI fallback |
+
+Firmware-frozen modules resolve before `lib` in the documented preferred
+`MICROPYPATH`, so bundled fallbacks do not replace native firmware modules.
