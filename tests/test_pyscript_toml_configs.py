@@ -21,10 +21,10 @@ class TestPyScriptTomlConfigs(unittest.TestCase):
         destinations = set(data["files"].values())
 
         expected = set()
-        # lib/utils mapped to /utils/
+        # lib/utils mapped to /utils/ (excluding untracked lib/utils/gui)
         utils_root = ROOT / "lib" / "utils"
         for path in utils_root.rglob("*.py"):
-            if "__pycache__" not in path.parts:
+            if "__pycache__" not in path.parts and "gui" not in path.parts:
                 expected.add("/utils/" + path.relative_to(utils_root).as_posix())
 
         # lib/examples mapped to /examples/
