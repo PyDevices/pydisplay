@@ -48,20 +48,6 @@ from pathlib import Path
 import sys
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-# Product-owned desktop modules are mounted at ./lib/utils/ in the legacy
-# PyScript configs but live in the sibling checkout — not in this repo.
-_HW_UTILS = REPO_ROOT.parent / "pydevices" / "utils"
-_HW_LIB = REPO_ROOT.parent / "pydevices" / "lib"
-# Gallery VFS mounts under .site/pyscript/lib/<pkg>/ (see install_gen_manifests).
-_HW_LIB_MOUNTS = frozenset({"eventsys", "multimer"})
-_HW_UTIL_FILES = frozenset(
-    {
-        "byteswap.py",
-        "frame_recorder.py",
-        "micropython.py",
-        "mip.py",
-    }
-)
 
 # Path prefix the page-side debug beacon POSTs to. Anything under it is treated
 # as a log sink so Cursor Debug mode tooling can pick its own sub-paths.
@@ -126,27 +112,6 @@ class DemoRequestHandler(SimpleHTTPRequestHandler):
             self._send_cors(200)
             return
         super().do_HEAD()
-
-    def translate_path(self, path: str) -> str:
-        mapped = super().translate_path(path)
-        mapped_path = Path(mapped)
-        name = mapped_path.name
-        if name in _HW_UTIL_FILES and mapped_path.parent.name == "utils":
-            hw = _HW_UTILS / name
-            if hw.is_file():
-                return str(hw)
-        parts = mapped_path.parts
-        for pkg in _HW_LIB_MOUNTS:
-            try:
-                marker = parts.index(pkg)
-            except ValueError:
-                continue
-            # .../.site/pyscript/lib/{eventsys,multimer}/...
-            if marker >= 1 and parts[marker - 1] == "lib" and parts[marker] == pkg:
-                hw = _HW_LIB.joinpath(pkg, *parts[marker + 1 :])
-                if hw.is_file():
-                    return str(hw)
-        return mapped
 
     def _log_debug(self, raw: bytes) -> None:
         stamp = _stamp()

@@ -1,14 +1,21 @@
+import { parse as parseTOML } from './vendor/toml-Blg7Izee.js';
+
 async function loadConfig(url) {
     const response = await fetch(url);
     if (!response.ok) {
         throw new Error(`Unable to load ${response.url}: HTTP ${response.status}`);
     }
-    return response.json();
+    const text = await response.text();
+    return parseTOML(text);
 }
 
 function mergeConfigs(configs) {
     const merged = Object.assign({}, ...configs);
     merged.files = Object.assign({}, ...configs.map((config) => config.files || {}));
+    const packages = configs.flatMap((config) => config.packages || []).filter(Boolean);
+    if (packages.length > 0) {
+        merged.packages = Array.from(new Set(packages));
+    }
     return merged;
 }
 

@@ -7,8 +7,8 @@ on:
     paths:
       - 'lib/**'
       - 'packages/**'
-      - 'web/pyscript/**'
-      - 'web/wokwi/**'
+      - '.site/pyscript/**'
+      - 'pydevices-examples.toml'
       - 'scripts/install_*'
       - 'scripts/gallery_generator.py'
       - 'scripts/audit_board_config_pairs.py'
@@ -17,8 +17,8 @@ on:
     paths:
       - 'lib/**'
       - 'packages/**'
-      - 'web/pyscript/**'
-      - 'web/wokwi/**'
+      - '.site/pyscript/**'
+      - 'pydevices-examples.toml'
       - 'scripts/install_*'
       - 'scripts/gallery_generator.py'
       - 'scripts/audit_board_config_pairs.py'
@@ -26,20 +26,18 @@ on:
   workflow_dispatch:
 
 jobs:
+  validate-pyscript-filesystem-toml:
+    uses: PyDevices/.github/.github/workflows/reusable-validate-pyscript-filesystem-toml.yml@publishing-v1
+    with:
+      config-path: pydevices-examples.toml
+      source-mappings: |
+        lib/utils=/utils
+        lib/examples=/examples
+
   check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Checkout pydevices product sources
-        uses: actions/checkout@v4
-        with:
-          repository: PyDevices/pydevices
-          path: pydevices
-          sparse-checkout: |
-            lib/eventsys
-            lib/multimer
-          sparse-checkout-cone-mode: false
 
       - uses: actions/setup-python@v5
         with:

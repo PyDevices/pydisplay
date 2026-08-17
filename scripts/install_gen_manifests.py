@@ -1,4 +1,11 @@
-#!/bin/python
+#!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+# SPDX-License-Identifier: MIT
+"""Generate MicroPython MIP package manifests (packages/*.json) for pydevices-examples.
+
+Filesystem TOML mappings (pydevices-examples.toml) are generated via
+dotgithub/scripts/generate_pyscript_filesystem_toml.py.
+"""
 
 import argparse
 import json
@@ -7,67 +14,28 @@ from pathlib import Path
 import subprocess
 import sys
 
-_scripts = Path(__file__).resolve().parent
-if str(_scripts) not in sys.path:
-    sys.path.insert(0, str(_scripts))
-from personal_examples import PERSONAL_EXAMPLE_DIRS  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+try:
+    from gallery_personal import PERSONAL_EXAMPLE_DIRS
+except ImportError:
+    PERSONAL_EXAMPLE_DIRS = ()
 
-parser = argparse.ArgumentParser(description="Generate install and PyScript manifests.")
-parser.add_argument(
-    "--toml",
-    action="store_true",
-    help="also generate legacy micropython.toml and pyodide.toml configs",
+parser = argparse.ArgumentParser(
+    description="Generate MicroPython package manifests for pydevices-examples."
 )
 args = parser.parse_args()
 
-# Define constants
-package_ver = "0.0.1"
-repo_url = "github:PyDevices/pydevices-examples/"
-repo_dir = os.getcwd() + "/"
-# Checkout tree and browser URLs both use lib/ (.site/pyscript/lib → ../../lib
-# locally; deploy assembles the same layout under _site/pyscript/lib/).
+repo_dir = ""
 src_dir = "lib/"
-pyscript_url_dir = "lib/"
+package_ver = "0.0.1"
+repo_url = "github:PyDevices/pydevices-examples/lib/"
 output_dir = repo_dir
 packages_dir = "packages/"
-toml_full_path = output_dir + ".site/pyscript/micropython.toml"
-pyodide_toml_path = output_dir + ".site/pyscript/pyodide.toml"
-micropython_json_path = output_dir + ".site/pyscript/micropython.json"
-pyodide_json_path = output_dir + ".site/pyscript/pyodide.json"
-examples_json_path = output_dir + ".site/pyscript/pydevices-examples.json"
-peterhinch_config_paths = {
-    "nano": output_dir + ".site/pyscript/peterhinch-nano.json",
-    "micro": output_dir + ".site/pyscript/peterhinch-micro.json",
-    "touch": output_dir + ".site/pyscript/peterhinch-touch.json",
-}
-peterhinch_packages = {
-    "nano": "micropython-nano-gui",
-    "micro": "micropython-micro-gui",
-    "touch": "micropython-touch",
-}
 
-# list of package directories, dependencies and extra files in that package.
-# Product libraries live in pydevices and are installed via mip or pip
-# (gallery: desktop board_config deps; PyScript mounts selected product sources).
-# Sister packages (pygraphics, palettes, pdwidgets, lvgl) are not from
-# this repo: frozen in firmware, or TestPyPI / MIP when needed (see url_maker.py).
+# List of package directories, dependencies, and extra files in that package.
 packages = [
     ["utils", [], []],
     ["examples", [], []],
-]
-
-# Packages omitted from .site/pyscript/micropython.toml (PyScript mounts utils for browser examples).
-toml_exclude = ["examples"]
-
-# PyScript [files] mounts that are not part of any mip package JSON.
-# These product modules live in pydevices/utils. Local serve.py and
-# deploy-pyscript.yml map the URLs onto that tree for the legacy JSON configs.
-# Example-owned keypins, wifi, and viper_tools are discovered from lib/utils.
-toml_only_mounts: list[tuple[str, str]] = [
-    ("lib/utils/byteswap.py", "/utils/"),
-    ("lib/utils/frame_recorder.py", "/utils/"),
-    ("lib/utils/micropython.py", "/utils/"),
-    ("lib/utils/mip.py", "/utils/"),
 ]
 
 SKIP_DIR_NAMES = {"__pycache__", ".git", ".mypy_cache", ".ruff_cache"}
@@ -80,17 +48,17 @@ PACKAGE_SKIP_DIRS = {
 }
 
 
-def should_include_file(filename):
+def should_include_file(filename: str) -> bool:
     """Keep only mip-safe source extensions (skip .bmp/.png/.sh/… uniformly)."""
     return Path(filename).suffix.lower() in MIP_FILE_SUFFIXES
 
 
-def is_gitignored(path):
-    """Skip generated/local-only files (e.g. graphics/framebuf.py from install_sync_framebuf)."""
+def is_gitignored(path: str) -> bool:
+    """Skip generated/local-only files."""
     try:
         return (
             subprocess.run(
-                ["git", "-C", repo_dir, "check-ignore", "-q", "--", path],
+                ["git", "-C", repo_dir or ".", "check-ignore", "-q", "--", path],
                 check=False,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -101,77 +69,27 @@ def is_gitignored(path):
         return False
 
 
-# Paths in micropython.toml / pyodide.toml [files] — relative to .site/pyscript/ (browser URL ./lib/...).
-PYSCRIPT_TOML_SRC_PREFIX = "./"
-# Local interpreters under vendor/; PyScript config key replaces the CDN build.
-PYSCRIPT_INTERPRETER = "./vendor/micropython/micropython.mjs"
-PYODIDE_INTERPRETER = "./vendor/pyodide/pyodide.mjs"
-
-
-def pyscript_toml_file_entry(browser_relative_path: str, mount: str) -> str:
-    """browser_relative_path e.g. lib/utils/path.py; mount e.g. /utils/."""
-    return f'"{PYSCRIPT_TOML_SRC_PREFIX}{browser_relative_path}" = "{mount}"'
-
-
 package_dicts = {}
-master_files = {}
-master_toml = [
-    f'interpreter = "{PYSCRIPT_INTERPRETER}"',
-    "",
-    "[files]",
-]
 
-
-def add_pyscript_file(browser_relative_path: str, mount: str) -> None:
-    """Add one browser URL (under .site/pyscript/) to TOML and JSON file maps."""
-    # board_config is now delivered via board_configs/* packages, not web mounts.
-    if browser_relative_path.replace("\\", "/").endswith("/board_config.py"):
-        return
-    source = PYSCRIPT_TOML_SRC_PREFIX + browser_relative_path
-    master_files[source] = mount
-    master_toml.append(pyscript_toml_file_entry(browser_relative_path, mount))
-
-
-for rel_path, mount in toml_only_mounts:
-    add_pyscript_file(rel_path, mount)
-
-master_toml.append("")
 # Iterate over the packages and create the package files
 for package_path, deps, extra_files in packages:
-    # Define the package variables
     package_name = package_path.split("/")[-1]
     full_path = os.path.join(repo_dir, src_dir, package_path)
     package_sub_dir = "" if package_name == package_path else package_name + "/"
-    # Add a dictionary for the package
     package_dicts[package_name] = {"urls": [], "deps": deps, "version": package_ver}
 
-    # Iterate over the extra files in the package
     for extra_file in sorted(extra_files):
-        # Add the extra file to the package
         full_file_path = os.path.join(full_path.split(package_name)[0], extra_file)
         src_file = repo_url + os.path.relpath(full_file_path, repo_dir)
         package_dicts[package_name]["urls"].append([extra_file, src_file])
 
-        if package_name not in toml_exclude:
-            master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
-            toml_dest_dir = "/" + "/".join(master_dest_file.split("/")[:-1]) + "/"
-            if toml_dest_dir == "//":
-                toml_dest_dir = "/"
-            add_pyscript_file(
-                pyscript_url_dir + master_dest_file.replace("\\", "/"),
-                toml_dest_dir,
-            )
-
     package_skip = PACKAGE_SKIP_DIRS.get(package_name, set())
 
-    # Iterate over the directories in the package
     for root, dirs, files in os.walk(full_path):
         dirs[:] = sorted(d for d in dirs if d not in SKIP_DIR_NAMES and d not in package_skip)
-        # Iterate over the sorted files list
         for f in sorted(files):
             if not should_include_file(f):
                 continue
-            # Add the file to the package
             full_file_path = os.path.join(root, f)
             if is_gitignored(full_file_path):
                 continue
@@ -179,22 +97,7 @@ for package_path, deps, extra_files in packages:
             src_file = repo_url + os.path.relpath(full_file_path, repo_dir)
             package_dicts[package_name]["urls"].append([dest_file, src_file])
 
-            if package_name not in toml_exclude:
-                # Gallery loaders use ``import ps_loader``; mounted at VFS root below.
-                # PyScript rejects the same source key twice in ``[files]``.
-                if package_name == "utils" and f == "ps_loader.py":
-                    continue
-                master_dest_file = os.path.relpath(full_file_path, repo_dir + src_dir)
-                toml_dest_dir = "/".join(master_dest_file.split("/")[:-1])
-                if toml_dest_dir == "//":
-                    toml_dest_dir = "/"
-                toml_src_file = pyscript_url_dir + master_dest_file
-                add_pyscript_file(toml_src_file, f"/{toml_dest_dir}/")
-
-    if package_name not in toml_exclude:
-        master_toml.append("")
-
-# Write the package .json files (GitHub MIP only — not mip cores).
+# Write the package .json files (GitHub MIP only).
 manual_package_stems = {
     "micropython-micro-gui",
     "micropython-nano-gui",
@@ -202,16 +105,12 @@ manual_package_stems = {
 }
 reserved_package_names = set(package_dicts) | manual_package_stems | {"eventsys", "multimer"}
 for package_name, contents in package_dicts.items():
-    package_file = output_dir + packages_dir + package_name + ".json"
+    package_file = os.path.join(output_dir, packages_dir, package_name + ".json")
     with open(package_file, "w") as f:
         json.dump(contents, f, indent=2)
+        f.write("\n")
 
 # One MIP manifest per examples/<subdir>/ (for PyScript ?manifests= and GitHub mip).
-# Package JSON lives in packages/<name>.json and is served via .site/pyscript/packages
-# (symlink → ../../packages). MicroPython mip resolves *file* URLs in the package
-# against the loader page base (…/.site/pyscript/), not against packages/<name>.json —
-# same as the old .site/pyscript/<name>.json layouts: use ./lib/examples/….
-# Only .py/.mpy/.json are listed (mip cannot install binary assets).
 examples_root = os.path.join(repo_dir, src_dir, "examples")
 example_package_names = []
 for entry in sorted(os.listdir(examples_root)):
@@ -233,25 +132,20 @@ for entry in sorted(os.listdir(examples_root)):
             if is_gitignored(full_file_path):
                 continue
             rel_from_examples = os.path.relpath(full_file_path, examples_root).replace("\\", "/")
-            # Loader page base is .site/pyscript/ (see mip resolution); packages/ is only
-            # where the manifest JSON is fetched from (via the symlink).
             src_file = "./lib/examples/" + rel_from_examples
             urls.append([rel_from_examples, src_file])
-    package_file = output_dir + packages_dir + entry + ".json"
+    package_file = os.path.join(output_dir, packages_dir, entry + ".json")
     if not urls:
-        # Drop a prior manifest that was only binary assets (e.g. assets/).
         if os.path.isfile(package_file) and entry not in reserved_package_names:
             os.remove(package_file)
             print(f"removed packages/{entry}.json (no mip-safe files)")
         continue
     with open(package_file, "w") as f:
         json.dump({"urls": urls, "version": package_ver}, f, indent=2)
+        f.write("\n")
     example_package_names.append(entry)
 
-# Gallery loaders use `import ps_loader` (top-level); also mount at VFS root.
-add_pyscript_file("lib/utils/ps_loader.py", "/")
-
-# .site/pyscript/lib → ../../lib and .site/pyscript/packages → ../../packages.
+# Ensure symlinks in .site/pyscript/
 pyscript_lib_link = os.path.join(output_dir, ".site", "pyscript", "lib")
 lib_abs = os.path.join(output_dir, "lib")
 if os.path.islink(pyscript_lib_link) or os.path.exists(pyscript_lib_link):
@@ -262,10 +156,6 @@ if os.path.islink(pyscript_lib_link) or os.path.exists(pyscript_lib_link):
         os.symlink("../../lib", pyscript_lib_link)
 else:
     os.symlink("../../lib", pyscript_lib_link)
-# Drop the pre-rename browser symlink if still present.
-pyscript_src_link = os.path.join(output_dir, ".site", "pyscript", "src")
-if os.path.islink(pyscript_src_link):
-    os.remove(pyscript_src_link)
 
 pyscript_packages_link = os.path.join(output_dir, ".site", "pyscript", "packages")
 packages_abs = os.path.join(output_dir, packages_dir.rstrip("/"))
@@ -278,53 +168,17 @@ if os.path.islink(pyscript_packages_link) or os.path.exists(pyscript_packages_li
 else:
     os.symlink("../../packages", pyscript_packages_link)
 
-# Legacy TOML output is opt-in. JSON composition is the default browser path.
-if args.toml:
-    with open(toml_full_path, "w") as f:
-        for line in master_toml:
-            f.write(line + "\n")
-
-    with open(pyodide_toml_path, "w") as f:
-        for line in master_toml:
-            if line.startswith("interpreter ="):
-                f.write(f'interpreter = "{PYODIDE_INTERPRETER}"\n')
-            else:
-                f.write(line + "\n")
-
-
-def github_mip_raw_url(source: str) -> str:
-    """Convert github:owner/repo/path to its raw GitHub source URL."""
-    prefix = "github:"
-    if not source.startswith(prefix):
-        raise ValueError(f"Unsupported Peter Hinch manifest URL: {source}")
-    owner, repository, path = source[len(prefix) :].split("/", 2)
-    return f"https://raw.githubusercontent.com/{owner}/{repository}/master/{path}"
-
-
-# JSON configs keep runtimes separate from the shared pydevices-examples filesystem so a
-# page can compose the runtime it needs before PyScript starts.
-with open(micropython_json_path, "w") as f:
-    json.dump({"interpreter": PYSCRIPT_INTERPRETER}, f, indent=2)
-    f.write("\n")
-with open(pyodide_json_path, "w") as f:
-    json.dump({"interpreter": PYODIDE_INTERPRETER}, f, indent=2)
-    f.write("\n")
-with open(examples_json_path, "w") as f:
-    json.dump({"files": master_files}, f, indent=2)
-    f.write("\n")
-
-# The manual package manifests remain the source of truth for each upstream GUI
-# file inventory.
-for gui, package_stem in peterhinch_packages.items():
-    package_path = output_dir + packages_dir + package_stem + ".json"
-    with open(package_path) as f:
-        gui_package = json.load(f)
-    files = {}
-    for destination, source in gui_package["urls"]:
-        files[github_mip_raw_url(source)] = "/utils/" + destination
-    with open(peterhinch_config_paths[gui], "w") as f:
-        json.dump({"files": files}, f, indent=2)
-        f.write("\n")
+pyscript_toml_link = os.path.join(output_dir, ".site", "pyscript", "pydevices-examples.toml")
+toml_abs = os.path.join(output_dir, "pydevices-examples.toml")
+if os.path.islink(pyscript_toml_link) or os.path.exists(pyscript_toml_link):
+    if os.path.islink(pyscript_toml_link) and os.readlink(pyscript_toml_link) not in (
+        "../../pydevices-examples.toml",
+        toml_abs,
+    ):
+        os.remove(pyscript_toml_link)
+        os.symlink("../../pydevices-examples.toml", pyscript_toml_link)
+elif not os.path.exists(pyscript_toml_link):
+    os.symlink("../../pydevices-examples.toml", pyscript_toml_link)
 
 print(
     f"{__file__.split('/')[-1]} finished "

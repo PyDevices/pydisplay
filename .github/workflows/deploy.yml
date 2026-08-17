@@ -6,10 +6,10 @@ on:
       - main
     paths:
       - '.site/**'
-      - 'web/**'
       - '.github/workflows/deploy.yml'
       - 'lib/**'
       - 'packages/**'
+      - 'pydevices-examples.toml'
       - 'scripts/install_gen_manifests.py'
       - 'scripts/install_refresh_manifests.sh'
       - 'scripts/gallery_generator.py'
@@ -24,14 +24,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Checkout pydevices (product sources for PyScript mounts)
-        uses: actions/checkout@v4
-        with:
-          repository: PyDevices/pydevices
-          path: pydevices
-          sparse-checkout: |
-            utils
 
       - uses: actions/setup-python@v5
         with:
@@ -48,13 +40,13 @@ jobs:
           mkdir -p _site
           cp -r .site/* _site/
           # Replace symlinks inside _site/pyscript with real trees for GitHub Pages
-          rm -rf _site/pyscript/lib _site/pyscript/src _site/pyscript/packages _site/pyscript/wheels
+          rm -rf _site/pyscript/lib _site/pyscript/packages _site/pyscript/pydevices-examples.toml
           mkdir -p _site/pyscript/lib _site/pyscript/packages
           cp -r lib/utils _site/pyscript/lib/
-          # Hardware-owned helpers (mip.py, byteswap, …)
-          cp -r pydevices/utils/* _site/pyscript/lib/utils/
           python scripts/gallery_generator.py --copy-examples _site/pyscript/lib/examples
           cp -r packages/* _site/pyscript/packages/
+          cp pydevices-examples.toml _site/pyscript/pydevices-examples.toml
+          cp pydevices-examples.toml _site/pydevices-examples.toml
           touch _site/.nojekyll
           # Stamp CACHE_NAME from a hash of the PWA shell (STATIC_ASSETS + sw.js).
           python scripts/pyscript_stamp_pwa_cache.py _site/pyscript

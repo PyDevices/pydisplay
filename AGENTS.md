@@ -26,8 +26,11 @@ Board configs never own a runtime. `AutoDisplay` is imported from
   which symlinks `/agent/repos/*` into `~/gh/pydevices/`. See
   [AGENTS.md there](https://github.com/PyDevices/.github/blob/main/AGENTS.md).
 - Use the repo-root virtualenv at `.venv` for all Python tooling
-  (`.venv/bin/python`, `.venv/bin/ruff`). The system `python3` has no project
+  (`.venv/bin/python`, `.venv/bin/ruff`, `.venv/bin/pytest`). The system `python3` has no project
   dependencies installed.
+- **Browser Testing with Playwright:** Playwright is installed in `.venv` (`playwright-1.62.0`).
+  If built-in browser subagents are unavailable or have driver issues, run browser tests headlessly
+  via `.venv/bin/python tools/test_html_shells.py` or `.venv/bin/python` using `from playwright.async_api import async_playwright`.
 - Desktop matrices use repo `.venv` (`cpython-venv`) plus interpreters on
   `PATH` / `bin/` (`micropython`, `circuitpython`, and when present
   `micropython.exe` / `python.exe`).   `./bin/jupyter.sh`, `./bin/pyscript.sh`, and

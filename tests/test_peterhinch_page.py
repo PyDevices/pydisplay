@@ -4,9 +4,11 @@ import json
 from pathlib import Path
 import re
 
+import tomllib
+
 ROOT = Path(__file__).resolve().parents[1]
-PAGE = ROOT / "web" / "pyscript" / "peterhinch.html"
-PWA_MANIFEST = ROOT / "web" / "pyscript" / "peterhinch-manifest.json"
+PAGE = ROOT / ".site" / "pyscript" / "peterhinch.html"
+PWA_MANIFEST = ROOT / ".site" / "pyscript" / "peterhinch-manifest.json"
 
 
 def _source():
@@ -27,11 +29,14 @@ def _excluded(gui):
 def test_page_selects_a_gui_specific_micropython_config_before_core_loads():
     source = _source()
     runtime = source.index('<script id="hinch-runtime" type="text/plain"')
-    runtime_config = source.index("'./micropython.json'")
-    shared_config = source.index("'./pydevices-examples.json'")
-    gui_config = source.index("'./peterhinch-' + gui + '.json'")
-    loader = source.index('<script type="module" src="./pyscript-json-config.js"></script>')
-    assert runtime < runtime_config < shared_config < gui_config < loader
+    runtime_config = source.index("'./micropython.toml'")
+    desktop_config = source.index(
+        "'https://raw.githubusercontent.com/PyDevices/pydevices/main/pydevices-desktop.toml'"
+    )
+    shared_config = source.index("'./pydevices-examples.toml'")
+    gui_config = source.index("'./peterhinch-' + gui + '.toml'")
+    loader = source.index('<script type="module" src="./pyscript-config.js"></script>')
+    assert runtime < runtime_config < desktop_config < shared_config < gui_config < loader
     assert "runtime.type = 'mpy';" in source
     assert "runtime.dataset.configs" in source
     assert "pyodide" not in source.lower()
@@ -40,7 +45,7 @@ def test_page_selects_a_gui_specific_micropython_config_before_core_loads():
 def test_page_has_its_own_pwa_identity():
     source = _source()
     manifest = json.loads(PWA_MANIFEST.read_text(encoding="utf-8"))
-    service_worker = (ROOT / "web" / "pyscript" / "sw.js").read_text(encoding="utf-8")
+    service_worker = (ROOT / ".site" / "pyscript" / "sw.js").read_text(encoding="utf-8")
     assert '<link rel="manifest" href="./peterhinch-manifest.json">' in source
     assert manifest["name"] == "Peter Hinch GUI Demos"
     assert manifest["id"] == "./peterhinch"
@@ -57,14 +62,10 @@ def test_bare_url_defaults_to_touch_gui():
 
 
 def test_generated_configs_split_shared_files_from_gui_manifests():
-    micropython = json.loads((ROOT / "web" / "pyscript" / "micropython.json").read_text())
-    pyodide = json.loads((ROOT / "web" / "pyscript" / "pyodide.json").read_text())
-    shared = json.loads((ROOT / "web" / "pyscript" / "pydevices-examples.json").read_text())
+    micropython = tomllib.loads((ROOT / ".site" / "pyscript" / "micropython.toml").read_text())
+    pyodide = tomllib.loads((ROOT / ".site" / "pyscript" / "pyodide.toml").read_text())
     assert micropython == {"interpreter": "./vendor/micropython/micropython.mjs"}
     assert pyodide == {"interpreter": "./vendor/pyodide/pyodide.mjs"}
-    assert set(shared) == {"files"}
-    assert "./lib/board_config.py" not in shared["files"]
-    assert shared["files"]["./lib/eventsys/__init__.py"] == "/lib/eventsys/"
 
     packages = {
         "nano": "micropython-nano-gui",
@@ -72,7 +73,9 @@ def test_generated_configs_split_shared_files_from_gui_manifests():
         "touch": "micropython-touch",
     }
     for gui, package in packages.items():
-        config = json.loads((ROOT / "web" / "pyscript" / f"peterhinch-{gui}.json").read_text())
+        config = tomllib.loads(
+            (ROOT / ".site" / "pyscript" / f"peterhinch-{gui}.toml").read_text()
+        )
         manifest = json.loads((ROOT / "packages" / f"{package}.json").read_text())
         assert set(config) == {"files"}
         assert "./lib/board_config.py" not in config["files"]
@@ -83,7 +86,7 @@ def test_generated_configs_split_shared_files_from_gui_manifests():
             assert config["files"][raw_source] == f"/utils/{destination}"
 
 
-def test_gallery_pages_compose_generated_json_configs():
+def test_gallery_pages_compose_modular_toml_configs():
     pages = {
         "repl.html": "micropython",
         "harness.html": "micropython",
@@ -96,17 +99,13 @@ def test_gallery_pages_compose_generated_json_configs():
         "pyodide.html": "pyodide",
     }
     for filename, runtime in pages.items():
-        source = (ROOT / "web" / "pyscript" / filename).read_text()
-        assert f'data-configs="./{runtime}.json ./pydevices-examples.json"' in source
-        assert '<script type="module" src="./pyscript-json-config.js"></script>' in source
-        assert ".toml" not in source
-        assert 'src="./vendor/core.js"' not in source
-
-
-def test_toml_generation_is_opt_in():
-    generator = (ROOT / "scripts" / "install_gen_manifests.py").read_text()
-    assert 'parser.add_argument(\n    "--toml",' in generator
-    assert "if args.toml:" in generator
+        source = (ROOT / ".site" / "pyscript" / filename).read_text()
+        assert (
+            f'data-configs="./{runtime}.toml https://raw.githubusercontent.com/PyDevices/pydevices/main/pydevices-desktop.toml ./pydevices-examples.toml"'
+            in source
+        )
+        assert '<script type="module" src="./pyscript-config.js"></script>' in source
+        assert ".json" not in source.split("data-configs=")[1].split(">")[0]
 
 
 def test_dynamic_discovery_is_sorted_and_excludes_init():

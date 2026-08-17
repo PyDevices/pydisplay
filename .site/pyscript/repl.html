@@ -7,7 +7,7 @@
         <script src="./pwa.js"></script>
     </head>
     <body>
-        <script type="mpy" data-configs="./micropython.json ./pydevices-examples.json" terminal worker>
+        <script type="mpy" data-configs="./micropython.toml https://raw.githubusercontent.com/PyDevices/pydevices/main/pydevices-desktop.toml ./pydevices-examples.toml" terminal worker>
             import utils.path
             from pyscript import document
             term = document.querySelector('script[terminal]').terminal
@@ -16,6 +16,6 @@
             code.interact(local=globals())
         </script>
         <canvas id="display_canvas" width="1" height="1" style="background-color: black; border:2px solid black;"></canvas>
-        <script type="module" src="./pyscript-json-config.js"></script>
+        <script type="module" src="./pyscript-config.js"></script>
     </body>
 </html>

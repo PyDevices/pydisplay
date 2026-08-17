@@ -24,7 +24,7 @@
     Q.publish(plan);
 })();
 </script>
-<script type="py" data-configs="./pyodide.json ./pydevices-examples.json" output="log">
+<script type="py" data-configs="./pyodide.toml https://raw.githubusercontent.com/PyDevices/pydevices/main/pydevices-desktop.toml ./pydevices-examples.toml" output="log">
 import builtins
 import os
 import sys
@@ -73,6 +73,6 @@ async def _run():
 
 await _run()
 </script>
-<script type="module" src="./pyscript-json-config.js"></script>
+<script type="module" src="./pyscript-config.js"></script>
 </body>
 </html>

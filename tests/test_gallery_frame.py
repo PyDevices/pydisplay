@@ -4,11 +4,11 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-INDEX = ROOT / "web" / "pyscript" / "index.html"
-CSS = ROOT / "web" / "pyscript" / "site.css"
-DEMO_CSS = ROOT / "web" / "pyscript" / "demo.css"
-THEME = ROOT / "web" / "pyscript" / "theme-toggle.js"
-RUNTIME_LAYOUT = ROOT / "web" / "pyscript" / "runtime-layout.js"
+INDEX = ROOT / ".site" / "pyscript" / "index.html"
+CSS = ROOT / ".site" / "pyscript" / "site.css"
+DEMO_CSS = ROOT / ".site" / "pyscript" / "demo.css"
+THEME = ROOT / ".site" / "pyscript" / "theme-toggle.js"
+RUNTIME_LAYOUT = ROOT / ".site" / "pyscript" / "runtime-layout.js"
 
 
 def test_gallery_has_sidebar_and_single_demo_frame():
@@ -110,7 +110,7 @@ def test_apps_heading_links_to_peter_hinch_collection():
 
 def test_runtime_loaders_show_two_cards_and_autorun():
     for name in ("micropython.html", "pyodide.html"):
-        source = (ROOT / "web" / "pyscript" / name).read_text(encoding="utf-8")
+        source = (ROOT / ".site" / "pyscript" / name).read_text(encoding="utf-8")
         assert 'class="runtime-page"' in source
         assert 'id="run-btn"' not in source
         assert 'class="device"' in source
@@ -127,7 +127,7 @@ def test_runtime_loaders_set_browser_defaults_without_importing_board():
     assert 'env_set("PYDEVICES_WIDTH", BOARD_WIDTH)' in loader
     assert 'env_set("PYDEVICES_HEIGHT", BOARD_HEIGHT)' in loader
     for name in ("micropython.html", "pyodide.html", "mp.html", "py.html"):
-        source = (ROOT / "web" / "pyscript" / name).read_text(encoding="utf-8")
+        source = (ROOT / ".site" / "pyscript" / name).read_text(encoding="utf-8")
         assert "ps_loader.set_board_defaults()" in source
         assert "import board_config" not in source
 
@@ -215,7 +215,7 @@ def test_console_is_opt_in_and_gallery_leaves_it_hidden():
     index = INDEX.read_text(encoding="utf-8")
     layout = RUNTIME_LAYOUT.read_text(encoding="utf-8")
     for name in ("micropython.html", "pyodide.html"):
-        source = (ROOT / "web" / "pyscript" / name).read_text(encoding="utf-8")
+        source = (ROOT / ".site" / "pyscript" / name).read_text(encoding="utf-8")
         assert 'class="console-toggle"' in source
         assert 'class="device-footer"' in source
     assert 'get("console") === "true"' in layout
