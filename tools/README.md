@@ -25,7 +25,7 @@ python tools/serve.py
 jupyter.py lib/examples/paint.py
 ```
 
-See [Run the notebook interactively](../docs/platforms/jupyter-run.md) and [PyScript local development](../docs/guides/pyscript.md).
+See [pydevices/docs/jupyter.md](https://github.com/PyDevices/pydevices/blob/main/docs/jupyter.md).
 
 ## Input / keypad probe
 
@@ -48,8 +48,13 @@ The core displaydev/eventsys probe is owned by
 | [`ps_debug.py`](ps_debug.py) | CDP console + network probe for a harness/load URL |
 | [`ps_shot.py`](ps_shot.py) | Timed screenshot with a hard kill if Chromium stalls |
 
-Agent-oriented guide: [PyScript local development](../docs/guides/pyscript.md)
-(including [Headless / CDP troubleshooting](../docs/guides/pyscript.md#headless--cdp-troubleshooting)).
+Prefer these over poking the IDE browser when a demo hangs.
+
+**Common wedge:** a sync provider's `timer.sleep_ms` (or any other blocking
+sleep) on the **main thread** often stalls `page.evaluate` and screenshots — the
+browser never yields. Prefer `runtime.run_forever()` and async sleep patterns.
+Capture console/CDP output with `ps_debug.py` before assuming a gallery or
+package-map regression.
 
 ```bash
 python tools/serve.py   # separate terminal
@@ -63,7 +68,7 @@ python tools/serve.py   # separate terminal
 (workflow), [`example_runtimes.toml`](example_runtimes.toml) (runtime command
 templates), and [`example_test_manifest.toml`](example_test_manifest.toml)
 (per-example metadata). **Platform** is the product category (see
-[Portability & platforms](../docs/platforms/index.md)); **runtime** is the
+[pydevices/docs/displaydev.md](https://github.com/PyDevices/pydevices/blob/main/docs/displaydev.md)); **runtime** is the
 concrete launcher used in automation.
 
 | Script | Purpose |
@@ -243,7 +248,7 @@ Start or reuse `python tools/serve.py`, then re-run with `--only-runtime pyscrip
 Headless needs Playwright (`.venv/bin/pip install -r requirements-dev.txt` and
 `.venv/bin/playwright install chromium`). Without it, pyscript cells report
 `needs_playwright` (not a hard failure). Troubleshooting hangs / CDP:
-[PyScript — Headless / CDP troubleshooting](../docs/guides/pyscript.md#headless--cdp-troubleshooting).
+[PyScript headless debug](#pyscript-headless-debug-playwright) above.
 
 ## LVGL / timer harnesses
 

@@ -3,7 +3,7 @@
 <h3 align="center">See the portable PyDevices driver stack in action.</h3>
 
 <p align="center">
-  <a href="https://pydisplay.readthedocs.io">Documentation</a> •
+  <a href="https://github.com/PyDevices/pydevices/tree/main/docs">Documentation</a> •
   <a href="https://PyDevices.github.io/pydevices-examples/pyscript/">PyScript gallery</a> •
   <a href="https://pydevices.github.io/pydevices/">Product packages</a> •
   <a href="docs/screenshots/README.md">Screenshots</a>
@@ -37,7 +37,7 @@ The fastest route is the installable
 the real examples in a browser and can be installed as a Progressive Web App.
 Start a standalone browser app from the
 **[pydevices-pyscript-template](https://github.com/PyDevices/pydevices-pyscript-template)**,
-or use the [PWA guide](https://pydisplay.readthedocs.io/en/latest/guides/pyscript-pwa/)
+or use the [PWA guide](https://github.com/PyDevices/pydevices-pyscript-template/blob/main/docs/pwa-guide.md)
 to understand and customize the full gallery shell.
 
 For a desktop clone:
@@ -126,7 +126,7 @@ packages remain conventional and unprefixed.
 | `lib/examples/` | Portable examples and complete demo applications |
 | `lib/utils/` | Example helpers and third-party GUI adapters |
 | `.site/pyscript/` | PyScript gallery and reusable PWA shell |
-| `docs/` | Integration, platform, example, and PWA documentation |
+| `docs/` | Peter Hinch GUI integration, the TFT GUI stub, and screenshots |
 | `tools/` | Cross-runtime example and LVGL test harnesses |
 | `packages/` | GitHub MIP manifests for examples and helpers |
 

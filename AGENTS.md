@@ -85,7 +85,7 @@ Board configs never own a runtime. `AutoDisplay` is imported from
   ```
 
 - PyScript hangs / CDP: prefer Playwright helpers and
-  [Headless / CDP troubleshooting](docs/guides/pyscript.md#headless--cdp-troubleshooting)
+  [tools/README.md — PyScript headless debug](tools/README.md#pyscript-headless-debug-playwright)
   before poking the IDE browser.
 
 ### `PYDEVICES_TIMER_ASYNC` (agents / matrix)
@@ -122,7 +122,7 @@ passes `--timer-async`.
 ### MCU: no `_thread` for network / blocking work
 
 Full guidance:
-[MicroPython — Background work (`_thread`)](docs/platforms/micropython.md#background-work-_thread).
+[pydevices — Background work on MicroPython (`_thread`)](https://github.com/PyDevices/pydevices/blob/main/docs/application-runtime.md#background-work-on-micropython-_thread).
 App pattern: queue work and drain on the main tick — see `roku_widgets` /
 `roku_lvgl` / `roku_graphics` (`_run_bg` + `_drain_bg`). Do not “fix” this in
 `eventsys` with speculative reentrancy guards — keep the pattern in the app.
