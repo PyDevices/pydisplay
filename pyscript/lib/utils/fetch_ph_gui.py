@@ -46,16 +46,37 @@ def _utils_dir():
         import os
 
         return os.path.dirname(__file__)
-    return __file__.replace("\\", "/").rsplit("/", 1)[0]
+    f = (
+        getattr(sys.modules.get(__name__), "__file__", None)
+        or getattr(sys.modules.get("fetch_ph_gui"), "__file__", None)
+        or __file__
+    )
+    f = f.replace("\\", "/")
+    if "/" in f:
+        return f.rsplit("/", 1)[0]
+    import os
+
+    for candidate in ("/utils", "utils", "lib/utils", "."):
+        try:
+            os.stat(candidate)
+            return candidate
+        except OSError:
+            pass
+    return "."
 
 
 def _gui_dir():
+    import os
     import sys
 
     if sys.implementation.name == "cpython":
-        import os
-
         return os.path.join(_utils_dir(), "gui")
+    for candidate in (_utils_dir() + "/gui", "/utils/gui", "utils/gui", "gui", "lib/utils/gui"):
+        try:
+            os.stat(candidate)
+            return candidate
+        except OSError:
+            pass
     return _utils_dir() + "/gui"
 
 
@@ -87,13 +108,14 @@ def _pid_alive(pid):
     try:
         import os
 
-        os.kill(pid, 0)
-        return True
+        if hasattr(os, "kill"):
+            os.kill(pid, 0)
+            return True
+        return False
     except OSError:
         return False
     except Exception:
-        # MicroPython may lack kill(0); treat unknown as alive so we wait.
-        return True
+        return False
 
 
 def _read_lock_pid():
@@ -396,43 +418,98 @@ def _patch_utime():
         sys.modules["utime"] = time
 
 
-def _patch_uasyncio():
-    """Alias uasyncio -> asyncio when uasyncio is absent (e.g. micropython.wasm, CPython)."""
+class _AsyncioCompat:
+    """Asyncio facade that protects host event loops (PyScript, Jupyter) from asyncio.run / new_event_loop calls."""
+
+    def __init__(self, backend):
+        self._backend = backend
+
+    def _running(self):
+        import sys
+
+        if sys.platform in ("emscripten", "webassembly", "wasi"):
+            return True
+        current_task = getattr(self._backend, "current_task", None)
+        if current_task is not None:
+            try:
+                return current_task() is not None
+            except Exception:
+                pass
+        get_running_loop = getattr(self._backend, "get_running_loop", None)
+        if get_running_loop is not None:
+            try:
+                get_running_loop()
+                return True
+            except Exception:
+                pass
+        return False
+
+    def run(self, coro):
+        """Run normally, or schedule ``coro`` when a host loop already exists."""
+        if self._running():
+            return self._backend.create_task(coro)
+        return self._backend.run(coro)
+
+    def new_event_loop(self):
+        """Create a loop normally, but never replace an active host loop."""
+        if self._running():
+            try:
+                return self._backend.get_running_loop()
+            except Exception:
+                try:
+                    return self._backend.get_event_loop()
+                except Exception:
+                    pass
+        return self._backend.new_event_loop()
+
+    def sleep(self, delay):
+        """Sleep while ensuring a zero-delay yield reaches the browser host loop."""
+        return self._backend.sleep(0.001 if delay <= 0 else delay)
+
+    def sleep_ms(self, delay):
+        """Millisecond sleep with a browser-safe minimum for cooperative yields."""
+        sleeper = getattr(self._backend, "sleep_ms", None)
+        if sleeper is not None:
+            return sleeper(1 if delay <= 0 else delay)
+        return self._backend.sleep(0.001 if delay <= 0 else delay / 1000.0)
+
+    def __getattr__(self, name):
+        return getattr(self._backend, name)
+
+
+def _install_asyncio_compat():
+    """Install host-loop-safe asyncio facade as both asyncio and uasyncio."""
     import sys
 
-    if "uasyncio" in sys.modules:
-        mod = sys.modules["uasyncio"]
-        if not hasattr(mod, "sleep_ms") and hasattr(mod, "sleep"):
+    existing = sys.modules.get("asyncio")
+    if existing is not None and isinstance(existing, _AsyncioCompat):
+        sys.modules["uasyncio"] = existing
+        return existing
 
-            async def sleep_ms(ms):
-                await mod.sleep(ms / 1000.0)
+    real = None
+    if existing is not None and hasattr(existing, "create_task"):
+        real = existing
+    else:
+        try:
+            import asyncio as real
+        except ImportError:
+            try:
+                import uasyncio as real
+            except ImportError:
+                real = None
 
-            mod.sleep_ms = sleep_ms
-        return
-    try:
-        import uasyncio  # noqa: F401
+    if real is None:
+        return None
 
-        if not hasattr(uasyncio, "sleep_ms") and hasattr(uasyncio, "sleep"):
+    compat = _AsyncioCompat(real)
+    sys.modules["asyncio"] = compat
+    sys.modules["uasyncio"] = compat
+    return compat
 
-            async def sleep_ms(ms):
-                await uasyncio.sleep(ms / 1000.0)
 
-            uasyncio.sleep_ms = sleep_ms
-        return
-    except ImportError:
-        pass
-    try:
-        import asyncio
-
-        if not hasattr(asyncio, "sleep_ms") and hasattr(asyncio, "sleep"):
-
-            async def sleep_ms(ms):
-                await asyncio.sleep(ms / 1000.0)
-
-            asyncio.sleep_ms = sleep_ms
-        sys.modules["uasyncio"] = asyncio
-    except ImportError:
-        pass
+def _patch_uasyncio():
+    """Alias uasyncio -> asyncio with host-loop-safe async compat facade."""
+    return _install_asyncio_compat()
 
 
 def _patch_micropython_const():
