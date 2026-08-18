@@ -22,7 +22,7 @@ except ImportError:
         return seq[0]
 from json import load, dump  # For saving the high score
 from sys import exit  # For exiting the game
-from framebuf import FrameBuffer, RGB565  # For drawing text boxes
+from pygraphics import FrameBuffer, RGB565  # For drawing text boxes
 
 try:
     from micropython import const  # For constant values
