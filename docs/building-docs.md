@@ -78,7 +78,7 @@ The public docs URL is **https://pydisplay.readthedocs.io**. ReadTheDocs reads [
 PyDevices uses the
 [Read the Docs Community GitHub App](https://github.com/apps/read-the-docs-community)
 installed on the org with access to **all repositories** (see
-[org installation](https://github.com/organizations/PyDevices/settings/installations/149173814)).
+[org installation](https://github.com/organizations/PyDevices/settings/installations)).
 That app delivers push/PR events to RTD — do **not** add a manual
 `readthedocs.org/api/v2/webhook/...` hook on the repo.
 
@@ -93,7 +93,7 @@ Sibling docs projects on the same app: **pydevices-examples**, **pygraphics**,
    and click **Add project**.
 3. Search for **`PyDevices/pydevices-examples`** and import it.
    - If the repo does not appear, confirm the
-     [GitHub App installation](https://github.com/organizations/PyDevices/settings/installations/149173814)
+     [GitHub App installation](https://github.com/organizations/PyDevices/settings/installations)
      includes this repository, then use **Refresh your repositories** on RTD.
 4. On the setup form, confirm:
    - **Documentation type:** MkDocs (auto-detected from `.readthedocs.yaml`)

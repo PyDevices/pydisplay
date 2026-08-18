@@ -13,7 +13,8 @@
 ## GitHub
 
 - **Issues:** [github.com/PyDevices/pydevices-examples/issues](https://github.com/PyDevices/pydevices-examples/issues) — bugs, feature requests, missing board configs
-- **Discussions:** use Issues if Discussions are not enabled on the repo
+- **Discussions:** use [pydevices Discussions](https://github.com/PyDevices/pydevices/discussions),
+  the org-wide Q&A venue. This repo and other PyDevices repos use Issues only.
 
 ## Try without hardware
 
