@@ -396,6 +396,45 @@ def _patch_utime():
         sys.modules["utime"] = time
 
 
+def _patch_uasyncio():
+    """Alias uasyncio -> asyncio when uasyncio is absent (e.g. micropython.wasm, CPython)."""
+    import sys
+
+    if "uasyncio" in sys.modules:
+        mod = sys.modules["uasyncio"]
+        if not hasattr(mod, "sleep_ms") and hasattr(mod, "sleep"):
+
+            async def sleep_ms(ms):
+                await mod.sleep(ms / 1000.0)
+
+            mod.sleep_ms = sleep_ms
+        return
+    try:
+        import uasyncio  # noqa: F401
+
+        if not hasattr(uasyncio, "sleep_ms") and hasattr(uasyncio, "sleep"):
+
+            async def sleep_ms(ms):
+                await uasyncio.sleep(ms / 1000.0)
+
+            uasyncio.sleep_ms = sleep_ms
+        return
+    except ImportError:
+        pass
+    try:
+        import asyncio
+
+        if not hasattr(asyncio, "sleep_ms") and hasattr(asyncio, "sleep"):
+
+            async def sleep_ms(ms):
+                await asyncio.sleep(ms / 1000.0)
+
+            asyncio.sleep_ms = sleep_ms
+        sys.modules["uasyncio"] = asyncio
+    except ImportError:
+        pass
+
+
 def _patch_micropython_const():
     """Provide ``const`` builtin used by ugui/tgui on MicroPython."""
     import builtins
@@ -413,6 +452,7 @@ def _patch_micropython_const():
 
 
 def _apply_patches(which):
+    _patch_uasyncio()
     if which in ("micropython-micro-gui", "micropython-touch"):
         _patch_micropython_const()
         _patch_time_ticks()
