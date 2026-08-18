@@ -30,5 +30,5 @@ Mappings live in `displaydev._domkeys._DOM_NAMED_KEYS`. Unknown TV keys arrive a
 
 ## Related
 
-- [Where PWAs run — Smart TVs](https://pydisplay.readthedocs.io/en/latest/platforms/pwa.html)
-- [PyScript platform notes](https://pydisplay.readthedocs.io/en/latest/platforms/pyscript.html)
+- [Where PWAs run — Smart TVs](https://github.com/PyDevices/pydevices-pyscript-template/blob/main/docs/pwa-guide.md#where-pwas-run)
+- [PSDisplay](https://github.com/PyDevices/pydevices/blob/main/docs/displaydev.md#psdisplay)
