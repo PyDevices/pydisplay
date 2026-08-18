@@ -172,7 +172,7 @@ see [Windows PE under WSL](#windows-pe-under-wsl).
 **Async timers on desktop:** the kit forwards `PYDEVICES_TIMER_ASYNC` as wrapper
 `--timer-async` (uses `env_set`, works for Windows PE under WSL). Shell export
 is the preferred way to select mode for a full kit run (see Preferred method
-above). Semantics: [Runtime — timer_async](https://pydevices.github.io/pydevices/application-runtime.html#timer_async-in-srclibboard_configpy).
+above). Semantics: [Runtime — timer_async](https://github.com/PyDevices/pydevices/blob/main/docs/application-runtime.md#timer_async-in-srclibboard_configpy).
 
 ### Windows PE under WSL
 
@@ -265,7 +265,7 @@ Headless needs Playwright (`.venv/bin/pip install -r requirements-dev.txt` and
 child before importing `multimer.auto`, so they also work for the Windows
 `.exe` runtimes, which cannot read WSL-exported env vars. Runtimes lacking that
 provider report `unavailable` and do not fail the run. See the
-[multimer automatic-selection documentation](https://pydevices.github.io/pydevices/multimer.html#automatic-selection).
+[multimer automatic-selection documentation](https://github.com/PyDevices/pydevices/blob/main/docs/multimer.md#automatic-selection).
 
 TestPyPI package smoke tests are owned by the repositories that publish the
 packages: core checks live in

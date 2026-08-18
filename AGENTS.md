@@ -91,7 +91,7 @@ Board configs never own a runtime. `AutoDisplay` is imported from
 ### `PYDEVICES_TIMER_ASYNC` (agents / matrix)
 
 Host defaults and env semantics:
-[Runtime — `timer_async`](https://pydevices.github.io/pydevices/application-runtime.html#timer_async-in-srclibboard_configpy).
+[Runtime — `timer_async`](https://github.com/PyDevices/pydevices/blob/main/docs/application-runtime.md#timer_async-in-srclibboard_configpy).
 Examples never read this variable — only library `board_config` and harnesses
 that call `displaydev.env_set`.
 
@@ -146,7 +146,7 @@ App pattern: queue work and drain on the main tick — see `roku_widgets` /
   timer kit covers dedicated click checks — its daemon-thread quit injection is
   incompatible with the generic example matrix for some ports.
 - **`multimer` is fragile** — before editing hardware `lib/multimer/`, read
-  [multimer concepts](https://pydevices.github.io/pydevices/multimer.html) and follow the local Cursor
+  [multimer concepts](https://github.com/PyDevices/pydevices/blob/main/docs/multimer.md) and follow the local Cursor
   rule `multimer-fragile` (thinking model, small diffs, revert failures). Do not
   duplicate that rule text in this repo.
 

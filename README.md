@@ -66,8 +66,8 @@ mip.install("eventsys", index=INDEX)  # optional; used by these non-LVGL example
 ```
 
 See the
-[pydevices install workflows](https://pydevices.github.io/pydevices/install-workflows.html)
-and [board configs](https://pydevices.github.io/pydevices/board-configs.html)
+[pydevices install workflows](https://github.com/PyDevices/pydevices/blob/main/docs/install-workflows.md)
+and [board configs](https://github.com/PyDevices/pydevices/blob/main/docs/board-configs.md)
 for complete device setup.
 
 ## Runtime ownership
