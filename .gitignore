@@ -43,9 +43,19 @@ lib/examples/spotify_remote
 lib/examples/frogger
 lib/examples/spotify_client
 
+# jupyter.py output. It names the notebook run-<slug>.ipynb for `-m <module>`
+# but <script-stem>.ipynb for a file path, and writes it to the cwd -- which is
+# lib/ for the documented flow and the repo root otherwise.
+run-*.ipynb
+run-*.nbconvert.ipynb
 lib/run-*.ipynb
 lib/run-*.nbconvert.ipynb
+/*.ipynb
+lib/*.ipynb
 pydevices-examples/lib/.ipynb_checkpoints
+
+# Stray uv artifact; this repo does not use uv
+uv.lock
 
 # CI / local sibling checkouts inside this workspace
 graphics/
