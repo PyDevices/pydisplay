@@ -2,10 +2,20 @@
 
 ## Cursor Cloud specific instructions
 
-This repo is the PyDevices examples, documentation, and PyScript gallery. The
-shareable product libraries live in sibling `pydevices`. There is no
-build step for examples. `.site/pyscript/lib` is a symlink to `../../lib`, so
-editing `lib/` updates the PyScript gallery too.
+This repo is a **showcase**: examples and a PyScript gallery for the PyDevices
+driver stack, not the product itself. The shareable product libraries and their
+docs live in sibling `pydevices`. There is no build step for examples.
+`.site/pyscript/lib` is a symlink to `../../lib`, so editing `lib/` updates the
+PyScript gallery too.
+
+**Docs map** (this repo's `docs/` is small on purpose — see
+[`docs/README.md`](docs/README.md)): [`docs/peterhinch-guis.md`](docs/peterhinch-guis.md)
+(Nano-GUI / Micro-GUI / MicroPython-Touch), [`docs/tft-gui.md`](docs/tft-gui.md)
+(@russhughes TFT GUI stub), [`docs/screenshots/`](docs/screenshots/README.md).
+Code-adjacent runbooks: [`tools/README.md`](tools/README.md) (example test
+matrix, PyScript/Playwright debugging, LVGL timer harnesses),
+[`lib/utils/README.md`](lib/utils/README.md), [`scripts/README.md`](scripts/README.md),
+[`tests/README.md`](tests/README.md).
 
 ### Environment
 
@@ -28,9 +38,8 @@ Board configs never own a runtime. `AutoDisplay` is imported from
 - Use the repo-root virtualenv at `.venv` for all Python tooling
   (`.venv/bin/python`, `.venv/bin/ruff`, `.venv/bin/pytest`). The system `python3` has no project
   dependencies installed.
-- **Browser Testing with Playwright:** Playwright is installed in `.venv` (`playwright-1.62.0`).
-  If built-in browser subagents are unavailable or have driver issues, run browser tests headlessly
-  via `.venv/bin/python tools/test_html_shells.py` or `.venv/bin/python` using `from playwright.async_api import async_playwright`.
+- **Browser testing with Playwright:** see
+  [`.agents/rules/playwright_environment_rule.md`](../.agents/rules/playwright_environment_rule.md).
 - Desktop matrices use repo `.venv` (`cpython-venv`) plus interpreters on
   `PATH` (`micropython`, `circuitpython`, and when present
   `micropython.exe` / `python.exe`). `jupyter.py` (from `pydevices/bin`), `./scripts/pyscript.sh`, and
@@ -91,7 +100,7 @@ Board configs never own a runtime. `AutoDisplay` is imported from
 ### `PYDEVICES_TIMER_ASYNC` (agents / matrix)
 
 Host defaults and env semantics:
-[Runtime — `timer_async`](https://github.com/PyDevices/pydevices/blob/main/docs/application-runtime.md#timer_async-in-srclibboard_configpy).
+[Runtime — `timer_async`](https://github.com/PyDevices/pydevices/blob/main/docs/application-runtime.md#timer_async).
 Examples never read this variable — only library `board_config` and harnesses
 that call `displaydev.env_set`.
 
