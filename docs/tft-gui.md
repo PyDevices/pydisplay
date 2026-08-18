@@ -12,7 +12,8 @@ Use or adapt `tft_config.py` from [`lib/utils/tft_config.py`](https://github.com
 - [write_font_converter.py](https://github.com/russhughes/st7789py_mpy/blob/master/utils/write_font_converter.py) → `tft_write.write()`
 - [image_converter.py](https://github.com/russhughes/st7789py_mpy/blob/master/utils/image_converter.py) → `.bitmap()`
 
-See [Drawing and fonts](../concepts/drawing-and-fonts.md) and [Graphics files](../concepts/graphics-files.md).
+See the pygraphics [graphics guide](https://github.com/PyDevices/pygraphics/blob/main/docs/graphics-guide.md)
+and [graphics files](https://github.com/PyDevices/pygraphics/blob/main/docs/graphics-files.md).
 
 ## Notable examples
 
