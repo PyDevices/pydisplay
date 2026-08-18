@@ -1,13 +1,17 @@
 --index-url https://test.pypi.org/simple/
+--extra-index-url https://pypi.org/simple/
 
-pydevices-events>=0.1.2
-pydevices-keys>=0.1.2
-pydevices-multimer>=0.1.2
-pydevices-displaydev>=0.1.2
-pydevices-audiodev>=0.1.2
-pydevices-eventsys>=0.1.2
-pydevices-pygraphics>=0.0.32
-pydevices-palettes>=0.0.8
-pydevices-pdwidgets>=0.0.16
-pydevices-desktop>=0.1.2
-pydevices-lvgl>=9.5.27
+pydevices
+pydevices-audiodev
+pydevices-desktop
+pydevices-displaydev
+pydevices-events
+pydevices-eventsys
+pydevices-keys
+pydevices-lvgl
+pydevices-multimer
+pydevices-palettes
+pydevices-pdwidgets
+pydevices-pygraphics
+pydevices-usdl2
+pydevices-uwin32
