@@ -104,8 +104,8 @@
     '<div class="tree-branch open">' +
     '<div class="tree-branch-header"><svg class="tree-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg> 📁 4: Target App Hosts & PWAs</div>' +
     '<div class="tree-branch-children">' +
-    '<a class="tree-leaf" href="https://pydevices.github.io/pydevices-pyscript-template/"><span class="tree-leaf-name">pyscript-template</span><span class="tag tag-tier-4">PWA Template</span></a>' +
-    '<a class="tree-leaf" href="https://pydevices.github.io/pydevices-android-template/"><span class="tree-leaf-name">android-template</span><span class="tag tag-tier-4">Android APK</span></a>' +
+    '<a class="tree-leaf" href="https://pydevices.github.io/pyscript-template/"><span class="tree-leaf-name">pyscript-template</span><span class="tag tag-tier-4">PWA Template</span></a>' +
+    '<a class="tree-leaf" href="https://pydevices.github.io/android-template/"><span class="tree-leaf-name">android-template</span><span class="tag tag-tier-4">Android APK</span></a>' +
     '</div>' +
     '</div>' +
     '<div class="tree-branch open">' +

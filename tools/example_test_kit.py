@@ -70,7 +70,7 @@ ANDROID_PACKAGE_ID = os.environ.get("PACKAGE_ID", "org.pydevices.launcher")
 def _find_android_runner() -> Path:
     """Locate android.py, the host tool that stages a script onto the Runner APK.
 
-    The older pydevices-android-runner/scripts/android.sh was retired in August
+    The older android-runner/scripts/android.sh was retired in August
     2026 once android.py covered every one of its flags; ANDROID_SH is still
     honored as an environment override for anyone with it in their shell profile.
     """

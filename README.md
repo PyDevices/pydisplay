@@ -36,8 +36,8 @@ The fastest route is the installable
 **[PyScript gallery](https://PyDevices.github.io/pydevices-examples/pyscript/)**. It runs
 the real examples in a browser and can be installed as a Progressive Web App.
 Start a standalone browser app from the
-**[pydevices-pyscript-template](https://github.com/PyDevices/pydevices-pyscript-template)**,
-or use the [PWA guide](https://github.com/PyDevices/pydevices-pyscript-template/blob/main/docs/pwa-guide.md)
+**[pyscript-template](https://github.com/PyDevices/pyscript-template)**,
+or use the [PWA guide](https://github.com/PyDevices/pyscript-template/blob/main/docs/pwa-guide.md)
 to understand and customize the full gallery shell.
 
 For a desktop clone:
@@ -141,8 +141,8 @@ packages remain conventional and unprefixed.
 - [pygraphics](https://github.com/PyDevices/pygraphics),
   [palettes](https://github.com/PyDevices/palettes), and
   [pdwidgets](https://github.com/PyDevices/pdwidgets) — companion packages
-- [pydevices-android-template](https://github.com/PyDevices/pydevices-android-template) — Android application packaging
-- [pydevices-pyscript-template](https://github.com/PyDevices/pydevices-pyscript-template) — standalone installable PyScript PWA starter
+- [android-template](https://github.com/PyDevices/android-template) — Android application packaging
+- [pyscript-template](https://github.com/PyDevices/pyscript-template) — standalone installable PyScript PWA starter
 
 ## Development
 

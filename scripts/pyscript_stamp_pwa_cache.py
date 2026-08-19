@@ -25,7 +25,7 @@ Deploy stamps a short hash; source in git keeps ``pydevices-examples-pwa-dev``.
 
 When ``sw.js`` contains ``MIGRATION: cache-purge`` (one-deploy cache purge for
 legacy installs), stamping is skipped. See the PWA guide in
-pydevices-pyscript-template (``docs/pwa-guide.md``, "Orphaned service workers
+pyscript-template (``docs/pwa-guide.md``, "Orphaned service workers
 and cache migration").
 """
 
