@@ -4,9 +4,10 @@ from random import getrandbits
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
+runtime = app
 import gc
 import time
 
@@ -65,5 +66,5 @@ def _tick(_=None):
         runtime.request_quit()
 
 
-runtime.on_tick(_tick, period=1, async_=runtime.timer_async)
-runtime.run_forever()
+app.every(_tick, period=1, async_=app.timer_async)
+app.run()

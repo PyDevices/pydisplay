@@ -5,6 +5,22 @@
       "github:PyDevices/pydevices-examples/lib/lib/examples/analog_clock_lvgl.py"
     ],
     [
+      "appdev_encoder_test.py",
+      "github:PyDevices/pydevices-examples/lib/lib/examples/appdev_encoder_test.py"
+    ],
+    [
+      "appdev_simpletest.py",
+      "github:PyDevices/pydevices-examples/lib/lib/examples/appdev_simpletest.py"
+    ],
+    [
+      "appdev_touch_coords.py",
+      "github:PyDevices/pydevices-examples/lib/lib/examples/appdev_touch_coords.py"
+    ],
+    [
+      "appdev_touch_test.py",
+      "github:PyDevices/pydevices-examples/lib/lib/examples/appdev_touch_test.py"
+    ],
+    [
       "audio_in_playback_test.py",
       "github:PyDevices/pydevices-examples/lib/lib/examples/audio_in_playback_test.py"
     ],
@@ -83,22 +99,6 @@
     [
       "displaysys_fill_rect_test.py",
       "github:PyDevices/pydevices-examples/lib/lib/examples/displaysys_fill_rect_test.py"
-    ],
-    [
-      "eventsys_encoder_test.py",
-      "github:PyDevices/pydevices-examples/lib/lib/examples/eventsys_encoder_test.py"
-    ],
-    [
-      "eventsys_simpletest.py",
-      "github:PyDevices/pydevices-examples/lib/lib/examples/eventsys_simpletest.py"
-    ],
-    [
-      "eventsys_touch_coords.py",
-      "github:PyDevices/pydevices-examples/lib/lib/examples/eventsys_touch_coords.py"
-    ],
-    [
-      "eventsys_touch_test.py",
-      "github:PyDevices/pydevices-examples/lib/lib/examples/eventsys_touch_test.py"
     ],
     [
       "feathers.py",

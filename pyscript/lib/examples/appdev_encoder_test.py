@@ -1,12 +1,12 @@
 """
-A simple test of an encoder in eventsys.
+A simple test of an encoder in appdev.
 """
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 
 color_byte = 1
 bg_color = 0xFF00
@@ -56,6 +56,6 @@ def _on_button(e):
         draw_line()
 
 
-runtime.on(runtime.events.MOUSEWHEEL, _on_wheel)
-runtime.on(runtime.events.MOUSEBUTTONDOWN, _on_button)
-runtime.run_forever()
+app.on(app.events.MOUSEWHEEL, _on_wheel)
+app.on(app.events.MOUSEBUTTONDOWN, _on_button)
+app.run()

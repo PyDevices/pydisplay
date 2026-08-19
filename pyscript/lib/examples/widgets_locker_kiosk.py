@@ -12,9 +12,9 @@ Short UI blips via ``utils.audio.AudioEngine``.
 
 import board_config
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 import pdwidgets as pd
 from audio import AudioEngine
 
@@ -36,7 +36,7 @@ except Exception:
 
 display = pd.Display(display_drv, runtime)
 pal = display.pal
-runtime = runtime
+runtime = app
 
 W = display.width
 H = display.height
@@ -318,4 +318,4 @@ sheet_btn.add_event_cb(pd.events.MOUSEBUTTONDOWN, lambda _s=None, _e=None: sheet
 confirm_book.add_event_cb(pd.events.MOUSEBUTTONDOWN, _confirm_booking)
 
 screen.visible = True
-runtime.run_forever()
+app.run()

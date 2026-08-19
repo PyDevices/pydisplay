@@ -24,9 +24,9 @@ Smoothly scrolls mirrored rainbow colored random curves across the display.
 """
 
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 
 import math
 from random import getrandbits
@@ -125,5 +125,5 @@ def _tick(_=None):
     poll()
 
 
-runtime.on_tick(_tick, period=1, async_=runtime.timer_async)
-runtime.run_forever()
+app.every(_tick, period=1, async_=app.timer_async)
+app.run()

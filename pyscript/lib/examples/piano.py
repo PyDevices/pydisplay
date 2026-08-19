@@ -11,16 +11,16 @@ portrait panel 90 degrees into landscape.
 from audio import AudioEngine, midi_to_hz
 import board_config
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 import board_peripherals
 
 import keys
 from pygraphics import Draw
 
 display_drv = board_config.display_drv
-runtime = runtime
+runtime = app
 # Built here rather than taken from board_config so it can ask for the
 # interactive profile: the default is buffered for throughput, which a synth
 # writing at realtime pays as note-to-sound delay.
@@ -310,7 +310,7 @@ piano = Piano()
 
 
 def _on_mouse_button(e):
-    if runtime.quit_requested:
+    if app.quit_requested:
         return
     # Finger path synthesizes mouse for the primary contact; ignore those so
     # multi-touch chords are not double-pressed.
@@ -318,14 +318,14 @@ def _on_mouse_button(e):
         return
     if e.button != 1:
         return
-    if e.type == runtime.events.MOUSEBUTTONDOWN:
+    if e.type == app.events.MOUSEBUTTONDOWN:
         piano.on_pointer_down("mouse", e.pos)
     else:
         piano.on_pointer_up("mouse", e.pos)
 
 
 def _on_mouse_motion(e):
-    if runtime.quit_requested:
+    if app.quit_requested:
         return
     if getattr(e, "touch", False):
         return
@@ -335,21 +335,21 @@ def _on_mouse_motion(e):
 
 
 def _on_finger(e):
-    if runtime.quit_requested:
+    if app.quit_requested:
         return
     source = ("finger", e.finger_id)
-    if e.type == runtime.events.FINGERDOWN:
+    if e.type == app.events.FINGERDOWN:
         piano.on_pointer_down(source, e.pos)
-    elif e.type == runtime.events.FINGERMOTION:
+    elif e.type == app.events.FINGERMOTION:
         piano.on_pointer_move(source, e.pos)
     else:
         piano.on_pointer_up(source, e.pos)
 
 
 def _on_key(e):
-    if runtime.quit_requested:
+    if app.quit_requested:
         return
-    piano.on_key(e.key, e.type == runtime.events.KEYDOWN)
+    piano.on_key(e.key, e.type == app.events.KEYDOWN)
 
 
 def _on_quit(_e=None):
@@ -357,13 +357,13 @@ def _on_quit(_e=None):
     display_drv.quit()
 
 
-runtime.on([runtime.events.MOUSEBUTTONDOWN, runtime.events.MOUSEBUTTONUP], _on_mouse_button)
-runtime.on(runtime.events.MOUSEMOTION, _on_mouse_motion)
-runtime.on(
-    [runtime.events.FINGERDOWN, runtime.events.FINGERUP, runtime.events.FINGERMOTION],
+app.on([app.events.MOUSEBUTTONDOWN, app.events.MOUSEBUTTONUP], _on_mouse_button)
+app.on(app.events.MOUSEMOTION, _on_mouse_motion)
+app.on(
+    [app.events.FINGERDOWN, app.events.FINGERUP, app.events.FINGERMOTION],
     _on_finger,
 )
-runtime.on([runtime.events.KEYDOWN, runtime.events.KEYUP], _on_key)
-runtime.on(runtime.events.QUIT, _on_quit)
+app.on([app.events.KEYDOWN, app.events.KEYUP], _on_key)
+app.on(app.events.QUIT, _on_quit)
 
-runtime.run_forever()
+app.run()

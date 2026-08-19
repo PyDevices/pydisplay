@@ -19,15 +19,16 @@ if _EXAMPLES not in sys.path:
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
+runtime = app
 from calc_engine import CalcEngine
 import keys
 from pygraphics import RGB565, FrameBuffer
 from multimer import auto as timer
 from palettes import get_palette
-from eventsys.touch_keypad import TouchKeypad
+from appdev import TouchGrid
 
 
 # Button grid: 1 display row + 6 keypad rows, 4 columns.
@@ -123,7 +124,7 @@ class _Calculator:
         keypad_keys = [None] * self.COLS + list(_CODES) + list(_KEY_ALIASES.keys())
         self._pending_release = None
         self._release_timer = timer.Timer(-1)
-        self.keypad = TouchKeypad(
+        self.keypad = TouchGrid(
             runtime,
             0,
             0,
@@ -306,4 +307,4 @@ calc = _Calculator()
 # program, and returns immediately in an interactive REPL on signal-driven
 # backends (the interpreter keeps servicing the app) — so the same call is
 # always correct.
-runtime.run_forever()
+app.run()

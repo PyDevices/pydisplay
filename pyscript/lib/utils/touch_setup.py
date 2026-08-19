@@ -15,10 +15,11 @@ import board_config
 from board_config import display_drv
 from displaybuf import DisplayBuffer as SSD
 
-import eventsys
+import appdev
 import pygraphics
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
+runtime = app
 
 # Peter Hinch's GUI modules import framebuf directly. Use the same FrameBuffer
 # implementation as DisplayBuffer so Writer glyph buffers can be blitted to ssd.
@@ -33,11 +34,11 @@ ssd = SSD(display_drv, format)
 
 # enable screenshot functionality
 def screenshot(event):
-    if event.type == runtime.events.MOUSEBUTTONDOWN and event.button == 3:
+    if event.type == app.events.MOUSEBUTTONDOWN and event.button == 3:
         ssd.screenshot()
 
 
-runtime.on(runtime.events.MOUSEBUTTONDOWN, screenshot)
+app.on(app.events.MOUSEBUTTONDOWN, screenshot)
 # End screenshot functionality
 
 
@@ -59,18 +60,18 @@ class Poller:
         return bool(self._touched)
 
     def callback(self, event):
-        if (event.type == runtime.events.MOUSEMOTION and event.buttons[0] == 1) or (
-            event.type == runtime.events.MOUSEBUTTONDOWN and event.button == 1
+        if (event.type == app.events.MOUSEMOTION and event.buttons[0] == 1) or (
+            event.type == app.events.MOUSEBUTTONDOWN and event.button == 1
         ):
             self.col, self.row = event.pos
             self._touched = True
-        elif event.type == runtime.events.MOUSEBUTTONUP and event.button == 1:
+        elif event.type == app.events.MOUSEBUTTONUP and event.button == 1:
             self._release_pending = True
 
 
-tpad = Poller(runtime.poll)
-runtime.on(
-    [runtime.events.MOUSEMOTION, runtime.events.MOUSEBUTTONDOWN, runtime.events.MOUSEBUTTONUP],
+tpad = Poller(app.poll)
+app.on(
+    [app.events.MOUSEMOTION, app.events.MOUSEBUTTONDOWN, app.events.MOUSEBUTTONUP],
     tpad.callback,
 )
 

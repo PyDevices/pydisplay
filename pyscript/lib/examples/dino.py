@@ -29,8 +29,9 @@ if _host_board.display_drv.width < _host_board.display_drv.height:
 
 # For real PixelDisplay hardware, replace this import with:
 # from board_config import display_drv
-# runtime = eventsys.Runtime.from_board_config(board_config)
-from pixel_sim import display_drv, runtime  # noqa: E402
+# app = appdev.App(board_config)
+from pixel_sim import display_drv, app
+runtime = app  # noqa: E402
 
 WIDTH = display_drv.width
 HEIGHT = display_drv.height
@@ -492,8 +493,8 @@ class DinoGame:
         display_drv.show()
 
     def tick(self, _timer=None):
-        runtime.poll()
-        if runtime.quit_requested:
+        app.poll()
+        if app.quit_requested:
             return
         now = ticks_ms()
         elapsed = ticks_diff(now, self.last_ms)
@@ -511,39 +512,39 @@ game = DinoGame()
 
 
 def _on_input(event):
-    if event.type == runtime.events.KEYDOWN:
+    if event.type == app.events.KEYDOWN:
         if event.key in (keys.K_SPACE, keys.K_UP, keys.K_w):
             game.keys["jump"] = True
             game.start_or_jump()
         elif event.key in (keys.K_DOWN, keys.K_s):
             game.set_down(True)
-    elif event.type == runtime.events.KEYUP:
+    elif event.type == app.events.KEYUP:
         if event.key in (keys.K_SPACE, keys.K_UP, keys.K_w):
             game.keys["jump"] = False
             game.release_jump()
         elif event.key in (keys.K_DOWN, keys.K_s):
             game.set_down(False)
-    elif event.type in (runtime.events.MOUSEBUTTONDOWN, runtime.events.FINGERDOWN):
+    elif event.type in (app.events.MOUSEBUTTONDOWN, app.events.FINGERDOWN):
         game.start_or_jump()
-    elif event.type in (runtime.events.MOUSEBUTTONUP, runtime.events.FINGERUP):
+    elif event.type in (app.events.MOUSEBUTTONUP, app.events.FINGERUP):
         game.release_jump()
 
 
 for _event_type in (
-    runtime.events.KEYDOWN,
-    runtime.events.KEYUP,
-    runtime.events.MOUSEBUTTONDOWN,
-    runtime.events.MOUSEBUTTONUP,
-    runtime.events.FINGERDOWN,
-    runtime.events.FINGERUP,
+    app.events.KEYDOWN,
+    app.events.KEYUP,
+    app.events.MOUSEBUTTONDOWN,
+    app.events.MOUSEBUTTONUP,
+    app.events.FINGERDOWN,
+    app.events.FINGERUP,
 ):
-    runtime.on(_event_type, _on_input)
+    app.on(_event_type, _on_input)
 
 
 def _tick(timer=None):
     game.tick(timer)
 
 
-_tick_subscription = runtime.on_tick(_tick, period=FRAME_MS, async_=runtime.timer_async)
+_tick_subscription = app.every(_tick, period=FRAME_MS, async_=app.timer_async)
 game.draw()
-runtime.run_forever()
+app.run()

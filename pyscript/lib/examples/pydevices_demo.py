@@ -3,15 +3,16 @@
 """
 pydevices_demo.py — flagship board_config demo: clicks, rotation, scrolling.
 
-Setup + callbacks, then ``runtime.run_forever()``. Uses only published product modules
-(board_config, graphics, multimer, eventsys).
+Setup + callbacks, then ``app.run()``. Uses only published product modules
+(board_config, graphics, multimer, appdev).
 """
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
+runtime = app
 
 from displaydev import color565
 from pygraphics import RGB565, Area, Font, FrameBuffer
@@ -52,7 +53,7 @@ TIPS = (
     "Clicks come from touch",
     "or the mouse.",
     "Display: board_config",
-    "Events: eventsys",
+    "Events: appdev",
     "Timers: runtime.on_tick",
 )
 
@@ -153,6 +154,6 @@ def _on_click(e):
 
 setup_scroll()
 redraw()
-runtime.on_tick(_scroll_tick, period=40, async_=runtime.timer_async)
-runtime.on(runtime.events.MOUSEBUTTONDOWN, _on_click)
-runtime.run_forever()
+app.every(_scroll_tick, period=40, async_=app.timer_async)
+app.on(app.events.MOUSEBUTTONDOWN, _on_click)
+app.run()

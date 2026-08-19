@@ -98,6 +98,13 @@ def make_emu_display(
             PGDisplay(width=width, height=height, title=title, scale=scale, quiet=True),
             None,
         )
+    if name == "WinDisplay":
+        from displaydev.windisplay import WinDisplay
+
+        return (
+            WinDisplay(width=width, height=height, title=title, quiet=True),
+            None,
+        )
     if name == "PSDisplay":
         from display_driver import HostInput
 

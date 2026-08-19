@@ -16,9 +16,9 @@ APPS | MORE | SELECT. MORE lists TV inputs. Layout, padding, and text scales
 are derived from ``display.width`` / ``height`` so the UI scales from 320x480
 up through tall phone portraits.
 
-Input and frame rendering are driven by the shared ``eventsys.Runtime``:
+Input and frame rendering are driven by the shared ``appdev.Runtime``:
 ``pd.Display`` wires them in at construction, so the example just builds the UI
-and hands control to ``runtime.run_forever()``. Blocking ECP/scan work is queued
+and hands control to ``app.run()``. Blocking ECP/scan work is queued
 and drained from the soft ``on_tick`` pump (no ``_thread`` — ESP32 thread stacks
 are too small for network).
 
@@ -36,9 +36,9 @@ if _EXAMPLES not in sys.path:
 
 import board_config
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 import pdwidgets as pd
 import keys
 from roku_engine import (
@@ -104,7 +104,7 @@ class _RemoteUI:
         except Exception:
             pass
         self.display = pd.Display(board_config.display_drv, runtime)
-        self.runtime = runtime
+        self.runtime = app
         pal = self.display.pal
         self.W = self.display.width
         self.H = self.display.height
@@ -294,7 +294,7 @@ class _RemoteUI:
         # a second soft IRQ can nest during I2C and blow ESP32-P4's ~55-frame
         # Python recursion limit).
         try:
-            self._pump_sub = self.runtime.on_tick(
+            self._pump_sub = self.app.every(
                 self._pump,
                 period=250,
                 async_=getattr(self.runtime, "timer_async", False),
@@ -1612,9 +1612,9 @@ def create(engine=None, start_page="devices"):
 
 
 def run(engine=None, start_page="devices"):
-    """Create the UI and hand control to ``runtime.run_forever()``."""
+    """Create the UI and hand control to ``app.run()``."""
     create(engine=engine, start_page=start_page)
-    runtime.run_forever()
+    app.run()
 
 
 # Direct import / example kit: auto-start. ``roku_remote`` owns launch when set.

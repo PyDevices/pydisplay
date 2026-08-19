@@ -30,9 +30,9 @@ import sys
 
 import tft_config
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 
 palette = tft_config.palette
 sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
@@ -64,7 +64,7 @@ def main():
     row += noto_mono.HEIGHT
 
     tft.show()
-    runtime.run_forever()
+    app.run()
 
 
 main()

@@ -6,12 +6,11 @@ A class to make keypad keys appear as pins on a microcontroller.
 
 Usage:
     import board_config
-    import eventsys
+    import appdev
     import keys
     from keypins import KeyPins
 
-
-    runtime = eventsys.Runtime.from_board_config(board_config)
+    app = appdev.App(board_config)
     buttons = KeyPins(
         left=keys.K_LEFT,
         right=keys.K_RIGHT,
@@ -20,10 +19,10 @@ Usage:
         fire=keys.K_SPACE,
     )
 
-    runtime.on([runtime.events.KEYDOWN, runtime.events.KEYUP], buttons)
+    app.on([app.events.KEYDOWN, app.events.KEYUP], buttons)
 
     while True:
-        _ = runtime.poll()
+        _ = app.poll()
         for button in buttons:
             if button.value() == True:
                 print(f"{button.name} ({button.keyname}) pressed")

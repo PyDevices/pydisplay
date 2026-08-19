@@ -5,7 +5,7 @@ pixel_sim_demos.py — NeoPixel simulator effects in one file.
 
 Pick an effect with ``DEMO`` (``scroll``, ``plasma``, ``fire``, ``matrix``,
 ``starfield``, or ``reel`` for all of them in sequence).  Each effect calls
-``runtime.poll()`` every frame so the desktop window stays closable.
+``app.poll()`` every frame so the desktop window stays closable.
 
 **Simulator (default):** set ``PYTHONPATH``/``MICROPYPATH`` to ``.:lib:utils`` and run
 directly from ``lib/``::
@@ -15,7 +15,7 @@ directly from ``lib/``::
 Or from the REPL: ``from examples import pixel_sim_demos``.
 
 **Real PixelDisplay hardware:** import ``display_drv`` from ``board_config`` and
-``eventsys.Runtime.from_board_config(board_config)``.
+``appdev.Runtime.from_board_config(board_config)``.
 instead of ``from pixel_sim import …`` (your hardware ``board_config`` must wire
 ``PixelDisplay``).
 
@@ -39,8 +39,9 @@ if _host_board.display_drv.width < _host_board.display_drv.height:
 
 # Uncomment one and only one of the following two lines
 # from board_config import display_drv
-# runtime = eventsys.Runtime.from_board_config(board_config)
-from pixel_sim import display_drv, runtime
+# app = appdev.App(board_config)
+from pixel_sim import display_drv, app
+runtime = app
 
 # scroll | plasma | fire | matrix | starfield | reel
 DEMO = "reel"
@@ -62,8 +63,8 @@ _REEL_START = ticks_ms()
 def _stop():
     """Poll input so the window closes; True when quitting or the test times out."""
     if runtime is not None:
-        runtime.poll()
-        if runtime.quit_requested:
+        app.poll()
+        if app.quit_requested:
             return True
     if _TEST_DURATION_S is not None and ticks_diff(ticks_ms(), _START) >= _TEST_DURATION_S * 1000:
         return True
@@ -72,8 +73,8 @@ def _stop():
 
 def _reel_stop():
     if runtime is not None:
-        runtime.poll()
-        if runtime.quit_requested:
+        app.poll()
+        if app.quit_requested:
             return True
     if _TEST_DURATION_S is not None and ticks_diff(ticks_ms(), _REEL_START) >= _TEST_DURATION_S * 1000:
         return True
@@ -442,5 +443,5 @@ def _tick(_=None):
         _next_at = now
 
 
-runtime.on_tick(_tick, period=1, async_=runtime.timer_async)
-runtime.run_forever()
+app.every(_tick, period=1, async_=app.timer_async)
+app.run()

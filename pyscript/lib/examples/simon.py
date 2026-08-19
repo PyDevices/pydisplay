@@ -2,7 +2,7 @@
 """
 Simon — classic memory game for round (and rectangular) displays.
 
-Uses PyDevices ``pygraphics`` (not LVGL) plus ``eventsys`` touch. Designed as a
+Uses PyDevices ``pygraphics`` (not LVGL) plus ``appdev`` touch. Designed as a
 light-RAM display/touch driver demo: draws directly to the bus display with no
 full-frame buffer.
 
@@ -18,12 +18,13 @@ under ``timer_async`` hosts such as PyScript.
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
+runtime = app
 from random import getrandbits
 
-import eventsys
+import appdev
 import pygraphics
 import events
 
@@ -324,6 +325,6 @@ def _on_tick(_=None):
 
 
 draw_board()
-runtime.on(events.MOUSEBUTTONUP, _on_up)
-runtime.on_tick(_on_tick, period=20, async_=getattr(runtime, "timer_async", False))
-runtime.run_forever()
+app.on(events.MOUSEBUTTONUP, _on_up)
+app.every(_on_tick, period=20, async_=getattr(runtime, "timer_async", False))
+app.run()

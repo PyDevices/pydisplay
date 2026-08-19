@@ -11,18 +11,18 @@ Typical instrument / game loop::
 
     import board_config
     from board_config import audio_out
-    import eventsys
+    import appdev
     from audio import AudioEngine
 
-    runtime = eventsys.Runtime.from_board_config(board_config)
+    app = appdev.App(board_config)
 
     eng = AudioEngine(audio_out)
-    eng.attach(runtime)          # pumps mixed PCM on a timer
+    eng.attach(app)              # pumps mixed PCM on a timer
     eng.note_on("c4", 261.63)    # hold while key is down
     eng.note_on("e4", 329.63)    # chord = multiple active voices
     eng.note_off("c4")
     eng.blip(880, ms=60)         # one-shot game SFX
-    runtime.run_forever()
+    app.run()
 
 Wave shapes are registered by name so apps can add custom oscillators without
 forking the mixer.
@@ -445,11 +445,14 @@ class AudioEngine:
         finally:
             self._pumping = False
 
-    def attach(self, runtime, period_ms=None):
-        """Subscribe ``tick`` to *runtime*'s shared timer; returns self."""
+    def attach(self, app, period_ms=None):
+        """Subscribe ``tick`` to *app*'s shared timer; returns self."""
         ms = self.chunk_ms if period_ms is None else int(period_ms)
-        async_ = getattr(runtime, "timer_async", False)
-        self._tick_sub = runtime.on_tick(self.tick, period=ms, async_=async_)
+        if hasattr(app, "every"):
+            self._tick_sub = app.every(ms, self.tick)
+        else:
+            async_ = getattr(app, "timer_async", False)
+            self._tick_sub = app.on_tick(self.tick, period=ms, async_=async_)
         return self
 
     def detach(self):
@@ -457,12 +460,15 @@ class AudioEngine:
         self._tick_sub = None
         if sub is None:
             return
-        deinit = getattr(sub, "deinit", None)
-        if deinit is not None:
-            try:
-                deinit()
-            except Exception:
-                pass
+        if hasattr(sub, "cancel"):
+            sub.cancel()
+        else:
+            deinit = getattr(sub, "deinit", None)
+            if deinit is not None:
+                try:
+                    deinit()
+                except Exception:
+                    pass
 
     def close(self):
         self.detach()

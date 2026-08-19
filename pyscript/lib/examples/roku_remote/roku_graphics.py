@@ -14,7 +14,7 @@ and is what ``roku_remote`` launches.
 
 Shares :class:`roku_engine.RokuEngine` for ECP over the LAN (SSDP discover +
 HTTP keypress / apps / queries). Uses only three core PyDevices packages
-(``pygraphics``, ``displaydev`` via ``board_config``, ``eventsys``, ``multimer``).
+(``pygraphics``, ``displaydev`` via ``board_config``, ``appdev``, ``multimer``).
 
 Geometry scales from a 320x480 reference up through tall phone portraits.
 Remote chrome matches ``roku_lvgl``: utility, D-pad, options (replay / info /
@@ -38,9 +38,9 @@ if _EXAMPLES not in sys.path:
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 import keys
 from pygraphics import RGB565, Area, FrameBuffer
 from multimer import auto as timer
@@ -304,9 +304,9 @@ class _Remote:
 
             self._run_bg(_soft)
 
-        runtime.on(runtime.events.MOUSEBUTTONDOWN, self._on_mouse_down)
-        runtime.on(runtime.events.MOUSEBUTTONUP, self._on_mouse_up)
-        runtime.on(runtime.events.KEYDOWN, self._on_key)
+        app.on(app.events.MOUSEBUTTONDOWN, self._on_mouse_down)
+        app.on(app.events.MOUSEBUTTONUP, self._on_mouse_up)
+        app.on(app.events.KEYDOWN, self._on_key)
         # Soft pump: apply playback status from bg workers + periodic refresh.
         # Must not call Timer.deinit from this callback (librt deadlock).
         try:
@@ -1643,9 +1643,9 @@ def create(engine=None, start_page="devices"):
 
 
 def run(engine=None, start_page="devices"):
-    """Create the UI and hand control to ``runtime.run_forever()``."""
+    """Create the UI and hand control to ``app.run()``."""
     create(engine=engine, start_page=start_page)
-    runtime.run_forever()
+    app.run()
 
 
 # Direct import / example kit: auto-start. ``roku_remote`` owns launch when set.

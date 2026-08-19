@@ -12,9 +12,9 @@ and a confirm dialog.
 
 import board_config
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 import pdwidgets as pd
 from pdwidgets import pct
 
@@ -22,7 +22,7 @@ pd.DEBUG = False
 
 display = pd.Display(board_config.display_drv, runtime)
 pal = display.pal
-runtime = runtime
+runtime = app
 
 W = display.width
 H = display.height
@@ -355,4 +355,4 @@ checkin_btn.add_event_cb(pd.events.MOUSEBUTTONDOWN, _do_checkin)
 
 nav.push(root)
 screen.visible = True
-runtime.run_forever()
+app.run()

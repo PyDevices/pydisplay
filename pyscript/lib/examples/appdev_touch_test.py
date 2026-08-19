@@ -1,6 +1,6 @@
 # deps: pygraphics
 """
-eventsys_touch_test.py - Touch rotation test.
+appdev_touch_test.py - Touch rotation test.
 Tests the touch driver and finds the correct rotation masks for the touch screen.
 Sets the rotation to each of 4 possible values and asks the user to touch the rectangle in each of the 4 corners.
 Then it prints the touch_rotation_table that should be set in board_config.py.
@@ -8,10 +8,10 @@ Then it prints the touch_rotation_table that should be set in board_config.py.
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
-import eventsys
+app = appdev.App(board_config)
+import appdev
 from pygraphics import round_rect, text16
 
 demo = False
@@ -40,7 +40,7 @@ _ZONE_MASKS = {
 
 def set_rotation_table(table):
     if display_drv.touch_device is not None:
-        if display_drv.touch_device.type == eventsys.POINTER:
+        if display_drv.touch_device.type == appdev.POINTER:
             display_drv.touch_device.rotation_table = table
 
 
@@ -171,5 +171,5 @@ if not demo:
     set_rotation_table((0, 0, 0, 0))
 
 _start_over()
-runtime.on(runtime.events.MOUSEBUTTONDOWN, _on_click)
-runtime.run_forever()
+app.on(app.events.MOUSEBUTTONDOWN, _on_click)
+app.run()

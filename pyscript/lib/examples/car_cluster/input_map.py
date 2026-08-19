@@ -43,7 +43,7 @@ if keys is not None:
 
 
 def remap_nav_key(sdl_key):
-    """Map eventsys/SDL key codes to lv.KEY for group navigation."""
+    """Map appdev/SDL key codes to lv.KEY for group navigation."""
     if sdl_key == _SDL_UP:
         return lv.KEY.UP
     if sdl_key == _SDL_DOWN:
@@ -148,7 +148,7 @@ class InputBridge:
     """Install SDL→LVGL key mapping and bind FocusNav to the keypad indev."""
 
     def __init__(self, runtime, vehicle, focus_nav=None):
-        self.runtime = runtime
+        self.runtime = app
         self.vehicle = vehicle
         self.focus_nav = focus_nav
 

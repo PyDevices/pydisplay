@@ -36,9 +36,10 @@ from random import getrandbits
 import tft_bitmap
 import tft_config
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
+runtime = app
 
 palette = tft_config.palette
 sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
@@ -217,9 +218,9 @@ def main():
     # move and draw sprites
 
     def _tick(_=None):
-        # Do not call runtime.poll() from on_tick: sync backends (librt/sdl2)
+        # Do not call app.poll() from on_tick: sync backends (librt/sdl2)
         # re-enter the timer path and hang. Auto-service handles QUIT.
-        if runtime.quit_requested if runtime else False:
+        if app.quit_requested if runtime else False:
             return
         for sprite in sprites:
             sprite.clear()
@@ -229,6 +230,6 @@ def main():
         tft.show()
         gc.collect()
 
-    runtime.on_tick(_tick, period=50, async_=runtime.timer_async)
-    runtime.run_forever()
+    app.every(_tick, period=50, async_=app.timer_async)
+    app.run()
 main()
