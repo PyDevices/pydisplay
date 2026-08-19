@@ -1709,9 +1709,9 @@ def restart_app():
             runtime = module.runtime
         else:
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 
         runtime.request_quit(RESTART_EXIT_CODE)
         return None

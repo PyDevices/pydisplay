@@ -74,15 +74,15 @@ display_drv.show()
 
 if _test_mode:
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 
     console.write("console_advanced_demo: smoke test\n", pal.GREEN)
     display_drv.show()
 
     # Quit is already serviced by Runtime's auto-service; just block until then.
-    runtime.run_forever()
+    app.run()
 
 #### Example commands
 # console.cls()                   # Clear the console screen

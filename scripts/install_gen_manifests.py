@@ -103,7 +103,7 @@ manual_package_stems = {
     "micropython-nano-gui",
     "micropython-touch",
 }
-reserved_package_names = set(package_dicts) | manual_package_stems | {"eventsys", "multimer"}
+reserved_package_names = set(package_dicts) | manual_package_stems | {"appdev", "multimer"}
 for package_name, contents in package_dicts.items():
     package_file = os.path.join(output_dir, packages_dir, package_name + ".json")
     with open(package_file, "w") as f:

@@ -86,7 +86,7 @@ target-version = "py38"  # keep utilities compatible with MicroPython-era Python
 
 
 [tool.ruff.lint.isort]
-known-first-party = ["displaydev", "eventsys", "events", "keys", "pygraphics", "multimer"]
+known-first-party = ["displaydev", "appdev", "events", "keys", "pygraphics", "multimer"]
 force-sort-within-sections = true
 
 [tool.ruff.lint.mccabe]

@@ -6,14 +6,14 @@
 #   ./scripts/gen_package_pyi.sh --help
 #
 # Requires the repo-root .venv (mypy / stubgen). Output is committed under
-# tools/typings/{displaydev,eventsys,multimer}/ for stubPath.
+# tools/typings/{displaydev,appdev,multimer}/ for stubPath.
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-PACKAGES=(displaydev eventsys multimer)
+PACKAGES=(displaydev appdev multimer)
 MODULES=(events keys)
 OUT=tools/typings
 STUBGEN="${ROOT}/.venv/bin/stubgen"
@@ -23,7 +23,7 @@ usage() {
     cat <<'EOF'
 Usage: ./scripts/gen_package_pyi.sh
 
-Regenerate mypy stubgen .pyi trees for displaydev, eventsys,
+Regenerate mypy stubgen .pyi trees for displaydev, appdev,
 multimer, events, and keys into tools/typings/ (Pylance / pyright stubPath).
 
 (source is gitignored; public API is pygraphics.FrameBuffer).
@@ -65,7 +65,7 @@ fi
 
 echo "Running stubgen → ${OUT}/ …"
 "$STUBGEN" --ignore-errors -o "$OUT" \
-    -p displaydev -p eventsys -p multimer \
+    -p displaydev -p appdev -p multimer \
     -m events -m keys
 
 # Gitignored generated module; public FrameBuffer lives in _framebuf_plus.

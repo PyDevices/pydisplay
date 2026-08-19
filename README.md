@@ -19,7 +19,7 @@ for the PyDevices driver ecosystem. The reusable product source lives in
 
 - `displaydev` and `audiodev` provide portable display and audio interfaces.
 - `events`, `keys`, and `multimer` provide shared event, key, and timing primitives.
-- `eventsys` is an optional application traffic controller for non-LVGL apps.
+- `appdev` is an optional application traffic controller for non-LVGL apps.
 - `board_configs`, `board_peripherals`, and hardware drivers connect those interfaces
   to real boards and desktop/browser hosts.
 
@@ -62,7 +62,7 @@ import mip
 
 INDEX = "https://PyDevices.github.io/mip"
 mip.install("displaydev", index=INDEX)
-mip.install("eventsys", index=INDEX)  # optional; used by these non-LVGL examples
+mip.install("appdev", index=INDEX)  # optional; used by these non-LVGL examples
 ```
 
 See the
@@ -76,20 +76,20 @@ Board configs describe hardware. They export neutral pieces such as
 `display_drv`, `touch_read`, `host_read`, and `timer_async`; they do not create
 an application runtime.
 
-Non-LVGL examples in this repo opt into the optional `eventsys` coordinator:
+Non-LVGL examples in this repo opt into the optional `appdev` coordinator:
 
 ```python
 import board_config
 from board_config import display_drv
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+runtime = appdev.App(board_config)
 
 runtime.run_forever()
 ```
 
 LVGL examples use the coordinator bundled with the LVGL binding and do not
-import `eventsys`:
+import `appdev`:
 
 ```python
 from board_config import display_drv
@@ -113,7 +113,7 @@ packages remain conventional and unprefixed.
 | `pydevices-events` | `events` |
 | `pydevices-keys` | `keys` |
 | `pydevices-multimer` | `multimer` |
-| `pydevices-eventsys` | `eventsys` |
+| `pydevices-appdev` | `appdev` |
 | `pydevices-pygraphics` | `pygraphics` |
 | `pydevices-palettes` | `palettes` |
 | `pydevices-pdwidgets` | `pdwidgets` |

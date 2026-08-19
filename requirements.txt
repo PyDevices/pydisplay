@@ -6,7 +6,7 @@ pydevices-audiodev
 pydevices-desktop
 pydevices-displaydev
 pydevices-events
-pydevices-eventsys
+pydevices-appdev
 pydevices-keys
 pydevices-lvgl
 pydevices-multimer

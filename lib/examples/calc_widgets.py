@@ -9,9 +9,9 @@ Shares :class:`calc_engine.CalcEngine` with the graphics and LVGL front ends.
 Layout, font scales, radii, and padding are derived from display size so the
 UI scales from 320x480 through 640x960 and similar desktop sizes.
 
-Input and frame rendering are driven by the shared ``eventsys.Runtime``:
+Input and frame rendering are driven by the shared ``appdev.Runtime``:
 ``pd.Display`` wires them in at construction, so the example just builds the UI
-and hands control to ``runtime.run_forever()``.
+and hands control to ``app.run()``.
 """
 
 import sys
@@ -22,9 +22,10 @@ if _EXAMPLES not in sys.path:
 
 import board_config
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
+runtime = app
 import pdwidgets as pd
 from calc_engine import CalcEngine
 
@@ -203,4 +204,4 @@ screen.visible = True
 # Display construction, so this just keeps the app alive. run_forever() blocks
 # when run as a program and returns immediately in an interactive REPL on
 # signal-driven backends, so the same call is always correct.
-runtime.run_forever()
+app.run()

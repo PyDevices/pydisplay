@@ -4,9 +4,9 @@ A simple paint application demonstrating the use of displaydev.
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 
 colors = [0xFFFF, 0xF800, 0x07E0, 0x001F, 0x07FF, 0xF81F, 0xFFE0, 0x0000]
 
@@ -89,6 +89,6 @@ def _on_motion(e):
         display_drv.show()
 
 
-runtime.on(runtime.events.MOUSEBUTTONDOWN, _on_button)
-runtime.on(runtime.events.MOUSEMOTION, _on_motion)
-runtime.run_forever()
+app.on(app.events.MOUSEBUTTONDOWN, _on_button)
+app.on(app.events.MOUSEMOTION, _on_motion)
+app.run()

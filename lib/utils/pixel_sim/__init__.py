@@ -8,9 +8,9 @@ PyScript / notebook display from the selected ``board_config.py``.
 
 The board config for this simulator is just::
 
-    from pixel_sim import display_drv, runtime
+    from pixel_sim import display_drv, app
 
-Poll ``runtime`` each frame (``runtime.poll()`` / ``runtime.quit_requested``) so
+Poll ``app`` each frame (``app.poll()`` / ``app.quit_requested``) so
 the desktop window stays closable — the simulator drives its own draw loop, so
 nothing polls for you.
 
@@ -22,12 +22,12 @@ import os
 
 import board_config as _host
 
+import appdev
 from displaydev import color565, color_rgb
 from displaydev.pixeldisplay import PixelDisplay
-import eventsys
 import pygraphics
 
-_host_runtime = eventsys.Runtime.from_board_config(_host)
+_host_app = appdev.App(_host)
 
 
 def _env_int(name, default):
@@ -57,8 +57,8 @@ PIXEL_HEIGHT = _env_int("PIXEL_SIM_HEIGHT", 16)
 # The runtime itself is kept (re-exported below) so apps can still poll it for
 # window-close / quit events; poll() is independent of the timer.
 _backend = _host.display_drv
-if _host_runtime is not None and hasattr(_host_runtime, "stop_timer"):
-    _host_runtime.stop_timer()
+if _host_app is not None and hasattr(_host_app, "stop_timer"):
+    _host_app.stop_timer()
 
 
 def _rgb888_from_565(c):
@@ -177,6 +177,6 @@ class SimPixelDisplay(PixelDisplay):
 _pixel_framebuf = SimPixelFramebuffer(PIXEL_WIDTH, PIXEL_HEIGHT, _backend)
 display_drv = SimPixelDisplay(_pixel_framebuf)
 
-# Host runtime for quit/window-close handling. Its refresh timer is stopped
-# (see above); apps still call runtime.poll() each frame to stay closable.
-runtime = _host_runtime
+# Host app coordinator for quit/window-close handling. Its refresh timer is stopped
+# (see above); apps still call app.poll() each frame to stay closable.
+app = _host_app

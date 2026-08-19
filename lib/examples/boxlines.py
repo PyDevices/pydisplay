@@ -23,9 +23,9 @@ Draws lines and rectangles in random colors at random locations on the display.
 """
 
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 
 from random import getrandbits
 
@@ -84,5 +84,5 @@ def _tick(_=None):
     poll()
 
 
-runtime.on_tick(_tick, period=1, async_=runtime.timer_async)
-runtime.run_forever()
+app.every(_tick, period=1, async_=app.timer_async)
+app.run()

@@ -33,9 +33,10 @@ import sys
 import tft_write
 import tft_config
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
+runtime = app
 
 palette = tft_config.palette
 sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
@@ -82,9 +83,9 @@ def main():
     st = {"index": 0, "wheel": 0}
 
     def _tick(_=None):
-        # Do not call runtime.poll() from on_tick: sync backends re-enter the
+        # Do not call app.poll() from on_tick: sync backends re-enter the
         # timer path and hang. Auto-service handles QUIT.
-        if runtime.quit_requested if runtime else False:
+        if app.quit_requested if runtime else False:
             return
         proverb = proverbs[st["index"]]
         proverb_lines = proverb.split("，")
@@ -109,8 +110,8 @@ def main():
         tft.show()
         st["index"] = (st["index"] + 1) % len(proverbs)
 
-    runtime.on_tick(_tick, period=5000, async_=runtime.timer_async)
-    runtime.run_forever()
+    app.every(_tick, period=5000, async_=app.timer_async)
+    app.run()
 
 
 main()

@@ -2,10 +2,11 @@
 # deps: pdwidgets
 import board_config
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
-import eventsys
+app = appdev.App(board_config)
+runtime = app
+import appdev
 import pdwidgets as pd
 
 display = pd.Display(board_config.display_drv, runtime,40)
@@ -41,6 +42,6 @@ def joystick_callback(event):
             if event.value[1] != 0:
                 select_item(event.value[1] > 0)
 
-runtime.on_device(eventsys.JOYSTICK, joystick_callback)
+runtime.on_device(appdev.JOYSTICK, joystick_callback)
 
-runtime.run_forever()
+app.run()

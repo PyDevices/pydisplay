@@ -8,12 +8,13 @@ Testris game implemented in MicroPython by Brad Barnett.
 # For the display & optional touch drivers
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
+runtime = app
 from displaydev import alloc_buffer
-from eventsys.touch_keypad import TouchKeypad
-from eventsys.joystick_keys import JoystickKeys
+from appdev import TouchGrid
+from appdev import JoyMap
 import keys
 try:
     from random import choice  # For random piece selection
@@ -48,7 +49,7 @@ CW = keys.K_f  # F
 LEFT = keys.K_LEFT  # LEFT
 DOWN = keys.K_DOWN  # DOWN
 RIGHT = keys.K_RIGHT  # RIGHT
-keypad = TouchKeypad(
+keypad = TouchGrid(
     runtime,
     0,
     0,
@@ -57,7 +58,7 @@ keypad = TouchKeypad(
     keys=[START, UNUSED, PAUSE, CW, DROP, CCW, LEFT, DOWN, RIGHT],
 )
 
-joystick_keys = JoystickKeys(
+joystick_keys = JoyMap(
     runtime,
     joymap={
         1: {
@@ -75,10 +76,10 @@ joystick_keys = JoystickKeys(
 
 
 def _quit_if_needed(_where):
-    # Do not call runtime.poll() from an on_tick callback: on sync librt
+    # Do not call app.poll() from an on_tick callback: on sync librt
     # backends that re-enters the timer path and deadlocks. Auto-service
     # already dispatches input to TouchKeypad/JoystickKeys and handles QUIT.
-    if not runtime.quit_requested if runtime else False:
+    if not app.quit_requested if runtime else False:
         return False
     display_drv.quit()
     return True
@@ -761,5 +762,5 @@ def _tick(_=None):
         runtime.request_quit()
 
 
-runtime.on_tick(_tick, period=20, async_=runtime.timer_async)
-runtime.run_forever()
+app.every(_tick, period=20, async_=app.timer_async)
+app.run()

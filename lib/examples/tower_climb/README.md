@@ -17,7 +17,7 @@ climbers. Early work focused on:
 - Scalable layout from a 320×480 reference (`Layout` in `tower_climb.py`)
 - Landing/collision physics stable enough for repeated jumps up procedurally
   placed branches
-- The shared periodic timer via ``eventsys.Runtime`` for display refresh
+- The shared periodic timer via ``appdev.App`` for display refresh
   (see `https://github.com/PyDevices/pydevices/blob/main/docs/application-runtime.md` for the timer/display split)
 
 Gameplay bugs (flicker, respawn deaths, camera clamp at the crown, bot pathing)
@@ -174,7 +174,7 @@ game does not need layout changes when art is regenerated.
 These pieces live in the main pydevices-examples tree and are **dependencies** if you
 extract only `tower_climb/`:
 
-- `board_config`, `displaydev`, `eventsys`, `pygraphics`, `multimer`
+- `board_config`, `displaydev`, `appdev`, `pygraphics`, `multimer`
 - `FFmpegFrameRecorder` / `PGDisplay.open_frame_recorder` (recording)
 - `tools/example_test_manifest.toml` entry for CI smoke tests
 - pydevices `tests/test_pgdisplay_frame_recorder.py`

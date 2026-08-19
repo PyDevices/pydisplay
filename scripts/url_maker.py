@@ -31,7 +31,7 @@ RUNTIMES = ("micropython", "pyodide")
 # Profiles → logical names already present (frozen/native, or toml-mounted).
 # Skip those names when emitting deps for that profile.
 PROFILES: dict[str, frozenset[str]] = {
-    # Browser MP WASM: PyDevices core (displaydev/eventsys/multimer) toml-mounted;
+    # Browser MP WASM: PyDevices core (displaydev/appdev/multimer) toml-mounted;
     # sister/ecosystem libs frozen in the pyscript vendor firmware (lvgl,
     # display_driver, pygraphics, palettes, pdwidgets, usdl2 when built in).
     # Do not mip-install those — Pyodide / CPython still get TestPyPI wheels.
@@ -40,7 +40,7 @@ PROFILES: dict[str, frozenset[str]] = {
             "pygraphics",
             "displaydev",
             "multimer",
-            "eventsys",
+            "appdev",
             "board_config",
             "lvgl",
             "pydevices-lvgl",
@@ -57,7 +57,7 @@ PROFILES: dict[str, frozenset[str]] = {
         {
             "displaydev",
             "multimer",
-            "eventsys",
+            "appdev",
             "board_config",
         }
     ),
@@ -92,7 +92,7 @@ _WHEEL_REWRITE: dict[str, str | None] = {
     "pygraphics": "pydevices-pygraphics",
     "palettes": "pydevices-palettes",
     "pdwidgets": "pydevices-pdwidgets",
-    "eventsys": "pydevices-eventsys",
+    "appdev": "pydevices-appdev",
     "multimer": "pydevices-multimer",
     "displaydev": "pydevices-displaydev",
     "usdl2-py": "usdl2",  # prefer native TestPyPI wheel when available

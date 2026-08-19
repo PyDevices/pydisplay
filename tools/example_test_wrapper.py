@@ -303,10 +303,10 @@ def _install_poll_deadline_quit(duration_s, injected=None):
     main thread. Does not import ``board_config`` (examples must load it).
     """
     try:
-        import eventsys
+        import appdev
     except Exception:
         return False
-    runtime_cls = eventsys.Runtime
+    runtime_cls = appdev.App
     if getattr(runtime_cls, "_pydevices_poll_deadline_armed", False):
         return True
     deadline = _monotonic() + duration_s

@@ -12,9 +12,10 @@ except ImportError:
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
+runtime = app
 from pygraphics import BMP565
 
 image = BMP565("examples/assets/warrior.bmp", streamed=True)
@@ -66,7 +67,7 @@ draw_sprite(*st["location"], a, fwd)
 
 
 def _tick(_=None):
-    if runtime.quit_requested if runtime else False:
+    if app.quit_requested if runtime else False:
         return
     location = st["location"]
     direction = st["dir"]
@@ -105,5 +106,5 @@ def _tick(_=None):
     st["pos_i"] = (st["pos_i"] + 1) % len(positions)
 
 
-runtime.on_tick(_tick, period=100, async_=runtime.timer_async)
-runtime.run_forever()
+app.every(_tick, period=100, async_=app.timer_async)
+app.run()

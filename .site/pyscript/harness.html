@@ -86,7 +86,7 @@ _mark("mpy_top")
 
 MANIFEST_MIP_TARGET = "."
 # Index packages install here instead of the cwd, which sys.path searches first.
-# board_config's deps (displaydev, and through it eventsys and multimer) are
+# board_config's deps (displaydev, and through it appdev and multimer) are
 # published copies of libraries this page already maps from the working tree —
 # installed into the cwd they shadow it, so the harness would silently test
 # released code instead of the tree under development.
@@ -187,7 +187,7 @@ def _finish_autotest(entry, *, status="ok", error=None, quit_injected=False):
 
 
 def _autotest_runtime(ensure_app_runtime=False):
-    """Return the eventsys Runtime used for quit (LVGL display_driver or app_runtime).
+    """Return the appdev Runtime used for quit (LVGL display_driver or app_runtime).
 
     Oneshot demos often only touch ``board_config.display_drv`` and never import
     ``app_runtime``. After the demo returns, pass ``ensure_app_runtime=True`` so

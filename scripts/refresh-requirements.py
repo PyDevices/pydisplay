@@ -27,7 +27,7 @@ PACKAGE_ORDER = (
     "pydevices-multimer",
     "pydevices-displaydev",
     "pydevices-audiodev",
-    "pydevices-eventsys",
+    "pydevices-appdev",
     "pydevices-pygraphics",
     "pydevices-palettes",
     "pydevices-pdwidgets",

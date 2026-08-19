@@ -2,9 +2,9 @@
 # gallery: binaries
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 from pygraphics import BMP565
 
 display_drv.rotation = 0
@@ -27,7 +27,7 @@ def main():
     st = {"phase": "fill", "j": 0, "i": display_drv.height}
 
     def _tick(_=None):
-        if runtime.quit_requested:
+        if app.quit_requested:
             return
         if st["phase"] == "fill":
             j = st["j"]
@@ -45,8 +45,8 @@ def main():
         display_drv.show()
         st["i"] = i + 1
 
-    runtime.on_tick(_tick, period=1, async_=runtime.timer_async)
-    runtime.run_forever()
+    app.every(_tick, period=1, async_=app.timer_async)
+    app.run()
 
 
 main()

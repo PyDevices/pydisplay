@@ -32,9 +32,9 @@ import chango_16 as font_16
 import chango_32 as font_32
 import chango_64 as font_64
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 import tft_config
 import tft_write
 
@@ -58,7 +58,7 @@ def main():
     row += font_64.HEIGHT
 
     tft.show()
-    runtime.run_forever()
+    app.run()
 
 
 main()

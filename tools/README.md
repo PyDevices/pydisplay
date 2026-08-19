@@ -38,7 +38,7 @@ micropython tools/lvgl_input_probe.py --selftest
 cd lib && micropython ../tools/lvgl_input_probe.py   # interactive; focus the window
 ```
 
-The core displaydev/eventsys probe is owned by
+The core displaydev/appdev probe is owned by
 [`pydevices/tools/input_probe.py`](https://github.com/PyDevices/pydevices/blob/main/tools/input_probe.py).
 
 ## PyScript headless debug (Playwright)
@@ -308,7 +308,7 @@ the binary-bundled ``imageio-ffmpeg`` Python package.
 | Content | Source |
 |---------|--------|
 | MicroPython stdlib stubs | committed under `tools/typings/` |
-| `displaydev` / `eventsys` / `multimer` / `events` / `keys` | committed package trees / modules; regenerate with [`../scripts/gen_package_pyi.sh`](../scripts/gen_package_pyi.sh) |
+| `displaydev` / `appdev` / `multimer` / `events` / `keys` | committed package trees / modules; regenerate with [`../scripts/gen_package_pyi.sh`](../scripts/gen_package_pyi.sh) |
 | `lvgl` | committed `tools/typings/lvgl.pyi` (from `cmods/lvgl-bindings/generated/lvgl.pyi`) |
 
 Confirm **Python: Select Interpreter** → `.venv/bin/python`. Cursor uses **cursorpyright** with `stubPath` / `typeshedPaths` → `tools/typings` (configured in a local `.vscode/settings.json` when present).

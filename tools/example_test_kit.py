@@ -1567,7 +1567,7 @@ def main(argv: list[str] | None = None) -> int:
             "pydevices_demo",
             "calc_graphics",
             "paint",
-            "eventsys_simpletest",
+            "appdev_simpletest",
             "graphics_simpletest",
             "framebuf_simpletest",
             "color_test",

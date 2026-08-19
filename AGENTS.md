@@ -19,11 +19,11 @@ matrix, PyScript/Playwright debugging, LVGL timer harnesses),
 
 ### Environment
 
-`displaydev`, `audiodev`, optional `eventsys`, `multimer`, `events`, `keys`,
+`displaydev`, `audiodev`, optional `appdev`, `multimer`, `events`, `keys`,
 and portable hardware utilities live in sibling
 [pydevices](https://github.com/PyDevices/pydevices), which
 also owns TestPyPI/MIP publishing. Non-LVGL examples instantiate
-`eventsys.Runtime.from_board_config(board_config)`; LVGL examples import it from `display_driver`.
+`appdev.App(board_config)`; LVGL examples import it from `display_driver`.
 Board configs never own a runtime. `AutoDisplay` is imported from
 `displaydev.auto` only.
 
@@ -123,9 +123,9 @@ passes `--timer-async`.
 
 ### Architecture note: timers and refresh
 
-- Non-LVGL examples instantiate `eventsys.Runtime.from_board_config(board_config)`.
+- Non-LVGL examples instantiate `appdev.App(board_config)`.
   LVGL's frozen/bundled `display_driver` owns an independent coordinator and
-  does not import `eventsys`. Both consume neutral board-config callables and
+  does not import `appdev`. Both consume neutral board-config callables and
   use `multimer`; display drivers remain policy-free.
 
 ### MCU: no `_thread` for network / blocking work
@@ -134,7 +134,7 @@ Full guidance:
 [pydevices — Background work on MicroPython (`_thread`)](https://github.com/PyDevices/pydevices/blob/main/docs/application-runtime.md#background-work-on-micropython-_thread).
 App pattern: queue work and drain on the main tick — see `roku_widgets` /
 `roku_lvgl` / `roku_graphics` (`_run_bg` + `_drain_bg`). Do not “fix” this in
-`eventsys` with speculative reentrancy guards — keep the pattern in the app.
+`appdev` with speculative reentrancy guards — keep the pattern in the app.
 
 ### LVGL
 

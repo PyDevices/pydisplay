@@ -10,9 +10,9 @@ This oneshot only verifies the framebuffer path (full widget demos use Screen.ch
 """
 
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 import hardware_setup  # noqa: F401 — fetch + Display
 from gui.core.ugui import ssd
 from gui.core.colors import RED, BLUE, GREEN
@@ -23,4 +23,4 @@ ssd.rect(0, 0, 15, 15, RED)
 ssd.rect(ssd.width - 15, ssd.height - 15, 15, 15, BLUE)
 ssd.show()
 
-runtime.run_forever()
+app.run()

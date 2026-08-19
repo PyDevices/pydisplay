@@ -15,9 +15,9 @@ def current_runtime():
         runtime = getattr(display_driver, "runtime", None)
         if runtime is not None:
             return runtime
-    eventsys = sys.modules.get("eventsys")
-    if eventsys is not None:
-        return getattr(getattr(eventsys, "Runtime", None), "_current", None)
+    appdev = sys.modules.get("appdev")
+    if appdev is not None:
+        return getattr(getattr(appdev, "App", None), "_current", None)
 
     return None
 
@@ -29,7 +29,7 @@ def queue_device():
 def host_point(x, y):
     """Convert a display-space point to the host-window coordinates ``_read`` yields.
 
-    ``eventsys.HostEventsDevice`` divides incoming positions by the display's
+    ``appdev.HostEvents`` divides incoming positions by the display's
     ``touch_scale``, because real SDL / pygame events arrive in window pixels.
     Synthetic events therefore have to be pre-multiplied: on any scaled window —
     the desktop default, and whatever ``fit_scale_to_desktop`` settles on — an

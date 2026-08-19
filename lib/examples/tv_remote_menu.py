@@ -8,16 +8,16 @@ tv_remote_menu.py — 10-foot / remote-friendly menu for PyScript TV browsers.
 
 Why large rows + D-pad only: webOS / Tizen (and Android TV web) are remote-first;
 touch targets sized for phones are unusable from the sofa. Arrow keys move
-focus; Enter selects; Escape / AC Back quits (same as eventsys quit path).
+focus; Enter selects; Escape / AC Back quits (same as appdev quit path).
 
 Desktop keyboards stand in for remotes during development.
 """
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 
 from displaydev import color565
 import keys
@@ -105,5 +105,5 @@ def on_key(e):
 
 
 redraw()
-runtime.on(runtime.events.KEYDOWN, on_key)
-runtime.run_forever()
+app.on(app.events.KEYDOWN, on_key)
+app.run()

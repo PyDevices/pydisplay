@@ -1,8 +1,9 @@
 # gallery: skip
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
+runtime = app
 from keypins import KeyPins
 
 import keys
@@ -35,18 +36,18 @@ print(f"{buttons.fire.key=}")
 print(f"{buttons.fire.keyname=}\n")
 
 # KeyPins updates on KEYDOWN/KEYUP via the runtime auto-service (no app poll).
-runtime.on([runtime.events.KEYDOWN, runtime.events.KEYUP], buttons)
+app.on([app.events.KEYDOWN, app.events.KEYUP], buttons)
 
 print(f"Press any of these keys:  {[button.keyname for button in buttons]}")
 
 
 def _on_key(e):
-    if runtime.quit_requested:
+    if app.quit_requested:
         return
     for button in buttons:
         if button.value():
             print(f"{button.name} ({button.keyname}) pressed")
 
 
-runtime.on([runtime.events.KEYDOWN, runtime.events.KEYUP], _on_key)
-runtime.run_forever()
+app.on([app.events.KEYDOWN, app.events.KEYUP], _on_key)
+app.run()

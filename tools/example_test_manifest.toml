@@ -91,9 +91,9 @@ quit = "poll"
 deps = ["core"]
 timeout_s = 45
 
-[examples.eventsys_simpletest]
-import = "eventsys_simpletest"
-script = "examples/eventsys_simpletest.py"
+[examples.appdev_simpletest]
+import = "appdev_simpletest"
+script = "examples/appdev_simpletest.py"
 kind = "async"
 quit = "poll"
 deps = ["core"]
@@ -269,16 +269,16 @@ kind = "oneshot"
 quit = "native_exit"
 deps = ["utils"]
 
-[examples.eventsys_encoder_test]
-import = "eventsys_encoder_test"
-script = "examples/eventsys_encoder_test.py"
+[examples.appdev_encoder_test]
+import = "appdev_encoder_test"
+script = "examples/appdev_encoder_test.py"
 kind = "loop"
 quit = "poll"
 deps = ["core"]
 
-[examples.eventsys_touch_test]
-import = "eventsys_touch_test"
-script = "examples/eventsys_touch_test.py"
+[examples.appdev_touch_test]
+import = "appdev_touch_test"
+script = "examples/appdev_touch_test.py"
 kind = "loop"
 quit = "inject"
 deps = ["core"]

@@ -5,9 +5,9 @@
 # (no env vars). Chrome labels show which path is active (drv / dbuf).
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 from pygraphics import Draw
 from palettes import get_palette
 from random import getrandbits
@@ -106,6 +106,6 @@ def _on_mode_tick(_=None):
 
 
 _rebuild()
-runtime.on(runtime.events.MOUSEBUTTONDOWN, _on_click)
-runtime.on_tick(_on_mode_tick, period=100, async_=runtime.timer_async)
-runtime.run_forever()
+app.on(app.events.MOUSEBUTTONDOWN, _on_click)
+app.every(_on_mode_tick, period=100, async_=app.timer_async)
+app.run()

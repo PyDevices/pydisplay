@@ -57,7 +57,7 @@ class CST816:
         return out
 
     def get_point(self):
-        """Return ``(x, y)`` or ``None`` — eventsys ``touch_read`` shape."""
+        """Return ``(x, y)`` or ``None`` — appdev ``touch_read`` shape."""
         buf = self._read_reg(_GESTURE, 6)
         fingers = buf[1]
         if not (0 < fingers < 6):

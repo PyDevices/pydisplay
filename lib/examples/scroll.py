@@ -26,9 +26,9 @@ Only works with fonts with heights that are even multiples of the screen height,
 """
 
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 
 import tft_text
 import tft_config
@@ -83,5 +83,5 @@ def _tick(_=None):
     poll()
 
 
-runtime.on_tick(_tick, period=10, async_=runtime.timer_async)
-runtime.run_forever()
+app.every(_tick, period=10, async_=app.timer_async)
+app.run()

@@ -9,9 +9,9 @@ number and the color of the display background.
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 from pygraphics import Draw, text16
 from palettes import get_palette
 
@@ -78,8 +78,8 @@ def main():
     def _tick(_=None):
         poll()
 
-    runtime.on_tick(_tick, period=2000, async_=runtime.timer_async)
-    runtime.run_forever()
+    app.every(_tick, period=2000, async_=app.timer_async)
+    app.run()
 
 
 main()

@@ -29,9 +29,10 @@ https://github.com/erikflowers/weather-icons and is licensed under SIL OFL 1.1
 """
 
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
+runtime = app
 
 import tft_config
 import tft_bitmap
@@ -63,9 +64,9 @@ def main():
     st["last_col"], st["old_row"] = st["col"], st["row"]
 
     def _tick(_=None):
-        # Do not call runtime.poll() from on_tick: sync backends (librt/sdl2)
+        # Do not call app.poll() from on_tick: sync backends (librt/sdl2)
         # re-enter the timer path and hang. Auto-service handles QUIT.
-        if runtime.quit_requested if runtime else False:
+        if app.quit_requested if runtime else False:
             return
         tft.draw.fill_rect(st["last_col"], st["old_row"], alien.WIDTH, alien.HEIGHT, 0)
         # Move and clamp *before* blit — PSDisplay blit_rect rejects OOB (and
@@ -91,6 +92,6 @@ def main():
         tft.show()
         st["last_col"], st["old_row"] = col, row
 
-    runtime.on_tick(_tick, period=10, async_=runtime.timer_async)
-    runtime.run_forever()
+    app.every(_tick, period=10, async_=app.timer_async)
+    app.run()
 main()

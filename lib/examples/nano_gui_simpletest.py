@@ -10,9 +10,9 @@ https://github.com/peterhinch/micropython-nano-gui/tree/master?tab=readme-ov-fil
 """
 
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 from color_setup import ssd  # Create a display instance
 from gui.core.colors import RED, BLUE, GREEN
 from gui.core.nanogui import refresh
@@ -24,4 +24,4 @@ ssd.rect(0, 0, 15, 15, RED)  # Red square at top left
 ssd.rect(ssd.width - 15, ssd.height - 15, 15, 15, BLUE)  # Blue square at bottom right
 ssd.show()
 
-runtime.run_forever()
+app.run()

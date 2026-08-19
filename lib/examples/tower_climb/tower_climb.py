@@ -25,9 +25,10 @@ if _PKG_DIR not in sys.path:
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
+runtime = app
 from displaydev import color565
 import keys
 from pygraphics import BMP565, FrameBuffer, RGB565, rect, text8
@@ -633,7 +634,7 @@ def _handle_event(ev):
         _start_received = True
         return
     t = ev.type
-    if t == runtime.events.KEYDOWN:
+    if t == app.events.KEYDOWN:
         k = ev.key
         if k in (keys.K_LEFT, keys.K_a):
             _keys["left"] = True
@@ -648,7 +649,7 @@ def _handle_event(ev):
             _keys["smash"] = True
         if _trace is not None:
             _trace.log_input("keydown", key=int(k))
-    elif t == runtime.events.KEYUP:
+    elif t == app.events.KEYUP:
         k = ev.key
         if k in (keys.K_LEFT, keys.K_a):
             _keys["left"] = False
@@ -661,7 +662,7 @@ def _handle_event(ev):
             _keys["smash"] = False
         if _trace is not None:
             _trace.log_input("keyup", key=int(k))
-    elif t == runtime.events.MOUSEBUTTONDOWN:
+    elif t == app.events.MOUSEBUTTONDOWN:
         tx, ty = ev.pos
         if ty < L.h // 3:
             _keys["up"] = True
@@ -673,7 +674,7 @@ def _handle_event(ev):
             _keys["right"] = True
         if _trace is not None:
             _trace.log_input("mousedown", pos=[tx, ty], keys=dict(_keys))
-    elif t == runtime.events.MOUSEBUTTONUP:
+    elif t == app.events.MOUSEBUTTONUP:
         _keys["left"] = _keys["right"] = _keys["up"] = _keys["smash"] = False
         if _trace is not None:
             _trace.log_input("mouseup", keys=dict(_keys))
@@ -761,9 +762,9 @@ def _draw_text_panel(lines, y0=None, at_top=False):
 
 
 def _is_start_input(ev):
-    if ev.type == runtime.events.KEYDOWN:
+    if ev.type == app.events.KEYDOWN:
         return True
-    if ev.type == runtime.events.MOUSEBUTTONDOWN:
+    if ev.type == app.events.MOUSEBUTTONDOWN:
         return True
     return False
 
@@ -1175,7 +1176,7 @@ def _on_wait_complete():
 
 def _tick(_=None):
     global _hold_left, _phase
-    if runtime.quit_requested if runtime else False:
+    if app.quit_requested if runtime else False:
         _cleanup()
         return
     if _phase == PHASE_DONE:
@@ -1207,13 +1208,13 @@ def main():
     _take_over_display_refresh()
     _open_video_recorder()
     for et in (
-        runtime.events.KEYDOWN,
-        runtime.events.KEYUP,
-        runtime.events.MOUSEBUTTONDOWN,
-        runtime.events.MOUSEBUTTONUP,
-        runtime.events.MOUSEMOTION,
+        app.events.KEYDOWN,
+        app.events.KEYUP,
+        app.events.MOUSEBUTTONDOWN,
+        app.events.MOUSEBUTTONUP,
+        app.events.MOUSEMOTION,
     ):
-        runtime.on(et, _handle_event)
+        app.on(et, _handle_event)
 
     show_splash = True
     if _trace is not None:
@@ -1227,8 +1228,8 @@ def main():
     else:
         _start_round()
 
-    runtime.on_tick(_tick, period=16, async_=runtime.timer_async)
-    runtime.run_forever()
+    app.every(_tick, period=16, async_=app.timer_async)
+    app.run()
 
 
 main()

@@ -24,9 +24,9 @@ from random import getrandbits
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 import pygraphics
 
 WIDTH = display_drv.width
@@ -104,5 +104,5 @@ def _tick(_=None):
     display_drv.show()
 
 
-runtime.on_tick(_tick, period=10, async_=runtime.timer_async)
-runtime.run_forever()
+app.every(_tick, period=10, async_=app.timer_async)
+app.run()

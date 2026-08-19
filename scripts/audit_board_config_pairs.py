@@ -4,7 +4,7 @@
 """Audit MicroPython / CircuitPython board_config sibling pairs.
 
 Board configs export hardware capabilities only. Application-level traffic
-controllers such as ``eventsys.Runtime`` must be constructed by the app.
+controllers such as ``appdev.App`` must be constructed by the app.
 """
 
 from __future__ import annotations
@@ -44,9 +44,9 @@ def _pairs(root: Path) -> list[tuple[Path, Path]]:
 
 def _owns_event_runtime(text: str) -> bool:
     return bool(
-        re.search(r"^\s*(?:import\s+eventsys\b|from\s+eventsys\b)", text, re.MULTILINE)
-        or re.search(r"^\s*(?:runtime|broker)\s*=", text, re.MULTILINE)
-        or re.search(r"\beventsys\.(?:Runtime|Broker)\b|\bbroker\.create\b", text)
+        re.search(r"^\s*(?:import\s+appdev\b|from\s+appdev\b)", text, re.MULTILINE)
+        or re.search(r"^\s*(?:runtime|app|broker)\s*=", text, re.MULTILINE)
+        or re.search(r"\bappdev\.(?:App|Runtime|Broker)\b|\bbroker\.create\b", text)
     )
 
 

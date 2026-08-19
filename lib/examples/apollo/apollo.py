@@ -38,9 +38,10 @@ print(f"Free memory at start: {mem:,}")
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
+runtime = app
 import dsky
 import time
 
@@ -126,7 +127,7 @@ def _handle_key(key):
 
 
 def _tick(_=None):
-    if runtime.quit_requested if runtime else False:
+    if app.quit_requested if runtime else False:
         return
 
     _update_time()
@@ -148,5 +149,5 @@ def _tick(_=None):
 
 
 _init_apollo()
-runtime.on_tick(_tick, period=20, async_=runtime.timer_async)
-runtime.run_forever()
+app.every(_tick, period=20, async_=app.timer_async)
+app.run()

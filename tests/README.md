@@ -5,7 +5,7 @@ and developer tooling.
 
 Product-library tests moved with their sources to
 [`pydevices/tests`](https://github.com/PyDevices/pydevices/tree/main/tests),
-including `eventsys`, `displaydev`, `audiodev`, `multimer`, `events`, `keys`,
+including `appdev`, `displaydev`, `audiodev`, `multimer`, `events`, `keys`,
 and `boarddev`.
 
 ## Running

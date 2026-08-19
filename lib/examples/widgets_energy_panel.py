@@ -13,9 +13,9 @@ import random
 
 import board_config
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 import pdwidgets as pd
 
 pd.DEBUG = False
@@ -33,7 +33,7 @@ except Exception:
 
 display = pd.Display(display_drv, runtime)
 pal = display.pal
-runtime = runtime
+runtime = app
 
 W = display.width
 H = display.height
@@ -256,7 +256,7 @@ def _on_spike(_s=None, _e=None):
 seg.set_change_cb(_on_seg)
 spike_btn.add_event_cb(pd.events.MOUSEBUTTONDOWN, _on_spike)
 
-runtime.on_tick(_live_tick, period=500, async_=runtime.timer_async)
+app.every(_live_tick, period=500, async_=app.timer_async)
 
 screen.visible = True
-runtime.run_forever()
+app.run()

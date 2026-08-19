@@ -24,9 +24,9 @@ Writes "Hello!" in a tiny font in random colors at random locations on the Displ
 """
 
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 
 from random import getrandbits
 
@@ -139,10 +139,10 @@ def main():
     """
     poll = _setup()
     # Blocks on desktop/MCU but yields to the event loop on PyScript and
-    # Jupyter (runtime.timer_async), so the browser main thread stays live.
+    # Jupyter (app.timer_async), so the browser main thread stays live.
     def _tick(_=None):
         poll()
 
-    runtime.on_tick(_tick, period=1, async_=runtime.timer_async)
-    runtime.run_forever()
+    app.every(_tick, period=1, async_=app.timer_async)
+    app.run()
 main()

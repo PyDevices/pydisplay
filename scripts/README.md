@@ -29,8 +29,8 @@ python scripts/gallery_generator.py --check
 ```
 
 `install_gen_manifests.py` enumerates pydevices-examples applications/utilities and the
-canonical sibling `pydevices/lib/{eventsys,multimer}` sources. The gallery mounts
-them at `./lib/eventsys/...` and `./lib/multimer/...` (same browser tree as
+canonical sibling `pydevices/lib/{appdev,multimer}` sources. The gallery mounts
+them at `./lib/appdev/...` and `./lib/multimer/...` (same browser tree as
 utils/examples). The local server and Pages workflow map those URLs to the
 product source.
 
@@ -57,7 +57,7 @@ manual Peter Hinch integration manifests also remain here:
 - `micropython-touch.json`
 
 Core packages (`displaydev`, `audiodev`, `events`, `keys`, `multimer`, and
-optional `eventsys`) come from the unprefixed PyDevices MIP index or prefixed
+optional `appdev`) come from the unprefixed PyDevices MIP index or prefixed
 TestPyPI distributions. Board configs and drivers come from
 pydevices. Companion packages (`pygraphics`, `palettes`, `pdwidgets`,
 and LVGL) come from their own repositories.

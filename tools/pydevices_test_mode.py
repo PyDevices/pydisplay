@@ -38,15 +38,15 @@ def check_deadline():
         if module is not None and hasattr(module, "runtime"):
             rt = getattr(module, "runtime", None)
         else:
-            eventsys = sys.modules.get("eventsys")
+            appdev = sys.modules.get("appdev")
             rt = (
-                getattr(getattr(eventsys, "Runtime", None), "_current", None)
-                if eventsys is not None
+                getattr(getattr(appdev, "App", None), "_current", None)
+                if appdev is not None
                 else None
             )
     except Exception:
         rt = None
-    # eventsys.Runtime uses ``_blocking_run_forever``; LVGL display_driver.Runtime
+    # appdev.App uses ``_blocking_run_forever``; LVGL display_driver.Runtime
     # uses ``_blocking`` for the same "inside run_forever/run" gate.
     if rt is None or not (
         getattr(rt, "_blocking_run_forever", False) or getattr(rt, "_blocking", False)

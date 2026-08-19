@@ -7,10 +7,11 @@ Image source:  https://commons.wikimedia.org/wiki/File:Apollo_DSKY_interface.svg
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
-from eventsys.touch_keypad import TouchKeypad
+app = appdev.App(board_config)
+runtime = app
+from appdev import TouchGrid
 from pygraphics import Area, BMP565
 
 try:
@@ -96,7 +97,7 @@ data3_pos = (187, 184)
 ########### Define the keypad
 # The keypad area starts at (2, 233) and is 7 keys wide and 3 keys tall
 # The keys are 45x45 pixels
-keypad = TouchKeypad(
+keypad = TouchGrid(
     runtime, 2, 233, 7 * 45, 3 * 45, cols=7, rows=3, translate=display_drv.translate_point
 )
 

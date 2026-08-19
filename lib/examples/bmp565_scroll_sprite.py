@@ -4,9 +4,9 @@ from collections import namedtuple
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
 from pygraphics import BMP565
 
 point = namedtuple("point", "x y")
@@ -84,7 +84,7 @@ def main():
 
     def _tick(_=None):
         # Auto-service handles QUIT; never poll from on_tick.
-        if runtime.quit_requested:
+        if app.quit_requested:
             return
         i = st["i"]
         if i > display_drv.width:
@@ -118,10 +118,10 @@ def main():
                 st["shot_location"] = 0
         display_drv.show()
 
-    runtime.on(runtime.events.MOUSEMOTION, _on_motion)
+    app.on(app.events.MOUSEMOTION, _on_motion)
     # ~20 fps once scrolling; first columns also tick so quit is always serviced.
-    runtime.on_tick(_tick, period=50, async_=runtime.timer_async)
-    runtime.run_forever()
+    app.every(_tick, period=50, async_=app.timer_async)
+    app.run()
 
 
 main()

@@ -1,15 +1,15 @@
 # gallery: skip
-# deps: eventsys
-"""Guided touch capture via eventsys (no LVGL). Prints coords on MOUSEBUTTONUP."""
+# deps: appdev
+"""Guided touch capture via appdev (no LVGL). Prints coords on MOUSEBUTTONUP."""
 
 import sys
 
 from board_config import display_drv
 import board_config
-import eventsys
+import appdev
 
-runtime = eventsys.Runtime.from_board_config(board_config)
-import eventsys
+app = appdev.App(board_config)
+import appdev
 import events
 
 from multimer import auto as timer
@@ -85,5 +85,5 @@ if touch is not None:
     touch.rotation_table = (0, 0, 0, 0)
 
 _show()
-runtime.on(events.MOUSEBUTTONUP, _on_up)
-runtime.run_forever()
+app.on(events.MOUSEBUTTONUP, _on_up)
+app.run()

@@ -22,10 +22,11 @@ import board_config
 from board_config import display_drv
 from displaybuf import DisplayBuffer as SSD
 
-import eventsys
+import appdev
 import pygraphics
 
-runtime = eventsys.Runtime.from_board_config(board_config)
+app = appdev.App(board_config)
+runtime = app
 
 # Peter Hinch's GUI modules import framebuf directly. Use the same FrameBuffer
 # implementation as DisplayBuffer so Writer glyph buffers can be blitted to ssd.
@@ -39,11 +40,11 @@ ssd = SSD(display_drv, format)
 
 
 def screenshot(event):
-    if event.type == runtime.events.MOUSEBUTTONDOWN and event.button == 3:
+    if event.type == app.events.MOUSEBUTTONDOWN and event.button == 3:
         ssd.screenshot()
 
 
-runtime.on(runtime.events.MOUSEBUTTONDOWN, screenshot)
+app.on(app.events.MOUSEBUTTONDOWN, screenshot)
 
 
 class _StubBtn:
@@ -122,7 +123,7 @@ def _bind_keys():
 
 
 def _on_key(event):
-    if event.type != runtime.events.KEYDOWN:
+    if event.type != app.events.KEYDOWN:
         return
     action = _KEYMAP.get(event.key)
     if action is None:
@@ -135,7 +136,7 @@ def _on_key(event):
 
 
 _bind_keys()
-runtime.on(runtime.events.KEYDOWN, _on_key)
+app.on(app.events.KEYDOWN, _on_key)
 
 # After SSD exists: gui.core.colors imports SSD from this module.
 from fetch_ph_gui import fetch_ph_gui  # noqa: E402
