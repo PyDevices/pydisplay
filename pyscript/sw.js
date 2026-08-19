@@ -1,7 +1,7 @@
 /*! pydevices-examples PWA service worker — offline cache + COI headers for PyScript */
 /* CACHE_NAME is stamped at Pages deploy from a hash of STATIC_ASSETS + this
  * file (see scripts/pyscript_stamp_pwa_cache.py). Git keeps -dev for local serve. */
-const CACHE_NAME = 'pydevices-examples-pwa-5f184a1686f5';
+const CACHE_NAME = 'pydevices-examples-pwa-e403e8e05b2e';
 
 const STATIC_ASSETS = [
   './index.html',
@@ -33,6 +33,19 @@ const STATIC_ASSETS = [
   './micropython.toml',
   './pyodide.toml',
   './pydevices-examples.toml',
+];
+
+/* Hash-only: these are NOT precached (the runtimes are megabytes, and a visitor
+ * who only loads one interpreter should not pay for both). They feed the
+ * CACHE_NAME hash so that rebuilding a runtime bumps the cache id, which evicts
+ * the stale copy the fetch handler cached opportunistically.
+ * See scripts/pyscript_stamp_pwa_cache.py. */
+const CACHE_KEY_EXTRAS = [
+  './vendor/micropython/micropython.mjs',
+  './vendor/micropython/micropython.wasm',
+  './vendor/pyodide/pyodide.mjs',
+  './vendor/pyodide/pyodide.asm.wasm',
+  './vendor/pyodide/python_stdlib.zip',
 ];
 
 // Loader HTML + gallery index change often; fetch network-first so deps/
