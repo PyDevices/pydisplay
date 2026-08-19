@@ -1,0 +1,16 @@
+# Keep pinned GitHub Actions current. Nothing else here is managed by
+# Dependabot: Python dependencies are pinned per docs/requirements.txt or
+# resolved at build time, not from a lockfile in this repo.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci"
+    open-pull-requests-limit: 3
