@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 """Stamp ``CACHE_NAME`` in the PWA service worker from a shell content hash.
 
-Only the precached shell assets listed in ``sw.js`` (``STATIC_ASSETS``) plus the
-service-worker source itself (with a stable ``CACHE_NAME`` placeholder) feed the
-hash. Example / ``lib/`` / packages churn does **not** change the cache id, so
-installed PWAs are not prompted to update on every Pages deploy.
+The hash is fed by the precached shell assets listed in ``sw.js``
+(``STATIC_ASSETS``), the runtime files listed in ``CACHE_KEY_EXTRAS``, and the
+service-worker source itself (with a stable ``CACHE_NAME`` placeholder). Example
+/ ``lib/`` / packages churn does **not** change the cache id, so installed PWAs
+are not prompted to update on every Pages deploy.
+
+``CACHE_KEY_EXTRAS`` exists because the interpreters are cached opportunistically
+by the fetch handler (``shouldCache`` accepts any same-origin GET) under
+``CACHE_NAME``, but are far too large to precache. Without them in the hash, a
+rebuilt runtime never bumps the cache id and returning visitors keep the stale
+copy.
 
 Usage::
 
@@ -36,6 +43,10 @@ STATIC_ASSETS_RE = re.compile(
     r"const\s+STATIC_ASSETS\s*=\s*\[(.*?)\];",
     re.DOTALL,
 )
+CACHE_KEY_EXTRAS_RE = re.compile(
+    r"const\s+CACHE_KEY_EXTRAS\s*=\s*\[(.*?)\];",
+    re.DOTALL,
+)
 ASSET_STRING_RE = re.compile(r"""['"](\./[^'"]+)['"]""")
 PLACEHOLDER_CACHE = "pydevices-examples-pwa-__SHELL_HASH__"
 MIGRATION_MARKER = "MIGRATION: cache-purge"
@@ -56,6 +67,14 @@ def parse_static_assets(sw_text: str) -> list[str]:
     if not assets:
         raise SystemExit("sw.js: STATIC_ASSETS is empty")
     return assets
+
+
+def parse_cache_key_extras(sw_text: str) -> list[str]:
+    """Runtime files that feed the hash but are deliberately not precached."""
+    m = CACHE_KEY_EXTRAS_RE.search(sw_text)
+    if not m:
+        raise SystemExit("sw.js: missing CACHE_KEY_EXTRAS array")
+    return ASSET_STRING_RE.findall(m.group(1))
 
 
 def normalize_sw_for_hash(sw_text: str) -> str:
@@ -87,7 +106,7 @@ def shell_hash(pyscript_dir: Path) -> str:
     if not sw_path.is_file():
         raise SystemExit(f"missing {sw_path}")
     sw_text = sw_path.read_text(encoding="utf-8")
-    assets = parse_static_assets(sw_text)
+    assets = parse_static_assets(sw_text) + parse_cache_key_extras(sw_text)
 
     h = hashlib.sha256()
     # Normalized SW body first (logic changes bump the id even if assets match).
@@ -97,7 +116,7 @@ def shell_hash(pyscript_dir: Path) -> str:
     for rel in assets:
         path = pyscript_dir / rel.removeprefix("./")
         if not path.is_file():
-            raise SystemExit(f"STATIC_ASSETS entry missing: {rel} ({path})")
+            raise SystemExit(f"hashed asset missing: {rel} ({path})")
         h.update(rel.encode("utf-8"))
         h.update(b"\0")
         h.update(asset_bytes_for_hash(path))

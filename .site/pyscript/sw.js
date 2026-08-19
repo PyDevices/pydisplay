@@ -35,6 +35,19 @@ const STATIC_ASSETS = [
   './pydevices-examples.toml',
 ];
 
+/* Hash-only: these are NOT precached (the runtimes are megabytes, and a visitor
+ * who only loads one interpreter should not pay for both). They feed the
+ * CACHE_NAME hash so that rebuilding a runtime bumps the cache id, which evicts
+ * the stale copy the fetch handler cached opportunistically.
+ * See scripts/pyscript_stamp_pwa_cache.py. */
+const CACHE_KEY_EXTRAS = [
+  './vendor/micropython/micropython.mjs',
+  './vendor/micropython/micropython.wasm',
+  './vendor/pyodide/pyodide.mjs',
+  './vendor/pyodide/pyodide.asm.wasm',
+  './vendor/pyodide/python_stdlib.zip',
+];
+
 // Loader HTML + gallery index change often; fetch network-first so deps/
 // card href fixes are not masked by cache-first (CACHE_NAME deliberately
 // ignores GEN:demos, so gallery-only deploys do not bump the cache id).
