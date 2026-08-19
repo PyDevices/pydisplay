@@ -92,9 +92,9 @@ _WHEEL_REWRITE: dict[str, str | None] = {
     "pygraphics": "pydevices-pygraphics",
     "palettes": "pydevices-palettes",
     "pdwidgets": "pydevices-pdwidgets",
-    "appdev": "pydevices-appdev",
-    "multimer": "pydevices-multimer",
-    "displaydev": "pydevices-displaydev",
+    "appdev": "pydevices",
+    "multimer": "pydevices",
+    "displaydev": "pydevices",
     "usdl2-py": "usdl2",  # prefer native TestPyPI wheel when available
 }
 

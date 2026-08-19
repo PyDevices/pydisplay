@@ -2,14 +2,8 @@
 --extra-index-url https://pypi.org/simple/
 
 pydevices
-pydevices-audiodev
 pydevices-desktop
-pydevices-displaydev
-pydevices-events
-pydevices-appdev
-pydevices-keys
 pydevices-lvgl
-pydevices-multimer
 pydevices-palettes
 pydevices-pdwidgets
 pydevices-pygraphics

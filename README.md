@@ -104,16 +104,13 @@ provide a different event loop or traffic controller when appropriate.
 ## Package names
 
 Python distributions on TestPyPI use the organization prefix; imports and MIP
-packages remain conventional and unprefixed.
+packages remain conventional and unprefixed. `pydevices` ships all of the core
+`lib/` tree as one distribution -- MIP publishes those components separately,
+because installing only what a board needs matters there.
 
 | TestPyPI distribution | Python import / MIP name |
 |---|---|
-| `pydevices-displaydev` | `displaydev` |
-| `pydevices-audiodev` | `audiodev` |
-| `pydevices-events` | `events` |
-| `pydevices-keys` | `keys` |
-| `pydevices-multimer` | `multimer` |
-| `pydevices-appdev` | `appdev` |
+| `pydevices` | `displaydev`, `audiodev`, `appdev`, `events`, `keys`, `multimer`, `boarddev` |
 | `pydevices-pygraphics` | `pygraphics` |
 | `pydevices-palettes` | `palettes` |
 | `pydevices-pdwidgets` | `pdwidgets` |

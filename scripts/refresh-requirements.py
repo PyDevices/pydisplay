@@ -20,14 +20,12 @@ import sys
 import urllib.error
 import urllib.request
 
-# Install order SoT (leaves before dependents). Keep in sync with the Cursor rule.
+# Install order SoT (dependencies before dependents). Keep in sync with the
+# Cursor rule. "pydevices" is the whole of pydevices/lib in one distribution --
+# appdev, audiodev, displaydev, events, keys, multimer and boarddev -- so the
+# per-component entries that used to head this list are gone.
 PACKAGE_ORDER = (
-    "pydevices-events",
-    "pydevices-keys",
-    "pydevices-multimer",
-    "pydevices-displaydev",
-    "pydevices-audiodev",
-    "pydevices-appdev",
+    "pydevices",
     "pydevices-pygraphics",
     "pydevices-palettes",
     "pydevices-pdwidgets",
