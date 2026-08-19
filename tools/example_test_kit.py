@@ -68,28 +68,30 @@ ANDROID_PACKAGE_ID = os.environ.get("PACKAGE_ID", "org.pydevices.launcher")
 
 
 def _find_android_runner() -> Path:
+    """Locate android.py, the host tool that stages a script onto the Runner APK.
+
+    The older pydevices-android-runner/scripts/android.sh was retired in August
+    2026 once android.py covered every one of its flags; ANDROID_SH is still
+    honored as an environment override for anyone with it in their shell profile.
+    """
     env_runner = os.environ.get("ANDROID_RUNNER") or os.environ.get("ANDROID_SH")
     if env_runner:
         return Path(env_runner)
     which_py = shutil.which("android.py")
     if which_py:
         return Path(which_py)
-    which_sh = shutil.which("android.sh")
-    if which_sh:
-        return Path(which_sh)
-    candidate_py = REPO.parent / "pydevices" / "bin" / "android.py"
-    if candidate_py.exists():
-        return candidate_py
-    return REPO.parent / "pydevices-android-runner" / "scripts" / "android.sh"
+    return REPO.parent / "pydevices" / "bin" / "android.py"
 
 
-ANDROID_SH = _find_android_runner()
+ANDROID_RUNNER = _find_android_runner()
+# Retained alias: this name is used throughout the module and in call sites below.
+ANDROID_SH = ANDROID_RUNNER
 # Short wall clocks: enough for inject/poll quit; override via --duration-s / --timeout-s.
 DEFAULT_DURATION = 2
 DEFAULT_TIMEOUT = 15
 DEFAULT_ONESHOT_TIMEOUT = 10
 # Android emulator paint is slow (splash + first EGL presents). Oneshot hold runs
-# in-app after android.sh returns; observe window must cover that hold.
+# in-app after android.py returns; observe window must cover that hold.
 ANDROID_ONESHOT_HOLD_S = 20
 ANDROID_OBSERVE_S = 20
 ANDROID_STAGE_TIMEOUT_S = 120
@@ -289,7 +291,7 @@ def _adb_base_cmd(adb_bin: str) -> list[str]:
 
 
 def android_runtime_available() -> bool:
-    """True when android.sh, adb, a device, and the launcher APK are present."""
+    """True when android.py, adb, a device, and the launcher APK are present."""
     if not ANDROID_SH.is_file():
         return False
     adb_bin = _pick_adb_bin()
@@ -1012,7 +1014,7 @@ def run_android_case(
     duration: float,
     timeout: float,
 ) -> dict:
-    """Stage via pydevices-android-template/scripts/android.sh; collect results from logcat."""
+    """Stage via pydevices/bin/android.py; collect results from logcat."""
     script = example_meta.get("script", f"examples/{example_id}.py")
     script_path = SRC / script
     if not script_path.is_file():
@@ -1054,7 +1056,7 @@ def run_android_case(
         cmd.append("--kit")
     # Oneshot scripts return immediately; without a hold the Activity tears down
     # (or Android splash covers the single present) and the screen looks blank.
-    # Hold runs on-device after android.sh returns — observe window must cover it.
+    # Hold runs on-device after android.py returns — observe window must cover it.
     hold_s = 0
     if kind == "oneshot" or example_meta.get("quit") == "native_exit":
         hold_s = max(int(duration), ANDROID_ONESHOT_HOLD_S)
