@@ -61,8 +61,7 @@ PyDevices MIP index, then install a board package:
 import mip
 
 INDEX = "https://PyDevices.github.io/mip"
-mip.install("displaydev", index=INDEX)
-mip.install("appdev", index=INDEX)  # optional; used by these non-LVGL examples
+mip.install("pydevices", index=INDEX)  # displaydev, appdev, and the rest of lib/
 ```
 
 See the
