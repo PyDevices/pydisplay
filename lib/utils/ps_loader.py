@@ -231,7 +231,10 @@ def _import_firmware_mip():
     try:
         import mip
     except ImportError as exc:
-        if "__future__" in str(exc):
+        # "__future__" is the pre-guard message from older mounted copies of
+        # utils/mip.py; "portable mip.py" is the guard it now raises itself.
+        detail = str(exc)
+        if "__future__" in detail or "portable mip.py" in detail:
             # No `from exc`: MicroPython prints "exception chaining not
             # supported" to the console, which is the opposite of helpful here.
             raise ImportError(  # noqa: B904
