@@ -339,7 +339,7 @@ kind = "loop"
 quit = "poll"
 deps = ["micropython-nano-gui"]
 # Cold mip into utils/gui can take well over the default 30s.
-timeout_s = 120
+timeout_s = 240
 
 [examples.micro_gui_simpletest]
 import = "micro_gui_simpletest"
@@ -347,7 +347,12 @@ script = "examples/micro_gui_simpletest.py"
 kind = "loop"
 quit = "poll"
 deps = ["micropython-micro-gui"]
-timeout_s = 120
+timeout_s = 240
+# CircuitPython unix has no ``machine`` module, which gui.core.ugui imports at
+# load; the shim path segfaults the interpreter (SIGSEGV, core dumped) rather
+# than raising. It also has no urllib/socket/ssl, so mip cannot fetch the GUI
+# there either -- the tree only ever appears via another interpreter.
+skip_interpreters = ["circuitpython"]
 
 [examples.touch_gui_simpletest]
 import = "touch_gui_simpletest"
@@ -355,7 +360,12 @@ script = "examples/touch_gui_simpletest.py"
 kind = "loop"
 quit = "poll"
 deps = ["micropython-touch"]
-timeout_s = 120
+timeout_s = 240
+# CircuitPython unix has no ``machine`` module, which gui.core.ugui imports at
+# load; the shim path segfaults the interpreter (SIGSEGV, core dumped) rather
+# than raising. It also has no urllib/socket/ssl, so mip cannot fetch the GUI
+# there either -- the tree only ever appears via another interpreter.
+skip_interpreters = ["circuitpython"]
 
 [examples.palettes_demo]
 import = "palettes_demo"

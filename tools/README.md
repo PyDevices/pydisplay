@@ -238,7 +238,6 @@ writes `.pth` files). The harness auto-discovers the same paths via
 
 ### Known pre-existing failures (not environment bugs)
 
-- `nano_gui_simpletest` needs the matching Hinch `gui/` package.
 - `tools/png_test.py` in **pdwidgets** (PNG probe) needs `PDWIDGETS_PNG_DIR` /
   material-design-icons and a sibling pydevices-examples checkout.
 

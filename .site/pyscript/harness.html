@@ -193,7 +193,23 @@ def _autotest_app(ensure_app_setup=False):
     ``hardware_setup``. After the demo returns, pass ``ensure_app_setup=True`` so
     autotest can still hook BrowserBack → ``before_quit``. Do not force that
     import before the demo: LVGL entries use ``display_driver.app`` instead.
+
+    Most demos build their own ``appdev.App(board_config)`` and import neither
+    module -- every roku_* entry does. Those used to leave the quit chord
+    unhooked, so BrowserBack landed on nothing and the run ended with
+    "no EXAMPLE_RESULT after Ctrl+Q quit chord". ``App.current()`` is the
+    library's own accessor for the live instance, so ask it first and keep the
+    module lookups as the fallback for anything that predates it.
     """
+    try:
+        import appdev
+
+        current = appdev.App.current()
+        if current is not None:
+            return current
+    except Exception:
+        pass
+
     for module_name in ("display_driver", "hardware_setup"):
         module = sys.modules.get(module_name)
         candidate = getattr(module, "app", None) if module is not None else None
@@ -230,9 +246,85 @@ def _arm_autotest_on_quit(entry, ensure_app_setup=False):
         from js import console
 
         console.log("AUTOTEST_READY=" + str(entry))
+        # Which devices can deliver the quit chord. A run that ends in
+        # "no EXAMPLE_RESULT after Ctrl+Q quit chord" is almost always an app
+        # with no HOST device, or one whose HOST device is never polled, and
+        # without this the console gives no way to tell those apart.
+        try:
+            devs = ",".join(
+                "%s/%s" % (type(d).__name__, getattr(d, "type", "?")) for d in app.devices
+            )
+        except Exception:
+            devs = "?"
+        console.log("AUTOTEST_DEVICES=" + (devs or "none"))
     except Exception:
         pass
     return app
+
+
+def _arm_autotest_host_pump(app):
+    """Drain the app's HOST devices on the browser event loop during autotest.
+
+    The quit chord is delivered by appdev's HostEventsDevice, which only sees
+    the key when something calls ``app.poll()``. Demos that call ``app.run()``
+    get that for free, but LVGL entries hand the loop to LVGL and drive the
+    app through display_driver's own pump -- which is not armed in the harness,
+    so BrowserBack reached a registered HOST device that nobody read and every
+    LVGL cell ended in "no EXAMPLE_RESULT after Ctrl+Q quit chord".
+
+    An asyncio task polls independently of whichever loop the demo chose. It is
+    autotest-only and stops as soon as quit is requested.
+    """
+    if app is None:
+        return
+
+    def _poll(*_args):
+        try:
+            app.poll()
+        except Exception:
+            pass
+        # Automation fallback. Under LVGL the indev read_cb drains PSDisplay's
+        # event queue before app.poll() can see it, so the BrowserBack chord
+        # never reaches HostEventsDevice and no amount of polling produces a
+        # quit. The chord stays the primary path -- it is what exercises real
+        # input -- and this flag only gives Playwright a way through when the
+        # queue already has another consumer.
+        try:
+            from js import window
+
+            if getattr(window, "__pydevices_autotest_quit", False):
+                app.request_quit()
+        except Exception:
+            pass
+
+    # LVGL entries hand the loop to LVGL: the asyncio scheduler never gets a
+    # turn, so an asyncio task would be created and never run. LVGL's own timer
+    # is the loop that is demonstrably running (it is what renders), so use it.
+    if "display_driver" in sys.modules:
+        try:
+            import lvgl as lv
+
+            lv.timer_create(_poll, 20, None)
+            print("autotest: host pump armed on an LVGL timer")
+            return
+        except Exception as exc:
+            print("autotest: LVGL host pump unavailable:", exc)
+
+    try:
+        import asyncio
+    except ImportError:
+        return
+
+    async def _pump():
+        while not getattr(app, "quit_requested", False):
+            _poll()
+            await asyncio.sleep(0.02)
+
+    try:
+        asyncio.ensure_future(_pump())
+        print("autotest: host pump armed on asyncio")
+    except Exception as exc:
+        print("autotest: host pump not armed:", exc)
 
 
 def _pump_autotest_app(app):
@@ -251,7 +343,9 @@ def _pump_autotest_app(app):
 
 def _schedule_pyscript_autotest(entry):
     """After import: wait for external Ctrl+Q (or request_quit); do not auto-ok on a timer."""
-    _pump_autotest_app(_arm_autotest_on_quit(entry, ensure_app_setup=True))
+    app = _arm_autotest_on_quit(entry, ensure_app_setup=True)
+    _arm_autotest_host_pump(app)
+    _pump_autotest_app(app)
 
 
 def _install_test_mode():
@@ -514,7 +608,9 @@ def _run():
     # #endregion
     if _autotest_enabled() and not _autotest_sent[0]:
         # Oneshot demos that return from import still need a quit path + event pump.
-        _pump_autotest_app(_arm_autotest_on_quit(entry, ensure_app_setup=True))
+        _app = _arm_autotest_on_quit(entry, ensure_app_setup=True)
+        _arm_autotest_host_pump(_app)
+        _pump_autotest_app(_app)
 
 _run()
 </script>

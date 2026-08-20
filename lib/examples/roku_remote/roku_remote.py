@@ -189,7 +189,12 @@ def main():
             # Import/create failure — stay on prefs; try the next candidate.
             print("roku_remote: %s front end unavailable (%s)" % (name, err))
             last_err = err
-            if name in _PYTHON_FB_FRONTENDS:
+            # Only a real OOM says anything about the panel buffer. Any other
+            # failure (a bad import, a missing binding) is specific to this
+            # front end, and must not disable the remaining framebuffer one --
+            # doing so skipped the last working fallback and reported the
+            # unrelated error as "need N-byte panel buffer".
+            if name in _PYTHON_FB_FRONTENDS and isinstance(err, MemoryError):
                 fb_ok = False
             try:
                 import gc

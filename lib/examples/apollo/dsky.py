@@ -9,7 +9,8 @@ from board_config import display_drv
 import board_config
 import appdev
 
-app = appdev.App(board_config)
+# apollo.py already built the App; a second instance would steal App.current().
+app = appdev.App.current() or appdev.App(board_config)
 from appdev import TouchGrid
 from pygraphics import Area, BMP565
 

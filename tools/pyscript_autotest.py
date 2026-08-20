@@ -311,6 +311,15 @@ def run_autotest(
                     }"""
                     % json.dumps(str(cdp_exc))
                 )
+            # Fallback for demos whose event queue already has another
+            # consumer (LVGL's indev read_cb drains it before appdev's
+            # HostEventsDevice can match the chord). The chord above is still
+            # the real test; this only stops that plumbing conflict from
+            # reading as a dead demo.
+            try:
+                page.evaluate("() => { window.__pydevices_autotest_quit = true; }")
+            except Exception:
+                pass
             console_msgs.append(
                 {
                     "type": "info",

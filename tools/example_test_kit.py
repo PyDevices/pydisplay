@@ -1288,6 +1288,98 @@ def _run_example_wave(
     return [by_interpreter[interpreter_id] for interpreter_id, _ in work]
 
 
+# The three Peter Hinch GUIs share one lib/utils/gui directory that holds
+# exactly one of them, so consecutive GUI examples force a wipe-and-refetch of
+# ~70 files. Doing that inside a timed, parallel wave is what broke these cells:
+# whichever interpreter won the lock paid the whole download against its own
+# timeout (micropython.exe wedged), and CircuitPython cannot download at all --
+# this build has no urllib, no socket and no ssl, so mip can never fetch there.
+# Seed the tree once, serially, with the venv CPython before the wave starts;
+# every interpreter then takes fetch_ph_gui's fast path and installs nothing.
+_SHARED_GUI_DEPS = (
+    "micropython-nano-gui",
+    "micropython-micro-gui",
+    "micropython-touch",
+)
+
+# Which core each setup module pulls in. Most examples that need the shared
+# tree never name it in ``deps`` -- they just import a setup module, which
+# calls fetch_ph_gui itself (bmp565_sprite_transparent and displaybuf_simpletest
+# both reach nano-gui through color_setup). Seeding only on ``deps`` left those
+# to swap the tree inside their own timed cell, which is a ~70 file download
+# that micropython.exe does not finish inside its 25s budget.
+_SETUP_MODULE_CORES = {
+    "color_setup": "micropython-nano-gui",
+    "hardware_setup": "micropython-micro-gui",
+    "touch_setup": "micropython-touch",
+}
+
+
+def _example_shared_gui_core(example_meta: dict) -> str | None:
+    """The Hinch core this example needs, from ``deps`` or its ``# utils:`` header."""
+    for dep in example_meta.get("deps", []):
+        if dep in _SHARED_GUI_DEPS:
+            return dep
+    script = example_meta.get("script")
+    if not script:
+        return None
+    path = SRC / script
+    try:
+        with open(path, encoding="utf-8") as handle:
+            for _ in range(10):
+                line = handle.readline()
+                if not line:
+                    break
+                stripped = line.strip()
+                if not stripped.startswith("# utils:"):
+                    continue
+                for name in stripped[len("# utils:") :].split(","):
+                    core = _SETUP_MODULE_CORES.get(name.strip())
+                    if core:
+                        return core
+    except OSError:
+        return None
+    return None
+
+
+def _preseed_shared_gui(example_meta: dict) -> None:
+    """Install this example's Hinch GUI core before any interpreter is timed."""
+    core = _example_shared_gui_core(example_meta)
+    if not core:
+        return
+    env = os.environ.copy()
+    apply_sibling_env(env, repo_root=str(REPO))
+    code = (
+        "import sys; sys.path.insert(0, 'utils')\n"
+        "import fetch_ph_gui\n"
+        # apply_patches=False: each setup module patches for its own interpreter.
+        f"ok = fetch_ph_gui.fetch_ph_gui({core!r}, apply_patches=False)\n"
+        "print('preseed-ok' if ok else 'preseed-FAILED')\n"
+    )
+    try:
+        proc = subprocess.run(
+            [sys.executable, "-c", code],
+            cwd=str(SRC),
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=300,
+            check=False,
+        )
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        print(f"  preseed {core}: {type(exc).__name__}", file=sys.stderr)
+        return
+    if proc.returncode != 0 or "preseed-FAILED" in proc.stdout:
+        # Not fatal: an interpreter that can fetch will still try for itself.
+        # Show why -- a silent "failed" here reads as flakiness in the cells it
+        # goes on to break.
+        detail = (proc.stderr or proc.stdout or "").strip().splitlines()
+        tail = detail[-1] if detail else "no output"
+        print(f"  preseed {core}: failed ({tail[:160]})", file=sys.stderr)
+    else:
+        print(f"  preseed {core}: ready", file=sys.stderr)
+
+
 def test_all_examples(
     examples: dict[str, dict],
     interpreters: dict[str, dict],
@@ -1332,6 +1424,7 @@ def test_all_examples(
             + (" in parallel..." if jobs != 1 and len(work) > 1 else "..."),
             file=sys.stderr,
         )
+        _preseed_shared_gui(example_meta)
         example_rows.extend(
             _run_example_wave(
                 example_id,
