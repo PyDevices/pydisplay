@@ -134,16 +134,25 @@ def apply(path=None):
         if key not in seen:
             seen.append(key)
 
+    # Walk the documented order, keeping an anchor just past the last
+    # documented entry seen in *path*. Missing entries go in at the anchor so
+    # they land in documented order *relative to the ones already there* --
+    # inserting them all at the front would push, say, ``lib`` ahead of an
+    # already-present ``.frozen`` and shadow frozen modules with mounted ones.
     missing = []
+    anchor = 0
     for target in TARGETS:
         key = _norm(target)
         if key in seen:
+            for index, entry in enumerate(path):
+                if _norm(entry) == key:
+                    anchor = max(anchor, index + 1)
+                    break
             continue
         seen.append(key)
         missing.append(target)
-
-    for offset, entry in enumerate(missing):
-        path.insert(offset, entry)
+        path.insert(anchor, target)
+        anchor += 1
     return missing
 
 
