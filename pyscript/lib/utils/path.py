@@ -1,4 +1,25 @@
-"""Portable, idempotent path configuration for PyDevices runtimes."""
+"""Portable, idempotent search-path configuration for PyDevices interpreters.
+
+Applies the documented interpreter search path when the environment has not
+already supplied it:
+
+    MicroPython / CircuitPython -- ``MICROPYPATH``
+        ``.:.frozen:lib:utils:~/.micropython/lib:/usr/lib/micropython``
+    Every other interpreter -- ``PYTHONPATH``
+        ``.:lib:utils``
+
+Importing this module is *optional*: with the matching variable exported as
+documented, every entry is already on ``sys.path`` and importing here is a
+no-op. Entries are only ever added -- nothing is removed or reordered, so a
+host that arranges its own path keeps that arrangement.
+
+``~/.micropython/lib`` and ``/usr/lib/micropython`` are MicroPython and
+CircuitPython package locations, which is why ``PYTHONPATH`` omits them:
+adding them on CPython puts a MIP tree ahead of ``site-packages`` and shadows
+pip-installed packages with ``.py`` sources meant for another interpreter.
+
+See https://github.com/PyDevices/pydevices/blob/main/docs/install-workflows.md
+"""
 
 import os
 import sys
@@ -23,45 +44,113 @@ def _env_get(name):
     return None
 
 
-# Get user home directory portably without os.path
-home = _env_get("HOME") or _env_get("USERPROFILE") or "~"
-home = home.replace("\\", "/").rstrip("/")
-user_lib = home + "/.micropython/lib"
+def _implementation_name():
+    impl = getattr(sys, "implementation", None)
+    name = getattr(impl, "name", None) if impl is not None else None
+    return str(name or "").lower()
 
-targets = [
-    "",
-    ".frozen",
-    "lib",
-    "utils",
-    user_lib,
-]
 
-# Only append /usr/lib/micropython on Unix/Linux systems
-is_windows = os.sep == "\\" or (hasattr(sys, "platform") and sys.platform == "win32")
-if not is_windows:
-    targets.append("/usr/lib/micropython")
+# MicroPython and CircuitPython read MICROPYPATH; everything else reads
+# PYTHONPATH. The two variables document different entries, so the interpreter
+# decides which set belongs on sys.path.
+USES_MICROPYPATH = _implementation_name() in ("micropython", "circuitpython")
+PATH_VAR = "MICROPYPATH" if USES_MICROPYPATH else "PYTHONPATH"
+
+_IS_WINDOWS = os.sep == "\\" or getattr(sys, "platform", "") == "win32"
+
+
+def _documented_targets():
+    """The entries ``PATH_VAR`` is documented to contain, in order."""
+    if not USES_MICROPYPATH:
+        return ["", "lib", "utils"]
+
+    # Home without os.path, which CircuitPython does not ship.
+    home = _env_get("HOME") or _env_get("USERPROFILE") or "~"
+    home = home.replace("\\", "/").rstrip("/")
+    targets = ["", ".frozen", "lib", "utils", home + "/.micropython/lib"]
+    # The documented Windows MICROPYPATH has no /usr/lib/micropython.
+    if not _IS_WINDOWS:
+        targets.append("/usr/lib/micropython")
+    return targets
+
+
+def _cwd():
+    getcwd = getattr(os, "getcwd", None)
+    if getcwd is None:
+        return ""
+    try:
+        return getcwd().replace("\\", "/").rstrip("/")
+    except Exception:
+        return ""
+
+
+_CWD = _cwd()
+_HOME = (_env_get("HOME") or _env_get("USERPROFILE") or "").replace("\\", "/").rstrip("/")
+
+
+def _is_absolute(p):
+    # POSIX root, or a Windows drive such as "C:/Users".
+    return p.startswith("/") or (len(p) > 1 and p[1] == ":")
 
 
 def _norm(path):
-    if path in ("", ".frozen"):
-        return path
+    """Comparison key for one search-path entry.
+
+    Relative entries resolve against the current directory so that ``lib`` and
+    the absolute form CPython stores for it (sys.path entries are absolutized
+    at startup since 3.11) compare equal -- otherwise exporting the documented
+    variable would not be detected and entries would be added twice.
+    """
     p = path.replace("\\", "/").rstrip("/")
-    if is_windows:
+    if p == ".frozen":
+        return ".frozen"  # virtual MicroPython path; never resolved
+    if p.startswith("~/") and _HOME:
+        p = _HOME + p[1:]
+    elif p in ("", "."):
+        p = _CWD
+    elif not _is_absolute(p) and _CWD:
+        p = _CWD + "/" + p
+    if _IS_WINDOWS:
         p = p.lower()
     return p
 
 
-insert_idx = 0
-for t in targets:
-    norm_t = _norm(t)
-    found = False
-    for idx, p in enumerate(sys.path):
-        if _norm(p) == norm_t:
-            found = True
-            insert_idx = max(insert_idx, idx + 1)
-            break
-    if not found:
-        sys.path.insert(insert_idx, t)
-        insert_idx += 1
+TARGETS = _documented_targets()
 
-print("path.py:  path updated")
+
+def apply(path=None):
+    """Add missing documented entries to *path* (default ``sys.path``).
+
+    Present entries keep their position; missing ones are inserted at the
+    front in documented order, matching what exporting ``PATH_VAR`` would
+    have produced. Returns the entries added, so a second call returns ``[]``.
+    """
+    if path is None:
+        path = sys.path
+
+    seen = []
+    for p in path:
+        key = _norm(p)
+        if key not in seen:
+            seen.append(key)
+
+    missing = []
+    for target in TARGETS:
+        key = _norm(target)
+        if key in seen:
+            continue
+        seen.append(key)
+        missing.append(target)
+
+    for offset, entry in enumerate(missing):
+        path.insert(offset, entry)
+    return missing
+
+
+added = apply()
+if added:
+    print(
+        "path.py: {} entries added: {}".format(PATH_VAR, ":".join(entry or "." for entry in added))
+    )
+else:
+    print("path.py: {} already satisfied".format(PATH_VAR))

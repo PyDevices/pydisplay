@@ -32,7 +32,6 @@ import board_config
 import appdev
 
 app = appdev.App(board_config)
-runtime = app
 
 import tft_config
 import tft_bitmap
@@ -66,7 +65,7 @@ def main():
     def _tick(_=None):
         # Do not call app.poll() from on_tick: sync backends (librt/sdl2)
         # re-enter the timer path and hang. Auto-service handles QUIT.
-        if app.quit_requested if runtime else False:
+        if app.quit_requested if app else False:
             return
         tft.draw.fill_rect(st["last_col"], st["old_row"], alien.WIDTH, alien.HEIGHT, 0)
         # Move and clamp *before* blit — PSDisplay blit_rect rejects OOB (and

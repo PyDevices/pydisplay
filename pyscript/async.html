@@ -10,7 +10,7 @@
         <canvas id="display_canvas" width="1" height="1" style="background-color: black; border:2px solid black;"></canvas>
         <script type="mpy" data-configs="./micropython.toml https://raw.githubusercontent.com/PyDevices/pydevices/main/pydevices-desktop.toml ./pydevices-examples.toml">
             import utils.path
-            from board_config import display_drv, runtime
+            from board_config import display_drv, app
             from multimer import asyncio
 
             x, y = 20, 20
@@ -33,7 +33,7 @@
                     display_drv.show()
                     await asyncio.sleep(0.016)
 
-            runtime.run_async(main)
+            app.run_async(main)
         </script>
         <script type="module" src="./pyscript-config.js"></script>
     </body>

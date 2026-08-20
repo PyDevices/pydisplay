@@ -1,4 +1,4 @@
-/*! Keep the runtime console locked to the display card's dimensions. */
+/*! Keep the interpreter console locked to the display card's dimensions. */
 (function () {
   var device = document.querySelector(".play-area .device");
   var panel = document.querySelector(".play-area .console-panel");
@@ -10,12 +10,12 @@
     new URLSearchParams(window.location.search).get("console") === "true";
   var toggle = document.querySelector(".console-toggle");
   var standalone = window.parent === window;
-  document.body.classList.add(standalone ? "runtime-standalone" : "runtime-embedded");
+  document.body.classList.add(standalone ? "interpreter-standalone" : "interpreter-embedded");
 
   function applyConsoleState(visible) {
     showConsole = visible;
-    document.body.classList.toggle("runtime-with-console", visible);
-    document.body.classList.toggle("runtime-without-console", !visible);
+    document.body.classList.toggle("interpreter-with-console", visible);
+    document.body.classList.toggle("interpreter-without-console", !visible);
     if (panel) {
       panel.hidden = !visible;
       panel.style.width = visible && lastWidth > 0 ? lastWidth + "px" : "";
@@ -45,7 +45,7 @@
       if (window.parent !== window && height > 0) {
         var width = Math.ceil(device.getBoundingClientRect().width);
         window.parent.postMessage(
-          { type: "pydevices-examples-runtime-size", height: height, width: width },
+          { type: "pydevices-examples-interpreter-size", height: height, width: width },
           window.location.origin
         );
       }

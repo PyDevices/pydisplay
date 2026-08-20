@@ -15,7 +15,7 @@ directly from ``lib/``::
 Or from the REPL: ``from examples import pixel_sim_demos``.
 
 **Real PixelDisplay hardware:** import ``display_drv`` from ``board_config`` and
-``appdev.Runtime.from_board_config(board_config)``.
+``appdev.App(board_config)``.
 instead of ``from pixel_sim import …`` (your hardware ``board_config`` must wire
 ``PixelDisplay``).
 
@@ -41,7 +41,6 @@ if _host_board.display_drv.width < _host_board.display_drv.height:
 # from board_config import display_drv
 # app = appdev.App(board_config)
 from pixel_sim import display_drv, app
-runtime = app
 
 # scroll | plasma | fire | matrix | starfield | reel
 DEMO = "reel"
@@ -62,7 +61,7 @@ _REEL_START = ticks_ms()
 
 def _stop():
     """Poll input so the window closes; True when quitting or the test times out."""
-    if runtime is not None:
+    if app is not None:
         app.poll()
         if app.quit_requested:
             return True
@@ -72,7 +71,7 @@ def _stop():
 
 
 def _reel_stop():
-    if runtime is not None:
+    if app is not None:
         app.poll()
         if app.quit_requested:
             return True
@@ -430,7 +429,7 @@ _next_at = ticks_ms()
 def _tick(_=None):
     global _gen, _next_at
     if _stop():
-        runtime.request_quit()
+        app.request_quit()
         return
     now = ticks_ms()
     if ticks_diff(_next_at, now) > 0:

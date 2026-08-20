@@ -151,7 +151,7 @@
                     <div class="stage-controls">
                         <div class="loading" id="loading">
                             <span class="spinner" id="spinner"></span>
-                            <span id="status">Loading MicroPython runtime…</span>
+                            <span id="status">Loading MicroPython interpreter…</span>
                         </div>
                     </div>
                     <div class="display-column">
@@ -259,7 +259,7 @@
         })();
     </script>
 
-    <script id="hinch-runtime" type="text/plain" output="log">
+    <script id="hinch-interpreter" type="text/plain" output="log">
 import asyncio
 import builtins
 import os
@@ -438,7 +438,7 @@ async def _boot():
             if selected not in names:
                 if selected in discovered:
                     raise ValueError(
-                        "Demo is not compatible with the browser runtime: " + selected
+                        "Demo is not compatible with the browser interpreter: " + selected
                     )
                 raise ValueError("Unknown demo: " + selected)
             await asyncio.sleep(0)
@@ -464,9 +464,9 @@ asyncio.create_task(_boot())
         (function () {
             const gui = window.__hinchGui;
             if (!gui) return;
-            const runtime = document.getElementById('hinch-runtime');
-            runtime.type = 'mpy';
-            runtime.dataset.configs = [
+            const interpreter = document.getElementById('hinch-interpreter');
+            interpreter.type = 'mpy';
+            interpreter.dataset.configs = [
                 './micropython.toml',
                 'https://raw.githubusercontent.com/PyDevices/pydevices/main/pydevices-desktop.toml',
                 './pydevices-examples.toml',

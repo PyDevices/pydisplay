@@ -2,14 +2,14 @@
 """
 lv_test_timer.py
 
-LVGL timer smoke test. Uses whatever timer mode ``board_config`` / ``runtime``
+LVGL timer smoke test. Uses whatever timer mode ``board_config`` / ``app``
 already has.
 
-Shows runtime, OS, display, timer backend, and LVGL version; a seconds counter
+Shows interpreter, OS, display, timer backend, and LVGL version; a seconds counter
 and spinning arc prove LVGL timers fire; a tap button exercises input.
 
-Interactive (default): build UI then ``runtime.run_forever()``. On an interactive
-REPL with a self-driving timer (``machine.Timer`` / signals), ``run_forever``
+Interactive (default): build UI then ``app.run()``. On an interactive
+REPL with a self-driving timer (``machine.Timer`` / signals), ``App.run``
 returns immediately so the prompt comes back for introspection while LVGL keeps
 ticking. Kit mode (``kit`` argv) still uses a short sync/async wait for click
 injection because LVGL owns the host queue.
@@ -51,7 +51,7 @@ if _lv_rot is not None and str(_lv_rot).strip() != "":
 
 import display_driver
 import lvgl as lv
-from display_driver import runtime
+from display_driver import app
 
 _seconds = 0
 _taps = 0
@@ -62,7 +62,7 @@ _RESULT_PREFIX = "KIT_RESULT="
 
 
 def _mode_label():
-    return "async" if getattr(runtime, "timer_async", False) else "sync"
+    return "async" if getattr(app, "timer_async", False) else "sync"
 
 
 def get_state():
@@ -97,7 +97,7 @@ def _format_timer_type(timer_cls):
     return part if part == name else f"{part}.{name}"
 
 
-def _runtime_label():
+def _interpreter_label():
     impl = getattr(sys, "implementation", None)
     if impl is None:
         return "python"
@@ -126,7 +126,7 @@ def _lvgl_label():
 
 def _timer_type():
     try:
-        timer = getattr(runtime, "_timer", None)
+        timer = getattr(app, "_timer", None)
         if timer is not None:
             return _format_timer_type(type(timer))
     except AttributeError:
@@ -134,7 +134,7 @@ def _timer_type():
     try:
         from multimer import AsyncTimer
 
-        return _format_timer_type(AsyncTimer if runtime.timer_async else timer.Timer)
+        return _format_timer_type(AsyncTimer if app.timer_async else timer.Timer)
     except ImportError:
         return "?"
 
@@ -143,7 +143,7 @@ def get_platform_info():
     w = int(getattr(display_drv, "width", 0) or 0)
     h = int(getattr(display_drv, "height", 0) or 0)
     return {
-        "runtime": _runtime_label(),
+        "interpreter": _interpreter_label(),
         "os": sys.platform,
         "display": type(display_drv).__name__,
         "resolution": f"{w}x{h}",
@@ -161,7 +161,7 @@ def timer_backend_name():
 def _add_info_labels(scr, info, y_start=26, line_h=16):
     lines = (
         f"Mode: {info['mode']}",
-        f"Runtime: {info['runtime']}",
+        f"Interpreter: {info['interpreter']}",
         f"OS: {info['os']}",
         f"Display: {info['display']} {info.get('resolution', '?')}",
         f"Timer: {info['timer']}",
@@ -286,7 +286,7 @@ def _inject_click(cx, cy):
     try:
         deadline = time.time() + 1.5
         while (pending or get_state()["taps"] < 1) and time.time() < deadline:
-            # Pump: the host queue is drained from the runtime tick, which
+            # Pump: the host queue is drained from the app tick, which
             # pump-based backends only deliver while the main thread sleeps here.
             timer.sleep_ms(10)
     finally:
@@ -348,7 +348,7 @@ def _emit_result(state, taps):
 
 def _quit_and_exit(code=0):
     try:
-        runtime.stop_timer()
+        app.stop_timer()
     except Exception:
         pass
     try:
@@ -386,7 +386,7 @@ async def _run_kit_async():
     deadline = time.time() + _DURATION_S
     clicked_taps = None
     while time.time() < deadline:
-        # Do not runtime.poll() while LVGL owns the host queue (indev reads it).
+        # Do not app.poll() while LVGL owns the host queue (indev reads it).
         await asyncio.sleep(0.01)
         if clicked_taps is None and get_state()["seconds"] >= 2:
             cx, cy = _button_center(btn)
@@ -400,14 +400,14 @@ async def _run_kit_async():
 def run_kit():
     """Automated timer + click check.
 
-    Interactive apps use ``runtime.run_forever()`` only. The kit still needs a
+    Interactive apps use ``app.run()`` only. The kit still needs a
     small sync/async wait flavor because LVGL click injection must pump either
     ``time.sleep`` (sync timer) or ``asyncio.sleep`` (async timer) — not
-    ``runtime.poll()`` while LVGL owns the host queue.
+    ``app.poll()`` while LVGL owns the host queue.
     """
     try:
-        if runtime.timer_async:
-            payload = runtime.run_async(_run_kit_async)
+        if app.timer_async:
+            payload = app.run_async(_run_kit_async)
             if payload is not None and hasattr(payload, "done"):
                 _quit_and_exit(1)
             _quit_and_exit(0 if payload and payload.get("status") == "ok" else 1)
@@ -442,9 +442,9 @@ if _wants_kit():
     run_kit()
 else:
     # Canonical interactive entry — no app loop here. display_driver wires LVGL
-    # into the shared runtime at import; run_forever keeps the app alive or
+    # into the shared app at import; App.run keeps the app alive or
     # returns immediately on an interactive REPL with a self-driving timer.
     import display_driver  # noqa: F401
 
     build_ui()
-    runtime.run_forever()
+    app.run()

@@ -21,7 +21,6 @@ import board_config
 import appdev
 
 app = appdev.App(board_config)
-runtime = app
 from random import getrandbits
 
 import appdev
@@ -326,5 +325,5 @@ def _on_tick(_=None):
 
 draw_board()
 app.on(events.MOUSEBUTTONUP, _on_up)
-app.every(_on_tick, period=20, async_=getattr(runtime, "timer_async", False))
+app.every(_on_tick, period=20, async_=getattr(app, "timer_async", False))
 app.run()

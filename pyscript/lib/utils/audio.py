@@ -404,7 +404,7 @@ class AudioEngine:
     def tick(self, _=None):
         """Render one chunk and write it when voices are active.
 
-        Safe to call from ``runtime.on_tick`` or after note changes. Re-entrant
+        Safe to call from ``app.on_tick`` or after note changes. Re-entrant
         calls are ignored so a blocking ``write`` cannot nest another pump.
         """
         if self._pumping:

@@ -7,7 +7,6 @@ import board_config
 import appdev
 
 app = appdev.App(board_config)
-runtime = app
 import gc
 import time
 
@@ -63,7 +62,7 @@ def _tick(_=None):
         rate = _count / (time.time() - _start_time)
         print(f"blocks/sec: {rate:5.2f}")
     if TEST_DURATION_S is not None and time.time() - _start_time >= TEST_DURATION_S:
-        runtime.request_quit()
+        app.request_quit()
 
 
 app.every(_tick, period=1, async_=app.timer_async)

@@ -3,7 +3,7 @@
 <head>
   <!-- PYDEVICES-HEAD-TAGS: START -->
   <title>PyDevices - pydevices-examples</title>
-  <meta name="description" content="Comprehensive example code, interactive PyScript browser demos, board configurations, and multi-runtime showcase benchmarks.">
+  <meta name="description" content="Comprehensive example code, interactive PyScript browser demos, board configurations, and multi-interpreter showcase benchmarks.">
   <link rel="icon" type="image/svg+xml" href="img/logo.svg">
   <!-- PYDEVICES-HEAD-TAGS: END -->
     <meta charset="utf-8">
@@ -30,7 +30,7 @@
       </div>
       <h1>pydevices-examples — Showcase, demos & PyScript runner.</h1>
     </div>
-    <p><code>pydevices-examples</code> Comprehensive example code, interactive PyScript browser demos, board configurations, and multi-runtime showcase benchmarks.</p>
+    <p><code>pydevices-examples</code> Comprehensive example code, interactive PyScript browser demos, board configurations, and multi-interpreter showcase benchmarks.</p>
     <div class="cta">
       <a class="btn primary" style="background: #24292e; color: #fff; border-color: #24292e;" href="https://github.com/PyDevices/pydevices-examples">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-1-2.6c3-.3 6-1.5 6-6.5a5 5 0 0 0-1.4-3.5 4.6 4.6 0 0 0-.1-3.5s-1.1-.3-3.5 1.3a12 12 0 0 0-6 0C6.6 1.7 5.5 2 5.5 2a4.6 4.6 0 0 0-.1 3.5A5 5 0 0 0 4 9c0 5 3 6.2 6 6.5a3.4 3.4 0 0 0-1 2.6V22"/></svg>
@@ -45,14 +45,14 @@
 
   <main class="cards wrap">
         <div class="section-head">
-            <h2>Core runtime</h2>
-            <span class="hint">board_config + Runtime — one idiom everywhere</span>
+            <h2>Core app</h2>
+            <span class="hint">board_config + Interpreter — one idiom everywhere</span>
         </div>
         <div class="install-block">
-            <pre><code>from board_config import display_drv, runtime
+            <pre><code>from board_config import display_drv, app
 
-runtime.on(runtime.events.MOUSEBUTTONDOWN, on_click)
-runtime.run_forever()</code></pre>
+app.on(app.events.MOUSEBUTTONDOWN, on_click)
+app.run()</code></pre>
         </div>
         <p class="prose" style="margin-top: 14px;">
             Import <code>board_config</code>, register handlers, run the loop.
@@ -118,7 +118,7 @@ runtime.run_forever()</code></pre>
             <a class="card" href="https://pydevices.github.io/lvgl-bindings/">
                 <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
                 <h3>LVGL bindings</h3>
-                <p>Full widget toolkit via lvgl-bindings and the matching cmod for your runtime.</p>
+                <p>Full widget toolkit via lvgl-bindings and the matching cmod for your interpreter.</p>
             </a>
         </div>
     </main>

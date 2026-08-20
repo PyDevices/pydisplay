@@ -1,7 +1,7 @@
 /*! pydevices-examples PWA service worker — offline cache + COI headers for PyScript */
 /* CACHE_NAME is stamped at Pages deploy from a hash of STATIC_ASSETS +
  * CACHE_KEY_EXTRAS + this file (see scripts/pyscript_stamp_pwa_cache.py). */
-const CACHE_NAME = 'pydevices-examples-pwa-4abff80a7f9e';
+const CACHE_NAME = 'pydevices-examples-pwa-c11d4e855b19';
 
 const STATIC_ASSETS = [
   './index.html',
@@ -20,7 +20,7 @@ const STATIC_ASSETS = [
   './icon-192.png',
   './icon-512.png',
   './site.css',
-  './runtime-layout.js',
+  './interpreter-layout.js',
   './site-chrome.js',
   './theme-toggle.js',
   './demo.css',
@@ -35,9 +35,9 @@ const STATIC_ASSETS = [
   './pydevices-examples.toml',
 ];
 
-/* Hash-only: these are NOT precached (the runtimes are megabytes, and a visitor
+/* Hash-only: these are NOT precached (the interpreters are megabytes, and a visitor
  * who only loads one interpreter should not pay for both). They feed the
- * CACHE_NAME hash so that rebuilding a runtime bumps the cache id, which evicts
+ * CACHE_NAME hash so that rebuilding a interpreter bumps the cache id, which evicts
  * the stale copy the fetch handler cached opportunistically.
  * See scripts/pyscript_stamp_pwa_cache.py. */
 const CACHE_KEY_EXTRAS = [
@@ -61,7 +61,7 @@ const NETWORK_FIRST_ASSETS = [
   './harness.html',
 ];
 
-const RUNTIME_ORIGINS = [
+const INTERPRETER_ORIGINS = [
   'pyscript.net',
   'cdn.jsdelivr.net',
   'pyodide.org',
@@ -80,8 +80,8 @@ function withCoiHeaders(response) {
   return new Response(status === 204 ? null : body, { status, statusText, headers });
 }
 
-function isRuntimeOrigin(hostname) {
-  return RUNTIME_ORIGINS.some((origin) => hostname.includes(origin));
+function isInterpreterOrigin(hostname) {
+  return INTERPRETER_ORIGINS.some((origin) => hostname.includes(origin));
 }
 
 function isStaticAssetPath(pathname) {
@@ -108,7 +108,7 @@ function shouldCache(url, request) {
   if (url.origin === self.location.origin) {
     return true;
   }
-  return isRuntimeOrigin(url.hostname);
+  return isInterpreterOrigin(url.hostname);
 }
 
 function networkFirstStaleWhileRevalidate(request) {

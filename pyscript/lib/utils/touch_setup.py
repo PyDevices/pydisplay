@@ -19,7 +19,6 @@ import appdev
 import pygraphics
 
 app = appdev.App(board_config)
-runtime = app
 
 # Peter Hinch's GUI modules import framebuf directly. Use the same FrameBuffer
 # implementation as DisplayBuffer so Writer glyph buffers can be blitted to ssd.

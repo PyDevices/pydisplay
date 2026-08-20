@@ -11,7 +11,7 @@ import time
 
 from board_config import display_drv
 import display_driver
-from display_driver import runtime
+from display_driver import app
 import lvgl as lv
 
 try:
@@ -799,12 +799,12 @@ def main():
     try:
         screen = lv.screen_active()
         _clock = ClockDeck(screen, DEFAULT_SKIN)
-        # Keep the widget reachable on runtimes whose Python GC does not trace
+        # Keep the widget reachable on interpreters whose Python GC does not trace
         # every reference held by the LVGL C object graph.
     finally:
         if current is not None:
             current.enable()
-    runtime.run_forever()
+    app.run()
 
 
 main()

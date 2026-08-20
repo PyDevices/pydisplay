@@ -48,10 +48,10 @@ env_set("PYDEVICES_HEIGHT", "512")
 if env_get("PYDEVICES_SCALE") is None:
     env_set("PYDEVICES_SCALE", "1")
 
-import display_driver  # noqa: E402 — wires LVGL into the shared runtime
+import display_driver  # noqa: E402 — wires LVGL into the shared app
 import lvgl as lv  # noqa: E402
 from board_config import display_drv  # noqa: E402
-from display_driver import runtime  # noqa: E402
+from display_driver import app  # noqa: E402
 
 import focus_nav  # noqa: E402
 import input_map  # noqa: E402
@@ -129,7 +129,7 @@ def build_ui():
         _vehicle = Vehicle()
         nav = focus_nav.FocusNav()
 
-        bridge = input_map.InputBridge(runtime, _vehicle, focus_nav=nav)
+        bridge = input_map.InputBridge(app, _vehicle, focus_nav=nav)
         bridge.install()
 
         _ui = layout.ClusterUI(_vehicle, focus_nav=nav)
@@ -143,7 +143,7 @@ def build_ui():
             if _ui is not None and _ui.rails is not None:
                 _ui.rails.drain_pending()
 
-        runtime.on_tick(_drain_rails, period=30, async_=False)
+        app.on_tick(_drain_rails, period=30, async_=False)
         _ui.rails.drain_pending()
         if _FREEZE:
             freeze(True)
@@ -154,8 +154,8 @@ def build_ui():
 
 build_ui()
 
-# Keep the shared runtime alive when launched as a script. When imported
+# Keep the shared app alive when launched as a script. When imported
 # (design session / REPL ``import``), timers keep the UI live under -i /
-# signal backends; the importer can call ``runtime.run_forever()`` if needed.
+# signal backends; the importer can call ``app.run()`` if needed.
 if __name__ == "__main__":
-    runtime.run_forever()
+    app.run()

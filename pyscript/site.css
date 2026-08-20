@@ -4,7 +4,7 @@
  * Design tokens + layout primitives shared by every PyDevices GitHub Pages
  * site (org root, lvgl-bindings, cmods, pydevices-examples, and the second-wave module
  * pages). Keep this file focused on *chrome*: header/nav, hero, buttons,
- * cards, footer, typography. Project-specific / demo-runtime styles belong
+ * cards, footer, typography. Project-specific / demo-interpreter styles belong
  * in a local stylesheet loaded after this one.
  *
  * Theme: dark by default; `<html data-theme="light">` switches to the light
@@ -305,7 +305,7 @@ pre code {
   display: block;
 }
 
-/* Runtime selector / swap (gallery + loaders) */
+/* Interpreter selector / swap (gallery + loaders) */
 .header-tools {
   display: inline-flex;
   align-items: center;
@@ -318,7 +318,7 @@ pre code {
   margin-left: 0;
 }
 
-.runtime-toggle {
+.interpreter-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -339,7 +339,7 @@ pre code {
   transition: border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
 }
 
-.runtime-toggle:hover {
+.interpreter-toggle:hover {
   border-color: var(--accent-strong);
   color: var(--accent-strong);
   box-shadow: var(--shadow-soft);
@@ -635,7 +635,7 @@ pre code {
   box-shadow: 0 0 0 1px var(--accent), var(--shadow-soft);
 }
 
-.gallery-sidebar .card-runtimes {
+.gallery-sidebar .card-interpreters {
   gap: 8px;
 }
 

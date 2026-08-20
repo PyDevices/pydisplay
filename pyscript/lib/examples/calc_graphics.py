@@ -22,7 +22,6 @@ import board_config
 import appdev
 
 app = appdev.App(board_config)
-runtime = app
 from calc_engine import CalcEngine
 import keys
 from pygraphics import RGB565, FrameBuffer
@@ -125,7 +124,7 @@ class _Calculator:
         self._pending_release = None
         self._release_timer = timer.Timer(-1)
         self.keypad = TouchGrid(
-            runtime,
+            app,
             0,
             0,
             self.width,
@@ -298,12 +297,12 @@ class _Calculator:
 
 
 # Canonical idiom: build the UI (registers input callbacks), then hand control
-# to the runtime. Identical for sync and async, interactive or not — the input
+# to the app. Identical for sync and async, interactive or not — the input
 # arrives via the TouchKeypad on_press callback dispatched by the shared-timer
 # auto-service; QUIT tears everything down.
 calc = _Calculator()
 
-# Canonical entry: run_forever() blocks to keep the app alive when run as a
+# Canonical entry: app.run() blocks to keep the app alive when run as a
 # program, and returns immediately in an interactive REPL on signal-driven
 # backends (the interpreter keeps servicing the app) — so the same call is
 # always correct.

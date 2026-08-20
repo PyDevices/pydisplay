@@ -11,7 +11,6 @@ import board_config
 import appdev
 
 app = appdev.App(board_config)
-runtime = app
 from displaydev import alloc_buffer
 from appdev import TouchGrid
 from appdev import JoyMap
@@ -50,7 +49,7 @@ LEFT = keys.K_LEFT  # LEFT
 DOWN = keys.K_DOWN  # DOWN
 RIGHT = keys.K_RIGHT  # RIGHT
 keypad = TouchGrid(
-    runtime,
+    app,
     0,
     0,
     display_drv.width,
@@ -59,7 +58,7 @@ keypad = TouchGrid(
 )
 
 joystick_keys = JoyMap(
-    runtime,
+    app,
     joymap={
         1: {
             'hats': {
@@ -79,7 +78,7 @@ def _quit_if_needed(_where):
     # Do not call app.poll() from an on_tick callback: on sync librt
     # backends that re-enters the timer path and deadlocks. Auto-service
     # already dispatches input to TouchKeypad/JoystickKeys and handles QUIT.
-    if not app.quit_requested if runtime else False:
+    if not app.quit_requested if app else False:
         return False
     display_drv.quit()
     return True
@@ -759,7 +758,7 @@ play = _start_play()
 
 def _tick(_=None):
     if _play_poll(play):
-        runtime.request_quit()
+        app.request_quit()
 
 
 app.every(_tick, period=20, async_=app.timer_async)

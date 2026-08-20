@@ -16,7 +16,7 @@ APPS | MORE | SELECT. MORE lists TV inputs. Layout, padding, and text scales
 are derived from ``display.width`` / ``height`` so the UI scales from 320x480
 up through tall phone portraits.
 
-Input and frame rendering are driven by the shared ``appdev.Runtime``:
+Input and frame rendering are driven by the shared ``appdev.App``:
 ``pd.Display`` wires them in at construction, so the example just builds the UI
 and hands control to ``app.run()``. Blocking ECP/scan work is queued
 and drained from the soft ``on_tick`` pump (no ``_thread`` — ESP32 thread stacks
@@ -103,8 +103,8 @@ class _RemoteUI:
                 pd.Display.tick_period = 50
         except Exception:
             pass
-        self.display = pd.Display(board_config.display_drv, runtime)
-        self.runtime = app
+        self.display = pd.Display(board_config.display_drv, app)
+        self.app = app
         pal = self.display.pal
         self.W = self.display.width
         self.H = self.display.height
@@ -290,14 +290,14 @@ class _RemoteUI:
 
         self.screen.visible = True
 
-        # Soft pump on the shared runtime timer (not a second machine.Timer —
+        # Soft pump on the shared app timer (not a second machine.Timer —
         # a second soft IRQ can nest during I2C and blow ESP32-P4's ~55-frame
         # Python recursion limit).
         try:
             self._pump_sub = self.app.every(
                 self._pump,
                 period=250,
-                async_=getattr(self.runtime, "timer_async", False),
+                async_=getattr(self.app, "timer_async", False),
             )
         except Exception:
             self._pump_sub = None
@@ -1607,7 +1607,7 @@ class _RemoteUI:
 
 
 def create(engine=None, start_page="devices"):
-    """Build the pdwidgets front end (does not call ``run_forever``)."""
+    """Build the pdwidgets front end (does not call ``App.run``)."""
     return _RemoteUI(engine=engine, start_page=start_page)
 
 
