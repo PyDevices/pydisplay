@@ -1,4 +1,5 @@
 # gallery: binaries
+# deps: pygraphics
 # SPDX-FileCopyrightText: 2024 Brad Barnett
 #
 # SPDX-License-Identifier: MIT

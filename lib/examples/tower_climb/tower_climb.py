@@ -1,4 +1,5 @@
 # gallery: binaries
+# deps: pygraphics
 """
 tower_climb.py — 1980s-style vertical scrolling platformer.
 
