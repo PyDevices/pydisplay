@@ -1,4 +1,3 @@
-# gallery: skip
 # deps: pdwidgets
 import board_config
 import appdev

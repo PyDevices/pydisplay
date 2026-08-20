@@ -1,4 +1,3 @@
-# gallery: skip
 # deps: pygraphics
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #

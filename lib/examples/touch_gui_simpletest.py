@@ -1,4 +1,3 @@
-# gallery: skip
 # deps: pygraphics
 # utils: touch_setup, gui
 """

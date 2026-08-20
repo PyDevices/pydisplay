@@ -1,4 +1,3 @@
-# gallery: skip
 # deps: lvgl
 """Minimal LVGL interactive test: tap button + animated spinning arc.
 

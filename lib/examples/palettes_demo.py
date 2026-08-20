@@ -1,5 +1,4 @@
 # deps: palettes, pygraphics
-# gallery: skip
 """
 palettes_demo.py — Palette walk cycling wheel → cube → material (no env vars).
 """

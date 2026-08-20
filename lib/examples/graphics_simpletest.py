@@ -1,4 +1,3 @@
-# gallery: skip
 # deps: palettes, pygraphics
 """
 Simple test example to demonstrate the use of pygraphics.

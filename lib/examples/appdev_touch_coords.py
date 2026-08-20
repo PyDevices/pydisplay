@@ -1,4 +1,3 @@
-# gallery: skip
 # deps: appdev
 """Guided touch capture via appdev (no LVGL). Prints coords on MOUSEBUTTONUP."""
 
