@@ -26,6 +26,59 @@ BOARD_WIDTH = 320
 BOARD_HEIGHT = 480
 
 
+# MicroPython WASM builds the errno string table out, so ``str(OSError(44))``
+# renders as a bare ``44`` where desktop MicroPython says ``[Errno 2] ENOENT``
+# and CPython/Pyodide says ``[Errno 2] No such file or directory: '<path>'``.
+# Names for the errnos a gallery demo can realistically hit.
+_ERRNO_NAMES = {
+    1: "EPERM",
+    2: "ENOENT",
+    5: "EIO",
+    9: "EBADF",
+    12: "ENOMEM",
+    13: "EACCES",
+    17: "EEXIST",
+    20: "ENOTDIR",
+    21: "EISDIR",
+    22: "EINVAL",
+    28: "ENOSPC",
+    44: "ENOENT",  # wasi/newlib numbering used by the WASM build
+}
+
+
+def describe_exception(exc):
+    """Render *exc* with its type, and decode bare-errno ``OSError``s.
+
+    ``print(exc)`` alone is not enough on MicroPython WASM: an ``OSError`` from a
+    missing file prints as ``44`` with no type, no name, and no path. Gallery
+    pages call this from their ``except`` handler so a failed demo says what
+    actually went wrong.
+    """
+    name = type(exc).__name__
+    text = str(exc)
+    # Only synthesise when the interpreter gave us nothing to work with: a bare
+    # errno. CPython/Pyodide already render "[Errno 2] No such file or
+    # directory: 'x.bmp'", which is strictly better than anything built here.
+    if isinstance(exc, OSError) and (not text or text.isdigit()):
+        errno = None
+        args = getattr(exc, "args", ()) or ()
+        if args and isinstance(args[0], int):
+            errno = args[0]
+        if errno is not None:
+            label = _ERRNO_NAMES.get(errno)
+            detail = " ".join(str(a) for a in args[1:]).strip()
+            text = "[Errno {}]{}{}".format(
+                errno,
+                " " + label if label else "",
+                " " + detail if detail else "",
+            )
+            if label in ("ENOENT", "EACCES", "EISDIR", "ENOTDIR") and not detail:
+                text += " — missing or unreadable file/directory"
+    if not text:
+        return name
+    return "{}: {}".format(name, text)
+
+
 def _quiet_install(mip_mod, package, **kwargs):
     """Run MIP without its per-file download/copy chatter."""
     had_printer = hasattr(mip_mod, "print")
@@ -100,6 +153,7 @@ def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url
         _quiet_install(mip_mod, manifest_url(name), **manifest_kw)
         # Package lands at ./<name>/; cwd/``/`` on sys.path → ``import name``.
         # Flat sibling imports are handled by package ``__init__`` / entry modules.
+        _check_package_entry(name)
     for name in modules:
         # Skip top-level fetch when the stem already lives inside a package.
         in_pkg = False
@@ -115,6 +169,33 @@ def _install_manifests_and_modules(mip_mod, modules, manifests, status=None, url
         if status:
             status("Fetching " + name + "…")
         _quiet_install(mip_mod, module_url(name), target=MANIFEST_MIP_TARGET)
+
+
+def _check_package_entry(name):
+    """Fail loudly when a manifest package has no ``__init__.py``.
+
+    The loader runs ``__import__(name)``. A directory with no ``__init__.py``
+    imports as an *empty* package on both MicroPython and CPython — no error,
+    no code run, just a black canvas. That is indistinguishable from a demo that
+    started and drew nothing, so check for the entry point instead.
+    """
+    import os
+
+    try:
+        os.stat(name + "/__init__.py")
+        return
+    except OSError:
+        pass
+    try:
+        os.stat(name + ".py")
+        return
+    except OSError:
+        pass
+    raise ImportError(
+        "package '{0}' has no {0}/__init__.py, so `import {0}` would import an "
+        "empty package and run nothing. Add an __init__.py that imports the "
+        "entry module (see examples/alien or examples/car_cluster).".format(name)
+    )
 
 
 def _install_index_deps_micropython(mip_mod, names, status):
@@ -139,10 +220,37 @@ def _import_firmware_mip():
     """Firmware ``mip`` on MicroPython WASM (not portable ``mip.py``).
 
     ``utils.path`` must run first so ``utils`` is appended, not prepended.
+
+    Guarded because the failure mode is otherwise unreadable: if ``sys.path``
+    puts ``lib`` before ``.frozen``, ``import mip`` silently resolves to the
+    mounted portable ``/lib/mip.py`` (CPython/Pyodide only) instead of frozen
+    ``mip``, and the loader dies with ``no module named '__future__'``.
     """
-    import mip
+    import sys
+
+    try:
+        import mip
+    except ImportError as exc:
+        if "__future__" in str(exc):
+            # No `from exc`: MicroPython prints "exception chaining not
+            # supported" to the console, which is the opposite of helpful here.
+            raise ImportError(  # noqa: B904
+                "`import mip` resolved to the portable /lib/mip.py (CPython/Pyodide "
+                "only) instead of MicroPython's frozen `mip`. `.frozen` must precede "
+                "`lib` on sys.path — see utils/path.py. sys.path={}".format(sys.path)
+            )
+        raise
     import utils.path  # noqa: F401
 
+    # Same shadowing, but reachable whenever portable mip.py becomes importable
+    # on MicroPython: it has no WASM transport, so installs would fail later and
+    # much less legibly than they do here.
+    if getattr(mip, "PORTABLE", False) and sys.implementation.name == "micropython":
+        raise ImportError(
+            "`import mip` resolved to the portable /lib/mip.py, which has no HTTP "
+            "transport on MicroPython WASM. `.frozen` must precede `lib` on "
+            "sys.path — see utils/path.py. sys.path={}".format(sys.path)
+        )
     return mip
 
 
