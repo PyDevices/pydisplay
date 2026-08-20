@@ -279,7 +279,7 @@
                 __import__(entry)
                 _set("")
             except Exception as e:
-                _log_print("Run failed:", e)
+                _log_print("Run failed:", ps_loader.describe_exception(e))
                 _set("Error — see console.")
                 _started = False
                 raise
