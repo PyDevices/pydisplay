@@ -17,6 +17,7 @@ Install into a device's `utils/`:
 
 ```python
 import mip
+
 mip.install("github:PyDevices/pydevices-examples/packages/utils.json", target="./utils")
 ```
 

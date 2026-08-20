@@ -208,10 +208,38 @@ def _release_gui_lock():
     _force_clear_lock()
 
 
+# The last file every one of the three packages installs. The core marker below
+# is written 2nd of ~70, so an install that dies partway (a timed-out matrix
+# cell, a killed process) leaves gui/core/<marker>.py behind with the rest of
+# the tree missing -- and _detect_core() would report the core as installed
+# forever after, so every later run failed importing gui.primitives. Requiring
+# the file mip writes last means a partial tree reads as absent and is
+# reinstalled instead of poisoning the directory.
+_TAIL_FILE = "widgets/textbox.py"
+
+
+def _tree_complete():
+    import os
+    import sys
+
+    if sys.implementation.name == "cpython":
+        path = os.path.join(_gui_dir(), *_TAIL_FILE.split("/"))
+    else:
+        path = _gui_dir() + "/" + _TAIL_FILE
+    try:
+        os.stat(path)
+        return True
+    except OSError:
+        return False
+
+
 def _detect_core():
     """Return which repo name is installed, or None. Uses files only (no import)."""
     import os
     import sys
+
+    if not _tree_complete():
+        return None
 
     found = []
     if sys.implementation.name == "cpython":

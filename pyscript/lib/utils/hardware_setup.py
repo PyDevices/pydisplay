@@ -25,7 +25,9 @@ from displaybuf import DisplayBuffer as SSD
 import appdev
 import pygraphics
 
-app = appdev.App(board_config)
+# An importing example may already have built the App; a second instance
+# would steal App.current() from the one that actually runs.
+app = appdev.App.current() or appdev.App(board_config)
 
 # Peter Hinch's GUI modules import framebuf directly. Use the same FrameBuffer
 # implementation as DisplayBuffer so Writer glyph buffers can be blitted to ssd.
