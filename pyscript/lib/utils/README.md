@@ -33,7 +33,7 @@ instead, and are installed by `pydevices-desktop`.
 | `keypins.py` | Presents key events as pin-like objects |
 | `wifi.py` | MicroPython `network.WLAN` shim used by the examples |
 | `viper_tools.py` | Optional MicroPython Viper accelerators |
-| `console.py` | Terminal-style console widget |
+| `console.py` | Scrolling character terminal; an `os.dupterm` target that mirrors the REPL onto a display |
 | `lv_encoder_emu.py` | Desktop-only soft encoder on a secondary surface, standing in for MCU `machine.Encoder` / `rotaryio` (see `examples/lv_multi_display.py`) |
 | `tft_text.py`, `tft_write.py` | @russhughes font rendering |
 | `png.py` | Experimental PNG support |
