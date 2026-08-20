@@ -9,7 +9,7 @@ From repo root:
     python tools/run_desktop_lv_tests.py
     ./tools/run_desktop_lv_tests.py
 
-For per-runtime selection, use ``python tools/lv_timer_test_kit.py`` instead.
+For per-interpreter selection, use ``python tools/lv_timer_test_kit.py`` instead.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ import tempfile
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "tools"))
 
-from lv_timer_test_kit import LVGL_RUNTIMES, run_kit  # noqa: E402
+from lv_timer_test_kit import LVGL_INTERPRETERS, run_kit  # noqa: E402
 
 
 def _temp_dir() -> Path:
@@ -40,7 +40,7 @@ DESKTOP_MODES = ("sync", "async")
 
 def main() -> int:
     return run_kit(
-        only=list(LVGL_RUNTIMES),
+        only=list(LVGL_INTERPRETERS),
         modes=DESKTOP_MODES,
         strict_clicks=True,
         results_path=DESKTOP_RESULTS,

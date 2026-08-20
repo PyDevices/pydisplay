@@ -24,7 +24,7 @@ and portable hardware utilities live in sibling
 [pydevices](https://github.com/PyDevices/pydevices), which
 also owns TestPyPI/MIP publishing. Non-LVGL examples instantiate
 `appdev.App(board_config)`; LVGL examples import it from `display_driver`.
-Board configs never own a runtime. `AutoDisplay` is imported from
+Board configs never own an `appdev.App`. `AutoDisplay` is imported from
 `displaydev.auto` only.
 
 - **Cursor Cloud (multi-repo workspace):** do not use a local
@@ -46,7 +46,7 @@ Board configs never own a runtime. `AutoDisplay` is imported from
   `android.py` (from `pydevices/bin`, on `PATH`) aid
   Jupyter, PyScript, and Android (adb stage onto `org.pydevices.runner`;
   cwd paths like CLI Python — not PyScript gallery). Opt-in matrix:
-  `tools/example_test_kit.py --only-runtime android …`.
+  `tools/example_test_kit.py --only-interpreter android …`.
 - The desktop display backend on CPython on Windows is `PGDisplay` (pygame-ce;
   `import pygame`). Prefer `python.exe` for PG work. Do **not** install pygame-ce
   into `.venv` / system `python3` on this laptop — those stay SDL-primary;
@@ -71,26 +71,26 @@ Board configs never own a runtime. `AutoDisplay` is imported from
 ### Running examples headlessly (GUI smoke tests)
 
 - **Read [`tools/README.md` — Example test matrix](tools/README.md#example-test-matrix)
-  first** — agent runbook for the cross-runtime example test system. Canonical
-  runtime list: [`tools/example_runtimes.toml`](tools/example_runtimes.toml);
+  first** — agent runbook for the cross-interpreter example test system. Canonical
+  interpreter list: [`tools/example_interpreters.toml`](tools/example_interpreters.toml);
   per-example metadata: [`tools/example_test_manifest.toml`](tools/example_test_manifest.toml).
-- **Preferred thorough gate:** example-by-example with **all selected runtimes
+- **Preferred thorough gate:** example-by-example with **all selected interpreters
   in parallel** (`--jobs 0`): **5** desktop for sync, **7** for async; both
   `PYDEVICES_TIMER_ASYNC=0` and `=1`, `--fail-fast`, line-buffered live log,
   fix after a failed example wave then resume — see
-  [Preferred method](tools/README.md#preferred-method-parallel-runtimes-fail-fast-both-timer-modes)
+  [Preferred method](tools/README.md#preferred-method-parallel-interpreters-fail-fast-both-timer-modes)
   and [Windows PE under WSL](tools/README.md#windows-pe-under-wsl).
   Do **not** forward `SDL_*` to `*.exe` (PE windows should appear; unix stays
   headless from the shell export). A PE `hang` with a live window means quit
   failed, not that PE failed to start. `--curated-only` is smoke only.
-- `--only-example` / `--only-runtime` take **space-separated** ids on one flag
-  (`--only-runtime circuitpython python.exe`). Repeating the flag keeps only
+- `--only-example` / `--only-interpreter` take **space-separated** ids on one flag
+  (`--only-interpreter circuitpython python.exe`). Repeating the flag keeps only
   the last list — see [tools/README.md](tools/README.md#matrix-commands).
 - Quick headless CPython smoke:
 
   ```bash
   SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
-    .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv
+    .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-interpreter cpython-venv
   ```
 
 - PyScript hangs / CDP: prefer Playwright helpers and
@@ -100,7 +100,7 @@ Board configs never own a runtime. `AutoDisplay` is imported from
 ### `PYDEVICES_TIMER_ASYNC` (agents / matrix)
 
 Host defaults and env semantics:
-[Runtime — `timer_async`](https://github.com/PyDevices/pydevices/blob/main/docs/application-runtime.md#timer_async).
+[App and board config — `timer_async`](https://github.com/PyDevices/pydevices/blob/main/docs/app-and-board-config.md#timer_async).
 Examples never read this variable — only library `board_config` and harnesses
 that call `displaydev.env_set`.
 
@@ -110,10 +110,10 @@ relying on OS environ. Shell export remains a valid host shortcut:
 
 ```bash
 PYDEVICES_TIMER_ASYNC=1 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
-  .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv
+  .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-interpreter cpython-venv
 ```
 
-`lv_test_timer.py` follows `runtime.timer_async` and does not set env vars.
+`lv_test_timer.py` follows `app.timer_async` and does not set env vars.
 To force async on desktop for that example (or the LVGL kit), set
 `PYDEVICES_TIMER_ASYNC=1` on the parent process before launch, or use a kit that
 passes `--timer-async`.
@@ -131,7 +131,7 @@ passes `--timer-async`.
 ### MCU: no `_thread` for network / blocking work
 
 Full guidance:
-[pydevices — Background work on MicroPython (`_thread`)](https://github.com/PyDevices/pydevices/blob/main/docs/application-runtime.md#background-work-on-micropython-_thread).
+[pydevices — Background work on MicroPython (`_thread`)](https://github.com/PyDevices/pydevices/blob/main/docs/app-and-board-config.md#background-work-on-micropython-_thread).
 App pattern: queue work and drain on the main tick — see `roku_widgets` /
 `roku_lvgl` / `roku_graphics` (`_run_bg` + `_drain_bg`). Do not “fix” this in
 `appdev` with speculative reentrancy guards — keep the pattern in the app.
@@ -142,8 +142,8 @@ App pattern: queue work and drain on the main tick — see `roku_widgets` /
   `.venv/bin/pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ pydevices-lvgl`
   (see https://github.com/PyDevices/lvgl-python). The update script installs it.
 - `display_driver` (frozen in MP/CP LVGL firmwares; bundled with `pydevices-lvgl`)
-  owns the LVGL `event_loop` (tick via `runtime.on_tick`, `asyncio` from
-  `multimer`) and claims runtime display refresh so LVGL presents frames from
+  owns the LVGL `event_loop` (tick via `app.on_tick`, `asyncio` from
+  `multimer`) and claims app display refresh so LVGL presents frames from
   `task_handler`. SoT: [lvgl-bindings](https://github.com/PyDevices/lvgl-bindings)
   `python/display_driver.py` — not shipped from this repo.
 - Test LVGL timers with `tools/lv_timer_test_kit.py` (modes: `sync`, `async`).

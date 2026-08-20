@@ -18,7 +18,7 @@ climbers. Early work focused on:
 - Landing/collision physics stable enough for repeated jumps up procedurally
   placed branches
 - The shared periodic timer via ``appdev.App`` for display refresh
-  (see `https://github.com/PyDevices/pydevices/blob/main/docs/application-runtime.md` for the timer/display split)
+  (see `https://github.com/PyDevices/pydevices/blob/main/docs/app-and-board-config.md` for the timer/display split)
 
 Gameplay bugs (flicker, respawn deaths, camera clamp at the crown, bot pathing)
 were fixed iteratively using the trace stream and bot playtests below rather than
@@ -184,7 +184,7 @@ The example matrix runs via:
 ```bash
 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
   .venv/bin/python tools/example_test_kit.py --no-unit-tests \
-  --only-runtime cpython-venv --only-example tower_climb
+  --only-interpreter cpython-venv --only-example tower_climb
 ```
 
 ## Quick reference — game argv (`_cfg.py`)

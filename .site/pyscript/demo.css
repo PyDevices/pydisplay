@@ -1,5 +1,5 @@
 /*
- * pydevices-examples PyScript demo — runtime/stage stylesheet
+ * pydevices-examples PyScript demo — interpreter/stage stylesheet
  *
  * Loaded *in addition to* site.css (shared PyDevices chrome) by micropython.html
  * and pyodide.html. Everything here is specific to the parametric loader's
@@ -75,45 +75,45 @@ html {
   margin-bottom: 26px;
 }
 
-.runtime-page > .site-header,
-.runtime-page > .site-footer,
-.runtime-page .loader-main > :not(.play-area) {
+.interpreter-page > .site-header,
+.interpreter-page > .site-footer,
+.interpreter-page .loader-main > :not(.play-area) {
   display: none;
 }
 
-.runtime-page .loader-main {
+.interpreter-page .loader-main {
   width: min(760px, calc(100% - 24px));
   margin: 0 auto;
   padding-top: 0;
   padding-bottom: 0;
 }
 
-.runtime-page .play-area {
+.interpreter-page .play-area {
   grid-template-columns: minmax(0, auto);
   grid-template-rows: auto auto;
   justify-content: center;
   margin-bottom: 0;
 }
 
-.runtime-page .play-area > .display-column {
+.interpreter-page .play-area > .display-column {
   grid-row: 1;
 }
 
-.runtime-page .play-area > .console-panel {
+.interpreter-page .play-area > .console-panel {
   grid-column: 1;
   grid-row: 2;
   justify-self: center;
 }
 
-.runtime-page {
+.interpreter-page {
   min-height: 0;
 }
 
-.runtime-page .device {
+.interpreter-page .device {
   padding: 6px 8px 16px;
 }
 
-.runtime-page .console-panel {
+.interpreter-page .console-panel {
   padding: 16px 9px 6px;
 }
 
@@ -189,36 +189,36 @@ html {
     grid-row: 3;
   }
 
-  .runtime-page .play-area {
+  .interpreter-page .play-area {
     grid-template-rows: auto auto;
   }
 
-  .runtime-page .play-area > .display-column {
+  .interpreter-page .play-area > .display-column {
     grid-row: 1;
   }
 
-  .runtime-page .play-area > .console-panel {
+  .interpreter-page .play-area > .console-panel {
     grid-row: 2;
   }
 }
 
 @media (min-width: 760px) {
-  .runtime-page.runtime-standalone .loader-main {
+  .interpreter-page.interpreter-standalone .loader-main {
     width: min(760px, calc(100% - 24px));
   }
 
-  .runtime-page.runtime-standalone.runtime-with-console .play-area {
+  .interpreter-page.interpreter-standalone.interpreter-with-console .play-area {
     grid-template-columns: auto auto;
     grid-template-rows: auto;
     column-gap: 18px;
   }
 
-  .runtime-page.runtime-standalone.runtime-with-console .play-area > .display-column {
+  .interpreter-page.interpreter-standalone.interpreter-with-console .play-area > .display-column {
     grid-column: 1;
     grid-row: 1;
   }
 
-  .runtime-page.runtime-standalone.runtime-with-console .play-area > .console-panel {
+  .interpreter-page.interpreter-standalone.interpreter-with-console .play-area > .console-panel {
     grid-column: 2;
     grid-row: 1;
   }

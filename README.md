@@ -69,11 +69,11 @@ See the
 and [board configs](https://github.com/PyDevices/pydevices/blob/main/docs/board-configs.md)
 for complete device setup.
 
-## Runtime ownership
+## App ownership
 
 Board configs describe hardware. They export neutral pieces such as
 `display_drv`, `touch_read`, `host_read`, and `timer_async`; they do not create
-an application runtime.
+an application-level `appdev.App`.
 
 Non-LVGL examples in this repo opt into the optional `appdev` coordinator:
 
@@ -82,9 +82,9 @@ import board_config
 from board_config import display_drv
 import appdev
 
-runtime = appdev.App(board_config)
+app = appdev.App(board_config)
 
-runtime.run_forever()
+app.run()
 ```
 
 LVGL examples use the coordinator bundled with the LVGL binding and do not
@@ -92,9 +92,9 @@ import `appdev`:
 
 ```python
 from board_config import display_drv
-from display_driver import runtime
+from display_driver import app
 
-runtime.run_forever()
+app.run()
 ```
 
 This separation keeps hardware policy out of board configs and lets applications
@@ -123,7 +123,7 @@ because installing only what a board needs matters there.
 | `lib/utils/` | Example helpers and third-party GUI adapters |
 | `.site/pyscript/` | PyScript gallery and reusable PWA shell |
 | `docs/` | Peter Hinch GUI integration, the TFT GUI stub, and screenshots |
-| `tools/` | Cross-runtime example and LVGL test harnesses |
+| `tools/` | Cross-interpreter example and LVGL test harnesses |
 | `packages/` | GitHub MIP manifests for examples and helpers |
 
 ## Related repositories
@@ -133,7 +133,7 @@ because installing only what a board needs matters there.
 - [lvgl-bindings](https://github.com/PyDevices/lvgl-bindings) — shared LVGL binding and `display_driver` source
 - [lvgl-micropython](https://github.com/PyDevices/lvgl-micropython),
   [lvgl-circuitpython](https://github.com/PyDevices/lvgl-circuitpython), and
-  [lvgl-python](https://github.com/PyDevices/lvgl-python) — runtime-specific LVGL distributions
+  [lvgl-python](https://github.com/PyDevices/lvgl-python) — interpreter-specific LVGL distributions
 - [pygraphics](https://github.com/PyDevices/pygraphics),
   [palettes](https://github.com/PyDevices/palettes), and
   [pdwidgets](https://github.com/PyDevices/pdwidgets) — companion packages
@@ -149,7 +149,7 @@ because installing only what a board needs matters there.
 ```
 
 See [AGENTS.md](AGENTS.md) and [tools/README.md](tools/README.md) for the
-cross-runtime example matrix. Contributions to reusable libraries and hardware
+cross-interpreter example matrix. Contributions to reusable libraries and hardware
 support belong in pydevices; examples, integrations, and gallery work
 belong here.
 

@@ -28,7 +28,6 @@ import board_config
 import appdev
 
 app = appdev.App(board_config)
-runtime = app
 from displaydev import color565
 import keys
 from pygraphics import BMP565, FrameBuffer, RGB565, rect, text8
@@ -799,8 +798,8 @@ _refresh_claim = None
 
 def _take_over_display_refresh():
     global _refresh_claim
-    if runtime is not None and _refresh_claim is None:
-        _refresh_claim = runtime.claim_display_refresh()
+    if app is not None and _refresh_claim is None:
+        _refresh_claim = app.pause_refresh()
 
 
 def _restore_display_refresh():
@@ -1176,7 +1175,7 @@ def _on_wait_complete():
 
 def _tick(_=None):
     global _hold_left, _phase
-    if app.quit_requested if runtime else False:
+    if app.quit_requested if app else False:
         _cleanup()
         return
     if _phase == PHASE_DONE:

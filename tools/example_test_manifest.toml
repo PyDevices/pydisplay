@@ -130,7 +130,7 @@ deps = ["utils", "tft_config"]
 
 # --- LVGL timer smoke test (matrix) ---
 # Also covered by tools/lv_timer_test_kit.py (``lv_test_timer.py kit``).
-# Follows runtime.timer_async; does not set PYDEVICES_TIMER_ASYNC itself.
+# Follows app.timer_async; does not set PYDEVICES_TIMER_ASYNC itself.
 
 [examples.lv_test_timer]
 import = "lv_test_timer"
@@ -179,7 +179,7 @@ bootstrap = "headless"
 deps = ["core"]
 oneshot_timeout_s = 30
 # Not under lib/examples/; loader cannot mip-install this path in the browser.
-skip_runtimes = ["pyscript"]
+skip_interpreters = ["pyscript"]
 
 # --- expanded runnable set ---
 

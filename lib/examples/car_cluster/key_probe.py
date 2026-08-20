@@ -30,7 +30,7 @@ if _PKG not in sys.path:
     sys.path.insert(0, _PKG)
 
 import display_driver  # noqa: E402, F401
-from display_driver import runtime  # noqa: E402
+from display_driver import app  # noqa: E402
 import lvgl as lv  # noqa: E402
 
 import events  # noqa: E402
@@ -85,6 +85,6 @@ print("Try: arrow keys, Enter, digits 0-9 (top row and keypad).")
 print("Ctrl+Q to quit.\n")
 
 for et in (events.KEYDOWN, events.KEYUP):
-    runtime.on(et, _on_key)
+    app.on(et, _on_key)
 
-runtime.run_forever()
+app.run()

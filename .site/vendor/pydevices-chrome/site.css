@@ -4,7 +4,7 @@
  * Design tokens + layout primitives shared by every PyDevices GitHub Pages
  * site (org root, lvgl-bindings, pydevices-examples, and the second-wave module
  * pages). Keep this file focused on *chrome*: header/nav, hero, buttons,
- * cards, footer, typography. Project-specific / demo-runtime styles belong
+ * cards, footer, typography. Project-specific / demo-interpreter styles belong
  * in a local stylesheet loaded after this one.
  *
  * Theme: dark by default; `<html data-theme="light">` switches to the light
@@ -1133,7 +1133,7 @@ pre code {
   overflow-y: auto;
 }
 
-/* Runtime Matrix Table */
+/* Interpreter Matrix Table */
 .matrix-wrap {
   overflow-x: auto;
   margin-top: 16px;

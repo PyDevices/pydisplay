@@ -38,10 +38,10 @@ if _EXAMPLES not in sys.path:
     sys.path.insert(0, _EXAMPLES)
 
 import board_config  # noqa: E402 — before display_driver so LVGL wiring sees it
-import display_driver  # noqa: E402 — wires LVGL display/input into the runtime
+import display_driver  # noqa: E402 — wires LVGL display/input into the app
 import lvgl as lv  # noqa: E402
 from board_config import display_drv  # noqa: E402
-from display_driver import runtime  # noqa: E402
+from display_driver import app  # noqa: E402
 from roku_engine import (  # noqa: E402
     FRONTEND_BUTTONS,
     app_label,
@@ -2131,7 +2131,7 @@ class _RokuLvgl:
 
         if self._pending_scan:
             if self._scan_yield:
-                # Skip one pump so the runtime tick can paint first.
+                # Skip one pump so the app tick can paint first.
                 self._scan_yield = False
             else:
                 self._pending_scan = False
@@ -2212,14 +2212,14 @@ class _RokuLvgl:
 
 
 def create(engine=None, start_page="devices"):
-    """Build the LVGL front end (does not call ``run_forever``)."""
+    """Build the LVGL front end (does not call ``App.run``)."""
     return _RokuLvgl(engine=engine, start_page=start_page)
 
 
 def run(engine=None, start_page="devices"):
-    """Create the UI and hand control to ``runtime.run_forever()``."""
+    """Create the UI and hand control to ``app.run()``."""
     create(engine=engine, start_page=start_page)
-    runtime.run_forever()
+    app.run()
 
 
 # Direct import / example kit: auto-start. ``roku_remote`` sets

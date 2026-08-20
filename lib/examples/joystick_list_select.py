@@ -1,15 +1,12 @@
 # gallery: skip
 # deps: pdwidgets
 import board_config
-import board_config
-import appdev
-
-app = appdev.App(board_config)
-runtime = app
 import appdev
 import pdwidgets as pd
 
-display = pd.Display(board_config.display_drv, runtime,40)
+app = appdev.App(board_config)
+
+display = pd.Display(board_config.display_drv, app,40)
 screen = pd.Screen(display, visible=False)
 
 top, bottom, main = screen.top, screen.bottom, screen.main
@@ -42,6 +39,6 @@ def joystick_callback(event):
             if event.value[1] != 0:
                 select_item(event.value[1] > 0)
 
-runtime.on_device(appdev.JOYSTICK, joystick_callback)
+app.on(pd.events.JOYHATMOTION, joystick_callback)
 
 app.run()

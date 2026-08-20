@@ -4,7 +4,7 @@ Example-matrix test flag (importable on MicroPython and CPython).
 example_test_wrapper.py / PyScript harness.html set ENABLED = True before
 running bounded examples. On single-threaded hosts the harness cannot inject
 quit from another thread; call :func:`install_deadline_hook` so
-provider ``timer.sleep_ms`` / ``Runtime.poll`` cooperatively exit after
+provider ``timer.sleep_ms`` / ``appdev.App.poll`` cooperatively exit after
 ``DURATION_S``.
 
 The underlying API is ``multimer.set_deadline_hook`` — development and
@@ -20,23 +20,23 @@ _deadline_fired = False
 
 
 def check_deadline():
-    """If test mode is active and ``DURATION_S`` elapsed, request runtime quit.
+    """If test mode is active and ``DURATION_S`` elapsed, request app quit.
 
     Returns True when the deadline has fired (possibly just now).
     """
     global _start_s, _deadline_fired
     if not ENABLED:
         return False
-    # Keep-alive only: do not arm or fire until ``run`` / ``run_forever`` is on
-    # the stack. ``runtime is None`` must also wait — an early timer tick during
-    # import used to start the clock, fire with no runtime, set
+    # Keep-alive only: do not arm or fire until ``run`` is on
+    # the stack. ``app is None`` must also wait — an early timer tick during
+    # import used to start the clock, fire with no app, set
     # ``_deadline_fired``, then never quit once the blocking loop started.
     try:
         import sys
 
         module = sys.modules.get("display_driver")
-        if module is not None and hasattr(module, "runtime"):
-            rt = getattr(module, "runtime", None)
+        if module is not None and hasattr(module, "app"):
+            rt = getattr(module, "app", None)
         else:
             appdev = sys.modules.get("appdev")
             rt = (
@@ -46,11 +46,9 @@ def check_deadline():
             )
     except Exception:
         rt = None
-    # appdev.App uses ``_blocking_run_forever``; LVGL display_driver.Runtime
-    # uses ``_blocking`` for the same "inside run_forever/run" gate.
-    if rt is None or not (
-        getattr(rt, "_blocking_run_forever", False) or getattr(rt, "_blocking", False)
-    ):
+    # appdev.App uses ``_blocking_run``; LVGL display_driver.app
+    # uses ``_blocking`` for the same "inside run" gate.
+    if rt is None or not (getattr(rt, "_blocking_run", False) or getattr(rt, "_blocking", False)):
         return False
     if getattr(rt, "_quit_requested", False):
         _deadline_fired = True

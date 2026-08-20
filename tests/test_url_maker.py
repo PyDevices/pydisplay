@@ -18,7 +18,7 @@ class UrlMakerTests(unittest.TestCase):
         q = url(
             modules=("hello",),
             deps=("palettes",),
-            runtime="micropython",
+            interpreter="micropython",
         )
         self.assertEqual(q, "?modules=hello")
 
@@ -26,12 +26,12 @@ class UrlMakerTests(unittest.TestCase):
         q = url(
             modules=("hello",),
             deps=("palettes",),
-            runtime="pyodide",
+            interpreter="pyodide",
         )
         self.assertEqual(q, "?modules=hello&deps=pydevices-palettes,pydevices-pygraphics")
 
-    def test_runtime_none_returns_both(self):
-        out = url(modules=("hello",), deps=("palettes",), runtime=None)
+    def test_interpreter_none_returns_both(self):
+        out = url(modules=("hello",), deps=("palettes",), interpreter=None)
         self.assertEqual(
             out,
             {
@@ -41,7 +41,7 @@ class UrlMakerTests(unittest.TestCase):
         )
 
     def test_deps_expand_both_channels(self):
-        out = urls_from_deps(modules=("hello",), deps=("palettes",), runtime=None)
+        out = urls_from_deps(modules=("hello",), deps=("palettes",), interpreter=None)
         self.assertEqual(out["micropython"], "?modules=hello")
         self.assertEqual(
             out["pyodide"],
@@ -52,7 +52,7 @@ class UrlMakerTests(unittest.TestCase):
         out = urls_from_deps(
             modules=("calc_lvgl", "calc_engine"),
             deps=("lvgl",),
-            runtime=None,
+            interpreter=None,
         )
         self.assertEqual(out["micropython"], "?modules=calc_lvgl,calc_engine")
         self.assertEqual(
@@ -64,7 +64,7 @@ class UrlMakerTests(unittest.TestCase):
         out = urls_from_deps(
             manifests=("car_cluster",),
             deps=("lvgl",),
-            runtime=None,
+            interpreter=None,
         )
         self.assertEqual(out["micropython"], "?manifests=car_cluster")
         self.assertEqual(
@@ -76,13 +76,13 @@ class UrlMakerTests(unittest.TestCase):
         self.assertEqual(rewrite_wheel("pygraphics"), "pydevices-pygraphics")
         self.assertEqual(rewrite_mip("pygraphics"), "pygraphics")
         # MP skips frozen pygraphics; Pyodide installs the prefixed TestPyPI dist.
-        out = urls_from_deps(modules=("x",), deps=("pygraphics",), runtime=None)
+        out = urls_from_deps(modules=("x",), deps=("pygraphics",), interpreter=None)
         self.assertEqual(out["micropython"], "?modules=x")
         self.assertEqual(out["pyodide"], "?modules=x&deps=pydevices-pygraphics")
         q = url(
             modules=("x",),
             deps=("pygraphics",),
-            runtime="micropython",
+            interpreter="micropython",
             profile="firmware-cmods",
         )
         self.assertEqual(q, "?modules=x")
@@ -91,7 +91,7 @@ class UrlMakerTests(unittest.TestCase):
         out = urls_from_deps(
             modules=("calc_widgets", "calc_engine"),
             deps=("pdwidgets",),
-            runtime=None,
+            interpreter=None,
         )
         self.assertEqual(out["micropython"], "?modules=calc_widgets,calc_engine")
         self.assertEqual(
@@ -104,7 +104,7 @@ class UrlMakerTests(unittest.TestCase):
             modules=("demo",),
             manifests=("alien",),
             deps=("palettes",),
-            runtime="micropython",
+            interpreter="micropython",
         )
         self.assertEqual(q, "?modules=demo&manifests=alien")
 
@@ -120,7 +120,7 @@ class UrlMakerTests(unittest.TestCase):
         q = url(
             modules=("x",),
             deps=("github:PyDevices/pydevices-examples/packages/foo.json",),
-            runtime="micropython",
+            interpreter="micropython",
         )
         self.assertEqual(
             q,
@@ -136,7 +136,7 @@ class UrlMakerTests(unittest.TestCase):
         self.assertEqual(rewrite_mip("usdl2-py"), "usdl2")
 
     def test_usdl2_mp_frozen_pyodide_wheels(self):
-        out = urls_from_deps(modules=("x",), deps=("usdl2",), runtime=None)
+        out = urls_from_deps(modules=("x",), deps=("usdl2",), interpreter=None)
         self.assertEqual(out["micropython"], "?modules=x")
         self.assertEqual(out["pyodide"], "?modules=x&deps=usdl2")
 

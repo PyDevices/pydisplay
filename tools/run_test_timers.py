@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Run the sibling core pydevices timer probe on all desktop subprocess runtimes.
+Run the sibling core pydevices timer probe on all desktop subprocess interpreters.
 
-Always includes micropython.exe and python.exe from ~/bin (via example_runtimes.toml).
+Always includes micropython.exe and python.exe from ~/bin (via example_interpreters.toml).
 
 From repo root:
     python tools/run_test_timers.py
@@ -24,11 +24,11 @@ sys.path.insert(0, str(REPO / "tools"))
 from example_test_kit import (  # noqa: E402
     compute_exit_code,
     example_timing,
+    interpreter_timing_defaults,
+    load_interpreters,
     load_manifest,
-    load_runtimes,
     print_table,
     run_case,
-    runtime_timing_defaults,
 )
 
 EXAMPLE_ID = "test_timers"
@@ -53,8 +53,8 @@ PROBE_COLUMNS = (
     "multimer.auto.Timer",
 )
 
-# Desktop subprocess runtimes for timer probes (order matches typical dev setup).
-DESKTOP_RUNTIMES = (
+# Desktop subprocess interpreters for timer probes (order matches typical dev setup).
+DESKTOP_INTERPRETERS = (
     "micropython",
     "micropython.exe",
     "circuitpython",
@@ -87,10 +87,10 @@ def _parse_probe_results(stdout: str) -> dict[str, str]:
 
 
 def _write_report(rows: list[dict]) -> None:
-    runtimes = [r["runtime"] for r in rows]
+    interpreters = [r["interpreter"] for r in rows]
     matrix: dict[str, dict[str, str]] = {}
     for row in rows:
-        rt = row["runtime"]
+        rt = row["interpreter"]
         stdout = row.get("stdout_tail") or ""
         matrix[rt] = _parse_probe_results(stdout)
 
@@ -104,12 +104,12 @@ def _write_report(rows: list[dict]) -> None:
         "",
         "## Summary matrix",
         "",
-        "| Timer backend | " + " | ".join(runtimes) + " |",
-        "|---------------|" + "|".join(":-----------:" for _ in runtimes) + "|",
+        "| Timer backend | " + " | ".join(interpreters) + " |",
+        "|---------------|" + "|".join(":-----------:" for _ in interpreters) + "|",
     ]
     for probe in PROBE_COLUMNS:
         cells = []
-        for rt in runtimes:
+        for rt in interpreters:
             status = matrix.get(rt, {}).get(probe, "?")
             if status == "PASS":
                 cells.append("**PASS**")
@@ -142,11 +142,11 @@ def _write_report(rows: list[dict]) -> None:
 
 
 def main() -> int:
-    runtime_data = __import__("example_test_kit", fromlist=["load_toml"]).load_toml(
-        REPO / "tools" / "example_runtimes.toml"
+    interpreter_data = __import__("example_test_kit", fromlist=["load_toml"]).load_toml(
+        REPO / "tools" / "example_interpreters.toml"
     )
-    runtime_defaults = runtime_data.get("defaults", {})
-    all_runtimes = load_runtimes()
+    interpreter_defaults = interpreter_data.get("defaults", {})
+    all_interpreters = load_interpreters()
     manifest_defaults, all_examples = load_manifest()
 
     example_meta = all_examples.get(EXAMPLE_ID)
@@ -155,14 +155,14 @@ def main() -> int:
         return 2
 
     rows = []
-    for runtime_id in DESKTOP_RUNTIMES:
-        runtime_meta = all_runtimes.get(runtime_id)
-        if runtime_meta is None:
-            print(f"Skipping {runtime_id} (not in runtimes.toml)", file=sys.stderr)
+    for interpreter_id in DESKTOP_INTERPRETERS:
+        interpreter_meta = all_interpreters.get(interpreter_id)
+        if interpreter_meta is None:
+            print(f"Skipping {interpreter_id} (not in interpreters.toml)", file=sys.stderr)
             rows.append(
                 {
                     "example": EXAMPLE_ID,
-                    "runtime": runtime_id,
+                    "interpreter": interpreter_id,
                     "summary": "missing",
                     "returncode": -1,
                     "timed_out": False,
@@ -173,17 +173,17 @@ def main() -> int:
             )
             continue
 
-        effective = runtime_timing_defaults(runtime_defaults, runtime_meta)
+        effective = interpreter_timing_defaults(interpreter_defaults, interpreter_meta)
         _duration, _timeout = example_timing(example_meta, manifest_defaults, effective)
-        print(f"Running {EXAMPLE_ID} @ {runtime_id}...", file=sys.stderr)
+        print(f"Running {EXAMPLE_ID} @ {interpreter_id}...", file=sys.stderr)
         rows.append(
             run_case(
                 EXAMPLE_ID,
                 example_meta,
-                runtime_id,
-                runtime_meta,
+                interpreter_id,
+                interpreter_meta,
                 manifest_defaults,
-                runtime_defaults,
+                interpreter_defaults,
             )
         )
 

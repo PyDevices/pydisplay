@@ -8,7 +8,7 @@ button in ``lv_test_timer.py``.
 
 import display_driver  # noqa: F401 — wires LVGL flush + input + event_loop
 import lvgl as lv
-from display_driver import runtime
+from display_driver import app
 
 _taps = 0
 
@@ -44,4 +44,4 @@ def build_ui():
 
 build_ui()
 print("lvgl_test: button on default screen")
-runtime.run_forever()
+app.run()

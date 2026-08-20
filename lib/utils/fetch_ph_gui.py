@@ -29,7 +29,7 @@ _PACKAGES = {
 # gui.core.* is mid-import during patching. Treat nested calls as success.
 _IN_FETCH = False
 
-# Cross-process lock directory under utils/ — parallel matrix runtimes share
+# Cross-process lock directory under utils/ — parallel matrix interpreters share
 # this tree and otherwise race on empty/install of utils/gui/.
 _LOCK_NAME = ".gui_fetch_lock"
 _LOCK_WAIT_S = 90
@@ -317,7 +317,7 @@ def _patch_machine_pin():
 
     Uses a plain class instance rather than ``types.ModuleType(name)`` — the
     latter's attribute exists on MicroPython-WASM but its constructor raises
-    ``TypeError: can't create 'module' instances`` (native runtime
+    ``TypeError: can't create 'module' instances`` (native interpreter
     limitation). A plain object works identically for ``sys.modules``
     caching: ``import machine`` returns whatever is registered there.
     """

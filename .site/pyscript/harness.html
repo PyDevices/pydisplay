@@ -51,7 +51,7 @@
                         example: plan.entryName,
                         status: 'error',
                         error: 'autotest timeout (no Python EXAMPLE_RESULT)',
-                        runtime: 'pyscript',
+                        interpreter: 'pyscript',
                         duration_s: plan.autotestDuration,
                         smoke: 'js_timeout'
                     };
@@ -178,7 +178,7 @@ def _finish_autotest(entry, *, status="ok", error=None, quit_injected=False):
         "backend": backend,
         "duration_s": duration,
         "quit_injected": bool(quit_injected),
-        "runtime": "pyscript",
+        "interpreter": "pyscript",
     }
     if error:
         result["error"] = error
@@ -186,36 +186,36 @@ def _finish_autotest(entry, *, status="ok", error=None, quit_injected=False):
     _post_debug(result)
 
 
-def _autotest_runtime(ensure_app_runtime=False):
-    """Return the appdev Runtime used for quit (LVGL display_driver or app_runtime).
+def _autotest_app(ensure_app_setup=False):
+    """Return the appdev App used for quit (LVGL display_driver or hardware_setup).
 
     Oneshot demos often only touch ``board_config.display_drv`` and never import
-    ``app_runtime``. After the demo returns, pass ``ensure_app_runtime=True`` so
+    ``hardware_setup``. After the demo returns, pass ``ensure_app_setup=True`` so
     autotest can still hook BrowserBack → ``before_quit``. Do not force that
-    import before the demo: LVGL entries use ``display_driver.runtime`` instead.
+    import before the demo: LVGL entries use ``display_driver.app`` instead.
     """
-    for module_name in ("display_driver", "app_runtime"):
+    for module_name in ("display_driver", "hardware_setup"):
         module = sys.modules.get(module_name)
-        candidate = getattr(module, "runtime", None) if module is not None else None
+        candidate = getattr(module, "app", None) if module is not None else None
         if candidate is not None:
             return candidate
-    if not ensure_app_runtime:
+    if not ensure_app_setup:
         return None
     try:
-        import app_runtime  # noqa: F401
+        import hardware_setup  # noqa: F401
     except Exception as exc:
-        print("autotest: app_runtime import failed:", exc)
+        print("autotest: hardware_setup import failed:", exc)
         return None
-    module = sys.modules.get("app_runtime")
-    return getattr(module, "runtime", None) if module is not None else None
+    module = sys.modules.get("hardware_setup")
+    return getattr(module, "app", None) if module is not None else None
 
 
-def _arm_autotest_on_quit(entry, ensure_app_runtime=False):
-    """Emit EXAMPLE_RESULT when Runtime processes quit (e.g. BrowserBack chord)."""
-    runtime = _autotest_runtime(ensure_app_runtime=ensure_app_runtime)
-    if runtime is None:
+def _arm_autotest_on_quit(entry, ensure_app_setup=False):
+    """Emit EXAMPLE_RESULT when the app processes quit (e.g. BrowserBack chord)."""
+    app = _autotest_app(ensure_app_setup=ensure_app_setup)
+    if app is None:
         return None
-    prev = getattr(runtime, "before_quit", None)
+    prev = getattr(app, "before_quit", None)
 
     def _hook():
         if callable(prev):
@@ -225,33 +225,33 @@ def _arm_autotest_on_quit(entry, ensure_app_runtime=False):
                 pass
         _finish_autotest(entry, quit_injected=True)
 
-    runtime.before_quit = _hook
+    app.before_quit = _hook
     try:
         from js import console
 
         console.log("AUTOTEST_READY=" + str(entry))
     except Exception:
         pass
-    return runtime
+    return app
 
 
-def _pump_autotest_runtime(runtime):
+def _pump_autotest_app(app):
     """Keep draining display events after oneshots so the quit chord can land.
 
-    Loop/async demos call ``runtime.run_forever()`` themselves. Oneshots that only
+    Loop/async demos call ``app.run()`` themselves. Oneshots that only
     blit and return leave PSDisplay's key queue unread unless we arm the pump.
     """
-    if runtime is None:
+    if app is None:
         return
     try:
-        runtime.run_forever()
+        app.run()
     except Exception as exc:
-        print("autotest: runtime.run_forever failed:", exc)
+        print("autotest: app.run failed:", exc)
 
 
 def _schedule_pyscript_autotest(entry):
     """After import: wait for external Ctrl+Q (or request_quit); do not auto-ok on a timer."""
-    _pump_autotest_runtime(_arm_autotest_on_quit(entry, ensure_app_runtime=True))
+    _pump_autotest_app(_arm_autotest_on_quit(entry, ensure_app_setup=True))
 
 
 def _install_test_mode():
@@ -345,7 +345,7 @@ def _deps_from_entry(entry):
     return []
 
 def _built_in(name):
-    """True when the runtime already provides ``name`` (native or frozen module)."""
+    """True when the interpreter already provides ``name`` (native or frozen module)."""
     try:
         __import__(name)
     except Exception:
@@ -361,9 +361,9 @@ def _install_deps(names):
     for which in names:
         # Native modules compiled into the wasm build (lvgl) have no MIP package,
         # so installing one can only 404. Frozen pure-Python deps are equally
-        # already present. Either way the runtime's copy is the authoritative one.
+        # already present. Either way the interpreter's copy is the authoritative one.
         if _built_in(which):
-            print("MIP skip (provided by runtime):", which)
+            print("MIP skip (provided by interpreter):", which)
             continue
         print("MIP install:", which)
         mip.install(which, index=MIP_LIB_INDEX)
@@ -476,14 +476,14 @@ def _run():
     if _autotest_enabled():
         _install_test_mode()
         # Preload board_config and arm before_quit *before* importing the demo.
-        # Many demos call runtime.run_forever() at import time and never return.
+        # Many demos call app.run() at import time and never return.
         try:
             import board_config  # noqa: F401
         except Exception as exc:
             _import_error[0] = "{}: {}".format(type(exc).__name__, exc)
             _finish_autotest(entry, status="error", error=_import_error[0])
             raise
-        # Prefer app_runtime so oneshots (display_drv only) still get a quit hook
+        # Prefer hardware_setup so oneshots (display_drv only) still get a quit hook
         # before demos that never return from import.
         _arm_autotest_on_quit(entry)
     # Nested package examples (e.g. modules=roku_lvgl&manifests=roku_remote)
@@ -514,7 +514,7 @@ def _run():
     # #endregion
     if _autotest_enabled() and not _autotest_sent[0]:
         # Oneshot demos that return from import still need a quit path + event pump.
-        _pump_autotest_runtime(_arm_autotest_on_quit(entry, ensure_app_runtime=True))
+        _pump_autotest_app(_arm_autotest_on_quit(entry, ensure_app_setup=True))
 
 _run()
 </script>

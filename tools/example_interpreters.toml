@@ -1,4 +1,4 @@
-# Canonical runtime targets for cross-runtime example tests.
+# Canonical interpreter targets for cross-interpreter example tests.
 # Agents: read this file and tools/README.md (Example test matrix) before running.
 #
 # Run from repo root:
@@ -11,7 +11,7 @@ oneshot_timeout_s = 10
 
 # Subprocess interpreters — cwd is lib/ unless noted.
 
-[runtimes.micropython]
+[interpreters.micropython]
 platform = "micropython"
 display_backend = "SDLDisplay"
 available_on = ["linux", "wsl", "macos"]
@@ -21,7 +21,7 @@ cwd = "lib"
 resolve = ["PATH", "~/bin/micropython"]
 setup_notes = "MicroPython unix build with SDL display support resolved via PATH or ~/bin/micropython."
 
-[runtimes."micropython.exe"]
+[interpreters."micropython.exe"]
 platform = "micropython"
 display_backend = "SDLDisplay"
 available_on = ["windows", "wsl"]
@@ -32,7 +32,7 @@ resolve = ["PATH", "~/bin/micropython.exe"]
 setup_notes = "MicroPython Windows (.exe). Async modes may be limited. Resolved via PATH or ~/bin/micropython.exe."
 timeout_s = 25
 
-[runtimes.circuitpython]
+[interpreters.circuitpython]
 platform = "circuitpython"
 display_backend = "SDLDisplay"
 available_on = ["linux", "wsl", "macos"]
@@ -42,7 +42,7 @@ cwd = "lib"
 resolve = ["PATH", "~/bin/circuitpython"]
 setup_notes = "CircuitPython unix with SDL resolved via PATH or ~/bin/circuitpython."
 
-[runtimes.cpython-venv]
+[interpreters.cpython-venv]
 platform = "cpython"
 display_backend = "SDLDisplay"
 available_on = ["linux", "wsl", "macos"]
@@ -52,7 +52,7 @@ cwd = "lib"
 resolve = ["repo:.venv/bin/python"]
 setup_notes = "Repo-root .venv (source .venv/bin/activate equivalent)."
 
-[runtimes."python.exe"]
+[interpreters."python.exe"]
 platform = "cpython"
 display_backend = "SDLDisplay"
 available_on = ["windows", "wsl"]
@@ -62,9 +62,9 @@ cwd = "lib"
 resolve = ["PATH", "~/bin/python.exe"]
 setup_notes = "Windows CPython on PATH."
 
-# Launcher runtimes — cwd is repo root.
+# Launcher interpreters — cwd is repo root.
 
-[runtimes.pyscript]
+[interpreters.pyscript]
 platform = "pyscript"
 display_backend = "PSDisplay"
 available_on = ["linux", "wsl", "macos", "windows"]
@@ -74,7 +74,7 @@ command_template = ["./scripts/pyscript.sh", "-m", "{example}", "--no-open"]
 cwd = "."
 setup_notes = "Requires tools/serve.py on port 8000. Autotest uses harness.html?autotest=1. Headless: .venv/bin/pip install -r requirements-dev.txt && .venv/bin/playwright install chromium"
 
-[runtimes.jupyter]
+[interpreters.jupyter]
 platform = "jupyter"
 display_backend = "JNDisplay"
 available_on = ["linux", "wsl", "macos"]
@@ -84,7 +84,7 @@ command_template = ["jupyter.py", "examples/{example}.py", "--no-open"]
 cwd = "lib"
 setup_notes = "Requires .venv with jupyterlab, ipywidgets, ipyevents, pillow. Host tool: jupyter.py (on PATH)."
 
-[runtimes.android]
+[interpreters.android]
 platform = "android"
 display_backend = "SDLDisplay"
 available_on = ["wsl", "linux"]
@@ -96,4 +96,4 @@ cwd = "lib"
 duration_s = 20
 timeout_s = 120
 oneshot_timeout_s = 45
-setup_notes = "Requires adb.exe (WSL) or adb, a connected emulator/device, and the PyDevices Runner APK. Host tool: android.py (on PATH). Opt in with --only-runtime android (not in the default 5/7 desktop matrix)."
+setup_notes = "Requires adb.exe (WSL) or adb, a connected emulator/device, and the PyDevices Runner APK. Host tool: android.py (on PATH). Opt in with --only-interpreter android (not in the default 5/7 desktop matrix)."

@@ -48,7 +48,7 @@ jobs:
           cp pydevices-examples.toml _site/pyscript/pydevices-examples.toml
           cp pydevices-examples.toml _site/pydevices-examples.toml
           touch _site/.nojekyll
-          # Stamp CACHE_NAME from a hash of the PWA shell and the vendored runtimes
+          # Stamp CACHE_NAME from a hash of the PWA shell and the vendored interpreters
           # (STATIC_ASSETS + CACHE_KEY_EXTRAS + sw.js).
           python scripts/pyscript_stamp_pwa_cache.py _site/pyscript
 

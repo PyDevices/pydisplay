@@ -9,7 +9,7 @@ Usage (cwd is ``lib/``)::
 automatic selection.
 
 Environment variables cover direct runs, but Windows MicroPython / CPython
-launched from WSL cannot see exported ones, so a sweep across runtimes sets
+launched from WSL cannot see exported ones, so a sweep across interpreters sets
 ``MULTIMER_BACKEND`` inside the child before importing ``multimer.auto`` and
 uses ``displaydev.env_set()`` for other ``--env`` values. The target script keeps the real command line
 (``sys.argv`` is read-only on CircuitPython), so scripts must locate their own
@@ -51,7 +51,7 @@ def _bootstrap_path(source_workspace=False):
     directories = ["utils", "lib", "."]
     if source_workspace:
         # The LVGL matrix validates coordinated sibling branches before their
-        # packages and frozen runtime copies are released.
+        # packages and frozen interpreter copies are released.
         directories.extend(
             (
                 "../../pydevices/drivers",

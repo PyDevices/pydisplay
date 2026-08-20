@@ -2,7 +2,7 @@
 """Stamp ``CACHE_NAME`` in the PWA service worker from a shell content hash.
 
 The hash is fed by the precached shell assets listed in ``sw.js``
-(``STATIC_ASSETS``), the runtime files listed in ``CACHE_KEY_EXTRAS``, and the
+(``STATIC_ASSETS``), the interpreter files listed in ``CACHE_KEY_EXTRAS``, and the
 service-worker source itself (with a stable ``CACHE_NAME`` placeholder). Example
 / ``lib/`` / packages churn does **not** change the cache id, so installed PWAs
 are not prompted to update on every Pages deploy.
@@ -10,7 +10,7 @@ are not prompted to update on every Pages deploy.
 ``CACHE_KEY_EXTRAS`` exists because the interpreters are cached opportunistically
 by the fetch handler (``shouldCache`` accepts any same-origin GET) under
 ``CACHE_NAME``, but are far too large to precache. Without them in the hash, a
-rebuilt runtime never bumps the cache id and returning visitors keep the stale
+rebuilt interpreter never bumps the cache id and returning visitors keep the stale
 copy.
 
 Usage::
@@ -70,7 +70,7 @@ def parse_static_assets(sw_text: str) -> list[str]:
 
 
 def parse_cache_key_extras(sw_text: str) -> list[str]:
-    """Runtime files that feed the hash but are deliberately not precached."""
+    """Interpreter files that feed the hash but are deliberately not precached."""
     m = CACHE_KEY_EXTRAS_RE.search(sw_text)
     if not m:
         raise SystemExit("sw.js: missing CACHE_KEY_EXTRAS array")

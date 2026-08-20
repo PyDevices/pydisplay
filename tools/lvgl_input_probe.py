@@ -104,7 +104,7 @@ def run_selftest():
 
 def run_interactive():
     display_driver, lv = _load_lvgl()
-    runtime = display_driver.runtime
+    app = display_driver.app
     map_key = display_driver._lv_key_from_event
     downs = {}
 
@@ -121,8 +121,8 @@ def run_interactive():
     print("lvgl_input_probe: focus the display window, then press keys.")
     print("Try letters, Shift+letter, Shift+1, arrows, Tab, modifiers, and F1.")
     for event_type in (events.KEYDOWN, events.KEYUP):
-        runtime.on(event_type, _on_key)
-    runtime.run_forever()
+        app.on(event_type, _on_key)
+    app.run()
 
 
 def main(argv=None):

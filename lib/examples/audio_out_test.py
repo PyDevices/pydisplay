@@ -1,5 +1,5 @@
 # gallery: skip
-"""440 Hz tone smoke test for board_peripherals.audio_out (no display/runtime)."""
+"""440 Hz tone smoke test for board_peripherals.audio_out (no display/app)."""
 
 import math
 import struct

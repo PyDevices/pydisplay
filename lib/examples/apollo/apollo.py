@@ -41,7 +41,6 @@ import board_config
 import appdev
 
 app = appdev.App(board_config)
-runtime = app
 import dsky
 import time
 
@@ -127,7 +126,7 @@ def _handle_key(key):
 
 
 def _tick(_=None):
-    if app.quit_requested if runtime else False:
+    if app.quit_requested if app else False:
         return
 
     _update_time()
@@ -142,7 +141,7 @@ def _tick(_=None):
     if _key_busy:
         return
 
-    # Keypad is wired to runtime events; read() drains presses filled by auto-service.
+    # Keypad is wired to app events; read() drains presses filled by auto-service.
     if keys := dsky.keypad.read():
         for key in keys:
             _handle_key(key)

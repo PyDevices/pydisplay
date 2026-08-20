@@ -20,7 +20,6 @@ import keys
 from pygraphics import Draw
 
 display_drv = board_config.display_drv
-runtime = app
 # Built here rather than taken from board_config so it can ask for the
 # interactive profile: the default is buffered for throughput, which a synth
 # writing at realtime pays as note-to-sound delay.
@@ -118,7 +117,7 @@ class Piano:
     def __init__(self):
         self.draw = Draw(display_drv)
         self.eng = AudioEngine(audio_out, chunk_ms=40, master=0.5, wave="piano")
-        self.eng.attach(runtime)
+        self.eng.attach(app)
 
         self.header_h = max(36, HEIGHT // 8)
         self.pad = max(4, min(WIDTH, HEIGHT) // 64)

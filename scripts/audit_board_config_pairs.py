@@ -42,11 +42,11 @@ def _pairs(root: Path) -> list[tuple[Path, Path]]:
     return pairs
 
 
-def _owns_event_runtime(text: str) -> bool:
+def _owns_event_app(text: str) -> bool:
     return bool(
         re.search(r"^\s*(?:import\s+appdev\b|from\s+appdev\b)", text, re.MULTILINE)
-        or re.search(r"^\s*(?:runtime|app|broker)\s*=", text, re.MULTILINE)
-        or re.search(r"\bappdev\.(?:App|Runtime|Broker)\b|\bbroker\.create\b", text)
+        or re.search(r"^\s*(?:app|broker)\s*=", text, re.MULTILINE)
+        or re.search(r"\bappdev\.(?:App|Broker)\b|\bbroker\.create\b", text)
     )
 
 
@@ -97,8 +97,8 @@ def audit_pair(mp_path: Path, cp_path: Path) -> list[str]:
     cp_text = cp_path.read_text(encoding="utf-8")
 
     for label, text in (("MP", mp_text), ("CP", cp_text)):
-        if _owns_event_runtime(text):
-            issues.append(f"{rel}: {label} owns application event runtime")
+        if _owns_event_app(text):
+            issues.append(f"{rel}: {label} owns an application-level appdev.App")
 
     mp_touch = _touch_kind(mp_text)
     cp_touch = _touch_kind(cp_text)

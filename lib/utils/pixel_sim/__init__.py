@@ -51,10 +51,10 @@ PIXEL_WIDTH = _env_int("PIXEL_SIM_WIDTH", 64)
 PIXEL_HEIGHT = _env_int("PIXEL_SIM_HEIGHT", 16)
 
 # Reuse the standard scaled desktop/browser/notebook backend as the output surface.
-# The host application wires its own optional periodic-refresh runtime; the simulator
+# The host application wires its own optional periodic-refresh app; the simulator
 # presents frames itself via PixelDisplay.show(), so stop that shared timer to
 # avoid a redundant refresh loop (and its signal-based teardown on CPython).
-# The runtime itself is kept (re-exported below) so apps can still poll it for
+# The app itself is kept (re-exported below) so apps can still poll it for
 # window-close / quit events; poll() is independent of the timer.
 _backend = _host.display_drv
 if _host_app is not None and hasattr(_host_app, "stop_timer"):

@@ -34,9 +34,8 @@ try:
 except Exception:
     pass
 
-display = pd.Display(display_drv, runtime)
+display = pd.Display(display_drv, app)
 pal = display.pal
-runtime = app
 
 W = display.width
 H = display.height
@@ -57,7 +56,7 @@ eng = None
 try:
     audio_out = board_config.audio_out
     eng = AudioEngine(audio_out, chunk_ms=40, master=0.45, wave="sine")
-    eng.attach(runtime)
+    eng.attach(app)
 except Exception:
     pass
 

@@ -9,7 +9,7 @@ Shares :class:`calc_engine.CalcEngine` with the graphics and LVGL front ends.
 Layout, font scales, radii, and padding are derived from display size so the
 UI scales from 320x480 through 640x960 and similar desktop sizes.
 
-Input and frame rendering are driven by the shared ``appdev.Runtime``:
+Input and frame rendering are driven by the shared ``appdev.App``:
 ``pd.Display`` wires them in at construction, so the example just builds the UI
 and hands control to ``app.run()``.
 """
@@ -25,13 +25,12 @@ import board_config
 import appdev
 
 app = appdev.App(board_config)
-runtime = app
 import pdwidgets as pd
 from calc_engine import CalcEngine
 
 pd.DEBUG = False
 
-display = pd.Display(board_config.display_drv, runtime)
+display = pd.Display(board_config.display_drv, app)
 pal = display.pal
 
 W = display.width
@@ -200,8 +199,8 @@ screen.add_event_cb(pd.events.KEYDOWN, lambda sender, e: _on_key(getattr(e, "uni
 _refresh()
 screen.visible = True
 
-# Canonical entry: pdwidgets wires input + rendering into the shared runtime at
-# Display construction, so this just keeps the app alive. run_forever() blocks
+# Canonical entry: pdwidgets wires input + rendering into the shared app at
+# Display construction, so this just keeps the app alive. app.run() blocks
 # when run as a program and returns immediately in an interactive REPL on
 # signal-driven backends, so the same call is always correct.
 app.run()

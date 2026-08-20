@@ -3,7 +3,6 @@ import board_config
 import appdev
 
 app = appdev.App(board_config)
-runtime = app
 from keypins import KeyPins
 
 import keys
@@ -35,7 +34,7 @@ print(f"{buttons.fire.name=}")
 print(f"{buttons.fire.key=}")
 print(f"{buttons.fire.keyname=}\n")
 
-# KeyPins updates on KEYDOWN/KEYUP via the runtime auto-service (no app poll).
+# KeyPins updates on KEYDOWN/KEYUP via the app auto-service (no app poll).
 app.on([app.events.KEYDOWN, app.events.KEYUP], buttons)
 
 print(f"Press any of these keys:  {[button.keyname for button in buttons]}")

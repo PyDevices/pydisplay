@@ -15,7 +15,6 @@ import board_config
 import appdev
 
 app = appdev.App(board_config)
-runtime = app
 from color_setup import ssd as canvas
 from pygraphics import BMP565
 
@@ -71,7 +70,7 @@ canvas.show(draw_sprite(*st["location"], a, fwd))
 
 
 def _tick(_=None):
-    if app.quit_requested if runtime else False:
+    if app.quit_requested if app else False:
         return
     location = st["location"]
     direction = st["dir"]

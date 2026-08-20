@@ -6,7 +6,7 @@ Flow:
   2. Wait until the demo has imported (``AUTOTEST_READY`` / ``MARK:after_import_entry``)
   3. Soak ``duration_s`` while monitoring console + pageerrors (fail on real errors)
   4. Focus ``#display_canvas`` and send the default quit chord **Ctrl+Q**
-  5. Wait for ``EXAMPLE_RESULT=`` (harness emits it from ``runtime.before_quit``)
+  5. Wait for ``EXAMPLE_RESULT=`` (harness emits it from ``app.before_quit``)
 
 Python ``print`` on harness goes to the page ``#log`` panel (not always the
 browser console). When ``stream_log=True`` (CLI / ``pyscript.sh --autotest``),
@@ -132,7 +132,7 @@ def run_autotest(
             "example": example_name_from_url(url),
             "status": "error",
             "error": f"playwright not installed: {exc}",
-            "runtime": "pyscript",
+            "interpreter": "pyscript",
         }
 
     soak = float(duration_s if soak_s is None else soak_s)
@@ -176,7 +176,7 @@ def run_autotest(
                 "example": example,
                 "status": "error",
                 "error": f"page.goto failed: {exc}",
-                "runtime": "pyscript",
+                "interpreter": "pyscript",
             }
 
         # --- wait for import ready (or early EXAMPLE_RESULT error) ---
@@ -214,7 +214,7 @@ def run_autotest(
                 "example": example,
                 "status": "error",
                 "error": early_errs[0][:300],
-                "runtime": "pyscript",
+                "interpreter": "pyscript",
                 "console_errors": early_errs[:5],
             }
 
@@ -262,7 +262,7 @@ def run_autotest(
                 "example": example,
                 "status": "error",
                 "error": soak_errors[0][:300],
-                "runtime": "pyscript",
+                "interpreter": "pyscript",
                 "phase": "soak",
                 "console_errors": soak_errors[:20],
             }
@@ -326,7 +326,7 @@ def run_autotest(
                 "example": example,
                 "status": "error",
                 "error": f"quit chord failed: {exc}",
-                "runtime": "pyscript",
+                "interpreter": "pyscript",
                 "phase": "quit_chord",
             }
 
@@ -344,7 +344,7 @@ def run_autotest(
                         "example": example,
                         "status": "error",
                         "error": text[:300],
-                        "runtime": "pyscript",
+                        "interpreter": "pyscript",
                         "phase": "after_quit",
                     }
             page.wait_for_timeout(100)
@@ -358,7 +358,7 @@ def run_autotest(
             "example": example,
             "status": "error",
             "error": "no EXAMPLE_RESULT after Ctrl+Q quit chord",
-            "runtime": "pyscript",
+            "interpreter": "pyscript",
             "phase": "after_quit",
             "console_tail": [m["text"][:120] for m in console_msgs[-8:]],
         }

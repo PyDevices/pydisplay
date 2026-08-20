@@ -52,7 +52,7 @@ Prefer these over poking the IDE browser when a demo hangs.
 
 **Common wedge:** a sync provider's `timer.sleep_ms` (or any other blocking
 sleep) on the **main thread** often stalls `page.evaluate` and screenshots — the
-browser never yields. Prefer `runtime.run_forever()` and async sleep patterns.
+browser never yields. Prefer `app.run()` and async sleep patterns.
 Capture console/CDP output with `ps_debug.py` before assuming a gallery or
 package-map regression.
 
@@ -64,18 +64,18 @@ python tools/serve.py   # separate terminal
 
 ## Example test matrix
 
-**Source of truth** for the cross-runtime example test system: this section
-(workflow), [`example_runtimes.toml`](example_runtimes.toml) (runtime command
+**Source of truth** for the cross-interpreter example test system: this section
+(workflow), [`example_interpreters.toml`](example_interpreters.toml) (interpreter command
 templates), and [`example_test_manifest.toml`](example_test_manifest.toml)
 (per-example metadata). **Platform** is the product category (see
-[pydevices/docs/displaydev.md](https://github.com/PyDevices/pydevices/blob/main/docs/displaydev.md)); **runtime** is the
+[pydevices/docs/displaydev.md](https://github.com/PyDevices/pydevices/blob/main/docs/displaydev.md)); **interpreter** is the
 concrete launcher used in automation.
 
 | Script | Purpose |
 |--------|---------|
-| [`example_test_kit.py`](example_test_kit.py) | Cross-runtime example matrix |
+| [`example_test_kit.py`](example_test_kit.py) | Cross-interpreter example matrix |
 | [`example_test_manifest.toml`](example_test_manifest.toml) | Per-example metadata |
-| [`example_runtimes.toml`](example_runtimes.toml) | Runtime command templates |
+| [`example_interpreters.toml`](example_interpreters.toml) | Interpreter command templates |
 | [`sibling_repos.py`](sibling_repos.py) | Discover sibling `lib/` paths for matrix runs |
 
 ### Unit tests first (default gate)
@@ -84,21 +84,21 @@ concrete launcher used in automation.
 .venv/bin/python -m unittest discover -s tests
 ```
 
-### Preferred method (parallel runtimes, fail-fast, both timer modes)
+### Preferred method (parallel interpreters, fail-fast, both timer modes)
 
-For thorough verification (timer/multimer/runtime changes, or “run the full
-matrix”), prefer **example-by-example**, **all selected runtimes in parallel**
+For thorough verification (timer/multimer/interpreter changes, or “run the full
+matrix”), prefer **example-by-example**, **all selected interpreters in parallel**
 per example (`--jobs 0`, default), **`--fail-fast`**, and **both**
 `PYDEVICES_TIMER_ASYNC` modes as separate kit runs.
 
-| Mode | Runtimes |
+| Mode | Interpreters |
 |------|----------|
 | Sync (`PYDEVICES_TIMER_ASYNC=0`) | **5** desktop SDL: `micropython`, `micropython.exe`, `circuitpython`, `cpython-venv`, `python.exe` |
 | Async (`PYDEVICES_TIMER_ASYNC=1`) | **7** — the five above plus `pyscript`, `jupyter` |
-| Android (opt-in) | `android` — `pydevices/bin/android.py` (or `~/bin/android.py` on PATH) + emulator/device + `org.pydevices.runner` APK; **not** in the default 5/7 lists (`--only-runtime android`) |
+| Android (opt-in) | `android` — `pydevices/bin/android.py` (or `~/bin/android.py` on PATH) + emulator/device + `org.pydevices.runner` APK; **not** in the default 5/7 lists (`--only-interpreter android`) |
 
 Default timing is already short (`duration_s=2`, `timeout_s=15` in the
-runtimes/manifest defaults). After each example’s parallel wave finishes, if
+interpreters/manifest defaults). After each example’s parallel wave finishes, if
 any cell failed, stop before the next example; fix the root cause, then resume.
 
 ```bash
@@ -113,26 +113,26 @@ ASYNC_RT="$SYNC_RT pyscript jupyter"
 
 set -o pipefail   # keep kit exit status through tee
 
-# Sync — 5 runtimes concurrently per example
+# Sync — 5 interpreters concurrently per example
 PYDEVICES_TIMER_ASYNC=0 stdbuf -oL -eL \
   .venv/bin/python tools/example_test_kit.py --no-unit-tests --fail-fast \
-  --only-runtime $SYNC_RT \
+  --only-interpreter $SYNC_RT \
   --results-json /tmp/pydevices-examples-matrix/sync.json \
   2>&1 | stdbuf -oL -eL tee /tmp/pydevices-examples-matrix/sync.log
 
 # After sync is clean — async, all 7
 PYDEVICES_TIMER_ASYNC=1 stdbuf -oL -eL \
   .venv/bin/python tools/example_test_kit.py --no-unit-tests --fail-fast \
-  --only-runtime $ASYNC_RT \
+  --only-interpreter $ASYNC_RT \
   --results-json /tmp/pydevices-examples-matrix/async.json \
   2>&1 | stdbuf -oL -eL tee /tmp/pydevices-examples-matrix/async.log
 ```
 
-Live log lines: `Running <example> @ N runtime(s) in parallel...`, then
-`start` / `done` per runtime. `--fail-fast` waits for the current example’s
+Live log lines: `Running <example> @ N interpreter(s) in parallel...`, then
+`start` / `done` per interpreter. `--fail-fast` waits for the current example’s
 workers, then exits if any cell failed. Resume with `--only-example`
 (remaining ids) or by restarting that mode from the failed example. Use
-`--jobs 1` for fully serial runtimes when isolating races. See
+`--jobs 1` for fully serial interpreters when isolating races. See
 [Windows PE under WSL](#windows-pe-under-wsl) for PE window / quit notes.
 
 `--curated-only` is a smoke shortcut, not a substitute for the preferred gate.
@@ -140,22 +140,22 @@ workers, then exits if any cell failed. Resume with `--only-example`
 ### Matrix commands (scoped / smoke)
 
 ```bash
-# Curated set across available runtimes (smoke)
+# Curated set across available interpreters (smoke)
 .venv/bin/python tools/example_test_kit.py --curated-only
 
 # Scope (space-separated ids on one flag; see note below)
-.venv/bin/python tools/example_test_kit.py --only-example calculator --only-runtime micropython
-.venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv micropython
+.venv/bin/python tools/example_test_kit.py --only-example calculator --only-interpreter micropython
+.venv/bin/python tools/example_test_kit.py --no-unit-tests --only-interpreter cpython-venv micropython
 .venv/bin/python tools/example_test_kit.py --no-unit-tests \
-  --only-example calc_lvgl lv_test_timer --only-runtime circuitpython
+  --only-example calc_lvgl lv_test_timer --only-interpreter circuitpython
 
-# Order: --order examples (default) / --order runtimes
+# Order: --order examples (default) / --order interpreters
 # Broader: --all-except-harness
 ```
 
-`--only-example` and `--only-runtime` use `nargs="+"`: pass multiple ids
+`--only-example` and `--only-interpreter` use `nargs="+"`: pass multiple ids
 space-separated after **one** occurrence of the flag. Repeating the flag
-silently keeps only the last list (`--only-runtime circuitpython --only-runtime
+silently keeps only the last list (`--only-interpreter circuitpython --only-interpreter
 python.exe` runs just `python.exe`). Same rule for `lv_timer_test_kit.py`
 `--only` / `--modes`.
 
@@ -163,7 +163,7 @@ python.exe` runs just `python.exe`). Same rule for `lv_timer_test_kit.py`
 
 ```bash
 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy \
-  .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-runtime cpython-venv
+  .venv/bin/python tools/example_test_kit.py --no-unit-tests --only-interpreter cpython-venv
 ```
 
 Unix subprocesses see that shell export. Windows `.exe` behavior is different —
@@ -172,7 +172,7 @@ see [Windows PE under WSL](#windows-pe-under-wsl).
 **Async timers on desktop:** the kit forwards `PYDEVICES_TIMER_ASYNC` as wrapper
 `--timer-async` (uses `env_set`, works for Windows PE under WSL). Shell export
 is the preferred way to select mode for a full kit run (see Preferred method
-above). Semantics: [Runtime — timer_async](https://github.com/PyDevices/pydevices/blob/main/docs/application-runtime.md#timer_async-in-srclibboard_configpy).
+above). Semantics: [App and board config — timer_async](https://github.com/PyDevices/pydevices/blob/main/docs/app-and-board-config.md#timer_async-in-srclibboard_configpy).
 
 ### Windows PE under WSL
 
@@ -196,10 +196,10 @@ Fix the quit path (wrapper deadline / `pydevices_test_mode` / inject) rather
 than treating PE as “failed to launch.”
 
 **Scheduling:** with `--order examples` and `--jobs 0` (default), **all**
-selected runtimes for an example — including both `.exe` launchers — run
+selected interpreters for an example — including both `.exe` launchers — run
 concurrently.
 
-**Results:** live `Running <example> @ <runtime>...` lines on stderr; summary
+**Results:** live `Running <example> @ <interpreter>...` lines on stderr; summary
 table at end (or when `--fail-fast` stops). Full JSON defaults to the system
 temp dir (`example_test_results.json`), not a path under the repo. Override
 with `--results-json PATH`.
@@ -215,11 +215,11 @@ Desktop matrices use repo `.venv` (`cpython-venv`) plus interpreters on
 `PATH` / `~/bin` (`micropython`, `circuitpython`). `micropython.exe` / `python.exe` are
 Windows binaries and cannot run in a Linux cloud sandbox.
 
-After usermod changes that affect these binaries or PyScript vendor wasm, run `cmods/build_runtimes.sh`.
+After usermod changes that affect these binaries or PyScript vendor wasm, run `cmods/build_interpreters.sh`.
 
 **`micropython.exe` matrix:** no `threading` / `_thread`. The example wrapper
-uses a `Runtime.poll` deadline quit (not a multimer SDL quit timer). With
-`pydevices_test_mode.ENABLED`, `Runtime` skips auto-refresh wiring so examples
+uses a `appdev.App.poll` deadline quit (not a multimer SDL quit timer). With
+`pydevices_test_mode.ENABLED`, `appdev.App` skips auto-refresh wiring so examples
 that call `show()` themselves avoid a competing SDL refresh timer. WSL PE
 scheduling and SDL env rules:
 [Windows PE under WSL](#windows-pe-under-wsl).
@@ -244,7 +244,7 @@ writes `.pth` files). The harness auto-discovers the same paths via
 
 ### PyScript matrix
 
-Start or reuse `python tools/serve.py`, then re-run with `--only-runtime pyscript`.
+Start or reuse `python tools/serve.py`, then re-run with `--only-interpreter pyscript`.
 Headless needs Playwright (`.venv/bin/pip install -r requirements-dev.txt` and
 `.venv/bin/playwright install chromium`). Without it, pyscript cells report
 `needs_playwright` (not a hard failure). Troubleshooting hangs / CDP:
@@ -255,15 +255,15 @@ Headless needs Playwright (`.venv/bin/pip install -r requirements-dev.txt` and
 | Script | Purpose |
 |--------|---------|
 | [`run_desktop_lv_tests.py`](run_desktop_lv_tests.py) | LVGL desktop matrix (sync/async, strict clicks) |
-| [`lv_timer_test_kit.py`](lv_timer_test_kit.py) | Full LVGL timer matrix (sync/async, all runtimes) |
-| [`run_test_timers.py`](run_test_timers.py) | Run the sibling core multimer timer probe across desktop runtimes |
+| [`lv_timer_test_kit.py`](lv_timer_test_kit.py) | Full LVGL timer matrix (sync/async, all interpreters) |
+| [`run_test_timers.py`](run_test_timers.py) | Run the sibling core multimer timer probe across desktop interpreters |
 | [`multimer_backend_preload.py`](multimer_backend_preload.py) | Force one multimer backend, then run a script |
 
 **Comparing multimer providers:** `lv_timer_test_kit.py --backend NAME` (or
 `example_test_kit.py` with `MULTIMER_BACKEND` set, which forwards
 `--multimer-backend` to the wrapper). Both set `MULTIMER_BACKEND` inside the
 child before importing `multimer.auto`, so they also work for the Windows
-`.exe` runtimes, which cannot read WSL-exported env vars. Runtimes lacking that
+`.exe` interpreters, which cannot read WSL-exported env vars. Interpreters lacking that
 provider report `unavailable` and do not fail the run. See the
 [multimer automatic-selection documentation](https://github.com/PyDevices/pydevices/blob/main/docs/multimer.md#automatic-selection).
 

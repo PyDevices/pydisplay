@@ -1,7 +1,7 @@
 """Build PyScript loader query strings from logical install intents.
 
 Callers pass logical names matching example headers (``# deps:``, ``# modules:``,
-``# manifests:``). This module rewrites deps per runtime, drops builtins for the
+``# manifests:``). This module rewrites deps per interpreter, drops builtins for the
 active profile, and emits query-only strings
 (``?modules=…&manifests=…&deps=…``). Prepend ``micropython.html`` /
 ``pyodide.html`` (or ``mp.html`` / ``py.html``) yourself.
@@ -11,13 +11,13 @@ via micropip.
 
     from url_maker import urls_from_deps
 
-    urls_from_deps(modules=("hello",), deps=("palettes",), runtime="micropython")
+    urls_from_deps(modules=("hello",), deps=("palettes",), interpreter="micropython")
     # -> '?modules=hello'  (palettes frozen in MP WASM)
 
-    urls_from_deps(modules=("hello",), deps=("palettes",), runtime="pyodide")
+    urls_from_deps(modules=("hello",), deps=("palettes",), interpreter="pyodide")
     # -> '?modules=hello&deps=palettes,pygraphics'
 
-    urls_from_deps(modules=("hello",), deps=("palettes",), runtime=None)
+    urls_from_deps(modules=("hello",), deps=("palettes",), interpreter=None)
     # -> {'micropython': '?modules=hello',
     #     'pyodide': '?modules=hello&deps=palettes,pygraphics'}
 """
@@ -26,7 +26,7 @@ from __future__ import annotations
 
 from typing import Iterable
 
-RUNTIMES = ("micropython", "pyodide")
+INTERPRETERS = ("micropython", "pyodide")
 
 # Profiles → logical names already present (frozen/native, or toml-mounted).
 # Skip those names when emitting deps for that profile.
@@ -76,7 +76,7 @@ PROFILES: dict[str, frozenset[str]] = {
     ),
 }
 
-# Runtime-aware rewrites: logical name → install name (or None to omit).
+# Interpreter-aware rewrites: logical name → install name (or None to omit).
 _MIP_REWRITE: dict[str, str | None] = {
     "lvgl": None,  # C-only; no MIP package
     "pydevices-lvgl": None,
@@ -98,7 +98,7 @@ _WHEEL_REWRITE: dict[str, str | None] = {
     "usdl2-py": "usdl2",  # prefer native TestPyPI wheel when available
 }
 
-# Logical deps that need pygraphics at runtime but often omit it from headers.
+# Logical deps that need pygraphics at interpreter but often omit it from headers.
 _WHEEL_PULLS_PYGRAPHICS = frozenset({"palettes", "pdwidgets"})
 
 
@@ -204,11 +204,11 @@ def url(
     modules: Iterable[str] = (),
     manifests: Iterable[str] = (),
     deps: Iterable[str] = (),
-    runtime: str | None = None,
+    interpreter: str | None = None,
     profile: str | None = None,
     **kwargs: object,
 ) -> str | dict[str, str]:
-    """Emit a loader query string, or both runtimes when ``runtime`` is None.
+    """Emit a loader query string, or both interpreters when ``interpreter`` is None.
 
     Package installs always use the ``deps=`` query key (MIP on MicroPython,
     micropip on Pyodide). Unknown keyword arguments raise ``TypeError``.
@@ -221,8 +221,10 @@ def url(
     manifests_t = _dedupe(_as_tuple(manifests))
     deps_t = _as_tuple(deps)
 
-    if runtime is not None and runtime not in RUNTIMES:
-        raise ValueError(f"runtime must be one of {RUNTIMES!r} or None, got {runtime!r}")
+    if interpreter is not None and interpreter not in INTERPRETERS:
+        raise ValueError(
+            f"interpreter must be one of {INTERPRETERS!r} or None, got {interpreter!r}"
+        )
 
     def _one(rt: str) -> str:
         if profile is None:
@@ -238,9 +240,9 @@ def url(
         ]
         return _join_query(parts)
 
-    if runtime is None:
-        return {rt: _one(rt) for rt in RUNTIMES}
-    return _one(runtime)
+    if interpreter is None:
+        return {rt: _one(rt) for rt in INTERPRETERS}
+    return _one(interpreter)
 
 
 def urls_from_deps(
@@ -248,14 +250,14 @@ def urls_from_deps(
     modules: Iterable[str] = (),
     manifests: Iterable[str] = (),
     deps: Iterable[str] = (),
-    runtime: str | None = None,
+    interpreter: str | None = None,
     profile: str | None = None,
 ) -> str | dict[str, str]:
-    """Emit loader queries from logical ``deps`` (rewritten per runtime)."""
+    """Emit loader queries from logical ``deps`` (rewritten per interpreter)."""
     return url(
         modules=modules,
         manifests=manifests,
         deps=deps,
-        runtime=runtime,
+        interpreter=interpreter,
         profile=profile,
     )

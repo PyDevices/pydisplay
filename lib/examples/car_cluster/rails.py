@@ -88,7 +88,7 @@ class Rails:
 
             btn.add_event_cb(_make(i), lv.EVENT.CLICKED, None)
             # Arrow focus switches the center page; set_active is deferred via
-            # drain_pending() on a Runtime tick (and skipped while lv._nesting!=0).
+            # drain_pending() on an app tick (and skipped while lv._nesting!=0).
             btn.add_event_cb(_make(i), lv.EVENT.FOCUSED, None)
             self.buttons.append(btn)
 
@@ -130,7 +130,7 @@ class Rails:
     def drain_pending(self):
         """Apply a deferred tabview change outside the LVGL event callback stack.
 
-        Called from a Runtime tick. Soft-timer ticks are delivered via
+        Called from an app tick. Soft-timer ticks are delivered via
         ``micropython.schedule`` and can run while LVGL is mid-render (the VM
         resumes inside ``flush_cb``); ``lv._nesting`` != 0 there, and calling
         ``set_active`` would re-enter LVGL — the intermittent hard-wedge seen

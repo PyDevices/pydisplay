@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Cross-runtime example smoke test harness.
+Cross-interpreter example smoke test harness.
 
 From repo root:
     python tools/example_test_kit.py
-    python tools/example_test_kit.py --order runtimes
-    python tools/example_test_kit.py --only-example calculator --only-runtime micropython
-    python tools/example_test_kit.py --only-runtime circuitpython python.exe
+    python tools/example_test_kit.py --order interpreters
+    python tools/example_test_kit.py --only-example calculator --only-interpreter micropython
+    python tools/example_test_kit.py --only-interpreter circuitpython python.exe
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ def _ensure_user_micropy_lib(env: dict) -> None:
     A shell ``MICROPYPATH=.:lib:utils`` *replaces* the interpreter default path,
     which drops both ``.frozen`` (lvgl / ``display_driver``) and
     ``~/.micropython/lib`` (``board_config`` from pydevices-desktop / mip).
-    Append those entries when missing so subprocess runtimes still resolve them
+    Append those entries when missing so subprocess interpreters still resolve them
     after the working-tree ``lib/`` prefix.
     """
     cur = env.get("MICROPYPATH")
@@ -57,7 +57,7 @@ def _ensure_user_micropy_lib(env: dict) -> None:
 REPO = Path(__file__).resolve().parent.parent
 TOOLS = REPO / "tools"
 SRC = REPO / "lib"
-RUNTIMES_TOML = TOOLS / "example_runtimes.toml"
+INTERPRETERS_TOML = TOOLS / "example_interpreters.toml"
 MANIFEST_TOML = TOOLS / "example_test_manifest.toml"
 WRAPPER = TOOLS / "example_test_wrapper.py"
 SERVE = TOOLS / "serve.py"
@@ -96,10 +96,10 @@ ANDROID_ONESHOT_HOLD_S = 20
 ANDROID_OBSERVE_S = 20
 ANDROID_STAGE_TIMEOUT_S = 120
 PYSCRIPT_PORT = 8000
-SUBPROCESS_RUNTIME_KIND = "subprocess"
-RUNTIME_TIMING_KEYS = ("duration_s", "timeout_s", "oneshot_timeout_s")
+SUBPROCESS_INTERPRETER_KIND = "subprocess"
+INTERPRETER_TIMING_KEYS = ("duration_s", "timeout_s", "oneshot_timeout_s")
 # Desktop SDL subprocesses — preferred sync matrix (skip async-only hosts).
-SYNC_RUNTIMES = (
+SYNC_INTERPRETERS = (
     "micropython",
     "micropython.exe",
     "circuitpython",
@@ -107,7 +107,7 @@ SYNC_RUNTIMES = (
     "python.exe",
 )
 # Full preferred async matrix (includes pyscript + jupyter).
-ASYNC_RUNTIMES = (*SYNC_RUNTIMES, "pyscript", "jupyter")
+ASYNC_INTERPRETERS = (*SYNC_INTERPRETERS, "pyscript", "jupyter")
 
 
 def _temp_dir() -> Path:
@@ -135,9 +135,9 @@ def _split_list(values: list[str] | None) -> list[str] | None:
     return out or None
 
 
-def load_runtimes() -> dict[str, dict]:
-    data = load_toml(RUNTIMES_TOML)
-    return data.get("runtimes", {})
+def load_interpreters() -> dict[str, dict]:
+    data = load_toml(INTERPRETERS_TOML)
+    return data.get("interpreters", {})
 
 
 def load_manifest() -> tuple[dict, dict]:
@@ -202,19 +202,19 @@ def display_only_examples(
 def append_display_rows(
     rows: list[dict],
     display_only: dict[str, str],
-    runtimes: dict[str, dict],
+    interpreters: dict[str, dict],
     all_examples: dict[str, dict],
 ) -> list[dict]:
-    """Add one row per (example, runtime) for manifest entries not run by default."""
+    """Add one row per (example, interpreter) for manifest entries not run by default."""
     for example_id, label in sorted(display_only.items()):
         example_meta = all_examples[example_id]
-        for runtime_id in sorted(runtimes):
-            if not example_allowed_on_runtime(example_meta, runtime_id):
+        for interpreter_id in sorted(interpreters):
+            if not example_allowed_on_interpreter(example_meta, interpreter_id):
                 continue
             rows.append(
                 {
                     "example": example_id,
-                    "runtime": runtime_id,
+                    "interpreter": interpreter_id,
                     "summary": label,
                     "display_only": True,
                     "returncode": 0,
@@ -231,10 +231,10 @@ def _expand_user(path: str) -> str:
     return os.path.expanduser(path)
 
 
-def resolve_runtime_exe(runtime_id: str, meta: dict) -> str | None:
-    kind = meta.get("kind", SUBPROCESS_RUNTIME_KIND)
-    if kind != SUBPROCESS_RUNTIME_KIND:
-        return runtime_id
+def resolve_interpreter_exe(interpreter_id: str, meta: dict) -> str | None:
+    kind = meta.get("kind", SUBPROCESS_INTERPRETER_KIND)
+    if kind != SUBPROCESS_INTERPRETER_KIND:
+        return interpreter_id
 
     command = meta.get("command", [])
     if not command:
@@ -290,7 +290,7 @@ def _adb_base_cmd(adb_bin: str) -> list[str]:
     return cmd
 
 
-def android_runtime_available() -> bool:
+def android_interpreter_available() -> bool:
     """True when android.py, adb, a device, and the launcher APK are present."""
     if not ANDROID_SH.is_file():
         return False
@@ -328,26 +328,26 @@ def android_runtime_available() -> bool:
     return bool((path_proc.stdout or "").strip())
 
 
-def runtime_available(runtime_id: str, meta: dict) -> bool:
-    kind = meta.get("kind", SUBPROCESS_RUNTIME_KIND)
-    if kind == SUBPROCESS_RUNTIME_KIND:
-        return resolve_runtime_exe(runtime_id, meta) is not None
+def interpreter_available(interpreter_id: str, meta: dict) -> bool:
+    kind = meta.get("kind", SUBPROCESS_INTERPRETER_KIND)
+    if kind == SUBPROCESS_INTERPRETER_KIND:
+        return resolve_interpreter_exe(interpreter_id, meta) is not None
     if kind == "pyscript":
         return SERVE.exists()
     if kind == "jupyter":
         jupyter = REPO / ".venv" / "bin" / "jupyter"
         return jupyter.exists()
     if kind == "android":
-        return android_runtime_available()
+        return android_interpreter_available()
     return False
 
 
-def example_allowed_on_runtime(example_meta: dict, runtime_id: str) -> bool:
-    skip = example_meta.get("skip_runtimes", [])
-    if runtime_id in skip:
+def example_allowed_on_interpreter(example_meta: dict, interpreter_id: str) -> bool:
+    skip = example_meta.get("skip_interpreters", [])
+    if interpreter_id in skip:
         return False
-    allowed = example_meta.get("runtimes")
-    return not (allowed and runtime_id not in allowed and "*" not in allowed)
+    allowed = example_meta.get("interpreters")
+    return not (allowed and interpreter_id not in allowed and "*" not in allowed)
 
 
 def parse_result(stdout: str) -> dict | None:
@@ -378,23 +378,23 @@ def summarize(result: dict | None, returncode: int, timed_out: bool) -> str:
     return status
 
 
-def runtime_timing_defaults(global_defaults: dict, runtime_meta: dict) -> dict:
-    """Merge per-runtime timing overrides from example_runtimes.toml."""
+def interpreter_timing_defaults(global_defaults: dict, interpreter_meta: dict) -> dict:
+    """Merge per-interpreter timing overrides from example_interpreters.toml."""
     merged = dict(global_defaults)
-    for key in RUNTIME_TIMING_KEYS:
-        if key in runtime_meta:
-            merged[key] = runtime_meta[key]
+    for key in INTERPRETER_TIMING_KEYS:
+        if key in interpreter_meta:
+            merged[key] = interpreter_meta[key]
     return merged
 
 
 def example_timing(
-    example_meta: dict, manifest_defaults: dict, runtime_defaults: dict
+    example_meta: dict, manifest_defaults: dict, interpreter_defaults: dict
 ) -> tuple[float, float]:
     kind = example_meta.get("kind", "loop")
     duration = float(
         example_meta.get(
             "duration_s",
-            runtime_defaults.get(
+            interpreter_defaults.get(
                 "duration_s",
                 manifest_defaults.get("duration_s", DEFAULT_DURATION),
             ),
@@ -406,7 +406,7 @@ def example_timing(
                 "oneshot_timeout_s",
                 example_meta.get(
                     "timeout_s",
-                    runtime_defaults.get(
+                    interpreter_defaults.get(
                         "oneshot_timeout_s",
                         manifest_defaults.get("oneshot_timeout_s", DEFAULT_ONESHOT_TIMEOUT),
                     ),
@@ -417,7 +417,7 @@ def example_timing(
         timeout = float(
             example_meta.get(
                 "timeout_s",
-                runtime_defaults.get(
+                interpreter_defaults.get(
                     "timeout_s",
                     manifest_defaults.get("timeout_s", DEFAULT_TIMEOUT),
                 ),
@@ -437,7 +437,7 @@ def run_unit_tests() -> int:
 
 
 def run_subprocess_case(
-    runtime_id: str,
+    interpreter_id: str,
     exe: str,
     example_id: str,
     example_meta: dict,
@@ -450,7 +450,7 @@ def run_subprocess_case(
     quit_mode = example_meta.get("quit", "poll")
     bootstrap = example_meta.get("bootstrap", "full")
     cmd = [exe]
-    if runtime_id == "micropython.exe":
+    if interpreter_id == "micropython.exe":
         cmd.extend(["-X", "heapsize=64M"])
     cmd.extend(
         [
@@ -487,13 +487,13 @@ def run_subprocess_case(
     #
     # PE also cannot see PYTHONUNBUFFERED from the WSL shell; pass it so
     # CPython .exe flushes EXAMPLE_RESULT / init lines before a timeout kill.
-    if runtime_id.endswith(".exe"):
+    if interpreter_id.endswith(".exe"):
         cmd.extend(["--env", "PYTHONUNBUFFERED=1"])
     #
     # PE stdout via pipes is often empty after a timeout kill (process was
     # still usable; quit just did not end it). Write PE output to temp files
     # so tails survive TimeoutExpired.
-    is_pe = runtime_id.endswith(".exe")
+    is_pe = interpreter_id.endswith(".exe")
     out_path = err_path = None
     out_f = err_f = None
     timed_out = False
@@ -561,7 +561,7 @@ def run_subprocess_case(
     summary = summarize(result, returncode, timed_out)
     return {
         "example": example_id,
-        "runtime": runtime_id,
+        "interpreter": interpreter_id,
         "summary": summary,
         "returncode": returncode,
         "timed_out": timed_out,
@@ -691,7 +691,7 @@ def pyscript_harness_query(example_id: str, example_meta: dict) -> str:
         modules=modules,
         manifests=manifests,
         deps=deps,
-        runtime="micropython",
+        interpreter="micropython",
     ).lstrip("?")
 
 
@@ -757,14 +757,14 @@ def run_pyscript_case(
 ) -> dict:
     if pyscript_skips_binaries(example_id, example_meta):
         result = {
-            "runtime": "pyscript",
+            "interpreter": "pyscript",
             "status": "skip",
             "example": example_id,
             "error": "skip: binaries (browser mip cannot install binary assets)",
         }
         return {
             "example": example_id,
-            "runtime": "pyscript",
+            "interpreter": "pyscript",
             "summary": "skip",
             "returncode": 0,
             "timed_out": False,
@@ -795,7 +795,7 @@ def run_pyscript_case(
     except Exception as exc:
         return {
             "example": example_id,
-            "runtime": "pyscript",
+            "interpreter": "pyscript",
             "summary": f"error: {exc}",
             "returncode": 1,
             "timed_out": False,
@@ -811,7 +811,7 @@ def run_pyscript_case(
     ):
         return {
             "example": example_id,
-            "runtime": "pyscript",
+            "interpreter": "pyscript",
             "summary": "needs_playwright",
             "returncode": -1,
             "timed_out": False,
@@ -826,7 +826,7 @@ def run_pyscript_case(
     line = "EXAMPLE_RESULT=" + json.dumps(result, separators=(",", ":"))
     return {
         "example": example_id,
-        "runtime": "pyscript",
+        "interpreter": "pyscript",
         "summary": summary,
         "returncode": 0 if result.get("status") == "ok" else 1,
         "timed_out": result.get("smoke") == "js_timeout",
@@ -903,7 +903,7 @@ def _write_jupyter_notebook(example_id: str, example_meta: dict, duration_s: flo
         },
         "cells": cells,
     }
-    # Unique path so concurrent matrix workers (runtime x timer_async) do not clobber.
+    # Unique path so concurrent matrix workers (interpreter x timer_async) do not clobber.
     mode = os.environ.get("PYDEVICES_TIMER_ASYNC", "x")
     out = SRC / f"run-{example_id}-async{mode}-{os.getpid()}.ipynb"
     out.write_text(json.dumps(nb, indent=1) + "\n", encoding="utf-8")
@@ -921,7 +921,7 @@ def run_jupyter_case(
     if not venv_python.exists() or not jupyter.exists():
         return {
             "example": example_id,
-            "runtime": "jupyter",
+            "interpreter": "jupyter",
             "summary": "missing",
             "returncode": -1,
             "timed_out": False,
@@ -987,7 +987,7 @@ def run_jupyter_case(
     summary = summarize(result, returncode, timed_out)
     return {
         "example": example_id,
-        "runtime": "jupyter",
+        "interpreter": "jupyter",
         "summary": summary,
         "returncode": returncode,
         "timed_out": timed_out,
@@ -1020,7 +1020,7 @@ def run_android_case(
     if not script_path.is_file():
         return {
             "example": example_id,
-            "runtime": "android",
+            "interpreter": "android",
             "summary": "missing_script",
             "returncode": -1,
             "timed_out": False,
@@ -1030,10 +1030,10 @@ def run_android_case(
             "stdout_tail": "",
             "stderr_tail": f"not found: {script_path}",
         }
-    if not android_runtime_available():
+    if not android_interpreter_available():
         return {
             "example": example_id,
-            "runtime": "android",
+            "interpreter": "android",
             "summary": "missing",
             "returncode": -1,
             "timed_out": False,
@@ -1041,7 +1041,7 @@ def run_android_case(
             "timeout_s": timeout,
             "result": None,
             "stdout_tail": "",
-            "stderr_tail": "android runtime unavailable (adb/device/APK)",
+            "stderr_tail": "android interpreter unavailable (adb/device/APK)",
         }
 
     adb_bin = _pick_adb_bin()
@@ -1082,7 +1082,7 @@ def run_android_case(
     if stage.returncode != 0:
         return {
             "example": example_id,
-            "runtime": "android",
+            "interpreter": "android",
             "summary": f"exit_{stage.returncode}",
             "returncode": stage.returncode,
             "timed_out": False,
@@ -1150,7 +1150,7 @@ def run_android_case(
     summary = summarize(result, returncode, timed_out)
     return {
         "example": example_id,
-        "runtime": "android",
+        "interpreter": "android",
         "summary": summary,
         "returncode": returncode,
         "timed_out": timed_out,
@@ -1165,21 +1165,21 @@ def run_android_case(
 def run_case(
     example_id: str,
     example_meta: dict,
-    runtime_id: str,
-    runtime_meta: dict,
+    interpreter_id: str,
+    interpreter_meta: dict,
     manifest_defaults: dict,
-    runtime_defaults: dict,
+    interpreter_defaults: dict,
 ) -> dict:
-    effective_defaults = runtime_timing_defaults(runtime_defaults, runtime_meta)
+    effective_defaults = interpreter_timing_defaults(interpreter_defaults, interpreter_meta)
     duration, timeout = example_timing(example_meta, manifest_defaults, effective_defaults)
-    kind = runtime_meta.get("kind", SUBPROCESS_RUNTIME_KIND)
+    kind = interpreter_meta.get("kind", SUBPROCESS_INTERPRETER_KIND)
 
-    if kind == SUBPROCESS_RUNTIME_KIND:
-        exe = resolve_runtime_exe(runtime_id, runtime_meta)
+    if kind == SUBPROCESS_INTERPRETER_KIND:
+        exe = resolve_interpreter_exe(interpreter_id, interpreter_meta)
         if exe is None:
             return {
                 "example": example_id,
-                "runtime": runtime_id,
+                "interpreter": interpreter_id,
                 "summary": "missing",
                 "returncode": -1,
                 "timed_out": False,
@@ -1189,7 +1189,9 @@ def run_case(
                 "stdout_tail": "",
                 "stderr_tail": "",
             }
-        return run_subprocess_case(runtime_id, exe, example_id, example_meta, duration, timeout)
+        return run_subprocess_case(
+            interpreter_id, exe, example_id, example_meta, duration, timeout
+        )
 
     if kind == "pyscript":
         return run_pyscript_case(example_id, example_meta, duration, timeout)
@@ -1202,8 +1204,8 @@ def run_case(
 
     return {
         "example": example_id,
-        "runtime": runtime_id,
-        "summary": "unsupported_runtime",
+        "interpreter": interpreter_id,
+        "summary": "unsupported_interpreter",
         "returncode": -1,
         "timed_out": False,
         "duration_s": duration,
@@ -1214,10 +1216,10 @@ def run_case(
     }
 
 
-def _missing_runtime_row(example_id: str, runtime_id: str) -> dict:
+def _missing_interpreter_row(example_id: str, interpreter_id: str) -> dict:
     return {
         "example": example_id,
-        "runtime": runtime_id,
+        "interpreter": interpreter_id,
         "summary": "missing",
         "returncode": -1,
         "timed_out": False,
@@ -1232,74 +1234,74 @@ def _run_example_wave(
     example_meta: dict,
     work: list[tuple[str, dict]],
     manifest_defaults: dict,
-    runtime_defaults: dict,
+    interpreter_defaults: dict,
     *,
     jobs: int,
 ) -> list[dict]:
-    """Run one wave of runtimes; preserve ``work`` order in returned rows."""
+    """Run one wave of interpreters; preserve ``work`` order in returned rows."""
     if not work:
         return []
-    for runtime_id, _ in work:
-        print(f"  start {example_id} @ {runtime_id}", file=sys.stderr)
+    for interpreter_id, _ in work:
+        print(f"  start {example_id} @ {interpreter_id}", file=sys.stderr)
 
     if jobs == 1 or len(work) == 1:
         rows = []
-        for runtime_id, runtime_meta in work:
+        for interpreter_id, interpreter_meta in work:
             row = run_case(
                 example_id,
                 example_meta,
-                runtime_id,
-                runtime_meta,
+                interpreter_id,
+                interpreter_meta,
                 manifest_defaults,
-                runtime_defaults,
+                interpreter_defaults,
             )
             rows.append(row)
             print(
-                f"  done  {example_id} @ {runtime_id}: {row.get('summary')}",
+                f"  done  {example_id} @ {interpreter_id}: {row.get('summary')}",
                 file=sys.stderr,
             )
         return rows
 
     max_workers = len(work) if jobs <= 0 else min(jobs, len(work))
-    by_runtime: dict[str, dict] = {}
+    by_interpreter: dict[str, dict] = {}
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = {
             pool.submit(
                 run_case,
                 example_id,
                 example_meta,
-                runtime_id,
-                runtime_meta,
+                interpreter_id,
+                interpreter_meta,
                 manifest_defaults,
-                runtime_defaults,
-            ): runtime_id
-            for runtime_id, runtime_meta in work
+                interpreter_defaults,
+            ): interpreter_id
+            for interpreter_id, interpreter_meta in work
         }
         for fut in as_completed(futures):
-            runtime_id = futures[fut]
+            interpreter_id = futures[fut]
             row = fut.result()
-            by_runtime[runtime_id] = row
+            by_interpreter[interpreter_id] = row
             print(
-                f"  done  {example_id} @ {runtime_id}: {row.get('summary')}",
+                f"  done  {example_id} @ {interpreter_id}: {row.get('summary')}",
                 file=sys.stderr,
             )
-    return [by_runtime[runtime_id] for runtime_id, _ in work]
+    return [by_interpreter[interpreter_id] for interpreter_id, _ in work]
 
 
 def test_all_examples(
     examples: dict[str, dict],
-    runtimes: dict[str, dict],
+    interpreters: dict[str, dict],
     manifest_defaults: dict,
-    runtime_defaults: dict,
+    interpreter_defaults: dict,
     *,
     fail_fast: bool = False,
     verbose: bool = False,
     jobs: int = 0,
 ) -> list[dict]:
-    """Run each example across runtimes, then advance to the next example.
+    """Run each example across interpreters, then advance to the next example.
 
-    With ``jobs != 1`` (default ``0`` = one worker per runtime), all eligible
-    runtimes for an example run concurrently. An empty PE ``hang`` usually
+    With ``jobs != 1`` (default ``0`` = one worker per interpreter), all eligible
+    interpreters for an example run concurrently. An empty PE ``hang`` usually
     means the example stayed alive past ``timeout_s`` (quit did not end it) —
     not that the Windows process failed to start. Fail-fast waits for that
     example's workers to finish, then stops before the next example.
@@ -1308,25 +1310,25 @@ def test_all_examples(
     for example_id, example_meta in examples.items():
         work: list[tuple[str, dict]] = []
         example_rows: list[dict] = []
-        for runtime_id, runtime_meta in runtimes.items():
-            if not example_allowed_on_runtime(example_meta, runtime_id):
+        for interpreter_id, interpreter_meta in interpreters.items():
+            if not example_allowed_on_interpreter(example_meta, interpreter_id):
                 continue
-            if not runtime_available(runtime_id, runtime_meta):
+            if not interpreter_available(interpreter_id, interpreter_meta):
                 if verbose:
                     print(
-                        f"Skipping {example_id} @ {runtime_id} (runtime missing)",
+                        f"Skipping {example_id} @ {interpreter_id} (interpreter missing)",
                         file=sys.stderr,
                     )
-                example_rows.append(_missing_runtime_row(example_id, runtime_id))
+                example_rows.append(_missing_interpreter_row(example_id, interpreter_id))
                 continue
-            work.append((runtime_id, runtime_meta))
+            work.append((interpreter_id, interpreter_meta))
 
         if not work:
             rows.extend(example_rows)
             continue
 
         print(
-            f"Running {example_id} @ {len(work)} runtime(s)"
+            f"Running {example_id} @ {len(work)} interpreter(s)"
             + (" in parallel..." if jobs != 1 and len(work) > 1 else "..."),
             file=sys.stderr,
         )
@@ -1336,7 +1338,7 @@ def test_all_examples(
                 example_meta,
                 work,
                 manifest_defaults,
-                runtime_defaults,
+                interpreter_defaults,
                 jobs=jobs,
             )
         )
@@ -1359,29 +1361,30 @@ def _row_failed(row: dict) -> bool:
     return result.get("status") != "ok"
 
 
-def test_all_runtimes(
+def test_all_interpreters(
     examples: dict[str, dict],
-    runtimes: dict[str, dict],
+    interpreters: dict[str, dict],
     manifest_defaults: dict,
-    runtime_defaults: dict,
+    interpreter_defaults: dict,
     *,
     fail_fast: bool = False,
     verbose: bool = False,
 ) -> list[dict]:
     rows = []
-    for runtime_id, runtime_meta in runtimes.items():
+    for interpreter_id, interpreter_meta in interpreters.items():
         for example_id, example_meta in examples.items():
-            if not example_allowed_on_runtime(example_meta, runtime_id):
+            if not example_allowed_on_interpreter(example_meta, interpreter_id):
                 continue
-            if not runtime_available(runtime_id, runtime_meta):
+            if not interpreter_available(interpreter_id, interpreter_meta):
                 if verbose:
                     print(
-                        f"Skipping {example_id} @ {runtime_id} (runtime missing)", file=sys.stderr
+                        f"Skipping {example_id} @ {interpreter_id} (interpreter missing)",
+                        file=sys.stderr,
                     )
                 rows.append(
                     {
                         "example": example_id,
-                        "runtime": runtime_id,
+                        "interpreter": interpreter_id,
                         "summary": "missing",
                         "returncode": -1,
                         "timed_out": False,
@@ -1391,14 +1394,14 @@ def test_all_runtimes(
                     }
                 )
                 continue
-            print(f"Running {example_id} @ {runtime_id}...", file=sys.stderr)
+            print(f"Running {example_id} @ {interpreter_id}...", file=sys.stderr)
             row = run_case(
                 example_id,
                 example_meta,
-                runtime_id,
-                runtime_meta,
+                interpreter_id,
+                interpreter_meta,
                 manifest_defaults,
-                runtime_defaults,
+                interpreter_defaults,
             )
             rows.append(row)
             if fail_fast and _row_failed(row):
@@ -1413,30 +1416,30 @@ def print_table(rows: list[dict], order: str):
 
     if order == "examples":
         examples = sorted({r["example"] for r in rows})
-        runtimes = sorted({r["runtime"] for r in rows})
+        interpreters = sorted({r["interpreter"] for r in rows})
         ex_w = max(10, max(len(e) for e in examples) + 2)
-        rt_w = max(8, max(len(r) for r in runtimes) + 2)
-        header = f"{'example':<{ex_w}} |" + "|".join(f"{rt:<{rt_w}}" for rt in runtimes)
-        sep = "-" * ex_w + "-+-" + "-+-".join("-" * rt_w for _ in runtimes)
+        rt_w = max(8, max(len(r) for r in interpreters) + 2)
+        header = f"{'example':<{ex_w}} |" + "|".join(f"{rt:<{rt_w}}" for rt in interpreters)
+        sep = "-" * ex_w + "-+-" + "-+-".join("-" * rt_w for _ in interpreters)
         print(header)
         print(sep)
-        by_key = {(r["example"], r["runtime"]): r["summary"] for r in rows}
+        by_key = {(r["example"], r["interpreter"]): r["summary"] for r in rows}
         for ex in examples:
             cells = [f"{ex:<{ex_w}}"]
-            for rt in runtimes:
+            for rt in interpreters:
                 cells.append(f"{by_key.get((ex, rt), '—'):<{rt_w}}")
             print(" |".join(cells))
     else:
-        runtimes = sorted({r["runtime"] for r in rows})
+        interpreters = sorted({r["interpreter"] for r in rows})
         examples = sorted({r["example"] for r in rows})
-        rt_w = max(12, max(len(r) for r in runtimes) + 2)
+        rt_w = max(12, max(len(r) for r in interpreters) + 2)
         ex_w = max(8, max(len(e) for e in examples) + 2)
-        header = f"{'runtime':<{rt_w}} |" + "|".join(f"{ex:<{ex_w}}" for ex in examples)
+        header = f"{'interpreter':<{rt_w}} |" + "|".join(f"{ex:<{ex_w}}" for ex in examples)
         sep = "-" * rt_w + "-+-" + "-+-".join("-" * ex_w for _ in examples)
         print(header)
         print(sep)
-        by_key = {(r["runtime"], r["example"]): r["summary"] for r in rows}
-        for rt in runtimes:
+        by_key = {(r["interpreter"], r["example"]): r["summary"] for r in rows}
+        for rt in interpreters:
             cells = [f"{rt:<{rt_w}}"]
             for ex in examples:
                 cells.append(f"{by_key.get((rt, ex), '—'):<{ex_w}}")
@@ -1461,13 +1464,13 @@ def compute_exit_code(rows: list[dict]) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Cross-runtime pydevices-examples example smoke tests"
+        description="Cross-interpreter pydevices-examples example smoke tests"
     )
     parser.add_argument(
         "--order",
-        choices=("examples", "runtimes"),
+        choices=("examples", "interpreters"),
         default="examples",
-        help="examples: each example on all runtimes first; runtimes: each runtime on all examples first",
+        help="examples: each example on all interpreters first; interpreters: each interpreter on all examples first",
     )
     parser.add_argument(
         "--only-example",
@@ -1479,11 +1482,11 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
     parser.add_argument(
-        "--only-runtime",
+        "--only-interpreter",
         nargs="+",
         metavar="ID",
         help=(
-            "Subset of runtime ids (space-separated after one flag; "
+            "Subset of interpreter ids (space-separated after one flag; "
             "repeating the flag keeps only the last list)"
         ),
     )
@@ -1511,7 +1514,7 @@ def main(argv: list[str] | None = None) -> int:
         metavar="N",
         help=(
             "With --order examples: parallel workers per example "
-            "(0=all runtimes concurrently, default; 1=serial)"
+            "(0=all interpreters concurrently, default; 1=serial)"
         ),
     )
     parser.add_argument(
@@ -1534,14 +1537,14 @@ def main(argv: list[str] | None = None) -> int:
             print("Unit tests failed; aborting example matrix.", file=sys.stderr)
             return rc
 
-    runtime_data = load_toml(RUNTIMES_TOML)
-    runtime_defaults = runtime_data.get("defaults", {})
+    interpreter_data = load_toml(INTERPRETERS_TOML)
+    interpreter_defaults = interpreter_data.get("defaults", {})
     if args.duration_s is not None:
-        runtime_defaults["duration_s"] = args.duration_s
+        interpreter_defaults["duration_s"] = args.duration_s
     if args.timeout_s is not None:
-        runtime_defaults["timeout_s"] = args.timeout_s
-        runtime_defaults["oneshot_timeout_s"] = args.timeout_s
-    runtimes = load_runtimes()
+        interpreter_defaults["timeout_s"] = args.timeout_s
+        interpreter_defaults["oneshot_timeout_s"] = args.timeout_s
+    interpreters = load_interpreters()
     manifest_defaults, all_examples = load_manifest()
 
     # CLI timing overrides also win over per-example manifest values.
@@ -1553,9 +1556,9 @@ def main(argv: list[str] | None = None) -> int:
                 meta["timeout_s"] = args.timeout_s
                 meta["oneshot_timeout_s"] = args.timeout_s
 
-    if args.only_runtime:
-        only_rt = _split_list(args.only_runtime)
-        runtimes = {k: v for k, v in runtimes.items() if k in only_rt}
+    if args.only_interpreter:
+        only_rt = _split_list(args.only_interpreter)
+        interpreters = {k: v for k, v in interpreters.items() if k in only_rt}
 
     only_examples = _split_list(args.only_example)
     examples = matrix_examples(
@@ -1581,9 +1584,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.order == "examples":
         rows = test_all_examples(
             examples,
-            runtimes,
+            interpreters,
             manifest_defaults,
-            runtime_defaults,
+            interpreter_defaults,
             fail_fast=args.fail_fast,
             verbose=args.verbose,
             jobs=args.jobs,
@@ -1594,16 +1597,16 @@ def main(argv: list[str] | None = None) -> int:
                 "warning: --jobs only applies to --order examples; ignoring",
                 file=sys.stderr,
             )
-        rows = test_all_runtimes(
+        rows = test_all_interpreters(
             examples,
-            runtimes,
+            interpreters,
             manifest_defaults,
-            runtime_defaults,
+            interpreter_defaults,
             fail_fast=args.fail_fast,
             verbose=args.verbose,
         )
 
-    rows = append_display_rows(rows, display_only, runtimes, all_examples)
+    rows = append_display_rows(rows, display_only, interpreters, all_examples)
 
     if args.json:
         print(json.dumps(rows, indent=2))

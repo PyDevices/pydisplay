@@ -147,8 +147,8 @@ def _mapped_keypad_cb(event, indev, data):
 class InputBridge:
     """Install SDL→LVGL key mapping and bind FocusNav to the keypad indev."""
 
-    def __init__(self, runtime, vehicle, focus_nav=None):
-        self.runtime = app
+    def __init__(self, app, vehicle, focus_nav=None):
+        self.app = app
         self.vehicle = vehicle
         self.focus_nav = focus_nav
 

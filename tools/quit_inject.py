@@ -6,15 +6,15 @@ Must stay importable on MicroPython, CircuitPython, and CPython.
 """
 
 
-def current_runtime():
-    """Return the runtime selected by the current application."""
+def current_app():
+    """Return the app selected by the current application."""
     import sys
 
     display_driver = sys.modules.get("display_driver")
     if display_driver is not None:
-        runtime = getattr(display_driver, "runtime", None)
-        if runtime is not None:
-            return runtime
+        app = getattr(display_driver, "app", None)
+        if app is not None:
+            return app
     appdev = sys.modules.get("appdev")
     if appdev is not None:
         return getattr(getattr(appdev, "App", None), "_current", None)
@@ -23,7 +23,7 @@ def current_runtime():
 
 
 def queue_device():
-    return getattr(current_runtime(), "host_dev", None)
+    return getattr(current_app(), "host_dev", None)
 
 
 def host_point(x, y):
@@ -69,23 +69,23 @@ def deinit_display():
 
 
 def service_host_events(count=15, delay_s=0.02, broker_poll=True):
-    """Service host display / runtime events only."""
+    """Service host display / app events only."""
     try:
         import time
     except ImportError:
         return
 
-    runtime = None
+    app = None
     if broker_poll:
         try:
-            runtime = current_runtime()
+            app = current_app()
         except Exception:
-            runtime = None
+            app = None
 
     for _ in range(count):
-        if runtime is not None:
+        if app is not None:
             try:
-                runtime.poll()
+                app.poll()
             except Exception:
                 pass
         if delay_s:
@@ -161,7 +161,7 @@ def inject_synthetic_touch(*, broker_poll=False, pump_count=20, pump_delay=0.02)
 
 def inject_quit(*, broker_poll=True, pump_count=15, pump_delay=0.02, lvgl=False, deinit=True):
     """
-    Mock QUEUE read to deliver one Quit event, then pump runtime / multimer / LVGL.
+    Mock QUEUE read to deliver one Quit event, then pump app / multimer / LVGL.
 
     Returns True if injection was attempted (QUEUE device existed).
     The caller should verify the process exits; if still running, quit was not handled.
@@ -188,7 +188,7 @@ def inject_quit(*, broker_poll=True, pump_count=15, pump_delay=0.02, lvgl=False,
             service_host_events(pump_count, pump_delay, broker_poll=broker_poll)
         if broker_poll:
             try:
-                current_runtime().poll()
+                current_app().poll()
             except Exception:
                 pass
     finally:

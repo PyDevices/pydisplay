@@ -28,17 +28,17 @@ def _excluded(gui):
 
 def test_page_selects_a_gui_specific_micropython_config_before_core_loads():
     source = _source()
-    runtime = source.index('<script id="hinch-runtime" type="text/plain"')
-    runtime_config = source.index("'./micropython.toml'")
+    interpreter = source.index('<script id="hinch-interpreter" type="text/plain"')
+    interpreter_config = source.index("'./micropython.toml'")
     desktop_config = source.index(
         "'https://raw.githubusercontent.com/PyDevices/pydevices/main/pydevices-desktop.toml'"
     )
     shared_config = source.index("'./pydevices-examples.toml'")
     gui_config = source.index("'./peterhinch-' + gui + '.toml'")
     loader = source.index('<script type="module" src="./pyscript-config.js"></script>')
-    assert runtime < runtime_config < desktop_config < shared_config < gui_config < loader
-    assert "runtime.type = 'mpy';" in source
-    assert "runtime.dataset.configs" in source
+    assert interpreter < interpreter_config < desktop_config < shared_config < gui_config < loader
+    assert "interpreter.type = 'mpy';" in source
+    assert "interpreter.dataset.configs" in source
     assert "pyodide" not in source.lower()
 
 
@@ -98,10 +98,10 @@ def test_gallery_pages_compose_modular_toml_configs():
         "py.html": "pyodide",
         "pyodide.html": "pyodide",
     }
-    for filename, runtime in pages.items():
+    for filename, interpreter in pages.items():
         source = (ROOT / ".site" / "pyscript" / filename).read_text()
         assert (
-            f'data-configs="./{runtime}.toml https://raw.githubusercontent.com/PyDevices/pydevices/main/pydevices-desktop.toml ./pydevices-examples.toml"'
+            f'data-configs="./{interpreter}.toml https://raw.githubusercontent.com/PyDevices/pydevices/main/pydevices-desktop.toml ./pydevices-examples.toml"'
             in source
         )
         assert '<script type="module" src="./pyscript-config.js"></script>' in source
@@ -196,7 +196,7 @@ def test_selected_demo_must_be_discovered_and_supported():
     assert "'Starting ' + demo + '…'" in source
     assert "if selected not in names:" in source
     assert "if selected in discovered:" in source
-    assert "Demo is not compatible with the browser runtime:" in source
+    assert "Demo is not compatible with the browser interpreter:" in source
     assert '__import__("gui.demos." + selected)' in source
 
 

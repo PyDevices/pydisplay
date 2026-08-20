@@ -20,10 +20,10 @@ _EXAMPLES = __file__.replace("\\", "/").rsplit("/", 1)[0]
 if _EXAMPLES not in sys.path:
     sys.path.insert(0, _EXAMPLES)
 
-import display_driver  # wires LVGL display/input into the runtime
+import display_driver  # wires LVGL display/input into the app
 import lvgl as lv
 from board_config import display_drv
-from display_driver import runtime
+from display_driver import app
 from calc_engine import CalcEngine
 
 # Button grid (last row: two wide buttons).
@@ -233,7 +233,7 @@ def build_ui():
 
 build_ui()
 
-# Canonical entry: display_driver wired LVGL into its own runtime at import;
-# run_forever() keeps the app alive (or returns immediately in a signal-driven
+# Canonical entry: display_driver wired LVGL into its own app at import;
+# app.run() keeps the app alive (or returns immediately in a signal-driven
 # interactive REPL).
-runtime.run_forever()
+app.run()

@@ -1,24 +1,24 @@
 # SPDX-FileCopyrightText: 2026 Brad Barnett
 #
 # SPDX-License-Identifier: MIT
-"""Soft rotary-encoder emulator for LVGL on non-MCU runtimes.
+"""Soft rotary-encoder emulator for LVGL on non-MCU interpreters.
 
 Stand-in for hardware ``machine.Encoder`` / ``rotaryio`` while developing on
 desktop (SDL/PG), PyScript, or Jupyter. Each :class:`EncoderEmu` owns:
 
 * a :class:`SoftEncoder` (position + pushbutton state)
-* a ``display_driver.EncoderInput`` registered on its LVGL runtime
+* a ``display_driver.EncoderInput`` registered on its LVGL app
 * an LVGL emulator UI (← / Enter / →) on a secondary displaydev surface,
   in a private focus group (not the app default)
 
 Multiple emulators may coexist in one app (one window/canvas each)::
 
     import display_driver  # primary LVGL first
-    from display_driver import runtime
+    from display_driver import app
     from lv_encoder_emu import EncoderEmu
 
-    emu_a = EncoderEmu(runtime, title="Enc A")
-    emu_b = EncoderEmu(runtime, title="Enc B")
+    emu_a = EncoderEmu(app, title="Enc A")
+    emu_b = EncoderEmu(app, title="Enc B")
     # emu_a.device / emu_b.device are LVGL encoder indevs on the primary display
 """
 
@@ -29,7 +29,7 @@ DEFAULT_ENCODER_BUTTON = 3
 
 
 class SoftEncoder:
-    """Position / button state for ``runtime.add_encoder`` read callbacks.
+    """Position / button state for ``app.add_encoder`` read callbacks.
 
     Same contract apps use with MCU ``machine.Encoder`` / ``rotaryio``: a
     wrapping position integer and a boolean pushbutton.
@@ -52,11 +52,11 @@ class SoftEncoder:
         self.pressed = False
 
     def read_pos(self):
-        """Zero-arg callable for ``runtime.add_encoder(read=...)``."""
+        """Zero-arg callable for ``app.add_encoder(read=...)``."""
         return self.pos
 
     def read_button(self):
-        """Zero-arg callable for ``runtime.add_encoder(button_read=...)``."""
+        """Zero-arg callable for ``app.add_encoder(button_read=...)``."""
         return self.pressed
 
 
@@ -81,7 +81,7 @@ def make_emu_display(
 
     Returns:
         tuple: ``(display, attach_devices)`` where ``attach_devices`` is
-        ``None`` (desktop reuses ``runtime.host_dev``) or a list of host
+        ``None`` (desktop reuses ``app.host_dev``) or a list of host
         devices for PyScript/Jupyter.
     """
     if primary is None:
@@ -164,7 +164,7 @@ class EncoderEmu:
     The encoder indev is attached to ``target_lv_display`` (default: primary).
 
     Args:
-        runtime: ``display_driver.runtime``.
+        app: ``display_driver.app``.
         display: Existing secondary displaydev driver, or ``None`` to create one.
         attach_devices: Host devices for ``display_driver.attach`` (PS/JN);
             ignored when ``display`` is created by :func:`make_emu_display`.
@@ -179,7 +179,7 @@ class EncoderEmu:
 
     def __init__(
         self,
-        runtime,
+        app,
         *,
         display=None,
         attach_devices=None,
@@ -198,19 +198,19 @@ class EncoderEmu:
         host_devs = attach_devices
         if display is None:
             display, host_devs = make_emu_display(
-                runtime.primary,
+                app.primary,
                 width=width,
                 height=height,
                 title=title,
                 scale=scale,
                 canvas_id=canvas_id,
             )
-        if display not in runtime.displays:
-            runtime.add_display(display)
+        if display not in app.displays:
+            app.add_display(display)
 
         self._display = display
         self._soft = soft if soft is not None else SoftEncoder()
-        self._device = runtime.add_encoder(
+        self._device = app.add_encoder(
             read=self._soft.read_pos,
             button_read=self._soft.read_button,
             button=button,

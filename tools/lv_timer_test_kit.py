@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Run the LVGL timer/input harness across desktop Python runtimes.
+Run the LVGL timer/input harness across desktop Python interpreters.
 
 Subprocesses run ``examples/lv_test_timer.py kit`` from ``lib/`` (~4 s of
 checks, then an injected ``events.Quit``). Each child prints ``KIT_RESULT=`` on
 stdout; exit code 0 is expected on success.
 
-The example follows ``runtime.timer_async`` (it does not set env vars). This kit
+The example follows ``app.timer_async`` (it does not set env vars). This kit
 sets ``PYDEVICES_TIMER_ASYNC`` in the child environment so ``board_config``
 constructs sync or async timers; modes are ``sync`` and ``async``.
 
@@ -18,10 +18,10 @@ From repo root:
 
 ``--backend`` forces one multimer backend through
 ``tools/multimer_backend_preload.py`` (in-process, so it also works for the
-Windows ``.exe`` runtimes, which cannot read WSL-exported env vars). Runtimes
+Windows ``.exe`` interpreters, which cannot read WSL-exported env vars). Interpreters
 without that backend report ``unavailable`` and do not fail the run.
 
-Runtimes resolve via ``tools/example_runtimes.toml`` (same as example_test_kit).
+Interpreters resolve via ``tools/example_interpreters.toml`` (same as example_test_kit).
 Missing executables show as ``missing`` in the table.
 """
 
@@ -56,7 +56,7 @@ def _temp_dir() -> Path:
 DEFAULT_RESULTS = _temp_dir() / "lv_timer_test_kit_results.json"
 
 # Subprocess LVGL matrix (order: Unix first, then Windows .exe targets).
-LVGL_RUNTIMES = (
+LVGL_INTERPRETERS = (
     "micropython",
     "circuitpython",
     "cpython-venv",
@@ -65,35 +65,35 @@ LVGL_RUNTIMES = (
 )
 
 # Back-compat alias for docs/CLI that used ``cpython``.
-RUNTIME_ALIASES = {"cpython": "cpython-venv"}
+INTERPRETER_ALIASES = {"cpython": "cpython-venv"}
 
 MODES = ("sync", "async")
 
 sys.path.insert(0, str(TOOLS))
-from example_test_kit import load_runtimes, resolve_runtime_exe  # noqa: E402
+from example_test_kit import load_interpreters, resolve_interpreter_exe  # noqa: E402
 
 
-def _normalize_runtime(name: str) -> str:
-    return RUNTIME_ALIASES.get(name, name)
+def _normalize_interpreter(name: str) -> str:
+    return INTERPRETER_ALIASES.get(name, name)
 
 
-def _runtime_choices() -> list[str]:
-    return sorted(set(LVGL_RUNTIMES) | set(RUNTIME_ALIASES))
+def _interpreter_choices() -> list[str]:
+    return sorted(set(LVGL_INTERPRETERS) | set(INTERPRETER_ALIASES))
 
 
-def _resolve_command(runtime_id: str) -> list[str] | None:
-    meta = load_runtimes().get(runtime_id)
+def _resolve_command(interpreter_id: str) -> list[str] | None:
+    meta = load_interpreters().get(interpreter_id)
     if not meta:
         return None
-    exe = resolve_runtime_exe(runtime_id, meta)
+    exe = resolve_interpreter_exe(interpreter_id, meta)
     return [exe] if exe else None
 
 
 def _resolve_interpreters(only: list[str] | None) -> dict[str, list[str] | None]:
-    selected = [_normalize_runtime(n) for n in (only or LVGL_RUNTIMES)]
+    selected = [_normalize_interpreter(n) for n in (only or LVGL_INTERPRETERS)]
     out: dict[str, list[str] | None] = {}
     for name in selected:
-        if name not in LVGL_RUNTIMES:
+        if name not in LVGL_INTERPRETERS:
             print(f"Unknown interpreter {name!r}", file=sys.stderr)
             sys.exit(2)
         out[name] = _resolve_command(name)
@@ -208,7 +208,7 @@ def run_case(
 
     result = parse_result(stdout)
     summary = summarize(result, returncode, timed_out)
-    # This host has no such backend; a sweep asks every runtime for every
+    # This host has no such backend; a sweep asks every interpreter for every
     # backend, so that is a skip rather than a failure. Match on the sentinel,
     # not the preload exit code: CircuitPython does not propagate sys.exit(3).
     unavailable = "MULTIMER_BACKEND_UNAVAILABLE" in stdout
@@ -268,7 +268,7 @@ def run_kit(
     for name, cmd_base in interpreters.items():
         for mode in modes_tuple:
             if cmd_base is None:
-                meta = load_runtimes().get(name, {})
+                meta = load_interpreters().get(name, {})
                 hint = (meta.get("command") or ["?"])[0]
                 print(f"Skipping {name} {mode} (not found: {hint})", file=sys.stderr)
                 rows.append(_missing_row(name, mode, exe_hint=hint))
@@ -295,10 +295,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--only",
         nargs="+",
-        choices=_runtime_choices(),
-        metavar="RUNTIME",
+        choices=_interpreter_choices(),
+        metavar="INTERPRETER",
         help=(
-            "Subset of runtimes, space-separated after one flag "
+            "Subset of interpreters, space-separated after one flag "
             "(repeating the flag keeps only the last list; default: all LVGL "
             "subprocess targets)"
         ),

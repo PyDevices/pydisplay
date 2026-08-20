@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Subprocess entry point for one cross-runtime example smoke test.
+Subprocess entry point for one cross-interpreter example smoke test.
 
 Invoked from src/ by example_test_kit.py:
 
@@ -295,23 +295,23 @@ def _has_background_inject():
 
 
 def _install_poll_deadline_quit(duration_s, injected=None):
-    """Arm quit via the next ``runtime.poll()`` when background inject is unavailable.
+    """Arm quit via the next ``app.poll()`` when background inject is unavailable.
 
     MicroPython ``micropython.exe`` has no ``threading`` / ``_thread``; the multimer
     SDL quit timer often never fires when the schedule queue is full. Patching
-    ``Runtime.poll`` avoids a competing timer while keeping quit on the example
+    ``appdev.App.poll`` avoids a competing timer while keeping quit on the example
     main thread. Does not import ``board_config`` (examples must load it).
     """
     try:
         import appdev
     except Exception:
         return False
-    runtime_cls = appdev.App
-    if getattr(runtime_cls, "_pydevices_poll_deadline_armed", False):
+    app_cls = appdev.App
+    if getattr(app_cls, "_pydevices_poll_deadline_armed", False):
         return True
     deadline = _monotonic() + duration_s
     state = {"fired": False}
-    orig_poll = runtime_cls.poll
+    orig_poll = app_cls.poll
 
     def poll(self):
         if not state["fired"] and _monotonic() >= deadline:
@@ -335,8 +335,8 @@ def _install_poll_deadline_quit(duration_s, injected=None):
                 injected[0] = True
         return orig_poll(self)
 
-    runtime_cls.poll = poll
-    runtime_cls._pydevices_poll_deadline_armed = True
+    app_cls.poll = poll
+    app_cls._pydevices_poll_deadline_armed = True
     return True
 
 
@@ -366,7 +366,7 @@ def _start_multimer_quit_schedule(duration_s, quit_mode, kind, injected):
         pass
 
     def on_quit(_timer):
-        # Leave Quit on the QUEUE mock; the example's runtime.poll() delivers it.
+        # Leave Quit on the QUEUE mock; the example's app.poll() delivers it.
         _inject_quit_now(quit_inject, kind, injected, pump_count=0)
 
     def on_touch(_timer):
@@ -593,7 +593,7 @@ def _subprocess_hard_exit(code, *, headless=False):
     """Exit past SDL teardown, which can block normal interpreter shutdown.
 
     CPython only: ``os._exit`` is the only way to skip that teardown, and no
-    other supported runtime has it — MicroPython and CircuitPython must return
+    other supported interpreter has it — MicroPython and CircuitPython must return
     and let shutdown take its course. Returns False when it could not exit;
     otherwise it does not return.
     """
@@ -704,7 +704,7 @@ def main(argv=None):
 
     # Install the deadline hook AFTER bootstrap: it imports multimer, which is
     # only on sys.path once _setup_bootstrap has run. The hook drives quit for
-    # the canonical no-loop idiom (runtime auto-service / run_forever).
+    # the canonical no-loop idiom (app auto-service / App.run).
     try:
         import pydevices_test_mode
 
@@ -715,7 +715,7 @@ def main(argv=None):
     # MULTIMER_BACKEND is the sole auto-provider override. Set it inside the
     # child because Windows PE launched from WSL cannot see the parent's
     # exported environment. A provider this host cannot supply is a skip, not
-    # a failure — sweeps ask every runtime for every provider.
+    # a failure — sweeps ask every interpreter for every provider.
     if args.get("multimer_backend") is not None:
         try:
             _env_set("MULTIMER_BACKEND", args["multimer_backend"])

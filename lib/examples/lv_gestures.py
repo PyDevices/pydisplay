@@ -30,7 +30,7 @@ if _src not in sys.path:
 from board_config import display_drv  # noqa: E402
 import display_driver as dd  # noqa: E402
 import lvgl as lv  # noqa: E402
-from display_driver import runtime  # noqa: E402
+from display_driver import app  # noqa: E402
 
 # Struct present when LV_USE_GESTURE_RECOGNITION is on (all ports).
 _GESTURE_OK = hasattr(lv, "indev_touch_data_t") and hasattr(lv, "INDEV_GESTURE")
@@ -105,8 +105,8 @@ def build_ui():
                     for d in getattr(vd, "devices", ()) or ():
                         if getattr(d, "type", None) == dd.POINTER:
                             return d
-            if getattr(runtime, "touch_dev", None) is not None:
-                return runtime.touch_dev
+            if getattr(app, "touch_dev", None) is not None:
+                return app.touch_dev
             return None
 
         def _ease_pinch_thresholds():
@@ -202,8 +202,8 @@ def build_ui():
 
 
 # Canonical interactive entry - no app loop here. build_ui imports
-# display_driver (wires LVGL into the shared runtime); run_forever keeps
+# display_driver (wires LVGL into the shared app); App.run keeps
 # the app alive or returns immediately on an interactive REPL with a
 # self-driving timer.
 build_ui()
-runtime.run_forever()
+app.run()

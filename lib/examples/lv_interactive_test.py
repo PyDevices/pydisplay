@@ -5,7 +5,7 @@
 Demonstrates self-driving background timers without a main application loop:
 
 * **Interactive REPL (`python -i`, `micropython -i`, or MCU prompt)**:
-  The script drops out the bottom to the `>>>` prompt. On runtimes with
+  The script drops out the bottom to the `>>>` prompt. On interpreters with
   hardware interrupts or signal-based timers (`machine.Timer` on MicroPython,
   `librt` on Linux, `uwin32` on Windows), animations and button tap inputs
   continue running live in the background while the REPL remains fully usable.
@@ -21,7 +21,7 @@ Demonstrates self-driving background timers without a main application loop:
 * **CircuitPython, PyScript, and Jupyter**:
   Because these environments lack hardware interrupt/signal timers and rely on
   cooperative/pumped timers, the display will never update without an active
-  event loop (e.g. `runtime.run_forever()`), and the app will appear hung.
+  event loop (e.g. `app.run()`), and the app will appear hung.
 """
 
 import display_driver  # noqa: F401 - initializes display, input, and timer

@@ -8,7 +8,7 @@ INDEX = ROOT / ".site" / "pyscript" / "index.html"
 CSS = ROOT / ".site" / "pyscript" / "site.css"
 DEMO_CSS = ROOT / ".site" / "pyscript" / "demo.css"
 THEME = ROOT / ".site" / "pyscript" / "theme-toggle.js"
-RUNTIME_LAYOUT = ROOT / ".site" / "pyscript" / "runtime-layout.js"
+INTERPRETER_LAYOUT = ROOT / ".site" / "pyscript" / "interpreter-layout.js"
 
 
 def test_gallery_has_sidebar_and_single_demo_frame():
@@ -20,7 +20,7 @@ def test_gallery_has_sidebar_and_single_demo_frame():
     assert "Selected demo</span>" not in source
 
 
-def test_every_generated_demo_runtime_can_be_embedded():
+def test_every_generated_demo_interpreter_can_be_embedded():
     source = INDEX.read_text(encoding="utf-8")
     generated = source.split("<!-- GEN:demos:start -->", 1)[1].split("<!-- GEN:demos:end -->", 1)[
         0
@@ -33,7 +33,7 @@ def test_every_generated_demo_runtime_can_be_embedded():
     assert loader_pages <= allowed
 
 
-def test_every_nochrome_card_uses_compact_runtime_pages():
+def test_every_nochrome_card_uses_compact_interpreter_pages():
     source = INDEX.read_text(encoding="utf-8")
     generated = source.split("<!-- GEN:demos:start -->", 1)[1].split("<!-- GEN:demos:end -->", 1)[
         0
@@ -108,10 +108,10 @@ def test_apps_heading_links_to_peter_hinch_collection():
     assert ".gallery-collection-link" in css
 
 
-def test_runtime_loaders_show_two_cards_and_autorun():
+def test_interpreter_loaders_show_two_cards_and_autorun():
     for name in ("micropython.html", "pyodide.html"):
         source = (ROOT / ".site" / "pyscript" / name).read_text(encoding="utf-8")
-        assert 'class="runtime-page"' in source
+        assert 'class="interpreter-page"' in source
         assert 'id="run-btn"' not in source
         assert 'class="device"' in source
         assert 'class="console-panel"' in source
@@ -120,7 +120,7 @@ def test_runtime_loaders_show_two_cards_and_autorun():
         assert 'addEventListener("click"' not in source
 
 
-def test_runtime_loaders_set_browser_defaults_without_importing_board():
+def test_interpreter_loaders_set_browser_defaults_without_importing_board():
     loader = (ROOT / "lib" / "utils" / "ps_loader.py").read_text(encoding="utf-8")
     assert "BOARD_WIDTH = 320" in loader
     assert "BOARD_HEIGHT = 480" in loader
@@ -147,7 +147,7 @@ def test_pixel_sim_demo_rotates_portrait_displays_before_layout():
     orientation = source.index(
         "if _host_board.display_drv.width < _host_board.display_drv.height:"
     )
-    simulator = source.index("from pixel_sim import display_drv, runtime")
+    simulator = source.index("from pixel_sim import display_drv, app")
     grid_size = source.index("GRID_W = display_drv.width")
     assert orientation < simulator < grid_size
     assert (
@@ -174,15 +174,15 @@ def test_gallery_uses_local_theme_toggle_and_syncs_the_frame():
     assert '<script src="./site-chrome.js"></script>' in source
     assert '<script src="./theme-toggle.js"></script>' in source
     assert 'id="pwa-install-btn"' not in source
-    assert 'id="runtime-toggle"' not in source
+    assert 'id="interpreter-toggle"' not in source
     assert "applyThemeToFrames(next)" in theme
     assert 'document.querySelectorAll("iframe")' in theme
     assert "assets/img/products/pydevices-examples.svg" in source
 
 
-def test_runtime_frame_and_sidebar_follow_content_height():
+def test_interpreter_frame_and_sidebar_follow_content_height():
     source = INDEX.read_text(encoding="utf-8")
-    layout = RUNTIME_LAYOUT.read_text(encoding="utf-8")
+    layout = INTERPRETER_LAYOUT.read_text(encoding="utf-8")
     assert 'scrolling="no"' in source
     assert "frame.style.height = Math.ceil(height) + 'px'" in source
     assert "frame.style.width = width + 'px'" in source
@@ -193,7 +193,7 @@ def test_runtime_frame_and_sidebar_follow_content_height():
     assert "Math.ceil(main.getBoundingClientRect().bottom)" in layout
 
 
-def test_runtime_cards_use_compact_outer_padding():
+def test_interpreter_cards_use_compact_outer_padding():
     css = DEMO_CSS.read_text(encoding="utf-8")
     assert "padding: 6px 8px 16px;" in css
     assert "padding: 16px 9px 6px;" in css
@@ -201,10 +201,10 @@ def test_runtime_cards_use_compact_outer_padding():
     assert "padding-bottom: 0;" in css
 
 
-def test_standalone_runtime_uses_side_by_side_height_tracking():
+def test_standalone_interpreter_uses_side_by_side_height_tracking():
     css = DEMO_CSS.read_text(encoding="utf-8")
-    layout = RUNTIME_LAYOUT.read_text(encoding="utf-8")
-    assert ".runtime-page.runtime-standalone.runtime-with-console .play-area" in css
+    layout = INTERPRETER_LAYOUT.read_text(encoding="utf-8")
+    assert ".interpreter-page.interpreter-standalone.interpreter-with-console .play-area" in css
     assert "grid-template-columns: auto auto;" in css
     assert "var standalone = window.parent === window;" in layout
     assert "if (lastWidth < 0)" in layout
@@ -213,7 +213,7 @@ def test_standalone_runtime_uses_side_by_side_height_tracking():
 
 def test_console_is_opt_in_and_gallery_leaves_it_hidden():
     index = INDEX.read_text(encoding="utf-8")
-    layout = RUNTIME_LAYOUT.read_text(encoding="utf-8")
+    layout = INTERPRETER_LAYOUT.read_text(encoding="utf-8")
     for name in ("micropython.html", "pyodide.html"):
         source = (ROOT / ".site" / "pyscript" / name).read_text(encoding="utf-8")
         assert 'class="console-toggle"' in source

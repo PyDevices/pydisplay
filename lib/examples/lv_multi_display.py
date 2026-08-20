@@ -10,11 +10,11 @@ reusable :class:`lv_encoder_emu.EncoderEmu` stand-in for hardware
 
 import display_driver  # noqa: F401 — primary LVGL + event loop
 import lvgl as lv
-from display_driver import runtime
+from display_driver import app
 from lv_encoder_emu import EncoderEmu
 
 # Soft encoder emulator on a secondary surface; EncoderDevice drives primary LVGL.
-emu = EncoderEmu(runtime, title="Encoder")
+emu = EncoderEmu(app, title="Encoder")
 
 # Primary: focusable widgets navigated by the encoder indev.
 scr = lv.screen_active()
@@ -47,4 +47,4 @@ focused = group.get_focused()
 if focused is not None:
     focused.add_state(lv.STATE.FOCUS_KEY)
 
-runtime.run_forever()
+app.run()

@@ -30,7 +30,7 @@ Then:
   - Enforces shared org chrome mounts via ``ensure_site_chrome``
   - Deletes stale ``.site/pyscript/*.html`` from the old per-demo page generator
 
-Each card links both runtimes (MicroPython + Pyodide) with filtered queries
+Each card links both interpreters (MicroPython + Pyodide) with filtered queries
 from ``url_maker``. Hinch GUIs are not listed in headers — ``fetch_ph_gui``
 installs them at runtime via color/hardware/touch setup.
 
@@ -151,7 +151,7 @@ class Example:
             modules=self._modules_for_query(),
             manifests=self._manifests_for_query(),
             deps=self.deps,
-            runtime=None,
+            interpreter=None,
         )
 
     def loader_hrefs(self) -> dict[str, str]:
@@ -490,7 +490,7 @@ def render_card(ex: Example) -> str:
                     </div>
                     <h3>{ex.title}</h3>
                     <p>{ex.blurb}</p>
-                    <div class="card-runtimes">
+                    <div class="card-interpreters">
                         <a class="go" href="{hrefs["micropython"]}"{link_attrs}>MicroPython {ARROW}</a>
                         <a class="go" href="{hrefs["pyodide"]}"{link_attrs}>Pyodide {ARROW}</a>
                     </div>
@@ -573,7 +573,7 @@ def copy_gallery_examples(dest: Path) -> int:
     return n
 
 
-def ensure_card_runtime_css(index_text: str) -> str:
+def ensure_card_interpreter_css(index_text: str) -> str:
     """No-op: card/badge styles live in site.css (kept for backward compat)."""
     return index_text
 
@@ -699,7 +699,7 @@ def main(argv: list[str] | None = None) -> int:
             f"{INDEX.name} is missing <!-- GEN:demos:start --> "
             "(collapse async/all sections before regenerating)"
         )
-    index_text = ensure_card_runtime_css(index_text)
+    index_text = ensure_card_interpreter_css(index_text)
     index_text = ensure_site_chrome(index_text)
     # Update hint text for new headers.
     index_text = index_text.replace(

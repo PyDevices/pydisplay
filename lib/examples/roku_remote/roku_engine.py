@@ -1126,7 +1126,7 @@ def _probe_hosts_poll(hosts, port, connect_timeout, batch_size=32):
         # CPython the loop had no timeout and filtered hosts (no RST, no connect)
         # kept ``pending`` non-empty forever, hanging the whole scan.
         deadline = _monotonic_deadline_ms(connect_timeout)
-        # Fallback bound for runtimes with no clock at all.
+        # Fallback bound for interpreters with no clock at all.
         max_iters = max(1, timeout_ms // 50 + 2)
         iters = 0
         while pending:
@@ -1680,8 +1680,8 @@ def restart_app():
     * PyScript / Jupyter / WASM: return a short status (``reload page`` /
       ``restart kernel``); caller shows it — no process exit.
     * MCU: ``machine.reset()`` / ``microcontroller.reset()`` (does not return).
-    * Desktop: ``runtime.request_quit(42)`` so SDL teardown runs, then the
-      process exits 42 from ``run_forever``. Relaunch with a host shell loop
+    * Desktop: ``app.request_quit(42)`` so SDL teardown runs, then the
+      process exits 42 from ``App.run``. Relaunch with a host shell loop
       (see ``RESTART_EXIT_CODE``); there is no in-process ``execv`` path.
     """
     if _restart_is_browser():
@@ -1702,18 +1702,16 @@ def restart_app():
     except (ImportError, AttributeError):
         pass
 
-    # Clean Runtime shutdown (same path as window close), then exit 42.
+    # Clean app shutdown (same path as window close), then exit 42.
     try:
         module = sys.modules.get("display_driver")
         if module is not None:
-            runtime = module.runtime
+            app = module.app
         else:
-import board_config
-import appdev
+            import appdev
 
-app = appdev.App(board_config)
-
-        runtime.request_quit(RESTART_EXIT_CODE)
+            app = appdev.App.current()
+        app.request_quit(RESTART_EXIT_CODE)
         return None
     except Exception:
         pass

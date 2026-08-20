@@ -15,7 +15,6 @@ import board_config
 import appdev
 
 app = appdev.App(board_config)
-runtime = app
 from pygraphics import BMP565
 
 image = BMP565("examples/assets/warrior.bmp", streamed=True)
@@ -67,7 +66,7 @@ draw_sprite(*st["location"], a, fwd)
 
 
 def _tick(_=None):
-    if app.quit_requested if runtime else False:
+    if app.quit_requested if app else False:
         return
     location = st["location"]
     direction = st["dir"]

@@ -1638,7 +1638,7 @@ class _Remote:
 
 
 def create(engine=None, start_page="devices"):
-    """Build the FrameBuffer front end (does not call ``run_forever``)."""
+    """Build the FrameBuffer front end (does not call ``App.run``)."""
     return _Remote(engine=engine, start_page=start_page)
 
 

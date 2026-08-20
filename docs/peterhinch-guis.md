@@ -28,7 +28,7 @@ the directory when you switch between them. `lib/utils/gui/` is gitignored.
 displays; here the display comes from your PyDevices `board_config` and
 `color_setup.ssd` / `displaybuf` instead. The same goes for upstream's `touch/`
 package — touch input comes from the board config and, for non-LVGL apps, the
-application-owned `appdev` runtime.
+application-owned `appdev` app.
 
 ### Shared requirements
 

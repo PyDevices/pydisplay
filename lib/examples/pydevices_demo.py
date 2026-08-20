@@ -12,7 +12,6 @@ import board_config
 import appdev
 
 app = appdev.App(board_config)
-runtime = app
 
 from displaydev import color565
 from pygraphics import RGB565, Area, Font, FrameBuffer
@@ -54,7 +53,7 @@ TIPS = (
     "or the mouse.",
     "Display: board_config",
     "Events: appdev",
-    "Timers: runtime.on_tick",
+    "Timers: app.on_tick",
 )
 
 state = {"rotation": 0, "scroll": 0, "color_i": 0}

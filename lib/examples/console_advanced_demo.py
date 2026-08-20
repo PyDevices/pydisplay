@@ -73,15 +73,15 @@ console.label(Console.LEFT, platform, pal.RED)
 display_drv.show()
 
 if _test_mode:
-import board_config
-import appdev
+    import board_config
+    import appdev
 
-app = appdev.App(board_config)
+    app = appdev.App(board_config)
 
     console.write("console_advanced_demo: smoke test\n", pal.GREEN)
     display_drv.show()
 
-    # Quit is already serviced by Runtime's auto-service; just block until then.
+    # Quit is already serviced by the app's auto-service; just block until then.
     app.run()
 
 #### Example commands

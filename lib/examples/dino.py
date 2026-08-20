@@ -31,7 +31,6 @@ if _host_board.display_drv.width < _host_board.display_drv.height:
 # from board_config import display_drv
 # app = appdev.App(board_config)
 from pixel_sim import display_drv, app
-runtime = app  # noqa: E402
 
 WIDTH = display_drv.width
 HEIGHT = display_drv.height

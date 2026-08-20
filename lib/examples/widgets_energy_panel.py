@@ -31,9 +31,8 @@ try:
 except Exception:
     pass
 
-display = pd.Display(display_drv, runtime)
+display = pd.Display(display_drv, app)
 pal = display.pal
-runtime = app
 
 W = display.width
 H = display.height

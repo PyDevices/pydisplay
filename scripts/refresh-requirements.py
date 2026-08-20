@@ -81,7 +81,7 @@ def _is_pydevices_examples_workspace(paths: list[str]) -> bool:
         if (
             os.path.isfile(os.path.join(norm, "requirements.txt"))
             and os.path.isdir(os.path.join(norm, "lib", "examples"))
-            and os.path.isfile(os.path.join(norm, "tools", "example_runtimes.toml"))
+            and os.path.isfile(os.path.join(norm, "tools", "example_interpreters.toml"))
         ):
             return True
     return False
@@ -93,7 +93,7 @@ def _requirements_path(paths: list[str]) -> str:
         candidate = os.path.join(norm, "requirements.txt")
         if os.path.basename(norm.rstrip(os.sep)) == "pydevices-examples" and os.path.isdir(norm):
             return candidate
-        if os.path.isfile(os.path.join(norm, "tools", "example_runtimes.toml")):
+        if os.path.isfile(os.path.join(norm, "tools", "example_interpreters.toml")):
             return candidate
     return DEFAULT_REQ
 

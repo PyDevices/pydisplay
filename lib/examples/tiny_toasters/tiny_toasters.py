@@ -39,7 +39,6 @@ import board_config
 import appdev
 
 app = appdev.App(board_config)
-runtime = app
 
 palette = tft_config.palette
 sys.path.insert(0, __file__.replace("\\", "/").rsplit("/", 1)[0])
@@ -220,7 +219,7 @@ def main():
     def _tick(_=None):
         # Do not call app.poll() from on_tick: sync backends (librt/sdl2)
         # re-enter the timer path and hang. Auto-service handles QUIT.
-        if app.quit_requested if runtime else False:
+        if app.quit_requested if app else False:
             return
         for sprite in sprites:
             sprite.clear()
