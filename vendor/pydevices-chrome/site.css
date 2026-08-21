@@ -1344,8 +1344,8 @@ pre code {
 }
 
 .nav-card-title {
-  font-family: var(--font-mono, monospace);
-  font-weight: 700;
+  font-family: var(--font-display, var(--font));
+  font-weight: 600;
   font-size: 0.84rem;
   color: var(--ink);
   white-space: nowrap;

@@ -63,10 +63,10 @@
       repos: [
         {
           id: "root",
-          name: "PyDevices Portal",
+          name: "PyDevices",
           path: "/",
           url: ROOT + "/",
-          tag: "Portal",
+          tag: "HOME",
           desc: "Universal board contract & Python graphics umbrella",
           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>'
         }
@@ -74,7 +74,7 @@
     },
     {
       tier: 1,
-      name: "Tier 1: Core Platform & HAL",
+      name: "Core Platform & HAL",
       color: "var(--tier-1-amber, #d97706)",
       repos: [
         {
@@ -97,7 +97,7 @@
         },
         {
           id: "pydevices-examples",
-          name: "pydevices-examples",
+          name: "pydevices",
           path: "/pydevices-examples/",
           url: ROOT + "/pydevices-examples/pyscript/",
           tag: "Gallery",
@@ -108,7 +108,7 @@
     },
     {
       tier: 2,
-      name: "Tier 2: Framebuffers & UI Toolkits",
+      name: "Framebuffers & UI Toolkits",
       color: "var(--tier-2-emerald, #059669)",
       repos: [
         {
@@ -142,7 +142,7 @@
     },
     {
       tier: 3,
-      name: "Tier 3: LVGL Native Extensions",
+      name: "LVGL Native Extensions",
       color: "var(--tier-3-blue, #2563eb)",
       repos: [
         {
@@ -185,7 +185,7 @@
     },
     {
       tier: 4,
-      name: "Tier 4: App Hosts & Mobile",
+      name: "App Hosts & Mobile",
       color: "var(--tier-4-purple, #7c3aed)",
       repos: [
         {
@@ -210,7 +210,7 @@
     },
     {
       tier: 5,
-      name: "Tier 5: Developer Tools & MIP",
+      name: "Developer Tools & Infrastructure",
       color: "var(--tier-5-steel, #0284c7)",
       repos: [
         {
