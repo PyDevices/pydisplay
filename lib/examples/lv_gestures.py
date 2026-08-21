@@ -206,4 +206,3 @@ def build_ui():
 # the app alive or returns immediately on an interactive REPL with a
 # self-driving timer.
 build_ui()
-app.run()

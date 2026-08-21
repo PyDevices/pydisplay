@@ -39,5 +39,3 @@ def joystick_callback(event):
                 select_item(event.value[1] > 0)
 
 app.on(pd.events.JOYHATMOTION, joystick_callback)
-
-app.run()

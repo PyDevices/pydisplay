@@ -25,5 +25,3 @@ for et in (
     app.events.KEYUP,
 ):
     app.on(et, _on_event)
-
-app.run()

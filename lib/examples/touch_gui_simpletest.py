@@ -21,5 +21,3 @@ ssd.line(0, 0, ssd.width - 1, ssd.height - 1, GREEN)
 ssd.rect(0, 0, 15, 15, RED)
 ssd.rect(ssd.width - 15, ssd.height - 15, 15, 15, BLUE)
 ssd.show()
-
-app.run()

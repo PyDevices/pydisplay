@@ -52,7 +52,7 @@ Prefer these over poking the IDE browser when a demo hangs.
 
 **Common wedge:** a sync provider's `timer.sleep_ms` (or any other blocking
 sleep) on the **main thread** often stalls `page.evaluate` and screenshots — the
-browser never yields. Prefer `app.run()` and async sleep patterns.
+browser never yields. Prefer the app's own loop and async sleep patterns.
 Capture console/CDP output with `ps_debug.py` before assuming a gallery or
 package-map regression.
 

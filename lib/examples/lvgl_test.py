@@ -43,4 +43,3 @@ def build_ui():
 
 build_ui()
 print("lvgl_test: button on default screen")
-app.run()

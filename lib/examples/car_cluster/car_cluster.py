@@ -154,8 +154,5 @@ def build_ui():
 
 build_ui()
 
-# Keep the shared app alive when launched as a script. When imported
-# (design session / REPL ``import``), timers keep the UI live under -i /
-# signal backends; the importer can call ``app.run()`` if needed.
-if __name__ == "__main__":
-    app.run()
+# The app keeps itself alive past the end of this script, and stays live under
+# a REPL ``import`` (design session) on signal-driven backends too.

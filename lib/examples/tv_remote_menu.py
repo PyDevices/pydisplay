@@ -105,4 +105,3 @@ def on_key(e):
 
 redraw()
 app.on(app.events.KEYDOWN, on_key)
-app.run()

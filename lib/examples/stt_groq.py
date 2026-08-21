@@ -59,7 +59,6 @@ def _desktop():
 
     app.on([app.events.KEYDOWN, app.events.KEYUP], on_key)
     print("stt_groq: hold Left Ctrl to talk; release to transcribe")
-    app.run()
 
 
 def _microcontroller():

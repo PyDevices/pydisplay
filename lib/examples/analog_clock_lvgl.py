@@ -804,7 +804,6 @@ def main():
     finally:
         if current is not None:
             current.enable()
-    app.run()
 
 
 main()

@@ -1229,7 +1229,6 @@ def main():
         _start_round()
 
     app.every(_tick, period=16, async_=app.timer_async)
-    app.run()
 
 
 main()

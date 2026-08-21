@@ -58,4 +58,3 @@ def _on_button(e):
 
 app.on(app.events.MOUSEWHEEL, _on_wheel)
 app.on(app.events.MOUSEBUTTONDOWN, _on_button)
-app.run()

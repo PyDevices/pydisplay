@@ -233,7 +233,5 @@ def build_ui():
 
 build_ui()
 
-# Canonical entry: display_driver wired LVGL into its own app at import;
-# app.run() keeps the app alive (or returns immediately in a signal-driven
-# interactive REPL).
-app.run()
+# Canonical entry: display_driver wired LVGL into its own app at import, and
+# the app keeps itself alive past the end of this script.

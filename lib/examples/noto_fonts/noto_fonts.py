@@ -64,7 +64,6 @@ def main():
     row += noto_mono.HEIGHT
 
     tft.show()
-    app.run()
 
 
 main()

@@ -173,8 +173,6 @@ else:
         console.write("color {:2d} ".format(index), fg=index)
         console.write("reverse\n", fg=Console.BLACK, bg=index)
 
-app.run()
-
 #### Things to try at the mirrored REPL
 # console.cls()                    # clear the text area
 # console.label(Console.LEFT, "hi", Console.BRIGHT_RED)

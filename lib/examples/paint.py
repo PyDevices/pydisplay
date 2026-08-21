@@ -91,4 +91,3 @@ def _on_motion(e):
 
 app.on(app.events.MOUSEBUTTONDOWN, _on_button)
 app.on(app.events.MOUSEMOTION, _on_motion)
-app.run()

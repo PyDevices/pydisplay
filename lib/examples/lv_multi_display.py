@@ -46,5 +46,3 @@ for i, label in enumerate(("Alpha", "Beta", "Gamma", "Delta")):
 focused = group.get_focused()
 if focused is not None:
     focused.add_state(lv.STATE.FOCUS_KEY)
-
-app.run()

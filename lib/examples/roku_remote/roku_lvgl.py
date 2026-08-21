@@ -2217,9 +2217,8 @@ def create(engine=None, start_page="devices"):
 
 
 def run(engine=None, start_page="devices"):
-    """Create the UI and hand control to ``app.run()``."""
+    """Create the UI and let the app run itself."""
     create(engine=engine, start_page=start_page)
-    app.run()
 
 
 # Direct import / example kit: auto-start. ``roku_remote`` sets

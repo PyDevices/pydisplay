@@ -8,4 +8,3 @@ from . import car_cluster  # noqa: F401 — gallery/kit entry: import car_cluste
 from display_driver import app
 
 # Package import is the PyScript/gallery entry (not ``__main__``); keep LVGL alive.
-app.run()

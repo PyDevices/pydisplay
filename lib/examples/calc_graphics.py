@@ -302,8 +302,5 @@ class _Calculator:
 # auto-service; QUIT tears everything down.
 calc = _Calculator()
 
-# Canonical entry: app.run() blocks to keep the app alive when run as a
-# program, and returns immediately in an interactive REPL on signal-driven
-# backends (the interpreter keeps servicing the app) — so the same call is
-# always correct.
-app.run()
+# Canonical entry: the app keeps itself alive past the end of this script, and
+# in an interactive REPL the prompt comes back while the app keeps running.

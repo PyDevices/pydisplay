@@ -354,4 +354,3 @@ checkin_btn.add_event_cb(pd.events.MOUSEBUTTONDOWN, _do_checkin)
 
 nav.push(root)
 screen.visible = True
-app.run()

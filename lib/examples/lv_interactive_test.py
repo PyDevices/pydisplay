@@ -20,7 +20,7 @@ Demonstrates self-driving background timers without a main application loop:
 * **CircuitPython, PyScript, and Jupyter**:
   Because these environments lack hardware interrupt/signal timers and rely on
   cooperative/pumped timers, the display will never update without an active
-  event loop (e.g. `app.run()`), and the app will appear hung.
+  event loop, and the app will appear hung.
 """
 
 import display_driver  # noqa: F401 - initializes display, input, and timer
