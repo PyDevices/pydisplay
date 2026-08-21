@@ -97,11 +97,11 @@
         },
         {
           id: "pydevices-examples",
-          name: "pydevices",
+          name: "examples",
           path: "/pydevices-examples/",
-          url: ROOT + "/pydevices-examples/pyscript/",
-          tag: "Gallery",
-          desc: "PyScript runner, demos & cross-runtime showcase",
+          url: ROOT + "/pydevices-examples/",
+          tag: "Showcase",
+          desc: "Multi-interpreter demos, benchmarks & PyScript runner",
           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/><circle cx="17" cy="15" r="1.5"/></svg>'
         }
       ]
