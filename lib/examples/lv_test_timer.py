@@ -124,12 +124,12 @@ def _lvgl_label():
 
 
 def _timer_type():
-    try:
-        timer = getattr(app, "_timer", None)
-        if timer is not None:
-            return _format_timer_type(type(timer))
-    except AttributeError:
-        pass
+    # Deliberately not named ``timer``: that would shadow the module-level
+    # ``multimer.auto`` import this function falls back to, and the fallback
+    # then reads None on any provider that has not armed yet.
+    armed = getattr(app, "_timer", None)
+    if armed is not None:
+        return _format_timer_type(type(armed))
     try:
         from multimer import AsyncTimer
 
