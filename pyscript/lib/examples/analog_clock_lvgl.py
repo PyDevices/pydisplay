@@ -428,7 +428,7 @@ class AnalogClock:
         self.scale.set_range(0, 720)
         self.scale.set_angle_range(360)
         self.scale.set_rotation(270)
-        self.scale.set_total_tick_count(60)
+        self.scale.set_total_tick_count(61)
         self.scale.set_major_tick_every(5)
         self.scale.set_label_show(False)
 
