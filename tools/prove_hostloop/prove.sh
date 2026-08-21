@@ -31,6 +31,12 @@ for scenario in noloop async run crash; do
 done
 
 echo
+echo "=================== browser (wasm, ambient): host loop outlives the script"
+for scenario in noloop async run; do
+    run "MicroPython wasm / $scenario" node wasm_host.mjs demo_$scenario.py
+done
+
+echo
 echo "=================== interactive (-i): REPL owns the loop"
 repl_feed() { sleep 0.6; printf 'print("[repl] ticks during REPL:", len(app.ticks))\n'; sleep 0.3; }
 echo "----- CPython -i"
