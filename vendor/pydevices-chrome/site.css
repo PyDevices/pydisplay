@@ -313,6 +313,107 @@ pre code {
   text-align: left;
 }
 
+/* Hero with Live Canvas Opposite Hero Badge */
+.hero.has-hero-canvas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(24px, 5vw, 48px);
+}
+
+.hero.has-hero-canvas .hero-main {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.hero-canvas-wrap {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.hero-canvas-circle {
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 35% 35%, #1c2229 0%, #0c0f12 100%);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 35px rgba(245, 78, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hero-canvas-circle canvas {
+  width: 240px;
+  height: 240px;
+  display: block;
+  image-rendering: pixelated;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.hero-canvas-wrap.active .hero-canvas-circle canvas {
+  opacity: 1;
+}
+
+.hero-canvas-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 50%;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+.hero-canvas-wrap.active .hero-canvas-loader {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.hero-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(245, 78, 0, 0.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: hero-spin 0.9s linear infinite;
+}
+
+@keyframes hero-spin {
+  to { transform: rotate(360deg); }
+}
+
+.hero-canvas-status {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  max-width: 180px;
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .hero.has-hero-canvas {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+  }
+  .hero-canvas-wrap {
+    align-self: center;
+    margin-bottom: 24px;
+  }
+}
+
 .hero-lead {
   display: flex;
   align-items: center;
