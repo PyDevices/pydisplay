@@ -335,10 +335,10 @@ pre code {
   position: relative;
 }
 
-.hero-canvas-circle {
+.hero-canvas-circle,
+.hero-canvas-square {
   width: 240px;
   height: 240px;
-  border-radius: 50%;
   position: relative;
   overflow: hidden;
   display: grid;
@@ -348,7 +348,16 @@ pre code {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.hero-canvas-circle canvas {
+.hero-canvas-circle {
+  border-radius: 50%;
+}
+
+.hero-canvas-square {
+  border-radius: 20px;
+}
+
+.hero-canvas-circle canvas,
+.hero-canvas-square canvas {
   width: 240px;
   height: 240px;
   display: block;
@@ -357,7 +366,12 @@ pre code {
   transition: opacity 0.4s ease;
 }
 
-.hero-canvas-wrap.active .hero-canvas-circle canvas {
+.hero-canvas-square canvas {
+  border-radius: 18px;
+}
+
+.hero-canvas-wrap.active .hero-canvas-circle canvas,
+.hero-canvas-wrap.active .hero-canvas-square canvas {
   opacity: 1;
 }
 
@@ -369,7 +383,7 @@ pre code {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  border-radius: 50%;
+  border-radius: inherit;
   pointer-events: none;
   transition: opacity 0.3s ease;
   z-index: 2;
