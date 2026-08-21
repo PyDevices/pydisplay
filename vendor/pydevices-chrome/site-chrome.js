@@ -273,7 +273,7 @@
     // Search Filter Input
     html += '  <div class="pydevices-nav-search-wrap">';
     html += '    <svg class="pydevices-nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>';
-    html += '    <input type="text" class="pydevices-nav-search" id="pydevices-nav-search" placeholder="Filter ecosystem..." autocomplete="off">';
+    html += '    <input type="text" class="pydevices-nav-search" id="pydevices-nav-search" placeholder="Filter..." autocomplete="off">';
     html += '  </div>';
 
     // Scrollable Body with Tiers & Cards
@@ -340,8 +340,15 @@
       sidebar.classList.add('is-open');
       scrim.classList.add('is-open');
       document.body.classList.add('pydevices-drawer-open');
-      if (searchInput && window.innerWidth <= 1400) {
-        setTimeout(function () { searchInput.focus(); }, 150);
+      var activeCard = sidebar.querySelector('.pydevices-nav-card.is-active');
+      if (activeCard) {
+        activeCard.focus({ preventScroll: true });
+        activeCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      } else {
+        var firstCard = sidebar.querySelector('.pydevices-nav-card');
+        if (firstCard) {
+          firstCard.focus({ preventScroll: true });
+        }
       }
     }
 
