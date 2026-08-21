@@ -106,4 +106,3 @@ def _tick(_=None):
 
 
 app.every(_tick, period=100, async_=app.timer_async)
-app.run()

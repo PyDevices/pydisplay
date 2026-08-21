@@ -18,7 +18,7 @@ up through tall phone portraits.
 
 Input and frame rendering are driven by the shared ``appdev.App``:
 ``pd.Display`` wires them in at construction, so the example just builds the UI
-and hands control to ``app.run()``. Blocking ECP/scan work is queued
+and lets the app run itself. Blocking ECP/scan work is queued
 and drained from the soft ``on_tick`` pump (no ``_thread`` — ESP32 thread stacks
 are too small for network).
 
@@ -1612,9 +1612,8 @@ def create(engine=None, start_page="devices"):
 
 
 def run(engine=None, start_page="devices"):
-    """Create the UI and hand control to ``app.run()``."""
+    """Create the UI and let the app run itself."""
     create(engine=engine, start_page=start_page)
-    app.run()
 
 
 # Direct import / example kit: auto-start. ``roku_remote`` owns launch when set.

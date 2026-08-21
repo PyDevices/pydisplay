@@ -83,9 +83,11 @@ from board_config import display_drv
 import appdev
 
 app = appdev.App(board_config)
-
-app.run()
 ```
+
+The app keeps itself alive past the end of the script, so no trailing
+`app.run()` is needed. Call it only when you want the script to block at that
+point, or need a nonzero exit code.
 
 LVGL examples use the coordinator bundled with the LVGL binding and do not
 import `appdev`:
@@ -93,8 +95,6 @@ import `appdev`:
 ```python
 from board_config import display_drv
 from display_driver import app
-
-app.run()
 ```
 
 This separation keeps hardware policy out of board configs and lets applications

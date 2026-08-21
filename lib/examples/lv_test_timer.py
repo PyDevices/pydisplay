@@ -8,11 +8,10 @@ already has.
 Shows interpreter, OS, display, timer backend, and LVGL version; a seconds counter
 and spinning arc prove LVGL timers fire; a tap button exercises input.
 
-Interactive (default): build UI then ``app.run()``. On an interactive
-REPL with a self-driving timer (``machine.Timer`` / signals), ``App.run``
-returns immediately so the prompt comes back for introspection while LVGL keeps
-ticking. Kit mode (``kit`` argv) still uses a short sync/async wait for click
-injection because LVGL owns the host queue.
+Interactive (default): build the UI and let the app run itself — no trailing
+``app.run()``. At a REPL the prompt comes back for introspection while LVGL
+keeps ticking. Kit mode (``kit`` argv) still uses a short sync/async wait for
+click injection because LVGL owns the host queue.
 
 Parent may set before launch:
 
@@ -400,7 +399,7 @@ async def _run_kit_async():
 def run_kit():
     """Automated timer + click check.
 
-    Interactive apps use ``app.run()`` only. The kit still needs a
+    Interactive apps need no explicit loop at all. The kit still needs a
     small sync/async wait flavor because LVGL click injection must pump either
     ``time.sleep`` (sync timer) or ``asyncio.sleep`` (async timer) — not
     ``app.poll()`` while LVGL owns the host queue.
@@ -442,9 +441,8 @@ if _wants_kit():
     run_kit()
 else:
     # Canonical interactive entry — no app loop here. display_driver wires LVGL
-    # into the shared app at import; App.run keeps the app alive or
-    # returns immediately on an interactive REPL with a self-driving timer.
+    # into the shared app at import, and the app keeps itself alive past the
+    # end of this script.
     import display_driver  # noqa: F401
 
     build_ui()
-    app.run()

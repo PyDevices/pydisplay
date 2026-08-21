@@ -49,4 +49,3 @@ def _on_key(e):
 
 
 app.on([app.events.KEYDOWN, app.events.KEYUP], _on_key)
-app.run()

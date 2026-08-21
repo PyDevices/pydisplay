@@ -230,5 +230,4 @@ def main():
         gc.collect()
 
     app.every(_tick, period=50, async_=app.timer_async)
-    app.run()
 main()

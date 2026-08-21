@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Prove that appdev.App keeps itself alive with no trailing app.run(),
+# on every interpreter PyDevices targets.
+cd "$(dirname "$0")"
+PD=${PD:-/home/brad/gh/pydevices/pydevices}
+BIN=${BIN:-/home/brad/gh/pydevices/cmods/bin}
+export MICROPYPATH=".:$PD/lib:$PD/utils"
+export PYTHONPATH=".:$PD/lib:$PD/utils"
+
+run() {  # run <label> <cmd...>
+    echo
+    echo "----- $1"
+    shift
+    timeout 30 "$@" </dev/null 2>&1 | sed 's/^/    /'
+    echo "    [rc=${PIPESTATUS[0]}]"
+}
+
+for scenario in noloop async run crash; do
+    echo
+    echo "=================== $scenario"
+    run "CPython / linux"       python3 demo_$scenario.py
+    run "MicroPython / linux"   "$BIN/micropython" demo_$scenario.py
+    run "MicroPython / windows" "$BIN/micropython.exe" demo_$scenario.py
+    run "CircuitPython / unix"  "$BIN/circuitpython" demo_$scenario.py
+done
+
+echo
+echo "=================== interactive (-i): REPL owns the loop"
+repl_feed() { sleep 0.6; printf 'print("[repl] ticks during REPL:", len(app.ticks))\n'; sleep 0.3; }
+echo "----- CPython -i"
+repl_feed | timeout 30 python3 -i demo_noloop.py 2>&1 | sed 's/^/    /'
+echo "----- MicroPython -i"
+repl_feed | timeout 30 "$BIN/micropython" -i demo_noloop.py 2>&1 | sed 's/^/    /'

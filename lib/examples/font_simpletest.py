@@ -143,7 +143,6 @@ def main():
         poll()
 
     app.every(_tick, period=1, async_=app.timer_async)
-    app.run()
 
 
 main()
