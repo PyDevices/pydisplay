@@ -286,8 +286,27 @@ pre code {
 }
 
 @media (max-width: 768px) {
-  .nav {
+  .nav a:not(.nav-gallery-link) {
     display: none;
+  }
+  .nav {
+    gap: 8px;
+  }
+  .nav-gallery-link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--accent-strong);
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+  }
+  .nav-gallery-link:hover {
+    background: var(--panel-2);
+    border-color: var(--accent-strong);
+    text-decoration: none;
   }
 }
 
