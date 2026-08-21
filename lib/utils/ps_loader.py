@@ -272,12 +272,19 @@ def _refresh_path_after_install():
 
 
 def _has_board_config():
-    try:
-        import board_config  # noqa: F401
+    import os
+    import sys
 
+    if "board_config" in sys.modules:
         return True
-    except ImportError:
-        return False
+    for p in sys.path:
+        target = (p + "/board_config.py") if p else "board_config.py"
+        try:
+            os.stat(target)
+            return True
+        except OSError:
+            pass
+    return False
 
 
 def _ensure_board_config(mip_mod, status=None, url_base=None):

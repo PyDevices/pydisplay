@@ -273,17 +273,18 @@ except OSError:
 if "/" not in sys.path:
     sys.path.insert(0, "/")
 import utils.path  # noqa: F401
-import ps_loader
-
-# Gallery wasm does not freeze displaydev; desktop board_config mip does.
-# Install before env_set, and before any import of board_config.
-ps_loader.ensure_board_config()
 
 from displaydev import env_set
 
 # Hinch demos use 320x240 (gallery default is 320x480).
 env_set("PYDEVICES_WIDTH", 320)
 env_set("PYDEVICES_HEIGHT", 240)
+
+import ps_loader
+
+# Gallery wasm does not freeze displaydev; desktop board_config mip does.
+# Install after env_set, and before any import of board_config.
+ps_loader.ensure_board_config()
 
 
 def _log_print(*args, **kwargs):
