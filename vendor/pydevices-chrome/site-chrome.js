@@ -37,7 +37,7 @@
     '/displayif/">Native C</a>' +
     '<a href="' +
     ROOT +
-    '/pydevices-examples/pyscript/">Gallery</a>' +
+    '/pydevices-examples/pyscript/" class="nav-gallery-link">Gallery</a>' +
     '<a href="https://github.com/PyDevices">GitHub</a>' +
     "</nav>" +
     '<button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme" title="Toggle color theme">' +
