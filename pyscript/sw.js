@@ -1,7 +1,7 @@
 /*! pydevices-examples PWA service worker — offline cache + COI headers for PyScript */
 /* CACHE_NAME is stamped at Pages deploy from a hash of STATIC_ASSETS +
  * CACHE_KEY_EXTRAS + this file (see scripts/pyscript_stamp_pwa_cache.py). */
-const CACHE_NAME = 'pydevices-examples-pwa-48d5ed3e258a';
+const CACHE_NAME = 'pydevices-examples-pwa-d5a2620e3076';
 
 const STATIC_ASSETS = [
   './index.html',

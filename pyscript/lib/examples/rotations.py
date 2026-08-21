@@ -79,7 +79,6 @@ def main():
         poll()
 
     app.every(_tick, period=2000, async_=app.timer_async)
-    app.run()
 
 
 main()

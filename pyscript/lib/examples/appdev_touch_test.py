@@ -172,4 +172,3 @@ if not demo:
 
 _start_over()
 app.on(app.events.MOUSEBUTTONDOWN, _on_click)
-app.run()

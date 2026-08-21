@@ -107,4 +107,3 @@ def _on_mode_tick(_=None):
 _rebuild()
 app.on(app.events.MOUSEBUTTONDOWN, _on_click)
 app.every(_on_mode_tick, period=100, async_=app.timer_async)
-app.run()

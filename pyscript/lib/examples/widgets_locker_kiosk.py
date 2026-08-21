@@ -317,4 +317,3 @@ sheet_btn.add_event_cb(pd.events.MOUSEBUTTONDOWN, lambda _s=None, _e=None: sheet
 confirm_book.add_event_cb(pd.events.MOUSEBUTTONDOWN, _confirm_booking)
 
 screen.visible = True
-app.run()

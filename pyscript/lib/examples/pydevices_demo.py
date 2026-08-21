@@ -3,7 +3,7 @@
 """
 pydevices_demo.py — flagship board_config demo: clicks, rotation, scrolling.
 
-Setup + callbacks, then ``app.run()``. Uses only published product modules
+Setup + callbacks; the app runs itself. Uses only published product modules
 (board_config, graphics, multimer, appdev).
 """
 
@@ -155,4 +155,3 @@ setup_scroll()
 redraw()
 app.every(_scroll_tick, period=40, async_=app.timer_async)
 app.on(app.events.MOUSEBUTTONDOWN, _on_click)
-app.run()

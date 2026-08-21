@@ -22,7 +22,6 @@ Typical instrument / game loop::
     eng.note_on("e4", 329.63)    # chord = multiple active voices
     eng.note_off("c4")
     eng.blip(880, ms=60)         # one-shot game SFX
-    app.run()
 
 Wave shapes are registered by name so apps can add custom oscillators without
 forking the mixer.

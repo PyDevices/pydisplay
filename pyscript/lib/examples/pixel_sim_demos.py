@@ -443,4 +443,3 @@ def _tick(_=None):
 
 
 app.every(_tick, period=1, async_=app.timer_async)
-app.run()

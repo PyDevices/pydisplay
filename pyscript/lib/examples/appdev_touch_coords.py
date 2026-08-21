@@ -85,4 +85,3 @@ if touch is not None:
 
 _show()
 app.on(events.MOUSEBUTTONUP, _on_up)
-app.run()

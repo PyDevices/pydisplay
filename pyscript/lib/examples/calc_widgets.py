@@ -11,7 +11,7 @@ UI scales from 320x480 through 640x960 and similar desktop sizes.
 
 Input and frame rendering are driven by the shared ``appdev.App``:
 ``pd.Display`` wires them in at construction, so the example just builds the UI
-and hands control to ``app.run()``.
+and lets the app run itself.
 """
 
 import sys
@@ -200,7 +200,5 @@ _refresh()
 screen.visible = True
 
 # Canonical entry: pdwidgets wires input + rendering into the shared app at
-# Display construction, so this just keeps the app alive. app.run() blocks
-# when run as a program and returns immediately in an interactive REPL on
-# signal-driven backends, so the same call is always correct.
-app.run()
+# Display construction, and the app keeps itself alive past the end of this
+# script — as a program or at an interactive REPL alike.

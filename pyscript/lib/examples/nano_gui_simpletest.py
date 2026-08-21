@@ -22,5 +22,3 @@ ssd.line(0, 0, ssd.width - 1, ssd.height - 1, GREEN)  # Green diagonal corner-to
 ssd.rect(0, 0, 15, 15, RED)  # Red square at top left
 ssd.rect(ssd.width - 15, ssd.height - 15, 15, 15, BLUE)  # Blue square at bottom right
 ssd.show()
-
-app.run()

@@ -86,5 +86,3 @@ print("Ctrl+Q to quit.\n")
 
 for et in (events.KEYDOWN, events.KEYUP):
     app.on(et, _on_key)
-
-app.run()

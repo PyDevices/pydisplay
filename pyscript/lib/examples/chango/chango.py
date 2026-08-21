@@ -58,7 +58,6 @@ def main():
     row += font_64.HEIGHT
 
     tft.show()
-    app.run()
 
 
 main()

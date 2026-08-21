@@ -137,11 +137,11 @@ def main():
     The big show!
     """
     poll = _setup()
-    # Blocks on desktop/MCU but yields to the event loop on PyScript and
-    # Jupyter (app.timer_async), so the browser main thread stays live.
+    # The app keeps itself alive after main() returns; on PyScript and Jupyter
+    # (app.timer_async) the host's own loop drives it, so the browser main
+    # thread stays live.
     def _tick(_=None):
         poll()
 
     app.every(_tick, period=1, async_=app.timer_async)
-    app.run()
 main()

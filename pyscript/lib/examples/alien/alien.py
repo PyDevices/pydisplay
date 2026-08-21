@@ -92,5 +92,4 @@ def main():
         st["last_col"], st["old_row"] = col, row
 
     app.every(_tick, period=10, async_=app.timer_async)
-    app.run()
 main()

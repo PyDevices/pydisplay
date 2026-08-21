@@ -364,5 +364,3 @@ app.on(
 )
 app.on([app.events.KEYDOWN, app.events.KEYUP], _on_key)
 app.on(app.events.QUIT, _on_quit)
-
-app.run()
