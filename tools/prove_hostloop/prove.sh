@@ -6,6 +6,12 @@ PD=${PD:-/home/brad/gh/pydevices/pydevices}
 BIN=${BIN:-/home/brad/gh/pydevices/cmods/bin}
 export MICROPYPATH=".:$PD/lib:$PD/utils"
 export PYTHONPATH=".:$PD/lib:$PD/utils"
+# micropython.exe is a Windows binary launched from WSL, so it only sees the
+# environment variables named in WSLENV. Without this it never receives
+# MICROPYPATH and silently falls back to the installed copy under
+# %USERPROFILE%\.micropython\lib -- which is how a stale install masquerades
+# as a code failure. The "/l" flag translates the WSL paths for it.
+export WSLENV="MICROPYPATH/l"
 
 run() {  # run <label> <cmd...>
     echo
