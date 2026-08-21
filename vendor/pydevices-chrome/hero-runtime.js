@@ -105,7 +105,7 @@ if "pyscript" not in sys.modules:
       await pyodide.runPythonAsync(`
 import mip, os
 _fetched = False
-for _url in ("${appUrl}", "${localAppUrl}", "https://raw.githubusercontent.com/PyDevices/dotgithub/main/assets/apps/${appName}.py"):
+for _url in ("${localAppUrl}", "${appUrl}", "https://raw.githubusercontent.com/PyDevices/dotgithub/main/assets/apps/${appName}.py"):
     if not _url:
         continue
     try:

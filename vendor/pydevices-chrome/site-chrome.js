@@ -134,10 +134,18 @@
     if (!document.getElementById("pydevices-tree-modal-backdrop")) {
       document.body.insertAdjacentHTML("beforeend", TREE_MODAL_HTML);
     }
+    var chromeScript = document.querySelector('script[src*="site-chrome.js"]');
+    var chromeBase = chromeScript ? chromeScript.src.replace(/\/site-chrome\.js.*$/, '') : '/vendor/pydevices-chrome';
+
     if (!document.querySelector('script[src*="tree-nav.js"]')) {
       var script = document.createElement('script');
-      script.src = ROOT + '/vendor/pydevices-chrome/tree-nav.js';
+      script.src = chromeBase + '/tree-nav.js';
       document.head.appendChild(script);
+    }
+    if (document.querySelector('[data-hero-canvas]') && !document.querySelector('script[src*="hero-runtime.js"]')) {
+      var heroScript = document.createElement('script');
+      heroScript.src = chromeBase + '/hero-runtime.js';
+      document.head.appendChild(heroScript);
     }
   }
 
